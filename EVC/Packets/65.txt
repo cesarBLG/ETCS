@@ -1,0 +1,10 @@
+Temporary Speed Restriction
+NID_PACKET 8
+Q_DIR 2
+L_PACKET 13
+Q_SCALE 2
+NID_TSR 8
+D_TSR 15
+L_TSR 15
+Q_FRONT 1
+V_TSR 7

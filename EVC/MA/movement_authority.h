@@ -1,0 +1,77 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _MOVEMENT_AUTHORITY_H
+#define _MOVEMENT_AUTHORITY_H
+
+/**
+ * @todo write docs
+ */
+#include <vector>
+#include "../parsed_packet.h"
+class timer
+{
+    float time;
+public:
+    timer(double time) : time(time)
+    {
+    }
+    void start();
+    void stop();
+    void reset();
+    void set(double time);
+};
+class section_timer : public timer
+{
+public:
+    section_timer(double time, double stoploc) : timer(time) 
+    {
+        
+    }
+};
+struct ma_section
+{
+    double length;
+    section_timer *stimer;
+};
+struct danger_point
+{
+    double distance;
+    double vrelease;
+};
+struct overlap
+{
+    double startdist;
+    double time;
+    double distance;
+    double vrelease;
+};
+class movement_authority
+{
+    double v_main;
+    double v_ema;
+    vector<ma_section> sections;
+    ma_section endsection;
+    danger_point *dp;
+    overlap *ol;
+public:
+    movement_authority(parsed_packet ma_packet);
+    ~movement_authority();
+};
+
+#endif // _MOVEMENT_AUTHORITY_H

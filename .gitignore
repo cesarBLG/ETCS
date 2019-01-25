@@ -1,0 +1,6 @@
+*.o
+.vscode/
+.kdev4
+ETCS.kdev4
+.directory
+Thumbs.db
