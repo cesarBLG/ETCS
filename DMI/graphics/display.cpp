@@ -51,8 +51,7 @@ void prepareLayout()
     extern Component b4;
     extern Component b5;
     
-    main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0));
-    Z.layer = 0;
+    main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0, 0));
     main_window.addToLayout(&a1, new ConsecutiveAlignment(&Z, DOWN | LEFT));
     main_window.addToLayout(&csg, new ConsecutiveAlignment(&a1, UP | RIGHT));
     main_window.addToLayout(&a2, new ConsecutiveAlignment(&a1, DOWN));
@@ -75,27 +74,20 @@ void prepareLayout()
     main_window.addToLayout(&c6, new ConsecutiveAlignment(&c5, RIGHT));
     main_window.addToLayout(&c7, new ConsecutiveAlignment(&c6, RIGHT));
     main_window.addToLayout(&textArea, new ConsecutiveAlignment(&c2, DOWN|LEFT));
-    main_window.addToLayout(&upArrow, new ConsecutiveAlignment(&textArea, UP|RIGHT));
-    main_window.addToLayout(&downArrow, new ConsecutiveAlignment(&upArrow, DOWN));
-    upArrow.layer = 0;
-    downArrow.layer = 0;
+    main_window.addToLayout(&upArrow, new ConsecutiveAlignment(&textArea, UP|RIGHT, 0));
+    main_window.addToLayout(&downArrow, new ConsecutiveAlignment(&upArrow, DOWN, 0));
     main_window.addToLayout(&e1, new ConsecutiveAlignment(&c9, DOWN));
     main_window.addToLayout(&e2, new ConsecutiveAlignment(&e1, DOWN));
     main_window.addToLayout(&e3, new ConsecutiveAlignment(&e2, DOWN));
     main_window.addToLayout(&e4, new ConsecutiveAlignment(&e3, DOWN));
     main_window.addToLayout(&Y, new ConsecutiveAlignment(&e4, DOWN | LEFT));
-    main_window.addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 274));
-    main_window.addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 274));
-    main_window.addToLayout(&b4, new RelativeAlignment(&csg, 140, 274));
-    main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT));
-    main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT));
-    modeRegion.layer--;
-    releaseRegion.layer--;
-    b3.layer--;
-    b4.layer--;
-    b5.layer--;
+    main_window.addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 274, -2));
+    main_window.addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 274, -2));
+    main_window.addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
+    main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
+    main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
 
-    active_windows.push_back(navigation_bar);
+    active_windows.push_back(&navigation_bar);
     navigation_bar.addToLayout(new TextButton("Main",36,36,nullptr), new RelativeAlignment(nullptr,0,0));
 
     extern bool showSpeeds;

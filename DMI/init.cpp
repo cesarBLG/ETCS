@@ -74,25 +74,13 @@ int main(int argc, char** argv)
                     }
                 }
                 if(c) continue;*/
+                extern float scale;
+                float x = mbe.x * scale;
+                float y = mbe.y * scale;
                 extern vector<window*> active_windows;
-                vector<LayoutElement> el;
                 for(int i=0; i<active_windows.size(); i++)
                 {
-                    vector<LayoutElement>& le = active_windows[i]->getLayoutElements();
-                    el.insert(el.begin(), le.begin(), le.end());
-                }
-                for(int i=0; i<el.size(); i++)
-                {
-                    Component *comp = el[i].comp;
-                    if(getScale(comp->x)<mbe.x && getScale(comp->x + comp->sx)>mbe.x
-                    && getScale(comp->y)<mbe.y && getScale(comp->y + comp->sy)>mbe.y)
-                    {
-                        if(comp->isSensitive())
-                        {
-                            comp->setPressed(true);
-                            playClick();
-                        }
-                    }
+                    active_windows[i]->event(1, x, y);
                 }
             }
         }

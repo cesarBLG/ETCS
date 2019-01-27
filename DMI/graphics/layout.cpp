@@ -7,6 +7,7 @@ static vector<LayoutElement> elements;
 void Layout::add(Component *comp, ComponentAlignment *alignment)
 {
     elements.push_back({comp, alignment});
+    if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();
 }
 void Layout::update()
@@ -32,7 +33,6 @@ void Layout::updateLocations()
             if(align->relative!=nullptr)
             {
                 c->setLocation(offset->x + align->relative->x - c->sx/2, offset->y + align->relative->y - c->sy/2);
-                //c->layer = align->relative->layer - 1;
             }
             else c->setLocation(offset->x, offset->y);
         }
@@ -48,7 +48,6 @@ void Layout::updateLocations()
             if(al & DOWN) y+=align->relative->sy;
             else if(!(al & UP) && (al & RIGHT)) y += (align->relative->sy - c->sy)/2;
             else if((al & UP) && !(al & RIGHT)) y-=c->sy;
-            //if(align->relative->layer != 0) c->layer = align->relative->layer;
             c->setLocation(x,y);
         }
     }
