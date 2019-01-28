@@ -23,6 +23,6 @@ void DistancePASP()
 
 float getPASPy(float dist)
 {
-    if(dist>25) return 283-((283-250)/25)*dist;
+    if(dist<25) return 283-((283-250)/25)*dist;
     else return 250-(250-21)/log10(1000/25)*log10(dist/25);
 }
