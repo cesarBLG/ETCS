@@ -46,7 +46,6 @@ class Component
     public:
     bool isButton = false;
     bool dispBorder = true;
-    int layer = -1;
     bool isSensitive(){return pressedAction != nullptr;}
     Component(){}
     Component(float sx, float sy, function<void()> display);

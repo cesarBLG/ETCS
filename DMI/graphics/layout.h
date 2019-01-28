@@ -12,16 +12,15 @@ struct ComponentAlignment
 {
     AlignType alignType;
     Component *relative;
-    ComponentAlignment(AlignType at, Component *c)
+    int layer;
+    ComponentAlignment(AlignType at, Component *c, int layer = -1) : alignType(at), relative(c), layer(layer)
     {
-        alignType = at;
-        relative = c;
     }
 };
 struct ConsecutiveAlignment : public ComponentAlignment
 {
     int align;
-    ConsecutiveAlignment(Component *rel, int align) : ComponentAlignment(CONSECUTIVE, rel)
+    ConsecutiveAlignment(Component *rel, int align, int layer = -1) : ComponentAlignment(CONSECUTIVE, rel, layer)
     {
         this->align = align;
     }
@@ -30,7 +29,7 @@ struct RelativeAlignment : public ComponentAlignment
 {
     float x;
     float y;
-    RelativeAlignment(Component *rel, float x, float y) : ComponentAlignment(RELATIVE, rel)
+    RelativeAlignment(Component *rel, float x, float y, int layer = -1) : ComponentAlignment(RELATIVE, rel, layer)
     {
         this->x = x;
         this->y = y;

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "../graphics/flash.h"
+#include "../sound/sound.h"
 using namespace std;
 Component Z(640, 15, nullptr);
 Component Y(640, 15, nullptr);
@@ -29,7 +30,11 @@ void Component::setAck(function<void()> ackAction)
 }
 void Component::setPressed(bool value)
 {
-    if(value && pressedAction != nullptr) pressedAction();
+    if(value && pressedAction != nullptr)
+    {
+        playClick();
+        pressedAction();
+    } 
 }
 void Component::setDisplayFunction(function<void()> display) 
 {
@@ -53,7 +58,7 @@ void Component::paint()
 {
     if(display!=nullptr) display();
     if(ack && (flash_state & 2)) setBorder(Yellow);
-    else if(dispBorder && layer<0)
+    else if(dispBorder)
     {
         vlineRGBA(sdlren, getX(0), getY(0), getY(sy-1), Black.R, Black.G, Black.B, 255);
         vlineRGBA(sdlren, getX(sx-1), getY(0), getY(sy-1), Shadow.R, Shadow.G, Shadow.B, 255);

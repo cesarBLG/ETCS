@@ -78,8 +78,7 @@ void prepareLayout()
     PASP.addToLayout(&distancePASP, new RelativeAlignment(nullptr, 334,15));
 
     
-    main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0));
-    Z.layer = 0;
+    main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0, 0));
     main_window.addToLayout(&a1, new ConsecutiveAlignment(&Z, DOWN | LEFT));
     main_window.addToLayout(&csg, new ConsecutiveAlignment(&a1, UP | RIGHT));
     main_window.addToLayout(&a2, new ConsecutiveAlignment(&a1, DOWN));
@@ -102,59 +101,36 @@ void prepareLayout()
     main_window.addToLayout(&c6, new ConsecutiveAlignment(&c5, RIGHT));
     main_window.addToLayout(&c7, new ConsecutiveAlignment(&c6, RIGHT));
     main_window.addToLayout(&textArea, new ConsecutiveAlignment(&c2, DOWN|LEFT));
-    main_window.addToLayout(&upArrow, new ConsecutiveAlignment(&textArea, UP|RIGHT));
-    main_window.addToLayout(&downArrow, new ConsecutiveAlignment(&upArrow, DOWN));
-    upArrow.layer = 0;
-    downArrow.layer = 0;
+    main_window.addToLayout(&upArrow, new ConsecutiveAlignment(&textArea, UP|RIGHT, 0));
+    main_window.addToLayout(&downArrow, new ConsecutiveAlignment(&upArrow, DOWN, 0));
     main_window.addToLayout(&e1, new ConsecutiveAlignment(&c9, DOWN));
     main_window.addToLayout(&e2, new ConsecutiveAlignment(&e1, DOWN));
     main_window.addToLayout(&e3, new ConsecutiveAlignment(&e2, DOWN));
     main_window.addToLayout(&e4, new ConsecutiveAlignment(&e3, DOWN));
     main_window.addToLayout(&Y, new ConsecutiveAlignment(&e4, DOWN | LEFT));
-    main_window.addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 274));
-    main_window.addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 274));
-    main_window.addToLayout(&b4, new RelativeAlignment(&csg, 140, 274));
-    main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT));
-    main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT));
-    modeRegion.layer--;
-    releaseRegion.layer--;
-    b3.layer--;
-    b4.layer--;
-    b5.layer--;
+    main_window.addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 274, -2));
+    main_window.addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 274, -2));
+    main_window.addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
+    main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
+    main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
 
     active_windows.push_back(&navigation_bar);
-    //navigation_bar.addToLayout(new TextButton("Main",60,50,nullptr), new RelativeAlignment(nullptr,580,15));
-    //navigation_bar.addToLayout(new TextButton("Override",60,50,nullptr), new RelativeAlignment(nullptr,580,75));
-    navigation_bar.addToLayout(&main_button, new RelativeAlignment(nullptr, 580, 15));
-    main_button.layer = 0;
-    navigation_bar.addToLayout(&override_button, new ConsecutiveAlignment(&main_button,DOWN));
-    override_button.layer = 0;
-    navigation_bar.addToLayout(&dataview_button, new ConsecutiveAlignment(&override_button,DOWN));
-    dataview_button.layer = 0;
-    navigation_bar.addToLayout(&special_button, new ConsecutiveAlignment(&dataview_button,DOWN));
-    special_button.layer = 0;
-    navigation_bar.addToLayout(&config_button, new ConsecutiveAlignment(&special_button,DOWN));
-    config_button.layer = 0;
+    navigation_bar.addToLayout(&main_button, new RelativeAlignment(nullptr, 580, 15, 0));
+    navigation_bar.addToLayout(&override_button, new ConsecutiveAlignment(&main_button,DOWN,0));
+    navigation_bar.addToLayout(&dataview_button, new ConsecutiveAlignment(&override_button,DOWN,0));
+    navigation_bar.addToLayout(&special_button, new ConsecutiveAlignment(&dataview_button,DOWN,0));
+    navigation_bar.addToLayout(&config_button, new ConsecutiveAlignment(&special_button,DOWN,0));
 
-    // Main menu
-    menu_main.addToLayout(&start_button, new ConsecutiveAlignment(&driverid_button,LEFT));
-    start_button.layer = 0;
-    menu_main.addToLayout(&driverid_button, new RelativeAlignment(nullptr, 490, 45));
-    driverid_button.layer = 0;
-    menu_main.addToLayout(&traindata_button, new ConsecutiveAlignment(&start_button,DOWN));
-    traindata_button.layer = 0;
-    menu_main.addToLayout(&level_button, new ConsecutiveAlignment(&traindata_button,DOWN));
-    level_button.layer = 0;
-    menu_main.addToLayout(&trainrn_button, new ConsecutiveAlignment(&level_button,RIGHT));
-    trainrn_button.layer = 0;
-    menu_main.addToLayout(&shunting_button, new ConsecutiveAlignment(&level_button,DOWN));
-    shunting_button.layer = 0;
-    menu_main.addToLayout(&maintsh_button, new ConsecutiveAlignment(&driverid_button,DOWN));
-    maintsh_button.layer = 0;
-    menu_main.addToLayout(&nl_button, new ConsecutiveAlignment(&shunting_button,RIGHT));
-    nl_button.layer = 0;
-    menu_main.addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT));
-    exit_button.layer = 0;
+    // 'Main' menu
+    menu_main.addToLayout(&start_button, new ConsecutiveAlignment(&driverid_button,LEFT,0));
+    menu_main.addToLayout(&driverid_button, new RelativeAlignment(nullptr, 490, 45,0));
+    menu_main.addToLayout(&traindata_button, new ConsecutiveAlignment(&start_button,DOWN,0));
+    menu_main.addToLayout(&level_button, new ConsecutiveAlignment(&traindata_button,DOWN,0));
+    menu_main.addToLayout(&trainrn_button, new ConsecutiveAlignment(&level_button,RIGHT,0));
+    menu_main.addToLayout(&shunting_button, new ConsecutiveAlignment(&level_button,DOWN,0));
+    menu_main.addToLayout(&maintsh_button, new ConsecutiveAlignment(&driverid_button,DOWN,0));
+    menu_main.addToLayout(&nl_button, new ConsecutiveAlignment(&shunting_button,RIGHT,0));
+    menu_main.addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));
     extern bool showSpeeds;
     csg.setPressedAction([]() {showSpeeds = !showSpeeds;});
 }
