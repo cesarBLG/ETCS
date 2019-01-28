@@ -1,0 +1,11 @@
+void ModePintar();
+void ModePulsado();
+void overpint();
+void overPuls();
+void Datapint();
+void DataPuls();
+void Specpint();
+void SpecPuls();
+void Confprint();
+void ConfPuls();
+void Shuntingprint();

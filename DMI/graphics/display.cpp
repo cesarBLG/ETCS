@@ -7,6 +7,8 @@
 using namespace std;
 window main_window;
 window navigation_bar;
+window navigation_main;
+window PASP;
 vector<window*> active_windows;
 void displayETCS()
 {
@@ -22,6 +24,8 @@ void displayETCS()
 void prepareLayout()
 {
     active_windows.push_back(&main_window);
+    active_windows.push_back(&PASP);
+
     extern Component csg;
     extern Component a1;
     extern Component a2;
@@ -41,6 +45,11 @@ void prepareLayout()
     extern Component textArea;
     extern Button upArrow;
     extern Button downArrow;
+    extern Button modeButton;
+    extern Button Override;
+    extern Button DataView;
+    extern Button Spec;
+    extern Button Conf;
     extern Component e1;
     extern Component e2;
     extern Component e3;
@@ -50,6 +59,22 @@ void prepareLayout()
     extern Component b3;
     extern Component b4;
     extern Component b5;
+
+    // Botones de menu main
+    extern Button start;
+    extern Button DriverId;
+    extern Button Level;
+    extern Button Shunting;
+    extern Button MaintShunt;
+    extern Button TrainData;
+    extern Button TrainRun;
+    extern Button Non;
+    extern Button Exit;
+
+    // PASP
+    extern Component distancePASP;
+    PASP.addToLayout(&distancePASP, new RelativeAlignment(nullptr, 334,15));
+
     
     main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0));
     Z.layer = 0;
@@ -95,9 +120,39 @@ void prepareLayout()
     b4.layer--;
     b5.layer--;
 
-    active_windows.push_back(navigation_bar);
-    navigation_bar.addToLayout(new TextButton("Main",36,36,nullptr), new RelativeAlignment(nullptr,0,0));
+    active_windows.push_back(&navigation_bar);
+    //navigation_bar.addToLayout(new TextButton("Main",60,50,nullptr), new RelativeAlignment(nullptr,580,15));
+    //navigation_bar.addToLayout(new TextButton("Override",60,50,nullptr), new RelativeAlignment(nullptr,580,75));
+    navigation_bar.addToLayout(&modeButton, new RelativeAlignment(nullptr, 580, 15));
+    modeButton.layer = 0;
+    navigation_bar.addToLayout(&Override, new ConsecutiveAlignment(&modeButton,DOWN));
+    Override.layer = 0;
+    navigation_bar.addToLayout(&DataView, new ConsecutiveAlignment(&Override,DOWN));
+    DataView.layer = 0;
+    navigation_bar.addToLayout(&Spec, new ConsecutiveAlignment(&DataView,DOWN));
+    Spec.layer = 0;
+    navigation_bar.addToLayout(&Conf, new ConsecutiveAlignment(&Spec,DOWN));
+    Conf.layer = 0;
 
+    // Main menu
+    navigation_main.addToLayout(&start, new ConsecutiveAlignment(&DriverId,LEFT));
+    start.layer = 0;
+    navigation_main.addToLayout(&DriverId, new RelativeAlignment(nullptr, 490, 45));
+    DriverId.layer = 0;
+    navigation_main.addToLayout(&TrainData, new ConsecutiveAlignment(&start,DOWN));
+    TrainData.layer = 0;
+    navigation_main.addToLayout(&Level, new ConsecutiveAlignment(&TrainData,DOWN));
+    Level.layer = 0;
+    navigation_main.addToLayout(&TrainRun, new ConsecutiveAlignment(&Level,RIGHT));
+    TrainRun.layer = 0;
+    navigation_main.addToLayout(&Shunting, new ConsecutiveAlignment(&Level,DOWN));
+    Shunting.layer = 0;
+    navigation_main.addToLayout(&MaintShunt, new ConsecutiveAlignment(&Shunting,DOWN));
+    MaintShunt.layer = 0;
+    navigation_main.addToLayout(&Non, new ConsecutiveAlignment(&Shunting,RIGHT));
+    Non.layer = 0;
+    navigation_main.addToLayout(&Exit, new ConsecutiveAlignment(&downArrow,RIGHT));
+    Exit.layer = 0;
     extern bool showSpeeds;
     csg.setPressedAction([]() {showSpeeds = !showSpeeds;});
 }
