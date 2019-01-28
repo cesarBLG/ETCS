@@ -3,13 +3,10 @@
 #include "../monitor.h"
 #include <string>
 
-// Distance 0 to 1000m
 const int posy[] = {283,250,206,182,164,150,107,64,21};
-Component distancePASP(246,300, DistancePASP);
+Component distancePASP(246,300, displayPASP);
 extern bool showSpeeds;
-// function
-// y=(y0/x0)*x
-void DistancePASP()
+void displayPASP()
 {
     setColor(Grey);
     for(int i=0; i<9; i++)

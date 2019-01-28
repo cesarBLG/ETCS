@@ -1,2 +1,2 @@
-void DistancePASP();
+void displayPASP();
 float getPASPy(float dist);
