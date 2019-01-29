@@ -1,11 +1,8 @@
 #include "menu_main.h"
 #include "button.h"
 #include "window.h"
-#include "algorithm"
-extern vector<window*> active_windows;
-extern window menu_main;
-extern window navigation_bar;
-extern window PASP;
+#include <algorithm>
+#include "display.h"
 
 Button start_button(153, 50, startbut_display, startbut_pressed);
 void startbut_display(){
@@ -78,7 +75,7 @@ void exitbut_display()
 }
 void exitbut_pressed()
 {
-    active_windows.push_back(&navigation_bar);
-    active_windows.push_back(&PASP);
-    remove(active_windows.begin(), active_windows.end(), &menu_main);
+    active_windows.insert(&navigation_bar);
+    active_windows.insert(&PASP);
+    active_windows.erase(&menu_main);
 }

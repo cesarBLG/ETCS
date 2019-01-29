@@ -12,14 +12,10 @@ void Layout::add(Component *comp, ComponentAlignment *alignment)
 }
 void Layout::update()
 {
-    auto start = chrono::system_clock::now();
     for(int i=0; i<elements.size(); i++)
     {
         elements[i].comp->paint();
     }
-    auto end = chrono::system_clock::now();
-    chrono::duration<double> diff = end-start;
-    printf("%f\n", diff.count());
 }
 void Layout::updateLocations()
 {

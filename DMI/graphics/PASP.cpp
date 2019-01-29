@@ -4,22 +4,29 @@
 #include <string>
 
 const int posy[] = {283,250,206,182,164,150,107,64,21};
+const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
+int pasp_scale = 1;
 Component distancePASP(246,300, displayPASP);
-extern bool showSpeeds;
 void displayPASP()
 {
     setColor(Grey);
     for(int i=0; i<9; i++)
     {
-        int dist = 1000-i*100;
+        if(i==0||i>4)
+        {
+            distancePASP.drawText(to_string(divs[i]*pasp_scale).c_str(), 208, posy[i]-150, 0,0, 10, White, RIGHT);
+        }
         distancePASP.drawLine(40, posy[i], 240, posy[i]);
-        distancePASP.drawLine(40, posy[i]+0.5, 240, posy[i]+0.5);
-        distancePASP.drawLine(40, posy[i]+1, 240, posy[i]+1);
+        if(i==0||i==5||i==8)
+        {
+            distancePASP.drawLine(40, posy[i]+0.5, 240, posy[i]+0.5);
+        }
     }
 }
 
 float getPASPy(float dist)
 {
-    if(dist<25) return 283-((283-250)/25)*dist;
-    else return 250-(250-21)/log10(1000/25)*log10(dist/25);
+    int first_line = divs[1]*pasp_scale;
+    if(dist<first_line) return 283-((283-250)/first_line)*dist;
+    else return 250-(250-21)/log10(1000/first_line)*log10(dist/first_line);
 }

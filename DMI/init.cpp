@@ -1,5 +1,6 @@
 #include "monitor.h"
 #include "graphics/drawing.h"
+#include "graphics/display.h"
 #include "graphics/window.h"
 #include "graphics/button.h"
 #include "tcp/server.h"
@@ -12,6 +13,7 @@
 #include "graphics/flash.h"
 #include <deque>
 #include "messages/messages.h"
+#include <algorithm>
 using namespace std;
 bool running = true;
 #ifdef __unix__
@@ -77,10 +79,14 @@ int main(int argc, char** argv)
                 extern float scale;
                 float x = mbe.x * scale;
                 float y = mbe.y * scale;
-                extern vector<window*> active_windows;
-                for(int i=0; i<active_windows.size(); i++)
+                vector<window*> windows;
+                for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
                 {
-                    active_windows[i]->event(1, x, y);
+                    windows.push_back(*it);
+                }
+                for(int i=0; i<windows.size(); i++)
+                {
+                    windows[i]->event(1, x, y);
                 }
             }
         }

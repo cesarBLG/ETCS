@@ -1,11 +1,8 @@
 #include "nav_buttons.h"
 #include "button.h"
 #include "window.h"
-#include "algorithm"
-extern vector<window*> active_windows;
-extern window menu_main;
-extern window navigation_bar;
-extern window PASP;
+#include <algorithm>
+#include "display.h"
 Button main_button(60, 50, mainbut_display, mainbut_pressed);
 void mainbut_display()
 {
@@ -13,9 +10,9 @@ void mainbut_display()
 }
 void mainbut_pressed()
 {
-    active_windows.push_back(&menu_main);
-    remove(active_windows.begin(), active_windows.end(), &navigation_bar);
-    remove(active_windows.begin(), active_windows.end(), &PASP);
+    active_windows.insert(&menu_main);
+    active_windows.erase(&navigation_bar);
+    active_windows.erase(&PASP);
 }
 Button override_button(60, 50, overridebut_display, overridebut_pressed);
 void overridebut_display()

@@ -1,7 +1,6 @@
 #include "display.h"
 #include <chrono>
 #include <cstdio>
-#include "window.h"
 #include "button.h"
 #include "text_button.h"
 using namespace std;
@@ -9,22 +8,23 @@ window main_window;
 window navigation_bar;
 window menu_main;
 window PASP;
-vector<window*> active_windows;
+unordered_set<window*> active_windows;
+#include <iostream>
 void displayETCS()
 {
     auto start = chrono::system_clock::now();
-    for(int i=0; i<active_windows.size(); i++)
+    for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
     {
-        active_windows[i]->display();
+        (*it)->display();
     }
     auto end = chrono::system_clock::now();
     chrono::duration<double> diff = end-start;
-    printf("%f\n", diff.count());
+    //printf("%f\n", diff.count());
 }
 void prepareLayout()
 {
-    active_windows.push_back(&main_window);
-    active_windows.push_back(&PASP);
+    active_windows.insert(&main_window);
+    active_windows.insert(&PASP);
 
     extern Component csg;
     extern Component a1;
@@ -114,7 +114,7 @@ void prepareLayout()
     main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
     main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
 
-    active_windows.push_back(&navigation_bar);
+    active_windows.insert(&navigation_bar);
     navigation_bar.addToLayout(&main_button, new RelativeAlignment(nullptr, 580, 15, 0));
     navigation_bar.addToLayout(&override_button, new ConsecutiveAlignment(&main_button,DOWN,0));
     navigation_bar.addToLayout(&dataview_button, new ConsecutiveAlignment(&override_button,DOWN,0));

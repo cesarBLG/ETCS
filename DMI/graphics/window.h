@@ -9,10 +9,7 @@ class window
     {
         l = new Layout();
     }
-    ~window()
-    {
-        delete l;
-    }
+    ~window();
     vector<LayoutElement>& getLayoutElements()
     {
         return l->getElements();
@@ -21,22 +18,7 @@ class window
     {
         l->add(comp, alignment);
     }
-    void display()
-    {
-        l->update();
-    }
-    void event(int evNo, float x, float y)
-    {
-        vector<LayoutElement>& el = getLayoutElements();
-        for(int i=0; i<el.size(); i++)
-        {
-            Component *comp = el[i].comp;
-            if(comp->x<x && (comp->x + comp->sx)>x
-            && comp->y<y && (comp->y + comp->sy)>y)
-            {
-                if(comp->isSensitive()) comp->setPressed(true);
-            }
-        }
-    }
+    void display();
+    void event(int evNo, float x, float y);
 };
 #endif

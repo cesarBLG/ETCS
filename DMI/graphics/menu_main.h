@@ -1,3 +1,5 @@
+#ifndef _MENU_MAIN_H
+#define _MENU_MAIN_H
 void startbut_display();
 void startbut_pressed();
 void driveridbut_display();
@@ -16,3 +18,4 @@ void nl_display();
 void nl_pressed();
 void exitbut_display();
 void exitbut_pressed();
+#endif
