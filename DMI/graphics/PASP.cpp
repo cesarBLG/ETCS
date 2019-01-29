@@ -6,10 +6,11 @@
 const int posy[] = {283,250,206,182,164,150,107,64,21};
 const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
 int pasp_scale = 1;
+const int objectPos[] = {55,80,105};
 Component distancePASP(246,300, displayPASP);
 void displayPASP()
 {
-    setColor(Grey);
+    setColor(DarkGrey);
     for(int i=0; i<9; i++)
     {
         if(i==0||i>4)
@@ -22,6 +23,9 @@ void displayPASP()
             distancePASP.drawLine(40, posy[i]+0.5, 240, posy[i]+0.5);
         }
     }
+    distancePASP.drawImage("symbols/Track Conditions/TC_01.bmp",objectPos[0],20,20,20);
+    distancePASP.drawImage("symbols/Track Conditions/TC_04.bmp",objectPos[1],40,20,20);
+    distancePASP.drawImage("symbols/Track Conditions/TC_06.bmp",objectPos[2],60,20,20);
 }
 
 float getPASPy(float dist)
