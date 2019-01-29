@@ -8,7 +8,6 @@
 using namespace std;
 Component Z(640, 15, nullptr);
 Component Y(640, 15, nullptr);
-extern Component csg;
 Component::Component(float sx, float sy, function<void()> display)
 {
     this->sx = sx;
@@ -167,7 +166,7 @@ void Component::drawText(const char *text, float x, float y, float sx, float sy,
     else x = x + this->sx/2;
     SDL_Surface *surf = TTF_RenderText_Blended(font, text, color);
     TTF_CloseFont(font);
-    drawSurface(surf, x, y, sx, sy, false);
+    drawSurface(surf, x, y, sx, sy, true);
 }
 void Component::setBackgroundImage(const char *name)
 {
@@ -191,6 +190,7 @@ void Component::setText(const char* text, float size, Color c)
         string t1 = t.substr(0,v);
         string t2 = t.substr(v+1);
         getFontSize(font,text, &width, &height);
+        TTF_CloseFont(font);
         drawText(t1.c_str(), 0, -height/2, sx, sy, size, c, CENTER);
         drawText(t2.c_str(), 0, height/2, sx, sy, size, c, CENTER);
     }
