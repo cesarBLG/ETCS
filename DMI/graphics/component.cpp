@@ -170,13 +170,14 @@ void Component::drawText(const char *text, float x, float y, float sx, float sy,
 }
 void Component::setBackgroundImage(const char *name)
 {
-    if(surfloc != name)
+    /*if(surfloc != name)
     {
         if(bgSurf != nullptr) SDL_FreeSurface(bgSurf);
         bgSurf = SDL_LoadBMP(name);
         surfloc = name;
-    }
-    drawSurface(bgSurf,sx/2,sy/2,bgSurf->w,bgSurf->h,false);
+    }*/
+    bgSurf = SDL_LoadBMP(name);
+    drawSurface(bgSurf,sx/2,sy/2,bgSurf->w,bgSurf->h,true);
 }
 void Component::setText(const char* text, float size, Color c)
 {

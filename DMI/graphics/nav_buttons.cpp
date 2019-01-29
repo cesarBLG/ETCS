@@ -3,6 +3,7 @@
 #include "window.h"
 #include <algorithm>
 #include "display.h"
+#include "menu_main.h"
 Button main_button(60, 50, mainbut_display, mainbut_pressed);
 void mainbut_display()
 {
@@ -10,7 +11,7 @@ void mainbut_display()
 }
 void mainbut_pressed()
 {
-    active_windows.insert(&menu_main);
+    active_windows.insert(new menu_main()); //FIXME: MEMORY LEAK!!!!!!!!!!!
     active_windows.erase(&navigation_bar);
     active_windows.erase(&PASP);
 }

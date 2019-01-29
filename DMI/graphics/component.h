@@ -39,7 +39,7 @@ class Component
         }
     }
     SDL_Surface *bgSurf;
-    string surfloc;
+    string surfloc = "";
     bool ack = false;
     function<void()> pressedAction;
     function<void()> display = nullptr;

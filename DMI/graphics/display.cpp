@@ -3,10 +3,10 @@
 #include <cstdio>
 #include "button.h"
 #include "text_button.h"
+#include "menu.h"
 using namespace std;
 window main_window;
 window navigation_bar;
-window menu_main;
 window PASP;
 unordered_set<window*> active_windows;
 #include <iostream>
@@ -62,17 +62,6 @@ void prepareLayout()
     extern Component b4;
     extern Component b5;
 
-    // 'Main' menu buttons
-    extern Button start_button;
-    extern Button driverid_button;
-    extern Button level_button;
-    extern Button shunting_button;
-    extern Button maintsh_button;
-    extern Button traindata_button;
-    extern Button trainrn_button;
-    extern Button nl_button;
-    extern Button exit_button;
-
     // PASP
     extern Component distancePASP;
     PASP.addToLayout(&distancePASP, new RelativeAlignment(nullptr, 334,15));
@@ -120,17 +109,6 @@ void prepareLayout()
     navigation_bar.addToLayout(&dataview_button, new ConsecutiveAlignment(&override_button,DOWN,0));
     navigation_bar.addToLayout(&special_button, new ConsecutiveAlignment(&dataview_button,DOWN,0));
     navigation_bar.addToLayout(&config_button, new ConsecutiveAlignment(&special_button,DOWN,0));
-
-    // 'Main' menu
-    menu_main.addToLayout(&start_button, new ConsecutiveAlignment(&driverid_button,LEFT,0));
-    menu_main.addToLayout(&driverid_button, new RelativeAlignment(nullptr, 490, 45,0));
-    menu_main.addToLayout(&traindata_button, new ConsecutiveAlignment(&start_button,DOWN,0));
-    menu_main.addToLayout(&level_button, new ConsecutiveAlignment(&traindata_button,DOWN,0));
-    menu_main.addToLayout(&trainrn_button, new ConsecutiveAlignment(&level_button,RIGHT,0));
-    menu_main.addToLayout(&shunting_button, new ConsecutiveAlignment(&level_button,DOWN,0));
-    menu_main.addToLayout(&maintsh_button, new ConsecutiveAlignment(&driverid_button,DOWN,0));
-    menu_main.addToLayout(&nl_button, new ConsecutiveAlignment(&shunting_button,RIGHT,0));
-    menu_main.addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));
     extern bool showSpeeds;
     csg.setPressedAction([]() {showSpeeds = !showSpeeds;});
 }
