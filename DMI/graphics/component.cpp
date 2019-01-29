@@ -181,7 +181,20 @@ void Component::setBackgroundImage(const char *name)
 }
 void Component::setText(const char* text, float size, Color c)
 {
-    drawText(text, 0, 0, sx, sy, size, c, CENTER);
+    string t = text;
+    int v = t.find('\n');
+    if(v!=string::npos)
+    {
+        TTF_Font *font = openFont(fontPath, size);
+        float width;
+        float height;
+        string t1 = t.substr(0,v);
+        string t2 = t.substr(v+1);
+        getFontSize(font,text, &width, &height);
+        drawText(t1.c_str(), 0, -height/2, sx, sy, size, c, CENTER);
+        drawText(t2.c_str(), 0, height/2, sx, sy, size, c, CENTER);
+    }
+    else drawText(text, 0, 0, sx, sy, size, c, CENTER);
 }
 void Component::setBorder(Color c)
 {

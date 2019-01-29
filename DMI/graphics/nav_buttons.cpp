@@ -17,7 +17,7 @@ void mainbut_pressed()
 Button override_button(60, 50, overridebut_display, overridebut_pressed);
 void overridebut_display()
 {
-    override_button.setText("Override",12,White);
+    override_button.setText("Over-\nride",12,White);
 }
 void overridebut_pressed()
 {
@@ -26,7 +26,7 @@ void overridebut_pressed()
 Button dataview_button(60, 50, dataviewbut_display, dataviewbut_pressed);
 void dataviewbut_display()
 {
-    dataview_button.setText("Dataview",12,White);
+    dataview_button.setText("Data\nview",12,White);
 }
 void dataviewbut_pressed()
 {
