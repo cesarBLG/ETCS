@@ -15,7 +15,7 @@ void mainbut_pressed()
 {
     active_windows.push_back(&menu_main);
     remove(active_windows.begin(), active_windows.end(), &navigation_bar);
-    remove(active_windows.begin(), active_windows.end(), &PASP);
+    //remove(active_windows.begin(), active_windows.end(), &PASP);
 }
 Button override_button(60, 50, overridebut_display, overridebut_pressed);
 void overridebut_display()

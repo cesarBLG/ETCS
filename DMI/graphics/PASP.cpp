@@ -4,11 +4,12 @@
 #include <string>
 
 const int posy[] = {283,250,206,182,164,150,107,64,21};
+const int objectPos[] = {55,80,105};
 Component distancePASP(246,300, displayPASP);
 extern bool showSpeeds;
 void displayPASP()
 {
-    setColor(Grey);
+    setColor(DarkGrey);
     for(int i=0; i<9; i++)
     {
         int dist = 1000-i*100;
@@ -16,6 +17,9 @@ void displayPASP()
         distancePASP.drawLine(40, posy[i]+0.5, 240, posy[i]+0.5);
         distancePASP.drawLine(40, posy[i]+1, 240, posy[i]+1);
     }
+    distancePASP.drawImage("symbols/Track Conditions/TC_01.bmp",objectPos[0],20,20,20);
+    distancePASP.drawImage("symbols/Track Conditions/TC_04.bmp",objectPos[1],40,20,20);
+    distancePASP.drawImage("symbols/Track Conditions/TC_06.bmp",objectPos[2],60,20,20);
 }
 
 float getPASPy(float dist)
