@@ -64,8 +64,11 @@ void prepareLayout()
 
     // PASP
     extern Component distancePASP;
+    extern IconButton zoomin;
+    extern IconButton zoomout;
     PASP.addToLayout(&distancePASP, new RelativeAlignment(nullptr, 334,15));
-
+    PASP.addToLayout(&zoomin, new RelativeAlignment(&distancePASP, 20,8,0));
+    PASP.addToLayout(&zoomout, new RelativeAlignment(&distancePASP, 20,292,0));
     
     main_window.addToLayout(&Z, new RelativeAlignment(nullptr, 0, 0, 0));
     main_window.addToLayout(&a1, new ConsecutiveAlignment(&Z, DOWN | LEFT));
