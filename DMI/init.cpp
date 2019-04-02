@@ -60,25 +60,26 @@ int main(int argc, char** argv)
                     display();
                 }
             }
-            else if(ev.type == SDL_MOUSEBUTTONDOWN)
+            else if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_FINGERDOWN)
             {
-                SDL_MouseButtonEvent mbe = ev.button;
-                /*extern deque<Message> messageList;
-                bool c = false;
-                for(int i = 0; i<messageList.size(); i++)
+                float scrx;
+                float scry;
+                if(ev.type == SDL_FINGERDOWN)
                 {
-                    if(messageList[i].ack)
-                    {
-                        messageList[i].ack = false;
-                        c = true;
-                        playClick();
-                        break;
-                    }
+                    SDL_TouchFingerEvent tfe = ev.tfinger;
+                    scrx = tfe.x;
+                    scry = tfe.y;
                 }
-                if(c) continue;*/
+                else
+                {
+                    SDL_MouseButtonEvent mbe = ev.button;
+                    scrx = mbe.x;
+                    scry = mbe.y;
+                }
                 extern float scale;
-                float x = mbe.x * scale;
-                float y = mbe.y * scale;
+                extern float offset[2];
+                float x = (scrx-offset[0]) / scale;
+                float y = scry / scale;
                 vector<window*> windows;
                 for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
                 {
