@@ -10,6 +10,7 @@
 #include "../sound/sound.h"
 #include "../messages/messages.h"
 #include "../time.h"
+#include "../graphics/PASP.h"
 using namespace std;
 IPaddress ip;
 TCPsocket serv_sock;
@@ -66,6 +67,29 @@ void parseData(string str)
         if(value == "WaS") s = WaS;
         if(value == "IntS") s = IntS;
         setSupervision(s);
+    }
+    if(command == "setPASPobjects")
+    {
+        vector<string> val;
+
+        int valsep = value.find(',');
+        while(valsep!=string::npos)
+        {
+            string param = value.substr(0,valsep);
+            value = value.substr(valsep+1);
+            valsep = value.find(',');
+            val.push_back(param);
+        }
+        val.push_back(value);
+
+        pasp_objects.clear();
+        for(int i = 0; i < val.size(); i+=2)
+        {
+            pasp_object p;
+            p.condition = stoi(val[i]);
+            p.distance = stoi(val[i+1]);
+            pasp_objects.push_back(p);
+        }
     }
     notifyDataReceived();
 }

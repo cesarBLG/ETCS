@@ -11,10 +11,17 @@ const int objectPos[] = {55,80,105};
 Component distancePASP(246,300, displayPASP);
 void displayScaleUp();
 void displayScaleDown();
-void zoominp(){pasp_scale/=2;}
-void zoomoutp(){pasp_scale*=2;}
+void zoominp()
+{
+    if(pasp_scale>1) pasp_scale/=2;
+}
+void zoomoutp()
+{
+    if(pasp_scale<=16) pasp_scale*=2;
+}
 IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
 IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
+vector<pasp_object> pasp_objects;
 void displayPASP()
 {
     setColor(DarkGrey);
@@ -30,9 +37,12 @@ void displayPASP()
             distancePASP.drawLine(40, posy[i]+0.5, 240, posy[i]+0.5);
         }
     }
-    distancePASP.drawImage("symbols/Track Conditions/TC_01.bmp",objectPos[0],getPASPy(120),20,20);
-    distancePASP.drawImage("symbols/Track Conditions/TC_04.bmp",objectPos[1],getPASPy(26000),20,20);
-    distancePASP.drawImage("symbols/Track Conditions/TC_06.bmp",objectPos[2],getPASPy(3000),20,20);
+    for(int i = 0; i < pasp_objects.size(); i++)
+    {
+        pasp_object p = pasp_objects[i];
+        string name = string("symbols/Track Conditions/TC_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
+        distancePASP.drawImage(name.c_str(),objectPos[i%3],getPASPy(p.distance),20,20);
+    }
 }
 
 float getPASPy(float dist)
