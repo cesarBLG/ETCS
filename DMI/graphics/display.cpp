@@ -9,10 +9,18 @@ window main_window;
 window navigation_bar;
 window PASP;
 unordered_set<window*> active_windows;
+unordered_set<window*> invalid_windows;
 #include <iostream>
 void displayETCS()
 {
     auto start = chrono::system_clock::now();
+    for(auto it=invalid_windows.begin(); it!=active_windows.end(); ++it)
+    {
+        window *w = *it;
+        active_windows.erase(w);
+        delete w;
+    }
+    invalid_windows.clear();
     for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
     {
         (*it)->display();

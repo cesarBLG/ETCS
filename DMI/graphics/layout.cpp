@@ -6,6 +6,7 @@ using namespace std;
 static vector<LayoutElement> elements;
 void Layout::add(Component *comp, ComponentAlignment *alignment)
 {
+    if(comp == nullptr || alignment == nullptr) return;
     elements.push_back({comp, alignment});
     if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();

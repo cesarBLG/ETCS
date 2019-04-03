@@ -4,6 +4,9 @@
 #include <algorithm>
 #include "display.h"
 #include "menu_main.h"
+#include "menu_override.h"
+#include "menu_settings.h"
+#include "menu_spec.h"
 Button main_button(60, 50, mainbut_display, mainbut_pressed);
 void mainbut_display()
 {
@@ -11,7 +14,7 @@ void mainbut_display()
 }
 void mainbut_pressed()
 {
-    active_windows.insert(new menu_main()); //FIXME: MEMORY LEAK!!!!!!!!!!!
+    active_windows.insert(new menu_main());
     active_windows.erase(&navigation_bar);
     active_windows.erase(&PASP);
 }
@@ -22,7 +25,9 @@ void overridebut_display()
 }
 void overridebut_pressed()
 {
-    
+    active_windows.insert(new menu_override());
+    active_windows.erase(&navigation_bar);
+    active_windows.erase(&PASP);
 }
 Button dataview_button(60, 50, dataviewbut_display, dataviewbut_pressed);
 void dataviewbut_display()
@@ -40,6 +45,9 @@ void specbut_display()
 }
 void specbut_pressed()
 {
+    active_windows.insert(new menu_spec());
+    active_windows.erase(&navigation_bar);
+    active_windows.erase(&PASP);
 }
 Button config_button(60, 50, configbut_display, configbut_pressed);
 void configbut_display()
@@ -48,4 +56,7 @@ void configbut_display()
 }
 void configbut_pressed()
 {
+    active_windows.insert(new menu_settings());
+    active_windows.erase(&navigation_bar);
+    active_windows.erase(&PASP);
 }
