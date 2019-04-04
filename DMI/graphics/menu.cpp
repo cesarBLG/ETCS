@@ -1,12 +1,6 @@
 #include "menu.h"
-menu::menu() : exit_button("symbols/Navigation/NA_11.bmp", 82, 50)
+menu::menu(char *title) : subwindow(title)
 {
-    extern Button downArrow;
-    addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));
-    exit_button.setPressedAction([this] 
-    {
-        exit(this);
-    });
     for(int i=0; i<8; i++)
     {
         buttons[i] = nullptr;
@@ -21,7 +15,7 @@ menu::~menu()
 }
 void menu::setLayout()
 {
-    addToLayout(buttons[0], new RelativeAlignment(nullptr, 490-153, 45,0));
+    addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 45,0));
     addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));
     addToLayout(buttons[2], new ConsecutiveAlignment(buttons[0],DOWN,0));
     addToLayout(buttons[3], new ConsecutiveAlignment(buttons[2],RIGHT,0));

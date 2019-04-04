@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "display.h"
 
-menu_spec::menu_spec()
+menu_spec::menu_spec() : menu("Special")
 {
     buttons[0] = new TextButton("Adhesion", 153, 50, nullptr);
     buttons[1] = new TextButton("SR Speed/Distance", 153, 50, nullptr);

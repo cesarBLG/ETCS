@@ -3,8 +3,8 @@
 #include "button.h"
 class TextButton : public Button
 {
-    char *caption;
+    const char *caption;
     public:
-    TextButton(char *text, float sx, float sy, function<void()> pressed);
+    TextButton(const char *text, float sx, float sy, function<void()> pressed);
 };
 #endif

@@ -65,10 +65,10 @@ void Component::paint()
     if(ack && (flash_state & 2)) setBorder(Yellow);
     else if(dispBorder)
     {
-        vlineRGBA(sdlren, getX(0), getY(0), getY(sy-1), Black.R, Black.G, Black.B, 255);
-        vlineRGBA(sdlren, getX(sx-1), getY(0), getY(sy-1), Shadow.R, Shadow.G, Shadow.B, 255);
-        hlineRGBA(sdlren, getX(0), getX(sx-1), getY(0), Black.R, Black.G, Black.B, 255);
-        hlineRGBA(sdlren, getX(0), getX(sx-1), getY(sy-1), Shadow.R, Shadow.G, Shadow.B, 255);
+        drawLine(0, 0, 0, sy-1, Black);
+        drawLine(sx-1, 0, sx-1, sy-1, Shadow);
+        drawLine(0, 0, sx-1, 0, Black);
+        drawLine(0, sy-1, sx-1, sy-1, Shadow);
     }
 }
 void Component::drawArc(float ang0, float ang1, float r, float cx, float cy)

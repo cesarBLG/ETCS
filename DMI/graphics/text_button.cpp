@@ -1,5 +1,5 @@
 #include "text_button.h"
-TextButton::TextButton(char *text, float sx, float sy, function<void()> pressed)
+TextButton::TextButton(const char *text, float sx, float sy, function<void()> pressed)
 {
     setSize(sx, sy);
     caption = text;

@@ -46,6 +46,10 @@ class Component
     bool isButton = false;
     bool dispBorder = true;
     bool isSensitive(){return pressedAction != nullptr;}
+    float touch_up = 0;
+    float touch_down = 0;
+    float touch_left = 0;
+    float touch_right = 0;
     Component(){}
     Component(float sx, float sy, function<void()> display);
     ~Component();

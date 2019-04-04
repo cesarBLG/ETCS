@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "display.h"
 #include "text_button.h"
-menu_settings::menu_settings()
+menu_settings::menu_settings() : menu("Settings")
 {
     buttons[0] = new IconButton("symbols/Setting/SE_03.bmp", 153, 50, nullptr);
     buttons[1] = new IconButton("symbols/Setting/SE_02.bmp", 153, 50, nullptr);
