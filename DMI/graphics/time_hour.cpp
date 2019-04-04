@@ -4,6 +4,7 @@
 Component time_hour(63,50,timeHour);
 void timeHour()
 {
-    time_hour.drawBox(63,50, DarkBlue);
-    time_hour.setText((to_string(getHour())+":"+to_string(getMinute())+":"+to_string(getSecond())).c_str(),10,White);
+    char time[9];
+    snprintf(time,9,"%02d:%02d:%02d",getHour(),getMinute(),getSecond());
+    time_hour.setText(time,10,White);
 }
