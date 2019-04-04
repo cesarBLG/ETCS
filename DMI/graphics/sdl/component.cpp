@@ -1,10 +1,10 @@
-#include "component.h"
-#include "display.h"
+#include "../component.h"
+#include "../display.h"
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <algorithm>
 #include <cmath>
-#include "../graphics/flash.h"
-#include "../sound/sound.h"
+#include "../flash.h"
+#include "../../sound/sound.h"
 using namespace std;
 Component Z(640, 15, nullptr);
 Component Y(640, 15, nullptr);
@@ -52,6 +52,12 @@ void Component::setLocation(float x, float y)
 void Component::drawLine(float x1, float y1, float x2, float y2)
 {
     aalineRGBA(sdlren, getX(x1), getY(y1), getX(x2), getY(y2), renderColor.R, renderColor.G, renderColor.B, 255);
+}
+void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
+{
+    if(x1 == x2) vlineRGBA(sdlren, getX(x1), getY(y1), getY(y1), c.R, c.G, c.B, 255);
+    if(y1 == y2) hlineRGBA(sdlren, getX(x1), getX(x2), getY(y1), c.R, c.G, c.B, 255);
+    aalineRGBA(sdlren, getX(x1), getY(y1), getX(x2), getY(y2), c.R, c.G, c.B, 255);
 }
 void Component::paint()
 {

@@ -7,9 +7,10 @@ using namespace std;
 extern window main_window;
 extern window navigation_bar;
 //extern window menu_main;
-extern window PASP;
+extern window planning_area;;
 extern unordered_set<window*> active_windows;
 extern unordered_set<window*> invalid_windows;
 void displayETCS();
 void prepareLayout();
+void exit(window *w);
 #endif

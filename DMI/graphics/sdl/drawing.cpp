@@ -1,5 +1,5 @@
-#include "drawing.h"
-#include "display.h"
+#include "../drawing.h"
+#include "../display.h"
 using namespace std;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;

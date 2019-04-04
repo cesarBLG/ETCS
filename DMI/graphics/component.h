@@ -2,7 +2,6 @@
 #define _COMPONENT_H
 #include "color.h"
 #include "SDL2/SDL.h"
-#include "SDL2/SDL_ttf.h"
 #include "drawing.h"
 #include <functional>
 #include <string>
@@ -61,6 +60,7 @@ class Component
     void drawArc(float ang0, float ang1, float r, float cx, float cy);
     void rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle);
     void drawLine(float x1, float y1, float x2, float y2);
+    void drawLine(float x1, float y1, float x2, float y2, Color c);
     void drawPolygon(float *x, float *y, int n);
     void drawBox(float sx, float sy, Color c);
     void drawCircle(float cx, float cy, float radius);

@@ -2,4 +2,5 @@
 #define _TIME_H_ETCS
 int getHour();
 int getMinute();
+int getSecond();
 #endif

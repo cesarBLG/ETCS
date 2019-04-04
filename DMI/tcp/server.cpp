@@ -10,7 +10,7 @@
 #include "../sound/sound.h"
 #include "../messages/messages.h"
 #include "../time.h"
-#include "../graphics/PASP.h"
+#include "../planning/planning.h"
 using namespace std;
 IPaddress ip;
 TCPsocket serv_sock;
@@ -68,7 +68,7 @@ void parseData(string str)
         if(value == "IntS") s = IntS;
         setSupervision(s);
     }
-    if(command == "setPASPobjects")
+    if(command == "setPlanningObjects")
     {
         vector<string> val;
 
@@ -82,13 +82,13 @@ void parseData(string str)
         }
         val.push_back(value);
 
-        pasp_objects.clear();
+        planning_elements.clear();
         for(int i = 0; i < val.size(); i+=2)
         {
-            pasp_object p;
+            planning_element p;
             p.condition = stoi(val[i]);
             p.distance = stoi(val[i+1]);
-            pasp_objects.push_back(p);
+            planning_elements.push_back(p);
         }
     }
     notifyDataReceived();

@@ -4,8 +4,9 @@
 class window
 {
     Layout *l;
+    function<void()> constructfun;
     public:
-    window()
+    window(function<void()> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();
     }
@@ -17,6 +18,10 @@ class window
     void addToLayout(Component *comp, ComponentAlignment *alignment) 
     {
         l->add(comp, alignment);
+    }
+    void construct()
+    {
+        if(constructfun != nullptr) constructfun();
     }
     void display();
     void event(int evNo, float x, float y);

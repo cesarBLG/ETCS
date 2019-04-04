@@ -14,3 +14,7 @@ int getMinute()
 {
     return getTime().tm_min;
 }
+int getSecond()
+{
+    return getTime().tm_sec;
+}
