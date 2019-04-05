@@ -61,6 +61,10 @@ void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 }
 void Component::paint()
 {
+    if(bgColor != DarkBlue)
+    {
+        boxRGBA(sdlren, getX(0), getY(0), getX(sx), getY(sy), bgColor.R, bgColor.G, bgColor.B, 255);
+    }
     if(display!=nullptr) display();
     if(ack && (flash_state & 2)) setBorder(Yellow);
     else if(dispBorder)
@@ -206,4 +210,8 @@ void Component::setText(const char* text, float size, Color c)
 void Component::setBorder(Color c)
 {
     rectangleRGBA(sdlren, getX(0), getY(0), getX(sx), getY(sy), c.R, c.G, c.B, 255);
+}
+void Component::setBackgroundColor(Color c)
+{
+    bgColor = c;
 }

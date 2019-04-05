@@ -5,6 +5,14 @@ struct Color
     int R;
     int G;
     int B;
+    bool operator==(Color b)
+    {
+        return R == b.R && G==b.G && B==b.B;
+    }
+    bool operator!=(Color b)
+    {
+        return !(*this==b);
+    }
 };
 const Color White = {255,255,255};
 const Color Black = {0,0,0};

@@ -1,7 +1,8 @@
 #include "menu_main.h"
 #include "button.h"
 #include "window.h"
-#include "input_window.h"
+#include "level_window.h"
+#include "running_number.h"
 #include <algorithm>
 #include "display.h"
 
@@ -15,12 +16,15 @@ menu_main::menu_main() : menu("Main")
     buttons[5] = new TextButton("Train running number", 153, 50, nullptr);
     buttons[6] = new TextButton("Shunting", 153, 50, nullptr);
     buttons[7] = new TextButton("Non-Leading", 153, 50, nullptr);
+    buttons[4]->setPressedAction([this] 
+    {
+        exit(this);
+        right_menu(new level_window());
+    });
     buttons[5]->setPressedAction([this] 
     {
         exit(this);
-        active_windows.insert(new input_window("Train running number"));
-        active_windows.erase(&navigation_bar);
-        active_windows.erase(&planning_area);
+        right_menu(new trn_window());
     });
     setLayout();
 }

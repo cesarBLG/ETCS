@@ -37,6 +37,12 @@ void prepareLayout()
         (*it)->construct();
     }
 }
+void right_menu(window *w)
+{
+    active_windows.insert(w);
+    active_windows.erase(&navigation_bar);
+    active_windows.erase(&planning_area);
+}
 void exit(window *w)
 {
     active_windows.insert(&navigation_bar);

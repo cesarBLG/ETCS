@@ -1,5 +1,5 @@
 #include "menu.h"
-menu::menu(char *title) : subwindow(title)
+menu::menu(const char *title) : subwindow(title)
 {
     for(int i=0; i<8; i++)
     {

@@ -37,6 +37,7 @@ class Component
             dest[i] = (short)getY(source[i]);
         }
     }
+    Color bgColor = DarkBlue;
     SDL_Surface *bgSurf;
     string surfloc = "";
     bool ack = false;
@@ -51,7 +52,7 @@ class Component
     float touch_left = 0;
     float touch_right = 0;
     Component(){}
-    Component(float sx, float sy, function<void()> display);
+    Component(float sx, float sy, function<void()> display = nullptr);
     ~Component();
     void setPressed(bool value);
     void setPressedAction(function<void()> action);
@@ -74,6 +75,7 @@ class Component
     void drawImage(const char *name, float cx, float cy, float sx, float sy);
     void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);
     void setBackgroundImage(const char *name);
+    void setBackgroundColor(Color c);
     void setText(const char* text, float size, Color c);
     void setBorder(Color c);
 };

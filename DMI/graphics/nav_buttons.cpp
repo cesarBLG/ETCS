@@ -16,9 +16,7 @@ void mainbut_display()
 }
 void mainbut_pressed()
 {
-    active_windows.insert(new menu_main());
-    active_windows.erase(&navigation_bar);
-    active_windows.erase(&planning_area);
+    right_menu(new menu_main());
 }
 Button override_button(60, 50, overridebut_display, overridebut_pressed);
 void overridebut_display()
@@ -27,9 +25,7 @@ void overridebut_display()
 }
 void overridebut_pressed()
 {
-    active_windows.insert(new menu_override());
-    active_windows.erase(&navigation_bar);
-    active_windows.erase(&planning_area);
+    right_menu(new menu_override());
 }
 Button dataview_button(60, 50, dataviewbut_display, dataviewbut_pressed);
 void dataviewbut_display()
@@ -47,9 +43,7 @@ void specbut_display()
 }
 void specbut_pressed()
 {
-    active_windows.insert(new menu_spec());
-    active_windows.erase(&navigation_bar);
-    active_windows.erase(&planning_area);
+    right_menu(new menu_spec());
 }
 Button config_button(60, 50, configbut_display, configbut_pressed);
 void configbut_display()
@@ -58,9 +52,7 @@ void configbut_display()
 }
 void configbut_pressed()
 {
-    active_windows.insert(new menu_settings());
-    active_windows.erase(&navigation_bar);
-    active_windows.erase(&planning_area);
+    right_menu(new menu_settings());
 }
 void construct_nav()
 {
