@@ -1,5 +1,8 @@
 #include "../drawing.h"
 #include "../display.h"
+#include <ctime>
+#include <chrono>
+#include <cstdio>
 using namespace std;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;
@@ -25,9 +28,13 @@ void startDisplay(bool fullscreen)
 }
 void display()
 {
+    auto start = chrono::system_clock::now();
     clear();
     displayETCS();
     SDL_RenderPresent(sdlren);
+    auto end = chrono::system_clock::now();
+    chrono::duration<double> diff = end-start;
+    //printf("%f\n", diff.count());
 }
 void quitDisplay()
 {

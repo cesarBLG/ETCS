@@ -43,6 +43,15 @@ int main(int argc, char** argv)
     {
         if(SDL_WaitEvent(&ev) != 0)
         {
+            /*if(ev.type == SDL_KEYDOWN)
+            {
+                SDL_KeyboardEvent kev = ev.key;
+                if(kev.keysym.sym == SDLK_c)
+                {
+                    printf("quit\n");
+                    running = false;
+                }
+            }*/
             if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
             {
                 printf("quit\n");

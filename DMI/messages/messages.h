@@ -28,7 +28,8 @@ enum DriverMessage
     RadioNetworkRegistrationFailed,
     NTCnotAvailable,
     NTCneedsData,
-    NTCfailed
+    NTCfailed,
+    AcknowledgeSR
 };
 struct Message
 {

@@ -1,7 +1,4 @@
-#include <ctime>
-#include <chrono>
 #include "display.h"
-#include <cstdio>
 #include "button.h"
 #include "text_button.h"
 #include "menu.h"
@@ -11,8 +8,7 @@ unordered_set<window*> invalid_windows;
 #include <iostream>
 void displayETCS()
 {
-    auto start = chrono::system_clock::now();
-    for(auto it=invalid_windows.begin(); it!=active_windows.end(); ++it)
+    for(auto it=invalid_windows.begin(); it!=invalid_windows.end(); ++it)
     {
         window *w = *it;
         active_windows.erase(w);
@@ -23,9 +19,6 @@ void displayETCS()
     {
         (*it)->display();
     }
-    auto end = chrono::system_clock::now();
-    chrono::duration<double> diff = end-start;
-    //printf("%f\n", diff.count());
 }
 void prepareLayout()
 {

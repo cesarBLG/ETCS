@@ -17,7 +17,7 @@ input_window::input_window(const char *title) : subwindow(title), input_field(20
     });
     input_field.setPressedAction([this]
     {
-        //TODO: validate data
+        validate(data);
         exit(this);
     });
     addToLayout(&input_field, new RelativeAlignment(nullptr, 334, 65, 0));

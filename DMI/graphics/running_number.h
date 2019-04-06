@@ -5,5 +5,6 @@ class trn_window : public input_window
 {
     public:
     trn_window();
+    void validate(string dat) override;
 };
 #endif

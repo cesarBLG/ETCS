@@ -12,7 +12,7 @@ class Button : public Component
     {
         pressedAction = pressed;
     }
-    Button(float sx, float sy, function<void()> display, function<void()> pressed) : Component(sx,sy,display)
+    Button(float sx, float sy, function<void()> display = nullptr, function<void()> pressed = nullptr) : Component(sx,sy,display)
     {
         isButton = true;
         setPressedAction(pressed);

@@ -76,6 +76,10 @@ class Component
     void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);
     void setBackgroundImage(const char *name);
     void setBackgroundColor(Color c);
+    string text;
+    float text_size;
+    Color text_color;
+    void setLabel(const char* text, float size, Color c);
     void setText(const char* text, float size, Color c);
     void setBorder(Color c);
 };

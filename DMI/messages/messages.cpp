@@ -46,7 +46,8 @@ const char *message_text[] = {
     "Radio network registration failed",
     "%s not available",
     "%s needs data",
-    "%s failed"
+    "%s failed",
+    "Reconocer modo SR"
 };
 deque <Message> messageList;
 int line;
@@ -77,7 +78,7 @@ void displayMessages()
     {
         addMsg(Message(4,BaliseReadError, 11, 9));
         addMsg(Message(5,SHrefused, 11, 8));
-        addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
+        //addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
         //addMsg({3,EnteringFS, 11, 9, false, false, true, false});
     } 
     sort(messageList.begin(), messageList.end());

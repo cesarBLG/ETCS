@@ -10,7 +10,8 @@ class input_window : public subwindow
     Button* buttons[12];
     public:
     input_window(const char *name);
+    virtual void validate(string dat){};
     void setLayout();
-    ~input_window();
+    virtual ~input_window();
 };
 #endif

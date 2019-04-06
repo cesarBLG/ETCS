@@ -16,6 +16,8 @@ float Vest;
 float Dtarg;
 float TTI = 20;
 bool EB = false;
+int trn;
+unsigned long driverid;
 void updateSupervision();
 void update()
 {

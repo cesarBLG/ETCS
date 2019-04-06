@@ -5,5 +5,6 @@ class level_window : public input_window
 {
     public:
     level_window();
+    void validate(string dat) override;
 };
 #endif

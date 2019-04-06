@@ -5,6 +5,6 @@ class TextButton : public Button
 {
     const char *caption;
     public:
-    TextButton(const char *text, float sx, float sy, function<void()> pressed);
+    TextButton(const char *text, float sx, float sy, function<void()> pressed = nullptr);
 };
 #endif

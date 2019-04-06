@@ -10,7 +10,7 @@ class window
     {
         l = new Layout();
     }
-    ~window();
+    virtual ~window();
     vector<LayoutElement>& getLayoutElements()
     {
         return l->getElements();

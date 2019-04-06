@@ -51,20 +51,17 @@ void Component::setLocation(float x, float y)
 }
 void Component::drawLine(float x1, float y1, float x2, float y2)
 {
-    aalineRGBA(sdlren, getX(x1), getY(y1), getX(x2), getY(y2), renderColor.R, renderColor.G, renderColor.B, 255);
+    SDL_RenderDrawLine(sdlren, getX(x1), getY(y1), getX(x2), getY(y2));
 }
 void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 {
-    if(x1 == x2) vlineRGBA(sdlren, getX(x1), getY(y1), getY(y1), c.R, c.G, c.B, 255);
-    if(y1 == y2) hlineRGBA(sdlren, getX(x1), getX(x2), getY(y1), c.R, c.G, c.B, 255);
-    aalineRGBA(sdlren, getX(x1), getY(y1), getX(x2), getY(y2), c.R, c.G, c.B, 255);
+    setColor(c);
+    drawLine(x1,y1,x2,y2);
 }
 void Component::paint()
 {
-    if(bgColor != DarkBlue)
-    {
-        boxRGBA(sdlren, getX(0), getY(0), getX(sx), getY(sy), bgColor.R, bgColor.G, bgColor.B, 255);
-    }
+    if(bgColor != DarkBlue) drawBox(sx,sy,bgColor);
+    //if(!text.empty()) setText(text.c_str(), text_size, text_color);
     if(display!=nullptr) display();
     if(ack && (flash_state & 2)) setBorder(Yellow);
     else if(dispBorder)
@@ -124,12 +121,15 @@ void Component::drawPolygon(float *x, float *y, int n)
     short scaley[n];
     getXpoints(x, scalex, n);
     getYpoints(y, scaley, n);
+    //polygon(sdlren, scalex, scaley, n);
     aapolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
     filledPolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
 }
 void Component::drawBox(float sx, float sy, Color c)
 {
-    boxRGBA(sdlren, getX((this->sx-sx)/2), getY((this->sy-sy)/2), getX((this->sx+sx)/2), getY((this->sy+sy)/2), c.R, c.G, c.B, 255);
+    setColor(c);
+    SDL_Rect r = {getX((this->sx-sx)/2), getY((this->sy-sy)/2), getX((this->sx+sx)/2)-getX((this->sx-sx)/2), getY((this->sy+sy)/2)-getY((this->sy-sy)/2)};
+    SDL_RenderFillRect(sdlren,&r);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
@@ -148,7 +148,7 @@ void Component::drawSurface(SDL_Surface *surf, float cx, float cy, float sx, flo
     if(destroy) SDL_FreeSurface(surf);
     SDL_Rect rect = SDL_Rect({getX(cx - sx/2), getY(cy-sy/2), getScale(sx), getScale(sy)});
     SDL_RenderCopy(sdlren, tex, nullptr, &rect);
-    SDL_DestroyTexture(tex);
+    if(destroy) SDL_DestroyTexture(tex);
 }
 void Component::drawImage(const char *name, float cx, float cy, float sx, float sy)
 {
@@ -207,9 +207,17 @@ void Component::setText(const char* text, float size, Color c)
     }
     else drawText(text, 0, 0, sx, sy, size, c, CENTER);
 }
+void Component::setLabel(const char* text, float size, Color c)
+{
+    this->text = text;
+    text_size = size;
+    text_color = c;
+}
 void Component::setBorder(Color c)
 {
-    rectangleRGBA(sdlren, getX(0), getY(0), getX(sx), getY(sy), c.R, c.G, c.B, 255);
+    setColor(c);
+    SDL_Rect r = {getX(0), getY(0), getX(sx)-getX(0), getY(sy)-getY(0)};
+    SDL_RenderDrawRect(sdlren, &r);
 }
 void Component::setBackgroundColor(Color c)
 {

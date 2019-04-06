@@ -1,5 +1,5 @@
 #include "subwindow.h"
-subwindow::subwindow(const char *title) : exit_button("symbols/Navigation/NA_11.bmp", 82, 50), title_bar(306,24,nullptr)
+subwindow::subwindow(const char *title) : window(), exit_button("symbols/Navigation/NA_11.bmp", 82, 50), title_bar(306,24)
 {
     extern Button downArrow;
     title_bar.setDisplayFunction([this,title]{title_bar.drawText(title,4,0,0,0,12,White, LEFT);});
