@@ -1,7 +1,6 @@
-#include "display.h"
-#include "button.h"
-#include "text_button.h"
-#include "time_hour.h"
+#include "../graphics/display.h"
+#include "../graphics/button.h"
+#include "../graphics/text_button.h"
 void construct_main();
 window main_window(construct_main);
 void construct_main()
@@ -71,7 +70,6 @@ void construct_main()
     main_window.addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
     main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
     main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
-    main_window.addToLayout(&time_hour, new RelativeAlignment(nullptr,517,415));
 
 
     extern bool showSpeeds;

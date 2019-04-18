@@ -1,9 +1,4 @@
 #include "menu_spec.h"
-#include "button.h"
-#include "window.h"
-#include <algorithm>
-#include "display.h"
-
 menu_spec::menu_spec() : menu("Special")
 {
     buttons[0] = new TextButton("Adhesion", 153, 50);

@@ -1,9 +1,9 @@
 #include "data_entry.h"
 #include "menu_main.h"
-#include "button.h"
 #include "window.h"
 #include <algorithm>
-#include "display.h"
+#include "../graphics/button.h"
+#include "../graphics/display.h"
 input_window::input_window(const char *title) : subwindow(title), input_field(204+102,50)
 {
     for(int i=0; i<12; i++)

@@ -11,6 +11,7 @@
 #include "../messages/messages.h"
 #include "../time.h"
 #include "../planning/planning.h"
+#include "../graphics/drawing.h"
 using namespace std;
 IPaddress ip;
 TCPsocket serv_sock;
@@ -23,9 +24,7 @@ SDLNet_SocketSet set;
 static SDL_Event ev;
 void notifyDataReceived()
 {
-    ev.type = SDL_USEREVENT;
-    int result = SDL_PushEvent(&ev);
-    if(result < 0) printf("SDL Event error: %s\n", SDL_GetError());
+    repaint();
 }
 void parseData(string str)
 {

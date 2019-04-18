@@ -21,4 +21,6 @@ void clear();
 void setColor(Color color);
 TTF_Font *openFont(char *text, float size);
 void getFontSize(TTF_Font *font, const char *str, float *width, float *height);
+void init_video();
+void repaint();
 #endif

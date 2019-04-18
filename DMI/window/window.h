@@ -1,11 +1,13 @@
 #ifndef _WINDOW_H
 #define _WINDOW_H
-#include "layout.h"
+#include "../graphics/layout.h"
+#include "../control/control.h"
 class window
 {
     Layout *l;
     function<void()> constructfun;
     public:
+    bool active = true;
     window(function<void()> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();

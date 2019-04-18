@@ -1,9 +1,19 @@
-#include "../drawing.h"
-#include "../display.h"
 #include <ctime>
 #include <chrono>
 #include <cstdio>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <SDL2/SDL.h>
+#include "../drawing.h"
+#include "../display.h"
+#include "../button.h"
+#include "../flash.h"
+#include "../../sound/sound.h"
+#include "../../messages/messages.h"
+#include <mutex>
 using namespace std;
+extern mutex draw_mtx;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;
 char *fontPath = "fonts/swiss.ttf";
@@ -11,6 +21,81 @@ char *fontPathb = "fonts/swissb.ttf";
 #define PI 3.14159265358979323846264338327950288419716939937510
 float scale = 1;
 float offset[2] = {0, 0};
+extern bool running;
+mutex ev_mtx;
+void init_video()
+{
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    startDisplay(false);
+    int timer = SDL_AddTimer(250, flash, nullptr);
+    SDL_Event ev;
+    int count = 0;
+    chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
+    while(running)
+    {
+        if(SDL_WaitEvent(&ev) != 0)
+        {
+            /*if(ev.type == SDL_KEYDOWN)
+            {
+                SDL_KeyboardEvent kev = ev.key;
+                if(kev.keysym.sym == SDLK_c)
+                {
+                    printf("quit\n");
+                    running = false;
+                }
+            }*/
+            if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
+            {
+                printf("quit\n");
+                running = false;
+            }
+            else if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT) 
+            {
+                auto now = chrono::system_clock::now();
+                chrono::duration<double> diff = now - lastrender;
+                checkSound();
+                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 80)
+                {
+                    lastrender = chrono::system_clock::now();
+                    display();
+                }
+            }
+            else if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_FINGERDOWN)
+            {
+                float scrx;
+                float scry;
+                if(ev.type == SDL_FINGERDOWN)
+                {
+                    SDL_TouchFingerEvent tfe = ev.tfinger;
+                    scrx = tfe.x;
+                    scry = tfe.y;
+                }
+                else
+                {
+                    SDL_MouseButtonEvent mbe = ev.button;
+                    scrx = mbe.x;
+                    scry = mbe.y;
+                }
+                extern float scale;
+                extern float offset[2];
+                float x = (scrx-offset[0]) / scale;
+                float y = scry / scale;
+                vector<window*> windows;
+                draw_mtx.lock();
+                for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
+                {
+                    if((*it)->active) windows.push_back(*it);
+                }
+                for(int i=0; i<windows.size(); i++)
+                {
+                    windows[i]->event(1, x, y);
+                }
+                draw_mtx.unlock();
+            }
+        }
+    }
+    quitDisplay();
+}
 void startDisplay(bool fullscreen)
 {
     TTF_Init();
@@ -23,14 +108,14 @@ void startDisplay(bool fullscreen)
     float extra = 640/2*(scrsize[0]/(scrsize[1]*4/3)-1);
     offset[0] = extra;
     scale = scrsize[1]/480.0;
-    prepareLayout();
-    display();
 }
 void display()
 {
     auto start = chrono::system_clock::now();
     clear();
+    draw_mtx.lock();
     displayETCS();
+    draw_mtx.unlock();
     SDL_RenderPresent(sdlren);
     auto end = chrono::system_clock::now();
     chrono::duration<double> diff = end-start;
@@ -41,6 +126,7 @@ void quitDisplay()
     SDL_DestroyRenderer(sdlren);
     SDL_DestroyWindow(sdlwin);
     SDL_Quit();
+    exit(nullptr);
 }
 void clear()
 {
@@ -73,4 +159,12 @@ TTF_Font *openFont(char *text, float size)
     TTF_CloseFont(f);
     f = TTF_OpenFont(text, getScale(size)*size/height);*/
     return f;
+}
+void repaint()
+{
+    SDL_Event ev;
+    //unique_lock<mutex> l(ev_mtx);
+    ev.type = SDL_USEREVENT;
+    int result = SDL_PushEvent(&ev);
+    if(result < 0) printf("SDL Event error: %s\n", SDL_GetError());
 }

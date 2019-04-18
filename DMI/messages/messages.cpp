@@ -138,11 +138,12 @@ void displayArrows()
 }
 void arrowUp()
 {
+    if(current==0) return;
     current--;
-    if(current<0) current = 0;
 }
 void arrowDown()
 {
+    if(line<=5+current) return;
     current++;
     if(current>line-5) current = line-5;
 }

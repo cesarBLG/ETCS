@@ -3,7 +3,7 @@
 #include "../monitor.h"
 #include <string>
 #include "../graphics/icon_button.h"
-#include "../graphics/window.h"
+#include "../window/window.h"
 #include "../graphics/display.h"
 
 void planningConstruct();

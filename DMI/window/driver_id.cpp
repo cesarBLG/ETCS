@@ -2,7 +2,9 @@
 #include "window.h"
 #include "algorithm"
 #include "../monitor.h"
-driver_window::driver_window() : input_window("Driver ID")
+#include "running_number.h"
+#include "menu_settings.h"
+driver_window::driver_window() : input_window("Driver ID"), TRN("TRN",82,50), settings("symbols/Setting/SE_04.bmp",82,50)
 {
     data = to_string(driverid);
     buttons[0] = new Button(102, 50, nullptr, nullptr);
@@ -71,6 +73,16 @@ driver_window::driver_window() : input_window("Driver ID")
             if(i==10) data = data + "0";
         });
     }
+    addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
+    addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
+    TRN.setPressedAction([this] 
+    {
+        right_menu(new trn_window());
+    });
+    settings.setPressedAction([this] 
+    {
+        right_menu(new menu_settings());
+    });
     setLayout();
 }
 void driver_window::validate(string dat)

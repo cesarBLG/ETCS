@@ -1,6 +1,5 @@
 #ifndef _DATA_ENTRY_H
 #define _DATA_ENTRY_H
-#include "text_button.h"
 #include "subwindow.h"
 class input_window : public subwindow
 {

@@ -21,6 +21,7 @@ enum Level
     N2,
     N3,
     NTC,
+    Unknown
 };
 enum Mode
 {

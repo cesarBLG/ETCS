@@ -1,9 +1,4 @@
 #include "menu_settings.h"
-#include "button.h"
-#include "window.h"
-#include <algorithm>
-#include "display.h"
-#include "text_button.h"
 menu_settings::menu_settings() : menu("Settings")
 {
     buttons[0] = new IconButton("symbols/Setting/SE_03.bmp", 153, 50);
