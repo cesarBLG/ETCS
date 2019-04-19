@@ -1,5 +1,6 @@
 #include "control.h"
 #include "../graphics/display.h"
+#include "../graphics/drawing.h"
 #include "../monitor.h"
 #include "../window/level_window.h"
 #include "../window/driver_id.h"
@@ -19,6 +20,7 @@ void wait(window *w)
     draw_mtx.lock();
     active_windows.insert(w);
     draw_mtx.unlock();
+    repaint();
     int i=0;
     while(!ex)
     {

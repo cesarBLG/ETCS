@@ -71,6 +71,7 @@ class Component
     void drawCircle(float cx, float cy, float radius);
     void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
     void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
+    void drawRectangle(float x, float y, float w, float h, Color c);
     void drawSurface(SDL_Surface *surf, float cx, float cy, float sx, float sy, bool destroy = true);
     void drawImage(const char *name, float cx, float cy, float sx, float sy);
     void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);

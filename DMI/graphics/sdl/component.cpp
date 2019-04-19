@@ -136,6 +136,13 @@ void Component::drawCircle(float radius, float cx, float cy)
     aacircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
     filledCircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
 }
+//TODO: merge to drawBox
+void Component::drawRectangle(float x, float y, float w, float h, Color c)
+{
+    setColor(c);
+    SDL_Rect r = {getX(x), getY(y), getScale(w), getScale(h)};
+    SDL_RenderFillRect(sdlren, &r);
+}
 void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang)
 {
     float c = cosf(ang);

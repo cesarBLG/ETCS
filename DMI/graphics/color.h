@@ -24,4 +24,6 @@ const Color Shadow = {8, 24, 57};
 const Color Red = {191,0,2};
 const Color Orange = {234,145,0};
 const Color DarkBlue = {3, 17, 34};
+const Color PASPdark = {33, 49, 74};
+const Color PASPlight = {41, 74, 107};
 #endif

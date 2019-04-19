@@ -54,7 +54,7 @@ void init_video()
                 auto now = chrono::system_clock::now();
                 chrono::duration<double> diff = now - lastrender;
                 checkSound();
-                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 80)
+                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 5)
                 {
                     lastrender = chrono::system_clock::now();
                     display();

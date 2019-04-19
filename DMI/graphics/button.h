@@ -7,6 +7,7 @@ class Button : public Component
     Button() {isButton = true;}
     public:
     bool enabled = true;
+    bool showBorder = true;
     virtual void paint();
     void setPressedAction(function<void()> pressed)
     {

@@ -1,7 +1,7 @@
 #include "button.h"
 void Button::paint()
 {
-    if(enabled)
+    if(enabled&&showBorder)
     {
         drawLine(2, 2, 2, sy-3, Shadow);
         drawLine(sx-3, 2, sx-3, sy-3, Black);
