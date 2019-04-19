@@ -21,6 +21,10 @@ class window
     {
         l->add(comp, alignment);
     }
+    void bringFront(Component *comp)
+    {
+        l->order.push_back(comp);
+    }
     void construct()
     {
         if(constructfun != nullptr) constructfun();

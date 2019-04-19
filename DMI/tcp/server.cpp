@@ -90,6 +90,53 @@ void parseData(string str)
             planning_elements.push_back(p);
         }
     }
+    if(command == "setPlanningGradients")
+    {
+        vector<string> val;
+
+        int valsep = value.find(',');
+        while(valsep!=string::npos)
+        {
+            string param = value.substr(0,valsep);
+            value = value.substr(valsep+1);
+            valsep = value.find(',');
+            val.push_back(param);
+        }
+        val.push_back(value);
+
+        gradient_elements.clear();
+        for(int i = 0; i < val.size(); i+=3)
+        {
+            gradient_element g;
+            g.val = stoi(val[i]);
+            g.distance = stoi(val[i+1]);
+            g.length = stoi(val[i+2]);
+            gradient_elements.push_back(g);
+        }
+    }
+    if(command == "setPlanningSpeeds")
+    {
+        vector<string> val;
+
+        int valsep = value.find(',');
+        while(valsep!=string::npos)
+        {
+            string param = value.substr(0,valsep);
+            value = value.substr(valsep+1);
+            valsep = value.find(',');
+            val.push_back(param);
+        }
+        val.push_back(value);
+
+        speed_elements.clear();
+        for(int i = 0; i < val.size(); i+=2)
+        {
+            speed_element s;
+            s.speed = stoi(val[i]);
+            s.distance = stoi(val[i+1]);
+            speed_elements.push_back(s);
+        }
+    }
     notifyDataReceived();
 }
 void read()

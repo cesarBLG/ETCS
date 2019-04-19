@@ -13,8 +13,10 @@ const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
 int planning_scale = 1;
 const int object_pos[] = {55,80,105};
 Component planning_distance(246,300, displayPlanning);
+Component planning_objects(246,300, displayObjects);
 Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
+Component planning_speed(99,270, displaySpeed);
 void displayScaleUp();
 void displayScaleDown();
 void zoominp()
@@ -30,19 +32,23 @@ IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
 vector<planning_element> planning_elements;
 void displayPlanning()
 {
-    setColor(DarkGrey);
     for(int i=0; i<9; i++)
     {
         if(i==0||i>4)
         {
+            setColor(DarkGrey);
             planning_distance.drawText(to_string(divs[i]*planning_scale).c_str(), 208, posy[i]-150, 0,0, 10, White, RIGHT);
         }
         planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
         if(i==0||i==5||i==8)
         {
+            setColor(MediumGrey);
             planning_distance.drawLine(40, posy[i]+0.5, 240-1, posy[i]+0.5);
         }
     }
+}
+void displayObjects()
+{
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
@@ -131,7 +137,9 @@ void displayPASP()
     {
         PASP.drawRectangle(14, 0, 93*red, getPlanningHeight(prev_pasp.distance)-15, PASPlight);
     }
-
+}
+void displaySpeed()
+{
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {
@@ -161,10 +169,19 @@ void displayPASP()
 void planningConstruct()
 {
     planning_area.addToLayout(&planning_distance, new RelativeAlignment(nullptr, 334,15));
+    planning_area.addToLayout(&planning_objects, new RelativeAlignment(nullptr, 334,15, 0));
     planning_area.addToLayout(&zoomin, new RelativeAlignment(&planning_distance, 20,8,0));
     planning_area.addToLayout(&zoomout, new RelativeAlignment(&planning_distance, 20,292,0));
     planning_area.addToLayout(&planning_gradient, new RelativeAlignment(&planning_distance, 115+9, 15+135, 0));
     planning_area.addToLayout(&PASP, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
+    planning_area.addToLayout(&planning_speed, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
+    planning_area.bringFront(&zoomin);
+    planning_area.bringFront(&zoomout);
+    planning_area.bringFront(&PASP);
+    planning_area.bringFront(&planning_distance);
+    planning_area.bringFront(&planning_objects);
+    planning_area.bringFront(&planning_gradient);
+    planning_area.bringFront(&planning_speed);
     zoomin.showBorder = false;
     zoomout.showBorder = false;
     zoomin.touch_down = 15;

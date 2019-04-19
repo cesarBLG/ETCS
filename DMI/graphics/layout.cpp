@@ -3,7 +3,6 @@
 #include <chrono>
 #include <cstdio>
 using namespace std;
-static vector<LayoutElement> elements;
 void Layout::add(Component *comp, ComponentAlignment *alignment)
 {
     if(comp == nullptr || alignment == nullptr) return;
@@ -12,7 +11,15 @@ void Layout::add(Component *comp, ComponentAlignment *alignment)
     updateLocations();
 }
 void Layout::update()
-{
+{   
+    if(!order.empty())
+    {
+        for(int i=0; i<elements.size(); i++)
+        {
+            order[i]->paint();
+        }
+        return;
+    }
     for(int i=0; i<elements.size(); i++)
     {
         elements[i].comp->paint();

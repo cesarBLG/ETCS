@@ -44,6 +44,7 @@ class Layout
 {
     vector<LayoutElement> elements;
     public:
+    vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
     void update();
     void updateLocations();
