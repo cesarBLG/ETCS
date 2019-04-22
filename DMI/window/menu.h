@@ -8,6 +8,6 @@ class menu : public subwindow
     public:
     menu(const char *title);
     ~menu();
-    void setLayout();
+    void setLayout() override;
 };
 #endif

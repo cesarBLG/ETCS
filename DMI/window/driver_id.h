@@ -7,6 +7,12 @@ class driver_window : public input_window
     IconButton settings;
     public:
     driver_window();
-    void validate(string dat) override;
+    void setLayout() override;
+};
+class driverid_input : public input_data
+{
+    public:
+    driverid_input();
+    void validate() override;
 };
 #endif

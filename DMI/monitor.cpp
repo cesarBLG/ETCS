@@ -18,6 +18,7 @@ float TTI = 20;
 bool EB = false;
 int trn;
 unsigned long driverid;
+bool ovEOA = false;
 void updateSupervision();
 void update()
 {

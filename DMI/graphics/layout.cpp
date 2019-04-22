@@ -10,6 +10,14 @@ void Layout::add(Component *comp, ComponentAlignment *alignment)
     if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();
 }
+void Layout::removeAll()
+{
+    for(int i=0; i<elements.size(); i++)
+    {
+        delete elements[i].alignment;
+    }
+    elements.clear();
+}
 void Layout::update()
 {   
     if(!order.empty())

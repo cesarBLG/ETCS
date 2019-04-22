@@ -8,7 +8,6 @@ Component c4(37, 50, nullptr);
 Component c1(58, 50, dispAcks);
 Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
-Component c7(37, 50, nullptr);
 void dispAcks()
 {
     if(modeAck)

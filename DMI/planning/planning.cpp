@@ -36,15 +36,11 @@ void displayPlanning()
     {
         if(i==0||i>4)
         {
-            setColor(DarkGrey);
             planning_distance.drawText(to_string(divs[i]*planning_scale).c_str(), 208, posy[i]-150, 0,0, 10, White, RIGHT);
         }
-        planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
-        if(i==0||i==5||i==8)
-        {
-            setColor(MediumGrey);
-            planning_distance.drawLine(40, posy[i]+0.5, 240-1, posy[i]+0.5);
-        }
+        setColor(DarkGrey);
+        if(i==0||i==5||i==8) planning_distance.drawRectangle(40, posy[i], 200, 2, MediumGrey);
+        else planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
     }
 }
 void displayObjects()
@@ -52,8 +48,9 @@ void displayObjects()
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
-        string name = string("symbols/Track Conditions/TC_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
-        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance),20,20);
+        if(p.distance>divs[8]*planning_scale) continue;
+        string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
+        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-10,20,20);
     }
 }
 vector<gradient_element> gradient_elements;
@@ -93,7 +90,7 @@ bool check_spdov(int i, int j)
     float a = getPlanningHeight(cur.distance)-15;
     float b = getPlanningHeight(chk.distance)-15;
     if(a-b>20) return false;
-    return cur.speed>chk.speed || check_spdov(i, j+1);
+    return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed) || check_spdov(i, j+1);
 }
 void displayPASP()
 {
@@ -131,15 +128,17 @@ void displayPASP()
             }
             prev_pasp = cur;
         }
-        //if(oth1 && prev.speed<cur.speed) oth2 = true;
+        if(oth1 && prev.speed<cur.speed) oth2 = true;
     }
-    if(!end)
+    /*if(!end)
     {
         PASP.drawRectangle(14, 0, 93*red, getPlanningHeight(prev_pasp.distance)-15, PASPlight);
-    }
+    }*/
 }
+indication_marker imarker;
 void displaySpeed()
 {
+    if(imarker.start_distance>0) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {
@@ -147,22 +146,22 @@ void displaySpeed()
         speed_element cur = speed_elements[i];
         speed_element prev = speed_elements[ld];
         ld = i;
+        bool im = (cur==imarker.element);
         if(cur.distance>divs[8]*planning_scale) break;
         float a = getPlanningHeight(cur.distance)-15;
-        PASP.drawLine(6, a-1, 22, a-1, Grey);
-        PASP.drawLine(6, a, 22, a, Grey);
+        planning_speed.drawRectangle(6, a-1, 16, 2, im ? Yellow : Grey);
         float x[] = {15, 18, 21};
         if(prev.speed>cur.speed)
         {
             float y[] = {a+2, a+10, a+2};
-            PASP.drawPolygon(x, y, 3);
-            PASP.drawText(to_string(cur.speed).c_str(), 25, a-2, 0, 0, 10, Grey, UP | LEFT);
+            planning_speed.drawPolygon(x, y, 3);
+            planning_speed.drawText(to_string(cur.speed).c_str(), 25, a-2, 0, 0, 10, im ? Yellow : Grey, UP | LEFT);
         }
         else
         {
             float y[] = {a-3, a-11, a-3};
-            PASP.drawPolygon(x, y, 3);
-            PASP.drawText(to_string(cur.speed).c_str(), 25, 270-a-2, 0, 0, 10, Grey, DOWN | LEFT);
+            planning_speed.drawPolygon(x, y, 3);
+            planning_speed.drawText(to_string(cur.speed).c_str(), 25, 270-a-2, 0, 0, 10, Grey, DOWN | LEFT);
         }
     }
 }
@@ -186,10 +185,15 @@ void planningConstruct()
     zoomout.showBorder = false;
     zoomin.touch_down = 15;
     zoomout.touch_up = 15;
+    planning_elements.push_back({1,500});
+    planning_elements.push_back({3,1000});
+    planning_elements.push_back({32,930});
     gradient_elements.push_back({10,0,600});
     gradient_elements.push_back({-5,600,3000});
     speed_elements.push_back({120, 0});
     speed_elements.push_back({90, 50});
+    imarker.element = speed_elements[1];
+    imarker.start_distance = 15;
     speed_elements.push_back({60, 200});
     speed_elements.push_back({20, 300});
     speed_elements.push_back({120, 500});

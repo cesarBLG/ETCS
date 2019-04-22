@@ -1,29 +1,73 @@
 #include "data_entry.h"
-#include "menu_main.h"
 #include "window.h"
 #include <algorithm>
 #include "../graphics/button.h"
 #include "../graphics/display.h"
-input_window::input_window(const char *title) : subwindow(title), input_field(204+102,50)
-{
+input_window::input_window(const char *title, int nfields) : subwindow(title, nfields>1), prev_button("symbols/Navigation/NA_18.bmp",82,50),
+    next_button("symbols/Navigation/NA_17.bmp",82,50), confirmation_label(330, 40), button_yes("YES",330,40), 
+    nfields(nfields)
+{      
     for(int i=0; i<12; i++)
     {
         buttons[i] = nullptr;
     }
-    input_field.setBackgroundColor(DarkGrey);
-    input_field.setDisplayFunction([this]
+    if(nfields > 1)
     {
-        input_field.drawText(data.c_str(),10,0,0,0,12,Grey, LEFT);
-    });
-    input_field.setPressedAction([this]
-    {
-        validate(data);
-        exit(this);
-    });
-    addToLayout(&input_field, new RelativeAlignment(nullptr, 334, 65, 0));
+        //button_yes.setBackgroundColor(Grey);
+        button_yes.setPressedAction([this, nfields]
+        {
+            for(int i=0; i<nfields; i++)
+            {
+                inputs[i]->validate();
+            }
+            exit(this);
+        });
+    }
 }
 void input_window::setLayout()
 {   
+    clearLayout();
+    subwindow::setLayout();
+    for(int i=0; i<nfields; i++)
+    {
+        inputs[i]->setSelected(false);
+    }
+    inputs[cursor]->setSelected(true);
+    if(nfields == 1)
+    {
+        //TODO: find a better location for this
+        inputs[0]->data_comp->setPressedAction([this]
+        {
+            inputs[0]->validate();
+            exit(this);
+        });
+        addToLayout(inputs[0]->data_comp, new RelativeAlignment(nullptr, 334, 65, 0));
+    }
+    else
+    {
+        addToLayout(&prev_button, new ConsecutiveAlignment(&exit_button, RIGHT, 0));
+        addToLayout(&next_button, new ConsecutiveAlignment(&prev_button, RIGHT, 0));
+        addToLayout(&confirmation_label, new RelativeAlignment(nullptr, 0, 330, 0));
+        addToLayout(&button_yes, new ConsecutiveAlignment(&confirmation_label, DOWN, 0));
+        for(int i=0; i<nfields && i<4; i++)
+        {
+            inputs[i]->data_comp->setPressedAction([this, i]
+            {
+                cursor = i;
+                setLayout();
+            });
+            addToLayout(inputs[i]->label_comp, new RelativeAlignment(nullptr, 334, 15+i*50, 0));
+            addToLayout(inputs[i]->data_comp, new ConsecutiveAlignment(inputs[i]->label_comp, RIGHT, 0));
+        }
+    }    
+    for(int i=0; i<12; i++)
+    {
+        buttons[i] = nullptr;
+    }
+    for(int i=0; i<inputs[cursor]->keys.size(); i++)
+    {
+        buttons[i] = inputs[cursor]->keys[i];
+    }
     addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 215,0));
     addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));
     addToLayout(buttons[2], new ConsecutiveAlignment(buttons[1],RIGHT,0));
@@ -39,8 +83,8 @@ void input_window::setLayout()
 }
 input_window::~input_window()
 {
-    for(int i=0; i<12; i++)
+    for(int i=0; i<inputs.size(); i++)
     {
-        if(buttons[i]!=nullptr) delete buttons[i];
+        delete inputs[i];
     }
 }

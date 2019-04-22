@@ -26,6 +26,7 @@ void wait(window *w)
     {
         navigation_bar.active = false;
         planning_area.active = false;
+        main_window.active = false;
         unique_lock<mutex> lck(window_mtx);
         cv.wait(lck, aw);
         if(!running) break;
@@ -49,6 +50,7 @@ void wait(window *w)
     draw_mtx.unlock();
     navigation_bar.active = true;
     planning_area.active = true;
+    main_window.active = true;
 }
 void prepareLayout()
 {

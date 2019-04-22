@@ -15,6 +15,7 @@ menu::~menu()
 }
 void menu::setLayout()
 {
+    subwindow::setLayout();
     addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 45,0));
     addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));
     addToLayout(buttons[2], new ConsecutiveAlignment(buttons[0],DOWN,0));

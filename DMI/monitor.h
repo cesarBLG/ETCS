@@ -57,6 +57,7 @@ extern float TTI;
 extern bool EB;
 extern int trn;
 extern unsigned long driverid;
+extern bool ovEOA;
 void update();
 void setSpeeds(float vtarg, float vperm, float vsbi, float vrelease, float vest, float dist);
 void setMonitor(MonitoringStatus status);

@@ -25,6 +25,10 @@ class window
     {
         l->order.push_back(comp);
     }
+    void clearLayout()
+    {
+        l->removeAll();
+    }
     void construct()
     {
         if(constructfun != nullptr) constructfun();

@@ -71,6 +71,9 @@ void construct_main()
     main_window.addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
     main_window.addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
 
+    csg.touch_left = a1.sx;
+    c9.touch_down = e1.sy;
+    c9.touch_up = levelRegion.sy;
 
     extern bool showSpeeds;
     csg.setPressedAction([]() {showSpeeds = !showSpeeds;});

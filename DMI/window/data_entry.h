@@ -1,16 +1,22 @@
 #ifndef _DATA_ENTRY_H
 #define _DATA_ENTRY_H
 #include "subwindow.h"
+#include "input_data.h"
+#include <map>
 class input_window : public subwindow
 {
-    Component input_field;
+    IconButton prev_button;
+    IconButton next_button;
+    TextButton button_yes;
+    int cursor=0;
+    int nfields;
     protected:
-    string data;
+    Component confirmation_label;
+    map<int, input_data*> inputs;
     Button* buttons[12];
     public:
-    input_window(const char *name);
-    virtual void validate(string dat){};
-    void setLayout();
+    input_window(const char *name, int nfields);
+    void setLayout() override;
     virtual ~input_window();
 };
 #endif

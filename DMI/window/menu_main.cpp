@@ -3,6 +3,7 @@
 #include "level_window.h"
 #include "driver_id.h"
 #include "running_number.h"
+#include "train_data.h"
 #include <algorithm>
 #include "../monitor.h"
 #include "../messages/messages.h"
@@ -37,6 +38,11 @@ menu_main::menu_main() : menu("Main")
     {
         exit(this);
         right_menu(new driver_window());
+    });
+    buttons[2]->setPressedAction([this] 
+    {
+        exit(this);
+        right_menu(new train_data_window());
     });
     buttons[4]->setPressedAction([this] 
     {

@@ -6,10 +6,13 @@
 #include "../graphics/text_button.h"
 class subwindow : public window
 {
-    IconButton exit_button;
     string title;
+    bool fullscreen;
     Component title_bar;
+    protected:
+    IconButton exit_button;
     public:
-    subwindow(const char *title);
+    subwindow(const char *title, bool full = false);
+    virtual void setLayout();
 };
 #endif

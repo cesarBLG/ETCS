@@ -68,7 +68,7 @@ class Component
     void drawLine(float x1, float y1, float x2, float y2, Color c);
     void drawPolygon(float *x, float *y, int n);
     void drawBox(float sx, float sy, Color c);
-    void drawCircle(float cx, float cy, float radius);
+    void drawCircle(float radius, float cx, float cy);
     void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
     void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
     void drawRectangle(float x, float y, float w, float h, Color c);

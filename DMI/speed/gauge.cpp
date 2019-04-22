@@ -94,6 +94,12 @@ void drawGauge(float minspeed, float maxspeed, Color color)
 {
     drawGauge(minspeed,maxspeed,color,128);
 }
+void drawSetSpeed(float speed)
+{
+    float an = speedToAngle(speed);
+    setColor(White);
+    csg.drawCircle(5, 111*cos(an) + cx, 111*sin(an) + cy);
+}
 bool showSpeeds = false;
 void displayCSG()
 {
@@ -204,6 +210,7 @@ void displayGauge()
     displayLines();
     displayCSG();
     drawNeedle();
+    //drawSetSpeed(50);
 }
 bool ttiShown = false;
 const float TdispTTI = 10;

@@ -1,6 +1,11 @@
 #include "level_window.h"
 #include "../monitor.h"
-level_window::level_window() : input_window("Level")
+level_window::level_window() : input_window("Level", 1)
+{
+    inputs[0] = new level_input();
+    setLayout();
+}
+level_input::level_input()
 {
     switch(level)
     {
@@ -17,26 +22,25 @@ level_window::level_window() : input_window("Level")
             data = "Level 3";
             break;
     }
-    buttons[0] = new TextButton("Level 1", 102, 50);
-    buttons[1] = new TextButton("Level 2", 102, 50);
-    buttons[2] = new TextButton("Level 3", 102, 50);
-    buttons[3] = new TextButton("Level 0", 102, 50);
-    buttons[4] = new TextButton("LZB", 102, 50);
-    buttons[5] = new TextButton("EBICAB", 102, 50);
+    keys.push_back(new TextButton("Level 1", 102, 50));
+    keys.push_back(new TextButton("Level 2", 102, 50));
+    keys.push_back(new TextButton("Level 3", 102, 50));
+    keys.push_back(new TextButton("Level 0", 102, 50));
+    keys.push_back(new TextButton("LZB", 102, 50));
+    keys.push_back(new TextButton("EBICAB", 102, 50));
     for(int i=0; i<4; i++)
     {
-        buttons[i]->setPressedAction([this, i]
+        keys[i]->setPressedAction([this, i]
         {
             if(i<3) data = "Level " + to_string(i+1);
             if(i==3) data = "Level 0";
         });
     }
-    setLayout();
 }
-void level_window::validate(string dat)
+void level_input::validate()
 {
     //TODO: manual level selection requires confirmation
-    switch(dat[6])
+    switch(data[6])
     {
         case '0':
             level = N0;

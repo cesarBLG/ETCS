@@ -39,7 +39,7 @@ void parseData(string str)
     if(command == "setDtarget") Dtarg = stof(value);
     if(command == "setTTI") TTI = stof(value);
     if(command == "setLevel") level = value== "NTC" ? NTC : (Level)stoi(value);
-    if(command == "setEB") EB = value=="true";
+    if(command == "setEB") EB = value!="false";
     if(command == "setMode")
     {
         Mode m;

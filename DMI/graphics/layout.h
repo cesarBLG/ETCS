@@ -46,6 +46,7 @@ class Layout
     public:
     vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
+    void removeAll();
     void update();
     void updateLocations();
     vector<LayoutElement>& getElements();

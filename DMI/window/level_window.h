@@ -5,6 +5,11 @@ class level_window : public input_window
 {
     public:
     level_window();
-    void validate(string dat) override;
+};
+class level_input : public input_data
+{
+    public:
+    level_input();
+    void validate() override;
 };
 #endif
