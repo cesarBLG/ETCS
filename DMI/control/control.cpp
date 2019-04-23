@@ -49,8 +49,8 @@ void wait(subwindow *w)
     if(w->fullscreen) main_window.active = true;
     navigation_bar.active = true;
     planning_area.active = true;
-    delete w;
     draw_mtx.unlock();
+    delete w;
 }
 void prepareLayout()
 {

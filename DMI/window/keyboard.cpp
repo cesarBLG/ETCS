@@ -130,7 +130,7 @@ vector<Button*> getAlphaNumericKeyboard(function<void(string)> setData, function
             if(i<11 && data=="0") data = "";
             if(i<9) data = data + to_string(i+1);
             if(i==9) data = data.substr(0, data.size()-1);
-            if(i==10) data = data + "0";
+            if(i==10 && data!="") data = data + "0";
             setData(data);
         });
     }
@@ -141,24 +141,11 @@ vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, function<vo
     vector<Button*> keys;
     for(int i=0; i<posibilities.size(); i++)
     {
-        keys.push_back(new TextButton(posibilities[i].c_str(), 102, 50));
-        keys[i]->setPressedAction([setData, i]
+        keys.push_back(new TextButton(posibilities[i], 102, 50));
+        keys[i]->setPressedAction([setData, i, posibilities]
         {
-            string data;
-            if(i<3) data = "Level " + to_string(i+1);
-            if(i==3) data = "Level 0";
-            setData(data);
+            setData(posibilities[i]);
         });
     }
     return keys;
-    keys.push_back(new TextButton("Level 1", 102, 50));
-    keys.push_back(new TextButton("Level 2", 102, 50));
-    keys.push_back(new TextButton("Level 3", 102, 50));
-    keys.push_back(new TextButton("Level 0", 102, 50));
-    keys.push_back(new TextButton("LZB", 102, 50));
-    keys.push_back(new TextButton("EBICAB", 102, 50));
-    for(int i=0; i<4; i++)
-    {
-        
-    }
 }
