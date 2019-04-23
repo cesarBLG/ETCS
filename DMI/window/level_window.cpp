@@ -1,9 +1,10 @@
 #include "level_window.h"
 #include "../monitor.h"
+#include "keyboard.h"
 level_window::level_window() : input_window("Level", 1)
 {
     inputs[0] = new level_input();
-    setLayout();
+    create();
 }
 level_input::level_input()
 {
@@ -22,24 +23,13 @@ level_input::level_input()
             data = "Level 3";
             break;
     }
-    keys.push_back(new TextButton("Level 1", 102, 50));
-    keys.push_back(new TextButton("Level 2", 102, 50));
-    keys.push_back(new TextButton("Level 3", 102, 50));
-    keys.push_back(new TextButton("Level 0", 102, 50));
-    keys.push_back(new TextButton("LZB", 102, 50));
-    keys.push_back(new TextButton("EBICAB", 102, 50));
-    for(int i=0; i<4; i++)
-    {
-        keys[i]->setPressedAction([this, i]
-        {
-            if(i<3) data = "Level " + to_string(i+1);
-            if(i==3) data = "Level 0";
-        });
-    }
+    accepted = true;
+    keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, data_set);
 }
 void level_input::validate()
 {
     //TODO: manual level selection requires confirmation
+    if(data.size() < 7) return;
     switch(data[6])
     {
         case '0':
@@ -55,4 +45,5 @@ void level_input::validate()
             level = N3;
             break;
     }
+    setAccepted(true);
 }

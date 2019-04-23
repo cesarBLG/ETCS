@@ -10,12 +10,12 @@
 #include <iostream>
 using namespace std;
 static bool ex = false;
-static window *c = nullptr;
+static subwindow *c = nullptr;
 mutex window_mtx;
 mutex draw_mtx;
 condition_variable cv;
 bool aw(){return ex||c!=nullptr||!running;}
-void wait(window *w)
+void wait(subwindow *w)
 {
     draw_mtx.lock();
     active_windows.insert(w);
@@ -26,31 +26,31 @@ void wait(window *w)
     {
         navigation_bar.active = false;
         planning_area.active = false;
-        main_window.active = false;
+        if(w->fullscreen) main_window.active = false;
         unique_lock<mutex> lck(window_mtx);
         cv.wait(lck, aw);
         if(!running) break;
         if(c!=nullptr)
         {
             bool e = ex;
-            window *w1 = c;
+            subwindow *w1 = c;
             c = nullptr;
             ex = false;
             w->active = false;
             lck.unlock();
             wait(w1);
             w->active = true;
-            ex = e | true;
+            ex = e;
         }
     }
     ex = false;
     draw_mtx.lock();
     active_windows.erase(w);
-    delete w;
-    draw_mtx.unlock();
+    if(w->fullscreen) main_window.active = true;
     navigation_bar.active = true;
     planning_area.active = true;
-    main_window.active = true;
+    delete w;
+    draw_mtx.unlock();
 }
 void prepareLayout()
 {
@@ -78,20 +78,20 @@ void prepareLayout()
         if(!running) break;
         if(c!=nullptr)
         {
-            window *w = c;
+            subwindow *w = c;
             c = nullptr;
             lck.unlock();
             wait(w);
         }
     }
 }
-void right_menu(window *w)
+void right_menu(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
     c = w;
     cv.notify_one();
 }
-void exit(window *w)
+void exit(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
     ex = true;

@@ -230,3 +230,7 @@ void Component::setBackgroundColor(Color c)
 {
     bgColor = c;
 }
+void Component::setForegroundColor(Color c)
+{
+    fgColor = c;
+}

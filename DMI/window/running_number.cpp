@@ -4,12 +4,12 @@
 trn_window::trn_window() : input_window("Train running number", 1)
 {
     inputs[0] = new trn_input();
-    setLayout();
+    create();
 }
 trn_input::trn_input()
 {
     data = to_string(trn);
-    keys = getNumericKeyboard([this](string d){ data = d;}, [this]{return data;});
+    keys = getNumericKeyboard(data_set, data_get);
 }
 void trn_input::validate()
 {

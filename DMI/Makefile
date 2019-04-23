@@ -6,7 +6,7 @@ OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.
 		window/nav_buttons.o window/menu.o window/menu_main.o window/menu_override.o \
 		window/menu_spec.o window/menu_settings.o \
 		window/driver_id.o window/running_number.o window/level_window.o \
-		planning/planning.o control/control.o \
+		planning/planning.o control/control.o state/gps_pos.o \
 		window/train_data.o window/keyboard.o window/input_data.o
 all: dmi
 dmi: $(OBJECTS)

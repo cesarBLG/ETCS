@@ -7,11 +7,11 @@
 class subwindow : public window
 {
     string title;
-    bool fullscreen;
     Component title_bar;
     protected:
     IconButton exit_button;
     public:
+    bool fullscreen;
     subwindow(const char *title, bool full = false);
     virtual void setLayout();
 };

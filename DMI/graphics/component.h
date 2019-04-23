@@ -38,6 +38,7 @@ class Component
         }
     }
     Color bgColor = DarkBlue;
+    Color fgColor = White;
     SDL_Surface *bgSurf;
     string surfloc = "";
     bool ack = false;
@@ -77,6 +78,7 @@ class Component
     void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);
     void setBackgroundImage(const char *name);
     void setBackgroundColor(Color c);
+    void setForegroundColor(Color c);
     string text;
     float text_size;
     Color text_color;

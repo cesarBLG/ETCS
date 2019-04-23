@@ -2,8 +2,9 @@
 #define _CONTROL_H
 #include "../window/window.h"
 class window;
+class subwindow;
 extern bool running;
 void prepareLayout();
-void right_menu(window *w);
-void exit(window *w);
+void right_menu(subwindow *w);
+void exit(subwindow *w);
 #endif

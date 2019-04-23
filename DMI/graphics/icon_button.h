@@ -3,8 +3,8 @@
 #include "button.h"
 class IconButton : public Button
 {
-    char *path;
+    const char *path;
     public:
-    IconButton(char *path, float sx, float sy, function<void()> pressed = nullptr);
+    IconButton(const char *path, float sx, float sy, function<void()> pressed = nullptr);
 };
 #endif

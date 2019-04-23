@@ -36,22 +36,18 @@ menu_main::menu_main() : menu("Main")
     });
     buttons[1]->setPressedAction([this] 
     {
-        exit(this);
         right_menu(new driver_window());
     });
     buttons[2]->setPressedAction([this] 
     {
-        exit(this);
         right_menu(new train_data_window());
     });
     buttons[4]->setPressedAction([this] 
     {
-        exit(this);
         right_menu(new level_window());
     });
     buttons[5]->setPressedAction([this] 
     {
-        exit(this);
         right_menu(new trn_window());
     });
     buttons[6]->setPressedAction([this]

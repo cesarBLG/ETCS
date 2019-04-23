@@ -8,8 +8,7 @@ train_data_window::train_data_window() : input_window("Train Data", 4)
     inputs[3] = new input_data("Axle load category");
     for(int i=0; i<3; i++)
     {
-        inputs[i]->keys = getNumericKeyboard([this,i](string s) {inputs[i]->data = s;}, [this,i]{return inputs[i]->data;});
+        inputs[i]->keys = getNumericKeyboard(inputs[i]->data_set, inputs[i]->data_get);
     }
-    confirmation_label.setDisplayFunction([this]{confirmation_label.setText("Train data entry complete?", 12, White);});
-    setLayout();
+    create();
 }

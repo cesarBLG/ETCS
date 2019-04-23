@@ -14,9 +14,10 @@ class input_window : public subwindow
     Component confirmation_label;
     map<int, input_data*> inputs;
     Button* buttons[12];
+    virtual void setLayout() override;
+    void create();
     public:
     input_window(const char *name, int nfields);
-    void setLayout() override;
     virtual ~input_window();
 };
 #endif
