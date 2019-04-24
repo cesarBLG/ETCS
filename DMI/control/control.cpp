@@ -5,15 +5,14 @@
 #include "../window/level_window.h"
 #include "../window/driver_id.h"
 #include <thread>
-#include <mutex>
-#include <condition_variable> 
 #include <iostream>
 using namespace std;
+extern bool running;
 static bool ex = false;
 static subwindow *c = nullptr;
 mutex window_mtx;
 mutex draw_mtx;
-condition_variable cv;
+condition_variable window_cv;
 bool aw(){return ex||c!=nullptr||!running;}
 void wait(subwindow *w)
 {
@@ -28,7 +27,7 @@ void wait(subwindow *w)
         planning_area.active = false;
         if(w->fullscreen) main_window.active = false;
         unique_lock<mutex> lck(window_mtx);
-        cv.wait(lck, aw);
+        window_cv.wait(lck, aw);
         if(!running) break;
         if(c!=nullptr)
         {
@@ -52,7 +51,7 @@ void wait(subwindow *w)
     draw_mtx.unlock();
     delete w;
 }
-void prepareLayout()
+void manage_windows()
 {
     main_window.construct();
     navigation_bar.construct();
@@ -74,7 +73,7 @@ void prepareLayout()
     while(running)
     {
         unique_lock<mutex> lck(window_mtx);
-        cv.wait(lck, aw);
+        window_cv.wait(lck, aw);
         if(!running) break;
         if(c!=nullptr)
         {
@@ -89,11 +88,11 @@ void right_menu(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
     c = w;
-    cv.notify_one();
+    window_cv.notify_one();
 }
 void exit(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
     ex = true;
-    cv.notify_one();
+    window_cv.notify_one();
 }

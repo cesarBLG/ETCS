@@ -114,7 +114,6 @@ void displayPASP()
         }
         if(prev_pasp.speed>cur.speed && (!oth2||cur.speed==0))
         {
-            printf("%d",i);
             oth1 = true;
             PASP.drawRectangle(14, getPlanningHeight(cur.distance)-15, 93*red, getPlanningHeight(prev_pasp.distance)-getPlanningHeight(cur.distance), PASPlight);
             float v = cur.speed/spd;

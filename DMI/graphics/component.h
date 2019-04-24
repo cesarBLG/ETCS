@@ -68,11 +68,10 @@ class Component
     void drawLine(float x1, float y1, float x2, float y2);
     void drawLine(float x1, float y1, float x2, float y2, Color c);
     void drawPolygon(float *x, float *y, int n);
-    void drawBox(float sx, float sy, Color c);
     void drawCircle(float radius, float cx, float cy);
     void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
     void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
-    void drawRectangle(float x, float y, float w, float h, Color c);
+    void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
     void drawSurface(SDL_Surface *surf, float cx, float cy, float sx, float sy, bool destroy = true);
     void drawImage(const char *name, float cx, float cy, float sx, float sy);
     void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);

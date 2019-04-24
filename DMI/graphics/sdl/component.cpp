@@ -51,7 +51,8 @@ void Component::setLocation(float x, float y)
 }
 void Component::drawLine(float x1, float y1, float x2, float y2)
 {
-    SDL_RenderDrawLine(sdlren, getX(x1), getY(y1), getX(x2), getY(y2));
+    int res = SDL_RenderDrawLine(sdlren, getX(x1), getY(y1), getX(x2), getY(y2));
+    if(res<0) printf("Failed to draw line. SDL Error: %s\n", SDL_GetError());
 }
 void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 {
@@ -60,7 +61,7 @@ void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 }
 void Component::paint()
 {
-    if(bgColor != DarkBlue) drawBox(sx,sy,bgColor);
+    if(bgColor != DarkBlue) drawRectangle(0,0,sx,sy,bgColor);
     //if(!text.empty()) setText(text.c_str(), text_size, text_color);
     if(display!=nullptr) display();
     if(ack && (flash_state & 2)) setBorder(Yellow);
@@ -125,23 +126,19 @@ void Component::drawPolygon(float *x, float *y, int n)
     aapolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
     filledPolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
 }
-void Component::drawBox(float sx, float sy, Color c)
-{
-    setColor(c);
-    SDL_Rect r = {getX((this->sx-sx)/2), getY((this->sy-sy)/2), getX((this->sx+sx)/2)-getX((this->sx-sx)/2), getY((this->sy+sy)/2)-getY((this->sy-sy)/2)};
-    SDL_RenderFillRect(sdlren,&r);
-}
 void Component::drawCircle(float radius, float cx, float cy)
 {
     aacircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
     filledCircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
 }
-//TODO: merge to drawBox
-void Component::drawRectangle(float x, float y, float w, float h, Color c)
+void Component::drawRectangle(float x, float y, float w, float h, Color c, int align)
 {
     setColor(c);
+    if(!(align & LEFT)) x = sx/2+x-w/2;
+    if(!(align & UP)) y = sy/2+y-h/2;
     SDL_Rect r = {getX(x), getY(y), getScale(w), getScale(h)};
-    SDL_RenderFillRect(sdlren, &r);
+    int res = SDL_RenderFillRect(sdlren,&r);
+    if(res<0) printf("Failed to draw rectangle. SDL Error: %s\n", SDL_GetError());
 }
 void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang)
 {
@@ -159,7 +156,13 @@ void Component::drawSurface(SDL_Surface *surf, float cx, float cy, float sx, flo
 }
 void Component::drawImage(const char *name, float cx, float cy, float sx, float sy)
 {
-    drawSurface(SDL_LoadBMP(name),cx,cy,sx,sy);
+    SDL_Surface *surf = SDL_LoadBMP(name);
+    if(surf == nullptr)
+    {
+        printf("Error loading BMP %s. SDL Error: %s\n", name, SDL_GetError());
+        return;
+    }
+    drawSurface(surf,cx,cy,sx,sy);
 }
 void Component::drawText(const char *text, float x, float y, float sx, float sy, float size, Color col, int align, int aspect)
 {
@@ -169,6 +172,7 @@ void Component::drawText(const char *text, float x, float y, float sx, float sy,
         surfloc = text;
     }*/
     TTF_Font *font = openFont(aspect ? fontPathb : fontPath, size == 0 ? 54 : size);
+    if(font == nullptr) return;
     SDL_Color color = {col.R, col.G, col.B};
     float width;
     float height;
@@ -194,6 +198,11 @@ void Component::setBackgroundImage(const char *name)
         surfloc = name;
     }*/
     bgSurf = SDL_LoadBMP(name);
+    if(bgSurf == nullptr)
+    {
+        printf("Error loading BMP %s. SDL Error: %s\n", name, SDL_GetError());
+        return;
+    }
     drawSurface(bgSurf,sx/2,sy/2,bgSurf->w,bgSurf->h,true);
 }
 void Component::setText(const char* text, float size, Color c)

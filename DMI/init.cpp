@@ -7,9 +7,16 @@ using namespace std;
 bool running = true;
 #ifdef __unix__
 #include <signal.h>
+void quit()
+{
+    unique_lock<mutex> lck(window_mtx);
+    running = false;
+    window_cv.notify_one();
+    printf("quit\n");
+}
 void sighandler(int sig)
 {
-    running = false;
+    quit();
 }
 #endif
 int main(int argc, char** argv)
@@ -23,7 +30,7 @@ int main(int argc, char** argv)
     setSupervision(NoS);
     thread tcp(startSocket);
     thread video(init_video);
-    prepareLayout();
+    manage_windows();
     tcp.join();
     video.join();
     return 0;

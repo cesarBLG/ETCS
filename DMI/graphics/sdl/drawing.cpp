@@ -22,12 +22,25 @@ char *fontPathb = "fonts/swissb.ttf";
 float scale = 1;
 float offset[2] = {0, 0};
 extern bool running;
+void quit();
 mutex ev_mtx;
 void init_video()
 {
-    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    int res = SDL_Init(SDL_INIT_EVERYTHING);
+    if(res<0)
+    {
+        printf("Failed to init SDL. SDL Error: %s", SDL_GetError());
+        running = false;
+        return;
+    }
     startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
+    if(timer == 0)
+    {
+        printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());
+        running = false;
+        return;
+    }
     SDL_Event ev;
     int count = 0;
     chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
@@ -46,8 +59,7 @@ void init_video()
             }*/
             if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
             {
-                printf("quit\n");
-                running = false;
+                quit();
             }
             else if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT) 
             {
@@ -100,8 +112,20 @@ void startDisplay(bool fullscreen)
 {
     TTF_Init();
     sdlwin = SDL_CreateWindow("Driver Machine Interface", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+    if(sdlwin == nullptr)
+    {
+        printf("Failed to create window. SDL Error: %s", SDL_GetError());
+        running = false;
+        return;
+    }
     if(fullscreen) SDL_SetWindowFullscreen(sdlwin, SDL_WINDOW_FULLSCREEN_DESKTOP); 
     sdlren = SDL_CreateRenderer(sdlwin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if(sdlren == nullptr)
+    {
+        printf("Failed to create renderer. SDL Error: %s", SDL_GetError());
+        running = false;
+        return;
+    }
     int w,h;
     SDL_GetWindowSize(sdlwin, &w, &h);
     float scrsize[] = {w,h};
@@ -137,8 +161,8 @@ Color renderColor;
 void setColor(Color color)
 {
     renderColor = color;
-    SDL_SetRenderDrawColor(sdlren, color.R,color.G,color.B,255);
-    //glColor3ub(color.R, color.G, color.B);
+    int res = SDL_SetRenderDrawColor(sdlren, color.R,color.G,color.B,255);
+    if(res<0) printf("Failed to set render color. SDL Error: %s\n", SDL_GetError());
 }
 inline int getScale(float val)
 {
@@ -155,6 +179,11 @@ void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
 TTF_Font *openFont(char *text, float size)
 {
     TTF_Font *f = TTF_OpenFont(text, getScale(size)*1.4);
+    if(f == nullptr)
+    {
+        printf("Error loading font %s. SDL Error: \n", text, SDL_GetError());
+        return nullptr;
+    }
     /*float height = TTF_FontAscent(f)/scale;
     TTF_CloseFont(f);
     f = TTF_OpenFont(text, getScale(size)*size/height);*/

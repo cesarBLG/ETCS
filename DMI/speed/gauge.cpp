@@ -230,8 +230,8 @@ void displaya1()
         {
             if(TdispTTI*(10-n)/10<=TTI && TTI<TdispTTI*(10-(n-1))/10) break;
         }
-        a1.drawBox(50, 50, White);
-        a1.drawBox(5*n, 5*n, Grey);
+        a1.drawRectangle(0, 0, 50, 50, White, CENTER);
+        a1.drawRectangle(0, 0, 5*n, 5*n, Grey, CENTER);
     }
     else ttiShown = false;
 }
