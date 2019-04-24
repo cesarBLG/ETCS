@@ -18,10 +18,6 @@
 
 #ifndef _MOVEMENT_AUTHORITY_H
 #define _MOVEMENT_AUTHORITY_H
-
-/**
- * @todo write docs
- */
 #include <vector>
 #include "../parsed_packet.h"
 class timer

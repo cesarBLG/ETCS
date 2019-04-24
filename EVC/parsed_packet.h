@@ -18,10 +18,6 @@
 
 #ifndef PARSED_PACKET_H
 #define PARSED_PACKET_H
-
-/**
- * @todo write docs
- */
 #include <vector>
 #include <string>
 #include "variable.h"

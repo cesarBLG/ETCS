@@ -18,10 +18,6 @@
 
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
-
-/**
- * @todo write docs
- */
 #include <string>
 #include <vector>
 #include "bitreader.h"

@@ -19,9 +19,6 @@
 #ifndef _BITREADER_H
 #define _BITREADER_H
 #include "stdint.h"
-/**
- * @todo write docs
- */
 typedef unsigned long bit_t;
 typedef uint8_t byte;
 class BitReader
