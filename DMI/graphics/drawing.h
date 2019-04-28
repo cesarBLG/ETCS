@@ -14,6 +14,7 @@ extern SDL_Window *sdlwin;
 extern SDL_Renderer *sdlren;
 extern Color renderColor;
 int getScale(float val);
+float getAntiScale(float val);
 void startDisplay(bool fullscreen);
 void display();
 void quitDisplay();

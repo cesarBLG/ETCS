@@ -3,8 +3,13 @@
 #include "color.h"
 #include "SDL2/SDL.h"
 #include "drawing.h"
+#include "graphic.h"
+#include "text_graphic.h"
+#include "image_graphic.h"
 #include <functional>
 #include <string>
+#include <cmath>
+#include <vector>
 extern float offset[];
 using namespace std;
 class Component
@@ -39,12 +44,19 @@ class Component
     }
     Color bgColor = DarkBlue;
     Color fgColor = White;
-    SDL_Surface *bgSurf;
-    string surfloc = "";
+    vector<graphic*> graphics;
     bool ack = false;
     function<void()> pressedAction;
     function<void()> display = nullptr;
     public:
+    void clear()
+    {
+        for(int i=0; i<graphics.size(); i++)
+        {
+            delete graphics[i];
+        }
+        graphics.clear();
+    }
     bool isButton = false;
     bool dispBorder = true;
     bool isSensitive(){return pressedAction != nullptr;}
@@ -54,7 +66,7 @@ class Component
     float touch_right = 0;
     Component(){}
     Component(float sx, float sy, function<void()> display = nullptr);
-    ~Component();
+    virtual ~Component();
     void setPressed(bool value);
     void setPressedAction(function<void()> action);
     void setAck(function<void()> ackAction);
@@ -62,9 +74,9 @@ class Component
     void setSize(float sx, float sy);
     void setLocation(float x, float y);
     virtual void paint();
-    void foo();
     void drawArc(float ang0, float ang1, float r, float cx, float cy);
     void rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle);
+    void draw(graphic *g, bool destroy = false);
     void drawLine(float x1, float y1, float x2, float y2);
     void drawLine(float x1, float y1, float x2, float y2, Color c);
     void drawPolygon(float *x, float *y, int n);
@@ -72,17 +84,24 @@ class Component
     void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
     void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
     void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
-    void drawSurface(SDL_Surface *surf, float cx, float cy, float sx, float sy, bool destroy = true);
-    void drawImage(const char *name, float cx, float cy, float sx, float sy);
-    void drawText(const char *text, float cx, float cy, float sx, float sy, float size, Color col = White, int align = CENTER, int aspect = 0);
-    void setBackgroundImage(const char *name);
+    void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
+    void drawTexture(SDL_Texture *tex, float cx, float cy, float sx, float sy);
+    void add(graphic *g) { graphics.push_back(g); }
+    void drawText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    void addText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    text_graphic *getText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    void getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect);
+    void drawImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    void addImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    image_graphic *getImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    void getImageGraphic(texture *t, string path, float cx=0, float cy=0, float sx=0, float sy=0);
     void setBackgroundColor(Color c);
     void setForegroundColor(Color c);
     string text;
     float text_size;
     Color text_color;
-    void setLabel(const char* text, float size, Color c);
-    void setText(const char* text, float size, Color c);
+    void setLabel(string text, float size, Color c);
+    void setText(string text, float size, Color c);
     void setBorder(Color c);
 };
 extern Component Z;

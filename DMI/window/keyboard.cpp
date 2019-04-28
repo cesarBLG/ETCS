@@ -5,50 +5,10 @@ vector<Button*> getNumericKeyboard(function<void(string)> setData, function<stri
     vector<Button*> keys;
     for(int i=0; i<9; i++)
     {
-        keys.push_back(new Button(102, 50, nullptr, nullptr));
+        keys.push_back(new TextButton(to_string(i+1), 102, 50, nullptr, 16));
     }
-    keys[0]->setDisplayFunction([keys]
-    {
-        keys[0]->drawText("1",0,0,0,0,16);
-    });
-    keys[1]->setDisplayFunction([keys]
-    {
-        keys[1]->drawText("2",0,0,0,0,16);
-    });
-    keys[2]->setDisplayFunction([keys]
-    {
-        keys[2]->drawText("3",0,0,0,0,16);
-    });
-    keys[3]->setDisplayFunction([keys]
-    {
-        keys[3]->drawText("4",0,0,0,0,16);
-    });
-    keys[4]->setDisplayFunction([keys]
-    {
-        keys[4]->drawText("5",0,0,0,0,16);
-    });
-    keys[5]->setDisplayFunction([keys]
-    {
-        keys[5]->drawText("6",0,0,0,0,16);
-    });
-    keys[6]->setDisplayFunction([keys]
-    {
-        keys[6]->drawText("7",0,0,0,0,16);
-    });
-    keys[7]->setDisplayFunction([keys]
-    {
-        keys[7]->drawText("8",0,0,0,0,16);
-    });
-    keys[8]->setDisplayFunction([keys]
-    {
-        keys[8]->drawText("9",0,0,0,0,16);
-    });
     keys.push_back(new TextButton("DEL", 102, 50, nullptr));
-    keys.push_back(new Button(102, 50, nullptr, nullptr));
-    keys[10]->setDisplayFunction([keys]
-    {
-        keys[10]->drawText("0",0,0,0,0,16);
-    });
+    keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50));
     for(int i=0; i<12; i++)
     {
@@ -71,56 +31,25 @@ vector<Button*> getAlphaNumericKeyboard(function<void(string)> setData, function
     {
         keys.push_back(new Button(102, 50, nullptr, nullptr));
     }
-    keys[0]->setDisplayFunction([keys]
-    {
-        keys[0]->drawText("1",0,0,0,0,16);
-    });
-    keys[1]->setDisplayFunction([keys]
-    {
-        keys[1]->drawText("2",-15,0,0,0,16);
-        keys[1]->drawText("abc",4,0,0,0,10);
-    });
-    keys[2]->setDisplayFunction([keys]
-    {
-        keys[2]->drawText("3",-15,0,0,0,16);
-        keys[2]->drawText("def",4,0,0,0,10);
-    });
-    keys[3]->setDisplayFunction([keys]
-    {
-        keys[3]->drawText("4",-15,0,0,0,16);
-        keys[3]->drawText("ghi",4,0,0,0,10);
-    });
-    keys[4]->setDisplayFunction([keys]
-    {
-        keys[4]->drawText("5",-15,0,0,0,16);
-        keys[4]->drawText("jkl",4,0,0,0,10);
-    });
-    keys[5]->setDisplayFunction([keys]
-    {
-        keys[5]->drawText("6",-15,0,0,0,16);
-        keys[5]->drawText("mno",10,0,0,0,10);
-    });
-    keys[6]->setDisplayFunction([keys]
-    {
-        keys[6]->drawText("7",-15,0,0,0,16);
-        keys[6]->drawText("pqrs",10,0,0,0,10);
-    });
-    keys[7]->setDisplayFunction([keys]
-    {
-        keys[7]->drawText("8",-15,0,0,0,16);
-        keys[7]->drawText("tuv",4,0,0,0,10);
-    });
-    keys[8]->setDisplayFunction([keys]
-    {
-        keys[8]->drawText("9",-15,0,0,0,16);
-        keys[8]->drawText("wxyz",10,0,0,0,10);
-    });
+    keys[0]->addText("1",0,0,16);
+    keys[1]->addText("2",-15,0,16);
+    keys[1]->addText("abc",4,0,10);
+    keys[2]->addText("3",-15,0,16);
+    keys[2]->addText("def",4,0,10);
+    keys[3]->addText("4",-15,0,16);
+    keys[3]->addText("ghi",4,0,10);
+    keys[4]->addText("5",-15,0,16);
+    keys[4]->addText("jkl",4,0,10);
+    keys[5]->addText("6",-15,0,16);
+    keys[5]->addText("mno",10,0,10);
+    keys[6]->addText("7",-15,0,16);
+    keys[6]->addText("pqrs",10,0,10);
+    keys[7]->addText("8",-15,0,16);
+    keys[7]->addText("tuv",4,0,10);
+    keys[8]->addText("9",-15,0,16);
+    keys[8]->addText("wxyz",10,0,10);
     keys.push_back(new TextButton("DEL", 102, 50, nullptr));
-    keys.push_back(new Button(102, 50, nullptr, nullptr));
-    keys[10]->setDisplayFunction([keys]
-    {
-        keys[10]->drawText("0",0,0,0,0,16);
-    });
+    keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50, nullptr));
     for(int i=0; i<12; i++)
     {

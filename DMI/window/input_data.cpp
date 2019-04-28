@@ -10,34 +10,43 @@ data_set([this](string s){setData(s);})
         data_echo = new Component(100,16);
     }
     else data_comp = new Component(204+102,50);
+    data_comp->addText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->setDisplayFunction([this]
     {
-        data_comp->drawText(data.c_str(),10,0,0,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
         data_comp->setBorder(MediumGrey);
     });
     if(label!="")
     {
         label_comp->setBackgroundColor(DarkGrey);
-        label_comp->setDisplayFunction([this]{label_comp->drawText(label.c_str(), 10, 0, 0, 0, 12, Grey, RIGHT);});
-        label_echo->setDisplayFunction([this]
-        {
-            label_echo->drawText(label.c_str(), 5, 0, 0, 0, 12, White, RIGHT);
-        });
-        data_echo->setDisplayFunction([this]
-        {
-            data_echo->drawText(data.c_str(), 4, 0, 0, 0, 12, White, LEFT);
-        });
+        label_comp->addText(label.c_str(), 10, 0, 12, Grey, RIGHT);
+        label_echo->addText(label, 5, 0, 12, White, RIGHT);
+        data_echo->addText(data, 4, 0, 12, White, LEFT);
+    }
+}
+void input_data::setData(string s)
+{
+    if(s==data) return;
+    data = s;
+    setAccepted(false);
+    if(label!="")
+    {
+        data_echo->clear();
+        data_echo->addText(data, 4, 0, 12, White, LEFT);
     }
 }
 void input_data::setSelected(bool val)
 {
     selected = val;
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
+    data_comp->clear();
+    data_comp->addText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
 }
 void input_data::setAccepted(bool val)
 {
     accepted = val;
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
+    data_comp->clear();
+    data_comp->addText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
 }
 input_data::~input_data()
 {

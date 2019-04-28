@@ -45,7 +45,7 @@ void dispAcks()
         path+=to_string(num);
         path+=".bmp";
         c1.setAck([](){modeAck = false;});
-        c1.setBackgroundImage(path.c_str());
+        c1.drawImage(path.c_str());
     }
     else if(levelAck>0)
     {
@@ -75,7 +75,7 @@ void dispAcks()
         path+=to_string(num);
         //If NTC is LZB/PZB, path+="a";
         path+=".bmp";
-        c1.setBackgroundImage(path.c_str());
+        c1.drawImage(path.c_str());
         if(levelAck == 2) c1.setAck([](){levelAck = 1;});
         else c1.setAck(nullptr);
     }

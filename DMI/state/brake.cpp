@@ -2,7 +2,11 @@
 #include "../monitor.h"
 void displayBrake();
 Component c9(54, 25, displayBrake);
+static bool prevEB;
 void displayBrake()
 {
-    if(EB) c9.setBackgroundImage("symbols/Status/ST_01.bmp");
+    if(prevEB == EB) return;
+    prevEB = EB;
+    c9.clear();
+    if(EB) c9.addImage("symbols/Status/ST_01.bmp");
 }

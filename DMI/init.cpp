@@ -5,8 +5,6 @@
 #include <thread>
 using namespace std;
 bool running = true;
-#ifdef __unix__
-#include <signal.h>
 void quit()
 {
     unique_lock<mutex> lck(window_mtx);
@@ -14,6 +12,8 @@ void quit()
     window_cv.notify_one();
     printf("quit\n");
 }
+#ifdef __unix__
+#include <signal.h>
 void sighandler(int sig)
 {
     quit();

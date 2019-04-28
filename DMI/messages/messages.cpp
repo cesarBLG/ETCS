@@ -3,7 +3,7 @@
 #include "../graphics/component.h"
 #include "../graphics/flash.h"
 #include "../sound/sound.h"
-#include "../graphics/button.h"
+#include "../graphics/icon_button.h"
 #include <string>
 #include <deque>
 #include <vector>
@@ -17,8 +17,8 @@ Component textArea(234, 100, displayMessages);
 void displayArrows();
 void arrowUp();
 void arrowDown();
-Button upArrow(46, 50, nullptr, arrowUp);
-Button downArrow(46, 50, displayArrows, arrowDown);
+IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, 50, arrowUp, "symbols/Navigation/NA_15.bmp");
+IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, 50, arrowDown, "symbols/Navigation/NA_16.bmp");
 const char *message_text[] = {
     "Datos de eurobaliza no consistentes",
     "Trackside malfunction",
@@ -52,10 +52,12 @@ const char *message_text[] = {
 deque <Message> messageList;
 int line;
 int current=0;
+void disp();
 void addMsg(Message m)
 {
     current = 0;
     messageList.push_back(m);
+    disp();
 }
 void revokeMessage(int id)
 {
@@ -64,6 +66,7 @@ void revokeMessage(int id)
     {
         if(messageList[i].Id == id) messageList.erase(messageList.begin() + i);
     }
+    disp();
 }
 bool operator < (Message a, Message b)
 {
@@ -78,9 +81,12 @@ void displayMessages()
     {
         addMsg(Message(4,BaliseReadError, 11, 9));
         addMsg(Message(5,SHrefused, 11, 8));
-        //addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
-        //addMsg({3,EnteringFS, 11, 9, false, false, true, false});
-    } 
+        addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
+        addMsg(Message(3,EnteringFS, 11, 9, true));
+    }
+}
+void disp()
+{
     sort(messageList.begin(), messageList.end());
     vector<Message*> displayMsg;
     bool ack = false;
@@ -103,9 +109,10 @@ void displayMessages()
     if(ack)
     {
         Message *msg = displayMsg[0];
-        textArea.setAck([msg]() {msg->ack = false;});
+        textArea.setAck([msg]() {msg->ack = false;disp();});
     }
     else textArea.setAck(nullptr);
+    textArea.clear();
     line = 0;
     for(int i=0; i<displayMsg.size(); i++)
     {
@@ -119,31 +126,33 @@ void displayMessages()
         {
             if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
             m.shown = true;
-            textArea.drawText(date.c_str(), 2, 4 + (line-current)*20, 0, 0, 10, White, UP | LEFT, m.firstGroup);
-            textArea.drawText(text.substr(0, last).c_str(), 48, 2 + (line-current)*20, 0, 0, 12, White, UP | LEFT, m.firstGroup);
+            textArea.addText(date, 2, 4 + (line-current)*20, 10, White, UP | LEFT, m.firstGroup);
+            textArea.addText(text.substr(0, last), 48, 2 + (line-current)*20, 12, White, UP | LEFT, m.firstGroup);
         }
         line++;
         if(last<text.size())
         {
-            if(line<5+current && line>=current) textArea.drawText(text.substr(last).c_str(), 48, 2 + (line-current)*20, 0, 0, 12, White, UP | LEFT, m.firstGroup);
+            if(line<5+current && line>=current) textArea.addText(text.substr(last), 48, 2 + (line-current)*20, 12, White, UP | LEFT, m.firstGroup);
             line++;
         }
     }
-}
-void displayArrows()
-{
-    string path = "symbols/Navigation/NA_";
-    upArrow.setBackgroundImage((path + (current>0 ? "13" : "15") + ".bmp").c_str());
-    downArrow.setBackgroundImage((path + (line>5+current ? "14" : "16") + ".bmp").c_str());
+    upArrow.enabled = current>0;
+    downArrow.enabled = line>(5+current);
 }
 void arrowUp()
 {
     if(current==0) return;
     current--;
+    upArrow.enabled = current>0;
+    downArrow.enabled = line<=5+current;
+    disp();
 }
 void arrowDown()
 {
     if(line<=5+current) return;
     current++;
     if(current>line-5) current = line-5;
+    upArrow.enabled = current>0;
+    downArrow.enabled = line<=5+current;
+    disp();
 }

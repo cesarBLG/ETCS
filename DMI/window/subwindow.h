@@ -12,7 +12,7 @@ class subwindow : public window
     IconButton exit_button;
     public:
     bool fullscreen;
-    subwindow(const char *title, bool full = false);
+    subwindow(string title, bool full = false);
     virtual void setLayout();
 };
 #endif

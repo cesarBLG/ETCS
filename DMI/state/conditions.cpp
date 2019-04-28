@@ -22,7 +22,7 @@ void dispTc(int num, Component &b)
     if(tc[num]<10) path+= "0";
     path+= to_string(tc[num]);
     path+= ".bmp";
-    b.setBackgroundImage(path.c_str());
+    b.drawImage(path.c_str());
 }
 void dispTc1(){dispTc(0, b3);}
 void dispTc2(){dispTc(1, b4);}

@@ -4,7 +4,12 @@
 class TextButton : public Button
 {
     string caption;
+    text_graphic *enabled_text;
+    text_graphic *disabled_text;
+    int size;
     public:
-    TextButton(string text, float sx, float sy, function<void()> pressed = nullptr);
+    void paint() override;
+    TextButton(string text, float sx, float sy, function<void()> pressed = nullptr, int size = 12);
+    ~TextButton();
 };
 #endif

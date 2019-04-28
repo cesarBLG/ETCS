@@ -3,8 +3,8 @@
 #include <algorithm>
 #include "../graphics/button.h"
 #include "../graphics/display.h"
-input_window::input_window(const char *title, int nfields) : subwindow(title, nfields>1), prev_button(82,50),
-    next_button(82,50), confirmation_label(330, 40), button_yes("Yes",330,40), 
+input_window::input_window(string title, int nfields) : subwindow(title, nfields>1), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
+    next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), confirmation_label(330, 40), button_yes("Yes",330,40), 
     nfields(nfields)
 {      
     for(int i=0; i<12; i++)
@@ -23,23 +23,18 @@ input_window::input_window(const char *title, int nfields) : subwindow(title, nf
             }
             exit(this);
         });
+        button_yes.showBorder = false;
+        prev_button.enabled = false;
+        next_button.enabled = false;
     }
     if(nfields > 4)
     {
-        next_button.setDisplayFunction([this, nfields] 
-        {
-            if((cursor/4)<(nfields/4)) next_button.setBackgroundImage("symbols/Navigation/NA_17.bmp");
-            else next_button.setBackgroundImage("symbols/Navigation/NA_18.2.bmp");
-        });
-        prev_button.setDisplayFunction([this, nfields] 
-        {
-            if(cursor>3) prev_button.setBackgroundImage("symbols/Navigation/NA_18.bmp");
-            else prev_button.setBackgroundImage("symbols/Navigation/NA_19.bmp");
-        });
         next_button.setPressedAction([this, nfields]
         {
             if((cursor/4)<(nfields/4))
             {
+                next_button.enabled = false;
+                prev_button.enabled = true;
                 cursor = 4*(cursor/4+1);
                 setLayout();
             }
@@ -48,15 +43,15 @@ input_window::input_window(const char *title, int nfields) : subwindow(title, nf
         {
             if(cursor>3)
             {
+                next_button.enabled = true;
+                prev_button.enabled = false;
                 cursor = 4*(cursor/4-1);
                 setLayout();
             }
         });
+        next_button.enabled = true;
     }
-    confirmation_label.setDisplayFunction([this, title]
-    {
-        confirmation_label.setText((string(title) + " entry complete?").c_str(), 12, White);
-    });
+    confirmation_label.addText(string(title) + " entry complete?", 0, 0, 12, White);
 }
 void input_window::create()
 {

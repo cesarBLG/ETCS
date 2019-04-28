@@ -66,7 +66,7 @@ void init_video()
                 auto now = chrono::system_clock::now();
                 chrono::duration<double> diff = now - lastrender;
                 checkSound();
-                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 5)
+                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 50)
                 {
                     lastrender = chrono::system_clock::now();
                     display();
@@ -143,7 +143,7 @@ void display()
     SDL_RenderPresent(sdlren);
     auto end = chrono::system_clock::now();
     chrono::duration<double> diff = end-start;
-    //printf("%f\n", diff.count());
+    printf("%f\n", diff.count());
 }
 void quitDisplay()
 {
@@ -167,6 +167,10 @@ void setColor(Color color)
 inline int getScale(float val)
 {
     return round(val*scale);
+}
+float getAntiScale(float val)
+{
+    return val/scale;
 }
 void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
 {

@@ -10,26 +10,29 @@ Component a2(54,30, displayDistanceText);
 Component distanceBar(54,191, displayDistance);
 Component a23(54, 221, nullptr);
 extern bool showSpeeds;
+static float prev_dist = 0;
 void displayDistanceText()
 {
     float dist = Dtarg;
-    if(monitoring == CSM && Vtarget>=Vperm) return;
-    if(!showSpeeds && (mode == OS || mode == SR)) return;
-    const char *str = to_string(((((int)(dist))/10))*10).c_str();
-    a2.drawText(str, 10, 0, 0, 0, 10, Grey, RIGHT);
+    if(dist!=prev_dist)
+    {
+        a2.clear();
+        if(monitoring == CSM && Vtarget>=Vperm) return;
+        if(!showSpeeds && (mode == OS || mode == SR)) return;
+        const char *str = to_string(((((int)(dist))/10))*10).c_str();
+        a2.addText(str, 10, 0, 10, Grey, RIGHT);
+    }
+    prev_dist = dist;
 }
 void displayDistance()
 {
     float dist = Dtarg;
     if(monitoring == CSM && Vtarget>=Vperm) return;
     if(!showSpeeds && (mode == OS || mode == SR)) return;
-    setColor(Grey);
     for(int i=0; i<11; i++)
     {
         int dist = 1000-i*100;
-        distanceBar.drawLine(posx[i], posy[i], 25, posy[i]);
-        distanceBar.drawLine(posx[i], posy[i]+0.5, 25, posy[i]+0.5);
-        distanceBar.drawLine(posx[i], posy[i]+1, 25, posy[i]+1);
+        distanceBar.drawRectangle(posx[i], posy[i], 25-posx[i], 1, Grey);
     }
     if(dist>1000) dist = 1000;
     float h = 0;
@@ -39,8 +42,9 @@ void displayDistance()
         h = 185-152;
         h += (log10(dist)-2)*(152+1);
     }
-    for(float y = 186; y>=(186-h); y-=0.5)
+    distanceBar.drawRectangle(29, 186-h, 10, h, Grey);
+    /*for(float y = 186; y>=(186-h); y-=0.5)
     {
         distanceBar.drawLine(29, y, 39, y);
-    }
+    }*/
 }

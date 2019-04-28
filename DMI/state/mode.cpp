@@ -5,8 +5,12 @@
 using namespace std;
 extern Component csg;
 Component modeRegion(36,36, displayMode);
+static Mode prevmode;
 void displayMode()
 {
+    if(mode==prevmode) return;
+    prevmode = mode;
+    modeRegion.clear();
     string path = "symbols/Mode/MO_";
     int num;
     switch(mode)
@@ -54,5 +58,5 @@ void displayMode()
     if(num<10) path+="0";
     path+=to_string(num);
     path+=".bmp";
-    modeRegion.setBackgroundImage(path.c_str());
+    modeRegion.addImage(path);
 }

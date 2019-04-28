@@ -1,4 +1,6 @@
 *.o
+*.exe
+*.dll
 .vscode/
 .kdev4
 ETCS.kdev4

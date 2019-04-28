@@ -1,4 +1,5 @@
 #include "../graphics/component.h"
+#include "../graphics/texture.h"
 #include "../graphics/color.h"
 #include "../sound/sound.h"
 #include "gauge.h"
@@ -19,6 +20,8 @@ const float cy = 150;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
+#include "../graphics/text_graphic.h"
+text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
 float speedToAngle(float speed)
 {
     if(speed>maxSpeed) return ang1;
@@ -64,17 +67,28 @@ void drawNeedle()
     short psy[8];
     csg.rotateVertex(px, py, 8, cx, cy, an);
     csg.drawPolygon(px, py, 8);
+
+    if(spd_nums[0]==nullptr || spd_nums[0]->color!=speedColor)
+    {
+        for(int i=0; i<10; i++)
+        {
+            if(spd_nums[i]!=nullptr) delete spd_nums[i];
+            spd_nums[i] = csg.getText(to_string(i), 0, 0, 18, speedColor, RIGHT);
+            spd_nums[i]->load();
+        }
+    }
     int spd = Vest;
     spd = Vest-spd > 0.01 ? spd + 1 : spd;
-    int c[3] = {spd/100%10 + 48, spd/10%10 + 48, (spd%10) + 48};
+    int c[3] = {spd/100%10, spd/10%10, (spd%10)};
     bool firstPrint = false;
     for(int i=0; i<3; i++)
     {
-        if(c[i] == '0' && !firstPrint && i!=2) continue;
+        if(c[i] == 0 && !firstPrint && i!=2) continue;
         firstPrint = true;
-        char ch[] = {(int)c[i], 0};
-        float adj = -24 + (2-i) * 15;
-        csg.drawText(ch, cx + adj, 0, 0, 0, 18, speedColor, RIGHT);
+        texture *t = spd_nums[c[i]];
+        float adj = (i-1) * 15;
+        t->x = cx + adj;
+        csg.draw(t);
     }
 }
 void drawHook(float speed)
@@ -166,6 +180,7 @@ void displayCSG()
         }
     }
 }
+static bool inited = false;
 void displayLines()
 {
     setColor(White);
@@ -175,7 +190,7 @@ void displayLines()
         float an = speedToAngle(i);
         int longinterval = maxSpeed == 400 ? 50 : 20;
         size = i%longinterval!=0 ? -110 : -100;
-        if((maxSpeed != 400 && i%20==0) || (maxSpeed == 400 && i%50==0 && i!=250 && i!=350))
+        if(!inited && ((maxSpeed != 400 && i%20==0) || (maxSpeed == 400 && i%50==0 && i!=250 && i!=350)))
         {
             const char *str = to_string(i).c_str();
             float hx = 0;
@@ -191,11 +206,19 @@ void displayLines()
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
             float val = size + adjust;
-            csg.drawSurface(TTF_RenderText_Blended(font, str, white), cx-val*cosf(an), cy-val*sinf(an), width, height);
+            SDL_Surface *surf = TTF_RenderText_Blended(font, str, white);
             TTF_CloseFont(font);
+            texture *t = new texture();
+            t->x = cx-val*cosf(an);
+            t->y = cy-val*sinf(an);
+            t->width = width;
+            t->height = height;
+            t->tex = SDL_CreateTextureFromSurface(sdlren, surf);
+            csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);
     }
+    inited = true;
 }
 Component releaseRegion(36,36, displayVrelease);
 void displayVrelease()
@@ -218,7 +241,7 @@ void displaya1()
 {
     if(mode == LS)
     {
-        a1.setBackgroundImage("symbols/Limited Supervision/MO_21.bmp");
+        a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
         a1.setText("120", 12, White);
     }
     if((mode == FS || ((mode == OS || mode == SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)

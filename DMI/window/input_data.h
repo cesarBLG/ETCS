@@ -23,12 +23,7 @@ class input_data
     input_data(string label_text="");
     function<string()> data_get;
     function<void(string)> data_set;
-    void setData(string s)
-    {
-        if(s==data) return;
-        setAccepted(false);
-        data = s;
-    }
+    void setData(string s);
     string getData()
     {
         return data;

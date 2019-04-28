@@ -19,13 +19,13 @@ void wait(subwindow *w)
     draw_mtx.lock();
     active_windows.insert(w);
     draw_mtx.unlock();
-    repaint();
     int i=0;
     while(!ex)
     {
         navigation_bar.active = false;
         planning_area.active = false;
         if(w->fullscreen) main_window.active = false;
+        repaint();
         unique_lock<mutex> lck(window_mtx);
         window_cv.wait(lck, aw);
         if(!running) break;

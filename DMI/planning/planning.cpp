@@ -5,6 +5,7 @@
 #include "../graphics/icon_button.h"
 #include "../window/window.h"
 #include "../graphics/display.h"
+#include "../graphics/rectangle.h"
 
 void planningConstruct();
 window planning_area(planningConstruct);
@@ -19,13 +20,22 @@ Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
 void displayScaleUp();
 void displayScaleDown();
+void speedLines();
 void zoominp()
 {
-    if(planning_scale>1) planning_scale/=2;
+    if(planning_scale>1)
+    {
+        planning_scale/=2;
+        speedLines();
+    }
 }
 void zoomoutp()
 {
-    if(planning_scale<=16) planning_scale*=2;
+    if(planning_scale<=16)
+    {
+        planning_scale*=2;
+        speedLines();
+    }
 }
 IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
 IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
@@ -34,10 +44,6 @@ void displayPlanning()
 {
     for(int i=0; i<9; i++)
     {
-        if(i==0||i>4)
-        {
-            planning_distance.drawText(to_string(divs[i]*planning_scale).c_str(), 208, posy[i]-150, 0,0, 10, White, RIGHT);
-        }
         setColor(DarkGrey);
         if(i==0||i==5||i==8) planning_distance.drawRectangle(40, posy[i], 200, 2, MediumGrey);
         else planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
@@ -71,13 +77,13 @@ void displayGradient()
         planning_gradient.drawLine(0, maxp-1, 17, maxp-1, Black);
         if(size>44)
         {
-            planning_gradient.drawText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 0, 0, 10, e.val<0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 0,0, 10, e.val<0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 0,0, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val<0 ? Black : White);
         }
         else if(size>14)
         {
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 0,0, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val<0 ? Black : White);
         }
     }
 }
@@ -129,15 +135,14 @@ void displayPASP()
         }
         if(oth1 && prev.speed<cur.speed) oth2 = true;
     }
-    /*if(!end)
-    {
-        PASP.drawRectangle(14, 0, 93*red, getPlanningHeight(prev_pasp.distance)-15, PASPlight);
-    }*/
 }
 indication_marker imarker;
+bool f= false;
 void displaySpeed()
 {
-    if(imarker.start_distance>0) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
+    if(f) return;
+    f = true;
+    if(imarker.start_distance>0) PASP.addRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {
@@ -148,19 +153,26 @@ void displaySpeed()
         bool im = (cur==imarker.element);
         if(cur.distance>divs[8]*planning_scale) break;
         float a = getPlanningHeight(cur.distance)-15;
-        planning_speed.drawRectangle(6, a-1, 16, 2, im ? Yellow : Grey);
-        float x[] = {15, 18, 21};
         if(prev.speed>cur.speed)
         {
-            float y[] = {a+2, a+10, a+2};
-            planning_speed.drawPolygon(x, y, 3);
-            planning_speed.drawText(to_string(cur.speed).c_str(), 25, a-2, 0, 0, 10, im ? Yellow : Grey, UP | LEFT);
+            planning_speed.addImage(im ? "symbols/Planning/PL_23.bmp" : "symbols/Planning/PL_22.bmp", 14, a+7, 20, 20);
+            planning_speed.addText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT);
         }
         else
         {
-            float y[] = {a-3, a-11, a-3};
-            planning_speed.drawPolygon(x, y, 3);
-            planning_speed.drawText(to_string(cur.speed).c_str(), 25, 270-a-2, 0, 0, 10, Grey, DOWN | LEFT);
+            planning_speed.addImage("symbols/Planning/PL_21.bmp", 14, a-7, 20, 20);
+            planning_speed.addText(to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT);
+        }
+    }
+}
+void speedLines()
+{
+    planning_distance.clear();
+    for(int i=0; i<9; i++)
+    {
+        if(i==0||i>4)
+        {
+            planning_distance.addText(to_string(divs[i]*planning_scale), 208, posy[i]-150, 10, White, RIGHT);
         }
     }
 }
@@ -197,6 +209,7 @@ void planningConstruct()
     speed_elements.push_back({20, 300});
     speed_elements.push_back({120, 500});
     speed_elements.push_back({0, 800});
+    speedLines();
 }
 float getPlanningHeight(float dist)
 {

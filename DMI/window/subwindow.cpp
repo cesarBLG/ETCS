@@ -1,7 +1,7 @@
 #include "subwindow.h"
-subwindow::subwindow(const char *title, bool full) : window(), fullscreen(full), exit_button("symbols/Navigation/NA_11.bmp", 82, 50), title_bar(full ? 334 : 306,24)
+subwindow::subwindow(string title, bool full) : window(), fullscreen(full), exit_button("symbols/Navigation/NA_11.bmp", 82, 50), title_bar(full ? 334 : 306,24)
 {
-    title_bar.setDisplayFunction([this,title, full]{title_bar.drawText(title,4,0,0,0,12,White, full ? RIGHT : LEFT);});
+    title_bar.addText(title,4,0,12,White, full ? RIGHT : LEFT);
     exit_button.setPressedAction([this] 
     {
         exit(this);

@@ -6,8 +6,12 @@ using namespace std;
 extern Component distanceBar;
 Component a4(54, 25, nullptr);
 Component levelRegion(54, 25, displayLevel);
+static Level prevlevel;
 void displayLevel()
 {
+    if(prevlevel==level) return;
+    prevlevel = level;
+    levelRegion.clear();
     string path = "symbols/Level/LE_";
     int num = 0;
     switch(level)
@@ -32,5 +36,5 @@ void displayLevel()
     path+=to_string(num);
     //If NTC is LZB/PZB, path+="a";
     path+=".bmp";
-    levelRegion.setBackgroundImage(path.c_str());
+    levelRegion.addImage(path);
 }
