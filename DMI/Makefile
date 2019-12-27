@@ -14,9 +14,9 @@ OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.
 all: dmi
 dmi: $(OBJECTS)
 #	$(CPP) $(OBJECTS) -o dmi -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_net
-	$(CPP) $(OBJECTS) -o dmi -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
+	$(CPP) $(OBJECTS) -o dmi -g -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
 %.o: %.cpp
 #	$(CPP) -c $< -o $@ -mwindows
-	$(CPP) -c $< -o $@
+	$(CPP) -c $< -o $@ -g -rdynamic
 clean:
 	rm $(OBJECTS)

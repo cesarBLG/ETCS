@@ -4,6 +4,7 @@
 #include "../window/menu.h"
 using namespace std;
 unordered_set<window*> active_windows;
+unordered_set<window*> old_windows;
 #include <iostream>
 void displayETCS()
 {
@@ -12,4 +13,9 @@ void displayETCS()
         window *w = *it;
         if(w->active) w->display();
     }
+    for(auto it=old_windows.begin(); it!=old_windows.end(); ++it)
+    {
+        delete *it;
+    }
+    old_windows.clear();
 }

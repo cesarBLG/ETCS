@@ -111,6 +111,7 @@ void init_video()
 void startDisplay(bool fullscreen)
 {
     TTF_Init();
+    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     sdlwin = SDL_CreateWindow("Driver Machine Interface", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
     if(sdlwin == nullptr)
     {
@@ -143,7 +144,7 @@ void display()
     SDL_RenderPresent(sdlren);
     auto end = chrono::system_clock::now();
     chrono::duration<double> diff = end-start;
-    printf("%f\n", diff.count());
+    //printf("%f\n", diff.count());
 }
 void quitDisplay()
 {

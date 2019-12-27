@@ -19,9 +19,9 @@
 #include "variable.h"
 #include <iostream>
 using namespace std;
-vector<data> variable::read(BitReader &bits)
+deque<data> variable::read(BitReader &bits)
 {
-    vector<data> variables;
+    deque<data> variables;
     unsigned long val = 0;
     if(size!=0)
     {
@@ -32,7 +32,7 @@ vector<data> variable::read(BitReader &bits)
     {
         for(int i=0; i<nested.size(); i++)
         {
-            vector<data> nr = nested[i]->read(bits);
+            deque<data> nr = nested[i]->read(bits);
             variables.insert(variables.end(), nr.begin(), nr.end());
         }
     }

@@ -19,6 +19,7 @@
 #ifndef _VARIABLE_H
 #define _VARIABLE_H
 #include <string>
+#include <deque>
 #include <vector>
 #include "bitreader.h"
 using namespace std;
@@ -46,7 +47,7 @@ public:
             delete nested[i];
         }
     }
-    vector<data> read(BitReader &bits);
+    deque<data> read(BitReader &bits);
 };
 class condition : public variable
 {

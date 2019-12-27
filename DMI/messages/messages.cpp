@@ -79,10 +79,10 @@ void displayMessages()
 {
     if(messageList.empty())
     {
-        addMsg(Message(4,BaliseReadError, 11, 9));
+        /*addMsg(Message(4,BaliseReadError, 11, 9));
         addMsg(Message(5,SHrefused, 11, 8));
         addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
-        addMsg(Message(3,EnteringFS, 11, 9, true));
+        addMsg(Message(3,EnteringFS, 11, 9, true));*/
     }
 }
 void disp()

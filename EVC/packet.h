@@ -19,8 +19,9 @@ class packet : public variable
 public:
     static parsed_packet parse(BitReader &b)
     {
-        packet *p = packets[b.peekByte()];
-        return parsed_packet(p->name, p->read(b));  
+        int num = b.peekByte();
+        packet *p = packets[num];
+        return parsed_packet(p->name, num, p->read(b));  
     }
     packet(int id)
     {

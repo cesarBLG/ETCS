@@ -1,5 +1,5 @@
-all: dmi evc
-dmi:
+all: DMI/dmi EVC/evc
+DMI/dmi:
 	+make -C DMI all
-evc:
+EVC/evc:
 	+make -C EVC all

@@ -13,11 +13,11 @@
 #include "../planning/planning.h"
 #include "../graphics/drawing.h"
 using namespace std;
-IPaddress ip;
-TCPsocket serv_sock;
-TCPsocket socket;
+static IPaddress ip;
+static TCPsocket serv_sock;
+static TCPsocket socket;
 #define BUFF_SIZE 512
-#define PORT 5000
+#define PORT 5010
 char data[BUFF_SIZE];
 stringstream buffer;
 SDLNet_SocketSet set;
@@ -137,6 +137,7 @@ void parseData(string str)
             speed_elements.push_back(s);
         }
     }
+    update();
     notifyDataReceived();
 }
 void read()

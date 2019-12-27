@@ -216,12 +216,14 @@ void Component::drawText(string text, float x, float y, float size, Color col, i
 }
 void Component::getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect)
 {
+    if(text=="") return;
     TTF_Font *font = openFont(aspect ? fontPathb : fontPath, size);
     if (font == nullptr) return;
+    int v = text.find('\n');
     SDL_Color color = {col.R, col.G, col.B};
     float width;
     float height;
-    getFontSize(font, text.c_str(), &width, &height);
+    getFontSize(font, text.substr(0,v).c_str(), &width, &height);
     float sx = width;
     float sy = height;
     if (align & UP) y = y + sy / 2;
@@ -230,14 +232,16 @@ void Component::getTextGraphic(texture *t, string text, float x, float y, float 
     if (align & LEFT) x = x + sx / 2;
     else if (align & RIGHT) x = (this->sx - x) - sx / 2;
     else x = x + this->sx / 2;
-    SDL_Surface *surf = TTF_RenderText_Blended(font, text.c_str(), color);
+    SDL_Surface *surf = TTF_RenderText_Blended_Wrapped(font, text.c_str(), color, getScale(sx));
+    if(surf==nullptr) printf("Error rendering text: %s\n", text.c_str());
     TTF_CloseFont(font);
     SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlren, surf);
     t->tex = tex;
     t->x = x;
     t->y = y;
-    t->width = sx;
-    t->height = sy;
+    t->width = getAntiScale(surf->w);
+    t->height = getAntiScale(surf->h);
+    SDL_FreeSurface(surf);
 }
 void Component::drawImage(string name, float cx, float cy, float sx, float sy)
 {
@@ -283,11 +287,12 @@ void Component::getImageGraphic(texture *t, string path, float cx, float cy, flo
         t->y = this->sy/2;
     }
     t->tex = SDL_CreateTextureFromSurface(sdlren, surf);
+    SDL_FreeSurface(surf);
 }
 void Component::setText(string text, float size, Color c)
 {
-    int v = text.find('\n');
-    /*if(v!=string::npos)
+    /*int v = text.find('\n');
+    if(v!=string::npos)
     {
         TTF_Font *font = openFont(fontPath, size);
         float width;
@@ -299,8 +304,8 @@ void Component::setText(string text, float size, Color c)
         drawText(t1.c_str(), 0, -height/2, sx, sy, size, c, CENTER);
         drawText(t2.c_str(), 0, height/2, sx, sy, size, c, CENTER);
     }
-    else */
-    drawText(text, 0, 0, size, c, CENTER);
+    else 
+    drawText(text, 0, 0, size, c, CENTER);*/
 }
 void Component::setLabel(string text, float size, Color c)
 {

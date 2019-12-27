@@ -15,6 +15,7 @@ float Vrelease;
 float Vest;
 float Dtarg;
 float TTI = 20;
+float prevVperm=-1;
 bool EB = false;
 int trn;
 unsigned long driverid;
@@ -22,7 +23,13 @@ bool ovEOA = false;
 void updateSupervision();
 void update()
 {
-    updateSupervision();
+    if(monitoring == CSM)
+    {
+        if(prevVperm >= 0 && prevVperm<Vperm) playSinfo();
+        prevVperm = Vperm;
+    }
+    else prevVperm = -1;
+    //updateSupervision();
 }
 void setSpeeds(float vtarg, float vperm, float vsbi, float vrelease, float vest, float dist)
 {
@@ -48,7 +55,7 @@ void setSupervision(SupervisionStatus status)
 //Note: this should be computed in EVC
 void updateSupervision()
 {
-    float P = Vperm;
+    /*float P = Vperm;
     float SBI = Vsbi<Vperm ? Vperm + 5 : Vsbi;
     float W = (Vperm+Vsbi)/2;
     SupervisionStatus status = supervision;
@@ -81,5 +88,5 @@ void updateSupervision()
             else status = IndS;
         }
     }
-    setSupervision(status);
+    setSupervision(status);*/
 }

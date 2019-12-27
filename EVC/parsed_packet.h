@@ -18,26 +18,32 @@
 
 #ifndef PARSED_PACKET_H
 #define PARSED_PACKET_H
-#include <vector>
+#include <deque>
 #include <string>
 #include "variable.h"
 using namespace std;
 class parsed_packet
 {
-    string name;
-    vector<data> variables;
+    deque<data> variables;
 public:
-    parsed_packet(string name, vector<data> variables) : name(name), variables(variables)
+    string name;
+    int num;
+    parsed_packet(string name, deque<data> variables) : name(name), variables(variables)
     {
 
     }
-    int read(string varname)
+    int peek(string varname, int &value)
     {
-        
         if(variables[0].type->name != name) return -1;
-        int val = variables[0].val;
-        //variables.pop_front();
-        return val;
+        value = variables[0].val;
+        return 0;
+    }
+    int read(string varname, int &value)
+    {
+        if(variables[0].type->name != name) return -1;
+        value = variables[0].val;
+        variables.pop_front();
+        return 0;
     }
 };
 

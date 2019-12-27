@@ -8,48 +8,57 @@
 #include <iostream>
 using namespace std;
 extern bool running;
-static bool ex = false;
+static bool exit_menu = false;
 static subwindow *c = nullptr;
 mutex window_mtx;
 mutex draw_mtx;
 condition_variable window_cv;
-bool aw(){return ex||c!=nullptr||!running;}
+bool wake_fun(){return exit_menu||c!=nullptr||!running;}
 void wait(subwindow *w)
 {
     draw_mtx.lock();
     active_windows.insert(w);
     draw_mtx.unlock();
-    int i=0;
-    while(!ex)
+    while(!exit_menu)
     {
+        draw_mtx.lock();
         navigation_bar.active = false;
         planning_area.active = false;
         if(w->fullscreen) main_window.active = false;
+        draw_mtx.unlock();
         repaint();
         unique_lock<mutex> lck(window_mtx);
-        window_cv.wait(lck, aw);
+        window_cv.wait(lck, wake_fun);
         if(!running) break;
         if(c!=nullptr)
         {
-            bool e = ex;
+            bool e = exit_menu;
             subwindow *w1 = c;
             c = nullptr;
-            ex = false;
+            exit_menu = false;
+            draw_mtx.lock();
             w->active = false;
+            draw_mtx.unlock();
             lck.unlock();
             wait(w1);
+            window_mtx.lock();
+            draw_mtx.lock();
             w->active = true;
-            ex = e;
+            exit_menu = e;
+            draw_mtx.unlock();
+            window_mtx.unlock();
         }
     }
-    ex = false;
+    window_mtx.lock();
+    exit_menu = false;
+    window_mtx.unlock();
     draw_mtx.lock();
     active_windows.erase(w);
+    old_windows.insert(w);
     if(w->fullscreen) main_window.active = true;
     navigation_bar.active = true;
     planning_area.active = true;
     draw_mtx.unlock();
-    delete w;
 }
 void manage_windows()
 {
@@ -73,7 +82,7 @@ void manage_windows()
     while(running)
     {
         unique_lock<mutex> lck(window_mtx);
-        window_cv.wait(lck, aw);
+        window_cv.wait(lck, wake_fun);
         if(!running) break;
         if(c!=nullptr)
         {
@@ -88,11 +97,13 @@ void right_menu(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
     c = w;
+    lck.unlock();
     window_cv.notify_one();
 }
 void exit(subwindow *w)
 {
     unique_lock<mutex> lck(window_mtx);
-    ex = true;
+    exit_menu = true;
+    lck.unlock();
     window_cv.notify_one();
 }

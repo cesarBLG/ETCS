@@ -18,6 +18,7 @@ Component planning_objects(246,300, displayObjects);
 Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
+bool f= false;
 void displayScaleUp();
 void displayScaleDown();
 void speedLines();
@@ -27,6 +28,7 @@ void zoominp()
     {
         planning_scale/=2;
         speedLines();
+        f = false;
     }
 }
 void zoomoutp()
@@ -35,6 +37,7 @@ void zoomoutp()
     {
         planning_scale*=2;
         speedLines();
+        f = false;
     }
 }
 IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
@@ -98,10 +101,14 @@ bool check_spdov(int i, int j)
     if(a-b>20) return false;
     return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed) || check_spdov(i, j+1);
 }
+indication_marker imarker;
 void displayPASP()
 {
+    PASP.clear();
     PASP.drawRectangle(14, 0, 99, 270, PASPdark);
-
+    
+    if(imarker.start_distance>0) PASP.addRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
+    
     speed_element prev_pasp = speed_elements[0];
     bool oth1 = false;
     bool oth2 = false;
@@ -136,13 +143,11 @@ void displayPASP()
         if(oth1 && prev.speed<cur.speed) oth2 = true;
     }
 }
-indication_marker imarker;
-bool f= false;
 void displaySpeed()
 {
     if(f) return;
     f = true;
-    if(imarker.start_distance>0) PASP.addRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
+    planning_speed.clear();
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {

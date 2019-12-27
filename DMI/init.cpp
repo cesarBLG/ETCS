@@ -13,6 +13,7 @@ void quit()
     printf("quit\n");
 }
 #ifdef __unix__
+#include <unistd.h>
 #include <signal.h>
 void sighandler(int sig)
 {
@@ -28,8 +29,8 @@ int main(int argc, char** argv)
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
-    thread tcp(startSocket);
     thread video(init_video);
+    thread tcp(startSocket);
     manage_windows();
     tcp.join();
     video.join();
