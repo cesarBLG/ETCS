@@ -22,7 +22,6 @@
 #include <deque>
 #include <vector>
 #include "bitreader.h"
-using namespace std;
 class variable;
 struct data
 {
@@ -32,14 +31,14 @@ struct data
 class variable
 {
 public:
-    string name;
+    std::string name;
     const int size;
-    vector<variable*> nested;
+    std::vector<variable*> nested;
     virtual bool goInto(int val) {return false;}
 public:
     variable() : size(0) {}
     void printall();
-    variable(string name, int size) : name(name), size(size) {}
+    variable(std::string name, int size) : name(name), size(size) {}
     virtual ~variable()
     {
         for(int i=0; i<nested.size(); i++)
@@ -47,7 +46,7 @@ public:
             delete nested[i];
         }
     }
-    deque<data> read(BitReader &bits);
+    std::deque<data> read(BitReader &bits);
 };
 class condition : public variable
 {
@@ -60,7 +59,7 @@ class condition : public variable
         return val == target;
     }
 public:
-    condition(string name, int size, int target) : variable(name, size), target(target){}
+    condition(std::string name, int size, int target) : variable(name, size), target(target){}
 };
 class N_ITER : public variable
 {

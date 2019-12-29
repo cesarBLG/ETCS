@@ -4,14 +4,13 @@
 #include "train_data.h"
 #include <map>
 #include <utility>
+#include <cmath>
 const double T_bs1_locked = 0;
 const double T_bs2_locked = 2;
 double T_bs;
 double T_bs1;
 double T_bs2;
 double T_be;
-
-double M_rotating_nom;
 
 std::map<distance, double> gradient;
 double get_gradient(distance dist)
@@ -69,22 +68,61 @@ void set_Kv_int_P()
         Kv_int[it->first] = val;
     }
 }
-
+acceleration conversion_acceleration(double lambda_0)
+{
+    double l1 = lambda_0;
+    double l2 = l1*l1;
+    double l3 = l1*l3;
+    double V_lim = 16.85*std::pow(lambda_0,0.428);
+    std::map<double,double> AD;
+    AD[0] = 0.0075*lambda_0+0.076;
+    double coef[5][4] = { {0.0663,4.72e-3,6.1e-5,6.3e-7},
+                        {0.13,5.14e-3,-4.53e-6,2.73e-7},
+                        {0.0479,5.81e-3,-6.76e-6,5.58e-8}, 
+                        {0.048, 5.52e-3, -3.85e-6, 3e-8}, 
+                        {0.0559, 5.06e-3, 1.66e-6, 3.23e-9}};
+    double acel[5];
+    for (int n=1; n<=5; n++) {
+        acel[n-1] = coef[n-1][3]*l3+coef[n-1][2]*l2+coef[n-1][1]*l1+coef[n-1][0];
+    }
+    if (V_lim<100)
+        AD[V_lim] = acel[0];
+    if (V_lim > 100 && V_lim<120)
+        AD[V_lim] = acel[1];
+    if (V_lim<=100)
+        AD[100] = acel[1];
+    if (V_lim>120 && V_lim<150)
+        AD[V_lim] = acel[2];
+    if (V_lim<=120)
+        AD[120] = acel[2];
+    if (V_lim>150 && V_lim<180)
+        AD[V_lim] = acel[3];
+    if (V_lim<=150)
+        AD[150] = acel[3];
+    if (V_lim>180)
+        AD[V_lim] = acel[4];
+    if (V_lim<=180)
+        AD[180] = acel[4];
+    acceleration a_calculated;
+    for (auto it=AD.begin(); it!=AD.end(); ++it) {
+        a_calculated.speed_step.insert(it->first/3.6);
+    }
+    a_calculated.accel = [AD](double V, distance d) {
+        return (--AD.upper_bound(V*3.6))->second;
+    };
+    return a_calculated;
+}
 void set_test_values()
 {
-    gradient[0] = 0;
+    gradient[distance(-10000)] = 0;
     
     Kv_int[0] = 1;
     Kr_int[0] = 1;
     Kn[0] = {1,1};
     
-    A_brake_emergency = acceleration();
-    A_brake_emergency.speed_step.insert(0);
-    A_brake_emergency.accel = [](double V, distance d) { return 1.2; };
+    A_brake_emergency = conversion_acceleration(brake_percentage);
     
-    A_brake_service = acceleration();
-    A_brake_service.speed_step.insert(0);
-    A_brake_service.accel = [](double V, distance d) { return 1.0; };
+    A_brake_service = conversion_acceleration(std::min(brake_percentage, 135));
     
     A_brake_normal_service = acceleration();
     A_brake_normal_service.speed_step.insert(0);
@@ -93,7 +131,6 @@ void set_test_values()
     calculate_gradient();
     calculate();
 }
-
 int redadh;
 
 void calculate()

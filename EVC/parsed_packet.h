@@ -21,24 +21,23 @@
 #include <deque>
 #include <string>
 #include "variable.h"
-using namespace std;
 class parsed_packet
 {
-    deque<data> variables;
+    std::deque<data> variables;
 public:
-    string name;
+    std::string name;
     int num;
-    parsed_packet(string name, deque<data> variables) : name(name), variables(variables)
+    parsed_packet(std::string name, std::deque<data> variables) : name(name), variables(variables)
     {
 
     }
-    int peek(string varname, int &value)
+    int peek(std::string varname, int &value)
     {
         if(variables[0].type->name != name) return -1;
         value = variables[0].val;
         return 0;
     }
-    int read(string varname, int &value)
+    int read(std::string varname, int &value)
     {
         if(variables[0].type->name != name) return -1;
         value = variables[0].val;

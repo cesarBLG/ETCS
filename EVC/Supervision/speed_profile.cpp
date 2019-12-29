@@ -1,5 +1,10 @@
 #include "speed_profile.h"
 #include "targets.h"
+#include <vector>
+#include <map>
+#include <list>
+speed_restriction_list mrsp_candidates;
+static std::vector<speed_restriction> SSP;
 void speed_restriction_list::recalculate_MRSP()
 {
     MRSP.clear();
@@ -19,4 +24,39 @@ void speed_restriction_list::recalculate_MRSP()
     }
     set_supervised_targets();
 }
-speed_restriction_list mrsp_candidates;
+void update_SSP(std::vector<SSP_element> nSSP)
+{
+    std::vector<speed_restriction> rest;
+    for (auto it=nSSP.begin(); it!=--nSSP.end(); ++it) {
+        auto next = it;
+        next++;
+        rest.push_back(speed_restriction(it->get_speed(0,std::set<int>()), it->start, next->start, true));
+    }
+    for (speed_restriction &r : SSP) {
+        mrsp_candidates.remove_restriction(&r);
+    }
+    SSP = rest;
+    for (speed_restriction &r : SSP) {
+        mrsp_candidates.insert_restriction(&r);
+    }
+}
+std::list<TSR> TSRs;
+void insert_TSR(TSR rest)
+{
+    revoke_TSR(rest.id);
+    TSRs.push_back(rest);
+    mrsp_candidates.insert_restriction(&TSRs.back().restriction);
+}
+void revoke_TSR(int id_tsr)
+{
+    std::list<std::list<TSR>::iterator> revocable;
+    for (auto it=TSRs.begin(); it!=TSRs.end(); ++it) {
+        if (it->id == id_tsr && it->revocable) {
+            mrsp_candidates.remove_restriction(&it->restriction);
+            revocable.push_back(it);
+        }
+    }
+    for (auto it : revocable) {
+        TSRs.erase(it);
+    }
+}

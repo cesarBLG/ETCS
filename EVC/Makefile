@@ -1,10 +1,21 @@
-OBJECTS = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o Supervision/conversion_model.o \
-Supervision/curve_calc.o Supervision/distance.o \
+OBJECTS = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
+Supervision/curve_calc.o  Supervision/conversion_model.o  Supervision/distance.o\
 Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
+antenna.o MA/movement_authority.o \
 OR_interface/interface.o
-A = packet.o bitreader.o variable.o MA/movement_authority.o
+CXX = g++
+CC = gcc
+DEBUG=-g -ggdb
+LDFLAGS =
+#DEBUG = -g -rdynamic
+ifeq ($(TARGET),WIN32)
+CXX = x86_64-w64-mingw32-g++ -m64
+CC = x86_64-w64-mingw32-gcc -m64
+CFLAGS = -I.
+LDFLAGS += -lstdc++ -lwsock32 -L.
+endif
 all: evc
 evc: $(OBJECTS)
-	g++ $(OBJECTS) -o evc -pthread -g -rdynamic -lorts
+	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -lorts -Wall
 %.o: %.cpp
-	g++ -c $< -o $@ -g -rdynamic
+	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall

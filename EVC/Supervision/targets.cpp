@@ -4,6 +4,8 @@
 #include "national_values.h"
 #include <set>
 #include <iostream>
+target::target() : type(target_class::MRSP), is_valid(false) {};
+target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type), is_valid(true) {}
 distance target::get_distance_curve(double velocity) const
 {
     /*if (type == target_class::MRSP) {
@@ -82,7 +84,7 @@ void target::calculate_curves(double V_est) const
         
         double D_be_display = (V_est+V_delta0+V_delta1/2)*T_traction + (V_est + V_delta0 + V_delta1 + V_delta2/2)*T_berem;
         distance v_sbi_dappr = d_maxsafefront + V_est*T_bs2 + D_be_display;
-        V_SBI2 = v_sbi_dappr < get_distance_curve(V_target) ? (get_speed_curve(v_sbi_dappr)-(V_delta0+V_delta1+V_delta2),V_target + dV_sbi(V_target)) : (V_target + dV_sbi(V_target));
+        V_SBI2 = v_sbi_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_sbi_dappr)-(V_delta0+V_delta1+V_delta2),V_target + dV_sbi(V_target)) : (V_target + dV_sbi(V_target));
         
         //GUI disabled
         distance v_p_dappr = d_maxsafefront + V_est*(T_driver+T_bs2) + D_be_display;
@@ -102,9 +104,10 @@ void target::calculate_curves(double V_est) const
         V_P = v_p_dappr < d_target ? get_speed_curve(v_p_dappr) : 0;
     }
 }
-EndOfAuthority *EoA = new EndOfAuthority();
-SupervisionLimit *SvL = new SupervisionLimit();
-std::set<target> supervised_targets;
+distance *EoA = nullptr;
+distance *SvL = nullptr;
+double V_releaseSvL=0;
+static std::set<target> supervised_targets;
 bool changed = false;
 void set_supervised_targets()
 {
@@ -118,12 +121,10 @@ void set_supervised_targets()
             supervised_targets.insert(target(it->first, it->second, target_class::MRSP));
         prev = it;
     }
-    target t1 = target(SvL->get_location(), 0, target_class::SvL);
-    target t2 = target(EoA->get_location(), 0, target_class::EoA);
     if (SvL != nullptr)
-        supervised_targets.insert(target(SvL->get_location(), 0, target_class::SvL));
+        supervised_targets.insert(target(*SvL, 0, target_class::SvL));
     if (EoA != nullptr)
-        supervised_targets.insert(target(EoA->get_location(), 0, target_class::EoA));
+        supervised_targets.insert(target(*EoA, 0, target_class::EoA));
     /*if (LoA != nullptr)
         supervised_targets.insert(target(LoA->pos, LoA->speed, target_class::LoA));
     if (SRdist != nullptr)

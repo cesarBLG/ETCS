@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <vector>
 #include "distance.h"
 #include "fixed_values.h"
 #include "train_data.h"
@@ -28,6 +29,48 @@ public:
     distance get_start() { return start_distance; }
     distance get_end() { return end_distance + compensate_train_length*L_TRAIN; }
 };
+struct SSP_element
+{
+    distance start;
+    bool compensate_train_length;
+    std::map<int,double> restrictions[3];
+    SSP_element() = default;
+    SSP_element(distance start, double basic_speed, bool comp) : start(start), compensate_train_length(comp)
+    {
+        restrictions[0][0] = basic_speed;
+    }
+    double get_speed(int train_cant_deficiency, std::set<int> train_categories)
+    {
+        double v = (--restrictions[0].upper_bound(train_cant_deficiency))->second;
+        double v2 = 10000;
+        bool replaces = false;
+        for (int cat : train_categories) {
+            auto it = restrictions[1].find(cat);
+            if (it!=restrictions[1].end()) {
+                v2 = std::min(v2, it->second);
+                replaces = true;
+            }
+        }
+        if (replaces)
+            v = v2;
+        for (int cat : train_categories) {
+            auto it = restrictions[2].find(cat);
+            if (it!=restrictions[2].end()) {
+                v = std::min(v, it->second);
+            }
+        }
+        return v;
+    }
+};
+void update_SSP(std::vector<SSP_element> nSSP);
+struct TSR
+{
+    int id;
+    bool revocable;
+    speed_restriction restriction;
+};
+void insert_TSR(TSR rest);
+void revoke_TSR(int id_tsr);
 class speed_restriction_list
 {
 private:

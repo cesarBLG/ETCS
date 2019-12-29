@@ -26,3 +26,5 @@ const double T_CYCRQSTD = 60;
 const double T_ACK = 5;
 
 const double D_Metal = 300;
+
+const double D_keep_information = 300;

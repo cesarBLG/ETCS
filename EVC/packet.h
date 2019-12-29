@@ -7,8 +7,8 @@
 #include "parsed_packet.h"
 class packet : public variable
 {
-    static map<int,packet*> packets;
-    vector<variable*> var;
+    static std::map<int,packet*> packets;
+    std::vector<variable*> var;
     bool entered = false;
     bool goInto(int val) override
     {
@@ -26,12 +26,12 @@ public:
     packet(int id)
     {
         packets[id] = this;
-        ifstream file;
-        file.open("Packets/"+to_string(id)+".txt");
-        string str;
-        getline(file,str);
+        std::ifstream file;
+        file.open("Packets/"+std::to_string(id)+".txt");
+        std::string str;
+        std::getline(file,str);
         name = str;
-        vector<variable*> depth;
+        std::vector<variable*> depth;
         depth.push_back(this);
         while(!file.eof())
         {
@@ -41,8 +41,8 @@ public:
             while(d<depth.size()-1) depth.pop_back();
             if(d>=depth.size()) depth.push_back(depth.back()->nested.back());
             variable* var;
-            stringstream stream(str);
-            string name;
+            std::stringstream stream(str);
+            std::string name;
             int size;
             stream>>name;
             stream>>size;

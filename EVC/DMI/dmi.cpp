@@ -1,23 +1,28 @@
 #ifdef unix
 #include <unistd.h>
-#include <cstdlib>
-#include <cstdio>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
+#include <cstdlib>
+#include <cstdio>
 #include <thread>
 #include <string>
 #include "../Supervision/supervision.h"
 #include <mutex>
 #include <iostream>
+#include <chrono>
 using namespace std;
 extern mutex loop_mtx;
 int dmi_pid;
 void dmi_comm();
 void start_dmi()
 {
+#ifdef unix
     printf("Starting Driver Machine Interface...\n");
     dmi_pid = fork();
     if(dmi_pid == 0)
@@ -28,6 +33,10 @@ void start_dmi()
         execl("dmi", "dmi", nullptr);
     }
     sleep(1);
+#else
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+#endif
     thread thr(dmi_comm);
     thr.detach();
 }
@@ -40,6 +49,12 @@ extern double D_target;
 extern bool EB;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
+#ifdef WIN32
+int write(int fd, const char *buff, size_t size)
+{
+    return send(fd,buff,size,0);
+}
+#endif
 void dmi_comm()
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -82,7 +97,7 @@ void dmi_comm()
         write(fd, s.c_str(), s.size());
         s = "setVest("+to_string(V_est*3.6)+");\n";
         write(fd, s.c_str(), s.size());
-        s = "setVsbi("+to_string((V_est+5)*3.6)+");\n";
+        s = "setVsbi("+to_string(V_sbi*3.6)+");\n";
         write(fd, s.c_str(), s.size());
         s = "setDtarget("+to_string(D_target)+");\n";
         write(fd, s.c_str(), s.size());
@@ -93,7 +108,6 @@ void dmi_comm()
         s += ");\n";
         write(fd, s.c_str(), s.size());
         lck.unlock();
-        usleep(50000);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
-#endif

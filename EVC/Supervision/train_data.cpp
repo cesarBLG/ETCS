@@ -4,3 +4,8 @@ double T_brake_emergency=2;
 double T_brake_service=5; 
 double T_traction = 0.1;
 double T_berem = 0.5;
+double M_rotating_nom;
+double V_train = 100/3.6;
+bool Q_airtight = false;
+int axle_number=12;
+int brake_percentage=150;

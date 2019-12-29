@@ -10,7 +10,7 @@
 #include <cstdio>
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
-int maxSpeed = 400;
+int maxSpeed = 140;
 const float ang00 = -239*PI/180.0;
 const float ang0 = -234*PI/180.0;
 const float amed = -42*PI/180.0;
@@ -221,11 +221,14 @@ void displayLines()
     inited = true;
 }
 Component releaseRegion(36,36, displayVrelease);
+static float prevVrelease=0;
 void displayVrelease()
 {
-    if(Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != OS || showSpeeds))
+    if(prevVrelease!=Vrelease && Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != OS || showSpeeds))
     {
-        releaseRegion.setText(to_string((int)Vrelease).c_str(),17, MediumGrey);
+        releaseRegion.clear();
+        releaseRegion.addText(to_string((int)Vrelease).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
+        prevVrelease = Vrelease;
     }
 }
 void displayGauge()

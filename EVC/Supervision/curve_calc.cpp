@@ -1,6 +1,5 @@
 #include <cmath>
 #include "conversion_model.h"
-#include <iostream>
 distance distance_curve(acceleration a, distance dref, double vref, double vel)
 {
     auto v = --a.speed_step.upper_bound(vref);

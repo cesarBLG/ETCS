@@ -17,11 +17,12 @@
  */
 
 #include "movement_authority.h"
+#include "../Supervision/supervision.h"
 double getScale(int val, int q_scale)
 {
     return val * (q_scale ? (q_scale == 2 ? 100 : 10) : 1);
 }
-movement_authority::movement_authority(parsed_packet p)
+/*movement_authority::movement_authority(parsed_packet p)
 {
     p.read("NID_PACKET");
     p.read("Q_DIR");
@@ -53,9 +54,40 @@ movement_authority::movement_authority(parsed_packet p)
     {
         ol = new overlap({getScale(p.read("D_STARTOL"),scale), p.read("T_OL"), getScale(p.read("D_OL"),scale), p.read("V_RELEASEOL")});
     }
-}
+}*/
 
 movement_authority::~movement_authority()
 {
 
+}
+movement_authority *MA;
+speed_restriction *LoA;
+speed_restriction *MA_speed;
+void set_MA(movement_authority *ma)
+{
+    if (MA != nullptr) {
+        mrsp_candidates.remove_restriction(MA_speed);
+        delete MA_speed;
+    }
+    MA = ma;
+    if (MA->v_ema == 0) {
+        EoA = new distance(MA->end);
+        if (MA->ol != nullptr) {
+            SvL = new distance(MA->end+MA->ol->distance);
+            V_releaseSvL = MA->ol->vrelease;
+        } else if (MA->dp != nullptr) {
+            SvL = new distance(MA->end+MA->dp->distance);
+            V_releaseSvL = MA->dp->vrelease;
+        } else {
+            SvL = new distance(MA->end);
+            V_releaseSvL = 0;
+        }
+    } else {
+        EoA = SvL = nullptr;
+        //LoA = new speed_profile(MA->v_ema, MA->end, TODO);
+    }
+    MA_speed = new speed_restriction(MA->v_main, MA->start, MA->end, false);
+    mrsp_candidates.insert_restriction(MA_speed);
+    if (MA->v_ema == 0)
+        V_release = calculate_V_release();
 }

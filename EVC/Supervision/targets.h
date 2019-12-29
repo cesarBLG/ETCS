@@ -16,16 +16,15 @@ class target
 {
     distance d_target;
     double V_target;
+    bool is_valid;
 public:
     target_class type;
     bool is_EBD_based() const
     {
         return type != target_class::EoA;
     }
-    target() : type(target_class::MRSP) {};
-    target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type)
-    {
-    }
+    target();
+    target(distance dist, double speed, target_class type);
     double get_target_speed() const { return V_target; }
     distance get_target_position() const { return d_target; }
     distance get_distance_curve (double velocity) const;
@@ -44,6 +43,10 @@ public:
     void calculate_curves(double V_est=::V_est) const;
     bool operator< (const target t) const
     {
+        if (!is_valid)
+            return t.is_valid;
+        if (!t.is_valid)
+            return !is_valid;
         if (d_target == t.d_target) {
             if (V_target == t.V_target) {
                 return (int)type<(int)t.type;
@@ -54,21 +57,14 @@ public:
     }
     bool operator== (const target t) const
     {
+        if (!is_valid || !t.is_valid)
+            return false;
         return V_target == t.V_target && d_target==t.d_target && (int)type==(int)t.type;
     }
 };
-class EndOfAuthority
-{
-public:
-    distance get_location() {return distance(1500);}
-};
-class SupervisionLimit
-{
-public:
-    distance get_location() {return distance(1700);}
-};
-extern EndOfAuthority *EoA;
-extern SupervisionLimit *SvL;
+extern distance *EoA;
+extern distance *SvL;
+extern double V_releaseSvL;
 void set_supervised_targets();
 std::set<target> get_supervised_targets();
 bool supervised_targets_changed();

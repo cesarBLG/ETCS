@@ -44,4 +44,6 @@ extern double V_est;
 extern double V_ura;
 extern double A_est1;
 extern double A_est2;
+extern double V_release;
 void update_supervision();
+double calculate_V_release();

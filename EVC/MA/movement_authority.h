@@ -19,7 +19,9 @@
 #ifndef _MOVEMENT_AUTHORITY_H
 #define _MOVEMENT_AUTHORITY_H
 #include <vector>
-#include "../parsed_packet.h"
+//#include "../parsed_packet.h"
+#include "../Supervision/speed_profile.h"
+#include "../Supervision/targets.h"
 class timer
 {
     float time;
@@ -61,13 +63,24 @@ class movement_authority
 {
     double v_main;
     double v_ema;
-    vector<ma_section> sections;
+    std::vector<ma_section> sections;
     ma_section endsection;
     danger_point *dp;
     overlap *ol;
+    distance start;
+    distance end;
 public:
-    movement_authority(parsed_packet ma_packet);
+    movement_authority(distance start, double length) : v_main(300/3.6), v_ema(0), start(start), end(start+length) //Test constructor
+    {
+        ol = nullptr;
+        dp = new danger_point({200,-1});
+    }
+    //movement_authority(parsed_packet ma_packet);
     ~movement_authority();
+    movement_authority(const movement_authority&) = delete;
+    movement_authority &operator=(const movement_authority&) = delete;
+    friend void set_MA(movement_authority *ma);
 };
-
+extern movement_authority *MA;
+void set_MA(movement_authority *ma);
 #endif // _MOVEMENT_AUTHORITY_H

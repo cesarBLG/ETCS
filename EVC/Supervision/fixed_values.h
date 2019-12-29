@@ -26,3 +26,4 @@ extern const double T_ACK;
 
 extern const double D_Metal;
  
+extern const double D_keep_information;

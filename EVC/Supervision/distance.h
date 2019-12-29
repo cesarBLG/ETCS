@@ -1,62 +1,24 @@
 #pragma once
 #include <set>
+#include <limits>
 class distance
 {
 private:
     double *dist;
-    static std::set<double*> distances;
-    static void update_distances(double offset)
-    {
-        for(double *d : distances) {
-            *d += offset;
-        }
-    }
+    //static std::set<double*> distances;
 public:
+    static void update_distances(double offset);
     double get() const
     {
         return *dist;
     }
-    distance()
-    {
-        dist = new double(0);
-        distances.insert(dist);
-    }
-    distance(double val)
-    {
-        dist = new double(val);
-        distances.insert(dist);
-    }
-    distance(const distance &d)
-    {
-        dist = new double(*d.dist);
-        distances.insert(dist);
-    }
-    distance(distance &&d)
-    {
-        dist = new double(*d.dist);
-        distances.insert(dist);
-    }
-    ~distance()
-    {
-        distances.erase(dist);
-        delete dist;
-    }
-    distance &operator = (const distance& d)
-    {
-        distances.erase(dist);
-        delete dist;
-        dist = new double(*d.dist);
-        distances.insert(dist);
-        return *this;
-    }
-    distance &operator = (distance&& d)
-    {
-        distances.erase(dist);
-        delete dist;
-        dist = new double(*d.dist);
-        distances.insert(dist);
-        return *this;
-    }
+    distance();
+    distance(double val);
+    distance(const distance &d);
+    distance(distance &&d);
+    ~distance();
+    distance &operator = (const distance& d);
+    distance &operator = (distance&& d);
     bool operator<(const distance d) const
     {
         return *dist<*d.dist;

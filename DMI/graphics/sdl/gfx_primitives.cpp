@@ -1,7 +1,8 @@
 //THIS FILE IS PART OF SDL_GFX LIBRARY, AND IT IS LICENSED UNDER ZLIB LICENSE
 //VISIT THE AUTHOR'S WEBPAGE FOR MORE INFORMATION
 #include "gfx_primitives.h"
-
+#include <cmath>
+using namespace std;
 int pixelRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
 	int result = 0;
