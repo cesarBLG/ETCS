@@ -13,6 +13,7 @@
 #include "Supervision/conversion_model.h"
 #include "OR_interface/interface.h"
 #include "MA/movement_authority.h"
+#include "Procedures/mode_transition.h"
 std::mutex loop_mtx;
 std::condition_variable loop_notifier;
 void start();
@@ -29,21 +30,20 @@ void start()
     start_dmi();
     start_or_iface();
     //start_packet_reader();
-    mrsp_candidates.insert_restriction(new speed_restriction(V_train, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false));
     set_test_values();
+    set_conversion_model();
 }
 void loop()
 {
     while(1)
     {
         std::unique_lock<std::mutex> lck(loop_mtx);
-        //update_train_position();
         auto prev = std::chrono::system_clock::now();
-        update_supervision();
+        update_mode_status();
+        if (mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR) update_supervision();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         //std::cout<<std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count()<<std::endl;
         lck.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-        //loop_notifier.wait(lck);
     }
 }

@@ -5,6 +5,7 @@ class level_window : public input_window
 {
     public:
     level_window();
+    void sendInformation() override;
 };
 class level_input : public input_data
 {

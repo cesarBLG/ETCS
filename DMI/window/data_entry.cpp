@@ -17,11 +17,17 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
         button_yes.setForegroundColor(Black);
         button_yes.setPressedAction([this, nfields]
         {
+            bool valid = true;
             for(int i=0; i<nfields; i++)
             {
                 inputs[i]->validate();
+                if (!inputs[i]->isValid())
+                    valid = false;
             }
-            exit(this);
+            if (valid) {
+                sendInformation();
+                exit(this);
+            }
         });
         button_yes.showBorder = false;
         prev_button.enabled = false;
@@ -61,7 +67,10 @@ void input_window::create()
         inputs[0]->data_comp->setPressedAction([this]
         {
             inputs[0]->validate();
-            exit(this);
+            if (inputs[0]->isValid()) {
+                sendInformation();
+                exit(this);
+            }
         });
     }
     else 

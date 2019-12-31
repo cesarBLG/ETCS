@@ -1,11 +1,18 @@
 #include "targets.h"
 #include "curve_calc.h"
 #include "speed_profile.h"
+#include "conversion_model.h"
+#include "supervision.h"
 #include "national_values.h"
+#include "fixed_values.h"
+#include "train_data.h"
 #include <set>
 #include <iostream>
 target::target() : type(target_class::MRSP), is_valid(false) {};
-target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type), is_valid(true) {}
+target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type), is_valid(true) 
+{
+    calculate_decelerations();
+}
 distance target::get_distance_curve(double velocity) const
 {
     /*if (type == target_class::MRSP) {
@@ -148,4 +155,47 @@ bool supervised_targets_changed()
 std::set<target> get_supervised_targets()
 {
     return supervised_targets;
+}
+void target::calculate_decelerations()
+{
+    std::map<distance,int> redadh;
+    redadh[distance(0)] = 0;
+    std::map<distance,double> gradient;
+    gradient[distance(0)] = 0;
+    acceleration A_gradient = get_A_gradient(gradient);
+    acceleration A_brake_safe;
+    if (convmod) {
+        A_brake_safe = A_brake_emergency;
+        A_brake_safe.accel = [=](double V, distance d) {
+            return (--Kv_int.upper_bound(V))->second*(--Kr_int.upper_bound(L_TRAIN))->second*A_brake_emergency(V,d);
+        };
+        for (auto it=Kv_int.begin(); it!=Kv_int.end(); ++it)
+            A_brake_safe.speed_step.insert(it->first);
+    } else {
+        A_brake_safe = A_brake_emergency;
+        A_brake_safe.accel = [=](double V, distance d) {
+            double wet = (--Kwet_rst.upper_bound(V))->second;
+            return Kdry_rst(V,M_NVEBCL)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
+        };
+    }
+        
+    A_safe = A_brake_safe + A_gradient;
+    for (auto it=redadh.begin(); it!=redadh.end(); ++it)
+        A_normal_service.dist_step.insert(it->first);
+    A_safe.accel = [=](double V, distance d) {
+        int adh = (--redadh.upper_bound(d))->second;
+        double A_MAXREDADH = (adh == 3 ? A_NVMAXREDADH3 : (adh == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
+        return std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d); 
+    };
+        
+    A_expected = A_brake_service + A_gradient;
+        
+    A_normal_service = A_brake_normal_service + A_gradient;
+    A_normal_service.accel = [=](double V, distance d) {
+        double grad = (--gradient.upper_bound(d))->second;
+        double kn = (grad > 0) ? (--Kn.upper_bound(V))->second.first : (--Kn.upper_bound(V))->second.second;
+        return A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
+    };
+    for (auto it=Kn.begin(); it!=Kn.end(); ++it)
+        A_normal_service.speed_step.insert(it->first);
 }

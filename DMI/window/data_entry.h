@@ -15,6 +15,7 @@ class input_window : public subwindow
     map<int, input_data*> inputs;
     Button* buttons[12];
     virtual void setLayout() override;
+    virtual void sendInformation() {}
     void create();
     public:
     input_window(string name, int nfields);

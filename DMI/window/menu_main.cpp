@@ -9,6 +9,7 @@
 #include "../messages/messages.h"
 #include "../time.h"
 #include "../control/control.h"
+#include "../tcp/server.h"
 
 menu_main::menu_main() : menu("Main")
 {
@@ -23,16 +24,7 @@ menu_main::menu_main() : menu("Main")
     buttons[3]->enabled = false;
     buttons[0]->setPressedAction([this]
     {
-        if(trn!=0 && driverid!=0)
-        {
-            exit(this);
-            mode = level == 0 ? UN : SR;
-            modeAck = true;
-            Vperm = 120;
-            Vsbi = 125;
-            Vebi = 130;
-            Vtarget = -1;
-        }
+        write_command("startMission","");
     });
     buttons[1]->setPressedAction([this] 
     {
@@ -52,21 +44,11 @@ menu_main::menu_main() : menu("Main")
     });
     buttons[6]->setPressedAction([this]
     {
-        if(driverid!=0)
-        {
-            exit(this);
-            mode = SH;
-            modeAck = true;
-            Vperm = 40;
-            Vsbi = 45;
-            Vebi = 50;
-            Vtarget = -1;
-        }
+        
     });
     buttons[7]->setPressedAction([this]
     { 
-        exit(this);
-        mode = NL;
+        
     });
     setLayout();
 }

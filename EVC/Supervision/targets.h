@@ -1,9 +1,10 @@
 #pragma once
 #include <set>
 #include <vector>
+#include "acceleration.h"
 #include "distance.h"
-#include "conversion_model.h"
 #include "supervision.h"
+#include "conversion_model.h"
 enum struct target_class
 {
     EoA,
@@ -40,7 +41,11 @@ public:
     mutable double V_SBI2;
     mutable double V_SBI1;
     mutable double V_P;
+    mutable acceleration A_safe;
+    mutable acceleration A_expected;
+    mutable acceleration A_normal_service;
     void calculate_curves(double V_est=::V_est) const;
+    void calculate_decelerations();
     bool operator< (const target t) const
     {
         if (!is_valid)

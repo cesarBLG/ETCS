@@ -8,6 +8,7 @@ class driver_window : public input_window
     public:
     driver_window();
     void setLayout() override;
+    void sendInformation() override;
 };
 class driverid_input : public input_data
 {

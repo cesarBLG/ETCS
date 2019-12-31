@@ -62,6 +62,7 @@ struct SSP_element
         return v;
     }
 };
+void set_train_max_speed(double vel);
 void update_SSP(std::vector<SSP_element> nSSP);
 struct TSR
 {
@@ -94,3 +95,4 @@ public:
     }
 };
 extern speed_restriction_list mrsp_candidates;
+extern std::map<distance, double> gradient;

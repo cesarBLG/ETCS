@@ -24,11 +24,15 @@ void driver_window::setLayout()
     addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
     addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
 }
+void driver_window::sendInformation()
+{
+    driverid = stoul(inputs[0]->getData());
+}
 void driverid_input::validate()
 {
-    if(data.size()>8) return;
-    driverid = stoul(data);
-    if(driverid!=0) setAccepted(true);
+    if(data.size()>8 || data.size()<0) return;
+    unsigned long id = stoul(data);
+    if(id!=0) setAccepted(true);
 }
 driverid_input::driverid_input()
 {

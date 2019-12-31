@@ -21,8 +21,8 @@ void displayDistanceText()
         if(!showSpeeds && (mode == OS || mode == SR)) return;
         const char *str = to_string(((((int)(dist))/10))*10).c_str();
         a2.addText(str, 10, 0, 10, Grey, RIGHT);
+        prev_dist = dist;
     }
-    prev_dist = dist;
 }
 void displayDistance()
 {

@@ -2,26 +2,18 @@
 #include "national_values.h"
 #include "fixed_values.h"
 #include "train_data.h"
+#include "distance.h"
+#include "acceleration.h"
 #include <map>
 #include <utility>
 #include <cmath>
-const double T_bs1_locked = 0;
-const double T_bs2_locked = 2;
-double T_bs;
-double T_bs1;
-double T_bs2;
-double T_be;
 
-std::map<distance, double> gradient;
-double get_gradient(distance dist)
+acceleration get_A_gradient(std::map<distance, double> gradient)
 {
-    return (--gradient.upper_bound(dist))->second;
-}
-void calculate_gradient()
-{
+    acceleration A_gradient;
     A_gradient = acceleration();
     A_gradient.accel = [=](double V, distance d) {
-        double grad = get_gradient(d);
+        double grad = (--gradient.upper_bound(d))->second;
         const double g = 9.81;
         if (M_rotating_nom > 0)
             return g*grad/(1000+10*M_rotating_nom);
@@ -31,16 +23,15 @@ void calculate_gradient()
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
     }
+    return A_gradient;
 }
-
+double T_brake_emergency_cm0;
+double T_brake_emergency_cmt;
+double T_brake_service_cm0;
+double T_brake_service_cmt;
 acceleration A_brake_emergency;
-acceleration A_brake_safe;
-acceleration A_safe;
 acceleration A_brake_service;
-acceleration A_expected;
 acceleration A_brake_normal_service;
-acceleration A_normal_service;
-acceleration A_gradient;
 
 std::map<double, std::pair<double,double>> Kv_int_ab;
 std::map<double, double> Kv_int;
@@ -112,76 +103,60 @@ acceleration conversion_acceleration(double lambda_0)
     };
     return a_calculated;
 }
-void set_test_values()
+inline double T_brake_basic(double L, double a, double b, double c)
 {
-    gradient[distance(-10000)] = 0;
-    
-    Kv_int[0] = 1;
-    Kr_int[0] = 1;
+    return a+L/100*(b+c*(L/100));
+}
+void set_test_values()
+{    
+    Kv_int[0] = M_NVKVINT;
+    Kr_int[0] = M_NVKRINT;
+    Kt_int = M_NVKTINT;
     Kn[0] = {1,1};
-    
-    A_brake_emergency = conversion_acceleration(brake_percentage);
-    
-    A_brake_service = conversion_acceleration(std::min(brake_percentage, 135));
     
     A_brake_normal_service = acceleration();
     A_brake_normal_service.speed_step.insert(0);
-    A_brake_normal_service.accel = [](double V, distance d) { return 0.6; };
-    
-    calculate_gradient();
-    calculate();
+    A_brake_normal_service.accel = [](double V, distance d) { return std::min(brake_percentage/200.0,0.7); };
 }
-int redadh;
+void convmodel_basic_accel(int lambda, acceleration &A_brake_emergency, acceleration &A_brake_service)
+{    
+    A_brake_emergency = conversion_acceleration(lambda);
+    
+    A_brake_service = conversion_acceleration(std::min(lambda, 135));
+}
+void convmodel_brake_build_up(brake_position_types brake_position, double L_TRAIN, double &T_brake_emergency_cm0, double &T_brake_emergency_cmt, double &T_brake_service_cm0, double &T_brake_service_cmt)
+{
+    double T_brake_basic_eb;
+    if (brake_position == PassengerP) 
+        T_brake_basic_eb = T_brake_basic(2.3,0,0.17, std::max(400.0, L_TRAIN));
+    else if (brake_position == FreightP)
+        T_brake_basic_eb = (L_TRAIN<=900) ? T_brake_basic(2.3,0,0.17, std::max(400.0, L_TRAIN)) : T_brake_basic(-0.5,1.6,0.03, L_TRAIN);
+    else
+        T_brake_basic_eb = (L_TRAIN<=900) ? T_brake_basic(12,0,0.05, L_TRAIN) : T_brake_basic(-0.4,1.6,0.03, L_TRAIN);
 
-void calculate()
-{
-    bool convmod = true;
-    T_be = (convmod ? Kt_int : 1)*T_brake_emergency;
-    T_bs = T_brake_service;
-    if (convmod) {
-        T_bs1 = T_bs2 = T_bs;
-    } else {
-    }
-    
-    if (convmod) {
-        A_brake_safe = A_brake_emergency;
-        A_brake_safe.accel = [=](double V, distance d) {
-            return (--Kv_int.upper_bound(V))->second*(--Kr_int.upper_bound(L_TRAIN))->second*A_brake_emergency(V,d);
-        };
-        for (auto it=Kv_int.begin(); it!=Kv_int.end(); ++it)
-            A_brake_safe.speed_step.insert(it->first);
-    } else {
-        A_brake_safe = A_brake_emergency;
-        A_brake_safe.accel = [=](double V, distance d) {
-            double wet = (--Kwet_rst.upper_bound(V))->second;
-            return Kdry_rst(V,M_NVEBCL)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
-        };
-    }
-    
-    A_safe = A_brake_safe + A_gradient;
-    if (redadh>0) {
-        double A_MAXREDADH = (redadh == 3 ? A_NVMAXREDADH3 : (redadh == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
-        A_safe.accel = [=](double V, distance d) { return std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d); };
-    }
-    
-    A_expected = A_brake_service + A_gradient;
-    
-    A_normal_service = A_brake_normal_service + A_gradient;
-    A_normal_service.accel = [=](double V, distance d) {
-        double grad = get_gradient(d);
-        double kn = (grad > 0) ? (--Kn.upper_bound(V))->second.first : (--Kn.upper_bound(V))->second.second;
-        return A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
-    };
-    for (auto it=Kn.begin(); it!=Kn.end(); ++it)
-        A_normal_service.speed_step.insert(it->first);
+    T_brake_emergency_cm0 = T_brake_basic_eb;
+    double Ct = brake_position == FreightG ? 0.16 : (brake_position == FreightP ? 0.20 : 0.20);
+    double kto = 1 + Ct;
+    T_brake_emergency_cmt = kto*T_brake_basic_eb;
+
+    double T_brake_basic_sb;
+    if (brake_position == PassengerP) 
+        T_brake_basic_sb = T_brake_basic(3,1.5,0.1, L_TRAIN);
+    else if (brake_position == FreightP)
+        T_brake_basic_sb = (L_TRAIN<=900) ? T_brake_basic(3,2.77,0, L_TRAIN) : T_brake_basic(10.5,0.32,0.18, L_TRAIN);
+    else
+        T_brake_basic_sb = (L_TRAIN<=900) ? T_brake_basic(3,2.77,0, std::max(400.0, L_TRAIN)) : T_brake_basic(10.5,0.32,0.18, L_TRAIN);
+
+    T_brake_service_cm0 = T_brake_basic_sb;
+
+    T_brake_service_cmt = kto*T_brake_basic_sb;
 }
-acceleration operator+(const acceleration a1, const acceleration a2)
+bool convmod = false;
+void set_conversion_model()
 {
-    acceleration an;
-    an.dist_step = a1.dist_step;
-    an.speed_step = a1.speed_step;
-    an.dist_step.insert(a2.dist_step.begin(), a2.dist_step.end());
-    an.speed_step.insert(a2.speed_step.begin(), a2.speed_step.end());
-    an.accel = [=](double V, distance d) {return a1.accel(V,d) + a2.accel(V,d);};
-    return an;
+    if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6) {
+        convmod = true;
+        convmodel_basic_accel(brake_percentage, A_brake_emergency, A_brake_service);
+        convmodel_brake_build_up(brake_position, L_TRAIN, T_brake_emergency_cmt, T_brake_emergency_cm0, T_brake_service_cmt, T_brake_service_cm0);
+    }
 }

@@ -1,7 +1,7 @@
 OBJECTS = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
 Supervision/curve_calc.o  Supervision/conversion_model.o  Supervision/distance.o\
 Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
-antenna.o MA/movement_authority.o \
+Supervision/acceleration.o antenna.o MA/movement_authority.o \
 OR_interface/interface.o
 CXX = g++
 CC = gcc

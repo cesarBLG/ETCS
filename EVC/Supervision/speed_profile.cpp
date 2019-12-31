@@ -1,10 +1,12 @@
 #include "speed_profile.h"
 #include "targets.h"
+#include "train_data.h"
 #include <vector>
 #include <map>
 #include <list>
 speed_restriction_list mrsp_candidates;
 static std::vector<speed_restriction> SSP;
+speed_restriction *train_speed=nullptr;
 void speed_restriction_list::recalculate_MRSP()
 {
     MRSP.clear();
@@ -30,7 +32,7 @@ void update_SSP(std::vector<SSP_element> nSSP)
     for (auto it=nSSP.begin(); it!=--nSSP.end(); ++it) {
         auto next = it;
         next++;
-        rest.push_back(speed_restriction(it->get_speed(0,std::set<int>()), it->start, next->start, true));
+        rest.push_back(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, true));
     }
     for (speed_restriction &r : SSP) {
         mrsp_candidates.remove_restriction(&r);
@@ -39,6 +41,15 @@ void update_SSP(std::vector<SSP_element> nSSP)
     for (speed_restriction &r : SSP) {
         mrsp_candidates.insert_restriction(&r);
     }
+}
+void set_train_max_speed(double vel)
+{
+    if (train_speed != nullptr) {
+        mrsp_candidates.remove_restriction(train_speed);
+        delete train_speed;
+    }
+    train_speed = new speed_restriction(V_train, ::distance(std::numeric_limits<double>::lowest()), ::distance(std::numeric_limits<double>::max()), false);
+    mrsp_candidates.insert_restriction(train_speed);
 }
 std::list<TSR> TSRs;
 void insert_TSR(TSR rest)
@@ -60,3 +71,4 @@ void revoke_TSR(int id_tsr)
         TSRs.erase(it);
     }
 }
+std::map<distance, double> gradient;

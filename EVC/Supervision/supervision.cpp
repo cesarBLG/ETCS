@@ -21,10 +21,18 @@ bool SB=false;
 bool TCO=false;
 MonitoringStatus monitoring = CSM;
 SupervisionStatus supervision = NoS;
+Level level;
+Mode mode=Mode::SB;
 target MRDT;
 target RSMtarget;
 distance d_startRSM;
 double V_release = 0;
+double T_brake_service;
+double T_brake_emergency;
+double T_bs;
+double T_bs1;
+double T_bs2;
+double T_be;
 double calc_ceiling_limit(distance min=d_minsafefront, distance max=d_maxsafefront)
 {
     std::map<distance,double> MRSP = mrsp_candidates.get_MRSP();
@@ -144,6 +152,22 @@ void update_monitor_transitions(bool suptargchang, const std::set<target> &super
         if (monitoring == TSM && nmonitor == RSM)
             SB = false;
         monitoring = nmonitor;
+    }
+}
+void calculate_buildup()
+{
+    if (V_target > 0) {
+        T_brake_emergency = T_brake_emergency_cmt;
+        T_brake_service = T_brake_service_cmt;
+    } else {
+        T_brake_emergency = T_brake_emergency_cm0;
+        T_brake_service = T_brake_service_cm0;
+    }
+    T_be = (convmod ? Kt_int : 1)*T_brake_emergency;
+    T_bs = T_brake_service;
+    if (Q_NVSBFBPERM) {
+    } else {
+        T_bs1 = T_bs2 = T_bs;
     }
 }
 void update_supervision()

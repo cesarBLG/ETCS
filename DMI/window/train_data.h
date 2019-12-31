@@ -5,6 +5,10 @@ class train_data_window : public input_window
 {
     public:
     train_data_window();
-    //void validate(string dat, int field=0) override;
+    void validate(string dat, int field)
+    {
+
+    }
+    void sendInformation() override;
 };
 #endif

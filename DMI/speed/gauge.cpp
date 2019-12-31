@@ -224,12 +224,15 @@ Component releaseRegion(36,36, displayVrelease);
 static float prevVrelease=0;
 void displayVrelease()
 {
-    if(prevVrelease!=Vrelease && Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != OS || showSpeeds))
+    if(prevVrelease!=Vrelease)
     {
         releaseRegion.clear();
-        releaseRegion.addText(to_string((int)Vrelease).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
-        prevVrelease = Vrelease;
-    }
+        if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != OS || showSpeeds))
+        {
+            releaseRegion.addText(to_string((int)Vrelease).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
+            prevVrelease = Vrelease;
+        }
+    } 
 }
 void displayGauge()
 {

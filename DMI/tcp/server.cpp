@@ -43,11 +43,7 @@ void parseData(string str)
     if(command == "setMode")
     {
         Mode m;
-        if(value == "FS")
-        {
-            m = FS;
-            addMsg(Message(1,EnteringFS, getHour(), getMinute(), true));
-        }
+        if(value == "FS") m = FS;
         if(value == "LS") m = LS;
         if(value == "OS") m = OS;
         if(value == "SH") m = SH;
@@ -170,6 +166,11 @@ void read()
         }
         //buffer.str(buffer.str().substr(buffer.tellg()));
     }
+}
+void write_command(string command, string value)
+{
+    string send = command+"("+value+");\n";
+    SDLNet_TCP_Send(socket, send.c_str(), send.size());
 }
 extern bool running;
 void startSocket()

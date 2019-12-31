@@ -1,5 +1,6 @@
 #include "train_data.h"
 #include "keyboard.h"
+#include "../tcp/server.h"
 train_data_window::train_data_window() : input_window("Train Data", 5)
 {
     inputs[0] = new input_data("Length (m)");
@@ -12,5 +13,12 @@ train_data_window::train_data_window() : input_window("Train Data", 5)
         inputs[i]->keys = getNumericKeyboard(inputs[i]->data_set, inputs[i]->data_get);
     }
     inputs[3]->keys = getSingleChoiceKeyboard({"G1", "GA", "GB", "GC", "Out of GC"}, inputs[3]->data_set);
+    inputs[4]->keys = getNumericKeyboard(inputs[4]->data_set, inputs[4]->data_get);
     create();
+}
+void train_data_window::sendInformation()
+{
+    write_command("setLtrain", inputs[0]->getData());
+    write_command("setBrakePercentage", inputs[1]->getData());
+    write_command("setVtrain", inputs[2]->getData());
 }

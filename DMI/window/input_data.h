@@ -18,8 +18,9 @@ class input_data
     Component* data_echo = nullptr;
     void setSelected(bool val);
     void setAccepted(bool val);
+    bool isValid() {return accepted;}
     vector<Button*> keys;
-    virtual void validate(){setAccepted(true);}
+    virtual void validate(){if (data!="") setAccepted(true);}
     input_data(string label_text="");
     function<string()> data_get;
     function<void(string)> data_set;

@@ -1,10 +1,17 @@
 #include "level_window.h"
 #include "../monitor.h"
+#include "../tcp/server.h"
 #include "keyboard.h"
 level_window::level_window() : input_window("Level", 1)
 {
     inputs[0] = new level_input();
     create();
+}
+void level_window::sendInformation()
+{
+    string data = inputs[0]->getData();
+    data = data.substr(6,1);
+    write_command("setLevel",data);
 }
 level_input::level_input()
 {
@@ -28,22 +35,6 @@ level_input::level_input()
 }
 void level_input::validate()
 {
-    //TODO: manual level selection requires confirmation
     if(data.size() < 7) return;
-    switch(data[6])
-    {
-        case '0':
-            level = N0;
-            break;
-        case '1':
-            level = N1;
-            break;
-        case '2':
-            level = N2;
-            break;
-        case '3':
-            level = N3;
-            break;
-    }
     setAccepted(true);
 }
