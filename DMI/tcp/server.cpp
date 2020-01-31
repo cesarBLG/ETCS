@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <thread>
 #include <chrono>
+#include <cmath>
 #include "server.h"
 #include "../monitor.h"
 #include "../sound/sound.h"
@@ -101,17 +102,17 @@ void parseData(string str)
         val.push_back(value);
 
         gradient_elements.clear();
-        for(int i = 0; i < val.size(); i+=3)
+        for(int i = 0; i < val.size(); i+=2)
         {
             gradient_element g;
-            g.val = stoi(val[i]);
-            g.distance = stoi(val[i+1]);
-            g.length = stoi(val[i+2]);
+            g.distance = (int)round(stof(val[i]));
+            g.val = (int)round(stof(val[i+1]));;
             gradient_elements.push_back(g);
         }
     }
     if(command == "setPlanningSpeeds")
     {
+        extern bool planning_unchanged;
         vector<string> val;
 
         int valsep = value.find(',');
@@ -125,13 +126,31 @@ void parseData(string str)
         val.push_back(value);
 
         speed_elements.clear();
+        bool imark=false;
         for(int i = 0; i < val.size(); i+=2)
         {
             speed_element s;
-            s.speed = stoi(val[i]);
-            s.distance = stoi(val[i+1]);
+            bool isim=false;
+            int inddist;
+            if(val[i]=="im")
+            {
+                i++;
+                isim = true;
+                imark = true;
+                inddist = (int)round(stof(val[i]));
+                i++;
+            }
+            s.distance = (int)round(stof(val[i]));
+            s.speed = (int)round(stof(val[i+1]));
+            if(isim)
+            {
+                imarker.element = s;
+                imarker.start_distance=inddist;
+            }
             speed_elements.push_back(s);
         }
+        if(!imark) imarker.start_distance = 0;
+        planning_unchanged = false;
     }
     update();
     notifyDataReceived();

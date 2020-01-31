@@ -1,5 +1,6 @@
 #pragma once
 #include <limits>
+#include <map>
 extern bool Q_NVDRIVER_ADHES;
 
 extern double V_NVSHUNT;
@@ -39,16 +40,20 @@ extern int M_NVAVADH;
 
 extern double M_NVEBCL;
 
-extern double L_NVKRINT;
-extern double M_NVKRINT;
-extern double V_NVKVINT;
-extern double M_NVKVINT;
+struct kvint_pass_step
+{
+    double a;
+    double b;
+    double A_NVP12;
+    double A_NVP23;
+};
+extern std::map<double,double> NV_KRINT;
+extern std::map<double,double> NV_KVINT_freight;
+extern std::map<double,kvint_pass_step> NV_KVINT_pass;
 extern double M_NVKTINT;
 
 extern double A_NVMAXREDADH1;
 extern double A_NVMAXREDADH2;
 extern double A_NVMAXREDADH3;
-
-extern double A_NVP12;
-extern double A_NVP23;
  
+void setup_national_values();

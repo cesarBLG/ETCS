@@ -1,7 +1,8 @@
 #include <map>
 #include "national_values.h"
 #include "fixed_values.h"
-#include "distance.h"
+#include "../Position/distance.h"
+#include "../Position/linking.h"
 #include "train_data.h"
 #include "speed_profile.h"
 #include "targets.h"
@@ -10,8 +11,7 @@
 #include <iostream>
 double V_est=0;
 double V_ura = 0;
-double A_est1 = 0;
-double A_est2 = 0;
+double A_est = 0;
 double V_perm;
 double V_target;
 double V_sbi;
@@ -26,6 +26,8 @@ Mode mode=Mode::SB;
 target MRDT;
 target RSMtarget;
 distance d_startRSM;
+target indication_target;
+double indication_distance;
 double V_release = 0;
 double T_brake_service;
 double T_brake_emergency;
@@ -33,10 +35,24 @@ double T_bs;
 double T_bs1;
 double T_bs2;
 double T_be;
-double calc_ceiling_limit(distance min=d_minsafefront, distance max=d_maxsafefront)
+double calc_ceiling_limit()
 {
-    std::map<distance,double> MRSP = mrsp_candidates.get_MRSP();
-    //TODO: LOA speed, same formulas
+    std::map<distance,double> MRSP = get_MRSP();
+    double V_MRSP = 1000;
+    for (auto it = MRSP.begin(); it!=MRSP.end(); ++it) {
+        distance d = it->first;
+        distance min = d_minsafefront(d.get_reference());
+        distance max = d_maxsafefront(d.get_reference());
+        auto next = it;
+        ++next;
+        if ((max>d && min<d) || (min>d && (next==MRSP.end() || min<next->first)))
+            V_MRSP = std::min(it->second, V_MRSP);
+    }
+    return V_MRSP;
+}
+double calc_ceiling_limit(distance min, distance max)
+{
+    std::map<distance,double> MRSP = get_MRSP();
     auto it1 = --MRSP.upper_bound(min);
     auto it2 = MRSP.upper_bound(max);
     double V_MRSP = 1000;
@@ -51,9 +67,8 @@ distance get_d_startRSM(double V_release)
     distance d_EoA = *EoA;
     std::set<target> supervised_targets = get_supervised_targets();
     target tEoA = *supervised_targets.find(target(d_EoA, 0, target_class::EoA));
-    int alpha = 1; //TODO: 0 if level!=1
-    int Q_locacc_refBG = 0;
-    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_locacc_refBG+10+d_EoA.get()/10,d_maxsafefront-d_minsafefront);
+    int alpha = level==Level::N1;
+    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_LOCACC_LRBG+10+d_EoA.get()/10,d_maxsafefront(0)-d_minsafefront(0));
     
     distance d_startRSM;
     
@@ -68,15 +83,16 @@ distance get_d_startRSM(double V_release)
     }
     candidates.insert(target(d_SvL, 0, target_class::SvL));
     for (target t : candidates) {
-        double V_delta0rs = 0;
-        distance d_ebit = t.get_distance_curve(V_release + V_delta0rs)-(V_release*V_delta0rs)*(T_berem+T_traction);
-        distance d_sbi2t = d_ebit - V_release * T_bs2;
+        t.calculate_times();
+        double V_delta0rs = 0.007*V_release;
+        distance d_ebit = t.get_distance_curve(V_release + V_delta0rs)-(V_release*V_delta0rs)*(t.T_berem+t.T_traction);
+        distance d_sbi2t = d_ebit - V_release * t.T_bs2;
         if (d_sbi2t<d_sbi2) {
             d_sbi2 = d_sbi2t;
             RSMtarget = t;
         }
     }
-    if (d_sbi2-d_sbi1>=d_maxsafefront-d_estfront) {
+    if (d_sbi2-d_sbi1>=d_maxsafefront(0)-d_estfront) {
         d_startRSM = d_sbi1;
         RSMtarget = tEoA;
     } else {
@@ -93,9 +109,9 @@ double calculate_V_release()
     distance d_SvL = *SvL;
     distance d_EoA = *EoA;
     std::set<target> supervised_targets = get_supervised_targets();
-    int alpha = 1; //TODO: 0 if level!=1
-    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_NVLOCACC+10+d_EoA.get()/10,d_maxsafefront-d_minsafefront);
-    double V_release = 100;
+    int alpha = level==Level::N1;
+    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_LOCACC_LRBG+10+d_EoA.get()/10,d_maxsafefront(0)-d_minsafefront(0));
+    double V_release = calc_ceiling_limit(d_EoA, d_SvL);
     std::set<target> candidates;
     for (auto it=supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
         if (it->is_EBD_based() && d_tripEoA < it->get_target_position() && it->get_target_position() <= d_SvL)
@@ -103,12 +119,13 @@ double calculate_V_release()
     }
     candidates.insert(target(d_SvL, 0, target_class::SvL));
     for (target t : candidates) {
+        t.calculate_times();
         double V_target = t.get_target_speed();
-        double V_delta0rsob = 0;
         double V_releaset = V_target;
         double V_test = V_target;
         while (V_test <= V_release) {
-            double D_bec = (V_test+V_delta0rsob)*(T_traction+T_berem);
+            double V_delta0rsob = Q_NVINHSMICPERM ? 0 : std::max(0.007*V_release, V_ura);
+            double D_bec = (V_test+V_delta0rsob)*(t.T_traction+t.T_berem);
             if (d_tripEoA+D_bec<=t.get_distance_curve(V_target) && std::abs(V_test-(t.get_speed_curve(d_tripEoA+D_bec)-V_delta0rsob))<=(1.0/3.6)) {
                 V_releaset = V_test;
                 break;
@@ -128,10 +145,10 @@ void update_monitor_transitions(bool suptargchang, const std::set<target> &super
     MonitoringStatus nmonitor = monitoring;
     bool c1 = false;
     for (target t : supervised_targets) {
-        c1 |= (t.get_target_speed()<=V_est) && ((t.is_EBD_based() ? d_maxsafefront : d_estfront) > t.d_I);
+        c1 |= (t.get_target_speed()<=V_est) && ((t.is_EBD_based() ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
     }
     c1 &= (V_est>=V_release);
-    bool c2 = V_release>0 && (RSMtarget.is_EBD_based() ? d_maxsafefront : d_estfront) > d_startRSM;
+    bool c2 = V_release>0 && (RSMtarget.is_EBD_based() ? d_maxsafefront(d_startRSM.get_reference()) : d_estfront) > d_startRSM;
     bool c3 = !c1 && !c2 && supervised_targets.find(MRDT)==supervised_targets.end();
     bool c4 = c1 && suptargchang;
     bool c5 = c2 && suptargchang;
@@ -154,27 +171,13 @@ void update_monitor_transitions(bool suptargchang, const std::set<target> &super
         monitoring = nmonitor;
     }
 }
-void calculate_buildup()
-{
-    if (V_target > 0) {
-        T_brake_emergency = T_brake_emergency_cmt;
-        T_brake_service = T_brake_service_cmt;
-    } else {
-        T_brake_emergency = T_brake_emergency_cm0;
-        T_brake_service = T_brake_service_cm0;
-    }
-    T_be = (convmod ? Kt_int : 1)*T_brake_emergency;
-    T_bs = T_brake_service;
-    if (Q_NVSBFBPERM) {
-    } else {
-        T_bs1 = T_bs2 = T_bs;
-    }
-}
 void update_supervision()
 {
     bool suptargchang = supervised_targets_changed();
     
     double V_MRSP = calc_ceiling_limit();
+    if (LoA && d_maxsafefront(0)>LoA->first)
+        V_MRSP = std::min(LoA->second, V_MRSP);
     double prev_V_perm = V_perm;
     double prev_D_target = D_target;
     double prev_V_sbi = V_sbi;
@@ -191,7 +194,7 @@ void update_supervision()
         if (it->type == target_class::EoA)
             tEoA = *it;
     }
-    if (EoA != nullptr && SvL != nullptr) {
+    if (EoA && SvL) {
         if (V_release != 0)
             d_startRSM = get_d_startRSM(V_release);
     } else {
@@ -230,10 +233,27 @@ void update_supervision()
             if (Q_NVEMRRLS)
                 EB = false;
         }
+        if (V_est < V_release) {
+            indication_target = RSMtarget;
+            if (RSMtarget.is_EBD_based())
+                indication_distance = d_startRSM-d_maxsafefront(d_startRSM.get_reference());
+            else
+                indication_distance = d_startRSM-d_estfront;
+        } else {
+            bool asig=false;
+            for (target t : supervised_targets) {
+                double d = t.d_I - (t.is_EBD_based() ? d_maxsafefront(t.d_I.get_reference()) : d_estfront);
+                if (!asig || indication_distance>d) {
+                    indication_distance = d;
+                    indication_target = t;
+                    asig = true;
+                }
+            }
+        }
     } else if (monitoring == TSM) {
         std::set<target> MRDTtarg;
         for (target t : supervised_targets) {
-            if ((t.type == target_class::EoA ? d_estfront : d_maxsafefront) > t.d_I && V_est>=t.get_target_speed())
+            if ((t.type == target_class::EoA ? d_estfront : d_maxsafefront(t.d_I.get_reference())) > t.d_I && V_est>=t.get_target_speed())
                 MRDTtarg.insert(t);
         }
         if (!MRDTtarg.empty())
@@ -289,65 +309,62 @@ void update_supervision()
             distance d_P = t.d_P;
             distance d_I = t.d_I;
             if (t.type == target_class::MRSP || t.type == target_class::LoA) {
-                t3 |= V_target<V_est && V_est<=V_MRSP && d_I<d_maxsafefront && d_maxsafefront <=d_P;
-                t4 |= V_target<V_est && V_est<=V_MRSP && d_maxsafefront > d_P;
-                t6 |= V_MRSP<V_est && V_est<=V_MRSP+dV_warning(V_MRSP) && d_I<d_maxsafefront && d_maxsafefront<=d_W;
-                t7 |= V_target + dV_warning(V_target) < V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafefront > d_W;
-                t9 |= V_MRSP+dV_warning(V_MRSP)<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_I<d_maxsafefront && d_maxsafefront <= d_SBI2;
-                t10 |= V_target + dV_sbi(V_target) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafefront > d_SBI2;
-                t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_I<d_maxsafefront && d_maxsafefront <= d_EBI;
-                t13 |= V_target + dV_ebi(V_target) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront > d_EBI;
-                t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront > d_I;
+                distance d_maxsafe = d_maxsafefront(t.get_target_position().get_reference());
+                t3 |= V_target<V_est && V_est<=V_MRSP && d_I<d_maxsafe && d_maxsafe <=d_P;
+                t4 |= V_target<V_est && V_est<=V_MRSP && d_maxsafe > d_P;
+                t6 |= V_MRSP<V_est && V_est<=V_MRSP+dV_warning(V_MRSP) && d_I<d_maxsafe && d_maxsafe<=d_W;
+                t7 |= V_target + dV_warning(V_target) < V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafe > d_W;
+                t9 |= V_MRSP+dV_warning(V_MRSP)<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_I<d_maxsafe && d_maxsafe <= d_SBI2;
+                t10 |= V_target + dV_sbi(V_target) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafe > d_SBI2;
+                t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_I<d_maxsafe && d_maxsafe <= d_EBI;
+                t13 |= V_target + dV_ebi(V_target) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafe > d_EBI;
+                t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && d_maxsafe > d_I;
                 r0 &= V_est == 0;
                 r1 &= V_est<=V_target;
-                r3 &= V_target<V_est && V_est<=V_MRSP && d_maxsafefront<=d_P;
+                r3 &= V_target<V_est && V_est<=V_MRSP && d_maxsafe<=d_P;
                 V_sbi = std::min(V_sbi, t.V_SBI2);
             } else if (t.type == target_class::EoA) {
                 V_sbi = std::min(V_sbi, std::max(t.V_SBI1, V_release));
             } else if (t.type == target_class::SvL) {
                 V_sbi = std::min(V_sbi, std::max(t.V_SBI2, V_release));
             } else if (t.type == target_class::SR_distance) {
-                t3 |= 0<V_est && V_est<=V_MRSP && d_maxsafefront>t.d_I && d_maxsafefront<=t.d_P;
-                t4 |= 0<V_est && V_est<=V_MRSP && d_maxsafefront>t.d_P;
-                t6 |= V_MRSP<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafefront>t.d_I && d_maxsafefront<=t.d_W;
-                t7 |= 0<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafefront>t.d_W;
-                t9 |= V_MRSP + dV_warning(V_MRSP) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafefront>t.d_I && d_maxsafefront<=t.d_SBI2;
-                t10 |= 0<V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafefront>t.d_SBI2;
-                t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront>t.d_I && d_maxsafefront<=t.d_EBI;
-                t13 |= 0<V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront>t.d_EBI;
-                t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront>t.d_I;
+                distance d_maxsafe = d_maxsafefront(t.get_target_position().get_reference());
+                t3 |= 0<V_est && V_est<=V_MRSP && d_maxsafe>t.d_I && d_maxsafe<=t.d_P;
+                t4 |= 0<V_est && V_est<=V_MRSP && d_maxsafe>t.d_P;
+                t6 |= V_MRSP<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafe>t.d_I && d_maxsafe<=t.d_W;
+                t7 |= 0<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && d_maxsafe>t.d_W;
+                t9 |= V_MRSP + dV_warning(V_MRSP) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafe>t.d_I && d_maxsafe<=t.d_SBI2;
+                t10 |= 0<V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && d_maxsafe>t.d_SBI2;
+                t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafe>t.d_I && d_maxsafe<=t.d_EBI;
+                t13 |= 0<V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafe>t.d_EBI;
+                t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && d_maxsafe>t.d_I;
                 r0 &= V_est == 0;
                 r1 &= V_est<=0;
-                r3 &= 0<V_est && V_est<=V_MRSP && d_maxsafefront<t.d_P;
+                r3 &= 0<V_est && V_est<=V_MRSP && d_maxsafe<t.d_P;
             }
             V_perm = std::min(V_perm, t.V_P);
         }
-        if (V_perm > prev_V_perm)
-            V_perm = prev_V_perm;
-        if (V_sbi > prev_V_sbi)
-            V_sbi = prev_V_sbi;
-        if (D_target > prev_D_target)
-            D_target = prev_D_target;
         MRDT.calculate_curves(MRDT.get_target_speed());
         V_target = MRDT.get_target_speed();
         if (MRDT.type == target_class::EoA || MRDT.type == target_class::SvL)
-            D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront), 0.0);
+            D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(SvL->get_reference())), 0.0);
         else
-            D_target = std::max(MRDT.d_P-d_maxsafefront, 0.0);
+            D_target = std::max(MRDT.d_P-d_maxsafefront(MRDT.get_target_position().get_reference()), 0.0);
         
-        if (EoA != nullptr && SvL != nullptr) {
-            t3 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafefront>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafefront<=tSvL.d_P && d_estfront<=tEoA.d_P);
-            t4 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafefront>tSvL.d_P || d_estfront > tEoA.d_P);
-            t6 |= V_MRSP<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && (d_maxsafefront>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafefront<=tSvL.d_W && d_estfront <= tEoA.d_W);
-            t7 |= V_release<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && (d_maxsafefront>tSvL.d_W || d_estfront>tEoA.d_W);
-            t9 |= V_MRSP + dV_warning(V_MRSP) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && (d_maxsafefront>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafefront<=tSvL.d_SBI2 && d_estfront <= tEoA.d_SBI1);
-            t10 |= V_release<V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && (d_maxsafefront>tSvL.d_SBI2 || d_estfront>tEoA.d_SBI1);
-            t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && (d_maxsafefront>tSvL.d_I || d_estfront>tEoA.d_I) && d_maxsafefront<=tSvL.d_EBI;
-            t13 |= V_release<V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafefront>tSvL.d_EBI;
-            t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && (d_maxsafefront>tSvL.d_I || d_estfront>tEoA.d_I);
+        if (EoA && SvL) {
+            distance d_maxsafe = d_maxsafefront(0);
+            t3 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafe<=tSvL.d_P && d_estfront<=tEoA.d_P);
+            t4 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafe>tSvL.d_P || d_estfront > tEoA.d_P);
+            t6 |= V_MRSP<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafe<=tSvL.d_W && d_estfront <= tEoA.d_W);
+            t7 |= V_release<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && (d_maxsafe>tSvL.d_W || d_estfront>tEoA.d_W);
+            t9 |= V_MRSP + dV_warning(V_MRSP) < V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafe<=tSvL.d_SBI2 && d_estfront <= tEoA.d_SBI1);
+            t10 |= V_release<V_est && V_est <= V_MRSP + dV_sbi(V_MRSP) && (d_maxsafe>tSvL.d_SBI2 || d_estfront>tEoA.d_SBI1);
+            t12 |= V_MRSP + dV_sbi(V_MRSP) < V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && d_maxsafe<=tSvL.d_EBI;
+            t13 |= V_release<V_est && V_est <= V_MRSP + dV_ebi(V_MRSP) && d_maxsafe>tSvL.d_EBI;
+            t15 |= V_est > V_MRSP + dV_ebi(V_MRSP) && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I);
             r0 &= V_est == 0;
             r1 &= V_est<=V_release;
-            r3 &= V_release<V_est && V_est<=V_MRSP && d_estfront<tEoA.d_P && d_maxsafefront<tSvL.d_P;
+            r3 &= V_release<V_est && V_est<=V_MRSP && d_estfront<tEoA.d_P && d_maxsafe<tSvL.d_P;
         }
         if (t3 && supervision == NoS)
             supervision = IndS;
@@ -384,14 +401,8 @@ void update_supervision()
     } else if (monitoring == RSM) {
         for (target t : supervised_targets) {
             V_perm = std::min(V_perm, t.V_P);
-            D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront), 0.0);
+            D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(SvL->get_reference())), 0.0);
         }
-        if (V_perm > prev_V_perm)
-            V_perm = prev_V_perm;
-        if (V_sbi > prev_V_sbi)
-            V_sbi = prev_V_sbi;
-        if (D_target > prev_D_target)
-            D_target = prev_D_target;
         V_target = 0;
         V_sbi = std::min(V_sbi, V_release);
         bool t1 = V_est <= V_release;
@@ -409,8 +420,7 @@ void update_supervision()
         if (r0)
             EB = false;
     }
-    if (EoA != nullptr && d_minsafefront-L_antenna_front > *EoA) {
+    if (EoA && d_minsafefront(0)-L_antenna_front > *EoA) {
         //TODO Train trip: unauthorized passing of EoA/LoA
     }
-    //V_est = (V_est + 1 > V_perm) ? (V_est-0.15) : (V_est + 0.15);
 }

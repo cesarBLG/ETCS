@@ -35,15 +35,15 @@ void sb_feedback()
 		} else if (p > p2) {
 			if (Q_feedback_active || p <= p1) {
 				Q_feedback_active = true;
-				T_bs_feedback = T_bs * (p - p3) / (p0 - p3);
+				T_bs_feedback = MRDT.T_bs * (p - p3) / (p0 - p3);
 				T_bs1 = T_bs2 = T_bs_feedback;
-				if (T_bs_feedback > T_bs)
-				    T_bs1 = T_bs2 = T_bs;
+				if (T_bs_feedback > MRDT.T_bs)
+				    T_bs1 = T_bs2 = MRDT.T_bs;
 				else
 					T_bs2 = T_bs2_locked;
 			} else {
-				T_bs1 = T_bs;
-				T_bs2 = T_bs;
+				T_bs1 = MRDT.T_bs;
+				T_bs2 = MRDT.T_bs;
 			}
 		} else {
 			T_bs1 = T_bs1_locked;
@@ -52,8 +52,8 @@ void sb_feedback()
 			Q_Tbslocked = true;
 		}
 	} else {
-		T_bs1 = T_bs;
-		T_bs2 = T_bs;
+		T_bs1 = MRDT.T_bs;
+		T_bs2 = MRDT.T_bs;
 	}
 	if (Q_feedback_active && T_bs1 < T_bs1_prev) {
 		Q_displaylocked_P = true;

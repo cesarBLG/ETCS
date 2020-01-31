@@ -19,9 +19,10 @@
 #ifndef _MOVEMENT_AUTHORITY_H
 #define _MOVEMENT_AUTHORITY_H
 #include <vector>
-//#include "../parsed_packet.h"
+#include "../Packets/12.h"
 #include "../Supervision/speed_profile.h"
 #include "../Supervision/targets.h"
+#include <optional>
 class timer
 {
     float time;
@@ -42,10 +43,18 @@ public:
         
     }
 };
+class end_timer : public timer
+{
+public:
+    end_timer(double time, double startloc) : timer(time) 
+    {
+        
+    }
+};
 struct ma_section
 {
     double length;
-    section_timer *stimer;
+    std::optional<section_timer> stimer;
 };
 struct danger_point
 {
@@ -59,28 +68,30 @@ struct overlap
     double distance;
     double vrelease;
 };
+extern std::set<speed_restriction> signal_speeds;
 class movement_authority
 {
     double v_main;
     double v_ema;
     std::vector<ma_section> sections;
-    ma_section endsection;
-    danger_point *dp;
-    overlap *ol;
+    std::optional<end_timer> endtimer;
+    std::optional<danger_point> dp;
+    std::optional<overlap> ol;
     distance start;
-    distance end;
 public:
-    movement_authority(distance start, double length) : v_main(300/3.6), v_ema(0), start(start), end(start+length) //Test constructor
+    movement_authority(distance start, Level1_MA);
+    distance get_end()
     {
-        ol = nullptr;
-        dp = new danger_point({200,-1});
+        distance end=start;
+        for (int i=0; i<sections.size(); i++) {
+            end += sections[i].length;
+        }
+        return end;
     }
-    //movement_authority(parsed_packet ma_packet);
-    ~movement_authority();
-    movement_authority(const movement_authority&) = delete;
-    movement_authority &operator=(const movement_authority&) = delete;
-    friend void set_MA(movement_authority *ma);
+    friend void MA_infill(movement_authority ma);
+    friend void replace_MA(movement_authority ma);
+    friend void set_data();
 };
-extern movement_authority *MA;
-void set_MA(movement_authority *ma);
+extern std::optional<movement_authority> MA;
+void replace_MA(movement_authority ma);
 #endif // _MOVEMENT_AUTHORITY_H

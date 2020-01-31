@@ -20,7 +20,7 @@
 #define _BITREADER_H
 #include "stdint.h"
 typedef unsigned long bit_t;
-typedef uint8_t byte;
+//typedef uint8_t byte;
 class BitReader
 {
     byte* buff;

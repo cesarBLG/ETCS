@@ -2,9 +2,13 @@
 #include <set>
 #include <map>
 #include <vector>
-#include "distance.h"
+#include <optional>
+#include "../Position/distance.h"
+#include "../SSP/ssp.h"
 #include "fixed_values.h"
 #include "train_data.h"
+void recalculate_MRSP();
+std::map<distance,double> get_MRSP();
 inline double dV_ebi(double vel)
 {
     return std::max(dV_ebi_min, std::min(dV_ebi_min*(dV_ebi_max - dV_ebi_min)/(V_ebi_max-V_ebi_min)*(vel-V_ebi_min), dV_ebi_max));
@@ -25,45 +29,19 @@ class speed_restriction
     bool compensate_train_length;
 public:
     speed_restriction(double spd, distance start, distance end, bool compensate_trainlength) : speed(spd), start_distance(start), end_distance(end), compensate_train_length(true) {}
-    double get_speed() { return speed; }
-    distance get_start() { return start_distance; }
-    distance get_end() { return end_distance + compensate_train_length*L_TRAIN; }
-};
-struct SSP_element
-{
-    distance start;
-    bool compensate_train_length;
-    std::map<int,double> restrictions[3];
-    SSP_element() = default;
-    SSP_element(distance start, double basic_speed, bool comp) : start(start), compensate_train_length(comp)
+    double get_speed() const { return speed; }
+    distance get_start() const { return start_distance; }
+    distance get_end() const { return end_distance + compensate_train_length*L_TRAIN; }
+    bool operator<(const speed_restriction r) const
     {
-        restrictions[0][0] = basic_speed;
-    }
-    double get_speed(int train_cant_deficiency, std::set<int> train_categories)
-    {
-        double v = (--restrictions[0].upper_bound(train_cant_deficiency))->second;
-        double v2 = 10000;
-        bool replaces = false;
-        for (int cat : train_categories) {
-            auto it = restrictions[1].find(cat);
-            if (it!=restrictions[1].end()) {
-                v2 = std::min(v2, it->second);
-                replaces = true;
-            }
-        }
-        if (replaces)
-            v = v2;
-        for (int cat : train_categories) {
-            auto it = restrictions[2].find(cat);
-            if (it!=restrictions[2].end()) {
-                v = std::min(v, it->second);
-            }
-        }
-        return v;
+        return start_distance<r.start_distance;
     }
 };
 void set_train_max_speed(double vel);
 void update_SSP(std::vector<SSP_element> nSSP);
+std::set<speed_restriction> get_SSP();
+void update_gradient(std::map<distance, double> grad);
+std::map<distance, double> get_gradient();
 struct TSR
 {
     int id;
@@ -72,27 +50,4 @@ struct TSR
 };
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
-class speed_restriction_list
-{
-private:
-    std::map<distance,double> MRSP;
-    std::set<speed_restriction*> restrictions;
-    void recalculate_MRSP();
-public:
-    std::map<distance,double> get_MRSP()
-    {
-        return MRSP;
-    }
-    void insert_restriction(speed_restriction *r)
-    {
-        restrictions.insert(r);
-        recalculate_MRSP();
-    }
-    void remove_restriction(speed_restriction *r)
-    {
-        restrictions.erase(r);
-        recalculate_MRSP();
-    }
-};
-extern speed_restriction_list mrsp_candidates;
-extern std::map<distance, double> gradient;
+extern std::optional<speed_restriction> SR_speed;

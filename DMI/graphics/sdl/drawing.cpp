@@ -41,6 +41,7 @@ void init_video()
         running = false;
         return;
     }
+    start_sound();
     SDL_Event ev;
     int count = 0;
     chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
@@ -65,7 +66,6 @@ void init_video()
             {
                 auto now = chrono::system_clock::now();
                 chrono::duration<double> diff = now - lastrender;
-                checkSound();
                 if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 50)
                 {
                     lastrender = chrono::system_clock::now();
@@ -133,6 +133,7 @@ void startDisplay(bool fullscreen)
     float extra = 640/2*(scrsize[0]/(scrsize[1]*4/3)-1);
     offset[0] = extra;
     scale = scrsize[1]/480.0;
+    //SDL_SetWindowBordered(sdlwin, SDL_FALSE);
 }
 void display()
 {

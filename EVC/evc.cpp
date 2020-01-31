@@ -5,11 +5,12 @@
 #include "DMI/dmi.h"
 #include <iostream>
 #include <chrono>
-//#include "packet_reader.h"
+#include "Packets/messages.h"
 #include "Supervision/speed_profile.h"
 #include "Supervision/targets.h"
 #include "Supervision/supervision.h"
-#include "Supervision/distance.h"
+#include "Supervision/national_values.h"
+#include "Position/distance.h"
 #include "Supervision/conversion_model.h"
 #include "OR_interface/interface.h"
 #include "MA/movement_authority.h"
@@ -29,9 +30,10 @@ void start()
 {
     start_dmi();
     start_or_iface();
-    //start_packet_reader();
+    setup_national_values();
     set_test_values();
-    set_conversion_model();
+    initialize_mode_transitions();
+    ETCS_packet::initialize();
 }
 void loop()
 {
@@ -39,7 +41,9 @@ void loop()
     {
         std::unique_lock<std::mutex> lck(loop_mtx);
         auto prev = std::chrono::system_clock::now();
+        update_odometer();
         update_mode_status();
+        check_eurobalise_passed();
         if (mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR) update_supervision();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         //std::cout<<std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count()<<std::endl;

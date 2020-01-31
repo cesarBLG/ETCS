@@ -8,6 +8,7 @@ class input_window : public subwindow
     IconButton prev_button;
     IconButton next_button;
     TextButton button_yes;
+    Button* empty_button[12];
     int cursor=0;
     int nfields;
     protected:

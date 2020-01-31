@@ -5,6 +5,7 @@ class trn_window : public input_window
 {
     public:
     trn_window();
+    void sendInformation() override;
 };
 class trn_input : public input_data
 {

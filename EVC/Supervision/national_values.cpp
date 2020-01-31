@@ -1,54 +1,107 @@
 #include "national_values.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
-bool Q_NVDRIVER_ADHES = false;
+bool Q_NVDRIVER_ADHES;
 
-double V_NVSHUNT = TO_MPS(30);
-double V_NVSTFF = TO_MPS(40);
-double V_NVONSIGHT = TO_MPS(30);
-double V_NVLIMSUPERV = TO_MPS(100);
-double V_NVUNFIT = TO_MPS(100);
-double V_NVREL = TO_MPS(40);
+double V_NVSHUNT;
+double V_NVSTFF;
+double V_NVONSIGHT;
+double V_NVLIMSUPERV;
+double V_NVUNFIT;
+double V_NVREL;
 
-double D_NVROLL = 2;
+double D_NVROLL;
 
-bool Q_NVSBTSMPERM = true;
-bool Q_NVEMRRLS = false;
-bool Q_NVGUIPERM = false;
-bool Q_NVSBFBPERM = false;
-bool Q_NVINHSMICPERM = false;
+bool Q_NVSBTSMPERM;
+bool Q_NVEMRRLS;
+bool Q_NVGUIPERM;
+bool Q_NVSBFBPERM;
+bool Q_NVINHSMICPERM;
 
-double V_NVALLOWOVTRP = 0;
-double V_NVSUPOVTRP = TO_MPS(30);
+double V_NVALLOWOVTRP;
+double V_NVSUPOVTRP;
 
-double D_NVOVTRP = 200;
+double D_NVOVTRP;
 
-double T_NVOVTRP = 60;
+double T_NVOVTRP;
 
-int M_NVDERUN = 0;
-int M_NVCONTACT = 0;
+int M_NVDERUN;
+int M_NVCONTACT;
 
-double T_NVCONTACT = std::numeric_limits<double>::infinity();
+double T_NVCONTACT;
 
-double D_NVPOTRP = 200;
+double D_NVPOTRP;
 
-double D_NVSTFF = std::numeric_limits<double>::infinity();
+double D_NVSTFF;
 
-double Q_NVLOCACC = 12;
+double Q_NVLOCACC;
 
-int M_NVAVADH = 0;
+int M_NVAVADH;
 
-double M_NVEBCL = 0.999999999;
+double M_NVEBCL;
 
-double L_NVKRINT = 0;
-double M_NVKRINT = 0.9;
-double V_NVKVINT = 0;
-double M_NVKVINT = 0.7;
-double M_NVKTINT = 1.1;
+std::map<double,double> NV_KRINT;
+std::map<double,double> NV_KVINT_freight;
+std::map<double,kvint_pass_step> NV_KVINT_pass;
+double M_NVKTINT;
 
-double A_NVMAXREDADH1 = 1;
-double A_NVMAXREDADH2 = 0.7;
-double A_NVMAXREDADH3 = 0.7;
+double A_NVMAXREDADH1;
+double A_NVMAXREDADH2;
+double A_NVMAXREDADH3;
+void nv_changed()
+{
+    /*set_conversion_correction_values();
+    SR_dist;
+    SR_speed;
+    recalculate_MRSP();*/
+}
+void setup_national_values()
+{
+    Q_NVDRIVER_ADHES = false;
+    V_NVSHUNT = TO_MPS(30);
+    V_NVSTFF = TO_MPS(40);
+    V_NVONSIGHT = TO_MPS(30);
+    V_NVLIMSUPERV = TO_MPS(100);
+    V_NVUNFIT = TO_MPS(100);
+    V_NVREL = TO_MPS(40);
 
-double A_NVP12 = 0;
-double A_NVP23 = 0;
+    D_NVROLL = 2;
+
+    Q_NVSBTSMPERM = true;
+    Q_NVEMRRLS = false;
+    Q_NVGUIPERM = false;
+    Q_NVSBFBPERM = false;
+    Q_NVINHSMICPERM = false;
+
+    V_NVALLOWOVTRP = 0;
+    V_NVSUPOVTRP = TO_MPS(30);
+
+    D_NVOVTRP = 200;
+
+    T_NVOVTRP = 60;
+
+    M_NVDERUN = 0;
+    M_NVCONTACT = 0;
+
+    T_NVCONTACT = std::numeric_limits<double>::infinity();
+
+    D_NVPOTRP = 200;
+
+    D_NVSTFF = std::numeric_limits<double>::infinity();
+
+    Q_NVLOCACC = 12;
+
+    M_NVAVADH = 0;
+
+    M_NVEBCL = 0.999999999;
+
+    NV_KRINT[0] = 0.9;
+    NV_KVINT_freight[0] = 0.7;
+    NV_KVINT_pass[0] = {0.7,0.7,0,0};
+    M_NVKTINT=1.1;
+
+    A_NVMAXREDADH1 = 1;
+    A_NVMAXREDADH2 = 0.7;
+    A_NVMAXREDADH3 = 0.7;
+    nv_changed();
+}

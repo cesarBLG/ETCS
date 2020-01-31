@@ -13,13 +13,15 @@ extern bool showSpeeds;
 static float prev_dist = 0;
 void displayDistanceText()
 {
+    if((monitoring == CSM && Vtarget>=Vperm) || (!showSpeeds && (mode == OS || mode == SR))) {
+        a2.clear();
+        return;
+    }
     float dist = Dtarg;
     if(dist!=prev_dist)
     {
         a2.clear();
-        if(monitoring == CSM && Vtarget>=Vperm) return;
-        if(!showSpeeds && (mode == OS || mode == SR)) return;
-        const char *str = to_string(((((int)(dist))/10))*10).c_str();
+        string str = to_string(((((int)(dist))/10))*10);
         a2.addText(str, 10, 0, 10, Grey, RIGHT);
         prev_dist = dist;
     }

@@ -1,7 +1,7 @@
 #pragma once
 #include <set>
 #include <functional>
-#include "distance.h"
+#include "../Position/distance.h"
 struct acceleration
 {
     std::set<distance> dist_step;

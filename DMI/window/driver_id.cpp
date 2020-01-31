@@ -30,7 +30,7 @@ void driver_window::sendInformation()
 }
 void driverid_input::validate()
 {
-    if(data.size()>8 || data.size()<0) return;
+    if(data.size()>8 || data.size()<1) return;
     unsigned long id = stoul(data);
     if(id!=0) setAccepted(true);
 }
@@ -41,5 +41,5 @@ driverid_input::driverid_input()
         data = to_string(driverid);
         accepted = true;
     } 
-    keys = getAlphaNumericKeyboard(data_set, data_get);
+    keys = getAlphaNumericKeyboard(this);
 }

@@ -1,4 +1,4 @@
-#ifdef unix
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -13,21 +13,29 @@
 #include <thread>
 #include <string>
 #include <sstream>
+#include <map>
 #include "../Supervision/supervision.h"
+#include "../Supervision/targets.h"
 #include <mutex>
 #include <iostream>
 #include <chrono>
 #include "../Supervision/train_data.h"
 #include "../Supervision/speed_profile.h"
-#include "../Supervision/distance.h"
+#include "../Position/distance.h"
 #include "../Procedures/start.h"
-using namespace std;
+using std::thread;
+using std::mutex;
+using std::unique_lock;
+using std::map;
+using std::set;
+using std::string;
+using std::to_string;
 extern mutex loop_mtx;
 int dmi_pid;
 void dmi_comm();
 void start_dmi()
 {
-#ifdef unix
+#ifndef _WIN32
     printf("Starting Driver Machine Interface...\n");
     dmi_pid = fork();
     if(dmi_pid == 0)
@@ -86,7 +94,7 @@ void dmi_recv()
     char buff[500];
     string s;
     for (;;) {
-        int count = read(fd, buff, sizeof(buff)-1);
+        int count = recv(fd, buff, sizeof(buff)-1,0);
         buff[count] = 0;
         s+=buff;
         int end;
@@ -104,6 +112,7 @@ void send_command(string command, string value)
     string txt = command+"("+value+");\n";
     write(fd, txt.c_str(), txt.size());
 }
+double calc_ceiling_limit();
 void dmi_comm()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -147,6 +156,36 @@ void dmi_comm()
         send_command("setDtarget", to_string(D_target));
         send_command("setEB", EB ? "true" : "false");
         send_command("setSB", SB ? "true" : "false");
+        if (mode == Mode::FS) {
+            string speeds="";
+            double v = calc_ceiling_limit()*3.6;
+            speeds += "0,"+to_string(v);
+            std::map<::distance,double> MRSP = get_MRSP();
+            extern target indication_target;
+            extern double indication_distance;
+            for (auto it=MRSP.begin(); it!=MRSP.end(); ++it) {
+                distance dist = it->first;
+                if (d_maxsafefront(dist.get_reference())>dist)
+                    continue;
+                if (EoA && dist > *EoA)
+                    break;
+                if (target(dist, it->second, target_class::MRSP) == indication_target && monitoring == CSM)
+                    speeds+= ",im,"+to_string(indication_distance);
+                speeds += ","+to_string(dist-d_maxsafefront(dist.get_reference()))+","+to_string(it->second*3.6);
+            }
+            if (EoA) {
+                if (monitoring == CSM && (indication_target.type == target_class::EoA || indication_target.type == target_class::SvL))
+                    speeds+= ",im,"+to_string(indication_distance);
+                speeds += ","+to_string(*EoA-d_estfront)+",0";
+            }
+            send_command("setPlanningSpeeds",speeds);
+            std::map<::distance,double> gradient = get_gradient();
+            string grad="0,"+to_string((--gradient.upper_bound(d_estfront))->second*100);
+            for (auto it=gradient.upper_bound(d_estfront); it!=gradient.end(); ++it) {
+                grad+=","+to_string(it->first-d_estfront)+","+to_string(it->second*100);
+            }
+            send_command("setPlanningGradients",grad);
+        }
         lck.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }

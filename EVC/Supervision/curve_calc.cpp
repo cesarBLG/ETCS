@@ -60,7 +60,6 @@ double speed_curve(acceleration a, distance dref, double vref, distance dist)
     auto dnext = fwd ? next(d) : d;
     distance pos = dref;
     double v02 = vref*vref;
-    int i=0;
     for (;;) {
         double dac = (dec ? -2 : 2)*a.accel(*v,*d);
         bool vend = vnext == a.speed_step.end();

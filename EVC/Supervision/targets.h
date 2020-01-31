@@ -1,8 +1,9 @@
 #pragma once
 #include <set>
 #include <vector>
+#include <optional>
 #include "acceleration.h"
-#include "distance.h"
+#include "../Position/distance.h"
 #include "supervision.h"
 #include "conversion_model.h"
 enum struct target_class
@@ -44,7 +45,18 @@ public:
     mutable acceleration A_safe;
     mutable acceleration A_expected;
     mutable acceleration A_normal_service;
-    void calculate_curves(double V_est=::V_est) const;
+    mutable double A_est1;
+    mutable double A_est2;
+    mutable double T_traction;
+    mutable double T_berem;
+    mutable double T_brake_emergency;
+    mutable double T_brake_service;
+    mutable double T_be;
+    mutable double T_bs;
+    mutable double T_bs1;
+    mutable double T_bs2;
+    void calculate_times() const;
+    void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     void calculate_decelerations();
     bool operator< (const target t) const
     {
@@ -67,8 +79,10 @@ public:
         return V_target == t.V_target && d_target==t.d_target && (int)type==(int)t.type;
     }
 };
-extern distance *EoA;
-extern distance *SvL;
+extern std::optional<distance> EoA;
+extern std::optional<distance> SvL;
+extern std::optional<distance> SR_dist;
+extern std::optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();
 std::set<target> get_supervised_targets();

@@ -1,4 +1,3 @@
-#CPP = x86_64-w64-mingw32-g++
 CPP = g++
 OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.o graphics/button.o \
 		graphics/display.o window/window.o graphics/layout.o graphics/text_button.o graphics/icon_button.o \
@@ -11,12 +10,16 @@ OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.
 		planning/planning.o control/control.o state/gps_pos.o \
 		window/train_data.o window/keyboard.o window/input_data.o \
 		graphics/sdl/gfx_primitives.o
+CFLAGS = -g
+LDFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
+ifeq ($(TARGET),WIN32)
+CPP = x86_64-w64-mingw32-g++ -m64 -mwindows
+LDFLAGS = -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_net
+endif
 all: dmi
 dmi: $(OBJECTS)
-#	$(CPP) $(OBJECTS) -o dmi -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_net
-	$(CPP) $(OBJECTS) -o dmi -g -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
+	$(CPP) $(OBJECTS) -o dmi $(CFLAGS) $(LDFLAGS)
 %.o: %.cpp
-#	$(CPP) -c $< -o $@ -mwindows
-	$(CPP) -c $< -o $@ -g -rdynamic
+	$(CPP) -c $< -o $@ $(CFLAGS)
 clean:
 	rm $(OBJECTS)

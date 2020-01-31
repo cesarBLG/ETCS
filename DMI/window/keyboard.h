@@ -3,8 +3,9 @@
 #include <vector>
 #include <string>
 #include "../graphics/button.h"
+#include "input_data.h"
 using namespace std;
-vector<Button*> getNumericKeyboard(function<void(string)> setData, function<string()> getData);
-vector<Button*> getAlphaNumericKeyboard(function<void(string)> setData, function<string()> getData);
-vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, function<void(string)> setData);
+vector<Button*> getNumericKeyboard(input_data *input);
+vector<Button*> getAlphaNumericKeyboard(input_data *input);
+vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, input_data *input);
 #endif

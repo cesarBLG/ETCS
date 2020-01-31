@@ -1,6 +1,6 @@
 #include "input_data.h"
 input_data::input_data(string label_text) : label(label_text), data_get([this] {return getData();}), 
-data_set([this](string s){setData(s);})
+data_set([this](string s){setData(s);}), more("More", 102, 50)
 {
     if(label!="")
     {

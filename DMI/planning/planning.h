@@ -11,7 +11,6 @@ struct gradient_element
 {
     int val;
     float distance;
-    float length;
 };
 struct speed_element
 {

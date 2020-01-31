@@ -2,10 +2,13 @@
 #include <orts/client.h>
 #include <orts/common.h>
 #include <set>
+#include <bitset>
 #include <algorithm>
-#include "../Supervision/distance.h"
+#include "../Position/distance.h"
 #include "../Supervision/speed_profile.h"
 #include "../MA/movement_authority.h"
+#include "../Position/linking.h"
+#include "../Packets/messages.h"
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -17,12 +20,9 @@ using std::thread;
 using std::mutex;
 extern mutex loop_mtx;
 extern double V_est;
-extern distance d_maxsafefront;
-extern distance d_minsafefront;
 extern distance d_estfront;
 extern bool EB;
 extern bool SB;
-double d_adjust=0;
 double or_dist;
 POSIXclient *s_client;
 std::set<Parameter*> parameters;
@@ -35,55 +35,109 @@ Parameter *GetParameter(string name)
     if(name=="distance") {
         p->SetValue = [](string val) {
             or_dist = stof(val);
-            double cval = or_dist-d_adjust;
             std::unique_lock<mutex> lck(loop_mtx);
-            d_maxsafefront = distance(cval*1.00001);
-            d_minsafefront = distance(cval*0.99999);
-            d_estfront = distance(cval);
+            odometer_value = or_dist;
         };
     } else if(name=="speed") {
         p->SetValue = [](string val) {
             std::unique_lock<mutex> lck(loop_mtx);
             V_est = stof(val)/3.6;
+            V_ura = 0.007*V_est;
+        };
+    } else if(name=="etcs_telegram") {
+        p->SetValue = [](string val) {
+            std::unique_lock<mutex> lck(loop_mtx);
+            std::vector<bool> message;
+            for (int i=0; i<val.size(); i++) {
+                message.push_back(val[i]=='1');
+            }
+            bit_read_temp r(message);
+            eurobalise_telegram t(r);
+            pending_telegrams.push_back(t);
         };
     } else if(name=="etcs_ssp") {
         p->SetValue = [](string val) {
             std::unique_lock<mutex> lck(loop_mtx);
-            double prevadj = d_adjust;
-            d_adjust = or_dist;
-            double d_offset = or_dist-prevadj;
-            d_maxsafefront = d_estfront;
-            d_minsafefront = d_estfront;
-            distance::update_distances(d_offset);
-            std::vector<SSP_element> SSP;
+            distance start = distance(0,update_location_reference(1, d_estfront, true));
+            std::map<distance, double> grad;
+            grad[distance(0)] = 0;
+            grad[distance(30000)] = 0;
+            update_gradient(grad);
+            InternationalSSP ISSP;
+            ISSP.Q_SCALE.rawdata = Q_SCALE_t::m1;
+            std::vector<SSP_element_packet> SSP;
+            double dist=0;
             while(val.find_first_of(',')!=string::npos) {
                 int pos = val.find_first_of(',');
-                distance n1(std::stof(val.substr(0,pos)));
+                double n1 = std::stof(val.substr(0,pos));
                 val = val.substr(pos+1);
                 pos = val.find_first_of(',');
-                double n2(std::stof(val.substr(0,pos)));
+                double n2 = std::stof(val.substr(0,pos));
                 val = val.substr(pos+1);
-                if (!SSP.empty() && (--SSP.end())->start==n1) {
-                    n1 += 10000;
-                }
-                SSP.push_back(SSP_element(n1, n2, true));
-                if (n2 < 0)
+                SSP_element_packet pack;
+                pack.N_ITER.rawdata = 0;
+
+                pack.D_STATIC.rawdata = (n1-dist>0 || dist==0) ? (int)(n1-dist) : 10000;
+                pack.V_STATIC.rawdata = (int)(n2*3.6/5);
+                pack.Q_FRONT.rawdata = Q_FRONT_t::TrainLengthDelay;
+                dist += n1;
+                if (n2 < 0) {
+                    pack.D_STATIC.rawdata = 32700;
+                    pack.V_STATIC.rawdata = V_STATIC_t::EndOfProfile;
+                    pack.Q_FRONT.rawdata = 0;
+                    SSP.push_back(pack);
                     break;
+                }
+                SSP.push_back(pack);
             }
-            update_SSP(SSP);
+            ISSP.N_ITER.rawdata = SSP.size()-1;
+            ISSP.element = SSP[0];
+            ISSP.elements.insert(ISSP.elements.end(), ++SSP.begin(), SSP.end());
+            update_SSP(get_SSP(start, ISSP));
         };
     } else if(name=="etcs_ma") {
         p->SetValue = [](string val) {
             std::unique_lock<mutex> lck(loop_mtx);
-            double prevadj = d_adjust;
-            d_adjust = or_dist;
-            double d_offset = or_dist-prevadj;
-            d_maxsafefront = d_estfront;
-            d_minsafefront = d_estfront;
-            distance::update_distances(d_offset);
-            if (MA != nullptr)
-                delete MA;
-            set_MA(new movement_authority(d_estfront, std::stof(val)));
+            distance start = distance(0,update_location_reference(1, d_estfront, true));
+            Level1_MA ma;
+            ma.Q_DIR.rawdata = Q_DIR_t::Nominal;
+            ma.Q_SCALE.rawdata = Q_SCALE_t::m1;
+            ma.N_ITER.rawdata = 0;
+            ma.L_ENDSECTION.rawdata = std::stof(val);
+            ma.Q_SECTIONTIMER.rawdata = 0;
+            ma.Q_ENDTIMER.rawdata = 0;
+            ma.Q_OVERLAP.rawdata = 0;
+            ma.Q_DANGERPOINT.rawdata = 1;
+            ma.D_DP.rawdata = 200;
+            ma.V_RELEASEDP.rawdata = V_RELEASE_t::UseNationalValue;
+            ma.V_MAIN.rawdata = 300/5;
+            ma.V_EMA.rawdata = 0;
+            replace_MA(movement_authority(start, ma));
+        };
+    } else if(name=="etcs_ma_infill") {
+        p->SetValue = [](string val) {
+            int com = val.find_first_of(',');
+            string infill_start = val.substr(0,com);
+            string len = val.substr(com+1);
+            std::unique_lock<mutex> lck(loop_mtx);
+            distance start = d_estfront;
+            if (MA)
+            {
+                Level1_MA ma;
+                ma.Q_DIR.rawdata = Q_DIR_t::Nominal;
+                ma.Q_SCALE.rawdata = Q_SCALE_t::m1;
+                ma.N_ITER.rawdata = 0;
+                ma.L_ENDSECTION.rawdata = std::stof(len);
+                ma.Q_SECTIONTIMER.rawdata = 0;
+                ma.Q_ENDTIMER.rawdata = 0;
+                ma.Q_OVERLAP.rawdata = 0;
+                ma.Q_DANGERPOINT.rawdata = 1;
+                ma.D_DP.rawdata = 200;
+                ma.V_RELEASEDP.rawdata = V_RELEASE_t::UseNationalValue;
+                ma.V_MAIN.rawdata = 300/5;
+                ma.V_EMA.rawdata = 0;
+                MA_infill(movement_authority(start+std::stof(infill_start), ma));
+            }
         };
     } else if(name=="etcs_emergency") {
         p->GetValue = []() {
@@ -106,11 +160,13 @@ Parameter *GetParameter(string name)
 void polling()
 {
     threadwait *poller = new threadwait();
-    s_client = new TCPclient("127.0.0.1", 5090, poller);
+    s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(etcs_ssp)");
     s_client->WriteLine("register(etcs_ma)");
+    s_client->WriteLine("register(etcs_ma_infill)");
+    s_client->WriteLine("register(etcs_telegram)");
     while(s_client->connected) {
         int nfds = poller->poll(100);
         s_client->handle();

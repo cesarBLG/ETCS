@@ -1,6 +1,6 @@
 #include "keyboard.h"
 #include "../graphics/text_button.h"
-vector<Button*> getNumericKeyboard(function<void(string)> setData, function<string()> getData)
+vector<Button*> getNumericKeyboard(input_data *input)
 {
     vector<Button*> keys;
     for(int i=0; i<9; i++)
@@ -12,19 +12,20 @@ vector<Button*> getNumericKeyboard(function<void(string)> setData, function<stri
     keys.push_back(new TextButton(".", 102, 50));
     for(int i=0; i<12; i++)
     {
-        keys[i]->setPressedAction([i, getData, setData]
+        keys[i]->setPressedAction([i, input]
         {
-            string s = getData();
+            string s = input->getData();
+            if (input->isValid()) s = "0";
             if(i<11 && s=="0") s = "";
             if(i<9) s = s + to_string(i+1);
             if(i==9) s = s.substr(0, s.size()-1);
             if(i==10) s = s + "0";
-            setData(s);
+            input->setData(s);
         });
     }
     return keys;
 }
-vector<Button*> getAlphaNumericKeyboard(function<void(string)> setData, function<string()> getData)
+vector<Button*> getAlphaNumericKeyboard(input_data *input)
 {
     vector<Button*> keys;
     for(int i=0; i<9; i++)
@@ -53,27 +54,28 @@ vector<Button*> getAlphaNumericKeyboard(function<void(string)> setData, function
     keys.push_back(new TextButton(".", 102, 50, nullptr));
     for(int i=0; i<12; i++)
     {
-        keys[i]->setPressedAction([setData, getData, i]
+        keys[i]->setPressedAction([input, i]
         {
-            string data = getData();
+            string data = input->getData();
+            if (input->isValid()) data = "0";
             if(i<11 && data=="0") data = "";
             if(i<9) data = data + to_string(i+1);
             if(i==9) data = data.substr(0, data.size()-1);
             if(i==10 && data!="") data = data + "0";
-            setData(data);
+            input->setData(data);
         });
     }
     return keys;
 }
-vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, function<void(string)> setData)
+vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, input_data *input)
 {
     vector<Button*> keys;
     for(int i=0; i<posibilities.size(); i++)
     {
         keys.push_back(new TextButton(posibilities[i], 102, 50));
-        keys[i]->setPressedAction([setData, i, posibilities]
+        keys[i]->setPressedAction([input, i, posibilities]
         {
-            setData(posibilities[i]);
+            input->setData(posibilities[i]);
         });
     }
     return keys;

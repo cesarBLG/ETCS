@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "../graphics/button.h"
+#include "../graphics/text_button.h"
 using namespace std;
 class input_data
 {
@@ -19,7 +20,9 @@ class input_data
     void setSelected(bool val);
     void setAccepted(bool val);
     bool isValid() {return accepted;}
+    TextButton more;
     vector<Button*> keys;
+    int keypage=0;
     virtual void validate(){if (data!="") setAccepted(true);}
     input_data(string label_text="");
     function<string()> data_get;

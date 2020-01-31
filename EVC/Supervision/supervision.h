@@ -1,5 +1,5 @@
 #pragma once
-#include "distance.h"
+#include "../Position/distance.h"
 enum MonitoringStatus
 {
     CSM,
@@ -25,35 +25,35 @@ enum struct Level
 };
 enum struct Mode
 {
-    SH,
-    PT,
-    TR,
+    FS,
+    LS,
     OS,
     SR,
-    FS,
-    NL,
-    SB,
-    RV,
+    SH,
     UN,
-    IS,
+    PS,
+    SL,
+    SB,
+    TR,
+    PT,
     SF,
-    NS,
-    LS,
+    IS,
+    NP,
+    NL,
+    SN,
+    RV
 };
-const char Mode_str[][3] = {"SH","PT","TR","OS","SR","FS","NL","SB","RV","UN","IS","SF","NS","LS"};
+const char Mode_str[][3] = {"FS","LS","OS","SR","SH","UN","PS","SL","SB","TR","PT","SF","IS","NP","NL","SN","RV"};
 extern Level level;
 extern Mode mode;
 extern double V_est;
+extern double V_ura;
+extern double A_est;
 extern double V_perm;
 extern double V_sbi;
 extern double D_target;
-extern double V_ura;
-extern double A_est1;
-extern double A_est2;
 extern double V_release;
 extern double T_bs1;
 extern double T_bs2;
-extern double T_bs;
-extern double T_be;
 void update_supervision();
 double calculate_V_release();

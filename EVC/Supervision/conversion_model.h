@@ -16,5 +16,5 @@ extern std::map<double, double> Kv_int;
 extern std::map<double, double> Kr_int;
 extern std::map<double, std::pair<double,double>> Kn;
 extern std::map<double, double> Kwet_rst;
-extern bool convmod;
-double Kdry_rst(double V, double EBCL);
+extern bool conversion_model_used;
+double Kdry_rst(double V, double EBCL, distance d);

@@ -6,10 +6,12 @@
 input_window::input_window(string title, int nfields) : subwindow(title, nfields>1), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
     next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), confirmation_label(330, 40), button_yes("Yes",330,40), 
     nfields(nfields)
-{      
+{
     for(int i=0; i<12; i++)
     {
-        buttons[i] = nullptr;
+        empty_button[i] = new Button(102,50);
+        empty_button[i]->showBorder = false;
+        buttons[i] = empty_button[i];
     }
     if(nfields > 1)
     {
@@ -41,6 +43,7 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             {
                 next_button.enabled = false;
                 prev_button.enabled = true;
+                inputs[cursor]->validate();
                 cursor = 4*(cursor/4+1);
                 setLayout();
             }
@@ -51,6 +54,7 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             {
                 next_button.enabled = true;
                 prev_button.enabled = false;
+                inputs[cursor]->validate();
                 cursor = 4*(cursor/4-1);
                 setLayout();
             }
@@ -79,6 +83,7 @@ void input_window::create()
         {
             inputs[i]->data_comp->setPressedAction([this, i]
             {
+                inputs[cursor]->validate();
                 cursor = i;
                 setLayout();
             });
@@ -120,11 +125,23 @@ void input_window::setLayout()
     }    
     for(int i=0; i<12; i++)
     {
-        buttons[i] = nullptr;
+        buttons[i] = empty_button[i];
     }
-    for(int i=0; i<inputs[cursor]->keys.size(); i++)
+    input_data *input=inputs[cursor];
+    int size = input->keys.size();
+    for(int i=0; i<12; i++)
     {
-        buttons[i] = inputs[cursor]->keys[i];
+        if (i == 11 && size > 12) 
+        {
+            input->more.setPressedAction([this, input](){
+                input->keypage++;
+                if (input->keys.size() <= 11*input->keypage) input->keypage = 0;
+                setLayout();
+            });
+            buttons[11] = &input->more;
+            break;
+        }
+        else if (i+input->keypage*11 < size) buttons[i] = input->keys[i+input->keypage*11];
     }
     addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 215,0));
     addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));
@@ -144,5 +161,9 @@ input_window::~input_window()
     for(int i=0; i<inputs.size(); i++)
     {
         delete inputs[i];
+    }
+    for(int i=0; i<12; i++)
+    {
+        delete empty_button[i];
     }
 }

@@ -1,8 +1,7 @@
 #include "train_data.h"
-double A_ebmax=1.2;
+double A_ebmax;
 double L_TRAIN=0;
-double T_traction = 0.1;
-double T_berem = 0.5;
+double T_traction_cutoff = 0.1;
 double M_rotating_nom;
 double V_train = 0;
 bool Q_airtight = false;

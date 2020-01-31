@@ -31,7 +31,7 @@ level_input::level_input()
             break;
     }
     accepted = true;
-    keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, data_set);
+    keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, this);
 }
 void level_input::validate()
 {

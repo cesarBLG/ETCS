@@ -18,7 +18,7 @@ Component planning_objects(246,300, displayObjects);
 Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
-bool f= false;
+bool planning_unchanged= false;
 void displayScaleUp();
 void displayScaleDown();
 void speedLines();
@@ -28,7 +28,7 @@ void zoominp()
     {
         planning_scale/=2;
         speedLines();
-        f = false;
+        planning_unchanged = false;
     }
 }
 void zoomoutp()
@@ -37,7 +37,7 @@ void zoomoutp()
     {
         planning_scale*=2;
         speedLines();
-        f = false;
+        planning_unchanged = false;
     }
 }
 IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
@@ -57,7 +57,7 @@ void displayObjects()
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
-        if(p.distance>divs[8]*planning_scale) continue;
+        if(p.distance>divs[8]*planning_scale || p.distance<0) continue;
         string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
         planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-10,20,20);
     }
@@ -65,11 +65,11 @@ void displayObjects()
 vector<gradient_element> gradient_elements;
 void displayGradient()
 {
-    for(int i=0; i<gradient_elements.size(); i++)
+    for(int i=0; i+1<gradient_elements.size(); i++)
     {
         gradient_element &e = gradient_elements[i];
-        if(e.distance>divs[8]*planning_scale) continue;
-        float max = e.distance+e.length;
+        if(e.distance>divs[8]*planning_scale || e.distance<0) continue;
+        float max = gradient_elements[i+1].distance;
         float minp = getPlanningHeight(max)-15;
         float maxp = getPlanningHeight(e.distance)-15;
         if(max>divs[8]*planning_scale) minp = 0;
@@ -98,7 +98,7 @@ bool check_spdov(int i, int j)
     speed_element &chk = speed_elements[j];
     float a = getPlanningHeight(cur.distance)-15;
     float b = getPlanningHeight(chk.distance)-15;
-    if(a-b>20) return false;
+    if(abs(a-b)>20) return false;
     return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed) || check_spdov(i, j+1);
 }
 indication_marker imarker;
@@ -109,16 +109,18 @@ void displayPASP()
     
     if(imarker.start_distance>0) PASP.addRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
     
+    if(speed_elements.size() == 0) return;
     speed_element prev_pasp = speed_elements[0];
     bool oth1 = false;
     bool oth2 = false;
     float red = 1;
-    float spd = speed_elements[0].speed;
+    float spd = prev_pasp.speed;
     bool end = false;
     for(int i=1; i<speed_elements.size(); i++)
     {
         speed_element cur = speed_elements[i];
         speed_element prev = speed_elements[i-1];
+        if (cur.distance < 0) continue;
         if(cur.distance>divs[8]*planning_scale)
         {
             PASP.drawRectangle(14, 0, 93*red, getPlanningHeight(prev_pasp.distance)-15, PASPlight);
@@ -145,8 +147,8 @@ void displayPASP()
 }
 void displaySpeed()
 {
-    if(f) return;
-    f = true;
+    if(planning_unchanged) return;
+    planning_unchanged = true;
     planning_speed.clear();
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
@@ -154,8 +156,9 @@ void displaySpeed()
         if(check_spdov(i, i+1)) continue;
         speed_element cur = speed_elements[i];
         speed_element prev = speed_elements[ld];
+        if (cur.distance < 0) continue;
         ld = i;
-        bool im = (cur==imarker.element);
+        bool im = imarker.start_distance>0 && (cur==imarker.element);
         if(cur.distance>divs[8]*planning_scale) break;
         float a = getPlanningHeight(cur.distance)-15;
         if(prev.speed>cur.speed)
@@ -201,19 +204,9 @@ void planningConstruct()
     zoomout.showBorder = false;
     zoomin.touch_down = 15;
     zoomout.touch_up = 15;
-    planning_elements.push_back({1,500});
+    /*planning_elements.push_back({1,500});
     planning_elements.push_back({3,1000});
-    planning_elements.push_back({32,930});
-    gradient_elements.push_back({10,0,600});
-    gradient_elements.push_back({-5,600,3000});
-    speed_elements.push_back({120, 0});
-    speed_elements.push_back({90, 50});
-    imarker.element = speed_elements[1];
-    imarker.start_distance = 15;
-    speed_elements.push_back({60, 200});
-    speed_elements.push_back({20, 300});
-    speed_elements.push_back({120, 500});
-    speed_elements.push_back({0, 800});
+    planning_elements.push_back({32,930});*/
     speedLines();
 }
 float getPlanningHeight(float dist)
