@@ -77,7 +77,7 @@ distance get_d_startRSM(double V_release)
     std::set<target> candidates;
     if (V_releaseSvL == -2) {
         for (auto it=supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
-            if (it->is_EBD_based() && d_tripEoA < it->get_target_position() && it->get_target_position() <= d_SvL)
+            if (it->is_EBD_based && d_tripEoA < it->get_target_position() && it->get_target_position() <= d_SvL)
                 candidates.insert(*it);
         }
     }
@@ -114,7 +114,7 @@ double calculate_V_release()
     double V_release = calc_ceiling_limit(d_EoA, d_SvL);
     std::set<target> candidates;
     for (auto it=supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
-        if (it->is_EBD_based() && d_tripEoA < it->get_target_position() && it->get_target_position() <= d_SvL)
+        if (it->is_EBD_based && d_tripEoA < it->get_target_position() && it->get_target_position() <= d_SvL)
             candidates.insert(*it);
     }
     candidates.insert(target(d_SvL, 0, target_class::SvL));
@@ -145,10 +145,10 @@ void update_monitor_transitions(bool suptargchang, const std::set<target> &super
     MonitoringStatus nmonitor = monitoring;
     bool c1 = false;
     for (target t : supervised_targets) {
-        c1 |= (t.get_target_speed()<=V_est) && ((t.is_EBD_based() ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
+        c1 |= (t.get_target_speed()<=V_est) && ((t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
     }
     c1 &= (V_est>=V_release);
-    bool c2 = V_release>0 && (RSMtarget.is_EBD_based() ? d_maxsafefront(d_startRSM.get_reference()) : d_estfront) > d_startRSM;
+    bool c2 = V_release>0 && (RSMtarget.is_EBD_based ? d_maxsafefront(d_startRSM.get_reference()) : d_estfront) > d_startRSM;
     bool c3 = !c1 && !c2 && supervised_targets.find(MRDT)==supervised_targets.end();
     bool c4 = c1 && suptargchang;
     bool c5 = c2 && suptargchang;
@@ -235,14 +235,14 @@ void update_supervision()
         }
         if (V_est < V_release) {
             indication_target = RSMtarget;
-            if (RSMtarget.is_EBD_based())
+            if (RSMtarget.is_EBD_based)
                 indication_distance = d_startRSM-d_maxsafefront(d_startRSM.get_reference());
             else
                 indication_distance = d_startRSM-d_estfront;
         } else {
             bool asig=false;
             for (target t : supervised_targets) {
-                double d = t.d_I - (t.is_EBD_based() ? d_maxsafefront(t.d_I.get_reference()) : d_estfront);
+                double d = t.d_I - (t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront);
                 if (!asig || indication_distance>d) {
                     indication_distance = d;
                     indication_target = t;

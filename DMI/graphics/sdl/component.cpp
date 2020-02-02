@@ -66,11 +66,11 @@ void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 void Component::paint()
 {
     if(bgColor != DarkBlue) drawRectangle(0, 0, sx, sy, bgColor);
-    if(display != nullptr) display();
     for(int i=0; i<graphics.size(); i++)
     {
         draw(graphics[i]);
     }
+    if(display != nullptr) display();
     if(ack && (flash_state & 2)) setBorder(Yellow);
     else if(dispBorder)
     {
@@ -217,15 +217,14 @@ void Component::drawText(string text, float x, float y, float size, Color col, i
 void Component::getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect)
 {
     if(text=="") return;
-    TTF_Font *font = openFont(aspect ? fontPathb : fontPath, size);
+    TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
     if (font == nullptr) return;
+    if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
     int v = text.find('\n');
     SDL_Color color = {col.R, col.G, col.B};
-    float width;
-    float height;
-    getFontSize(font, text.substr(0,v).c_str(), &width, &height);
-    float sx = width;
-    float sy = height;
+    getFontSize(font, text.substr(0,v).c_str(), &t->width, &t->height);
+    float sx = t->width;
+    float sy = t->height;
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;

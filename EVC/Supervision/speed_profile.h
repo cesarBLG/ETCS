@@ -51,3 +51,4 @@ struct TSR
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
 extern std::optional<speed_restriction> SR_speed;
+speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end, bool EB, double g);

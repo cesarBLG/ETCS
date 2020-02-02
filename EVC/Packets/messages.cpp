@@ -85,8 +85,10 @@ void check_linking()
             expect_next_linking();
             if (c3)
                 check_linking();
+            else if (c1)
+                stop_checking_linking = true;
         }
-        if (isexpected) {
+        else if (isexpected) {
             stop_checking_linking = true;
             if (bg_referencemax>=link_expected->min() && bg_referencemin<=link_expected->max())
                 expect_next_linking();

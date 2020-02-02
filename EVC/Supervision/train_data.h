@@ -1,5 +1,6 @@
 #pragma once
 #include <set>
+#include "../antenna.h"
 enum brake_position_types
 {
     PassengerP,

@@ -12,6 +12,7 @@ target::target() : is_valid(false), type(target_class::MRSP) {};
 target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type) 
 {
     calculate_decelerations();
+    is_EBD_based = type != target_class::EoA;
 }
 distance target::get_distance_curve(double velocity) const
 {
@@ -31,24 +32,25 @@ distance target::get_distance_curve(double velocity) const
             std::cout<<diff<<std::endl;
         return a;
     }*/
-    if (type == target_class::MRSP || type == target_class::LoA)
-        return distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
-    else if (type == target_class::SvL || type == target_class::SR_distance)
-        return distance_curve(A_safe, d_target, 0, velocity);
-    else if (type == target_class::EoA)
+    if (is_EBD_based) {
+        if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
+            return distance_curve(A_safe, d_target, 0, velocity);
+        else
+            return distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
+    } else {
         return distance_curve(A_expected, d_target, 0, velocity);
-    else
-        return distance(0);
+    }
 }
 double target::get_speed_curve(distance dist) const
 {
-    if (type == target_class::MRSP || type == target_class::LoA)
-        return speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
-    else if (type == target_class::SvL || type == target_class::SR_distance)
-        return speed_curve(A_safe, d_target, 0, dist);
-    else if (type == target_class::EoA)
+    if (is_EBD_based) {
+        if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
+            return speed_curve(A_safe, d_target, 0, dist);
+        else
+            return speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
+    } else {
         return speed_curve(A_expected, d_target, 0, dist);
-    else return 0;
+    }
 }
 distance target::get_distance_gui_curve(double velocity) const
 {
@@ -97,7 +99,7 @@ void target::calculate_times() const
 void target::calculate_curves(double V_est, double A_est, double V_delta) const
 {
     calculate_times();
-    if (is_EBD_based()) {
+    if (is_EBD_based) {
         A_est1 = std::max(0.0, A_est);
         A_est1 = std::max(0.0, std::min(0.4, A_est));
         double V_delta0 = Q_NVINHSMICPERM ? 0 : V_delta;
@@ -183,9 +185,13 @@ std::set<target> get_supervised_targets()
 }
 void target::calculate_decelerations()
 {
+    calculate_decelerations(get_gradient());
+}
+void target::calculate_decelerations(std::map<distance,double> gradient)
+{
     std::map<distance,int> redadh;
     redadh[distance(0)] = 0;
-    acceleration A_gradient = get_A_gradient(get_gradient());
+    acceleration A_gradient = get_A_gradient(gradient);
     acceleration A_brake_safe;
     if (conversion_model_used) {
         A_brake_safe = A_brake_emergency;

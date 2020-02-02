@@ -1,6 +1,7 @@
 #include "distance.h"
 #include "../Supervision/supervision.h"
 #include "../Supervision/national_values.h"
+#include "linking.h"
 #include <limits>
 #include <iostream>
 std::set<_dist_base*> distance::distances;
@@ -93,11 +94,11 @@ distance &distance::operator = (distance&& d)
 }
 distance d_maxsafefront(double reference)
 {
-    return distance((d_estfront.get()-reference)*1.01+Q_NVLOCACC);
+    return distance((d_estfront.get()-reference)*1.01+(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC));
 }
 distance d_minsafefront(double reference)
 {
-    return distance((d_estfront.get()-reference)*0.99-Q_NVLOCACC);
+    return distance((d_estfront.get()-reference)*0.99-(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC));
 }
 distance d_estfront(0);
 double odometer_value=0;

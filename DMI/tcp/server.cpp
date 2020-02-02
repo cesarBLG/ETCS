@@ -43,7 +43,7 @@ void parseData(string str)
     if(command == "setEB") EB = value!="false";
     if(command == "setMode")
     {
-        Mode m;
+        Mode m=mode;
         if(value == "FS") m = FS;
         if(value == "LS") m = LS;
         if(value == "OS") m = OS;
@@ -51,12 +51,13 @@ void parseData(string str)
         if(value == "SB") m = SB;
         if(value == "SR") m = SR;
         if(value == "UN") m = UN;
+        if(value == "TR") m = TR;
         mode = m;
     }
     if(command == "setMonitor") setMonitor(value == "CSM" ? CSM : (value == "TSM" ? TSM : RSM));
     if(command == "setSupervision")
     {
-        SupervisionStatus s;
+        SupervisionStatus s=IntS;
         if(value == "NoS") s = NoS;
         if(value == "IndS") s = IndS;
         if(value == "OvS") s = OvS;

@@ -12,7 +12,8 @@ enum struct target_class
     LoA,
     MRSP,
     SvL,
-    SR_distance
+    SR_distance,
+    PBD
 };
 class target
 {
@@ -21,15 +22,12 @@ class target
     bool is_valid;
 public:
     target_class type;
-    bool is_EBD_based() const
-    {
-        return type != target_class::EoA;
-    }
+    bool is_EBD_based;
     target();
     target(distance dist, double speed, target_class type);
     double get_target_speed() const { return V_target; }
     distance get_target_position() const { return d_target; }
-    distance get_distance_curve (double velocity) const;
+    virtual distance get_distance_curve (double velocity) const;
     double get_speed_curve(distance dist) const;
     distance get_distance_gui_curve(double velocity) const;
     double get_speed_gui_curve(distance dist) const;
@@ -58,6 +56,7 @@ public:
     void calculate_times() const;
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     void calculate_decelerations();
+    void calculate_decelerations(std::map<distance,double> gradient);
     bool operator< (const target t) const
     {
         if (!is_valid)
@@ -77,6 +76,18 @@ public:
         if (!is_valid || !t.is_valid)
             return false;
         return V_target == t.V_target && d_target==t.d_target && (int)type==(int)t.type;
+    }
+};
+class PBD_target : public target
+{
+    bool emergency;
+    public:
+    PBD_target(distance d_PBD, bool emergency, double grad) : target(d_PBD, 0, target_class::PBD)
+    {
+        std::map<distance,double> gradient;
+        gradient[distance(std::numeric_limits<double>::lowest())] = grad;
+        is_EBD_based = emergency;
+        calculate_decelerations(gradient);
     }
 };
 extern std::optional<distance> EoA;

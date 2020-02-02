@@ -2,6 +2,8 @@
 #include "conversion_model.h"
 distance distance_curve(acceleration a, distance dref, double vref, double vel)
 {
+    if (a.speed_step.empty() || vref<*a.speed_step.begin() || a.dist_step.empty() || dref<*a.dist_step.begin())
+        return distance(0);
     auto v = --a.speed_step.upper_bound(vref);
     auto d = --a.dist_step.upper_bound(dref);
     bool dec = 1; //Decceleration curve
@@ -17,7 +19,7 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
-        double vd2 = dend ? (inc ? 1e9 : -1) : dac*(*dnext-pos)+v02;
+        double vd2 = dend ? (inc ? 1e9 : -1) : dac*((dnext->get()==std::numeric_limits<double>::lowest()) ? dnext->get() : *dnext-pos)+v02;
         if (inc ? (v2<=std::min(vv2,vd2)) : (v2>=std::max(vv2,vd2))) {
             pos += (v2-v02)/dac;
             v02 = v2;
@@ -49,6 +51,8 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
 }
 double speed_curve(acceleration a, distance dref, double vref, distance dist)
 {
+    if (a.speed_step.empty() || vref<*a.speed_step.begin() || a.dist_step.empty() || dref<*a.dist_step.begin())
+        return 0;
     if (dist<*a.dist_step.begin())
         dist = *a.dist_step.begin();
     auto v = --a.speed_step.upper_bound(vref);
@@ -65,7 +69,7 @@ double speed_curve(acceleration a, distance dref, double vref, distance dist)
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
-        double vd2 = dend ? (inc ? 1e9 : -1) : dac*(*dnext-pos)+v02;
+        double vd2 = dend ? (inc ? 1e9 : -1) : dac*((dnext->get()==std::numeric_limits<double>::lowest()) ? dnext->get() : *dnext-pos)+v02;
         double v2 = dac*(dist-pos)+v02;
         if (inc ? (v2<=std::min(vv2,vd2)) : (v2>=std::max(vv2,vd2))) {
             pos = dist;

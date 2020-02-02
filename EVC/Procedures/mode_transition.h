@@ -1,3 +1,4 @@
+#pragma once
 #include "../MA/movement_authority.h"
 #include "../Supervision/supervision.h"
 #include "../Supervision/speed_profile.h"

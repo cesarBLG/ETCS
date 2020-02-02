@@ -32,7 +32,7 @@ void driverid_input::validate()
 {
     if(data.size()>8 || data.size()<1) return;
     unsigned long id = stoul(data);
-    if(id!=0) setAccepted(true);
+    valid = id!=0;
 }
 driverid_input::driverid_input()
 {

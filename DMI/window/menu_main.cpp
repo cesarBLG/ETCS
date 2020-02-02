@@ -25,6 +25,7 @@ menu_main::menu_main() : menu("Main")
     buttons[0]->setPressedAction([this]
     {
         write_command("startMission","");
+        exit(this);
     });
     buttons[1]->setPressedAction([this] 
     {

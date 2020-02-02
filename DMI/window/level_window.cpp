@@ -36,5 +36,5 @@ level_input::level_input()
 void level_input::validate()
 {
     if(data.size() < 7) return;
-    setAccepted(true);
+    valid = true;
 }

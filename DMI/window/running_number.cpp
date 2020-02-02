@@ -22,5 +22,5 @@ trn_input::trn_input()
 void trn_input::validate()
 {
     if(data.size()>6) return;
-    setAccepted(true);
+    valid = true;
 }

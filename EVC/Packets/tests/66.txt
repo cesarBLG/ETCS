@@ -1,5 +1,0 @@
-Temporary Speed Restriction Revocation
-NID_PACKET 8
-Q_DIR 2
-L_PACKET 13
-NID_TSR 8

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "../graphics/button.h"
 #include "../graphics/display.h"
+#include "data_validation.h"
 input_window::input_window(string title, int nfields) : subwindow(title, nfields>1), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
     next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), confirmation_label(330, 40), button_yes("Yes",330,40), 
     nfields(nfields)
@@ -32,6 +33,7 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             }
         });
         button_yes.showBorder = false;
+        button_yes.touch_up = 50;
         prev_button.enabled = false;
         next_button.enabled = false;
     }
@@ -43,7 +45,6 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             {
                 next_button.enabled = false;
                 prev_button.enabled = true;
-                inputs[cursor]->validate();
                 cursor = 4*(cursor/4+1);
                 setLayout();
             }
@@ -54,7 +55,6 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             {
                 next_button.enabled = true;
                 prev_button.enabled = false;
-                inputs[cursor]->validate();
                 cursor = 4*(cursor/4-1);
                 setLayout();
             }
@@ -70,6 +70,7 @@ void input_window::create()
     {
         inputs[0]->data_comp->setPressedAction([this]
         {
+            inputs[0]->setAccepted(true);
             inputs[0]->validate();
             if (inputs[0]->isValid()) {
                 sendInformation();
@@ -83,8 +84,13 @@ void input_window::create()
         {
             inputs[i]->data_comp->setPressedAction([this, i]
             {
-                inputs[cursor]->validate();
-                cursor = i;
+                if (i == cursor)
+                {
+                    inputs[cursor]->setAccepted(true);
+                    if (i+1<nfields) cursor++;
+                    else cursor = 0;
+                }
+                else cursor = i;
                 setLayout();
             });
         }
@@ -96,7 +102,7 @@ void input_window::setLayout()
     subwindow::setLayout();
     for(int i=0; i<nfields; i++)
     {
-        inputs[i]->setSelected(false);
+        if(i!=cursor) inputs[i]->setSelected(false);
     }
     inputs[cursor]->setSelected(true);
     if(nfields == 1)
@@ -141,7 +147,7 @@ void input_window::setLayout()
             buttons[11] = &input->more;
             break;
         }
-        else if (i+input->keypage*11 < size) buttons[i] = input->keys[i+input->keypage*11];
+        else if (i+input->keypage*11 < size && input->keys[i+input->keypage*11]!=nullptr) buttons[i] = input->keys[i+input->keypage*11];
     }
     addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 215,0));
     addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));

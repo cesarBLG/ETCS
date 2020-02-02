@@ -13,6 +13,8 @@ acceleration get_A_gradient(std::map<distance, double> gradient)
     acceleration A_gradient;
     A_gradient = acceleration();
     A_gradient.accel = [=](double V, distance d) {
+        if (d-L_TRAIN<gradient.begin()->first)
+            return 0.0;
         double grad = 50000;
         for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
             grad = std::min(grad, it->second);
@@ -23,6 +25,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient)
         else
             return g*grad/(1000+10*((grad>0) ? M_rotating_max : M_rotating_min));
     };
+    A_gradient.dist_step.insert(std::numeric_limits<double>::lowest());
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
         A_gradient.dist_step.insert(it->first-L_TRAIN);

@@ -23,6 +23,7 @@
 #include "../Supervision/speed_profile.h"
 #include "../Position/distance.h"
 #include "../Procedures/start.h"
+#include "../Procedures/mode_transition.h"
 using std::thread;
 using std::mutex;
 using std::unique_lock;
@@ -87,6 +88,8 @@ void parse_command(string str)
         level = (Level)stoi(value);
     } else if (command == "startMission") {
         start_mission();
+    } else if (command == "override") {
+        mode_conditions[37].trigger();
     }
 }
 void dmi_recv()

@@ -42,8 +42,8 @@ void loop()
         std::unique_lock<std::mutex> lck(loop_mtx);
         auto prev = std::chrono::system_clock::now();
         update_odometer();
-        update_mode_status();
         check_eurobalise_passed();
+        update_mode_status();
         if (mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR) update_supervision();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         //std::cout<<std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count()<<std::endl;
