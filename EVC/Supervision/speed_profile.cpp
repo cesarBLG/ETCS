@@ -11,8 +11,8 @@
 static std::map<distance,double> MRSP;
 static std::set<speed_restriction> SSP;
 static std::list<TSR> TSRs;
-std::optional<speed_restriction> train_speed;
-std::optional<speed_restriction> SR_speed;
+optional<speed_restriction> train_speed;
+optional<speed_restriction> SR_speed;
 static std::map<distance, double> gradient;
 void delete_back_info()
 {
@@ -33,6 +33,13 @@ void delete_back_info()
     TSRs.remove_if([mindist](TSR t) {
         return t.restriction.get_end()<mindist;
     });
+}
+void delete_track_info()
+{
+    SSP.clear();
+    gradient.clear();
+    TSRs.clear();
+    recalculate_MRSP();
 }
 void recalculate_MRSP()
 {
@@ -74,6 +81,11 @@ void update_SSP(std::vector<SSP_element> nSSP)
     for (auto it=nSSP.begin(); it!=--nSSP.end(); ++it) {
         auto next = it;
         next++;
+        while (next->start==it->start)
+        {
+            next++;
+            if (next == nSSP.end()) break;
+        }
         rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, true));
     }
     auto it_start = SSP.lower_bound(*rest.begin());

@@ -23,6 +23,7 @@
 #include "../Supervision/speed_profile.h"
 #include "../Position/distance.h"
 #include "../Procedures/start.h"
+#include "../Procedures/override.h"
 #include "../Procedures/mode_transition.h"
 using std::thread;
 using std::mutex;
@@ -89,6 +90,7 @@ void parse_command(string str)
     } else if (command == "startMission") {
         start_mission();
     } else if (command == "override") {
+        overrideProcedure = true;
         mode_conditions[37].trigger();
     }
 }
@@ -159,6 +161,7 @@ void dmi_comm()
         send_command("setDtarget", to_string(D_target));
         send_command("setEB", EB ? "true" : "false");
         send_command("setSB", SB ? "true" : "false");
+        send_command("setOverride", overrideProcedure ? "true" : "false");
         if (mode == Mode::FS) {
             string speeds="";
             double v = calc_ceiling_limit()*3.6;
@@ -190,6 +193,6 @@ void dmi_comm()
             send_command("setPlanningGradients",grad);
         }
         lck.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 }

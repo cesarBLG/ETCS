@@ -49,6 +49,13 @@ struct eurobalise_telegram
         valid = !r.sparefound;
     }
 };
+struct message_packet
+{
+    ETCS_packet *p;
+    distance dist;
+    bool infill;
+    int dir;
+};
 extern std::deque<eurobalise_telegram> pending_telegrams;
 extern std::list<link_data>::iterator link_expected;
 void check_eurobalise_passed();

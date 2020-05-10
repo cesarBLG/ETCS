@@ -9,6 +9,7 @@
 #include "supervision.h"
 #include "../antenna.h"
 #include <iostream>
+#include <cmath>
 double V_est=0;
 double V_ura = 0;
 double A_est = 0;
@@ -171,6 +172,8 @@ void update_monitor_transitions(bool suptargchang, const std::set<target> &super
         monitoring = nmonitor;
     }
 }
+#include <chrono>
+#include <iostream>
 void update_supervision()
 {
     bool suptargchang = supervised_targets_changed();
@@ -193,13 +196,13 @@ void update_supervision()
             tSvL = *it;
         if (it->type == target_class::EoA)
             tEoA = *it;
-    }
+    } 
     if (EoA && SvL) {
         if (V_release != 0)
             d_startRSM = get_d_startRSM(V_release);
     } else {
         V_release = 0;
-    }
+    }   
     update_monitor_transitions(suptargchang, supervised_targets);
     if (monitoring == CSM) {
         bool t1 = V_est <= V_MRSP;
@@ -419,8 +422,5 @@ void update_supervision()
             EB = true;
         if (r0)
             EB = false;
-    }
-    if (EoA && d_minsafefront(0)-L_antenna_front > *EoA) {
-        //TODO Train trip: unauthorized passing of EoA/LoA
     }
 }

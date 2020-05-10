@@ -3,6 +3,8 @@
 #include "21.h"
 #include "27.h"
 #include "136.h"
+#include "../Procedures/mode_transition.h"
+#include "../Procedures/override.h"
 static int reading_nid_bg=-1;
 static std::vector<eurobalise_telegram> telegrams;
 static distance last_passed_distance;
@@ -42,7 +44,8 @@ void trigger_reaction(int reaction)
             //No reaction
             break;
         default:
-            std::cout<<"TODO: Train Trip - Balise read error"<<std::endl;
+            //Train Trip - Balise read error"
+            mode_conditions[17].trigger();
             break;
     }
 }
@@ -331,6 +334,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
 }
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir)
 {
+    std::list<message_packet> ordered_messages;
     for (int i=0; i<message.size(); i++) {
         eurobalise_telegram t = message[i];
         distance ref = dist;
@@ -351,12 +355,20 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 if (!found)
                     break;
             }
-            handle_packet(p, ref, infill, dir);
+            if (p->NID_PACKET == 12)
+                ordered_messages.push_back({p, ref, infill, dir});
+            else
+                ordered_messages.push_front({p, ref, infill, dir});
         }
+    }
+    for (auto it = ordered_messages.begin(); it!=ordered_messages.end(); ++it)
+    {
+        handle_packet(it->p, it->dist, it->infill, it->dir);
     }
 }
 void handle_packet(ETCS_packet *p, distance dist, bool infill, int dir)
 {
+    if (level == Level::N0) return;
     if (p->directional) {
         auto *dp = (ETCS_directional_packet*)p;
         if (dir == -1 || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
@@ -368,11 +380,13 @@ void handle_packet(ETCS_packet *p, distance dist, bool infill, int dir)
     } else if (p->NID_PACKET == 12) {
         Level1_MA ma = *((Level1_MA*)p);
         movement_authority MA = movement_authority(dist, ma);
-        distance end = MA.get_end();
-        /*if (get_SSP().empty() || (--get_SSP().end())->get_end()<end)
+        if (MA.get_v_main() == 0 && !infill && !overrideProcedure)
+            mode_conditions[18].trigger();
+        distance end = MA.get_abs_end();
+        if (get_SSP().empty() || (--get_SSP().end())->get_end()<end || get_SSP().begin()->get_start() > d_estfront)
             return;
-        if (get_gradient().empty() || (--get_gradient().end())->first<end)
-            return;*/
+        if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
+            return;
         if (infill)
             MA_infill(MA);
         else
@@ -385,7 +399,7 @@ void handle_packet(ETCS_packet *p, distance dist, bool infill, int dir)
         elements.insert(elements.end(), grad.elements.begin(), grad.elements.end());
         distance d = dist;
         for (auto e : elements) {
-            gradient[d+e.D_GRADIENT] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
+            gradient[d+e.D_GRADIENT.get_value(grad.Q_SCALE)] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
             d += e.D_GRADIENT;
         }
         update_gradient(gradient);

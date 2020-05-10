@@ -15,6 +15,7 @@
 #include "OR_interface/interface.h"
 #include "MA/movement_authority.h"
 #include "Procedures/mode_transition.h"
+#include "NationalFN/nationalfn.h"
 std::mutex loop_mtx;
 std::condition_variable loop_notifier;
 void start();
@@ -34,6 +35,7 @@ void start()
     set_test_values();
     initialize_mode_transitions();
     ETCS_packet::initialize();
+    initialize_national_functions();
 }
 void loop()
 {
@@ -44,7 +46,10 @@ void loop()
         update_odometer();
         check_eurobalise_passed();
         update_mode_status();
-        if (mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR) update_supervision();
+        if (mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SN ||
+        mode == Mode::SR || mode == Mode::SH || mode == Mode::UN || mode == Mode::RV)
+             update_supervision();
+        update_national_functions();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         //std::cout<<std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count()<<std::endl;
         lck.unlock();

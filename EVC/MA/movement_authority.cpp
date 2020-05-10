@@ -65,7 +65,7 @@ movement_authority::movement_authority(distance start, Level1_MA ma) : start(sta
     }
 }
 
-std::optional<movement_authority> MA;
+optional<movement_authority> MA;
 std::set<speed_restriction> signal_speeds;
 void set_data()
 {
@@ -125,4 +125,13 @@ void MA_infill(movement_authority ma)
     MA->dp = ma.dp;
     MA->ol = ma.ol;
     set_data();
+}
+void delete_MA()
+{
+    MA = {};
+    SvL = {};
+    EoA = {};
+    LoA = {};
+    signal_speeds.clear();
+    V_release = 0;
 }

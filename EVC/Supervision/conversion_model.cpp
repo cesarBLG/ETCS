@@ -13,7 +13,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient)
     acceleration A_gradient;
     A_gradient = acceleration();
     A_gradient.accel = [=](double V, distance d) {
-        if (d-L_TRAIN<gradient.begin()->first)
+        if (gradient.empty() || d-L_TRAIN<gradient.begin()->first)
             return 0.0;
         double grad = 50000;
         for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
@@ -44,10 +44,10 @@ std::map<int,acceleration> A_brake_emergency_combination;
 std::map<int,acceleration> A_brake_service_combination;
 std::map<int,acceleration> A_brake_normal_service_combination;
 std::map<int,std::map<double,std::map<double,double>>> Kdry_rst_combination;
-
 double Kdry_rst(double V, double EBCL, distance d)
 {
-    return (--(--Kdry_rst_combination[0].upper_bound(EBCL))->second.upper_bound(V))->second;
+    return 1;
+    // return (--((--Kdry_rst_combination[0].upper_bound(EBCL))->second.upper_bound(V)))->second;
 }
 
 std::map<double, std::pair<double,double>> Kn;

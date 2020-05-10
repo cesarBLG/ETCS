@@ -107,8 +107,6 @@ void displayPASP()
     PASP.clear();
     PASP.drawRectangle(14, 0, 99, 270, PASPdark);
     
-    if(imarker.start_distance>0) PASP.addRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
-    
     if(speed_elements.size() == 0) return;
     speed_element prev_pasp = speed_elements[0];
     bool oth1 = false;
@@ -144,6 +142,7 @@ void displayPASP()
         }
         if(oth1 && prev.speed<cur.speed) oth2 = true;
     }
+    if(imarker.start_distance>0) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
 }
 void displaySpeed()
 {

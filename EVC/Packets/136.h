@@ -5,6 +5,10 @@ struct InfillLocationReference : ETCS_directional_packet
     Q_NEWCOUNTRY_t Q_NEWCOUNTRY;
     NID_C_t NID_C;
     NID_BG_t NID_BG;
+    InfillLocationReference()
+    {
+        
+    }
     InfillLocationReference(bit_read_temp &r )
     {
         r.read(&NID_PACKET);

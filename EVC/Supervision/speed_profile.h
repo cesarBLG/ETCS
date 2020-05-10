@@ -2,12 +2,13 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <optional>
+#include "../optional.h"
 #include "../Position/distance.h"
 #include "../SSP/ssp.h"
 #include "fixed_values.h"
 #include "train_data.h"
 void recalculate_MRSP();
+void delete_track_info();
 std::map<distance,double> get_MRSP();
 inline double dV_ebi(double vel)
 {
@@ -50,5 +51,5 @@ struct TSR
 };
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
-extern std::optional<speed_restriction> SR_speed;
+extern optional<speed_restriction> SR_speed;
 speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end, bool EB, double g);

@@ -136,10 +136,10 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         V_P = v_p_dappr < d_target ? get_speed_curve(v_p_dappr) : 0;
     }
 }
-std::optional<distance> EoA;
-std::optional<distance> SvL;
-std::optional<distance> SR_dist;
-std::optional<std::pair<distance,double>> LoA;
+optional<distance> EoA;
+optional<distance> SvL;
+optional<distance> SR_dist;
+optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
 static std::set<target> supervised_targets;
 bool changed = false;

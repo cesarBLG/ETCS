@@ -22,7 +22,7 @@
 #include "../Packets/12.h"
 #include "../Supervision/speed_profile.h"
 #include "../Supervision/targets.h"
-#include <optional>
+#include "../optional.h"
 class timer
 {
     float time;
@@ -54,7 +54,7 @@ public:
 struct ma_section
 {
     double length;
-    std::optional<section_timer> stimer;
+    optional<section_timer> stimer;
 };
 struct danger_point
 {
@@ -74,9 +74,9 @@ class movement_authority
     double v_main;
     double v_ema;
     std::vector<ma_section> sections;
-    std::optional<end_timer> endtimer;
-    std::optional<danger_point> dp;
-    std::optional<overlap> ol;
+    optional<end_timer> endtimer;
+    optional<danger_point> dp;
+    optional<overlap> ol;
     distance start;
 public:
     movement_authority(distance start, Level1_MA);
@@ -88,10 +88,24 @@ public:
         }
         return end;
     }
+    distance get_abs_end()
+    {
+        distance end = get_end();
+        if (ol)
+            end += ol->distance;
+        else if (dp) 
+            end += dp->distance;
+        return end;
+    }
+    double get_v_main()
+    {
+        return v_main;
+    }
     friend void MA_infill(movement_authority ma);
     friend void replace_MA(movement_authority ma);
     friend void set_data();
 };
-extern std::optional<movement_authority> MA;
+extern optional<movement_authority> MA;
 void replace_MA(movement_authority ma);
+void delete_MA();
 #endif // _MOVEMENT_AUTHORITY_H

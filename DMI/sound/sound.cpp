@@ -18,6 +18,7 @@ void start_sound()
 {
     SDL_LoadWAV("sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
     SDL_LoadWAV("sound/S_info.wav", &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
+    SDL_LoadWAV("sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
     SDL_LoadWAV("sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
     deviceId = SDL_OpenAudioDevice(NULL, 0, &sinfo.wavSpec, NULL, 0);
 }

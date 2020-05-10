@@ -25,8 +25,9 @@ SDLNet_SocketSet set;
 static SDL_Event ev;
 void notifyDataReceived()
 {
-    repaint();
+    //repaint();
 }
+#include <iostream>
 void parseData(string str)
 {
     int index = str.find_first_of('(');
@@ -41,6 +42,7 @@ void parseData(string str)
     if(command == "setTTI") TTI = stof(value);
     if(command == "setLevel") level = value== "NTC" ? NTC : (Level)stoi(value);
     if(command == "setEB") EB = value!="false";
+    if(command == "setOverride") ovEOA = value!="false";
     if(command == "setMode")
     {
         Mode m=mode;

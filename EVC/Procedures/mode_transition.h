@@ -36,7 +36,7 @@ class cond
         triggered = true;
     }
 };
-extern std::map<int,cond> mode_conditions;
+extern cond mode_conditions[];
 struct mode_transition
 {
     Mode from;

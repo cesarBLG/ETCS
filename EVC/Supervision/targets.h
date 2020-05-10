@@ -1,7 +1,7 @@
 #pragma once
 #include <set>
 #include <vector>
-#include <optional>
+#include "../optional.h"
 #include "acceleration.h"
 #include "../Position/distance.h"
 #include "supervision.h"
@@ -90,10 +90,10 @@ class PBD_target : public target
         calculate_decelerations(gradient);
     }
 };
-extern std::optional<distance> EoA;
-extern std::optional<distance> SvL;
-extern std::optional<distance> SR_dist;
-extern std::optional<std::pair<distance,double>> LoA;
+extern optional<distance> EoA;
+extern optional<distance> SvL;
+extern optional<distance> SR_dist;
+extern optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();
 std::set<target> get_supervised_targets();

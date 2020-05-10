@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <limits>
 #include <set>
+#include "../Supervision/supervision.h"
 struct ETCS_variable
 {
     int size;
@@ -53,7 +54,14 @@ struct D_ENDTIMERSTARTLOC_t : D_t
 struct D_GRADIENT_t : D_t
 {
 };
+struct D_LEVELTR_t : D_t
+{
+    static const uint32_t Now=32767;
+};
 struct D_LINK_t : D_t
+{
+};
+struct D_MAMODE_t : D_t
 {
 };
 struct D_NVROLL_t : D_t
@@ -94,6 +102,15 @@ struct D_STATIC_t : D_t
 struct D_STARTOL_t : D_t
 {
 };
+struct D_TRACKCOND_t : D_t
+{
+};
+struct D_TRACKINIT_t : D_t
+{
+};
+struct D_TSR_t : D_t
+{
+};
 struct G_A_t : ETCS_variable
 {
     static const uint32_t EndOfGradient=255;
@@ -116,23 +133,26 @@ struct L_PACKET_t : ETCS_variable
 {
     L_PACKET_t() : ETCS_variable(13) {}
 };
-struct L_SECTION_t : D_t
+struct L_ACKLEVELTR_t : D_t
+{
+};
+struct L_ACKMAMODE_t : D_t
 {
 };
 struct L_ENDSECTION_t : D_t
 {
 };
-struct M_LINEGAUGE_t : ETCS_variable
+struct L_MAMODE_t : D_t
 {
-    static const uint32_t G1 = 1;
-    static const uint32_t GA = 2;
-    static const uint32_t GB = 4;
-    static const uint32_t GC = 8;
-    M_LINEGAUGE_t() : ETCS_variable(8) {}
-    bool is_valid() override
-    {
-        return rawdata!=0 && (rawdata&0xF0)==0;
-    }
+};
+struct L_SECTION_t : D_t
+{
+};
+struct L_TRACKCOND : D_t
+{
+};
+struct L_TSR : D_t
+{
 };
 struct M_AIRTIGHT_t : ETCS_variable
 {
@@ -154,11 +174,78 @@ struct M_DUP_t : ETCS_variable
         invalid.insert(3);
     }
 };
+struct M_LEVELTR_t : ETCS_variable
+{
+    M_LEVELTR_t() : ETCS_variable(3)
+    {
+        invalid.insert(5);
+        invalid.insert(6);
+        invalid.insert(7);
+    }
+    Level get_level()
+    {
+        switch (rawdata) {
+            case 0:
+                return Level::N0;
+            case 1:
+                return Level::NTC;
+            case 2:
+                return Level::N1;
+            case 3:
+                return Level::N2;
+            case 4:
+                return Level::N3;
+            default:
+                return Level::N0;
+        }
+    }
+};
+struct M_LINEGAUGE_t : ETCS_variable
+{
+    static const uint32_t G1 = 1;
+    static const uint32_t GA = 2;
+    static const uint32_t GB = 4;
+    static const uint32_t GC = 8;
+    M_LINEGAUGE_t() : ETCS_variable(8) {}
+    bool is_valid() override
+    {
+        return rawdata!=0 && (rawdata&0xF0)==0;
+    }
+};
 struct M_MCOUNT_t : ETCS_variable
 {
     static const uint32_t NeverFitsTelegrams=254;
     static const uint32_t FitsAllTelegrams=255;
     M_MCOUNT_t() : ETCS_variable(8) {}
+};
+struct M_MAMODE_t : ETCS_variable
+{
+    static const uint32_t OS=0;
+    static const uint32_t SH=1;
+    static const uint32_t LS=2;
+    M_MAMODE_t() : ETCS_variable(3) 
+    {
+        invalid.insert(3);
+    }
+};
+struct M_TRACKCOND_t : ETCS_variable
+{
+    static const uint32_t NonStoppingArea=0;
+    static const uint32_t TunnelStoppingArea=1;
+    static const uint32_t SoundHorn=2;
+    static const uint32_t PowerlessLowerPantograph=3;
+    static const uint32_t RadioHole=4;
+    static const uint32_t AirTightness=5;
+    static const uint32_t SwitchOffRegenerative=6;
+    static const uint32_t SwitchOffEddyService=7;
+    static const uint32_t SwitchOffShoe=8;
+    static const uint32_t PowerlessSwitchOffPower=9;
+    static const uint32_t SwitchOffEddyEmergency=10;
+    M_TRACKCOND_t() : ETCS_variable(4) {}
+    bool is_valid() override
+    {
+        return rawdata<11;
+    }
 };
 struct M_VERSION_t : ETCS_variable
 {
@@ -199,6 +286,10 @@ struct NID_C_t : ETCS_variable
 {
     NID_C_t() : ETCS_variable(10) {}
 };
+struct NID_NTC_t : ETCS_variable
+{
+    NID_NTC_t() : ETCS_variable(8) {}
+};
 struct NID_OPERATIONAL_t : ETCS_variable
 {
     NID_OPERATIONAL_t() : ETCS_variable(32) {}
@@ -230,6 +321,11 @@ struct NID_OPERATIONAL_t : ETCS_variable
 struct NID_PACKET_t : ETCS_variable
 {
     NID_PACKET_t() : ETCS_variable(8) {}
+};
+struct NID_TSR_t : ETCS_variable
+{
+    static const uint32_t NonRevocable=255;
+    NID_TSR_t() : ETCS_variable(8) {}
 };
 struct N_ITER_t : ETCS_variable
 {
@@ -339,6 +435,12 @@ struct Q_MEDIA_t : ETCS_variable
     static const uint32_t Loop=1;
     Q_MEDIA_t() : ETCS_variable(1) {}
 };
+struct Q_MAMODE_t : ETCS_variable
+{
+    static const uint32_t DeriveSvL=0;
+    static const uint32_t BeginningIsSvL=1;
+    Q_MAMODE_t() : ETCS_variable(1) {}
+};
 struct Q_NEWCOUNTRY_t : ETCS_variable
 {
     static const uint32_t SameCountry=0;
@@ -356,6 +458,12 @@ struct Q_SECTIONTIMER_t : ETCS_variable
     static const uint32_t NoTimer=0;
     static const uint32_t HasTimer=1;
     Q_SECTIONTIMER_t() : ETCS_variable(1) {}
+};
+struct Q_TRACKINIT_t : ETCS_variable
+{
+    static const uint32_t NoInitialState=0;
+    static const uint32_t InitialState=1;
+    Q_TRACKINIT_t() : ETCS_variable(1) {}
 };
 struct Q_UPDOWN_t : ETCS_variable
 {
@@ -384,6 +492,14 @@ struct V_EMA_t : V_t
 struct V_MAIN_t : V_t
 {
 };
+struct V_MAMODE_t : V_t
+{
+    static const uint32_t UseNationalValue=127;
+    bool is_valid() override
+    {
+        return rawdata<121 || rawdata>126;
+    }
+};
 struct V_RELEASE_t : V_t
 {
     static const uint32_t CalculateOnBoard=126;
@@ -405,5 +521,12 @@ struct V_STATIC_t : V_t
     bool is_valid() override
     {
         return rawdata<121 || rawdata==127;
+    }
+};
+struct V_TSR_t : V_t
+{
+    bool is_valid() override
+    {
+        return rawdata<121;
     }
 };
