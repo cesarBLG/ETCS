@@ -148,10 +148,10 @@ struct L_MAMODE_t : D_t
 struct L_SECTION_t : D_t
 {
 };
-struct L_TRACKCOND : D_t
+struct L_TRACKCOND_t : D_t
 {
 };
-struct L_TSR : D_t
+struct L_TSR_t : D_t
 {
 };
 struct M_AIRTIGHT_t : ETCS_variable
