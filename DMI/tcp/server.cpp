@@ -1,11 +1,17 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_net.h>
 #include <string>
-#include <sstream>
 #include <cstdio>
 #include <thread>
 #include <chrono>
+#include <set>
 #include <cmath>
+#ifndef _WIN32
+#include <unistd.h>
+#include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#include <windows.h>
+#endif
 #include "server.h"
 #include "../monitor.h"
 #include "../sound/sound.h"
@@ -13,15 +19,14 @@
 #include "../time.h"
 #include "../planning/planning.h"
 #include "../graphics/drawing.h"
+#include "../state/gps_pos.h"
 using namespace std;
-static IPaddress ip;
-static TCPsocket serv_sock;
-static TCPsocket socket;
-#define BUFF_SIZE 512
+int server;
+int client;
+#define BUFF_SIZE 1024
 #define PORT 5010
-char data[BUFF_SIZE];
-stringstream buffer;
-SDLNet_SocketSet set;
+static char data[BUFF_SIZE];
+string buffer;
 static SDL_Event ev;
 void notifyDataReceived()
 {
@@ -38,37 +43,69 @@ void parseData(string str)
     if(command == "setVtarget") Vtarget = stof(value);
     if(command == "setVest") Vest = stof(value);
     if(command == "setVrelease") Vrelease = stof(value);
+    if(command == "setVset") Vset = stof(value);
     if(command == "setDtarget") Dtarg = stof(value);
     if(command == "setTTI") TTI = stof(value);
     if(command == "setLevel") level = value== "NTC" ? NTC : (Level)stoi(value);
+    if(command == "setLevelTransition") {
+        if (value.empty()) {
+            levelAck = 0;
+        } else {
+            int ind = value.find_first_of(',');
+            string lev = value.substr(0,ind);
+            ackLevel = lev== "NTC" ? NTC : (Level)stoi(lev);
+            levelAck = stoi(value.substr(ind+1));
+        }
+    }
     if(command == "setEB") EB = value!="false";
     if(command == "setOverride") ovEOA = value!="false";
     if(command == "setMode")
     {
         Mode m=mode;
         if(value == "FS") m = FS;
-        if(value == "LS") m = LS;
-        if(value == "OS") m = OS;
-        if(value == "SH") m = SH;
-        if(value == "SB") m = SB;
-        if(value == "SR") m = SR;
-        if(value == "UN") m = UN;
-        if(value == "TR") m = TR;
+        else if(value == "LS") m = LS;
+        else if(value == "OS") m = OS;
+        else if(value == "SH") m = SH;
+        else if(value == "SB") m = SB;
+        else if(value == "SR") m = SR;
+        else if(value == "UN") m = UN;
+        else if(value == "TR") m = TR;
+        else if(value == "PT") m = PT;
         mode = m;
+    }
+    if(command == "setModeTransition")
+    {
+        Mode m;
+        modeAck = true;
+        if (value.empty()) modeAck = false;
+        else if(value == "FS") m = FS;
+        else if(value == "LS") m = LS;
+        else if(value == "OS") m = OS;
+        else if(value == "SH") m = SH;
+        else if(value == "SB") m = SB;
+        else if(value == "SR") m = SR;
+        else if(value == "UN") m = UN;
+        else if(value == "TR") m = TR;
+        ackMode = m;
     }
     if(command == "setMonitor") setMonitor(value == "CSM" ? CSM : (value == "TSM" ? TSM : RSM));
     if(command == "setSupervision")
     {
         SupervisionStatus s=IntS;
         if(value == "NoS") s = NoS;
-        if(value == "IndS") s = IndS;
-        if(value == "OvS") s = OvS;
-        if(value == "WaS") s = WaS;
-        if(value == "IntS") s = IntS;
+        else if(value == "IndS") s = IndS;
+        else if(value == "OvS") s = OvS;
+        else if(value == "WaS") s = WaS;
+        else if(value == "IntS") s = IntS;
         setSupervision(s);
     }
+    if(command == "setGeoPosition") pk = stof(value);
     if(command == "setPlanningObjects")
     {
+        planning_elements.clear();
+        if (value.empty())
+            return;
+
         vector<string> val;
 
         int valsep = value.find(',');
@@ -79,9 +116,8 @@ void parseData(string str)
             valsep = value.find(',');
             val.push_back(param);
         }
-        val.push_back(value);
+        if (!value.empty()) val.push_back(value);
 
-        planning_elements.clear();
         for(int i = 0; i < val.size(); i+=2)
         {
             planning_element p;
@@ -102,7 +138,7 @@ void parseData(string str)
             valsep = value.find(',');
             val.push_back(param);
         }
-        val.push_back(value);
+        if (!value.empty()) val.push_back(value);
 
         gradient_elements.clear();
         for(int i = 0; i < val.size(); i+=2)
@@ -126,7 +162,7 @@ void parseData(string str)
             valsep = value.find(',');
             val.push_back(param);
         }
-        val.push_back(value);
+        if (!value.empty()) val.push_back(value);
 
         speed_elements.clear();
         bool imark=false;
@@ -155,65 +191,139 @@ void parseData(string str)
         if(!imark) imarker.start_distance = 0;
         planning_unchanged = false;
     }
+    if(command == "setActiveConditions")
+    {
+        vector<string> val;
+
+        int valsep = value.find(',');
+        while(valsep!=string::npos)
+        {
+            string param = value.substr(0,valsep);
+            value = value.substr(valsep+1);
+            valsep = value.find(',');
+            val.push_back(param);
+        }
+        if (!value.empty()) val.push_back(value);
+
+        std::set<int> syms;
+        for(int i = 0; i<val.size(); i++)
+        {
+            syms.insert(stoi(val[i]));
+        }
+        extern int track_conditions[];
+        std::set<int> asig;
+        for (int i=0; i<3; i++) 
+        {
+            if (syms.find(track_conditions[i]) == syms.end()) track_conditions[i] = 0;
+            if (track_conditions[i] != 0) asig.insert(track_conditions[i]);
+        }
+        for (int s : syms)
+        {
+            if (asig.size()>=3) break;
+            if (asig.find(s) != asig.end()) continue;
+            for (int i=0; i<3; i++)
+            {
+                if (track_conditions[i] == 0)
+                {
+                    track_conditions[i] = s;
+                    asig.insert(s);
+                    break;
+                }
+            }
+        }
+    }
+    if (command == "setMessage")
+    {
+        int valsep = value.find(',');
+        int id = stoi(value.substr(0,valsep));
+        value = value.substr(valsep+1);
+        valsep = value.find(',');
+        int size = stoi(value.substr(0,valsep));
+        value = value.substr(valsep+1);
+        string text = value.substr(0, size);
+
+        value = value.substr(size+1);
+        valsep = value.find(',');
+        vector<string> val;
+        while(valsep!=string::npos)
+        {
+            string param = value.substr(0,valsep);
+            value = value.substr(valsep+1);
+            valsep = value.find(',');
+            val.push_back(param);
+        }
+        val.push_back(value);
+        addMsg(Message(id, text, stoi(val[0]), stoi(val[1]), val[2]!="false", val[3]!="false", stoi(val[4])));
+    }
+    if (command == "setRevokeMessage")
+    {
+        revokeMessage(stoi(value));
+    }
     update();
     notifyDataReceived();
 }
 void read()
 {
-    if(SDLNet_CheckSockets(set, 100)<0)
-    {
-        printf("SDL CheckSockets Error: %s\n", SDL_GetError());
-    }
-    if(!SDLNet_SocketReady(socket)) return;
-    int result = SDLNet_TCP_Recv(socket, data, BUFF_SIZE);
+    int result = recv(client, data, BUFF_SIZE-1, 0);
     if(result>0)
     {
-        for(int i=0; i<result && i<BUFF_SIZE; i++)
-        {
-            buffer<<data[i];
+        data[result] = 0;
+        buffer += data;
+        int end;
+        while ((end=buffer.find_first_of(';'))!=string::npos) {
+            int start = buffer.find_first_not_of("\n\r ;");
+            string command = buffer.substr(start, end-start);
+            parseData(command);
+            buffer = buffer.substr(end+1);
         }
-        int index = buffer.str().substr(buffer.tellg()).find_first_of(';');
-        while(index>0 && index<512)
-        {
-            stringstream command;
-            bool s = false;
-            for(int i=0; i<=index; i++)
-            {
-                char c = buffer.get();
-                if(c == 's') s = true;
-                if(s) command.put(c);
-            }
-            parseData(command.str());
-            index = buffer.str().substr(buffer.tellg()).find_first_of(';');
-        }
-        //buffer.str(buffer.str().substr(buffer.tellg()));
     }
 }
 void write_command(string command, string value)
 {
-    string send = command+"("+value+");\n";
-    SDLNet_TCP_Send(socket, send.c_str(), send.size());
+    string tosend = command+"("+value+");\n";
+    send(client, tosend.c_str(), tosend.size(), 0);
 }
 extern bool running;
 void startSocket()
 {
-    if(SDLNet_Init()<0)
-    {
-        printf("%SDL Net Init Error: %s\n", SDL_GetError());
+#ifdef _WIN32
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2,2), &wsa);
+#endif
+    server = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in serv;
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(PORT);
+    serv.sin_addr.s_addr = INADDR_ANY;
+    if (server == -1) {
+        perror("socket");
+        return;
     }
-    set = SDLNet_AllocSocketSet(2);
-    SDLNet_ResolveHost(&ip, nullptr, PORT);
-    serv_sock = SDLNet_TCP_Open(&ip);
-    SDLNet_TCP_AddSocket(set, serv_sock);
-    socket = nullptr;
-    while(socket == nullptr && running)
+    if (bind(server, (struct sockaddr *)&(serv), sizeof(serv)) == -1) {
+        perror("bind");
+        return;
+    }
+    if (listen(server, 1) == -1) {
+        perror("listen");
+        return;
+    }
+    client = -1;
+    while(client == -1 && running)
     {
-        SDLNet_CheckSockets(set, 100);
-        if(SDLNet_SocketReady(serv_sock))
-        {
-            socket = SDLNet_TCP_Accept(serv_sock);
-            SDLNet_TCP_AddSocket(set, socket);
+        struct sockaddr_in addr;
+        int c = sizeof(struct sockaddr_in);
+        int cl = accept(server, (struct sockaddr *)&addr, 
+#ifdef _WIN32
+        (int *)
+#else
+        (socklen_t *)
+#endif
+        &c);
+        if(cl == -1) {
+            perror("accept");
+            continue;
         }
+        client = cl;
     }
     while(running)
     {
@@ -223,7 +333,9 @@ void startSocket()
 }
 void closeSocket()
 {
-    SDLNet_TCP_Close(socket);
-    SDLNet_TCP_Close(serv_sock);
-    SDLNet_Quit();
+#ifdef _WIN32
+    closesocket(server);
+#else
+    close(server);
+#endif
 }

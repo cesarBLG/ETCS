@@ -4,11 +4,13 @@
 class train_data_window : public input_window
 {
     public:
+    TextButton SelectType;
     train_data_window();
     void validate(string dat, int field)
     {
 
     }
     void sendInformation() override;
+    void setLayout() override;
 };
 #endif

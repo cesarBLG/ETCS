@@ -13,6 +13,7 @@ static std::set<speed_restriction> SSP;
 static std::list<TSR> TSRs;
 optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
+optional<speed_restriction> override_speed;
 static std::map<distance, double> gradient;
 void delete_back_info()
 {
@@ -34,6 +35,18 @@ void delete_back_info()
         return t.restriction.get_end()<mindist;
     });
 }
+void delete_SSP()
+{
+    SSP.clear();
+}
+void delete_gradient()
+{
+    gradient.clear();
+}
+void delete_TSR()
+{
+    TSRs.clear();
+}
 void delete_track_info()
 {
     SSP.clear();
@@ -53,6 +66,8 @@ void recalculate_MRSP()
         restrictions.insert(*train_speed);
     if (SR_speed)
         restrictions.insert(*SR_speed);
+    if (override_speed)
+        restrictions.insert(*override_speed);
     if (MA)
         restrictions.insert(signal_speeds.begin(), signal_speeds.end());
     std::set<distance> critical_points;

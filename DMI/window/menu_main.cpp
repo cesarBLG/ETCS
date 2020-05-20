@@ -3,7 +3,7 @@
 #include "level_window.h"
 #include "driver_id.h"
 #include "running_number.h"
-#include "train_data.h"
+#include "fixed_train_data.h"
 #include <algorithm>
 #include "../monitor.h"
 #include "../messages/messages.h"
@@ -33,7 +33,7 @@ menu_main::menu_main() : menu("Main")
     });
     buttons[2]->setPressedAction([this] 
     {
-        right_menu(new train_data_window());
+        right_menu(new fixed_train_data_window());
     });
     buttons[4]->setPressedAction([this] 
     {
@@ -45,7 +45,8 @@ menu_main::menu_main() : menu("Main")
     });
     buttons[6]->setPressedAction([this]
     {
-        
+        write_command("shunting","");
+        exit(this);
     });
     buttons[7]->setPressedAction([this]
     { 

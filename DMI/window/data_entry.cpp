@@ -89,6 +89,15 @@ void input_window::create()
                     inputs[cursor]->setAccepted(true);
                     if (i+1<nfields) cursor++;
                     else cursor = 0;
+                    bool allaccepted = true;
+                    for (int j=0; j<nfields; j++) {
+                        if (!inputs[j]->isAccepted())
+                            allaccepted = false;
+                    }
+                    if (allaccepted)
+                        button_yes.setBackgroundColor(Grey);
+                    else
+                        button_yes.setBackgroundColor(DarkGrey);
                 }
                 else cursor = i;
                 setLayout();

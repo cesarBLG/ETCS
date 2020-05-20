@@ -18,27 +18,29 @@
 
 #include "movement_authority.h"
 #include "../Supervision/supervision.h"
-movement_authority::movement_authority(distance start, Level1_MA ma) : start(start)
+movement_authority::movement_authority(distance start, Level1_MA ma, int64_t time) : start(start), time_stamp(time)
 {
     v_main = ma.V_MAIN.get_value();
     v_ema = ma.V_EMA.get_value();
+    distance cumdist = start;
     for (int i=0; i<ma.N_ITER; i++) {
         ma_section section;
-        section.length =ma.sections[i].L_SECTION.get_value(ma.Q_SCALE);
+        section.length = ma.sections[i].L_SECTION.get_value(ma.Q_SCALE);
         if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
-            section.stimer = section_timer(ma.sections[i].T_SECTIONTIMER, ma.sections[i].D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
+            section.stimer = section_timer(ma.sections[i].T_SECTIONTIMER, cumdist + ma.sections[i].D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
         sections.push_back(section);
+        cumdist += section.length;
     }
     ma_section endsection;
     endsection.length = ma.L_ENDSECTION.get_value(ma.Q_SCALE);
     if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
-        endsection.stimer = section_timer(ma.T_SECTIONTIMER, ma.D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
+        endsection.stimer = section_timer(ma.T_SECTIONTIMER, cumdist + ma.D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
     sections.push_back(endsection);
+    cumdist += endsection.length;
     if (ma.Q_ENDTIMER && ma.T_ENDTIMER != T_SECTIONTIMER_t::Infinity)
-        endtimer = end_timer(ma.T_ENDTIMER, ma.D_ENDTIMERSTARTLOC.get_value(ma.Q_SCALE));
+        endtimer = end_timer(ma.T_ENDTIMER, cumdist-ma.D_ENDTIMERSTARTLOC.get_value(ma.Q_SCALE));
     if (ma.Q_OVERLAP) {
         overlap ov;
-        ov.startdist = ma.D_STARTOL.get_value(ma.Q_SCALE);
         ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
         if (ma.V_RELEASEOL == V_RELEASE_t::CalculateOnBoard)
             ov.vrelease = -2;
@@ -46,10 +48,8 @@ movement_authority::movement_authority(distance start, Level1_MA ma) : start(sta
             ov.vrelease = -1;
         else
             ov.vrelease = ma.V_RELEASEOL.get_value();
-        if (ma.T_OL == T_OL_t::Infinity)
-            ov.time = std::numeric_limits<double>::infinity();
-        else
-            ov.time = ma.T_OL;
+        if (ma.T_OL != T_OL_t::Infinity)
+            ov.ovtimer = end_timer(ma.T_OL, cumdist-ma.D_STARTOL.get_value(ma.Q_SCALE));
         ol = ov;
     }
     if (ma.Q_DANGERPOINT) {
@@ -63,6 +63,60 @@ movement_authority::movement_authority(distance start, Level1_MA ma) : start(sta
             d.vrelease = ma.V_RELEASEDP.get_value();
         dp = d;
     }
+}
+void set_data();
+void movement_authority::update_timers()
+{
+	if (endtimer) {
+		if (!endtimer->started && endtimer->startloc < d_maxsafefront(endtimer->startloc.get_reference()))
+			endtimer->start();
+		if (endtimer->triggered()) {
+			V_release = 0;
+			EoA = d_estfront;
+			LoA = {};
+			recalculate_MRSP();
+		}
+	}
+	if (ol && ol->ovtimer) {
+		if (!ol->ovtimer->started &&
+			ol->ovtimer->startloc < d_maxsafefront(ol->ovtimer->startloc.get_reference()))
+			ol->ovtimer->start();
+		if (ol->ovtimer->triggered() || (ol->ovtimer->started && V_est <= 0)) {
+			v_ema = 0;
+			ol = {};
+			set_data();
+		}
+	}
+	distance cumdist = start;
+	for (int i = 0; i < sections.size(); i++) {
+		if (sections[i].stimer) {
+			if (!sections[i].stimer->started &&
+				sections[i].stimer->stoploc > d_minsafefront(sections[i].stimer->stoploc.get_reference())) {
+				sections[i].stimer->start(time_stamp);
+			}
+			if (sections[i].stimer->stoploc <= d_minsafefront(sections[i].stimer->stoploc.get_reference())) {
+				sections[i].stimer->started = false;
+			}
+			if (sections[i].stimer->triggered()) {
+                v_ema = 0;
+				EoA = cumdist;
+				SvL = cumdist;
+				LoA = {};
+				recalculate_MRSP();
+                sections.erase(sections.begin()+i, sections.end());
+                break;
+			}
+		}
+		cumdist += sections[i].length;
+	}
+	if (loa_timer) {
+		if (!loa_timer->started)
+			loa_timer->start(time_stamp);
+		if (loa_timer->triggered()) {
+			v_ema = 0;
+			set_data();
+		}
+	}
 }
 
 optional<movement_authority> MA;
@@ -93,16 +147,54 @@ void set_data()
 }
 void replace_MA(movement_authority ma)
 {
+    if (MA && MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+        ma.endtimer->started = true;
+        ma.endtimer->start_time = MA->endtimer->start_time;
+    } else if ((!MA || !MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+        ma.endtimer->started = true;
+        ma.endtimer->start_time = get_milliseconds() - ma.endtimer->time;
+    }
+    if (MA && MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+        ma.ol->ovtimer->started = true;
+        ma.ol->ovtimer->start_time = MA->ol->ovtimer->start_time;
+    } else if ((!MA || !MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+        ma.ol->ovtimer->started = true;
+        ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
+    }
+    auto prevSvL = SvL;
+    auto prevLoA = LoA;
     MA = ma;
-    signal_speeds.clear();
-    signal_speeds.insert(speed_restriction(MA->v_main, MA->start, MA->get_end(), false));
     set_data();
+    if ((prevSvL && SvL && *prevSvL>*SvL) || (SvL && prevLoA)) {
+        //MA shortening
+    }
 }
 void MA_infill(movement_authority ma)
 {
+    if (!MA)
+        return;
     distance dist = ma.start;
     if (MA->get_end() < dist)
         return;
+
+    
+    if (MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+        ma.endtimer->started = true;
+        ma.endtimer->start_time = MA->endtimer->start_time;
+    } else if ((!MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+        ma.endtimer->started = true;
+        ma.endtimer->start_time = get_milliseconds() - ma.endtimer->time;
+    }
+    if (MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+        ma.ol->ovtimer->started = true;
+        ma.ol->ovtimer->start_time = MA->ol->ovtimer->start_time;
+    } else if ((!MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+        ma.ol->ovtimer->started = true;
+        ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
+    }
+
+    auto prevSvL = SvL;
+    auto prevLoA = LoA;
     distance cumdist = MA->start;
     std::vector<ma_section> s;
     for (int i=0; i<MA->sections.size(); i++) {
@@ -117,14 +209,15 @@ void MA_infill(movement_authority ma)
     }
     s.insert(s.end(), ma.sections.begin(), ma.sections.end());
     MA->sections = s;
-    signal_speeds.clear();
-    signal_speeds.insert(speed_restriction(MA->v_main, MA->start, dist, false));
-    signal_speeds.insert(speed_restriction(ma.v_main, dist, ma.get_end(), false));
     MA->v_ema = ma.v_ema;
     MA->endtimer = ma.endtimer;
     MA->dp = ma.dp;
     MA->ol = ma.ol;
+    MA->time_stamp = ma.time_stamp;
     set_data();
+    if ((prevSvL && SvL && *prevSvL>*SvL) || (SvL && prevLoA)) {
+        //MA shortening
+    }
 }
 void delete_MA()
 {
@@ -132,6 +225,14 @@ void delete_MA()
     SvL = {};
     EoA = {};
     LoA = {};
-    signal_speeds.clear();
     V_release = 0;
+}
+void set_signalling_restriction(movement_authority ma, bool infill)
+{
+    if (ma.v_main == 0)
+        return;
+    signal_speeds.clear();
+    if (infill && MA)
+        signal_speeds.insert(speed_restriction(MA->v_main, MA->start, ma.start, false));
+    signal_speeds.insert(speed_restriction(ma.v_main, ma.start, ma.get_end(), false));
 }

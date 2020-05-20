@@ -1,5 +1,6 @@
 #include "../graphics/component.h"
 #include "../monitor.h"
+#include "../tcp/server.h"
 void dispAcks();
 Component c234(37*3, 50, nullptr);
 Component c2(37, 50, nullptr);
@@ -8,19 +9,25 @@ Component c4(37, 50, nullptr);
 Component c1(58, 50, dispAcks);
 Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
+bool prevAck = false;
+int prevlevel = 0;
 void dispAcks()
 {
+    if (modeAck == prevAck && prevlevel == levelAck) return;
+    prevAck = modeAck;
+    prevlevel = levelAck;
+    c1.clear();
     if(modeAck)
     {
         string path = "symbols/Mode/MO_";
         int num;
-        switch(mode)
+        switch(ackMode)
         {
             case SH:
                 num = 2;
                 break;
             case TR:
-                num = 4;
+                num = 5;
                 break;
             case OS:
                 num = 8;
@@ -44,14 +51,14 @@ void dispAcks()
         if(num<10) path+="0";
         path+=to_string(num);
         path+=".bmp";
-        c1.setAck([](){modeAck = false;});
-        c1.drawImage(path.c_str());
+        c1.setAck([](){write_command("modeAcked","");});
+        c1.addImage(path.c_str());
     }
     else if(levelAck>0)
     {
         string path = "symbols/Level/LE_";
         int num = 0;
-        switch(level)
+        switch(ackLevel)
         {
             case N0:
                 num=1;
@@ -75,8 +82,8 @@ void dispAcks()
         path+=to_string(num);
         //If NTC is LZB/PZB, path+="a";
         path+=".bmp";
-        c1.drawImage(path.c_str());
-        if(levelAck == 2) c1.setAck([](){levelAck = 1;});
+        c1.addImage(path.c_str());
+        if(levelAck == 2) c1.setAck([](){write_command("levelAcked","");});
         else c1.setAck(nullptr);
     }
     else c1.setAck(nullptr);

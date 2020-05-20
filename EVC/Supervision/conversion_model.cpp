@@ -7,7 +7,6 @@
 #include <map>
 #include <utility>
 #include <cmath>
-
 acceleration get_A_gradient(std::map<distance, double> gradient)
 {
     acceleration A_gradient;
@@ -39,35 +38,179 @@ double T_brake_service_cmt;
 acceleration A_brake_emergency;
 acceleration A_brake_service;
 acceleration A_brake_normal_service;
-
-std::map<int,acceleration> A_brake_emergency_combination;
-std::map<int,acceleration> A_brake_service_combination;
-std::map<int,acceleration> A_brake_normal_service_combination;
+std::map<distance,int> active_combination;
+std::map<int,std::map<double, double>> A_brake_emergency_combination;
+std::map<int,std::map<double, double>> A_brake_service_combination;
+std::map<int,std::map<double,std::map<double, double>>> A_brake_normal_service_combination;
 std::map<int,std::map<double,std::map<double,double>>> Kdry_rst_combination;
+std::map<int,std::map<double, double>> Kwet_rst_combination;
+std::map<int,double> T_brake_service_combination;
+std::map<int,double> T_brake_emergency_combination;
+acceleration get_A_brake_emergency()
+{
+    if (conversion_model_used)
+        return A_brake_emergency;
+    acceleration ac;
+    for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
+        ac.dist_step.insert(it->first);
+    for (int i=0; i<16; i++) {
+        for (auto it = A_brake_emergency_combination[i].begin(); it!=A_brake_emergency_combination[i].end(); ++it)
+            ac.speed_step.insert(it->first);
+    }
+    ac.accel = [](double V, distance d)
+    {
+        int comb = (--active_combination.upper_bound(d))->second;
+        return (--A_brake_emergency_combination[comb].upper_bound(V))->second;
+    };
+    return ac;
+}
+acceleration get_A_brake_service()
+{
+    if (conversion_model_used)
+        return A_brake_service;
+    acceleration ac;
+    for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
+        ac.dist_step.insert(it->first);
+    for (int i=0; i<16; i++) {
+        for (auto it = A_brake_service_combination[i].begin(); it!=A_brake_service_combination[i].end(); ++it)
+            ac.speed_step.insert(it->first);
+    }
+    ac.accel = [](double V, distance d)
+    {
+        int comb = (--active_combination.upper_bound(d))->second;
+        return (--A_brake_service_combination[comb].upper_bound(V))->second;
+    };
+    return ac;
+}
+acceleration get_A_brake_normal_service(acceleration service)
+{
+    acceleration ac;
+    for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
+        ac.dist_step.insert(it->first);
+    for (auto it = A_brake_normal_service_combination[brake_position != PassengerP].begin(); it!=A_brake_normal_service_combination[brake_position].end(); ++it) {
+        for (auto it2 = it->second.begin(); it2!=it->second.end(); ++it2)
+            ac.speed_step.insert(it->first);
+    }
+    ac.accel = [service](double V, distance d)
+    {
+        return (--(--A_brake_normal_service_combination[brake_position != PassengerP].upper_bound(service(0,d)))->second.upper_bound(V))->second;
+    };
+    return ac;
+}
+double get_T_brake_emergency(distance d)
+{
+    return T_brake_emergency_combination[(--active_combination.upper_bound(d))->second];
+}
+double get_T_brake_service(distance d)
+{
+    return T_brake_service_combination[(--active_combination.upper_bound(d))->second];
+}
 double Kdry_rst(double V, double EBCL, distance d)
 {
-    return 1;
-    // return (--((--Kdry_rst_combination[0].upper_bound(EBCL))->second.upper_bound(V)))->second;
+    return (--((--Kdry_rst_combination[(--active_combination.upper_bound(d))->second].upper_bound(V))->second.upper_bound(EBCL)))->second;
 }
-
-std::map<double, std::pair<double,double>> Kn;
-std::map<double, double> Kwet_rst;
-void set_test_values()
-{    
-    Kn[0] = {1,1};
-    Kwet_rst[0] = 1;
-    
-    A_brake_emergency = acceleration();
-    A_brake_emergency.speed_step.insert(0);
-    A_brake_emergency.accel = [](double V, distance d) { return 1.1; };
-
-    A_brake_service = acceleration();
-    A_brake_service.speed_step.insert(0);
-    A_brake_service.accel = [](double V, distance d) { return 0.9; };
-    
-    A_brake_normal_service = acceleration();
-    A_brake_normal_service.speed_step.insert(0);
-    A_brake_normal_service.accel = [](double V, distance d) { return 0.5; };
+double Kwet_rst(double V, distance d)
+{
+    return (--Kwet_rst_combination[(--active_combination.upper_bound(d))->second].upper_bound(V))->second;
+}
+std::map<double,double> Kn[2];
+void set_brake_model(json &traindata)
+{
+    json &brakes = traindata["brakes"];
+    json &emergency = brakes["emergency"];
+    for (auto it = emergency.begin(); it!=emergency.end(); ++it) {
+        std::string valid = (*it)["validity"].get<std::string>();
+        json &curves = (*it)["curves"];
+        std::map<double,std::map<double,double>> dry;
+        std::map<double,double> wet;
+        std::map<double,double> accel;
+        double build_time = (*it)["build_up_time"].get<double>();
+        for (auto it2 = curves.begin(); it2!=curves.end(); ++it2) {
+            json &step = *it2;
+            double spd = step["speed"].get<double>()/3.6;
+            accel[spd] = step["value"].get<double>();
+            wet[spd] = step["kwet"].get<double>();
+            json &dries = step["kdry"];
+            for (auto it3 = dries.begin(); it3!=dries.end(); ++it3) {
+                json &conf = *it3;
+                double ebcl = conf["confidence"].get<double>();
+                dry[spd][ebcl] = conf["value"].get<double>();
+            }
+        }
+        for (int i=0; i<16; i++) {
+            bool applies = true;
+            for (int j=0; j<4; j++) {
+                if (valid[j]!='.') {
+                    int num = valid[j]-'0';
+                    if (num != ((i>>j)&1)) {
+                        applies = false;
+                        break;
+                    }
+                }
+            }
+            if (applies) {
+                A_brake_emergency_combination[i] = accel;
+                T_brake_emergency_combination[i] = build_time;
+                Kwet_rst_combination[i] = wet;
+                Kdry_rst_combination[i] = dry;
+            }
+        }
+    }
+    json &service = brakes["service"];
+    for (auto it = service.begin(); it!=service.end(); ++it) {
+        std::string valid = (*it)["validity"].get<std::string>();
+        json &curves = (*it)["curves"];
+        std::map<double,double> accel;
+        double build_time = (*it)["build_up_time"].get<double>();
+        for (auto it2 = curves.begin(); it2!=curves.end(); ++it2) {
+            json &step = *it2;
+            double spd = step["speed"].get<double>()/3.6;
+            accel[spd] = step["value"].get<double>();
+        }
+        for (int i=0; i<16; i++) {
+            bool applies = true;
+            for (int j=0; j<4; j++) {
+                if (valid[j]!='.') {
+                    int num = valid[j]-'0';
+                    if (num != ((i>>j)&1)) {
+                        applies = false;
+                        break;
+                    }
+                }
+            }
+            if (applies) {
+                A_brake_service_combination[i] = accel;
+                T_brake_service_combination[i] = build_time;
+            }
+        }
+    }
+    json &normal = brakes["normal_service"];
+    for (auto it = normal.begin(); it!=normal.end(); ++it) {
+        std::string position = it.key();
+        if (position == "kn+") {
+            for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
+                Kn[0][(*it2)["speed"].get<double>()] = (*it2)["value"].get<double>();
+            }
+            continue;
+        }
+        if (position == "kn-") {
+            for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
+                Kn[1][(*it2)["speed"].get<double>()] = (*it2)["value"].get<double>();
+            }
+            continue;
+        }
+        int p = position=="passenger" ? 0 : 1;
+        for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
+            double sbaccel = stof(it2.key());
+            json &curves = (*it2)["curves"];
+            for (auto it3 = curves.begin(); it3!=curves.end(); ++it3) {
+                json &step = *it3;
+                double spd = step["speed"].get<double>()/3.6;
+                A_brake_normal_service_combination[p][sbaccel][spd] = step["value"].get<double>();
+            }
+        }
+    }
+    active_combination[distance(std::numeric_limits<double>::lowest())] = 15;
 }
 std::map<double, double> Kv_int;
 std::map<double, double> Kr_int;

@@ -31,7 +31,7 @@ struct Q_SCALE_t : ETCS_variable
 struct D_t : ETCS_variable
 {
     D_t() : ETCS_variable(15) {}
-    virtual double get_value(Q_SCALE_t scale)
+    virtual double get_value(const Q_SCALE_t scale) const
     {
         double fact=1;
         if (scale == Q_SCALE_t::m10)
@@ -67,7 +67,7 @@ struct D_MAMODE_t : D_t
 struct D_NVROLL_t : D_t
 {
     static const uint32_t Infinity=32767;
-    double get_value(Q_SCALE_t scale) override
+    double get_value(Q_SCALE_t scale) const
     {
         if (rawdata == Infinity)
             return std::numeric_limits<double>::infinity();
@@ -75,6 +75,9 @@ struct D_NVROLL_t : D_t
     }
 };
 struct D_OL_t : D_t
+{
+};
+struct D_POSOFF_t : D_t
 {
 };
 struct D_REF_t : ETCS_variable
@@ -102,6 +105,10 @@ struct D_STATIC_t : D_t
 struct D_STARTOL_t : D_t
 {
 };
+struct D_TEXTDISPLAY_t : D_t
+{
+    static const uint32_t NotDistanceLimited=32767;
+};
 struct D_TRACKCOND_t : D_t
 {
 };
@@ -119,7 +126,7 @@ struct G_A_t : ETCS_variable
 struct L_NVKRINT_t : ETCS_variable
 {
     L_NVKRINT_t() : ETCS_variable(5) {}
-    double get_value()
+    double get_value() const
     {
         if (rawdata < 5)
             return 25*rawdata;
@@ -148,6 +155,14 @@ struct L_MAMODE_t : D_t
 struct L_SECTION_t : D_t
 {
 };
+struct L_TEXT_t : ETCS_variable
+{
+    L_TEXT_t() : ETCS_variable(8) {}
+};
+struct L_TEXTDISPLAY_t : D_t
+{
+    static const uint32_t NotDistanceLimited=32767;
+};
 struct L_TRACKCOND_t : D_t
 {
 };
@@ -172,6 +187,37 @@ struct M_DUP_t : ETCS_variable
     M_DUP_t() : ETCS_variable(2)
     {
         invalid.insert(3);
+    }
+};
+struct M_LEVELTEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t N0=0;
+    static const uint32_t NTC=1;
+    static const uint32_t N1=2;
+    static const uint32_t N2=3;
+    static const uint32_t N3=4;
+    static const uint32_t NoLevelLimited=5;
+    M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
+    {
+        invalid.insert(6);
+        invalid.insert(7);
+    }
+    Level get_value() const
+    {
+        switch (rawdata) {
+            case N0:
+                return Level::N0;
+            case N1:
+                return Level::N1;
+            case N2:
+                return Level::N2;
+            case N3:
+                return Level::N3;
+            case NTC:
+                return Level::NTC;
+            default:
+                return Level::Unknown;
+        }
     }
 };
 struct M_LEVELTR_t : ETCS_variable
@@ -212,12 +258,6 @@ struct M_LINEGAUGE_t : ETCS_variable
         return rawdata!=0 && (rawdata&0xF0)==0;
     }
 };
-struct M_MCOUNT_t : ETCS_variable
-{
-    static const uint32_t NeverFitsTelegrams=254;
-    static const uint32_t FitsAllTelegrams=255;
-    M_MCOUNT_t() : ETCS_variable(8) {}
-};
 struct M_MAMODE_t : ETCS_variable
 {
     static const uint32_t OS=0;
@@ -226,6 +266,67 @@ struct M_MAMODE_t : ETCS_variable
     M_MAMODE_t() : ETCS_variable(3) 
     {
         invalid.insert(3);
+    }
+};
+struct M_MCOUNT_t : ETCS_variable
+{
+    static const uint32_t NeverFitsTelegrams=254;
+    static const uint32_t FitsAllTelegrams=255;
+    M_MCOUNT_t() : ETCS_variable(8) {}
+};
+struct M_MODETEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t FS=0;
+    static const uint32_t OS=1;
+    static const uint32_t SR=2;
+    static const uint32_t UN=4;
+    static const uint32_t SB = 6;
+    static const uint32_t TR = 7;
+    static const uint32_t PT = 8;
+    static const uint32_t LS = 12;
+    static const uint32_t RV = 14;
+    static const uint32_t NoModeLimited = 15;
+    M_MODETEXTDISPLAY_t() : ETCS_variable(4) 
+    {
+        invalid.insert(3);
+        invalid.insert(5);
+        invalid.insert(9);
+        invalid.insert(10);
+        invalid.insert(11);
+        invalid.insert(13);
+    }
+    Mode get_value() const
+    {
+        switch (rawdata)
+        {
+            case FS:
+                return Mode::FS;
+            case OS:
+                return Mode::OS;
+            case SR:
+                return Mode::SR;
+            case UN:
+                return Mode::UN;
+            case SB:
+                return Mode::SB;
+            case PT:
+                return Mode::PT;
+            case LS:
+                return Mode::LS;
+            case RV:
+                return Mode::RV;
+            default:
+                return Mode::TR;
+        }
+    }
+};
+struct M_POSITION_t : ETCS_variable
+{
+    static const uint32_t NoMoreCalculation=16777215UL;
+    M_POSITION_t() : ETCS_variable(24) {}
+    bool is_valid() override
+    {
+        return rawdata<10000000UL || rawdata == 16777215UL;
     }
 };
 struct M_TRACKCOND_t : ETCS_variable
@@ -266,6 +367,35 @@ struct NC_CDDIFF_t : ETCS_variable
     {
         return rawdata<11;
     }
+    int get_value()
+    {
+        switch (rawdata)
+        {
+            case 0:
+            default:
+                return 80;
+            case 1:
+                return 100;
+            case 2:
+                return 130;
+            case 3:
+                return 150;
+            case 4:
+                return 165;
+            case 5:
+                return 180;
+            case 6:
+                return 210;
+            case 7:
+                return 225;
+            case 8:
+                return 245;
+            case 9:
+                return 275;
+            case 10:
+                return 300;
+        }
+    }
 };
 struct NC_DIFF_t : ETCS_variable
 {
@@ -289,6 +419,15 @@ struct NID_C_t : ETCS_variable
 struct NID_NTC_t : ETCS_variable
 {
     NID_NTC_t() : ETCS_variable(8) {}
+};
+struct NID_RBC_t : ETCS_variable
+{
+    static const uint32_t ContactLastRBC=16383;
+    NID_RBC_t() : ETCS_variable(14) {}
+};
+struct NID_TEXTMESSAGE_t : ETCS_variable
+{
+    NID_TEXTMESSAGE_t() : ETCS_variable(8) {}
 };
 struct NID_OPERATIONAL_t : ETCS_variable
 {
@@ -358,6 +497,16 @@ struct T_OL_t : T_t
 struct T_SECTIONTIMER_t : T_t
 {
     static const uint32_t Infinity=1023;
+};
+struct T_TEXTDISPLAY_t : T_t
+{
+    static const uint32_t NoTimeLimited=1023;
+};
+struct Q_CONFTEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t AcknowledgeEnds=0;
+    static const uint32_t AcknowledgeRequired=1;
+    Q_CONFTEXTDISPLAY_t() : ETCS_variable(1) {}
 };
 struct Q_DANGERPOINT_t : ETCS_variable
 {
@@ -429,17 +578,23 @@ struct Q_LINKREACTION_t : ETCS_variable
         invalid.insert(3);
     }
 };
+struct Q_MAMODE_t : ETCS_variable
+{
+    static const uint32_t DeriveSvL=0;
+    static const uint32_t BeginningIsSvL=1;
+    Q_MAMODE_t() : ETCS_variable(1) {}
+};
 struct Q_MEDIA_t : ETCS_variable
 {
     static const uint32_t Balise=0;
     static const uint32_t Loop=1;
     Q_MEDIA_t() : ETCS_variable(1) {}
 };
-struct Q_MAMODE_t : ETCS_variable
+struct Q_MPOSITION_t : ETCS_variable
 {
-    static const uint32_t DeriveSvL=0;
-    static const uint32_t BeginningIsSvL=1;
-    Q_MAMODE_t() : ETCS_variable(1) {}
+    static const uint32_t Opposite=0;
+    static const uint32_t Same=1;
+    Q_MPOSITION_t() : ETCS_variable(1) {}
 };
 struct Q_NEWCOUNTRY_t : ETCS_variable
 {
@@ -458,6 +613,52 @@ struct Q_SECTIONTIMER_t : ETCS_variable
     static const uint32_t NoTimer=0;
     static const uint32_t HasTimer=1;
     Q_SECTIONTIMER_t() : ETCS_variable(1) {}
+};
+struct Q_SRSTOP_t : ETCS_variable
+{
+    static const uint32_t StopIfInSR=0;
+    static const uint32_t GoIfInSR=1;
+    Q_SRSTOP_t() : ETCS_variable(1) {}
+};
+struct Q_TEXT_t : ETCS_variable
+{
+    static const uint32_t LXNotProtected=0;
+    static const uint32_t Acknowledgement=1;
+    Q_TEXT_t() : ETCS_variable(8) {}
+    bool is_valid() override
+    {
+        return rawdata<2;
+    }
+};
+struct Q_TEXTCLASS_t : ETCS_variable
+{
+    static const uint32_t AuxiliaryInformation=0;
+    static const uint32_t ImportantInformation=1;
+    Q_TEXTCLASS_t() : ETCS_variable(2)
+    {
+        invalid.insert(2);
+        invalid.insert(3);
+    }
+};
+struct Q_TEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t WaitOne=0;
+    static const uint32_t WaitAll=1;
+    Q_TEXTDISPLAY_t() : ETCS_variable(1) {}
+};
+struct Q_TEXTCONFIRM_t : ETCS_variable
+{
+    static const uint32_t NoConfirm=0;
+    static const uint32_t Confirm=1;
+    static const uint32_t ConfirmSB=2;
+    static const uint32_t ConfirmEB=3;
+    Q_TEXTCONFIRM_t() : ETCS_variable(2) {}
+};
+struct Q_TEXTREPORT_t : ETCS_variable
+{
+    static const uint32_t NoAckReport=0;
+    static const uint32_t AckReport=1;
+    Q_TEXTREPORT_t() : ETCS_variable(1) {}
 };
 struct Q_TRACKINIT_t : ETCS_variable
 {
@@ -529,4 +730,8 @@ struct V_TSR_t : V_t
     {
         return rawdata<121;
     }
+};
+struct X_TEXT_t : ETCS_variable
+{
+    X_TEXT_t() : ETCS_variable(8) {}
 };

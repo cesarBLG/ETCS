@@ -23,33 +23,39 @@
 #include "../Supervision/speed_profile.h"
 #include "../Supervision/targets.h"
 #include "../optional.h"
+#include "../Time/clock.h"
 class timer
 {
-    float time;
 public:
-    timer(double time) : time(time)
+    int64_t time;
+    int64_t start_time;
+    bool started;
+    timer(int64_t time) : time(1000*time), started(false) {}
+    void start()
     {
+        start(get_milliseconds());
     }
-    void start();
-    void stop();
-    void reset();
-    void set(double time);
+    void start(int64_t start_time)
+    {
+        started = true;
+        this->start_time = start_time;
+    }
+    bool triggered()
+    {
+        return started && start_time+time<get_milliseconds();
+    }
 };
 class section_timer : public timer
 {
-public:
-    section_timer(double time, double stoploc) : timer(time) 
-    {
-        
-    }
+    public:
+    distance stoploc;
+    section_timer(int64_t time, distance stoploc) : timer(time), stoploc(stoploc) {}
 };
 class end_timer : public timer
 {
-public:
-    end_timer(double time, double startloc) : timer(time) 
-    {
-        
-    }
+    public:
+    distance startloc;
+    end_timer(int64_t time, distance startloc) : timer(time), startloc(startloc) {}
 };
 struct ma_section
 {
@@ -63,8 +69,7 @@ struct danger_point
 };
 struct overlap
 {
-    double startdist;
-    double time;
+    optional<end_timer> ovtimer;
     double distance;
     double vrelease;
 };
@@ -77,9 +82,11 @@ class movement_authority
     optional<end_timer> endtimer;
     optional<danger_point> dp;
     optional<overlap> ol;
+    optional<timer> loa_timer;
     distance start;
+    int64_t time_stamp;
 public:
-    movement_authority(distance start, Level1_MA);
+    movement_authority(distance start, Level1_MA ma, int64_t first_balise_passed_time);
     distance get_end()
     {
         distance end=start;
@@ -101,11 +108,14 @@ public:
     {
         return v_main;
     }
+    void update_timers();
     friend void MA_infill(movement_authority ma);
     friend void replace_MA(movement_authority ma);
     friend void set_data();
+    friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
 void replace_MA(movement_authority ma);
 void delete_MA();
+void set_signalling_restriction(movement_authority ma, bool infill);
 #endif // _MOVEMENT_AUTHORITY_H

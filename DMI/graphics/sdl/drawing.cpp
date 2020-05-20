@@ -35,6 +35,7 @@ void init_video()
     }
     startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
+    SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)
     {
         printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());

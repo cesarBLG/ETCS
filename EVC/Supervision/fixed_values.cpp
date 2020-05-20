@@ -18,6 +18,8 @@ const double V_warning_max = TO_MPS(140);
 const double T_dispTTI = 14;
 const double T_warning = 2;
 const double T_driver = 4;
+const double T_horn = 4;
+const double T_delete_condition = 5;
 
 const double M_rotating_max = 0.15;
 const double M_rotating_min = 0.02;

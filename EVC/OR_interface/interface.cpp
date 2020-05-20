@@ -9,6 +9,7 @@
 #include "../MA/movement_authority.h"
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
+#include "../TrainSubsystems/power.h"
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -20,10 +21,10 @@ using std::thread;
 using std::mutex;
 extern mutex loop_mtx;
 extern double V_est;
+double V_set;
 extern distance d_estfront;
-extern bool EB;
-extern bool SB;
-extern bool TCO;
+extern bool EB_commanded;
+extern bool SB_commanded;
 double or_dist;
 POSIXclient *s_client;
 ParameterManager manager;
@@ -67,21 +68,42 @@ void SetParameters()
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {
         std::unique_lock<mutex> lck(loop_mtx);
-        return EB ? "true" : "false";
+        return EB_commanded ? "true" : "false";
     };
     manager.AddParameter(p);
 
     p = new Parameter("etcs::fullbrake");
     p->GetValue = []() {
         std::unique_lock<mutex> lck(loop_mtx);
-        return SB ? "true" : "false";
+        return SB_commanded ? "true" : "false";
     };
     manager.AddParameter(p);
 
     p = new Parameter("etcs::tractioncutoff");
     p->GetValue = []() {
         std::unique_lock<mutex> lck(loop_mtx);
-        return TCO ? "true" : "false";
+        return traction_cutoff_status ? "false" : "true";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::main_power_switch");
+    p->GetValue = []() {
+        std::unique_lock<mutex> lck(loop_mtx);
+        return main_power_switch_status ? "1" : "0";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::pantographs");
+    p->GetValue = []() {
+        std::unique_lock<mutex> lck(loop_mtx);
+        return pantograph_status ? "1" : "0";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("cruise_speed");
+    p->SetValue = [](string val) {
+        std::unique_lock<mutex> lck(loop_mtx);
+        V_set = stof(val)/3.6;
     };
     manager.AddParameter(p);
     /*} else if(name=="speed") {
@@ -203,6 +225,8 @@ void polling()
     s_client->WriteLine("register(etcs::ma)");
     s_client->WriteLine("register(etcs::ma_infill)");*/
     s_client->WriteLine("register(etcs::telegram)");
+    s_client->WriteLine("register(cruise_speed)");
+    s_client->WriteLine("register(asfa::cg)");
     SetParameters();
     while(s_client->connected) {
         int nfds = poller->poll(100);

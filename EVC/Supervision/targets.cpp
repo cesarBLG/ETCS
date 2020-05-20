@@ -78,12 +78,17 @@ double target::get_speed_gui_curve(distance dist) const
 }
 void target::calculate_times() const
 {
-    if (V_target > 0) {
-        T_brake_emergency = T_brake_emergency_cmt;
-        T_brake_service = T_brake_service_cmt;
+    if (conversion_model_used) {
+        if (V_target > 0) {
+            T_brake_emergency = T_brake_emergency_cmt;
+            T_brake_service = T_brake_service_cmt;
+        } else {
+            T_brake_emergency = T_brake_emergency_cm0;
+            T_brake_service = T_brake_service_cm0;
+        }
     } else {
-        T_brake_emergency = T_brake_emergency_cm0;
-        T_brake_service = T_brake_service_cm0;
+        T_brake_service = get_T_brake_service(d_estfront);
+        T_brake_emergency = get_T_brake_emergency(d_estfront);
     }
     T_be = (conversion_model_used ? Kt_int : 1)*T_brake_emergency;
     T_bs = T_brake_service;
@@ -192,6 +197,9 @@ void target::calculate_decelerations(std::map<distance,double> gradient)
     std::map<distance,int> redadh;
     redadh[distance(0)] = 0;
     acceleration A_gradient = get_A_gradient(gradient);
+    acceleration A_brake_emergency = get_A_brake_emergency();
+    acceleration A_brake_service = get_A_brake_service();
+    acceleration A_brake_normal_service = get_A_brake_normal_service(A_brake_service);
     acceleration A_brake_safe;
     if (conversion_model_used) {
         A_brake_safe = A_brake_emergency;
@@ -203,14 +211,14 @@ void target::calculate_decelerations(std::map<distance,double> gradient)
     } else {
         A_brake_safe = A_brake_emergency;
         A_brake_safe.accel = [=](double V, distance d) {
-            double wet = (--Kwet_rst.upper_bound(V))->second;
+            double wet = Kwet_rst(V,d);
             return Kdry_rst(V,M_NVEBCL,d)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
         };
     }
         
     A_safe = A_brake_safe + A_gradient;
     for (auto it=redadh.begin(); it!=redadh.end(); ++it)
-        A_normal_service.dist_step.insert(it->first);
+        A_safe.dist_step.insert(it->first);
     A_safe.accel = [=](double V, distance d) {
         int adh = (--redadh.upper_bound(d))->second;
         double A_MAXREDADH = (adh == 3 ? A_NVMAXREDADH3 : (adh == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
@@ -218,13 +226,15 @@ void target::calculate_decelerations(std::map<distance,double> gradient)
     };
         
     A_expected = A_brake_service + A_gradient;
-        
+    
     A_normal_service = A_brake_normal_service + A_gradient;
     A_normal_service.accel = [=](double V, distance d) {
         double grad = (--get_gradient().upper_bound(d))->second;
-        double kn = (grad > 0) ? (--Kn.upper_bound(V))->second.first : (--Kn.upper_bound(V))->second.second;
+        double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
         return A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
     };
-    for (auto it=Kn.begin(); it!=Kn.end(); ++it)
+    for (auto it=Kn[0].begin(); it!=Kn[0].end(); ++it)
+        A_normal_service.speed_step.insert(it->first);
+    for (auto it=Kn[1].begin(); it!=Kn[1].end(); ++it)
         A_normal_service.speed_step.insert(it->first);
 }

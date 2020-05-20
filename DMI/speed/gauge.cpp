@@ -40,8 +40,13 @@ void drawNeedle()
     {
         needleColor = Grey;
     }
-    else
+    else if(supervision == IntS)
     {
+        needleColor = Red;
+        speedColor = White;
+    }
+    else
+    {        
         if(monitoring == RSM && Vest<=Vrelease && Vrelease!=0) needleColor = Yellow;
         if(Vtarget<=Vest && Vest<=Vperm && Vtarget<Vperm && Vtarget>=0)
         {
@@ -50,12 +55,7 @@ void drawNeedle()
         }
         if((Vest>Vperm && monitoring!=RSM) || (Vest>Vrelease && monitoring==RSM))
         {
-            if(supervision == IntS)
-            {
-                needleColor = Red;
-                speedColor = White;
-            }
-            else needleColor = Orange;
+            needleColor = Orange;
         }
     }
     float an = speedToAngle(Vest);
@@ -108,9 +108,10 @@ void drawGauge(float minspeed, float maxspeed, Color color)
 {
     drawGauge(minspeed,maxspeed,color,128);
 }
-void drawSetSpeed(float speed)
+void drawSetSpeed()
 {
-    float an = speedToAngle(speed);
+    if (Vset == 0) return;
+    float an = speedToAngle(Vset);
     setColor(White);
     csg.drawCircle(5, 111*cos(an) + cx, 111*sin(an) + cy);
 }
@@ -240,7 +241,7 @@ void displayGauge()
     displayLines();
     displayCSG();
     drawNeedle();
-    //drawSetSpeed(50);
+    drawSetSpeed();
 }
 bool ttiShown = false;
 const float TdispTTI = 10;
@@ -249,7 +250,7 @@ void displaya1()
     if(mode == LS)
     {
         a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
-        a1.setText("120", 12, White);
+        //a1.addText("120", 12, 0, 0, White);
     }
     if((mode == FS || ((mode == OS || mode == SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
     {

@@ -1,5 +1,5 @@
 all: dmi evc
 dmi:
-	make -C DMI
+	make -C DMI -j5
 evc:
-	make -C EVC
+	make -C EVC -j5

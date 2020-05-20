@@ -18,22 +18,7 @@ struct ETCS_packet
     }
     static std::map<int, ETCS_packet*> packet_factory;
     static void initialize();
-    static ETCS_packet *construct(bit_read_temp &r)
-    {
-        int pos = r.position;
-        NID_PACKET_t NID_PACKET;
-        r.peek(&NID_PACKET);
-        ETCS_packet *p;
-        if (packet_factory.find(NID_PACKET) == packet_factory.end()) {
-            r.sparefound = true;
-            p = new ETCS_packet(r);
-        } else {
-            p = packet_factory[NID_PACKET]->create(r);
-        }
-        if (r.position-pos != p->L_PACKET)
-            r.error = true;
-        return p;
-    }
+    static ETCS_packet *construct(bit_read_temp &r);
 };
 struct ETCS_nondirectional_packet : ETCS_packet
 {
@@ -48,5 +33,17 @@ struct ETCS_directional_packet : ETCS_packet
     ETCS_directional_packet()
     {
         directional = true;
+    }
+    ETCS_directional_packet(bit_read_temp &r)
+    {
+        directional = true;
+        r.read(&NID_PACKET);
+        r.read(&Q_DIR);
+        r.read(&L_PACKET);
+        r.position = L_PACKET - L_PACKET.size - Q_DIR.size - NID_PACKET.size;
+    }
+    ETCS_packet *create(bit_read_temp &r) override
+    {
+        return new ETCS_directional_packet(r);
     }
 };

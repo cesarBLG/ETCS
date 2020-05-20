@@ -55,7 +55,9 @@ struct message_packet
     distance dist;
     bool infill;
     int dir;
+    bool fromRBC;
 };
 extern std::deque<eurobalise_telegram> pending_telegrams;
 extern std::list<link_data>::iterator link_expected;
 void check_eurobalise_passed();
+void set_message_filters();

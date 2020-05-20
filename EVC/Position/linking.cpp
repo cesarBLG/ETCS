@@ -3,9 +3,9 @@
 #include "../Supervision/national_values.h"
 #include "../Packets/messages.h"
 std::list<link_data> linking;
-int NID_LRBG;
+bg_id NID_LRBG;
 double Q_LOCACC_LRBG;
-double update_location_reference(int nid_bg, distance group_pos, bool linked)
+double update_location_reference(bg_id nid_bg, distance group_pos, bool linked)
 {
     if (!linked) {
         double offset = group_pos.get();
@@ -30,7 +30,7 @@ double update_location_reference(int nid_bg, distance group_pos, bool linked)
     //Never reach this point
     return group_pos.get();
 }
-void update_linking(distance start, Linking link, bool infill)
+void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
 {
     std::vector<LinkingElement> elements;
     elements.push_back(link.element);
@@ -42,7 +42,7 @@ void update_linking(distance start, Linking link, bool infill)
         link_data d;
         d.dist = cumdist+l.D_LINK.get_value(link.Q_SCALE);
         d.locacc = l.Q_LOCACC;
-        d.nid_bg = l.NID_BG;
+        d.nid_bg = {l.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : l.NID_C, l.NID_BG};
         d.reaction = l.Q_LINKREACTION;
         d.reverse_dir = l.Q_LINKORIENTATION == Q_LINKORIENTATION_t::Reverse;
         links.push_back(d);
@@ -61,4 +61,9 @@ void update_linking(distance start, Linking link, bool infill)
         linking = links;
     }
     link_expected = linking.begin();
+}
+void delete_linking()
+{
+    linking.clear();
+    link_expected = linking.end();
 }

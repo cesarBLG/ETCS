@@ -288,30 +288,6 @@ void Component::getImageGraphic(texture *t, string path, float cx, float cy, flo
     t->tex = SDL_CreateTextureFromSurface(sdlren, surf);
     SDL_FreeSurface(surf);
 }
-void Component::setText(string text, float size, Color c)
-{
-    /*int v = text.find('\n');
-    if(v!=string::npos)
-    {
-        TTF_Font *font = openFont(fontPath, size);
-        float width;
-        float height;
-        string t1 = text.substr(0,v);
-        string t2 = text.substr(v+1);
-        getFontSize(font,text.c_str(), &width, &height);
-        TTF_CloseFont(font);
-        drawText(t1.c_str(), 0, -height/2, sx, sy, size, c, CENTER);
-        drawText(t2.c_str(), 0, height/2, sx, sy, size, c, CENTER);
-    }
-    else 
-    drawText(text, 0, 0, size, c, CENTER);*/
-}
-void Component::setLabel(string text, float size, Color c)
-{
-    this->text = text;
-    text_size = size;
-    text_color = c;
-}
 void Component::setBorder(Color c)
 {
     setColor(c);

@@ -27,6 +27,7 @@ class input_data
     void setSelected(bool val);
     void setAccepted(bool val);
     bool isValid() {return valid;}
+    bool isAccepted() {return accepted;}
     TextButton more;
     vector<Button*> keys;
     int keypage=0;

@@ -1,0 +1,104 @@
+#include "text_message.h"
+#include "../Time/clock.h"
+#include <list>
+int idcount=0;
+text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
+    : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)
+{
+    std::time_t t = std::time(0);
+    std::tm* now = std::localtime(&t);
+    hour = now->tm_hour;
+    minute = now->tm_min;
+    start_condition = [](text_message &t){return true;};
+    id = idcount++;
+    acknowledged = false;
+    shown = false;
+}
+std::list<text_message> messages;
+text_message &add_message(text_message t)
+{
+    /*for (auto it = messages.begin(); it!=messages.end(); ++it) {
+        if (it->id == t.id) {
+            *it = t;
+            return *it;
+        }
+    }*/
+    messages.push_back(t);
+    return messages.back();
+}
+void send(text_message t) {
+    send_command("setMessage", std::to_string(t.id)+","+std::to_string(t.text.size())+","+t.text+","+std::to_string(t.hour)+","+std::to_string(t.minute)+","+(t.firstGroup?"true,":"false,")+(t.ack?"true,":"false,")+std::to_string(t.reason));
+}
+void update_messages()
+{
+    for (auto it = messages.begin(); it!=messages.end(); ++it) {
+        if (it->end_condition(*it)) {
+            auto next = it;
+            ++next;
+            send_command("setRevokeMessage", std::to_string(it->id));
+            messages.erase(it);
+            it = --next;
+        } else if (!it->shown && it->start_condition(*it)) {
+            it->shown = true;
+            it->first_distance = d_estfront;
+            send(*it);
+            it->first_displayed = get_milliseconds();
+        }
+    }
+}
+void add_message(PlainTextMessage m, distance ref)
+{
+    std::string text;
+    for (int i=0; i<m.X_TEXT.size(); i++) {
+        text += (char)m.X_TEXT[i];
+    }
+    std::function<bool(text_message&)> start = [m, ref](text_message &t) {
+        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        std::vector<bool> conds;
+        if (m.D_TEXTDISPLAY != D_TEXTDISPLAY_t::NotDistanceLimited)
+            conds.push_back(d_estfront>ref+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
+        if (m.M_MODETEXTDISPLAY1!=M_MODETEXTDISPLAY_t::NoModeLimited)
+            conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
+        if (m.M_LEVELTEXTDISPLAY1!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+            conds.push_back(level == m.M_LEVELTEXTDISPLAY1.get_value());
+        bool cond = waitall;
+        for (int i=0; i<conds.size(); i++) {
+            if (waitall)
+                cond &= conds[i];
+            else
+                cond |= conds[i];
+        }
+        return cond;
+    };
+    std::function<bool(text_message&)> end = [m, ref](text_message &t) {
+        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        std::vector<bool> conds;
+        if (m.L_TEXTDISPLAY != L_TEXTDISPLAY_t::NotDistanceLimited)
+            conds.push_back(t.shown && d_estfront>t.first_distance+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
+        if (m.M_MODETEXTDISPLAY2!=M_MODETEXTDISPLAY_t::NoModeLimited)
+            conds.push_back(mode == m.M_MODETEXTDISPLAY2.get_value());
+        if (m.M_LEVELTEXTDISPLAY2!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+            conds.push_back(level == m.M_LEVELTEXTDISPLAY2.get_value());
+        if (m.T_TEXTDISPLAY != T_TEXTDISPLAY_t::NoTimeLimited)
+            conds.push_back(t.shown && t.first_displayed+m.T_TEXTDISPLAY*1000<get_milliseconds());
+        bool cond = waitall;
+        for (int i=0; i<conds.size(); i++) {
+            if (waitall)
+                cond &= conds[i];
+            else
+                cond |= conds[i];
+        }
+        if (m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm)
+            return (m.Q_CONFTEXTDISPLAY == Q_CONFTEXTDISPLAY_t::AcknowledgeEnds || cond) && t.acknowledged;
+        return cond;
+    };
+    text_message t(text, m.Q_TEXTCLASS == Q_TEXTCLASS_t::ImportantInformation, m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm, 0, end);
+    t.start_condition = start;
+    add_message(t);
+}
+void message_acked(int id)
+{
+    for (auto it = messages.begin(); it!=messages.end(); ++it) {
+        if (it->id == id) it->acknowledged = true;
+    }
+}

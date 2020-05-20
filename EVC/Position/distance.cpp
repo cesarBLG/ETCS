@@ -94,11 +94,11 @@ distance &distance::operator = (distance&& d)
 }
 distance d_maxsafefront(double reference)
 {
-    return distance((d_estfront.get()-reference)*1.01+(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC));
+    return distance((d_estfront.get()-reference)*1.01+(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);
 }
 distance d_minsafefront(double reference)
 {
-    return distance((d_estfront.get()-reference)*0.99-(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC));
+    return distance((d_estfront.get()-reference)*0.99-(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);
 }
 distance d_estfront(0);
 double odometer_value=0;

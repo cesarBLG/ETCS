@@ -3,7 +3,7 @@
 #include "../monitor.h"
 using namespace std;
 extern Component csg;
-int tc[] = {0,0,0};
+int track_conditions[] = {0,0,0};
 void dispTc1();
 void dispTc2();
 void dispTc3();
@@ -12,15 +12,15 @@ Component b4(36, 36, dispTc2);
 Component b5(36, 36, dispTc3);
 void dispTc(int num, Component &b)
 {
-    if(num == 1 && level == NTC)
+    /*if(num == 1 && level == NTC)
     {
         b.setText(to_string((int)Vtarget).c_str(), 15, Red);
         return;
-    }
-    if(tc[num]==0) return;
+    }*/
+    if(track_conditions[num]==0) return;
     string path = "symbols/Track Conditions/TC_";
-    if(tc[num]<10) path+= "0";
-    path+= to_string(tc[num]);
+    if(track_conditions[num]<10) path+= "0";
+    path+= to_string(track_conditions[num]);
     path+= ".bmp";
     b.drawImage(path.c_str());
 }
@@ -31,9 +31,9 @@ void addTc(int newtc)
 {
     for(int i=0; i<3; i++)
     {
-        if(tc[i]==0)
+        if(track_conditions[i]==0)
         {
-            tc[i] = newtc;
+            track_conditions[i] = newtc;
             break;
         }
     }

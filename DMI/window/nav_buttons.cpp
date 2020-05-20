@@ -7,7 +7,7 @@
 #include "menu_override.h"
 #include "menu_settings.h"
 #include "menu_spec.h"
-#include "../graphics/time_hour.h"
+#include "../state/time_hour.h"
 #include "../state/gps_pos.h"
 void construct_nav();
 window navigation_bar(construct_nav);

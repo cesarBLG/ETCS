@@ -9,6 +9,9 @@
 #include "train_data.h"
 void recalculate_MRSP();
 void delete_track_info();
+void delete_SSP();
+void delete_gradient();
+void delete_TSR();
 std::map<distance,double> get_MRSP();
 inline double dV_ebi(double vel)
 {
@@ -35,6 +38,11 @@ public:
     distance get_end() const { return end_distance + compensate_train_length*L_TRAIN; }
     bool operator<(const speed_restriction r) const
     {
+        if (start_distance == r.start_distance) {
+            if (speed==r.speed)
+                return get_end()<r.get_end();
+            return speed<r.speed;
+        }
         return start_distance<r.start_distance;
     }
 };
@@ -52,4 +60,5 @@ struct TSR
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
 extern optional<speed_restriction> SR_speed;
+extern optional<speed_restriction> override_speed;
 speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end, bool EB, double g);

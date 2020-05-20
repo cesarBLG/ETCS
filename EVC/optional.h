@@ -77,7 +77,7 @@ class optional
         assigned = false;
         return *this;
     }
-    T operator*()
+    T &operator*()
     {
         return *value;
     }

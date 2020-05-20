@@ -1,11 +1,16 @@
 #include "messages.h"
+#include "information.h"
 #include "12.h"
 #include "21.h"
 #include "27.h"
+#include "41.h"
 #include "136.h"
 #include "../Procedures/mode_transition.h"
+#include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
+#include "../TrainSubsystems/brake.h"
 static int reading_nid_bg=-1;
+static int reading_nid_c=-1;
 static std::vector<eurobalise_telegram> telegrams;
 static distance last_passed_distance;
 static bool reffound=false;
@@ -17,6 +22,7 @@ static int prevpig=-1;
 static int totalbg=8;
 static bool reading = false;
 static int dir = -1;
+static int64_t first_balise_time;
 static distance bg_reference1;
 static distance bg_reference1max;
 static distance bg_reference1min;
@@ -27,9 +33,8 @@ static bool stop_checking_linking=false;
 std::list<link_data>::iterator link_expected=linking.end();
 std::deque<eurobalise_telegram> pending_telegrams;
 void trigger_reaction(int reaction);
-void handle_packet(ETCS_packet *p, distance dist, bool infill, int dir);
-void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir);
-void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked);
+void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg);
+void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp);
 void check_eurobalise_passed();
 void balise_group_passed();
 void check_linking();
@@ -38,14 +43,14 @@ void trigger_reaction(int reaction)
 {
     switch (reaction) {
         case 1:
-            std::cout<<"TODO: Service brake due to balise read error"<<std::endl;
+            trigger_brake_reason(0);
             break;
         case 2:
             //No reaction
             break;
         default:
-            //Train Trip - Balise read error"
-            mode_conditions[17].trigger();
+            //Train Trip - Balise read error - Linking"
+            trigger_condition(17);
             break;
     }
 }
@@ -53,6 +58,7 @@ void reset_eurobalise_data()
 {
     telegrams.clear();
     reading_nid_bg = -1;
+    reading_nid_c=-1;
     prevpig = -1;
     totalbg = 8;
     reading = false;
@@ -74,7 +80,7 @@ void check_linking()
     if (link_expected!=linking.end() && !stop_checking_linking) {
         auto link_bg=linking.end();
         for (auto it = link_expected; it!=linking.end(); ++it) {
-            if (it->nid_bg == reading_nid_bg) {
+            if (it->nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
                 link_bg = it;
                 break;
             }
@@ -114,16 +120,16 @@ void balise_group_passed()
     if (linked && reffound && !linking.empty()) {
         linking_rejected = true;
         for (link_data l : linking) {
-            if (l.nid_bg == reading_nid_bg) {
+            if (l.nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
                 if (dir != -1 && dir != l.reverse_dir)
-                    trigger_reaction(0);
+                    trigger_condition(66);
                 if (l.max() >= bg_referencemin && l.min() <= bg_referencemax)
                     linking_rejected = false;
                 break;
             }
         }
     }
-    if (!linking_rejected) check_valid_data(telegrams, bg_reference, linked);
+    if (!linking_rejected) check_valid_data(telegrams, bg_reference, linked, first_balise_time);
     linking.erase(linking.begin(), link_expected);
     reset_eurobalise_data();
 }
@@ -155,7 +161,11 @@ void check_eurobalise_passed()
         linked = t.Q_LINK == Q_LINK_t::Linked;
         if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG)
             balise_group_passed();
+        if (reading_nid_bg != t.NID_BG) {
+            first_balise_time = get_milliseconds();
+        }
         reading_nid_bg = t.NID_BG;
+        reading_nid_c = t.NID_C;
         totalbg = t.N_TOTAL+1;
         if (prevpig != -1) {
             if (dir == -1)
@@ -191,9 +201,10 @@ void check_eurobalise_passed()
         refpassed = true;
     }
 }
-void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked)
+void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp)
 {
     int nid_bg=-1;
+    int nid_c=-1;
     int dir=-1;
     int prevno=-1;
     std::vector<eurobalise_telegram> read_telegrams;
@@ -201,6 +212,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         eurobalise_telegram t = telegrams[i];
         if (!t.readerror) {
             nid_bg = t.NID_BG;
+            nid_c = t.NID_C;
             if (prevno == -1)
                 prevno = t.N_PIG;
             else
@@ -219,7 +231,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     bool containedinlinking=false;
     if (linked && !linking.empty()) {
         for (link_data l : linking) {
-            if (l.nid_bg == nid_bg) {
+            if (l.nid_bg == bg_id({nid_c, nid_bg})) {
                 containedinlinking = true;
                 balise_link = l;
             }
@@ -314,6 +326,8 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
             if (accepted2) {
                 for (int i=0; i<message.size(); i++) {
                     eurobalise_telegram t = message[i];
+                    if (t.packets.empty())
+                        continue;
                     for (int j=0; j<t.packets.size()-1; j++) {
                         auto p = t.packets[j];
                         if (p->NID_PACKET == 145) {
@@ -327,25 +341,40 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         return;
     }
     
-    bg_reference = distance(0,update_location_reference(nid_bg, bg_reference, linked));
+    bg_reference = distance(0,update_location_reference({nid_c, nid_bg}, bg_reference, linked));
     if (dir == -1 && containedinlinking)
         dir = balise_link.reverse_dir;
-    handle_telegrams(message, bg_reference, dir);
+    handle_telegrams(message, bg_reference, dir, timestamp, {nid_c, nid_bg});
+    if (dir != -1)
+        geographical_position_handle_bg_passed({nid_c, nid_bg}, bg_reference, dir == 1);
 }
-void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir)
+void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg)
 {
-    std::list<message_packet> ordered_messages;
+    if (!ongoing_transition) {
+        transition_buffer.clear();
+    } else {
+        if (transition_buffer.size() == 3)
+            transition_buffer.pop_front();
+        transition_buffer.push_back({});
+    }
+
+    std::list<std::shared_ptr<etcs_information>> ordered_info;
     for (int i=0; i<message.size(); i++) {
         eurobalise_telegram t = message[i];
         distance ref = dist;
         bool infill=false;
         for (int j=0; j<t.packets.size(); j++) {
             ETCS_packet *p = t.packets[j].get();
+            if (p->directional) {
+                auto *dp = (ETCS_directional_packet*)p;
+                if (dir == -1 || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                    continue;
+            }
             if (p->NID_PACKET == 136) {
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
                 bool found = false;
                 for (link_data l : linking) {
-                    if (l.nid_bg == ilr.NID_BG) {
+                    if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, ilr.NID_BG})) {
                         found = true;
                         infill = true;
                         ref = l.dist;
@@ -355,56 +384,273 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 if (!found)
                     break;
             }
-            if (p->NID_PACKET == 12)
-                ordered_messages.push_back({p, ref, infill, dir});
-            else
-                ordered_messages.push_front({p, ref, infill, dir});
+            std::vector<etcs_information*> info = construct_information(p->NID_PACKET);
+            for (int i=0; i<info.size(); i++) {
+                info[i]->linked_packets.push_back(t.packets[j]);
+                info[i]->ref = ref;
+                info[i]->infill = infill;
+                info[i]->dir = dir;
+                info[i]->fromRBC = false;
+                info[i]->timestamp = timestamp;
+                info[i]->nid_bg = nid_bg;
+                if (info[i]->index == 3) {
+                    ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
+                } else {
+                    ordered_info.push_front(std::shared_ptr<etcs_information>(info[i]));
+                }
+            }
         }
     }
-    for (auto it = ordered_messages.begin(); it!=ordered_messages.end(); ++it)
+    for (auto it = ordered_info.begin(); it!=ordered_info.end(); ++it)
     {
-        handle_packet(it->p, it->dist, it->infill, it->dir);
+        try_handle_information(*it, ordered_info);
     }
 }
-void handle_packet(ETCS_packet *p, distance dist, bool infill, int dir)
+struct level_filter_data
 {
-    if (level == Level::N0) return;
-    if (p->directional) {
-        auto *dp = (ETCS_directional_packet*)p;
-        if (dir == -1 || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
-            return;
-    }
-    if (p->NID_PACKET == 5) {
-        Linking l = *(Linking*)p;
-        update_linking(dist, l, infill);
-    } else if (p->NID_PACKET == 12) {
-        Level1_MA ma = *((Level1_MA*)p);
-        movement_authority MA = movement_authority(dist, ma);
-        if (MA.get_v_main() == 0 && !infill && !overrideProcedure)
-            mode_conditions[18].trigger();
-        distance end = MA.get_abs_end();
-        if (get_SSP().empty() || (--get_SSP().end())->get_end()<end || get_SSP().begin()->get_start() > d_estfront)
-            return;
-        if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
-            return;
-        if (infill)
-            MA_infill(MA);
-        else
-            replace_MA(MA);
-    } else if (p->NID_PACKET == 21) {
-        GradientProfile grad = *((GradientProfile*)p);
-        std::map<distance, double> gradient;
-        std::vector<GradientElement> elements;
-        elements.push_back(grad.element);
-        elements.insert(elements.end(), grad.elements.begin(), grad.elements.end());
-        distance d = dist;
-        for (auto e : elements) {
-            gradient[d+e.D_GRADIENT.get_value(grad.Q_SCALE)] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
-            d += e.D_GRADIENT;
+    int num;
+    Level level;
+    bool fromRBC;
+    bool operator<(const level_filter_data &o) const
+    {
+        if (num==o.num) {
+            if (level == o.level)
+                return fromRBC<o.fromRBC;
+            return level<o.level;
         }
-        update_gradient(gradient);
-    } else if (p->NID_PACKET == 27) {
-        InternationalSSP ISSP = *((InternationalSSP*)p);
-        update_SSP(get_SSP(dist, ISSP));
+        return num<o.num;
     }
+};
+struct accepted_condition
+{
+    bool reject;
+    std::set<int> exceptions;
+};
+std::map<level_filter_data, accepted_condition> level_filter_index;
+bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message) 
+{
+    accepted_condition s = level_filter_index[{info->index, level, info->fromRBC}];
+    if (!s.reject) {
+        if (s.exceptions.find(3) != s.exceptions.end()) {
+            //TODO: RBC dependent
+        }
+        if (s.exceptions.find(4) != s.exceptions.end()) {
+            if (info->linked_packets.begin()->get()->NID_PACKET == 12) {
+                Level1_MA ma = *((Level1_MA*)info->linked_packets.begin()->get());
+                movement_authority MA = movement_authority(info->ref, ma, info->timestamp);
+                distance end = MA.get_abs_end();
+                if (get_SSP().empty() || (--get_SSP().end())->get_end()<end || get_SSP().begin()->get_start() > d_estfront)
+                    return false;
+                if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
+                    return false;   
+            }
+        }
+        if (s.exceptions.find(9) != s.exceptions.end()) {
+            if (!ongoing_transition || (ongoing_transition->leveldata.level != Level::N2 && ongoing_transition->leveldata.level != Level::N3))
+                return false;
+        }
+        if (s.exceptions.find(11) != s.exceptions.end()) {
+            if (ongoing_transition)
+                return false;
+        }
+        if (s.exceptions.find(7) != s.exceptions.end()) {
+            //TODO: NTC dependent
+        }
+        return true;
+    } else {
+        if (s.exceptions.find(1) != s.exceptions.end()) {
+            if (ongoing_transition && ongoing_transition->leveldata.level == Level::N1)
+                transition_buffer.back().push_back(info);
+            return false;
+        }
+        if (s.exceptions.find(2) != s.exceptions.end()) {
+            if (ongoing_transition && (ongoing_transition->leveldata.level == Level::N2 || ongoing_transition->leveldata.level == Level::N3))
+                transition_buffer.back().push_back(info);
+            return false;
+        }
+        if (s.exceptions.find(6) != s.exceptions.end()) {
+            /*if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == nid_ntc)
+                transition_buffer.back().insert(info);*/
+            return false;
+        }
+        return false;
+    }
+    return false;
+}
+void set_level_filter()
+{
+    std::vector<std::vector<std::string>> conds = {
+        {"A","A","A","A","A","R2","R2","R2","A","A"},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1","R1","A","R1","R1","","","","",""},
+        {"R1","R1","A4","R1","R1","R2","R2","R2","A3,4,5","A3,4,5"},
+        {"R","R","A","R","R","","","","",""},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"A","A","A","A","A","A","A","A","A","A"},
+        {"A11","A11","A11","A11","A11","","","","",""},
+        {"A","A","A","A14","A14","A","A","A","A","A"},
+        {"A","A","A","A","A","A","A","A","A","A"},
+        {"","","","","","A","A","A","A","A"},
+        {"","","","","","A","A","A","A","A"},
+        {"","","","","","R","R","R","A3","A3"},
+        {"R","R","A","A","A","","","","",""},
+        {"R","R","A","R","R","","","","",""},
+        {"A","R1,2","A","A8","A8","R2","R2","R2","A3","A3"},
+        {"A","R1,2","A","A","A","R2","R2","R2","A3","A3"},
+        {"","","","","","R2","R2","R2","A","A"},
+        {"A","R1,2","A","A","A","","","","",""},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1","R1","A","R","R","R2","R2","R2","A","A"},
+        {"A","R1,2","A","A","A","R2","R2","R2","A12","A12"},
+        {"A","R1,2","A","A","A","R2","R2","R2","A12","A12"},
+        {"A","R1,2","A","A","A","R2","R2","R2","A","A"},
+        {"R","R","R","A","A","R","R","R","A3","A3"},
+        {"A13","A13","A","A","A","","","","",""},
+        {"A","A","A","A","A","","","","",""},
+        {"R","R","A","R1","R1","","","","",""},
+        {"R","R","A","R","R","","","","",""},
+        {"A","A","A","A","A","","","","",""},
+        {"","","","","","A10","A10","A10","A10","A10"},
+        {"R","R","A","R1","R1","","","","",""},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"A","A","A","A","A","","","","",""},
+        {"A","A","A","A","A","","","","",""},
+        {"","","","","","R","R","R","A","A"},
+        {"","","","","","A","A","A","A","A"},
+        {"","","","","","R","R","R","A3,4,5","A3,4,5"},
+        {"","","","","","R2","R2","R2","A","A"},
+        {"","","","","","R2","R2","R2","A","A"},
+        {"","","","","","R","R","R","A3","A3"},
+        {"","","","","","R","R","R","A3","A3"},
+        {"A","A","A","A","A","A","A","A","A","A"},
+        {"A","A","A","A","A","","","","",""},
+        {"","","","","","R","R","R","A3","A3"},
+        {"","","","","","R","R","R","A3","A3"},
+        {"A","A","A","A","A","A","A","A","A","A"},
+        {"","","","","","R","R","R","A","A"},
+        {"","","","","","R","R","R","A","A"},
+        {"","","","","","R","R","R","A","A"},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"A","A","A","A","A","","","","",""},
+        {"A9","A9","A9","R","R","","","","",""},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
+        {"R1,2","R1,2","A","A","A","R2","R2","R2","A3","A3"},
+        {"A","A","A","A","A","","","","",""},
+        {"A","A","A","A","A","","","","",""},
+        {"R1","R1","A","R1","R1","R2","R2","R2","A3,5","A3,5"},
+        {"R","R","A","R","R","R","R","R","A","A"},
+        {"A","A","A","A","A","A","A","A","A","A"}
+    };
+    Level levels[] = {Level::N0, Level::NTC, Level::N1, Level::N2, Level::N3};
+    for (int i=0; i<conds.size(); i++) {
+        for (int j=0; j<10; j++) {
+            std::string str = conds[i][j];
+            if (str != "") {
+                bool rej = str[0] == 'R';
+                str = str.substr(1);
+                std::set<int> except;
+                for(;!str.empty();) {
+                    std::size_t index = str.find_first_of(',');
+                    except.insert(std::stoi(str.substr(0, index)));
+                    if (index != std::string::npos)
+                        str = str.substr(index+1);
+                    else
+                        break;
+                }
+                level_filter_index[{i, levels[j%5], j>4}] = {rej, except};
+            }
+        }
+    }
+}
+struct mode_filter_data
+{
+    int num;
+    Mode mode;
+    bool operator<(const mode_filter_data &o) const
+    {
+        if (num==o.num) {
+            return mode<o.mode;
+        }
+        return num<o.num;
+    }
+};
+std::map<mode_filter_data, accepted_condition> mode_filter_index;
+void set_mode_filter()
+{
+    /*std::vector<std::vector<std::string>> conds = {
+    };
+    Mode modes[] = {};
+    for (int i=0; i<conds.size(); i++) {
+        for (int j=0; j<17; j++) {
+            std::string str = conds[i][j];
+            if (str != "" && str != "NR") {
+                bool rej = str[0] == 'R';
+                str = str.substr(1);
+                std::set<int> except;
+                for(;!str.empty();) {
+                    std::size_t index = str.find_first_of(',');
+                    except.insert(std::stoi(str.substr(0, index)));
+                    if (index != std::string::npos)
+                        str = str.substr(index+1);
+                    else
+                        break;
+                }
+                mode_filter_index[{i, modes[j]}] = {rej, except};
+            }
+        }
+    }*/
+}
+void set_message_filters()
+{
+    set_mode_filter();
+    set_level_filter();
+}
+bool second_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
+{
+    if (!info->fromRBC)
+        return true;
+    return false;
+}
+bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
+{
+    /*accepted_condition s = mode_filter_index[{info->index, mode}];
+    return !s.reject;*/
+    return true;
+}
+void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
+{
+    if (!level_filter(info, message)) return;
+    if (!second_filter(info, message)) return;
+    if (!mode_filter(info, message)) return;
+    info->handle();
+}
+std::vector<etcs_information*> construct_information(int packet_num)
+{
+    std::vector<etcs_information*> info;
+    if (packet_num == 5) {
+        info.push_back(new linking_information());
+    } else if (packet_num == 12) {
+        info.push_back(new ma_information());
+        info.push_back(new signalling_information());
+    } else if (packet_num == 21) {
+        info.push_back(new gradient_information());
+    } else if (packet_num == 27) {
+        info.push_back(new issp_information());
+    } else if (packet_num == 41) {
+        info.push_back(new leveltr_order_information());
+    } else if (packet_num == 41) {
+        info.push_back(new condleveltr_order_information());
+    } else if (packet_num == 68) {
+        info.push_back(new track_condition_information());
+    } else if (packet_num == 72) {
+        info.push_back(new plain_text_information());
+    } else if (packet_num == 79) {
+        info.push_back(new geographical_position_information());
+    } else if (packet_num == 137) {
+        info.push_back(new stop_if_in_SR_information());
+    }
+    return info;
 }

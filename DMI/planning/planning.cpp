@@ -160,7 +160,7 @@ void displaySpeed()
         bool im = imarker.start_distance>0 && (cur==imarker.element);
         if(cur.distance>divs[8]*planning_scale) break;
         float a = getPlanningHeight(cur.distance)-15;
-        if(prev.speed>cur.speed)
+        if(prev.speed>cur.speed || cur.speed == 0)
         {
             planning_speed.addImage(im ? "symbols/Planning/PL_23.bmp" : "symbols/Planning/PL_22.bmp", 14, a+7, 20, 20);
             planning_speed.addText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT);
@@ -170,6 +170,7 @@ void displaySpeed()
             planning_speed.addImage("symbols/Planning/PL_21.bmp", 14, a-7, 20, 20);
             planning_speed.addText(to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT);
         }
+        if (cur.speed == 0) return;
     }
 }
 void speedLines()

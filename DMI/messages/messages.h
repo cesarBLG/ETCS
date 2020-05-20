@@ -1,6 +1,6 @@
 #include <string>
 using namespace std;
-enum DriverMessage
+/*enum DriverMessage
 {
     BaliseReadError,
     TracksideMalfunction,
@@ -30,25 +30,25 @@ enum DriverMessage
     NTCneedsData,
     NTCfailed,
     AcknowledgeSR
-};
+};*/
 struct Message
 {
     int Id;
-    DriverMessage message;
     int hour;
     int minute;
     bool ack;
-    bool tripReason;
+    int reason;
     bool firstGroup;
     bool shown;
     string text;
-    Message(int id, DriverMessage type, int hour, int minute, 
-            bool firstGroup = false, bool ack = false, bool tripReason = false, string text = "") : 
-            Id(id), message(type), hour(hour), minute(minute), firstGroup(firstGroup), ack(ack), tripReason(tripReason),
+    Message(int id, string text, int hour, int minute, 
+            bool firstGroup = false, bool ack = false, int reason = 0) : 
+            Id(id), hour(hour), minute(minute), firstGroup(firstGroup), ack(ack), reason(reason),
             shown(false), text(text)
     {
 
     }
 };
 void addMsg(Message m);
+void revokeMessage(int id);
 void displayMessages();

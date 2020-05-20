@@ -17,6 +17,8 @@ extern const double V_warning_max;
 extern const double T_dispTTI;
 extern const double T_warning;
 extern const double T_driver;
+extern const double T_horn;
+extern const double T_delete_condition;
 
 extern const double M_rotating_max;
 extern const double M_rotating_min;

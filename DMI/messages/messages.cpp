@@ -4,6 +4,8 @@
 #include "../graphics/flash.h"
 #include "../sound/sound.h"
 #include "../graphics/icon_button.h"
+#include "../tcp/server.h"
+#include "text_strings.h"
 #include <string>
 #include <deque>
 #include <vector>
@@ -19,44 +21,22 @@ void arrowUp();
 void arrowDown();
 IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, 50, arrowUp, "symbols/Navigation/NA_15.bmp");
 IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, 50, arrowDown, "symbols/Navigation/NA_16.bmp");
-const char *message_text[] = {
-    "Datos de eurobaliza no consistentes",
-    "Trackside malfunction",
-    "Communication error",
-    "Entrada en modo FS",
-    "Entrada en modo OS",
-    "Runaway movement",
-    "SH refused",
-    "SH request failed",
-    "Trackside not compatible",
-    "Train data changed",
-    "Train is rejected",
-    "EoA o LoA rebasado",
-    "No MA received at level transition",
-    "SR distance exceeded",
-    "SH stop order",
-    "SR stop order",
-    "Emergency stop",
-    "RV distance exceeded",
-    "No track description",
-    "%s brake demand",
-    "Route unsuitable – loading gauge",
-    "Route unsuitable – traction system",
-    "Route unsuitable – axle load category",
-    "Radio network registration failed",
-    "%s not available",
-    "%s needs data",
-    "%s failed",
-    "Reconocer modo SR"
-};
 deque <Message> messageList;
 int line;
 int current=0;
 void disp();
 void addMsg(Message m)
 {
+    bool found = false;
+    for (auto it = messageList.begin(); it != messageList.end(); ++it) {
+        if (it->Id == m.Id) {
+            *it = m;
+            found = true;
+        }
+    }
     current = 0;
-    messageList.push_back(m);
+    if (!found)
+        messageList.push_back(m);
     disp();
 }
 void revokeMessage(int id)
@@ -73,7 +53,8 @@ bool operator < (Message a, Message b)
     if(a.firstGroup && !b.firstGroup) return true;
     if(!a.firstGroup && b.firstGroup) return false;
     if(a.hour != b.hour) return a.hour>b.hour;
-    return a.minute > b.minute;
+    if (a.minute != b.minute) return a.minute>b.minute;
+    return a.Id > b.Id;
 }
 void displayMessages()
 {
@@ -109,7 +90,11 @@ void disp()
     if(ack)
     {
         Message *msg = displayMsg[0];
-        textArea.setAck([msg]() {msg->ack = false;disp();});
+        textArea.setAck([msg]() {
+            msg->ack = false;
+            write_command("messageAcked", to_string(msg->Id));
+            disp();
+        });
     }
     else textArea.setAck(nullptr);
     textArea.clear();
@@ -118,8 +103,12 @@ void disp()
     {
         Message &m = *displayMsg[i];
         string date = to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + to_string(m.minute);
-        string text = m.tripReason ? "Modo TRIP - " : "";
-        text += message_text[m.message];
+        string text = "";
+        if (m.reason == 1) 
+            text += "Train TRIP - ";
+        else if (m.reason == 2) 
+            text += "Train brake - ";
+        text += m.text;
         int last = text.size();
         if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
         if(line<5+current && line>=current)

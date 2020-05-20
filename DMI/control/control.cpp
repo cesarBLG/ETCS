@@ -71,12 +71,13 @@ void manage_windows()
     while(running && driverid==0)
     {
         wait(new driver_window());
+        std::this_thread::sleep_for(100ms);
     }
-    do
+    while(running && level==Unknown)
     {
         wait(new level_window());
+        std::this_thread::sleep_for(100ms);
     }
-    while(running && level==Unknown);
     navigation_bar.active = true;
     planning_area.active = true;
     while(running)

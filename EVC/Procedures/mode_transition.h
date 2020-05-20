@@ -8,6 +8,9 @@
 #include <vector>
 #include <initializer_list>
 #include <cmath>
+extern bool mode_acknowledgeable;
+extern bool mode_acknowledged;
+extern Mode mode_to_ack;
 class cond
 {
     bool triggered;
@@ -41,20 +44,21 @@ struct mode_transition
 {
     Mode from;
     Mode to;
-    std::vector<int> conditions;
+    std::set<int> conditions;
     int priority;
-    bool happens()
+    int happens()
     {
         for (int c : conditions) {
             if (mode_conditions[c]())
-                return true;
+                return c;
         }
-        return false;
+        return -1;
     }
-    mode_transition(Mode from, Mode to, std::vector<int> conditionnum, int priority) : from(from), to(to), conditions(conditionnum), priority(priority)
+    mode_transition(Mode from, Mode to, std::set<int> conditionnum, int priority) : from(from), to(to), conditions(conditionnum), priority(priority)
     {
 
     }
 };
 void initialize_mode_transitions();
 void update_mode_status();
+void trigger_condition(int num);

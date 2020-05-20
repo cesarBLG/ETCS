@@ -42,8 +42,10 @@ enum Mode
 };
 extern Level level;
 extern int levelAck;
+extern Level ackLevel;
 extern Mode mode;
 extern bool modeAck;
+extern Mode ackMode;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
 extern float Vtarget;
@@ -52,6 +54,7 @@ extern float Vsbi;
 extern float Vebi;
 extern float Vrelease;
 extern float Vest;
+extern float Vset;
 extern float Dtarg;
 extern float TTI;
 extern bool EB;

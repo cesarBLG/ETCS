@@ -14,15 +14,15 @@ std::vector<SSP_element> get_SSP(distance start, InternationalSSP issp)
         e.start = start;
         if (elements[i].V_STATIC == V_STATIC_t::EndOfProfile)
         {
-            e.restrictions[0][-1] = -1;
+            e.restrictions[0][0] = -1;
             ssp.push_back(e);
             break;
         }
-        e.restrictions[0][-1] = elements[i].V_STATIC.get_value();
+        e.restrictions[0][0] = elements[i].V_STATIC.get_value();
         for (int j=0; j<elements[i].diffs.size(); j++) {
             int diff = elements[i].diffs[j].Q_DIFF;
             if (diff == 0)
-                e.restrictions[0][elements[i].diffs[j].NC_CDDIFF] = elements[i].diffs[j].V_DIFF.get_value();
+                e.restrictions[0][elements[i].diffs[j].NC_CDDIFF.get_value()] = elements[i].diffs[j].V_DIFF.get_value();
             else
                 e.restrictions[diff][elements[i].diffs[j].NC_DIFF] = elements[i].diffs[j].V_DIFF.get_value();
         }

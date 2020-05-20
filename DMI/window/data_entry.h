@@ -5,13 +5,13 @@
 #include <map>
 class input_window : public subwindow
 {
-    IconButton prev_button;
-    IconButton next_button;
     TextButton button_yes;
     Button* empty_button[12];
     int cursor=0;
     int nfields;
     protected:
+    IconButton prev_button;
+    IconButton next_button;
     Component confirmation_label;
     map<int, input_data*> inputs;
     Button* buttons[12];

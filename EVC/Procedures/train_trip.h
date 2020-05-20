@@ -1,2 +1,4 @@
 #pragma once
-void train_trip();
+#include "../DMI/text_message.h"
+void train_trip(int reason);
+void update_trip();
