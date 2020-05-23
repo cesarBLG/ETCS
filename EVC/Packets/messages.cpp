@@ -9,6 +9,7 @@
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
 #include "../TrainSubsystems/brake.h"
+#include <algorithm>
 static int reading_nid_bg=-1;
 static int reading_nid_c=-1;
 static std::vector<eurobalise_telegram> telegrams;
@@ -348,6 +349,14 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     if (dir != -1)
         geographical_position_handle_bg_passed({nid_c, nid_bg}, bg_reference, dir == 1);
 }
+bool info_compare(const std::shared_ptr<etcs_information> &i1, const std::shared_ptr<etcs_information> &i2)
+{
+    if ((i1->index == 8 || i1->index == 9) && (i2->index != 8 && i2->index != 9))
+        return true;
+    if (i2->index == 3 && i1->index != 3)
+        return true;
+    return false;
+}
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg)
 {
     if (!ongoing_transition) {
@@ -383,6 +392,13 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 }
                 if (!found)
                     break;
+            } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
+                for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
+                    if (it->get()->index == 3) {
+                        it->get()->linked_packets.push_back(t.packets[j]);
+                        break;
+                    }
+                }
             }
             std::vector<etcs_information*> info = construct_information(p->NID_PACKET);
             for (int i=0; i<info.size(); i++) {
@@ -393,14 +409,11 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 info[i]->fromRBC = false;
                 info[i]->timestamp = timestamp;
                 info[i]->nid_bg = nid_bg;
-                if (info[i]->index == 3) {
-                    ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
-                } else {
-                    ordered_info.push_front(std::shared_ptr<etcs_information>(info[i]));
-                }
+                ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
             }
         }
     }
+    ordered_info.sort(info_compare);
     for (auto it = ordered_info.begin(); it!=ordered_info.end(); ++it)
     {
         try_handle_information(*it, ordered_info);
@@ -468,11 +481,11 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                 transition_buffer.back().push_back(info);
             return false;
         }
-        if (s.exceptions.find(6) != s.exceptions.end()) {
-            /*if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == nid_ntc)
-                transition_buffer.back().insert(info);*/
+        /*if (s.exceptions.find(6) != s.exceptions.end()) {
+            if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == nid_ntc)
+                transition_buffer.back().push_back(info);
             return false;
-        }
+        }*/
         return false;
     }
     return false;

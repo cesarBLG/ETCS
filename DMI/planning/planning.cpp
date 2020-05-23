@@ -94,12 +94,11 @@ vector<speed_element> speed_elements;
 bool check_spdov(int i, int j)
 {
     speed_element &cur = speed_elements[i];
-    if(i+1>=speed_elements.size() || j>=speed_elements.size()) return false;
     speed_element &chk = speed_elements[j];
     float a = getPlanningHeight(cur.distance)-15;
     float b = getPlanningHeight(chk.distance)-15;
-    if(abs(a-b)>20) return false;
-    return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed) || check_spdov(i, j+1);
+    if(abs(a-b)>18) return false;
+    return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed);
 }
 indication_marker imarker;
 void displayPASP()
@@ -152,7 +151,16 @@ void displaySpeed()
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {
-        if(check_spdov(i, i+1)) continue;
+        bool ov=false;
+        for (int j=1; j<speed_elements.size(); j++)
+        {
+            if (i!=j && check_spdov(i, j))
+            {
+                ov = true;
+                break;
+            }
+        }
+        if (ov) continue;
         speed_element cur = speed_elements[i];
         speed_element prev = speed_elements[ld];
         if (cur.distance < 0) continue;

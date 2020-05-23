@@ -47,8 +47,8 @@ void start_dmi()
     if(dmi_pid == 0)
     {
         chdir("../DMI");
-        int fd = open("dmi.log.o", O_WRONLY | O_CREAT);
-        dup2(fd, 1);
+        /*int fd = open("dmi.log.o", O_RDWR);
+        dup2(fd, 2);*/
         execl("dmi", "dmi", nullptr);
     }
     sleep(1);
@@ -251,6 +251,12 @@ void dmi_comm()
                     speeds+= ",im,"+to_string(indication_distance);
                 speeds += ","+to_string(*EoA-d_estfront)+",0";
                 last_distance = *EoA-d_estfront;
+            }
+            if (LoA && LoA->first-d_maxsafefront(LoA->first.get_reference()) <= last_distance + 1) {
+                if (monitoring == CSM && (indication_target.type == target_class::LoA))
+                    speeds+= ",im,"+to_string(indication_distance);
+                speeds += ","+to_string(LoA->first-d_maxsafefront(LoA->first.get_reference()))+","+to_string(LoA->second*3.6);
+                last_distance = LoA->first-d_maxsafefront(LoA->first.get_reference());
             }
             send_command("setPlanningSpeeds",speeds);
             std::map<::distance,double> gradient = get_gradient();

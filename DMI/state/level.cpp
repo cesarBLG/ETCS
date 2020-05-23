@@ -16,22 +16,23 @@ void displayLevel()
     int num = 0;
     switch(level)
     {
-        case N0:
+        case Level::N0:
             num=1;
             break;
-        case NTC:
+        case Level::NTC:
             num=2;
             break;
-        case N1:
+        case Level::N1:
             num=3;
             break;
-        case N2:
+        case Level::N2:
             num=4;
             break;
-        case N3:
+        case Level::N3:
             num=5;
             break;
     }
+    if (num == 0) return;
     if(num<10) path+="0";
     path+=to_string(num);
     //If NTC is LZB/PZB, path+="a";

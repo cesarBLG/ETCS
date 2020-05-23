@@ -14,7 +14,7 @@ enum SupervisionStatus
     WaS,
     IntS
 };
-enum Level 
+enum struct Level 
 {
     N0,
     N1,

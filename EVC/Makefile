@@ -7,12 +7,14 @@ Packets/messages.o Procedures/override.o Procedures/train_trip.o Procedures/leve
 TrackConditions/track_conditions.o Time/clock.o Position/geographical.o \
 DMI/text_messages.o TrainSubsystems/power.o TrainSubsystems/brake.o \
 $(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))
+LIB = evc.so
 CXX = g++
 CC = gcc
 DEBUG=-g -rdynamic
 LDFLAGS = -lorts
 CXXFLAGS = -std=c++11
 ifeq ($(TARGET),WIN32)
+LIB = evc.dll
 CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -I.
@@ -23,4 +25,7 @@ all: evc
 evc: $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -Wall
 %.o: %.cpp
-	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall -Wno-sign-compare $(CXXFLAGS)
+	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall -Wno-sign-compare $(CXXFLAGS) -fpic
+
+evc.dll: $(OBJECTS)
+	$(CXX) -shared -o evc.dll $(OBJECTS) $(LDFLAGS) -g

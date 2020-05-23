@@ -21,7 +21,7 @@ void initialize_mode_transitions()
     c[2] = [](){return true;};
     c[3] = [](){return V_est == 0;};
     c[4] = [](){return true;};
-    c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_acknowledged;};
+    c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;;};
     c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(EoA->get_reference())-L_antenna_front);};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(EoA->get_reference());};

@@ -46,14 +46,14 @@ void parseData(string str)
     if(command == "setVset") Vset = stof(value);
     if(command == "setDtarget") Dtarg = stof(value);
     if(command == "setTTI") TTI = stof(value);
-    if(command == "setLevel") level = value== "NTC" ? NTC : (Level)stoi(value);
+    if(command == "setLevel") level = value== "NTC" ? Level::NTC : (Level)stoi(value);
     if(command == "setLevelTransition") {
         if (value.empty()) {
             levelAck = 0;
         } else {
             int ind = value.find_first_of(',');
             string lev = value.substr(0,ind);
-            ackLevel = lev== "NTC" ? NTC : (Level)stoi(lev);
+            ackLevel = lev== "NTC" ? Level::NTC : (Level)stoi(lev);
             levelAck = stoi(value.substr(ind+1));
         }
     }
@@ -259,9 +259,11 @@ void parseData(string str)
     {
         revokeMessage(stoi(value));
     }
+    if (command == "playSinfo") playSinfo();
     update();
     notifyDataReceived();
 }
+extern bool running;
 void read()
 {
     int result = recv(client, data, BUFF_SIZE-1, 0);
@@ -277,13 +279,13 @@ void read()
             buffer = buffer.substr(end+1);
         }
     }
+    if (result < 0) running = false;
 }
 void write_command(string command, string value)
 {
     string tosend = command+"("+value+");\n";
     send(client, tosend.c_str(), tosend.size(), 0);
 }
-extern bool running;
 void startSocket()
 {
 #ifdef _WIN32

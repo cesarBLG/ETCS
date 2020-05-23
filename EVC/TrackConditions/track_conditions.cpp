@@ -3,11 +3,51 @@
 #include "../Supervision/fixed_values.h"
 #include "../Time/clock.h"
 #include "../TrainSubsystems/power.h"
+#include "../Supervision/conversion_model.h"
 std::list<std::shared_ptr<track_condition>> track_conditions;
-std::list<std::shared_ptr<track_condition>> various_track_conditions;
 optional<distance> restore_initial_states_various;
 std::set<distance> brake_change;
 void add_condition();
+void update_brake_contributions()
+{
+    std::map<distance, int> active;
+    active[std::numeric_limits<double>::lowest()] = 15;
+    for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        active[(*it)->start]=15;
+        if ((*it)->profile) active[(*it)->end]=15;
+    }
+    for (auto it = active.begin(); it != active.end(); ++it) {
+        distance d = it->first;
+        bool reg=true;
+        bool shoe=true;
+        bool eddyemerg=true;
+        bool eddyserv=true;
+        for (auto it2 = track_conditions.begin(); it2 != track_conditions.end(); ++it2) {
+            if ((*it2)->start <= d && (*it2)->end > d) {
+                switch((*it2)->condition) {
+                    case TrackConditions::PowerLessSectionLowerPantograph:
+                    case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
+                    case TrackConditions::SwitchOffRegenerativeBrake:
+                        reg=false;
+                        break;
+                    case TrackConditions::SwitchOffMagneticShoe:
+                        shoe=false;
+                        break;
+                    case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
+                        eddyemerg=false;
+                        break;
+                    case TrackConditions::SwitchOffEddyCurrentServiceBrake:
+                        eddyserv=false;
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        it->second = (reg?8:0)+(shoe?4:0)+(eddyemerg?2:0)+(eddyserv?1:0);
+    }
+    active_combination = active;
+}
 void update_track_conditions()
 {
     if (restore_initial_states_various && *restore_initial_states_various<d_minsafefront(restore_initial_states_various->get_reference())) {
@@ -17,15 +57,15 @@ void update_track_conditions()
                 c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
                 c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
                 c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) {
-                
+
                 auto newit = it;
                 ++newit;
                 track_conditions.erase(it);
                 it = --newit;
             }
         }
-        various_track_conditions.clear();
         restore_initial_states_various = {};
+        update_brake_contributions();
     }
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         track_condition *c = it->get();
@@ -172,7 +212,7 @@ void load_track_condition_various(TrackCondition cond, distance ref)
                 break;
         }
         bool exists = false;
-        for (auto it = various_track_conditions.begin(); it != various_track_conditions.end(); ++it) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
             track_condition *tc2 = it->get();
             if (tc2->condition == tc->condition) {
                 if (tc->start <= tc2->start && tc->end >= tc2->start)
@@ -189,4 +229,5 @@ void load_track_condition_various(TrackCondition cond, distance ref)
             track_conditions.push_back(std::shared_ptr<track_condition>(tc));
         }
     }
+    update_brake_contributions();
 }

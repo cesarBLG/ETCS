@@ -2,6 +2,7 @@
 #include "sound.h"
 #include <map>
 #include <string>
+#include <ctime>
 using namespace std;
 struct sdlsounddata
 {
@@ -14,6 +15,7 @@ sdlsounddata swarn;
 sdlsounddata stoofast;
 sdlsounddata click; 
 SDL_AudioDeviceID deviceId;
+time_t last_sinfo;
 void start_sound()
 {
     SDL_LoadWAV("sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
@@ -21,6 +23,7 @@ void start_sound()
     SDL_LoadWAV("sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
     SDL_LoadWAV("sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
     deviceId = SDL_OpenAudioDevice(NULL, 0, &sinfo.wavSpec, NULL, 0);
+    last_sinfo = time(nullptr)-1;
 }
 Uint32 warnLength;
 Uint8 *warnBuffer = nullptr;
@@ -61,6 +64,8 @@ void stopSwarning()
 }
 void playSinfo()
 {
+    if (time(nullptr)-last_sinfo<1) return;
+    last_sinfo = time(nullptr);
     play(sinfo);
 }
 void playTooFast()

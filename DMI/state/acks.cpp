@@ -1,6 +1,7 @@
 #include "../graphics/component.h"
 #include "../monitor.h"
 #include "../tcp/server.h"
+#include "../sound/sound.h"
 void dispAcks();
 Component c234(37*3, 50, nullptr);
 Component c2(37, 50, nullptr);
@@ -14,6 +15,7 @@ int prevlevel = 0;
 void dispAcks()
 {
     if (modeAck == prevAck && prevlevel == levelAck) return;
+    if (modeAck || levelAck == 2) playSinfo();
     prevAck = modeAck;
     prevlevel = levelAck;
     c1.clear();
@@ -60,19 +62,19 @@ void dispAcks()
         int num = 0;
         switch(ackLevel)
         {
-            case N0:
+            case Level::N0:
                 num=1;
                 break;
-            case NTC:
+            case Level::NTC:
                 num=2;
                 break;
-            case N1:
+            case Level::N1:
                 num=3;
                 break;
-            case N2:
+            case Level::N2:
                 num=4;
                 break;
-            case N3:
+            case Level::N3:
                 num=5;
                 break;
         }

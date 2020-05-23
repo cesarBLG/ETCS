@@ -3,7 +3,7 @@
 #include "sound/sound.h"
 MonitoringStatus monitoring;
 SupervisionStatus supervision;
-Level level = N0;
+Level level = Level::N0;
 int levelAck = 0;
 Level ackLevel;
 Mode mode = SB;
@@ -26,12 +26,12 @@ bool ovEOA = false;
 void updateSupervision();
 void update()
 {
-    if(monitoring == CSM)
+    /*if(monitoring == CSM)
     {
         if(prevVperm >= 0 && prevVperm<Vperm) playSinfo();
         prevVperm = Vperm;
     }
-    else prevVperm = -1;
+    else prevVperm = -1;*/
     //updateSupervision();
 }
 void setSpeeds(float vtarg, float vperm, float vsbi, float vrelease, float vest, float dist)

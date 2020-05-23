@@ -73,7 +73,7 @@ void manage_windows()
         wait(new driver_window());
         std::this_thread::sleep_for(100ms);
     }
-    while(running && level==Unknown)
+    while(running && level==Level::Unknown)
     {
         wait(new level_window());
         std::this_thread::sleep_for(100ms);

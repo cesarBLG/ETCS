@@ -14,7 +14,9 @@ CFLAGS = -g
 LDFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
 ifeq ($(TARGET),WIN32)
 CPP = x86_64-w64-mingw32-g++ -m64 -mwindows
-LDFLAGS = -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_net
+LDFLAGS = -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_net -lwsock32
+else
+CFLAGS += -rdynamic
 endif
 all: dmi
 dmi: $(OBJECTS)

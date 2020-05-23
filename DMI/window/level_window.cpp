@@ -17,16 +17,16 @@ level_input::level_input()
 {
     switch(level)
     {
-        case N0:
+        case Level::N0:
             data = "Level 0";
             break;
-        case N1:
+        case Level::N1:
             data = "Level 1";
             break;
-        case N2:
+        case Level::N2:
             data = "Level 2";
             break;
-        case N3:
+        case Level::N3:
             data = "Level 3";
             break;
     }

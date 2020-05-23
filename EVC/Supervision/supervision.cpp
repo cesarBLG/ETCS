@@ -335,7 +335,10 @@ void update_supervision()
                 if (!mask)
                     break;
             }
-            ::MRDT = MRDT[MRDT.size()-1];
+            target newMRDT = MRDT[MRDT.size()-1];
+            if (!(::MRDT == newMRDT))
+                send_command("playSinfo","");
+            ::MRDT = newMRDT;
         }
         bool t3=false;
         bool t4=false;
