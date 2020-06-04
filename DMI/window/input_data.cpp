@@ -1,3 +1,21 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019  Iván Izquierdo
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "input_data.h"
 #include "../graphics/flash.h"
 input_data::input_data(string label_text) : label(label_text), data_get([this] {return getData();}), 
@@ -38,6 +56,7 @@ void input_data::setData(string s)
 {
     data = s;
     keybd_data = s;
+    prev_data = "";
     setAccepted(false);
 }
 void input_data::setSelected(bool val)
@@ -45,21 +64,10 @@ void input_data::setSelected(bool val)
     if (selected != val) 
     {
         selected = val;
-        if (selected)
-        {
-            data = prev_data;
-            keybd_data = "";
-        }
-        else
-        {
-            if(!prev_data.empty() && !keybd_data.empty()) data = "";
-            prev_data = data;
-        }
+        data = prev_data;
+        if (selected) keybd_data = "";
     }
-    data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
-    data_comp->clear();
-    data_tex = data_comp->getText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
-    data_comp->add(data_tex);
+    updateText();
 }
 void input_data::setAccepted(bool val)
 {
@@ -68,7 +76,14 @@ void input_data::setAccepted(bool val)
         accepted = val;
         if (accepted) data_accepted = data;
         else data_accepted = "";
+        prev_data = data_accepted;
+        if (!selected) data = prev_data;
+        if (!accepted) techresol_invalid = techrange_invalid = false;
     }
+    updateText();
+}
+void input_data::updateText()
+{
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
     data_comp->clear();
     data_tex = data_comp->getText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
@@ -76,7 +91,15 @@ void input_data::setAccepted(bool val)
     if(label!="")
     {
         data_echo->clear();
-        data_echo->addText(prev_data, 4, 0, 12, White, LEFT);
+        if (techrange_invalid || techresol_invalid)
+            data_echo->addText("++++", 4, 0, 12, Red, LEFT);
+        if (techcross_invalid)
+            data_echo->addText("????", 4, 0, 12, Red, LEFT);
+        if (operatrange_invalid)
+            data_echo->addText("++++", 4, 0, 12, Yellow, LEFT);
+        if (operatcross_invalid)
+            data_echo->addText("????", 4, 0, 12, Yellow, LEFT);
+        data_echo->addText(data, 4, 0, 12, accepted ? White : Grey, LEFT);
     }
 }
 input_data::~input_data()

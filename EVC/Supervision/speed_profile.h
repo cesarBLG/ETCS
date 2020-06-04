@@ -53,6 +53,7 @@ public:
     double get_speed() const { return speed; }
     distance get_start() const { return start_distance; }
     distance get_end() const { return end_distance + compensate_train_length*L_TRAIN; }
+    distance get_uncompensated_end() const { return end_distance; }
     bool operator<(const speed_restriction r) const
     {
         if (start_distance == r.start_distance) {
@@ -62,12 +63,16 @@ public:
         }
         return start_distance<r.start_distance;
     }
+    bool is_compensated() const
+    {
+        return compensate_train_length;
+    }
 };
 void set_train_max_speed(double vel);
 void update_SSP(std::vector<SSP_element> nSSP);
 std::set<speed_restriction> get_SSP();
 void update_gradient(std::map<distance, double> grad);
-std::map<distance, double> get_gradient();
+const std::map<distance, double> &get_gradient();
 struct TSR
 {
     int id;
@@ -77,5 +82,9 @@ struct TSR
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
 extern optional<speed_restriction> SR_speed;
+extern optional<speed_restriction> SH_speed;
+extern optional<speed_restriction> UN_speed;
+extern optional<speed_restriction> OS_speed;
+extern optional<speed_restriction> LS_speed;
 extern optional<speed_restriction> override_speed;
 speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end, bool EB, double g);

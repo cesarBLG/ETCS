@@ -1,5 +1,6 @@
 #ifndef _MONITOR_H
 #define _MONITOR_H
+#include <string>
 enum MonitoringStatus
 {
     CSM,
@@ -23,7 +24,7 @@ enum struct Level
     NTC,
     Unknown
 };
-enum Mode
+enum struct Mode
 {
     SH,
     PT,
@@ -39,8 +40,10 @@ enum Mode
     SF,
     NS,
     LS,
+    SN
 };
 extern Level level;
+extern bool level_valid;
 extern int levelAck;
 extern Level ackLevel;
 extern Mode mode;
@@ -57,9 +60,16 @@ extern float Vest;
 extern float Vset;
 extern float Dtarg;
 extern float TTI;
+extern float TTP;
+extern bool SB;
 extern bool EB;
 extern int trn;
-extern unsigned long driverid;
+extern bool trn_valid;
+extern std::string driverid;
+extern bool driverid_valid;
+extern bool ovEOA;
+extern bool train_data_valid;
+extern int L_train;
 extern bool ovEOA;
 void update();
 void setSpeeds(float vtarg, float vperm, float vsbi, float vrelease, float vest, float dist);

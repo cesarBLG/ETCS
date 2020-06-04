@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "../graphics/component.h"
 #include "../graphics/texture.h"
 #include "../graphics/color.h"
@@ -36,7 +53,7 @@ void drawNeedle()
 {
     Color needleColor = Grey;
     Color speedColor = Black;
-    if(mode == SB)
+    if(mode == Mode::SB)
     {
         needleColor = Grey;
     }
@@ -118,9 +135,9 @@ void drawSetSpeed()
 bool showSpeeds = false;
 void displayCSG()
 {
-    if(mode != FS)
+    if(mode != Mode::FS)
     {
-        if((mode == OS || mode == SR) && showSpeeds)
+        if((mode == Mode::OS || mode == Mode::SR) && showSpeeds)
         {
             setColor(White);
             drawHook(Vperm);
@@ -130,7 +147,7 @@ void displayCSG()
                 drawHook(Vtarget);
             }
         }
-        if((mode == SH && showSpeeds) || mode == RV)
+        if((mode == Mode::SH && showSpeeds) || mode == Mode::RV)
         {
             setColor(White);
             drawHook(Vperm);
@@ -225,7 +242,7 @@ Component releaseRegion(36,36, displayVrelease);
 static float prevVrelease=0;
 void displayVrelease()
 {
-    if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != OS || showSpeeds)) {
+    if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != Mode::OS || showSpeeds)) {
         if(prevVrelease!=Vrelease)
         {
             releaseRegion.clear();
@@ -247,12 +264,12 @@ bool ttiShown = false;
 const float TdispTTI = 10;
 void displaya1()
 {
-    if(mode == LS)
+    if(mode == Mode::LS)
     {
         a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
         //a1.addText("120", 12, 0, 0, White);
     }
-    if((mode == FS || ((mode == OS || mode == SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
+    if((mode == Mode::FS || ((mode == Mode::OS || mode == Mode::SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
     {
         if(!ttiShown) playSinfo();
         ttiShown = true;
@@ -265,4 +282,12 @@ void displaya1()
         a1.drawRectangle(0, 0, 5*n, 5*n, Grey, CENTER);
     }
     else ttiShown = false;
+    if (mode == Mode::FS && (monitoring == TSM || monitoring == RSM) && TTP < TdispTTI) {
+        int n;
+        for(n = 1; n<11; n++)
+        {
+            if(TdispTTI*(10-n)/10<=TTP && TTP<TdispTTI*(10-(n-1))/10) break;
+        }
+        a1.drawRectangle(0, 0, 5*n, 5*n, supervision == IntS ? Red : ((supervision == WaS || supervision == OvS) ? Orange : Yellow), CENTER);
+    }
 }

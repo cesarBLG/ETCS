@@ -105,6 +105,8 @@ public:
 };
 distance d_maxsafefront(double reference);
 distance d_minsafefront(double reference);
+distance d_maxsafe(distance d, double reference);
+distance d_minsafe(distance d, double reference);
 extern distance d_estfront;
 extern double odometer_value;
 void update_odometer();

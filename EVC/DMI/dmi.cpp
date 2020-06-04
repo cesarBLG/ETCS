@@ -51,6 +51,7 @@ using std::mutex;
 using std::unique_lock;
 using std::map;
 using std::set;
+using std::list;
 using std::string;
 using std::to_string;
 extern mutex loop_mtx;
@@ -83,6 +84,8 @@ extern double V_set;
 extern double V_release;
 extern double V_sbi;
 extern double D_target;
+extern double TTI;
+extern double TTP;
 extern bool EB;
 extern bool SB;
 extern MonitoringStatus monitoring;
@@ -144,7 +147,9 @@ void parse_command(string str)
     } else if (command == "override") {
         start_override();
     } else if (command == "shunting") {
-        if (V_est == 0 && (level==Level::N0 || level==Level::NTC || level==Level::N1)) {
+        if (V_est == 0 && mode == Mode::SH)
+            trigger_condition(19);
+        if (V_est == 0 && (level==Level::N0 || level==Level::NTC || level==Level::N1) && mode != Mode ::SH) {
             trigger_condition(5);
         }
     } else if (command == "messageAcked") {
@@ -236,6 +241,7 @@ void dmi_comm()
         send_command("setEB", EB ? "true" : "false");
         send_command("setSB", SB ? "true" : "false");
         send_command("setOverride", overrideProcedure ? "true" : "false");
+        send_command("setTTP", to_string(TTP));
         send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
         if (mode == Mode::FS) {
             string speeds="";
@@ -245,7 +251,8 @@ void dmi_comm()
             extern target indication_target;
             extern double indication_distance;
             double last_distance = MA ? MA->get_end()-d_minsafefront(MA->get_end().get_reference()) : 0;
-            for (const target &t : get_supervised_targets())
+            const std::list<target> &targets = get_supervised_targets();
+            for (const target &t : targets)
             {
                 distance td = t.get_target_position();
                 double d = td - (t.is_EBD_based ? d_maxsafefront(td.get_reference()) : d_estfront);

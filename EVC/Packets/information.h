@@ -22,9 +22,12 @@
 #include "21.h"
 #include "27.h"
 #include "41.h"
+#include "65.h"
+#include "66.h"
 #include "68.h"
 #include "72.h"
 #include "79.h"
+#include "80.h"
 #include "136.h"
 #include "137.h"
 #include "../Procedures/mode_transition.h"
@@ -68,6 +71,14 @@ struct ma_information : etcs_information
             MA_infill(MA);
         else
             replace_MA(MA);
+        bool mp = false;
+        for (auto it = ++linked_packets.begin(); it != linked_packets.end(); ++it) {
+            if (it->get()->NID_PACKET == 80) {
+                set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
+                mp = true;
+            }
+        }
+        reset_mode_profile(ref, infill);
     }
 };
 struct gradient_information : etcs_information
@@ -82,8 +93,8 @@ struct gradient_information : etcs_information
         elements.insert(elements.end(), grad.elements.begin(), grad.elements.end());
         distance d = ref;
         for (auto e : elements) {
-            gradient[d+e.D_GRADIENT.get_value(grad.Q_SCALE)] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
-            d += e.D_GRADIENT;
+            d += e.D_GRADIENT.get_value(grad.Q_SCALE);
+            gradient[d] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
         }
         update_gradient(gradient);
     }
@@ -122,7 +133,38 @@ struct stop_if_in_SR_information : etcs_information
     {
         StopIfInSR s = *(StopIfInSR*)linked_packets.front().get();
         // TODO: balises allowed
-        if (s.Q_SRSTOP == Q_SRSTOP_t::StopIfInSR && !overrideProcedure) trigger_condition(54);
+        if (s.Q_SRSTOP == Q_SRSTOP_t::StopIfInSR) {
+            formerEoA = {};
+            if (!overrideProcedure)
+                trigger_condition(54);
+        }
+    }
+};
+struct TSR_information : etcs_information
+{
+    TSR_information() : etcs_information(17) {}
+    void handle() override
+    {
+        TemporarySpeedRestriction t = *(TemporarySpeedRestriction*)linked_packets.front().get();
+        std::vector<TSR_element_packet> elements;
+        elements.push_back(t.element);
+        elements.insert(elements.end(), t.elements.begin(), t.elements.end());
+        distance start = ref;
+        for (auto it = t.elements.begin(); it != t.elements.end(); ++it) {
+            start += it->D_TSR.get_value(t.Q_SCALE);
+            speed_restriction p(it->V_TSR.get_value(), start, start+it->L_TSR.get_value(t.Q_SCALE), it->Q_FRONT==Q_FRONT_t::TrainLengthDelay);
+            TSR tsr = {tsr.id = it->NID_TSR, it->NID_TSR != NID_TSR_t::NonRevocable, p};
+            insert_TSR(tsr);
+        }
+    }
+};
+struct TSR_revocation_information : etcs_information
+{
+    TSR_revocation_information() : etcs_information(18) {}
+    void handle() override
+    {
+        TemporarySpeedRestrictionRevocation r = *(TemporarySpeedRestrictionRevocation*)linked_packets.front().get();
+        revoke_TSR(r.NID_TSR);
     }
 };
 struct plain_text_information : etcs_information

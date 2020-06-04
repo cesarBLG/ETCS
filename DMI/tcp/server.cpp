@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <SDL2/SDL.h>
 #include <string>
 #include <cstdio>
@@ -20,6 +37,7 @@
 #include "../planning/planning.h"
 #include "../graphics/drawing.h"
 #include "../state/gps_pos.h"
+#include <mutex>
 using namespace std;
 int server;
 int client;
@@ -35,6 +53,8 @@ void notifyDataReceived()
 #include <iostream>
 void parseData(string str)
 {
+    extern mutex draw_mtx;
+    unique_lock<mutex> lck(draw_mtx);
     int index = str.find_first_of('(');
     string command = str.substr(0, index);
     string value = str.substr(index+1, str.find_first_of(')')-index-1);
@@ -46,6 +66,7 @@ void parseData(string str)
     if(command == "setVset") Vset = stof(value);
     if(command == "setDtarget") Dtarg = stof(value);
     if(command == "setTTI") TTI = stof(value);
+    if(command == "setTTP") TTP = stof(value);
     if(command == "setLevel") level = value== "NTC" ? Level::NTC : (Level)stoi(value);
     if(command == "setLevelTransition") {
         if (value.empty()) {
@@ -62,15 +83,15 @@ void parseData(string str)
     if(command == "setMode")
     {
         Mode m=mode;
-        if(value == "FS") m = FS;
-        else if(value == "LS") m = LS;
-        else if(value == "OS") m = OS;
-        else if(value == "SH") m = SH;
-        else if(value == "SB") m = SB;
-        else if(value == "SR") m = SR;
-        else if(value == "UN") m = UN;
-        else if(value == "TR") m = TR;
-        else if(value == "PT") m = PT;
+        if(value == "FS") m = Mode::FS;
+        else if(value == "LS") m = Mode::LS;
+        else if(value == "OS") m = Mode::OS;
+        else if(value == "SH") m = Mode::SH;
+        else if(value == "SB") m = Mode::SB;
+        else if(value == "SR") m = Mode::SR;
+        else if(value == "UN") m = Mode::UN;
+        else if(value == "TR") m = Mode::TR;
+        else if(value == "PT") m = Mode::PT;
         mode = m;
     }
     if(command == "setModeTransition")
@@ -78,14 +99,14 @@ void parseData(string str)
         Mode m;
         modeAck = true;
         if (value.empty()) modeAck = false;
-        else if(value == "FS") m = FS;
-        else if(value == "LS") m = LS;
-        else if(value == "OS") m = OS;
-        else if(value == "SH") m = SH;
-        else if(value == "SB") m = SB;
-        else if(value == "SR") m = SR;
-        else if(value == "UN") m = UN;
-        else if(value == "TR") m = TR;
+        else if(value == "FS") m = Mode::FS;
+        else if(value == "LS") m = Mode::LS;
+        else if(value == "OS") m = Mode::OS;
+        else if(value == "SH") m = Mode::SH;
+        else if(value == "SB") m = Mode::SB;
+        else if(value == "SR") m = Mode::SR;
+        else if(value == "UN") m = Mode::UN;
+        else if(value == "TR") m = Mode::TR;
         ackMode = m;
     }
     if(command == "setMonitor") setMonitor(value == "CSM" ? CSM : (value == "TSM" ? TSM : RSM));

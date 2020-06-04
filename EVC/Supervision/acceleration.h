@@ -23,8 +23,8 @@ struct acceleration
 {
     std::set<distance> dist_step;
     std::set<double> speed_step;
-    std::function<double(double, distance)> accel;
-    double operator()(double V, distance d) const
+    std::function<double(const double, const distance)> accel;
+    double operator()(const double V, const distance d) const
     {
         return accel(V,d);
     }

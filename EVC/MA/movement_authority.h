@@ -23,6 +23,7 @@
 #include "../Supervision/targets.h"
 #include "../optional.h"
 #include "../Time/clock.h"
+#include "mode_profile.h"
 class timer
 {
 public:
@@ -108,6 +109,22 @@ public:
         return v_main;
     }
     void update_timers();
+    void shorten(distance d)
+    {
+        ol = {};
+        dp = {};
+        distance cum = start;
+        for (int i=0; i<sections.size(); i++) {
+            cum += sections[i].length;
+            if (cum > d) {
+                sections.erase(sections.begin()+i+1, sections.end());
+                sections[i].length -= cum-d;
+                if (sections[i].length <= 0)
+                    sections.erase(sections.begin()+i);
+                break;
+            }
+        }
+    }
     friend void MA_infill(movement_authority ma);
     friend void replace_MA(movement_authority ma);
     friend void set_data();

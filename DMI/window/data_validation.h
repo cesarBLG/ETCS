@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef _DATA_VALIDATION_H
 #define _DATA_VALIDATION_H
 #include "subwindow.h"
@@ -52,9 +69,6 @@ class validation_window : public subwindow
     validation_window(string title, vector<input_data*> data) : subwindow(title, true), validation_data(data)
     {
         confirmation = new validation_input();
-        confirmation->setData("Yes");
-        confirmation->validate();
-        confirmation->setSelected(true);
         vector<Button*> keys = getYesNoKeyboard(confirmation);
         for(int i=0; i<12; i++)
         {
@@ -65,10 +79,22 @@ class validation_window : public subwindow
         }
         confirmation->data_comp->setPressedAction([this]
         {
+            if (confirmation->getData() == "Yes")
+            {
+                sendInformation();
+            }
             exit(this);
         });
         setLayout();
+        confirmation->setSelected(true);
+        confirmation->setData("Yes");
+        confirmation->setAccepted(true);
+        for (int i=0; i<data.size(); i++)
+        {
+            data[i]->setAccepted(true);
+        }
     }
+    virtual void sendInformation() {}
     virtual ~validation_window()
     {
         delete confirmation;

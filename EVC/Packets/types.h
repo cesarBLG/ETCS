@@ -19,6 +19,9 @@
 #include <stdint.h>
 #include <vector>
 #include "variables.h"
+#include <typeinfo>
+#include <iostream>
+#include <string>
 struct bit_read_temp
 {
     std::vector<bool> bits;
@@ -39,6 +42,9 @@ struct bit_read_temp
         var->rawdata = value;
         if (!var->is_valid())
             sparefound = true;
+        /*std::string tip = typeid(*var).name();
+        tip = tip.substr(tip.find_first_not_of("0123456789"));
+        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;*/
     }
     void peek(ETCS_variable *var, int offset=0)
     {

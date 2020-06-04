@@ -44,6 +44,8 @@ struct eurobalise_telegram
     bool readerror;
     eurobalise_telegram(bit_read_temp &r)
     {
+        extern double or_dist;
+        //std::cout<<"Decoding telegram "<<get_milliseconds()/1000<<" "<<or_dist<<std::endl;
         r.read(&Q_UPDOWN);
         r.read(&M_VERSION);
         r.read(&Q_MEDIA);
@@ -74,7 +76,7 @@ struct message_packet
     int dir;
     bool fromRBC;
 };
-extern std::deque<eurobalise_telegram> pending_telegrams;
+extern std::deque<std::pair<eurobalise_telegram,distance>> pending_telegrams;
 extern std::list<link_data>::iterator link_expected;
 void check_eurobalise_passed();
 void set_message_filters();

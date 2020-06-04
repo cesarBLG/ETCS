@@ -24,7 +24,6 @@
 #include "fixed_values.h"
 #include "train_data.h"
 #include <set>
-#include <iostream>
 target::target() : is_valid(false), type(target_class::MRSP) {};
 target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type) 
 {
@@ -49,25 +48,29 @@ distance target::get_distance_curve(double velocity) const
             std::cout<<diff<<std::endl;
         return a;
     }*/
+    distance dist;
     if (is_EBD_based) {
         if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
-            return distance_curve(A_safe, d_target, 0, velocity);
+            dist = distance_curve(A_safe, d_target, 0, velocity);
         else
-            return distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
+            dist = distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
     } else {
-        return distance_curve(A_expected, d_target, 0, velocity);
+        dist = distance_curve(A_expected, d_target, 0, velocity);
     }
+    return dist;
 }
 double target::get_speed_curve(distance dist) const
 {
+    double spd;
     if (is_EBD_based) {
         if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
-            return speed_curve(A_safe, d_target, 0, dist);
+            spd = speed_curve(A_safe, d_target, 0, dist);
         else
-            return speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
+            spd = speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
     } else {
-        return speed_curve(A_expected, d_target, 0, dist);
+        spd = speed_curve(A_expected, d_target, 0, dist);
     }
+    return spd;
 }
 distance target::get_distance_gui_curve(double velocity) const
 {
@@ -163,45 +166,47 @@ optional<distance> SvL;
 optional<distance> SR_dist;
 optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
-static std::set<target> supervised_targets;
+static std::list<target> supervised_targets;
 bool changed = false;
 void set_supervised_targets()
 {
     changed = true;
     supervised_targets.clear();
     std::map<distance, double> MRSP = get_MRSP();
-    auto minMRSP = MRSP.begin();
-    auto prev = minMRSP;
-    for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
-        if (it->second < prev->second && d_maxsafefront(it->first.get_reference())<it->first)
-            supervised_targets.insert(target(it->first, it->second, target_class::MRSP));
-        prev = it;
+    if (!MRSP.empty()) {
+        auto minMRSP = MRSP.begin();
+        auto prev = minMRSP;
+        for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
+            if (it->second < prev->second && d_maxsafefront(it->first.get_reference())<it->first)
+                supervised_targets.push_back(target(it->first, it->second, target_class::MRSP));
+            prev = it;
+        }
     }
     if (SvL)
-        supervised_targets.insert(target(*SvL, 0, target_class::SvL));
+        supervised_targets.push_back(target(*SvL, 0, target_class::SvL));
     if (EoA)
-        supervised_targets.insert(target(*EoA, 0, target_class::EoA));
+        supervised_targets.push_back(target(*EoA, 0, target_class::EoA));
     if (SR_dist)
-        supervised_targets.insert(target(*SR_dist, 0, target_class::SR_distance));
+        supervised_targets.push_back(target(*SR_dist, 0, target_class::SR_distance));
     if (LoA)
-        supervised_targets.insert(target(LoA->first, LoA->second, target_class::LoA));
+        supervised_targets.push_back(target(LoA->first, LoA->second, target_class::LoA));
 }
 bool supervised_targets_changed()
 {
-    std::set<target> old;
+    bool removed = false;
     for (auto it = supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
-        if (it->type == target_class::MRSP && d_maxsafefront(it->get_target_position().get_reference()) >= it->get_target_position())
-            old.insert(*it);
+        if (it->type == target_class::MRSP && d_maxsafefront(it->get_target_position().get_reference()) >= it->get_target_position()) {
+            removed = true;
+            it = --supervised_targets.erase(it);
+        }
     }
-    for (auto it = old.begin(); it!=old.end(); ++it)
-        supervised_targets.erase(*it);
-    if (changed || !old.empty()) {
+    if (changed || removed) {
         changed = false;
         return true;
     }
     return false;
 }
-std::set<target> get_supervised_targets()
+const std::list<target> &get_supervised_targets()
 {
     return supervised_targets;
 }
@@ -209,7 +214,7 @@ void target::calculate_decelerations()
 {
     calculate_decelerations(get_gradient());
 }
-void target::calculate_decelerations(std::map<distance,double> gradient)
+void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
     std::map<distance,int> redadh;
     redadh[distance(0)] = 0;
@@ -220,7 +225,7 @@ void target::calculate_decelerations(std::map<distance,double> gradient)
     acceleration A_brake_safe;
     if (conversion_model_used) {
         A_brake_safe = A_brake_emergency;
-        A_brake_safe.accel = [=](double V, distance d) {
+        A_brake_safe.accel = [A_brake_emergency](double V, distance d) {
             return (--Kv_int.upper_bound(V))->second*(--Kr_int.upper_bound(L_TRAIN))->second*A_brake_emergency(V,d);
         };
         for (auto it=Kv_int.begin(); it!=Kv_int.end(); ++it)
@@ -232,7 +237,7 @@ void target::calculate_decelerations(std::map<distance,double> gradient)
             return Kdry_rst(V,M_NVEBCL,d)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
         };
     }
-        
+
     A_safe = A_brake_safe + A_gradient;
     for (auto it=redadh.begin(); it!=redadh.end(); ++it)
         A_safe.dist_step.insert(it->first);

@@ -1,3 +1,21 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019  Iván Izquierdo
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "driver_id.h"
 #include "window.h"
 #include "algorithm"
@@ -17,6 +35,8 @@ driver_window::driver_window() : input_window("Driver ID", 1), TRN("TRN",82,50),
         right_menu(new menu_settings());
     });
     create();
+    inputs[0]->data = driverid;
+    inputs[0]->setAccepted(true);
 }
 void driver_window::setLayout()
 {
@@ -26,20 +46,15 @@ void driver_window::setLayout()
 }
 void driver_window::sendInformation()
 {
-    driverid = stoul(inputs[0]->getData());
+    driverid = inputs[0]->getData();
+    driverid_valid = true;
 }
 void driverid_input::validate()
 {
-    if(data.size()>8 || data.size()<1) return;
-    unsigned long id = stoul(data);
-    valid = id!=0;
+    if(data.empty()) return;
+    valid = true;
 }
 driverid_input::driverid_input()
 {
-    if(driverid!=0)
-    {
-        data = to_string(driverid);
-        accepted = true;
-    } 
     keys = getAlphaNumericKeyboard(this);
 }

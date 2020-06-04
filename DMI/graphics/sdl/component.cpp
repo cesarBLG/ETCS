@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "../component.h"
 #include "../display.h"
 #include "gfx_primitives.h"
@@ -9,6 +26,7 @@
 #include "../rectangle.h"
 #include "../line.h"
 #include "../circle.h"
+#include "../button.h"
 using namespace std;
 Component Z(640, 15, nullptr);
 Component Y(640, 15, nullptr);
@@ -22,6 +40,14 @@ Component::~Component()
 {
     clear();
 }
+void Component::clear()
+{
+    for(int i=0; i<graphics.size(); i++)
+    {
+        delete graphics[i];
+    }
+    graphics.clear();
+}
 void Component::setPressedAction(function<void()> action)
 {
     pressedAction = action;
@@ -33,7 +59,7 @@ void Component::setAck(function<void()> ackAction)
 }
 void Component::setPressed(bool value)
 {
-    if(value && pressedAction != nullptr)
+    if(value && pressedAction != nullptr && (!isButton || ((Button*)this)->enabled))
     {
         playClick();
         pressedAction();

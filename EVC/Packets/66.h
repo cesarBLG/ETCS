@@ -5,19 +5,19 @@
 #include "packets.h"
 #include <vector>
 
-struct TemporarySpeedRevocation : ETCS_directional_packet
+struct TemporarySpeedRestrictionRevocation : ETCS_directional_packet
 {
     NID_TSR_t NID_TSR;
-    TemporarySpeedRevocation() = default;
-    TemporarySpeedRevocation(bit_read_temp &r)
+    TemporarySpeedRestrictionRevocation() = default;
+    TemporarySpeedRestrictionRevocation(bit_read_temp &r)
     {
         r.read(&NID_PACKET);
         r.read(&Q_DIR);
         r.read(&L_PACKET);
         r.read(&NID_TSR);
     }
-    TemporarySpeedRevocation *create(bit_read_temp &r) override
+    TemporarySpeedRestrictionRevocation *create(bit_read_temp &r) override
     {
-        return new TemporarySpeedRevocation(r);
+        return new TemporarySpeedRestrictionRevocation(r);
     }
 };

@@ -29,6 +29,7 @@ bool CON=true;
 extern mutex loop_mtx;
 extern mutex iface_mtx;
 bool detected = false;
+void register_parameter(std::string parameter);
 void initialize_asfa()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -51,6 +52,8 @@ void initialize_asfa()
             add_message(text_message("ASFA conectado en C.G.", false, false, false, [](text_message &t){return !detected;}));
     };
     manager.AddParameter(p);
+
+    register_parameter("asfa::cg");
 }
 void update_asfa()
 {

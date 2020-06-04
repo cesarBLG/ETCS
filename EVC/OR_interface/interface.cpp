@@ -29,6 +29,7 @@
 #include "../TrainSubsystems/power.h"
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include <mutex>
 using namespace ORserver;
 using std::string;
@@ -46,6 +47,7 @@ double or_dist;
 POSIXclient *s_client;
 ParameterManager manager;
 mutex iface_mtx;
+static threadwait *poller;
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -75,7 +77,7 @@ void SetParameters()
         }
         bit_read_temp r(message);
         eurobalise_telegram t(r);
-        pending_telegrams.push_back(t);
+        pending_telegrams.push_back({t,d_estfront});
     };
     manager.AddParameter(p);
 
@@ -114,19 +116,60 @@ void SetParameters()
         V_set = stof(val)/3.6;
     };
     manager.AddParameter(p);
+    
+    p = new Parameter("etcs::vperm");
+    p->GetValue = []() {
+        return std::to_string(V_perm*3.6);
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::vtarget");
+    p->GetValue = []() {
+        return std::to_string(V_target*3.6);
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::vsbi");
+    p->GetValue = []() {
+        return std::to_string(V_sbi*3.6);
+    };
+    manager.AddParameter(p);
+    
+    p = new Parameter("etcs::supervision");
+    p->GetValue = []() {
+        string s = "";
+        extern SupervisionStatus supervision;
+        switch(supervision)
+        {
+            case NoS:
+                s += "NoS";
+                break;
+            case IndS:
+                s += "IndS";
+                break;
+            case OvS:
+                s += "OvS";
+                break;
+            case WaS:
+                s += "WaS";
+                break;
+            case IntS:
+                s += "IntS";
+                break;
+        }
+        return s;
+    };
+    manager.AddParameter(p);
+}
+void register_parameter(string parameter)
+{
+    s_client->WriteLine("register("+parameter+")");
 }
 void polling()
 {
-    threadwait *poller = new threadwait();
-    s_client = new TCPclient("127.0.0.1", 5090, poller);//TCPclient::connect_to_server(poller);
-    s_client->WriteLine("register(speed)");
-    s_client->WriteLine("register(distance)");
-    s_client->WriteLine("register(etcs::telegram)");
-    s_client->WriteLine("register(cruise_speed)");
-    s_client->WriteLine("register(asfa::cg)");
-    SetParameters();
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     while(s_client->connected) {
-        int nfds = poller->poll(100);
+        int nfds = poller->poll(300);
         s_client->handle();
         string s = s_client->ReadLine();
         std::unique_lock<mutex> lck(iface_mtx);
@@ -140,6 +183,13 @@ void polling()
 }
 void start_or_iface()
 {
+    poller = new threadwait();
+    s_client = new TCPclient("192.168.1.36", 5090, poller);//TCPclient::connect_to_server(poller);
+    s_client->WriteLine("register(speed)");
+    s_client->WriteLine("register(distance)");
+    s_client->WriteLine("register(etcs::telegram)");
+    s_client->WriteLine("register(cruise_speed)");
+    SetParameters();
     thread t(polling);
     t.detach();
 }

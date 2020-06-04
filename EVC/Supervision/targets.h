@@ -18,6 +18,7 @@
 #pragma once
 #include <set>
 #include <vector>
+#include <list>
 #include "../optional.h"
 #include "acceleration.h"
 #include "../Position/distance.h"
@@ -73,7 +74,7 @@ public:
     void calculate_times() const;
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     void calculate_decelerations();
-    void calculate_decelerations(std::map<distance,double> gradient);
+    void calculate_decelerations(const std::map<distance,double> &gradient);
     bool operator< (const target t) const
     {
         if (!is_valid)
@@ -113,5 +114,5 @@ extern optional<distance> SR_dist;
 extern optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();
-std::set<target> get_supervised_targets();
+const std::list<target> &get_supervised_targets();
 bool supervised_targets_changed();

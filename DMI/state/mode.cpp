@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "mode.h"
 #include "../monitor.h"
 #include "../graphics/component.h"
@@ -15,43 +32,43 @@ void displayMode()
     int num;
     switch(mode)
     {
-        case SH:
+        case Mode::SH:
             num = 1;
             break;
-        case TR:
+        case Mode::TR:
             num = 4;
             break;
-        case PT:
+        case Mode::PT:
             num = 6;
             break;
-        case OS:
+        case Mode::OS:
             num = 7;
             break;
-        case SR:
+        case Mode::SR:
             num = 9;
             break;
-        case FS:
+        case Mode::FS:
             num = 11;
             break;
-        case NL:
+        case Mode::NL:
             num = 12;
             break;
-        case SB:
+        case Mode::SB:
             num = 13;
             break;
-        case RV:
+        case Mode::RV:
             num = 14;
             break;
-        case UN:
+        case Mode::UN:
             num = 16;
             break;
-        case SF:
+        case Mode::SF:
             num = 18;
             break;
-        case NS:
+        case Mode::NS:
             num = 19;
             break;
-        case LS:
+        case Mode::LS:
             num = 21;
             break;
     }

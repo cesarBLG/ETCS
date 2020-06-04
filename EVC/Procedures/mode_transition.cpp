@@ -39,21 +39,26 @@ void initialize_mode_transitions()
     c[3] = [](){return V_est == 0;};
     c[4] = [](){return true;};
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
-    c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;;};
+    c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
+    c[10] = [](){return train_data_valid() && MA && !get_SSP().empty() && !get_gradient().empty() && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
     c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(EoA->get_reference())-L_antenna_front);};
+    c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(EoA->get_reference());};
     c[21] = [](){return level == Level::N0;};
-    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty();};
+    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
     c[37] = [](){return false;};
-    c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3);};
-    c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1;};
+    c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
+    c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
+    c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference())  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
+    c[40] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
     c[42] = [](){return SR_dist && *SR_dist < d_estfront && !overrideProcedure;};
     c[43] = [](){return !overrideProcedure && formerEoA && *formerEoA<d_minsafefront(formerEoA->get_reference())-L_antenna_front;};
     c[39] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && !MA;};
     c[60] = [](){return mode_to_ack==Mode::UN && mode_acknowledged;};
     c[62] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && train_data_valid() && mode_acknowledged;;};
     c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid() && mode_acknowledged;;};
-    c[69] = [](){return get_SSP().begin()->get_start()>d_estfront || get_gradient().begin()->first>d_estfront;};
+    c[69] = [](){return get_SSP().begin()->get_start()>d_estfront || get_gradient().begin()->first>d_estfront || (--get_gradient().end())->first<d_estfront || (--get_SSP().end())->get_end()<d_estfront;};
+    c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
 
     transitions.push_back({Mode::SB, Mode::SR, {8,37}, 7});
     transitions.push_back({Mode::FS, Mode::SR, {37}, 6});
@@ -101,6 +106,20 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::PT, Mode::SH, {5,6,50}, 5});
     transitions.push_back({Mode::SN, Mode::SH, {5,61}, 7});
 
+    transitions.push_back({Mode::NP, Mode::SB, {4}, 2});
+    transitions.push_back({Mode::PS, Mode::SB, {22}, 4});
+    transitions.push_back({Mode::SH, Mode::SB, {19,27,30}, 5});
+    transitions.push_back({Mode::FS, Mode::SB, {28}, 5});
+    transitions.push_back({Mode::LS, Mode::SB, {28}, 5});
+    transitions.push_back({Mode::SR, Mode::SB, {28}, 5});
+    transitions.push_back({Mode::OS, Mode::SB, {28}, 5});
+    transitions.push_back({Mode::SL, Mode::SB, {2,3}, 3});
+    transitions.push_back({Mode::NL, Mode::SB, {28,47}, 3});
+    transitions.push_back({Mode::UN, Mode::SB, {28}, 6});
+    transitions.push_back({Mode::PT, Mode::SB, {28}, 4});
+    transitions.push_back({Mode::SN, Mode::SB, {28}, 6});
+    transitions.push_back({Mode::RV, Mode::SB, {28}, 4});
+
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);
     }
@@ -112,7 +131,7 @@ struct stored_information
     std::function<void()> delete_info;
     std::function<void()> invalidate_info;
 };
-std::map<int,stored_information> information_list;
+static std::map<int,stored_information> information_list;
 struct deleted_information
 {
     int index;
@@ -136,6 +155,7 @@ struct deleted_information
 std::map<Mode, std::vector<deleted_information>> deleted_informations;
 void update_mode_status()
 {
+    update_mode_profile();
     std::vector<mode_transition> &available=ordered_transitions[(int)mode];
     int priority = 10;
     int transition_index=-1;
@@ -163,8 +183,19 @@ void update_mode_status()
                 SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
             }
         } else {
+            SR_dist = {};
+            SR_speed = {};
             formerEoA = {};
         }
+        if (mode == Mode::UN)
+            UN_speed = speed_restriction(V_NVUNFIT, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
+        else
+            UN_speed = {};
+        if (mode == Mode::SH)
+            SH_speed = speed_restriction(V_NVSHUNT, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
+        else
+            SH_speed = {};
+        
         if (mode == Mode::FS) {
             add_message(text_message("Entering FS", true, false, false, [](text_message &t){
                 distance back = d_estfront-L_TRAIN;
@@ -260,7 +291,6 @@ void set_mode_deleted_data()
     information_list[4].delete_info = []() {delete_gradient();};
     information_list[5].delete_info = []() {delete_SSP();};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear();};
-    information_list[14].delete_info = []() {SR_dist = {}; SR_speed = {};};
     information_list[18].delete_info = []() {signal_speeds.clear();};
     information_list[29].delete_info = []() {
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {

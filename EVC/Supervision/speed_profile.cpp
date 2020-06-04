@@ -30,6 +30,10 @@ static std::set<speed_restriction> SSP;
 static std::list<TSR> TSRs;
 optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
+optional<speed_restriction> SH_speed;
+optional<speed_restriction> UN_speed;
+optional<speed_restriction> OS_speed;
+optional<speed_restriction> LS_speed;
 optional<speed_restriction> override_speed;
 static std::map<distance, double> gradient;
 void delete_back_info()
@@ -52,13 +56,29 @@ void delete_back_info()
         return t.restriction.get_end()<mindist;
     });
 }
+void delete_SSP(distance d)
+{
+    SSP.erase(SSP.lower_bound(speed_restriction(0,d,d,false)), SSP.end());
+}
 void delete_SSP()
 {
     SSP.clear();
 }
+void delete_gradient(distance d)
+{
+    auto it = gradient.upper_bound(d);
+    if (it != gradient.end()) {
+        gradient.erase(it, gradient.end());
+        gradient[d] = 255;
+    }
+}
 void delete_gradient()
 {
     gradient.clear();
+}
+void delete_TSR(distance d)
+{
+    std::remove_if(TSRs.begin(), TSRs.end(), [d](const TSR& t) {return d < t.restriction.get_start();});
 }
 void delete_TSR()
 {
@@ -83,10 +103,22 @@ void recalculate_MRSP()
         restrictions.insert(*train_speed);
     if (SR_speed)
         restrictions.insert(*SR_speed);
+    if (OS_speed)
+        restrictions.insert(*OS_speed);
+    if (LS_speed)
+        restrictions.insert(*LS_speed);
+    if (SH_speed)
+        restrictions.insert(*SH_speed);
+    if (UN_speed)
+        restrictions.insert(*UN_speed);
     if (override_speed)
         restrictions.insert(*override_speed);
     if (MA)
         restrictions.insert(signal_speeds.begin(), signal_speeds.end());
+    if (restrictions.empty()) {
+        set_supervised_targets();
+        return;
+    }
     std::set<distance> critical_points;
     for (auto it = restrictions.begin(); it != restrictions.end(); ++it) {
         critical_points.insert(it->get_start());
@@ -118,10 +150,19 @@ void update_SSP(std::vector<SSP_element> nSSP)
             next++;
             if (next == nSSP.end()) break;
         }
-        rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, true));
+        rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, it->compensate_train_length));
     }
     auto it_start = SSP.lower_bound(*rest.begin());
     SSP.erase(it_start, SSP.end());
+    if (!SSP.empty() && !rest.empty()) {
+        auto it = --SSP.end();
+        distance end = it->get_uncompensated_end();
+        if (end > rest.begin()->get_start()) {
+            speed_restriction r = speed_restriction(it->get_speed(), it->get_start(), rest.begin()->get_start(), it->is_compensated());
+            SSP.erase(it);
+            SSP.insert(r);
+        }
+    }
     SSP.insert(rest.begin(), rest.end());
     recalculate_MRSP();
 }
@@ -135,7 +176,7 @@ void update_gradient(std::map<distance, double> grad)
     gradient.erase(it_start, gradient.end());
     gradient.insert(grad.begin(), grad.end());
 }
-std::map<distance, double> get_gradient()
+const std::map<distance, double> &get_gradient()
 {
     return gradient;
 }

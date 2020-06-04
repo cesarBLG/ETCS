@@ -1,3 +1,20 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <ctime>
 #include <chrono>
 #include <cstdio>
@@ -35,7 +52,7 @@ void init_video()
     }
     startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
-    SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
+    //SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)
     {
         printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());
@@ -94,7 +111,7 @@ void init_video()
                 float x = (scrx-offset[0]) / scale;
                 float y = scry / scale;
                 vector<window*> windows;
-                draw_mtx.lock();
+                unique_lock<mutex> lck(draw_mtx);
                 for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
                 {
                     if((*it)->active) windows.push_back(*it);
@@ -103,7 +120,6 @@ void init_video()
                 {
                     windows[i]->event(1, x, y);
                 }
-                draw_mtx.unlock();
             }
         }
     }
@@ -140,10 +156,10 @@ void display()
 {
     auto start = chrono::system_clock::now();
     clear();
-    draw_mtx.lock();
+    unique_lock<mutex> lck(draw_mtx);
     displayETCS();
-    draw_mtx.unlock();
     SDL_RenderPresent(sdlren);
+    lck.unlock();
     auto end = chrono::system_clock::now();
     chrono::duration<double> diff = end-start;
     //printf("%f\n", diff.count());

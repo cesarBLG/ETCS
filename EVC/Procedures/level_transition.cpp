@@ -26,6 +26,8 @@ std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer;
 bool level_acknowledgeable = false;
 bool level_acknowledged = false;
 Level level_to_ack;
+bool level_timer_started = false;
+int64_t level_timer;
 void perform_transition()
 {
     if (!ongoing_transition) return;
@@ -40,16 +42,21 @@ void perform_transition()
         }
     }
     transition_buffer.clear();
-    if (!level_acknowledged) {
+    if (level_acknowledgeable && !level_acknowledged) {
+        level_timer_started = true;
+        level_timer = get_milliseconds();
+    }
+}
+void update_level_status()
+{
+    if (level_timer_started && level_timer + T_ACK*1000 < get_milliseconds()) {
+        level_timer_started = false;
         brake_conditions.push_back({nullptr, [](brake_command_information &i) {
             if (level_acknowledged || level_to_ack != level || !level_acknowledgeable)
                 return true;
             return false;
         }});
     }
-}
-void update_level_status()
-{
     if (!ongoing_transition) return;
     if (ongoing_transition->start<=d_estfront)
         perform_transition();
@@ -64,6 +71,7 @@ void level_transition_received(level_transition_information info)
     if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level)
         level_acknowledged = false;
     level_acknowledgeable = false;
+    level_timer_started = false;
     transition_buffer.clear();
     transition_buffer.push_back({});
     if (info.leveldata.level == level) {

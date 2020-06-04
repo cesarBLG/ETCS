@@ -37,7 +37,7 @@ double update_location_reference(bg_id nid_bg, distance group_pos, bool linked)
         return 0;
     } else if (linking.begin()->nid_bg==nid_bg) {
         double offset = linking.begin()->dist.get();
-        reset_odometer(offset);
+        reset_odometer(group_pos.get());
         distance::update_distances(offset, group_pos.get());
         NID_LRBG = nid_bg;
         Q_LOCACC_LRBG = linking.front().locacc;
@@ -83,4 +83,15 @@ void delete_linking()
 {
     linking.clear();
     link_expected = linking.end();
+}
+void delete_linking(distance d)
+{
+    if (link_expected != linking.end() && link_expected->dist > d)
+        link_expected = linking.end();
+    for (auto it = linking.begin(); it != linking.end(); ++it) {
+        if (it->dist > d) {
+            linking.erase(it, linking.end());
+            break;
+        }
+    }
 }

@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "acceleration.h"
+#include <iostream>
+#include <chrono>
 acceleration operator+(const acceleration a1, const acceleration a2)
 {
     acceleration an;
@@ -23,6 +25,9 @@ acceleration operator+(const acceleration a1, const acceleration a2)
     an.speed_step = a1.speed_step;
     an.dist_step.insert(a2.dist_step.begin(), a2.dist_step.end());
     an.speed_step.insert(a2.speed_step.begin(), a2.speed_step.end());
-    an.accel = [=](double V, distance d) {return a1.accel(V,d) + a2.accel(V,d);};
+
+    auto ac1 = a1.accel;
+    auto ac2 = a2.accel;
+    an.accel = [ac1,ac2](double V, distance d) {return ac1(V,d) + ac2(V,d);};
     return an;
 }

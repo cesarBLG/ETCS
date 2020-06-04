@@ -49,7 +49,7 @@ static distance bg_referencemax;
 static distance bg_referencemin;
 static bool stop_checking_linking=false;
 std::list<link_data>::iterator link_expected=linking.end();
-std::deque<eurobalise_telegram> pending_telegrams;
+std::deque<std::pair<eurobalise_telegram, distance>> pending_telegrams;
 void trigger_reaction(int reaction);
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg);
 void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp);
@@ -84,7 +84,7 @@ void reset_eurobalise_data()
     refmissed = false;
     reffound = false;
     dupfound = false;
-    refpassed = true;
+    refpassed = false;
     linked = false;
     stop_checking_linking = false;
 }
@@ -105,7 +105,7 @@ void check_linking()
         }
         bool isexpected = linked && refpassed && link_expected==link_bg;
         bool c1 = isexpected && link_expected->min() > bg_referencemax;
-        bool c2 = link_expected->max() < d_minsafefront(0);
+        bool c2 = (!isexpected || link_expected->max() < bg_referencemin) && link_expected->max() < d_minsafefront(0);
         bool c3 = linked && link_bg!=linking.end() && link_bg != link_expected;
         if (c1 || c2 || c3) {
             trigger_reaction(link_expected->reaction);
@@ -131,9 +131,9 @@ void balise_group_passed()
             bg_referencemax = bg_reference1max;
             bg_referencemin = bg_reference1min;
             refpassed = true;
-            check_linking();
         }
     }
+    check_linking();
     bool linking_rejected=false;
     if (linked && reffound && !linking.empty()) {
         linking_rejected = true;
@@ -153,70 +153,76 @@ void balise_group_passed()
 }
 void check_eurobalise_passed()
 {
-    check_linking();
-    if (reading) {
-        double elapsed = d_estfront-last_passed_distance;
-        if (prevpig==-1) {
-            if (elapsed > 12*8)
-                balise_group_passed();
-        } else {
-            int v1 = (totalbg-prevpig-1);
-            int v2 = prevpig;
-            if (dir == 0 && elapsed > v1*12)
-                balise_group_passed();
-            else if (dir == 1 && elapsed > v2*12)
-                balise_group_passed();
-            else if (dir == -1 && elapsed > std::max(v1, v2)*12)
-                balise_group_passed();
+    if (pending_telegrams.empty()) {
+        check_linking();
+        if (reading) {
+            double elapsed = d_estfront-last_passed_distance;
+            if (prevpig==-1) {
+                if (elapsed > 12*8)
+                    balise_group_passed();
+            } else {
+                int v1 = (totalbg-prevpig-1);
+                int v2 = prevpig;
+                if (dir == 0 && elapsed > v1*12)
+                    balise_group_passed();
+                else if (dir == 1 && elapsed > v2*12)
+                    balise_group_passed();
+                else if (dir == -1 && elapsed > std::max(v1, v2)*12)
+                    balise_group_passed();
+            }
         }
-    }
-    if (pending_telegrams.empty()) return;
-    eurobalise_telegram t = pending_telegrams.front();
-    pending_telegrams.pop_front();
-    last_passed_distance = d_estfront;
-    reading = true;
-    if (!t.readerror) {
-        linked = t.Q_LINK == Q_LINK_t::Linked;
-        if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG)
-            balise_group_passed();
-        if (reading_nid_bg != t.NID_BG) {
-            first_balise_time = get_milliseconds();
+    } else {
+        eurobalise_telegram t = pending_telegrams.front().first;
+        distance passed_dist = pending_telegrams.front().second;
+        pending_telegrams.pop_front();
+        last_passed_distance = passed_dist;
+        reading = true;
+        if (!t.readerror) {
+            linked = t.Q_LINK == Q_LINK_t::Linked;
+            if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG)
+                balise_group_passed();
+            if (reading_nid_bg != t.NID_BG) {
+                first_balise_time = get_milliseconds();
+            }
+            reading_nid_bg = t.NID_BG;
+            reading_nid_c = t.NID_C;
+            totalbg = t.N_TOTAL+1;
+            if (prevpig != -1) {
+                if (dir == -1)
+                    dir = (prevpig>t.N_PIG) ? 1 : 0;
+                if (t.N_PIG>prevpig && !reffound)
+                    refmissed = true;
+            }
+            prevpig = t.N_PIG;
+            if (t.N_PIG == 1 && t.M_DUP == M_DUP_t::DuplicateOfPrev) {
+                dupfound = true;
+                bg_reference1 = passed_dist;
+                bg_reference1max = d_maxsafe(passed_dist, 0);
+                bg_reference1min = d_minsafe(passed_dist, 0);
+            }
+            if (t.N_PIG == 0) {
+                reffound = true;
+                bg_reference = passed_dist;
+                bg_referencemax = d_maxsafe(passed_dist, 0);
+                bg_referencemin = d_minsafe(passed_dist, 0);
+                refpassed = true;
+                check_linking();
+            }
+            if ((dir==0 && t.N_PIG == t.N_TOTAL) || (dir == 1 && t.N_PIG == 0)) {
+                telegrams.push_back(t);
+                balise_group_passed();
+                return;
+            }
         }
-        reading_nid_bg = t.NID_BG;
-        reading_nid_c = t.NID_C;
-        totalbg = t.N_TOTAL+1;
-        if (prevpig != -1) {
-            if (dir == -1)
-                dir = (prevpig>t.N_PIG) ? 1 : 0;
-            if (t.N_PIG>prevpig && !reffound)
-                refmissed = true;
-        }
-        prevpig = t.N_PIG;
-        if (t.N_PIG == 1 && t.M_DUP == M_DUP_t::DuplicateOfPrev) {
-            dupfound = true;
-            bg_reference1 = d_estfront;
-            bg_reference1max = d_maxsafefront(0);
-            bg_reference1min = d_minsafefront(0);
-        }
-        if (t.N_PIG == 0) {
-            reffound = true;
-            bg_reference = d_estfront;
-            bg_referencemax = d_maxsafefront(0);
-            bg_referencemin = d_minsafefront(0);
+        telegrams.push_back(t);
+        if (refmissed && dupfound) {
+            bg_reference = bg_reference1;
+            bg_referencemax = bg_reference1max;
+            bg_referencemin = bg_reference1min;
             refpassed = true;
+            check_linking();
         }
-        if ((dir==0 && t.N_PIG == t.N_TOTAL) || (dir == 1 && t.N_PIG == 0)) {
-            telegrams.push_back(t);
-            balise_group_passed();
-            return;
-        }
-    }
-    telegrams.push_back(t);
-    if (refmissed && dupfound) {
-        bg_reference = bg_reference1;
-        bg_referencemax = bg_reference1max;
-        bg_referencemin = bg_reference1min;
-        refpassed = true;
+        check_eurobalise_passed();
     }
 }
 void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp)
@@ -673,6 +679,10 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new leveltr_order_information());
     } else if (packet_num == 41) {
         info.push_back(new condleveltr_order_information());
+    } else if (packet_num == 65) {
+        info.push_back(new TSR_information());
+    } else if (packet_num == 66) {
+        info.push_back(new TSR_revocation_information());
     } else if (packet_num == 68) {
         info.push_back(new track_condition_information());
     } else if (packet_num == 72) {

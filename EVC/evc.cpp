@@ -75,12 +75,13 @@ void update()
 }
 void loop()
 {
+    /*auto prev = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
+    int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
+    if (d>1000) std::cout<<d<<std::endl;*/
     while(1)
     {
-        auto prev = std::chrono::system_clock::now();
-        std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
-        //std::cout<<std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count()<<std::endl;
         update();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(80));
     }
 }

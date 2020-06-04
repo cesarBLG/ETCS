@@ -67,12 +67,8 @@ distance::distance(const distance &d)
 }
 distance::distance(distance &&d)
 {
-    if (d.base != nullptr) {
-        base = new _dist_base(*d.base);
-        distances.insert(base);
-    } else {
-        base = nullptr;
-    }
+    base = d.base;
+    d.base = nullptr;
 }
 distance::~distance()
 {
@@ -101,12 +97,8 @@ distance &distance::operator = (distance&& d)
         distances.erase(base);
         delete base;
     }
-    if (d.base != nullptr) {
-        base = new _dist_base(*d.base);
-        distances.insert(base);
-    } else {
-        base = nullptr;
-    }
+    base = d.base;
+    d.base = nullptr;
     return *this;
 }
 distance d_maxsafefront(double reference)
@@ -116,6 +108,14 @@ distance d_maxsafefront(double reference)
 distance d_minsafefront(double reference)
 {
     return distance((d_estfront.get()-reference)*0.99-(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);
+}
+distance d_maxsafe(distance d, double reference)
+{
+    return distance((d.get()-reference)*1.01+(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);
+}
+distance d_minsafe(distance d, double reference)
+{
+    return distance((d.get()-reference)*0.99-(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);
 }
 distance d_estfront(0);
 double odometer_value=0;

@@ -41,7 +41,7 @@ void ETCS_packet::initialize()
     packet_factory[41] = new LevelTransitionOrder();
     packet_factory[47] = new ConditionalLevelTransitionOrder();
     packet_factory[65] = new TemporarySpeedRestriction();
-    packet_factory[66] = new TemporarySpeedRevocation();
+    packet_factory[66] = new TemporarySpeedRestrictionRevocation();
     packet_factory[68] = new TrackCondition();
     packet_factory[72] = new PlainTextMessage();
     packet_factory[76] = new FixedTextMessage();

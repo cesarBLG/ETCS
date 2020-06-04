@@ -10,7 +10,7 @@ OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.
 		planning/planning.o control/control.o state/gps_pos.o \
 		window/train_data.o window/fixed_train_data.o window/keyboard.o window/input_data.o \
 		graphics/sdl/gfx_primitives.o
-CFLAGS = -g
+CFLAGS = -Wall -g
 LDFLAGS = -lSDL2 -lSDL2_ttf -lSDL2_net -pthread
 ifeq ($(TARGET),WIN32)
 CPP = x86_64-w64-mingw32-g++ -m64 -mwindows

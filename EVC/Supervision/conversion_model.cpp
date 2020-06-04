@@ -28,7 +28,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient)
 {
     acceleration A_gradient;
     A_gradient = acceleration();
-    A_gradient.accel = [=](double V, distance d) {
+    A_gradient.accel = [gradient](double V, distance d) {
         if (gradient.empty() || d-L_TRAIN<gradient.begin()->first)
             return 0.0;
         double grad = 50000;

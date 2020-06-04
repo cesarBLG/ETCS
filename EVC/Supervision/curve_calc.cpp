@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <chrono>
+#include <iostream>
 #include <cmath>
 #include "conversion_model.h"
 distance distance_curve(acceleration a, distance dref, double vref, double vel)

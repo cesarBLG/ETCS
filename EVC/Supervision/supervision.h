@@ -67,6 +67,7 @@ extern double V_est;
 extern double V_ura;
 extern double A_est;
 extern double V_perm;
+extern double V_target;
 extern double V_sbi;
 extern double D_target;
 extern double V_release;

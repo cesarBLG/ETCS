@@ -226,6 +226,12 @@ void delete_MA()
     EoA = {};
     LoA = {};
     V_release = 0;
+    set_supervised_targets();
+}
+void delete_MA(distance d)
+{
+    if (MA)
+        MA->shorten(d);
 }
 void set_signalling_restriction(movement_authority ma, bool infill)
 {
