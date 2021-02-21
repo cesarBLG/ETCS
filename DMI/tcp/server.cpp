@@ -322,7 +322,7 @@ void startSocket()
         perror("socket");
         return;
     }
-    if (bind(server, (struct sockaddr *)&(serv), sizeof(serv)) == -1) {
+    if (0 != ::bind(server, (struct sockaddr *)&(serv), sizeof(serv))) {
         perror("bind");
         return;
     }

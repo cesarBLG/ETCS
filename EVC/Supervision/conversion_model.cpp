@@ -150,7 +150,7 @@ void set_brake_model(json &traindata)
             json &dries = step["kdry"];
             for (auto it3 = dries.begin(); it3!=dries.end(); ++it3) {
                 json &conf = *it3;
-                double ebcl = conf["confidence"].get<double>();
+                double ebcl = conf["confidence"].get<double>()/100;
                 dry[spd][ebcl] = conf["value"].get<double>();
             }
         }

@@ -43,7 +43,11 @@ void fixed_train_data_window::setLayout()
 }
 fixed_train_data_input::fixed_train_data_input()
 {
+#ifdef __ANDROID__
+    std::ifstream file("/data/data/com.etcs.dmi/traindata.txt");
+#else
     std::ifstream file("../EVC/traindata.txt");
+#endif
     json j;
     file >> j;
     vector<string> types;

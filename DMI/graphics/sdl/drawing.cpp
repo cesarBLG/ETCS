@@ -33,8 +33,13 @@ using namespace std;
 extern mutex draw_mtx;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;
+#ifdef __ANDROID__
+char *fontPath = "/data/data/com.etcs.dmi/fonts/swiss.ttf";
+char *fontPathb = "/data/data/com.etcs.dmi/fonts/swissb.ttf";
+#else
 char *fontPath = "fonts/swiss.ttf";
 char *fontPathb = "fonts/swissb.ttf";
+#endif
 #define PI 3.14159265358979323846264338327950288419716939937510
 float scale = 1;
 float offset[2] = {0, 0};
@@ -50,7 +55,7 @@ void init_video()
         running = false;
         return;
     }
-    startDisplay(false);
+    startDisplay(true);
     int timer = SDL_AddTimer(250, flash, nullptr);
     //SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)
@@ -168,7 +173,7 @@ void startDisplay(bool fullscreen)
     }
     int w,h;
     SDL_GetWindowSize(sdlwin, &w, &h);
-    float scrsize[] = {w,h};
+    float scrsize[] = {(float)w,(float)h};
     float extra = 640/2*(scrsize[0]/(scrsize[1]*4/3)-1);
     offset[0] = extra;
     scale = scrsize[1]/480.0;

@@ -32,7 +32,7 @@ void handle_geographical_position(GeographicalPosition p, bg_id this_bg)
         if (elems[i].M_POSITION == M_POSITION_t::NoMoreCalculation)
             g.initial_val = -1;
         g.start_offset = elems[i].D_POSOFF.get_value(p.Q_SCALE);
-        g.id = {elems[i].Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : elems[i].NID_C, elems[i].NID_BG};
+        g.id = {elems[i].Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : elems[i].NID_C, (int)elems[i].NID_BG};
         geo_references.push_back(g);
     }
 }

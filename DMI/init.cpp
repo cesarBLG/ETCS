@@ -29,6 +29,8 @@ void quit()
     window_cv.notify_one();
     printf("quit\n");
 }
+#ifdef __ANDROID__
+#else
 #ifdef __unix__
 #include <unistd.h>
 #include <signal.h>
@@ -54,12 +56,16 @@ void crash_handler(int sig)
     exit(1);
 }
 #endif
+#endif
 int main(int argc, char** argv)
 {
+#ifdef __ANDROID__
+#else
 #ifdef __unix__
     signal(SIGINT, sighandler);
     signal(SIGSEGV, crash_handler);
     signal(SIGABRT, crash_handler);
+#endif
 #endif
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);

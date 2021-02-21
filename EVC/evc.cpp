@@ -37,10 +37,11 @@
 #include "NationalFN/nationalfn.h"
 #include "TrackConditions/track_condition.h"
 #include "TrainSubsystems/subsystems.h"
-#include "evc.h"
+
 std::mutex loop_mtx;
 std::condition_variable loop_notifier;
 void loop();
+void start();
 int main()
 {
     std::printf("Starting European Train Control System...\n");
@@ -48,6 +49,14 @@ int main()
     loop();
     return 0;
 }
+
+#ifdef __ANDROID__
+#include <jni.h>
+extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz)
+{
+    main();
+}
+#endif
 bool started=false;
 void start()
 {

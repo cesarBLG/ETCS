@@ -47,7 +47,7 @@ struct level_transition_information
         std::vector<target_level_information> priorities;
         priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level()});
         for (int i=0; i<o.elements.size(); i++) {
-            priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  o.elements[i].NID_NTC});
+            priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
         }
         for (int i=0; i<priorities.size(); i++) {
             if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1) {
@@ -62,9 +62,9 @@ struct level_transition_information
         immediate = true;
         start = ref;
         std::vector<target_level_information> priorities;
-        priorities.push_back({start, o.element.M_LEVELTR.get_level(), o.element.NID_NTC});
+        priorities.push_back({start, o.element.M_LEVELTR.get_level(), (int)o.element.NID_NTC});
         for (int i=0; i<o.elements.size(); i++) {
-            priorities.push_back({start, o.elements[i].M_LEVELTR.get_level(), o.elements[i].NID_NTC});
+            priorities.push_back({start, o.elements[i].M_LEVELTR.get_level(), (int)o.elements[i].NID_NTC});
         }
         for (int i=0; i<priorities.size(); i++) {
             if (priorities[i].level == level) {

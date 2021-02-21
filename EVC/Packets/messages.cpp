@@ -407,7 +407,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 bool found = false;
                 for (auto it = link_expected; it!=linking.end(); ++it) {
                     link_data &l = *it;
-                    if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, ilr.NID_BG})) {
+                    if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, (int)ilr.NID_BG})) {
                         found = true;
                         infill = true;
                         ref = l.dist;

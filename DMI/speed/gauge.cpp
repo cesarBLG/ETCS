@@ -214,7 +214,12 @@ void displayLines()
             float hx = 0;
             float hy = 12/2.0;
             TTF_Font *font = openFont(fontPath, 16);
-            SDL_Color white = {White.R, White.G, White.B};
+            if (font == nullptr)
+            {
+                inited = true;
+                return;
+            }
+            SDL_Color white = {(Uint8)White.R, (Uint8)White.G, (Uint8)White.B};
             float width;
             float height;
             getFontSize(font, str, &width, &height);

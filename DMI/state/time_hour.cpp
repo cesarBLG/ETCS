@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "time_hour.h"
-#include "../time.h"
+#include "../time_etcs.h"
 int lastsec = -1;
 Component time_hour(63,50,timeHour);
 void timeHour()

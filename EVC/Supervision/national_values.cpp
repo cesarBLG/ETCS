@@ -112,7 +112,7 @@ void set_default_national()
 
     M_NVAVADH = 0;
 
-    M_NVEBCL = 0.999999999;
+    M_NVEBCL = 0.999999999f;
 
     NV_KRINT[0] = 0.9;
     NV_KVINT_freight[0] = 0.7;
@@ -200,7 +200,11 @@ void load_national_values(NationalValues nv)
     }
     nv_changed();
 
+#ifdef __ANDROID__
+    std::ofstream file("/data/data/com.etcs.dmi/nationalvalues.bin", std::ios::binary);
+#else
     std::ofstream file("nationalvalues.bin", std::ios::binary);
+#endif
     bit_write w;
     nv.serialize(w);
     for (int i=0; i<w.bits.size()/8; i++) {
@@ -231,7 +235,11 @@ void national_values_received(NationalValues nv, distance reference)
 }
 void setup_national_values()
 {
+#ifdef __ANDROID__
+    std::ifstream file("/data/data/com.etcs.dmi/nationalvalues.bin", std::ios::binary);
+#else
     std::ifstream file("nationalvalues.bin", std::ios::binary);
+#endif
     std::vector<bool> message;
     while (!file.eof() && !file.fail()) {
         char c;

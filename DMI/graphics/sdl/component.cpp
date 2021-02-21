@@ -159,6 +159,7 @@ void Component::draw(graphic *graph, bool destroy)
             {
                 t->load();
             }
+            if(t->tex == nullptr) return;
             drawTexture(t->tex, t->x, t->y, t->width, t->height);
             break;}
         case RECTANGLE:{
@@ -242,11 +243,12 @@ void Component::drawText(string text, float x, float y, float size, Color col, i
 void Component::getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect)
 {
     if(text=="") return;
+    t->tex = nullptr;
     TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
     if (font == nullptr) return;
     if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
     int v = text.find('\n');
-    SDL_Color color = {col.R, col.G, col.B};
+    SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};
     getFontSize(font, text.substr(0,v).c_str(), &t->width, &t->height);
     float sx = t->width;
     float sy = t->height;
@@ -280,7 +282,11 @@ void Component::addImage(string path, float cx, float cy, float sx, float sy)
 image_graphic *Component::getImage(string path, float cx, float cy, float sx, float sy)
 {
     image_graphic *ig = new image_graphic();
+#ifdef __ANDROID__
+    ig->path = "/data/data/com.etcs.dmi/"+path;
+#else
     ig->path = path;
+#endif
     ig->cx = cx;
     ig->cy = cy;
     ig->sx = sx;

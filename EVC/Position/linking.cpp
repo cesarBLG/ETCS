@@ -59,7 +59,7 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
         link_data d;
         d.dist = cumdist+l.D_LINK.get_value(link.Q_SCALE);
         d.locacc = l.Q_LOCACC;
-        d.nid_bg = {l.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : l.NID_C, l.NID_BG};
+        d.nid_bg = {l.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : l.NID_C, (int)l.NID_BG};
         d.reaction = l.Q_LINKREACTION;
         d.reverse_dir = l.Q_LINKORIENTATION == Q_LINKORIENTATION_t::Reverse;
         links.push_back(d);

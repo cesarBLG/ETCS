@@ -17,6 +17,7 @@
  */
 #ifndef _TIME_H_ETCS
 #define _TIME_H_ETCS
+#include <time.h>
 int getHour();
 int getMinute();
 int getSecond();

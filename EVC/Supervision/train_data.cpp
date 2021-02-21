@@ -57,7 +57,11 @@ bool train_data_valid()
 void validate_train_data()
 {
     if (!special_train_data.empty()) {
+#ifdef __ANDROID__
+        std::ifstream file("/data/data/com.etcs.dmi/traindata.txt");
+#else
         std::ifstream file("traindata.txt");
+#endif
         json j;
         file >> j;
         if (j.contains(special_train_data)) {
