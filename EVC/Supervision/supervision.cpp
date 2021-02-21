@@ -176,11 +176,11 @@ void update_monitor_transitions(bool suptargchang, const std::list<target> &supe
     bool c1 = false;
     bool mrdt = false;
     for (const target &t : supervised_targets) {
-        c1 |= (t.get_target_speed()<=V_est) && ((t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
-        if (MRDT == t)
+        bool ct = (t.get_target_speed()<=V_est) && ((t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
+        c1 |= ct && (t.get_target_speed() > 0 || V_est>=V_release);
+        if (MRDT == t/* || (MRDT.type == t.type && MRDT.get_target_speed() == t.get_target_speed() && std::abs(MRDT.get_target_position()-t.get_target_position())<2)*/)
             mrdt = true;
     }
-    c1 &= (V_est>=V_release);
     bool c2 = V_release>0 && (RSMtarget.is_EBD_based ? d_maxsafefront(d_startRSM.get_reference()) : d_estfront) > d_startRSM;
     bool c3 = !c1 && !c2 && !mrdt;
     bool c4 = c1 && suptargchang;
@@ -274,7 +274,7 @@ void update_supervision()
         if (it->type == target_class::EoA)
             tEoA = *it;
     }
-    if (EoA && SvL) {
+    if (EoA && SvL && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
         if (V_release != 0)
             d_startRSM = get_d_startRSM(V_release);
     } else {
@@ -321,7 +321,7 @@ void update_supervision()
                 indication_distance = d_startRSM-d_estfront;
         } else {
             bool asig=false;
-            for (target t : supervised_targets) {
+            for (const target &t : supervised_targets) {
                 double d = t.d_I - (t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront);
                 if (!asig || indication_distance>d) {
                     indication_distance = d;

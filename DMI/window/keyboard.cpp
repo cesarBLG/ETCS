@@ -30,6 +30,7 @@ vector<Button*> getNumericKeyboard(input_data *input)
     keys.push_back(new TextButton(".", 102, 50));
     for(int i=0; i<12; i++)
     {
+        keys[i]->upType = false;
         keys[i]->setPressedAction([i, input]
         {
             string s = input->keybd_data;
@@ -71,6 +72,7 @@ vector<Button*> getAlphaNumericKeyboard(input_data *input)
     keys.push_back(new TextButton(".", 102, 50, nullptr));
     for(int i=0; i<12; i++)
     {
+        keys[i]->upType = false;
         keys[i]->setPressedAction([input, i]
         {
             string data = input->keybd_data;
@@ -164,6 +166,7 @@ vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, input_data 
     for(int i=0; i<posibilities.size(); i++)
     {
         keys.push_back(new TextButton(posibilities[i], 102, 50));
+        keys[i]->upType = false;
         keys[i]->setPressedAction([input, i, posibilities]
         {
             input->setData(posibilities[i]);
@@ -187,5 +190,7 @@ vector<Button*> getYesNoKeyboard(input_data *input)
     {
             input->setData("Yes");
     });
+    keys[6]->upType = false;
+    keys[7]->upType = false;
     return keys;
 }

@@ -109,28 +109,15 @@ public:
         return v_main;
     }
     void update_timers();
-    void shorten(distance d)
-    {
-        ol = {};
-        dp = {};
-        distance cum = start;
-        for (int i=0; i<sections.size(); i++) {
-            cum += sections[i].length;
-            if (cum > d) {
-                sections.erase(sections.begin()+i+1, sections.end());
-                sections[i].length -= cum-d;
-                if (sections[i].length <= 0)
-                    sections.erase(sections.begin()+i);
-                break;
-            }
-        }
-    }
+    void shorten(distance d);
+    void reposition(distance current, double new_length);
     friend void MA_infill(movement_authority ma);
     friend void replace_MA(movement_authority ma);
     friend void set_data();
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
+void calculate_SvL();
 void replace_MA(movement_authority ma);
 void delete_MA();
 void set_signalling_restriction(movement_authority ma, bool infill);

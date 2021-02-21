@@ -69,6 +69,10 @@ class Component
     void clear();
     bool isButton = false;
     bool dispBorder = true;
+    bool upType = true;
+    bool delayType = false;
+    int64_t firstPressedTime = 0;
+    int64_t lastPressedTime = 0;
     bool isSensitive(){return pressedAction != nullptr;}
     float touch_up = 0;
     float touch_down = 0;
@@ -77,7 +81,7 @@ class Component
     Component(){}
     Component(float sx, float sy, function<void()> display = nullptr);
     virtual ~Component();
-    void setPressed(bool value);
+    void setPressed();
     void setPressedAction(function<void()> action);
     void setAck(function<void()> ackAction);
     void setDisplayFunction(function<void()> display);

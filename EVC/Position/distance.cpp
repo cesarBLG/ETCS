@@ -21,7 +21,8 @@
 #include "linking.h"
 #include <limits>
 #include <iostream>
-std::set<_dist_base*> distance::distances;
+#define DISTANCE_COW
+std::unordered_set<_dist_base*> distance::distances;
 void distance::update_distances(double expected, double estimated)
 {
     for(_dist_base *d : distances) {
@@ -47,6 +48,7 @@ void distance::update_unlinked_reference(double newref)
         }
     }
 }
+#ifdef DISTANCE_COW
 distance::distance()
 {
     base = nullptr;
@@ -58,12 +60,9 @@ distance::distance(double val, double ref)
 }
 distance::distance(const distance &d)
 {
-    if (d.base != nullptr) {
-        base = new _dist_base(*d.base);
-        distances.insert(base);
-    } else {
-        base = nullptr;
-    }
+    base = d.base;
+    if (base != nullptr)
+        base->refcount++;
 }
 distance::distance(distance &&d)
 {
@@ -73,34 +72,83 @@ distance::distance(distance &&d)
 distance::~distance()
 {
     if (base != nullptr) {
-        distances.erase(base);
-        delete base;
+        base->refcount--;
+        if (base->refcount < 1) {
+            distances.erase(base);
+            delete base;
+        }
     }
 }
 distance &distance::operator = (const distance& d)
 {
     if (base != nullptr) {
-        distances.erase(base);
-        delete base;
+        base->refcount--;
+        if (base->refcount < 1) {
+            distances.erase(base);
+            delete base;
+        }
     }
-    if (d.base != nullptr) {
-        base = new _dist_base(*d.base);
-        distances.insert(base);
-    } else {
-        base = nullptr;
-    }
+    base = d.base;
+    if (base != nullptr)
+        base->refcount++;
     return *this;
 }
 distance &distance::operator = (distance&& d)
 {
     if (base != nullptr) {
-        distances.erase(base);
-        delete base;
+        base->refcount--;
+        if (base->refcount < 1) {
+            distances.erase(base);
+            delete base;
+        }
     }
     base = d.base;
     d.base = nullptr;
     return *this;
 }
+#else
+distance::distance() : base_allocation(0, 0)
+{
+    base = nullptr;
+}
+distance::distance(double val, double ref) : base_allocation(val, ref)
+{
+    base = &base_allocation;
+    distances.insert(base);
+}
+distance::distance(const distance &d) : base_allocation(d.base_allocation)
+{
+    base = &base_allocation;
+    distances.insert(base);
+}
+distance::distance(distance &&d) : base_allocation(d.base_allocation)
+{
+    base = &base_allocation;
+    distances.insert(base);
+}
+distance::~distance()
+{
+    distances.erase(base);
+}
+distance &distance::operator = (const distance& d)
+{
+    if (base != nullptr)
+        distances.erase(base);
+    base_allocation = d.base_allocation;
+    base = &base_allocation;
+    distances.insert(base);
+    return *this;
+}
+distance &distance::operator = (distance&& d)
+{
+    if (base != nullptr)
+        distances.erase(base);
+    base_allocation = d.base_allocation;
+    base = &base_allocation;
+    distances.insert(base);
+    return *this;
+}
+#endif
 distance d_maxsafefront(double reference)
 {
     return distance((d_estfront.get()-reference)*1.01+(reference==0 ? Q_LOCACC_LRBG : Q_NVLOCACC), reference);

@@ -66,6 +66,7 @@ void update()
     update_odometer();
     update_geographical_position();
     check_eurobalise_passed();
+    update_national_values();
     update_procedures();
     update_supervision();
     update_track_conditions();
@@ -75,13 +76,13 @@ void update()
 }
 void loop()
 {
-    /*auto prev = std::chrono::system_clock::now();
-    std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
-    int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
-    if (d>1000) std::cout<<d<<std::endl;*/
     while(1)
     {
+        auto prev = std::chrono::system_clock::now();
         update();
+        std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
+        int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
+        //if (d>1000) std::cout<<d<<std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(80));
     }
 }

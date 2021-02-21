@@ -48,6 +48,7 @@ POSIXclient *s_client;
 ParameterManager manager;
 mutex iface_mtx;
 static threadwait *poller;
+void parse_command(string str, bool lock);
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -66,6 +67,12 @@ void SetParameters()
         {
             V_est = V_ura = 0;
         }
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("acceleration");
+    p->SetValue = [](string val) {
+        A_est = stof(val);
     };
     manager.AddParameter(p);
 
@@ -160,6 +167,12 @@ void SetParameters()
         return s;
     };
     manager.AddParameter(p);
+
+    p = new Parameter("etcs::dmi::feedback");
+    p->SetValue = [](string val) {
+        parse_command(val, false);
+    };
+    manager.AddParameter(p);
 }
 void register_parameter(string parameter)
 {
@@ -184,11 +197,13 @@ void polling()
 void start_or_iface()
 {
     poller = new threadwait();
-    s_client = new TCPclient("192.168.1.36", 5090, poller);//TCPclient::connect_to_server(poller);
+    s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
+    s_client->WriteLine("register(acceleration)");
     s_client->WriteLine("register(etcs::telegram)");
     s_client->WriteLine("register(cruise_speed)");
+    s_client->WriteLine("register(etcs::dmi::feedback)");
     SetParameters();
     thread t(polling);
     t.detach();

@@ -76,7 +76,7 @@ void displayObjects()
         planning_element p = planning_elements[i];
         if(p.distance>divs[8]*planning_scale || p.distance<0) continue;
         string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
-        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-10,20,20);
+        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-25,20,20);
     }
 }
 vector<gradient_element> gradient_elements;
@@ -91,19 +91,19 @@ void displayGradient()
         float maxp = getPlanningHeight(e.distance)-15;
         if(max>divs[8]*planning_scale) minp = 0;
         float size = maxp-minp;
-        planning_gradient.drawRectangle(0, minp, 18, size, e.val<0 ? Grey : DarkGrey);
-        planning_gradient.drawLine(0, minp, 17, minp, e.val<0 ? White : Grey);
-        planning_gradient.drawLine(0, minp, 0, maxp-1, e.val<0 ? White : Grey);
+        planning_gradient.drawRectangle(0, minp, 18, size, e.val>=0 ? Grey : DarkGrey);
+        planning_gradient.drawLine(0, minp, 17, minp, e.val>=0 ? White : Grey);
+        planning_gradient.drawLine(0, minp, 0, maxp-1, e.val>=0 ? White : Grey);
         planning_gradient.drawLine(0, maxp-1, 17, maxp-1, Black);
         if(size>44)
         {
-            planning_gradient.drawText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val<0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val<0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val>=0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val>=0 ? Black : White);
         }
         else if(size>14)
         {
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val<0 ? Black : White);
+            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White);
         }
     }
 }
@@ -185,7 +185,7 @@ void displaySpeed()
         bool im = imarker.start_distance>0 && (cur==imarker.element);
         if(cur.distance>divs[8]*planning_scale) break;
         float a = getPlanningHeight(cur.distance)-15;
-        if(prev.speed>cur.speed || cur.speed == 0)
+        if(im || prev.speed>cur.speed || cur.speed == 0)
         {
             planning_speed.addImage(im ? "symbols/Planning/PL_23.bmp" : "symbols/Planning/PL_22.bmp", 14, a+7, 20, 20);
             planning_speed.addText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT);
@@ -213,8 +213,8 @@ void planningConstruct()
 {
     planning_area.addToLayout(&planning_distance, new RelativeAlignment(nullptr, 334,15));
     planning_area.addToLayout(&planning_objects, new RelativeAlignment(nullptr, 334,15, 0));
-    planning_area.addToLayout(&zoomin, new RelativeAlignment(&planning_distance, 20,8,0));
-    planning_area.addToLayout(&zoomout, new RelativeAlignment(&planning_distance, 20,292,0));
+    planning_area.addToLayout(&zoomout, new RelativeAlignment(&planning_distance, 20,8,0));
+    planning_area.addToLayout(&zoomin, new RelativeAlignment(&planning_distance, 20,292,0));
     planning_area.addToLayout(&planning_gradient, new RelativeAlignment(&planning_distance, 115+9, 15+135, 0));
     planning_area.addToLayout(&PASP, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
     planning_area.addToLayout(&planning_speed, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
@@ -227,8 +227,8 @@ void planningConstruct()
     planning_area.bringFront(&planning_speed);
     zoomin.showBorder = false;
     zoomout.showBorder = false;
-    zoomin.touch_down = 15;
-    zoomout.touch_up = 15;
+    zoomout.touch_down = 15;
+    zoomin.touch_up = 15;
     /*planning_elements.push_back({1,500});
     planning_elements.push_back({3,1000});
     planning_elements.push_back({32,930});*/

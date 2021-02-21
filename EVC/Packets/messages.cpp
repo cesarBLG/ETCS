@@ -405,7 +405,8 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
             if (p->NID_PACKET == 136) {
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
                 bool found = false;
-                for (link_data l : linking) {
+                for (auto it = link_expected; it!=linking.end(); ++it) {
+                    link_data &l = *it;
                     if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, ilr.NID_BG})) {
                         found = true;
                         infill = true;
@@ -616,9 +617,75 @@ struct mode_filter_data
 std::map<mode_filter_data, accepted_condition> mode_filter_index;
 void set_mode_filter()
 {
-    /*std::vector<std::vector<std::string>> conds = {
+    std::vector<std::vector<std::string>> conds = {
+        {"NR","A2","A","A","A","A","A","A","A","A","A","A","A1","NR","NR","A","A"},
+        {"NR","A2,4","R","R","A","A","A","A","R","A","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","R","R","R","A","A","R","A","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","R","R"},
+        {"NR","A2","A7","A7","A","A","A","A","A","A","A","A","A1,5","NR","NR","A","R"},
+        {"NR","A","A3","A3","A","A","A","A","A","A","A","A","A1","NR","NR","A","A"},
+        {"NR","A2","A","A","A","A","A","A","A","A","A","A","A1","NR","NR","A","A"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2","R","R","A","A","A","A","R","A","A","R","A1","NR","NR","A","A"},
+        {"NR","A2,4","R","R","R","R","A","R","R","R","R","R","A1","NR","NR","R","R"},
+        {"NR","R","R","R","R","R","A","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","R","R","R","R","R","A6","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","A"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A1","NR","NR","A","A"},
+        {"NR","A2","R","R","A","A","A","A","R","A","A","A","A1","NR","NR","A","R"},
+        {"NR","A2,4","A8","A8","A","A","A","A","A","A","R","A","A1","NR","NR","R","R"},
+        {"NR","R","R","A","R","R","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","R","A","R","R","R","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
+        {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
+        {"NR","R","R","A","A","A","A","A","A","A","A","A","R","NR","NR","A","A"},
+        {"NR","A2","R","R","R","R","A","R","R","A","A","R","A1","NR","N","R","A","R"},
+        {"NR","R","R","R","A","A","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","A","A","A","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","A","A","A","A","A","A","A","A","A","A","A1","NR","NR","A","R"},
+        {"NR","A2","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","R","R","R","R","R","R","R","R","R","R","R","A","NR","NR","R","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A","NR","NR","A","A"},
+        {"NR","R","R","R","A","A","R","A","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","R","R","NR","NR","A","R"},
+        {"NR","R","R","R","A","A","R","A","R","R","A","R","R","NR","NR","A","R"},
+        {"NR","R","R","R","A","A","R","A","R","R","R","R","A1","NR","NR","R","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","R","R","A1","NR","NR","R","R"},
+        {"NR","A2","R","R","A","A","A","A","R","R","R","R","A1","NR","NR","R","R"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","A2","R","R","R","A","A","A","R","R","R","R","A1","NR","NR","R","R"},
+        {"NR","A2","R","R","A","A","A","A","R","A","R","A","A","NR","NR","R","A"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","A2","R","R","R","R","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2","R","R","R","R","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2","R","R","R","R","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","A"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","A"},
+        {"NR","A2","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","A2","R","R","A","A","A","A","R","R","A","A","A","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"},
+        {"NR","R","R","R","A9","A","A9","A9","R","R","A9","R","R","NR","NR","A9","R"},
+        {"NR","R","R","R","R","A","R","R","R","R","R","R","R","NR","NR","R","R"},
+        {"NR","A","A","A","A","A","A","A","A","A","A","A","A","NR","NR","A","A"}
     };
-    Mode modes[] = {};
+    Mode modes[] = {Mode::NP, Mode::SB, Mode::PS, Mode::SH, Mode::FS, Mode::LS, Mode::SR, Mode::OS, Mode::SL, Mode::NL, Mode::UN, Mode::TR, Mode::PT, Mode::SF, Mode::IS, Mode::SN, Mode::RV};
     for (int i=0; i<conds.size(); i++) {
         for (int j=0; j<17; j++) {
             std::string str = conds[i][j];
@@ -637,7 +704,7 @@ void set_mode_filter()
                 mode_filter_index[{i, modes[j]}] = {rej, except};
             }
         }
-    }*/
+    }
 }
 void set_message_filters()
 {
@@ -652,9 +719,8 @@ bool second_filter(std::shared_ptr<etcs_information> info, std::list<std::shared
 }
 bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
 {
-    /*accepted_condition s = mode_filter_index[{info->index, mode}];
-    return !s.reject;*/
-    return true;
+    accepted_condition s = mode_filter_index[{info->index, mode}];
+    return !s.reject;
 }
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
 {
@@ -666,11 +732,15 @@ void try_handle_information(std::shared_ptr<etcs_information> info, std::list<st
 std::vector<etcs_information*> construct_information(int packet_num)
 {
     std::vector<etcs_information*> info;
-    if (packet_num == 5) {
+    if (packet_num == 3) {
+        info.push_back(new national_values_information());
+    } else if (packet_num == 5) {
         info.push_back(new linking_information());
     } else if (packet_num == 12) {
         info.push_back(new ma_information());
         info.push_back(new signalling_information());
+    } else if (packet_num == 16) {
+        info.push_back(new repositioning_information());
     } else if (packet_num == 21) {
         info.push_back(new gradient_information());
     } else if (packet_num == 27) {
@@ -683,12 +753,16 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new TSR_information());
     } else if (packet_num == 66) {
         info.push_back(new TSR_revocation_information());
-    } else if (packet_num == 68) {
+    } else if (packet_num == 67) {
+        info.push_back(new track_condition_big_metal_information());
+    } else if (packet_num == 68 || packet_num == 69) {
         info.push_back(new track_condition_information());
     } else if (packet_num == 72) {
         info.push_back(new plain_text_information());
     } else if (packet_num == 79) {
         info.push_back(new geographical_position_information());
+    } else if (packet_num == 132) {
+        info.push_back(new danger_for_SH_information());
     } else if (packet_num == 137) {
         info.push_back(new stop_if_in_SR_information());
     }

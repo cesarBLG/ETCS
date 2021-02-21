@@ -18,27 +18,42 @@
 #pragma once
 #include "etcs_information.h"
 #include "messages.h"
+#include "3.h"
 #include "12.h"
+#include "16.h"
 #include "21.h"
 #include "27.h"
 #include "41.h"
 #include "65.h"
 #include "66.h"
+#include "67.h"
 #include "68.h"
+#include "69.h"
 #include "72.h"
 #include "79.h"
 #include "80.h"
+#include "132.h"
 #include "136.h"
 #include "137.h"
+#include "../Supervision/national_values.h"
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
 #include "../TrackConditions/track_condition.h"
 #include "../DMI/text_message.h"
 #include "../Position/geographical.h"
+struct national_values_information : etcs_information
+{
+    national_values_information() : etcs_information(1) {}
+    void handle() override
+    {
+        NationalValues nv = *(NationalValues*)linked_packets.front().get();
+        national_values_received(nv, ref);
+    }
+};
 struct linking_information : etcs_information
 {
-    linking_information() : etcs_information(0) {}
+    linking_information() : etcs_information(1) {}
     void handle() override
     {
         Linking l = *(Linking*)linked_packets.front().get();
@@ -65,7 +80,7 @@ struct ma_information : etcs_information
     ma_information() : etcs_information(3) {}
     void handle() override
     {
-        Level1_MA ma = *(Level1_MA*)linked_packets.front().get();;
+        Level1_MA ma = *(Level1_MA*)linked_packets.front().get();
         movement_authority MA = movement_authority(ref, ma, timestamp);
         if (infill)
             MA_infill(MA);
@@ -78,7 +93,17 @@ struct ma_information : etcs_information
                 mp = true;
             }
         }
-        reset_mode_profile(ref, infill);
+        if (!mp) reset_mode_profile(ref, infill);
+    }
+};
+struct repositioning_information : etcs_information
+{
+    repositioning_information() : etcs_information(4) {}
+    void handle() override
+    {
+        RepositioningInformation ri = *(RepositioningInformation*)linked_packets.front().get();
+        if (MA)
+            MA->reposition(ref, ri.L_SECTION.get_value(ri.Q_SCALE));
     }
 };
 struct gradient_information : etcs_information
@@ -94,7 +119,7 @@ struct gradient_information : etcs_information
         distance d = ref;
         for (auto e : elements) {
             d += e.D_GRADIENT.get_value(grad.Q_SCALE);
-            gradient[d] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 1 : -1)*e.G_A;
+            gradient[d] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_A;
         }
         update_gradient(gradient);
     }
@@ -185,13 +210,40 @@ struct geographical_position_information : etcs_information
         handle_geographical_position(m, nid_bg);
     }
 };
+struct danger_for_SH_information : etcs_information
+{
+    danger_for_SH_information() : etcs_information(27) {}
+    void handle() override
+    {
+        DangerForShunting s = *(DangerForShunting*)linked_packets.front().get();
+        // TODO: balises allowed
+        if (s.Q_ASPECT == Q_ASPECT_t::StopIfInSH) {
+            if (!overrideProcedure)
+                trigger_condition(49);
+        }
+    }
+};
 struct track_condition_information : etcs_information
 {
     track_condition_information() : etcs_information(35) {}
     void handle() override
     {
-        TrackCondition tc = *(TrackCondition*)linked_packets.front().get();
-        load_track_condition_various(tc, ref);
+        if (linked_packets.front()->NID_PACKET == 68) {
+            TrackCondition tc = *(TrackCondition*)linked_packets.front().get();
+            load_track_condition_various(tc, ref);
+        } else if (linked_packets.front()->NID_PACKET == 69) {
+            TrackConditionStationPlatforms tc = *(TrackConditionStationPlatforms*)linked_packets.front().get();
+            load_track_condition_platforms(tc, ref);
+        }
+    }
+};
+struct track_condition_big_metal_information : etcs_information
+{
+    track_condition_big_metal_information() : etcs_information(36) {}
+    void handle() override
+    {
+        TrackConditionBigMetalMasses tc = *(TrackConditionBigMetalMasses*)linked_packets.front().get();
+        load_track_condition_bigmetal(tc, ref);
     }
 };
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);

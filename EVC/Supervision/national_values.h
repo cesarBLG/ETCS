@@ -18,6 +18,7 @@
 #pragma once
 #include <limits>
 #include <map>
+#include "../Packets/3.h"
 extern bool Q_NVDRIVER_ADHES;
 
 extern double V_NVSHUNT;
@@ -74,3 +75,5 @@ extern double A_NVMAXREDADH2;
 extern double A_NVMAXREDADH3;
  
 void setup_national_values();
+void national_values_received(NationalValues nv, distance reference);
+void update_national_values();

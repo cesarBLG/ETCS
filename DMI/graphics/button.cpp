@@ -19,11 +19,19 @@
 void Button::paint()
 {
     Component::paint();
-    if(/*enabled&&*/showBorder)
+    if(showBorder)
     {
-        drawLine(2, 2, 2, sy-3, Shadow);
-        drawLine(sx-3, 2, sx-3, sy-3, Black);
-        drawLine(2, 2, sx-3, 2, Shadow);
-        drawLine(2, sy-3, sx-3, sy-3, Black);
+        drawLine(0, 0, 0, sy - 1, Black);
+        drawLine(sx - 1, 0, sx - 1, sy - 1, Shadow);
+        drawLine(0, 0, sx - 1, 0, Black);
+        drawLine(0, sy - 1, sx - 1, sy - 1, Shadow);
+
+        if (!pressed)
+        {
+            drawLine(1, 1, 1, sy-2, Shadow);
+            drawLine(sx-2, 1, sx-2, sy-2, Black);
+            drawLine(1, 1, sx-2, 1, Shadow);
+            drawLine(1, sy-2, sx-2, sy-2, Black);
+        }
     }
 }

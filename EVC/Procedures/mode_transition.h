@@ -65,11 +65,12 @@ struct mode_transition
     int priority;
     int happens()
     {
+        int cond = -1;
         for (int c : conditions) {
             if (mode_conditions[c]())
-                return c;
+                cond = c;
         }
-        return -1;
+        return cond;
     }
     mode_transition(Mode from, Mode to, std::set<int> conditionnum, int priority) : from(from), to(to), conditions(conditionnum), priority(priority)
     {

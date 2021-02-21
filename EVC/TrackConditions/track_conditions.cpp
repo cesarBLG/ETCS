@@ -23,7 +23,9 @@
 #include "../Supervision/conversion_model.h"
 std::list<std::shared_ptr<track_condition>> track_conditions;
 optional<distance> restore_initial_states_various;
+optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
+std::map<track_condition*, std::vector<target>> track_condition_targets; 
 void add_condition();
 void update_brake_contributions()
 {
@@ -64,27 +66,39 @@ void update_brake_contributions()
         it->second = (reg?8:0)+(shoe?4:0)+(eddyemerg?2:0)+(eddyserv?1:0);
     }
     active_combination = active;
+    target::recalculate_all_decelerations();
 }
 void update_track_conditions()
 {
     if (restore_initial_states_various && *restore_initial_states_various<d_minsafefront(restore_initial_states_various->get_reference())) {
-        for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
             if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
                 c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
                 c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
                 c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) {
 
-                auto newit = it;
-                ++newit;
-                track_conditions.erase(it);
-                it = --newit;
+                track_condition_targets.erase(it->get());
+                it = track_conditions.erase(it);
+                continue;
             }
+            ++it;
         }
         restore_initial_states_various = {};
         update_brake_contributions();
     }
-    for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+    if (restore_initial_states_platforms && *restore_initial_states_platforms<d_minsafefront(restore_initial_states_platforms->get_reference())) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
+            TrackConditions c = it->get()->condition;
+            if (c == TrackConditions::StationPlatform) {
+                it = track_conditions.erase(it);
+                continue;
+            }
+            ++it;
+        }
+        restore_initial_states_platforms = {};
+    }
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         track_condition *c = it->get();
         double end = c->get_end_distance_to_train();
         if (end < (c->condition == TrackConditions::BigMetalMasses ? -D_keep_information : 0) && !c->display_end) {
@@ -92,14 +106,21 @@ void update_track_conditions()
             c->end_time = get_milliseconds() + T_delete_condition * 1000;
         }
         if (c->display_end && c->end_time < get_milliseconds()) {
-            auto newit = it;
-            ++newit;
-            track_conditions.erase(it);
-            it = --newit;
+            track_condition_targets.erase(it->get());
+            it = track_conditions.erase(it);
+            continue;
         }
         if (c->condition == TrackConditions::NonStoppingArea) {
-            target SBId(c->start, 0, target_class::EoA);
-            target SBIg(c->end + L_TRAIN, 0, target_class::EoA);
+            if (track_condition_targets.find(c) == track_condition_targets.end())
+            {
+                std::vector<target> l;
+                l.push_back(target(c->start, 0, target_class::EoA));
+                l.push_back(target(c->end + L_TRAIN, 0, target_class::EoA));
+                track_condition_targets[c] = l;
+            }
+            std::vector<target> &l = track_condition_targets[c];
+            target &SBId = l[0];
+            target &SBIg = l[1];
             SBId.calculate_curves();
             SBIg.calculate_curves();
             distance max = d_maxsafefront(c->start.get_reference());
@@ -146,7 +167,46 @@ void update_track_conditions()
             }
         } else if (c->condition == TrackConditions::SoundHorn) {
             distance pointC = c->start - V_est * T_horn;
+        } else if (c->condition == TrackConditions::AirTightness) {
+            distance pointC = c->start - V_est * 10;
+            distance max = d_maxsafefront(c->start.get_reference());
+            distance min = d_minsafefront(c->start.get_reference());
+            if (min + L_TRAIN > c->end) {
+                c->announce = false;
+                c->order = false;
+            } else if (max>c->start) {
+                c->announce = false;
+                c->order = true;
+            } else if (max > pointC) {
+                c->announce = true;
+                c->order = false;
+            }
         }
+        ++it;
+    }
+}
+void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref)
+{
+    distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+        if (it->get()->condition == TrackConditions::BigMetalMasses && it->get()->start >= first) {
+            it = track_conditions.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    std::vector<TC_bigmetal_element_packet> elements;
+    elements.push_back(cond.element);
+    elements.insert(elements.end(), cond.elements.begin(), cond.elements.end());
+    distance curr = ref;
+    for (auto it = elements.begin(); it != elements.end(); ++it) {
+        track_condition *tc = new track_condition();
+        tc->start = curr + it->D_TRACKCOND.get_value(cond.Q_SCALE);
+        curr = tc->start;
+        tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
+        tc->profile = true;
+        tc->condition = TrackConditions::BigMetalMasses;
+        track_conditions.push_back(std::shared_ptr<track_condition>(tc));
     }
 }
 void load_track_condition_various(TrackCondition cond, distance ref)
@@ -156,27 +216,39 @@ void load_track_condition_various(TrackCondition cond, distance ref)
         return;
     }
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
-    for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
-        if (it->get()->start >= first) {
-            auto newit = it;
-            ++newit;
-            track_conditions.erase(it);
-            it = --newit;
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+        TrackConditions c = it->get()->condition;
+        if ((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
+            c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
+            c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
+            c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe)
+            && it->get()->start >= first) {
+            track_condition_targets.erase(it->get());    
+            it = track_conditions.erase(it);
+            continue;
         }
+        ++it;
     }
     std::vector<TC_element_packet> elements;
     elements.push_back(cond.element);
     elements.insert(elements.end(), cond.elements.begin(), cond.elements.end());
+    distance curr = ref;
     for (auto it = elements.begin(); it != elements.end(); ++it) {
         track_condition *tc = new track_condition();
-        tc->start = ref + it->D_TRACKCOND.get_value(cond.Q_SCALE);
+        tc->start = curr + it->D_TRACKCOND.get_value(cond.Q_SCALE);
+        curr = tc->start;
         tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
         tc->profile = true;
         switch(it->M_TRACKCOND) {
             case M_TRACKCOND_t::AirTightness:
                 tc->condition = TrackConditions::AirTightness;
-                tc->start_symbol = 19;
-                tc->end_symbol = 20;
+                if (Q_airtight) {
+                    tc->start_symbol = 19;
+                    tc->end_symbol = 20;
+                    tc->announcement_symbol = 21;
+                    tc->active_symbol = 19;
+                    tc->end_active_symbol = 22;
+                }
                 break;
             case M_TRACKCOND_t::TunnelStoppingArea:
                 tc->condition = TrackConditions::TunnelStoppingArea;
@@ -247,4 +319,35 @@ void load_track_condition_various(TrackCondition cond, distance ref)
         }
     }
     update_brake_contributions();
+}
+void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref)
+{
+    if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+        restore_initial_states_platforms = cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        return;
+    }
+    distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+        if (it->get()->condition == TrackConditions::StationPlatform && it->get()->start >= first) {
+            it = track_conditions.erase(it);
+            continue;
+        }
+        ++it;
+    }
+    std::vector<TC_station_element_packet> elements;
+    elements.push_back(cond.element);
+    elements.insert(elements.end(), cond.elements.begin(), cond.elements.end());
+    distance curr = ref;
+    for (auto it = elements.begin(); it != elements.end(); ++it) {
+        track_condition_platforms *tc = new track_condition_platforms();
+        tc->start = curr + it->D_TRACKCOND.get_value(cond.Q_SCALE);
+        curr = tc->start;
+        tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
+        tc->profile = true;
+        tc->platform_height = it->M_PLATFORM.get_value();
+        tc->right_side = it->Q_PLATFORM != Q_PLATFORM_t::LeftSide;
+        tc->left_side = it->Q_PLATFORM != Q_PLATFORM_t::RightSide;
+        tc->condition = TrackConditions::StationPlatform;
+        track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+    }
 }

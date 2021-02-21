@@ -240,16 +240,19 @@ void displayLines()
 }
 Component releaseRegion(36,36, displayVrelease);
 static float prevVrelease=0;
+bool releaseSignShown=false;
 void displayVrelease()
 {
     if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != Mode::OS || showSpeeds)) {
-        if(prevVrelease!=Vrelease)
+        if(prevVrelease!=Vrelease || !releaseSignShown)
         {
+            releaseSignShown = true;
             releaseRegion.clear();
             releaseRegion.addText(to_string((int)Vrelease).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
             prevVrelease = Vrelease;
         }
     } else {
+        releaseSignShown = false;
         releaseRegion.clear();
     }
 }
@@ -261,7 +264,7 @@ void displayGauge()
     drawSetSpeed();
 }
 bool ttiShown = false;
-const float TdispTTI = 10;
+const float TdispTTI = 14;
 void displaya1()
 {
     if(mode == Mode::LS)

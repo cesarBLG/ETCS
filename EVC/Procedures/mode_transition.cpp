@@ -23,7 +23,7 @@
 #include "level_transition.h"
 #include "../TrackConditions/track_condition.h"
 #include <map>
-cond mode_conditions[74];
+cond mode_conditions[75];
 static std::vector<mode_transition> transitions;
 static std::vector<mode_transition> ordered_transitions[20];
 Mode mode=Mode::SB;
@@ -40,25 +40,29 @@ void initialize_mode_transitions()
     c[4] = [](){return true;};
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
-    c[10] = [](){return train_data_valid() && MA && !get_SSP().empty() && !get_gradient().empty() && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
+    c[10] = [](){return train_data_valid() && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
     c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(EoA->get_reference())-L_antenna_front);};
     c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(EoA->get_reference());};
     c[21] = [](){return level == Level::N0;};
-    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
+    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
     c[37] = [](){return false;};
-    c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
-    c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && (mode_profiles.empty() || mode_profiles.front().start > d_maxsafefront(mode_profiles.front().start.get_reference()));};
+    c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
+    c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
     c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference())  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
     c[40] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
     c[42] = [](){return SR_dist && *SR_dist < d_estfront && !overrideProcedure;};
     c[43] = [](){return !overrideProcedure && formerEoA && *formerEoA<d_minsafefront(formerEoA->get_reference())-L_antenna_front;};
     c[39] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && !MA;};
+    c[50] = [](){return mode_to_ack==Mode::SH && mode_acknowledged;};
+    c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
     c[60] = [](){return mode_to_ack==Mode::UN && mode_acknowledged;};
     c[62] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && train_data_valid() && mode_acknowledged;;};
     c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid() && mode_acknowledged;;};
     c[69] = [](){return get_SSP().begin()->get_start()>d_estfront || get_gradient().begin()->first>d_estfront || (--get_gradient().end())->first<d_estfront || (--get_SSP().end())->get_end()<d_estfront;};
+    c[70] = [](){return mode_to_ack==Mode::LS && mode_acknowledged;};
     c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
+    c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start.get_reference());};
 
     transitions.push_back({Mode::SB, Mode::SR, {8,37}, 7});
     transitions.push_back({Mode::FS, Mode::SR, {37}, 6});
@@ -120,6 +124,14 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::SN, Mode::SB, {28}, 6});
     transitions.push_back({Mode::RV, Mode::SB, {28}, 4});
 
+    transitions.push_back({Mode::SB, Mode::OS, {15}, 7});
+    transitions.push_back({Mode::FS, Mode::OS, {15, 40}, 6});
+    transitions.push_back({Mode::LS, Mode::OS, {15, 73}, 6});
+    transitions.push_back({Mode::SR, Mode::OS, {40}, 6});
+    transitions.push_back({Mode::UN, Mode::OS, {34}, 7});
+    transitions.push_back({Mode::PT, Mode::OS, {15}, 5});
+    transitions.push_back({Mode::SN, Mode::OS, {34}, 7});
+
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);
     }
@@ -169,7 +181,8 @@ void update_mode_status()
         }
     }
     if (mode != transition) {
-        mode_acknowledgeable = mode_acknowledged = false;
+        mode_acknowledged = false;
+        if (transition != mode_to_ack) mode_acknowledgeable = false;
         Mode prevmode = mode;
         mode = transition;
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
@@ -192,7 +205,7 @@ void update_mode_status()
         else
             UN_speed = {};
         if (mode == Mode::SH)
-            SH_speed = speed_restriction(V_NVSHUNT, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
+            SH_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVSHUNT, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
         else
             SH_speed = {};
         
@@ -202,6 +215,15 @@ void update_mode_status()
                 return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
             }));
         }
+        if (mode == Mode::OS) {
+            OS_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVONSIGHT, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
+            add_message(text_message("Entering OS", true, false, false, [](text_message &t){
+                distance back = d_estfront-L_TRAIN;
+                return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
+            }));
+        } else {
+            OS_speed = {};
+        }
         if (mode == Mode::TR) {
             train_trip(transition_index);
         }
@@ -209,7 +231,7 @@ void update_mode_status()
         for (int i=0; i<info.size(); i++) {
             info[i].handle(prevmode, mode);
         }
-        recalculate_MRSP();
+        calculate_SvL();
     }
 }
 void set_mode_deleted_data()
@@ -292,6 +314,7 @@ void set_mode_deleted_data()
     information_list[5].delete_info = []() {delete_SSP();};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear();};
     information_list[18].delete_info = []() {signal_speeds.clear();};
+    information_list[25].delete_info = []() {reset_mode_profile(distance(), false);};
     information_list[29].delete_info = []() {
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
             TrackConditions c = it->get()->condition;
@@ -329,13 +352,10 @@ void set_mode_deleted_data()
 }
 void trigger_condition(int num)
 {
-    bool available = false;
     for (mode_transition &t : ordered_transitions[(int)mode]) {
         if (t.conditions.find(num) != t.conditions.end()) {
-            available = true;
+            mode_conditions[num].trigger();
             break;
         }
     }
-    if (available)
-        mode_conditions[num].trigger();
 }

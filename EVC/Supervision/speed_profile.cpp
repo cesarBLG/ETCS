@@ -71,10 +71,12 @@ void delete_gradient(distance d)
         gradient.erase(it, gradient.end());
         gradient[d] = 255;
     }
+    target::recalculate_all_decelerations();
 }
 void delete_gradient()
 {
     gradient.clear();
+    target::recalculate_all_decelerations();
 }
 void delete_TSR(distance d)
 {
@@ -96,24 +98,27 @@ void recalculate_MRSP()
     delete_back_info();
     MRSP.clear();
     std::set<speed_restriction> restrictions;
-    restrictions.insert(SSP.begin(), SSP.end());
-    for (auto it=TSRs.begin(); it!=TSRs.end(); ++it)
-        restrictions.insert(it->restriction);
-    if (train_speed)
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)
+        restrictions.insert(SSP.begin(), SSP.end());
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN)
+        for (auto it=TSRs.begin(); it!=TSRs.end(); ++it)
+            restrictions.insert(it->restriction);
+    if (train_speed && 
+        (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN || mode == Mode::RV))
         restrictions.insert(*train_speed);
-    if (SR_speed)
+    if (SR_speed && mode == Mode::SR)
         restrictions.insert(*SR_speed);
-    if (OS_speed)
+    if (OS_speed && mode == Mode::OS)
         restrictions.insert(*OS_speed);
-    if (LS_speed)
+    if (LS_speed && mode == Mode::LS)
         restrictions.insert(*LS_speed);
-    if (SH_speed)
+    if (SH_speed && mode == Mode::SH)
         restrictions.insert(*SH_speed);
-    if (UN_speed)
+    if (UN_speed && mode == Mode::UN)
         restrictions.insert(*UN_speed);
-    if (override_speed)
+    if (override_speed && (mode == Mode::SH || mode == Mode::SR || mode == Mode::UN))
         restrictions.insert(*override_speed);
-    if (MA)
+    if (MA) // TODO: also in SR mode
         restrictions.insert(signal_speeds.begin(), signal_speeds.end());
     if (restrictions.empty()) {
         set_supervised_targets();
@@ -150,6 +155,7 @@ void update_SSP(std::vector<SSP_element> nSSP)
             next++;
             if (next == nSSP.end()) break;
         }
+        if (next == nSSP.end()) break;
         rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, it->compensate_train_length));
     }
     auto it_start = SSP.lower_bound(*rest.begin());
@@ -175,6 +181,7 @@ void update_gradient(std::map<distance, double> grad)
     auto it_start = gradient.lower_bound(grad.begin()->first);
     gradient.erase(it_start, gradient.end());
     gradient.insert(grad.begin(), grad.end());
+    target::recalculate_all_decelerations();
 }
 const std::map<distance, double> &get_gradient()
 {

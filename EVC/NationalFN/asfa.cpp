@@ -29,6 +29,7 @@ bool CON=true;
 extern mutex loop_mtx;
 extern mutex iface_mtx;
 bool detected = false;
+bool connected = false;
 void register_parameter(std::string parameter);
 void initialize_asfa()
 {
@@ -45,24 +46,28 @@ void initialize_asfa()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("asfa::cg");
+    p = new Parameter("asfa::conectado");
     p->SetValue = [](string val) {
-        detected = val=="1";
+        detected = val.length() > 0;
+        connected = val == "1";
         if (detected)
-            add_message(text_message("ASFA conectado en C.G.", false, false, false, [](text_message &t){return !detected;}));
+        {
+            if (connected) add_message(text_message("ASFA conectado en C.G.", false, false, false, [](text_message &t){return !connected || !detected;}));
+            else add_message(text_message("ASFA anulado en C.G.", false, false, false, [](text_message &t){return connected || !detected;}));
+        }
     };
     manager.AddParameter(p);
 
-    register_parameter("asfa::cg");
+    register_parameter("asfa::conectado");
 }
 void update_asfa()
 {
-    if (!detected)
+    if (!detected || !connected)
         return;
-    if (level == Level::N0 && mode == Mode::UN) {
+    if (mode == Mode::UN) {
         AKT = false;
         CON = true;
-    } else if (level != Level::N0 && level != Level::Unknown && mode != Mode::UN) {
+    } else if (level != Level::N0 && level != Level::Unknown && mode != Mode::UN && mode != Mode::SH && mode != Mode::SB && mode != Mode::IS && mode != Mode::SL) {
         AKT = true;
         CON = false;
     }

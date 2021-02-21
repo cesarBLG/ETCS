@@ -46,6 +46,8 @@
 #include "../Procedures/level_transition.h"
 #include "../TrackConditions/track_condition.h"
 #include "text_message.h"
+#include <orts/client.h>
+#include <orts/common.h>
 using std::thread;
 using std::mutex;
 using std::unique_lock;
@@ -54,23 +56,31 @@ using std::set;
 using std::list;
 using std::string;
 using std::to_string;
+using namespace ORserver;
 extern mutex loop_mtx;
 int dmi_pid;
 void dmi_comm();
 void start_dmi()
 {
-#ifndef _WIN32
     printf("Starting Driver Machine Interface...\n");
-    dmi_pid = fork();
+#ifndef _WIN32
+    /*dmi_pid = fork();
     if(dmi_pid == 0)
     {
-        chdir("../DMI");
+        chdir("../DMI");*/
         /*int fd = open("dmi.log.o", O_RDWR);
         dup2(fd, 2);*/
-        execl("dmi", "dmi", nullptr);
+        /*execl("dmi", "dmi", nullptr);
     }
-    sleep(1);
+    sleep(1);*/
 #else
+    /*STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+    TCHAR cmd[] = TEXT("../DMI/dmi.exe");
+    CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../DMI", &si, &pi);*/
+    Sleep(1000);
     WSADATA wsa;
     WSAStartup(MAKEWORD(2,2), &wsa);
 #endif
@@ -97,12 +107,12 @@ int write(int fd, const char *buff, size_t size)
 }
 #endif
 static int fd;
-void parse_command(string str)
+void parse_command(string str, bool lock=true)
 {
     int index = str.find_first_of('(');
     string command = str.substr(0, index);
-    string value = str.substr(index+1, str.find_first_of(')')-index-1);
-    unique_lock<mutex> lck(loop_mtx);
+    string value = str.substr(index+1, str.find_last_of(')')-index-1);
+    if (lock) unique_lock<mutex> lck(loop_mtx);
     if (command == "setTrainData") {
         special_train_data = value;
         validate_train_data();
@@ -181,9 +191,13 @@ void dmi_recv()
 
 }
 string lines = "";
+extern POSIXclient *s_client;
+bool sendtoor=false;
+int64_t lastor;
 void send_command(string command, string value)
 {
     lines += command+"("+value+");\n";
+    if(sendtoor && s_client != nullptr && s_client->connected) s_client->WriteLine("noretain(etcs::dmi::command="+command+"("+value+"))");
 }
 double calc_ceiling_limit();
 void dmi_comm()
@@ -192,12 +206,17 @@ void dmi_comm()
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(5010);
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    std::cout<<"Ip del DMI"<<std::endl;
+    string ip;
+    std::cin>>ip;
+    addr.sin_addr.s_addr = inet_addr(ip.c_str());
     connect(fd, (struct sockaddr *)&addr, sizeof(addr));
     thread reading(dmi_recv);
     reading.detach();
     for (;;) {
         unique_lock<mutex> lck(loop_mtx);
+        sendtoor = get_milliseconds() - lastor > 250;
+        if (sendtoor) lastor = get_milliseconds();
         send_command("setMode", Mode_str[(int)mode]);
         if (mode_acknowledgeable) {
             send_command("setModeTransition", Mode_str[(int)mode_to_ack]);
@@ -250,7 +269,7 @@ void dmi_comm()
             std::map<::distance,double> MRSP = get_MRSP();
             extern target indication_target;
             extern double indication_distance;
-            double last_distance = MA ? MA->get_end()-d_minsafefront(MA->get_end().get_reference()) : 0;
+            double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end().get_reference()) : 0;
             const std::list<target> &targets = get_supervised_targets();
             for (const target &t : targets)
             {
@@ -270,8 +289,14 @@ void dmi_comm()
                     speeds+= ",im,"+to_string(indication_distance);
                 speeds += ","+to_string(safedist)+","+to_string(it->second*3.6);
             }
-            if (EoA && *EoA-d_estfront <= last_distance + 1) {
-                if (monitoring == CSM && (indication_target.type == target_class::EoA || indication_target.type == target_class::SvL))
+            if (SvL && *SvL-d_maxsafefront(SvL->get_reference()) <= last_distance + 1) {
+                if (monitoring == CSM && (indication_target.type == target_class::SvL || indication_target.type == target_class::EoA))
+                    speeds+= ",im,"+to_string(indication_distance);
+                speeds += ","+to_string(*SvL-d_maxsafefront(SvL->get_reference()))+",0";
+                last_distance = *SvL-d_maxsafefront(SvL->get_reference());
+            }
+            else if (EoA && *EoA-d_estfront <= last_distance + 1) {
+                if (monitoring == CSM && (indication_target.type == target_class::SvL || indication_target.type == target_class::EoA))
                     speeds+= ",im,"+to_string(indication_distance);
                 speeds += ","+to_string(*EoA-d_estfront)+",0";
                 last_distance = *EoA-d_estfront;
@@ -284,12 +309,12 @@ void dmi_comm()
             }
             send_command("setPlanningSpeeds",speeds);
             std::map<::distance,double> gradient = get_gradient();
-            string grad="0,"+to_string((--gradient.upper_bound(d_estfront))->second*100);
+            string grad="0,"+to_string((--gradient.upper_bound(d_estfront))->second*1000);
             for (auto it=gradient.upper_bound(d_estfront); it!=gradient.end(); ++it) {
                 float dist = it->first-d_estfront;
                 if (dist >= last_distance + 1)
                     break;
-                grad+=","+to_string(dist)+","+to_string(it->second*100);
+                grad+=","+to_string(dist)+","+to_string(it->second*1000);
             }
             grad += ","+to_string(last_distance)+","+"0";
             send_command("setPlanningGradients",grad);

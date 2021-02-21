@@ -19,6 +19,7 @@
 #include "../MA/movement_authority.h"
 #include "mode_transition.h"
 #include <string>
+bool trip_acknowledged = false;
 void train_trip(int reason)
 {
     std::string str;
@@ -71,11 +72,13 @@ void train_trip(int reason)
 void update_trip()
 {
     if (mode != Mode::TR) {
+        trip_acknowledged = false;
         return;
     }
-    if (V_est<=0 && !mode_acknowledgeable) {
+    if (V_est<=0 && !trip_acknowledged) {
         mode_to_ack = Mode::TR;
         mode_acknowledgeable = true;
         mode_acknowledged = false;
+        trip_acknowledged = true;
     }
 }

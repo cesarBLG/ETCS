@@ -43,7 +43,9 @@ text_message &add_message(text_message t)
     messages.push_back(t);
     return messages.back();
 }
+extern bool sendtoor;
 void send(text_message t) {
+    sendtoor=true;
     send_command("setMessage", std::to_string(t.id)+","+std::to_string(t.text.size())+","+t.text+","+std::to_string(t.hour)+","+std::to_string(t.minute)+","+(t.firstGroup?"true,":"false,")+(t.ack?"true,":"false,")+std::to_string(t.reason));
 }
 void update_messages()
@@ -52,6 +54,7 @@ void update_messages()
         if (it->end_condition(*it)) {
             auto next = it;
             ++next;
+            sendtoor=true;
             send_command("setRevokeMessage", std::to_string(it->id));
             messages.erase(it);
             it = --next;

@@ -18,7 +18,9 @@
 #pragma once
 #include "../Position/distance.h"
 #include "../Supervision/train_data.h"
+#include "../Packets/67.h"
 #include "../Packets/68.h"
+#include "../Packets/69.h"
 #include "../optional.h"
 #include <functional>
 #include <list>
@@ -82,7 +84,15 @@ struct track_condition
         return end-d_minsafefront(end.get_reference())+L_TRAIN;
     }
 };
+struct track_condition_platforms : track_condition
+{
+    double platform_height;
+    bool left_side;
+    bool right_side;
+};
 extern std::list<std::shared_ptr<track_condition>> track_conditions;
 extern optional<distance> restore_initial_states_various;
 void update_track_conditions();
+void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref);
 void load_track_condition_various(TrackCondition cond, distance ref);
+void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref);

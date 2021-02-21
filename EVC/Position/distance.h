@@ -16,14 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include <set>
+#include <unordered_set>
 #include <limits>
+#define DISTANCE_COW
 struct _dist_base
 {
     double dist;
     double ref;
-    _dist_base(double dist, double ref=0) : dist(dist), ref(ref) {}
-    _dist_base(_dist_base &d) = default;
+    int refcount;
+    _dist_base(double dist, double ref=0) : dist(dist), ref(ref), refcount(1) {}
+    _dist_base(const _dist_base &d) : dist(d.dist), ref(d.ref), refcount(1) {}
     double get()
     {
         return ref+dist;
@@ -33,7 +35,10 @@ class distance
 {
 private:
     _dist_base *base;
-    static std::set<_dist_base*> distances;
+#ifndef DISTANCE_COW
+    _dist_base base_allocation;
+#endif
+    static std::unordered_set<_dist_base*> distances;
 public:
     static void update_distances(double expected, double estimated);
     static void update_unlinked_reference(double newref);
@@ -90,6 +95,14 @@ public:
     }
     distance &operator+=(const double d)
     {
+#ifdef DISTANCE_COW
+        if (base->refcount > 1)
+        {
+            base->refcount--;
+            base = new _dist_base(*base);
+            distances.insert(base);
+        }
+#endif
         base->dist += d;
         return *this;
     }

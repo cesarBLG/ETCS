@@ -35,7 +35,7 @@ extern std::list<mode_profile> mode_profiles;
 extern bool in_mode_ack_area;
 extern bool mode_timer_started;
 extern int64_t mode_timer;
-extern optional<mode_profile> first_profile;
+extern optional<mode_profile> requested_mode_profile;
 void update_mode_profile();
 void reset_mode_profile(distance ref, bool infill);
 void set_mode_profile(ModeProfile profile, distance ref, bool infill);

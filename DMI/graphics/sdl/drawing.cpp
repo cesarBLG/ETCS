@@ -63,6 +63,8 @@ void init_video()
     SDL_Event ev;
     int count = 0;
     chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
+    SDL_Event lastPressEvent;
+    bool pressEventReceived = false;
     while(running)
     {
         if(SDL_WaitEvent(&ev) != 0)
@@ -76,11 +78,62 @@ void init_video()
                     running = false;
                 }
             }*/
-            if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
+			if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
             {
                 quit();
+                break;
             }
-            else if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT) 
+            if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_FINGERDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_FINGERUP || ev.type == SDL_MOUSEMOTION || ev.type == SDL_FINGERMOTION)
+            {
+                pressEventReceived = true;
+                lastPressEvent = ev;
+            }
+			if (pressEventReceived)
+			{
+                auto prevev = ev;
+				ev = lastPressEvent;
+				float scrx;
+				float scry;
+				bool pressed;
+				if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
+				{
+					SDL_TouchFingerEvent tfe = ev.tfinger;
+					pressed = tfe.pressure > 0.1;
+					scrx = tfe.x;
+					scry = tfe.y;
+				}
+				else if (ev.type == SDL_MOUSEMOTION)
+				{
+					SDL_MouseMotionEvent mme = ev.motion;
+					pressed = mme.state == SDL_PRESSED;
+					scrx = mme.x;
+					scry = mme.y;
+				}
+				else
+				{
+					SDL_MouseButtonEvent mbe = ev.button;
+					pressed = mbe.state == SDL_PRESSED;
+					scrx = mbe.x;
+					scry = mbe.y;
+				}
+				extern float scale;
+				extern float offset[2];
+				float x = (scrx - offset[0]) / scale;
+				float y = scry / scale;
+				vector<window *> windows;
+				unique_lock<mutex> lck(draw_mtx);
+				for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
+				{
+					windows.push_back(*it);
+				}
+				for (int i = 0; i < windows.size(); i++)
+				{
+					if (windows[i]->active) windows[i]->event(pressed, x, y);
+                    else windows[i]->event(0, -100, -100);
+				}
+                ev = prevev;
+			}
+            if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT) 
             {
                 auto now = chrono::system_clock::now();
                 chrono::duration<double> diff = now - lastrender;
@@ -88,37 +141,6 @@ void init_video()
                 {
                     lastrender = chrono::system_clock::now();
                     display();
-                }
-            }
-            else if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_FINGERDOWN)
-            {
-                float scrx;
-                float scry;
-                if(ev.type == SDL_FINGERDOWN)
-                {
-                    SDL_TouchFingerEvent tfe = ev.tfinger;
-                    scrx = tfe.x;
-                    scry = tfe.y;
-                }
-                else
-                {
-                    SDL_MouseButtonEvent mbe = ev.button;
-                    scrx = mbe.x;
-                    scry = mbe.y;
-                }
-                extern float scale;
-                extern float offset[2];
-                float x = (scrx-offset[0]) / scale;
-                float y = scry / scale;
-                vector<window*> windows;
-                unique_lock<mutex> lck(draw_mtx);
-                for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
-                {
-                    if((*it)->active) windows.push_back(*it);
-                }
-                for(int i=0; i<windows.size(); i++)
-                {
-                    windows[i]->event(1, x, y);
                 }
             }
         }

@@ -57,11 +57,10 @@ void Component::setAck(function<void()> ackAction)
     pressedAction = ackAction;
     ack = ackAction != nullptr;
 }
-void Component::setPressed(bool value)
+void Component::setPressed()
 {
-    if(value && pressedAction != nullptr && (!isButton || ((Button*)this)->enabled))
+    if (pressedAction != nullptr)
     {
-        playClick();
         pressedAction();
     }
 }

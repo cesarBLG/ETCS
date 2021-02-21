@@ -19,11 +19,12 @@
 #include "../monitor.h"
 void displayBrake();
 Component c9(54, 25, displayBrake);
-static bool prevEB;
+static bool prevB;
 void displayBrake()
 {
-    if(prevEB == EB) return;
-    prevEB = EB;
+    bool B = EB || SB;
+    if(prevB == B) return;
+    prevB = B;
     c9.clear();
     if(EB) c9.addImage("symbols/Status/ST_01.bmp");
 }

@@ -42,9 +42,9 @@ struct bit_read_temp
         var->rawdata = value;
         if (!var->is_valid())
             sparefound = true;
-        /*std::string tip = typeid(*var).name();
+        std::string tip = typeid(*var).name();
         tip = tip.substr(tip.find_first_not_of("0123456789"));
-        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;*/
+        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
     }
     void peek(ETCS_variable *var, int offset=0)
     {
@@ -60,4 +60,16 @@ struct bit_read_temp
         var->rawdata = value;
     }
     bit_read_temp(std::vector<bool> bits) : bits(bits), position(0) {}
+};
+struct bit_write
+{
+    std::vector<bool> bits;
+    void write(ETCS_variable *var)
+    {
+        uint32_t value=var->rawdata;
+        int count=var->size;
+        while(count-->0) {
+            bits.push_back((value>>count)&1);
+        }
+    }
 };

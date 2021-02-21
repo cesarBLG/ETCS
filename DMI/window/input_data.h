@@ -23,6 +23,7 @@
 #include <ctime>
 #include "../graphics/button.h"
 #include "../graphics/text_button.h"
+#include "../graphics/icon_button.h"
 using namespace std;
 class input_data
 {
@@ -51,7 +52,7 @@ class input_data
     void setAccepted(bool val);
     bool isValid() {return valid;}
     bool isAccepted() {return accepted;}
-    TextButton more;
+    IconButton more;
     vector<Button*> keys;
     int keypage=0;
     virtual void validate(){if (data!="") valid = true;}

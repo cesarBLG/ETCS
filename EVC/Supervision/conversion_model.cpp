@@ -24,13 +24,13 @@
 #include <map>
 #include <utility>
 #include <cmath>
-acceleration get_A_gradient(std::map<distance, double> gradient)
+acceleration get_A_gradient(std::map<distance, double> gradient, double default_gradient)
 {
     acceleration A_gradient;
     A_gradient = acceleration();
-    A_gradient.accel = [gradient](double V, distance d) {
-        if (gradient.empty() || d-L_TRAIN<gradient.begin()->first)
-            return 0.0;
+    A_gradient.accel = [gradient, default_gradient](double V, distance d) {
+        if (gradient.empty() || d-L_TRAIN<gradient.begin()->first || (--gradient.end())->first >= d)
+            return default_gradient; 
         double grad = 50000;
         for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
             grad = std::min(grad, it->second);
@@ -63,7 +63,7 @@ std::map<int,std::map<double,std::map<double,double>>> Kdry_rst_combination;
 std::map<int,std::map<double, double>> Kwet_rst_combination;
 std::map<int,double> T_brake_service_combination;
 std::map<int,double> T_brake_emergency_combination;
-acceleration get_A_brake_emergency()
+acceleration get_A_brake_emergency(bool use_active_combination)
 {
     if (conversion_model_used)
         return A_brake_emergency;
@@ -74,14 +74,14 @@ acceleration get_A_brake_emergency()
         for (auto it = A_brake_emergency_combination[i].begin(); it!=A_brake_emergency_combination[i].end(); ++it)
             ac.speed_step.insert(it->first);
     }
-    ac.accel = [](double V, distance d)
+    ac.accel = [use_active_combination](double V, distance d)
     {
-        int comb = (--active_combination.upper_bound(d))->second;
+        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second : 0;
         return (--A_brake_emergency_combination[comb].upper_bound(V))->second;
     };
     return ac;
 }
-acceleration get_A_brake_service()
+acceleration get_A_brake_service(bool use_active_combination)
 {
     if (conversion_model_used)
         return A_brake_service;
@@ -92,9 +92,9 @@ acceleration get_A_brake_service()
         for (auto it = A_brake_service_combination[i].begin(); it!=A_brake_service_combination[i].end(); ++it)
             ac.speed_step.insert(it->first);
     }
-    ac.accel = [](double V, distance d)
+    ac.accel = [use_active_combination](double V, distance d)
     {
-        int comb = (--active_combination.upper_bound(d))->second;
+        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second : 0;
         return (--A_brake_service_combination[comb].upper_bound(V))->second;
     };
     return ac;

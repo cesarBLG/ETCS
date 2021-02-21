@@ -35,12 +35,15 @@ enum struct target_class
 };
 class target
 {
+protected:
     distance d_target;
     double V_target;
     bool is_valid;
+    bool use_brake_combination = true;
 public:
     target_class type;
     bool is_EBD_based;
+    double default_gradient;
     target();
     target(distance dist, double speed, target_class type);
     double get_target_speed() const { return V_target; }
@@ -73,9 +76,9 @@ public:
     mutable double T_bs2;
     void calculate_times() const;
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
-    void calculate_decelerations();
+    virtual void calculate_decelerations();
     void calculate_decelerations(const std::map<distance,double> &gradient);
-    bool operator< (const target t) const
+    bool operator< (const target &t) const
     {
         if (!is_valid)
             return t.is_valid;
@@ -89,11 +92,18 @@ public:
         }
         return d_target<t.d_target;
     }
-    bool operator== (const target t) const
+    bool operator== (const target &t) const
     {
         if (!is_valid || !t.is_valid)
             return false;
         return V_target == t.V_target && d_target==t.d_target && (int)type==(int)t.type;
+    }
+    static std::set<target*> targets; 
+    static void recalculate_all_decelerations()
+    {
+        for (target *t : targets) {
+            t->calculate_decelerations();
+        }
     }
 };
 class PBD_target : public target
@@ -102,10 +112,15 @@ class PBD_target : public target
     public:
     PBD_target(distance d_PBD, bool emergency, double grad) : target(d_PBD, 0, target_class::PBD)
     {
-        std::map<distance,double> gradient;
-        gradient[distance(std::numeric_limits<double>::lowest())] = grad;
+        default_gradient = grad;
         is_EBD_based = emergency;
-        calculate_decelerations(gradient);
+        use_brake_combination = false;
+        calculate_decelerations();
+    }
+    void calculate_decelerations() override
+    {
+        std::map<distance,double> gradient;
+        target::calculate_decelerations(gradient);
     }
 };
 extern optional<distance> EoA;

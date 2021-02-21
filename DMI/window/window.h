@@ -25,6 +25,7 @@ class window
     function<void()> constructfun;
     public:
     bool active = true;
+    Component *pressedButton = nullptr;
     window(function<void()> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();

@@ -8,6 +8,7 @@ TrackConditions/track_conditions.o Time/clock.o Position/geographical.o \
 DMI/text_messages.o TrainSubsystems/power.o TrainSubsystems/brake.o \
 $(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))
 LIB = evc.so
+ARCHIVE = evc.a
 CXX = g++
 CC = gcc
 DEBUG=-g -rdynamic
@@ -27,5 +28,7 @@ evc: $(OBJECTS)
 %.o: %.cpp
 	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall -Wno-sign-compare $(CXXFLAGS) -fpic
 
-evc.dll: $(OBJECTS)
+$(LIB): $(OBJECTS)
 	$(CXX) -shared -o evc.dll $(OBJECTS) $(LDFLAGS) -g
+$(ARCHIVE): $(OBJECTS)
+	ar rcs

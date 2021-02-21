@@ -35,7 +35,7 @@ struct speed_element
     float distance;
     bool operator==(speed_element e)
     {
-        return (e.speed == speed) && (e.distance = distance);
+        return (e.speed == speed) && (e.distance == distance);
     }
     bool operator!=(speed_element e)
     {

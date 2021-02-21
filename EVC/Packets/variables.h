@@ -45,6 +45,38 @@ struct Q_SCALE_t : ETCS_variable
         invalid.insert(3);
     }
 };
+struct A_t : ETCS_variable
+{
+    A_t() : ETCS_variable(6) {}
+    virtual double get_value() const
+    {
+        return rawdata * 0.05;
+    }
+};
+struct A_NVMAXREDADH1_t : A_t
+{
+    static const uint32_t NoMaximumDisplayTargetInformation=61;
+    static const uint32_t NoMaximumDisplayTTI=62;
+    static const uint32_t NoMaximumNoDisplay=63;
+};
+struct A_NVMAXREDADH2_t : A_t
+{
+    static const uint32_t NoMaximumDisplayTargetInformation=61;
+    static const uint32_t NoMaximumDisplayTTI=62;
+    static const uint32_t NoMaximumNoDisplay=63;
+};
+struct A_NVMAXREDADH3_t : A_t
+{
+    static const uint32_t NoMaximumDisplayTargetInformation=61;
+    static const uint32_t NoMaximumDisplayTTI=62;
+    static const uint32_t NoMaximumNoDisplay=63;
+};
+struct A_NVP12_t : A_t
+{
+};
+struct A_NVP23_t : A_t
+{
+};
 struct D_t : ETCS_variable
 {
     D_t() : ETCS_variable(15) {}
@@ -78,7 +110,16 @@ struct D_LEVELTR_t : D_t
 struct D_LINK_t : D_t
 {
 };
+struct D_LX_t : D_t
+{
+};
 struct D_MAMODE_t : D_t
+{
+};
+struct D_NVOVTRP_t : D_t
+{
+};
+struct D_NVPOTRP_t : D_t
 {
 };
 struct D_NVROLL_t : D_t
@@ -90,6 +131,10 @@ struct D_NVROLL_t : D_t
             return std::numeric_limits<double>::infinity();
         return D_t::get_value(scale);
     }
+};
+struct D_NVSTFF_t : D_t
+{
+    static const uint32_t Infinity=32767;
 };
 struct D_OL_t : D_t
 {
@@ -135,6 +180,10 @@ struct D_TRACKINIT_t : D_t
 struct D_TSR_t : D_t
 {
 };
+struct D_VALIDNV_t : D_t
+{
+    static const uint32_t Now=32767;
+};
 struct G_A_t : ETCS_variable
 {
     static const uint32_t EndOfGradient=255;
@@ -166,10 +215,17 @@ struct L_ACKMAMODE_t : D_t
 struct L_ENDSECTION_t : D_t
 {
 };
-struct L_MAMODE_t : D_t
+struct L_LX_t : D_t
 {
 };
+struct L_MAMODE_t : D_t
+{
+    static const uint32_t Infinity=32767;
+};
 struct L_SECTION_t : D_t
+{
+};
+struct L_STOPLX_t : D_t
 {
 };
 struct L_TEXT_t : ETCS_variable
@@ -280,7 +336,7 @@ struct M_MAMODE_t : ETCS_variable
     static const uint32_t OS=0;
     static const uint32_t SH=1;
     static const uint32_t LS=2;
-    M_MAMODE_t() : ETCS_variable(3) 
+    M_MAMODE_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
     }
@@ -335,6 +391,134 @@ struct M_MODETEXTDISPLAY_t : ETCS_variable
             default:
                 return Mode::TR;
         }
+    }
+};
+struct M_NVAVADH_t : ETCS_variable
+{
+    M_NVAVADH_t() : ETCS_variable(5) {}
+    double get_value() const
+    {
+        return rawdata*0.05;
+    }
+    bool is_valid() override
+    {
+        return get_value()<1.05;
+    }
+};
+struct M_NVCONTACT_t : ETCS_variable
+{
+    static const uint32_t TrainTrip=0;
+    static const uint32_t ServiceBrake=1;
+    static const uint32_t NoReaction=2;
+    M_NVCONTACT_t() : ETCS_variable(2) 
+    {
+        invalid.insert(3);
+    }
+};
+struct M_NVDERUN_t : ETCS_variable
+{
+    static const uint32_t No=0;
+    static const uint32_t Yes=1;
+    M_NVDERUN_t() : ETCS_variable(1) {}
+};
+struct M_NVEBCL_t : ETCS_variable
+{
+    M_NVEBCL_t() : ETCS_variable(4) {}
+    double get_value()
+    {
+        switch(rawdata)
+        {
+            case 0:
+                return 0.5;
+            case 1:
+                return 0.9;
+            case 2:
+                return 0.99;
+            case 3:
+                return 0.999;
+            case 4:
+                return 0.9999;
+            case 5:
+                return 0.99999;
+            case 6:
+                return 0.999999;
+            case 7:
+                return 0.9999999;
+            case 8:
+                return 0.99999999;
+            case 9:
+                return 0.999999999;
+        }
+    }
+    bool is_valid() override
+    {
+        return rawdata < 10;
+    }
+};
+struct M_NVKRINT_t : ETCS_variable
+{
+    M_NVKRINT_t() : ETCS_variable(5) {}
+    double get_value()
+    {
+        return rawdata * 0.05;
+    }
+};
+struct M_NVKTINT_t : ETCS_variable
+{
+    M_NVKTINT_t() : ETCS_variable(5) {}
+    double get_value()
+    {
+        return rawdata * 0.05;
+    }
+};
+struct M_NVKVINT_t : ETCS_variable
+{
+    M_NVKVINT_t() : ETCS_variable(7) {}
+    double get_value()
+    {
+        return rawdata * 0.02;
+    }
+};
+struct M_PLATFORM_t : ETCS_variable
+{
+    M_PLATFORM_t() : ETCS_variable(4)
+    {
+        invalid.insert(14);
+        invalid.insert(15);
+    }
+    double get_value()
+    {
+        switch(rawdata) {
+            case 0:
+                return 0.2;
+            case 1:
+                return 0.3;
+            case 2:
+                return 0.55;
+            case 3:
+                return 0.58;
+            case 4:
+                return 0.68;
+            case 5:
+                return 0.685;
+            case 6:
+                return 0.73;
+            case 7:
+                return 0.76;
+            case 8:
+                return 0.84;
+            case 9:
+                return 0.9;
+            case 10:
+                return 0.915;
+            case 11:
+                return 0.92;
+            case 12:
+                return 0.96;
+            case 13:
+                return 1.1;
+        }
+        return 0;
     }
 };
 struct M_POSITION_t : ETCS_variable
@@ -433,6 +617,10 @@ struct NID_C_t : ETCS_variable
 {
     NID_C_t() : ETCS_variable(10) {}
 };
+struct NID_LX_t : ETCS_variable
+{
+    NID_LX_t() : ETCS_variable(8) {}
+};
 struct NID_NTC_t : ETCS_variable
 {
     NID_NTC_t() : ETCS_variable(8) {}
@@ -495,29 +683,11 @@ struct N_TOTAL_t : ETCS_variable
 {
     N_TOTAL_t() : ETCS_variable(3) {}
 };
-struct T_t : ETCS_variable
+struct Q_ASPECT_t : ETCS_variable
 {
-    T_t() : ETCS_variable(10) {}
-};
-struct T_EMA_t : T_t
-{
-    static const uint32_t NoTimeout=1023;
-};
-struct T_ENDTIMER_t : T_t
-{
-    static const uint32_t Infinity=1023;
-};
-struct T_OL_t : T_t
-{
-    static const uint32_t Infinity=1023;
-};
-struct T_SECTIONTIMER_t : T_t
-{
-    static const uint32_t Infinity=1023;
-};
-struct T_TEXTDISPLAY_t : T_t
-{
-    static const uint32_t NoTimeLimited=1023;
+    static const uint32_t StopIfInSH=0;
+    static const uint32_t GoIfInSH=1;
+    Q_ASPECT_t() : ETCS_variable(1) {}
 };
 struct Q_CONFTEXTDISPLAY_t : ETCS_variable
 {
@@ -595,6 +765,12 @@ struct Q_LINKREACTION_t : ETCS_variable
         invalid.insert(3);
     }
 };
+struct Q_LXSTATUS_t : ETCS_variable
+{
+    static const uint32_t Protected=0;
+    static const uint32_t NotProtected=1;
+    Q_LXSTATUS_t() : ETCS_variable(1) {}
+};
 struct Q_MAMODE_t : ETCS_variable
 {
     static const uint32_t DeriveSvL=0;
@@ -619,11 +795,81 @@ struct Q_NEWCOUNTRY_t : ETCS_variable
     static const uint32_t NewCountry=1;
     Q_NEWCOUNTRY_t() : ETCS_variable(1) {}
 };
+struct Q_NVDRIVER_ADHES_t : ETCS_variable
+{
+    static const uint32_t NotAllowed=0;
+    static const uint32_t Allowed=1;
+    Q_NVDRIVER_ADHES_t() : ETCS_variable(1) {}
+};
+struct Q_NVEMRRLS_t : ETCS_variable
+{
+    static const uint32_t RevokeAtStandstill=0;
+    static const uint32_t RevokeNotExceeded=1;
+    Q_NVEMRRLS_t() : ETCS_variable(1) {}
+};
+struct Q_NVGUIPERM_t : ETCS_variable
+{
+    static const uint32_t No=0;
+    static const uint32_t Yes=1;
+    Q_NVGUIPERM_t() : ETCS_variable(1) {}
+};
+struct Q_NVINHSMICPERM_t : ETCS_variable
+{
+    static const uint32_t No=0;
+    static const uint32_t Yes=1;
+    Q_NVINHSMICPERM_t() : ETCS_variable(1) {}
+};
+struct Q_NVKINT_t : ETCS_variable
+{
+    static const uint32_t NoCorrectionFollow=0;
+    static const uint32_t CorrectionFollow=1;
+    Q_NVKINT_t() : ETCS_variable(1) {}
+};
+struct Q_NVKVINTSET_t : ETCS_variable
+{
+    static const uint32_t FreightTrains=0;
+    static const uint32_t ConventionalPassengerTrains=1;
+    Q_NVKVINTSET_t() : ETCS_variable(2) 
+    {
+        invalid.insert(2);
+        invalid.insert(3);
+    }
+};
+struct Q_NVLOCACC_t : ETCS_variable
+{
+    Q_NVLOCACC_t() : ETCS_variable(6) {}
+    double get_value()
+    {
+        return rawdata;
+    }
+};
+struct Q_NVSBFBPERM_t : ETCS_variable
+{
+    static const uint32_t No=0;
+    static const uint32_t Yes=1;
+    Q_NVSBFBPERM_t() : ETCS_variable(1) {}
+};
+struct Q_NVSBTSMPERM_t : ETCS_variable
+{
+    static const uint32_t No=0;
+    static const uint32_t Yes=1;
+    Q_NVSBTSMPERM_t() : ETCS_variable(1) {}
+};
 struct Q_OVERLAP_t : ETCS_variable
 {
     static const uint32_t NoOverlap=0;
     static const uint32_t ExistsOverlap=1;
     Q_OVERLAP_t() : ETCS_variable(1) {}
+};
+struct Q_PLATFORM_t : ETCS_variable
+{
+    static const uint32_t LeftSide=0;
+    static const uint32_t RightSide=1;
+    static const uint32_t BothSides=2;
+    Q_PLATFORM_t() : ETCS_variable(2) 
+    {
+        invalid.insert(3);
+    }
 };
 struct Q_SECTIONTIMER_t : ETCS_variable
 {
@@ -636,6 +882,12 @@ struct Q_SRSTOP_t : ETCS_variable
     static const uint32_t StopIfInSR=0;
     static const uint32_t GoIfInSR=1;
     Q_SRSTOP_t() : ETCS_variable(1) {}
+};
+struct Q_STOPLX_t : ETCS_variable
+{
+    static const uint32_t NoStopRequired=0;
+    static const uint32_t StopRequired=1;
+    Q_STOPLX_t() : ETCS_variable(1) {}
 };
 struct Q_TEXT_t : ETCS_variable
 {
@@ -689,6 +941,39 @@ struct Q_UPDOWN_t : ETCS_variable
     static const uint32_t TrackToTrain=1;
     Q_UPDOWN_t() : ETCS_variable(1) {}
 };
+struct T_t : ETCS_variable
+{
+    T_t() : ETCS_variable(10) {}
+};
+struct T_EMA_t : T_t
+{
+    static const uint32_t NoTimeout=1023;
+};
+struct T_ENDTIMER_t : T_t
+{
+    static const uint32_t Infinity=1023;
+};
+struct T_NVCONTACT_t : ETCS_variable
+{
+    static const uint32_t Infinity=255;
+    T_NVCONTACT_t() : ETCS_variable(8) {}
+};
+struct T_NVOVTRP_t : ETCS_variable
+{
+    T_NVOVTRP_t() : ETCS_variable(8) {}
+};
+struct T_OL_t : T_t
+{
+    static const uint32_t Infinity=1023;
+};
+struct T_SECTIONTIMER_t : T_t
+{
+    static const uint32_t Infinity=1023;
+};
+struct T_TEXTDISPLAY_t : T_t
+{
+    static const uint32_t NoTimeLimited=1023;
+};
 struct V_t : ETCS_variable
 {
     V_t() : ETCS_variable(7) {}
@@ -707,6 +992,9 @@ struct V_DIFF_t : V_t
 struct V_EMA_t : V_t
 {
 };
+struct V_LX_t : V_t
+{
+};
 struct V_MAIN_t : V_t
 {
 };
@@ -717,6 +1005,33 @@ struct V_MAMODE_t : V_t
     {
         return rawdata<121 || rawdata>126;
     }
+};
+struct V_NVALLOWOVTRP_t : V_t
+{
+};
+struct V_NVKVINT_t : V_t
+{
+};
+struct V_NVLIMSUPERV_t : V_t
+{
+};
+struct V_NVONSIGHT_t : V_t
+{
+};
+struct V_NVSUPOVTRP_t : V_t
+{
+};
+struct V_NVREL_t : V_t
+{
+};
+struct V_NVSHUNT_t : V_t
+{
+};
+struct V_NVSTFF_t : V_t
+{
+};
+struct V_NVUNFIT_t : V_t
+{
 };
 struct V_RELEASE_t : V_t
 {

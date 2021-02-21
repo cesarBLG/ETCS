@@ -24,6 +24,7 @@ class Button : public Component
     Button() {isButton = true;}
     public:
     bool enabled = true;
+    bool pressed = false;
     bool showBorder = true;
     virtual void paint();
     virtual void setEnabled(bool val) {enabled = val;}

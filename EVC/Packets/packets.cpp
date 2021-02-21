@@ -16,37 +16,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "packets.h"
+#include "3.h"
 #include "5.h"
 #include "12.h"
+#include "16.h"
 #include "21.h"
 #include "27.h"
 #include "41.h"
 #include "47.h"
 #include "65.h"
 #include "66.h"
+#include "67.h"
 #include "68.h"
+#include "69.h"
 #include "72.h"
 #include "76.h"
 #include "79.h"
 #include "80.h"
+#include "88.h"
+#include "132.h"
 #include "136.h"
 #include "137.h"
 std::map<int, ETCS_packet*> ETCS_packet::packet_factory;
 void ETCS_packet::initialize()
 {
+    packet_factory[3] = new NationalValues();
     packet_factory[5] = new Linking();
     packet_factory[12] = new Level1_MA();
+    packet_factory[16] = new RepositioningInformation();
     packet_factory[21] = new GradientProfile();
     packet_factory[27] = new InternationalSSP();
     packet_factory[41] = new LevelTransitionOrder();
     packet_factory[47] = new ConditionalLevelTransitionOrder();
     packet_factory[65] = new TemporarySpeedRestriction();
     packet_factory[66] = new TemporarySpeedRestrictionRevocation();
+    packet_factory[67] = new TrackConditionBigMetalMasses();
     packet_factory[68] = new TrackCondition();
+    packet_factory[69] = new TrackConditionStationPlatforms();
     packet_factory[72] = new PlainTextMessage();
     packet_factory[76] = new FixedTextMessage();
     packet_factory[79] = new GeographicalPosition();
     packet_factory[80] = new ModeProfile();
+    packet_factory[88] = new LevelCrossingInformation();
+    packet_factory[132] = new DangerForShunting();
     packet_factory[136] = new InfillLocationReference();
     packet_factory[137] = new StopIfInSR();
 }

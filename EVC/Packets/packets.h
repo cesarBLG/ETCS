@@ -33,6 +33,7 @@ struct ETCS_packet
     {
         return new ETCS_packet(r);
     }
+    virtual void serialize(bit_write &w) {}
     static std::map<int, ETCS_packet*> packet_factory;
     static void initialize();
     static ETCS_packet *construct(bit_read_temp &r);

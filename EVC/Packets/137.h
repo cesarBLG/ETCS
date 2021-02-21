@@ -1,8 +1,6 @@
 #pragma once
 #include "variables.h"
 #include "packets.h"
-#include <vector>
-
 struct StopIfInSR : ETCS_directional_packet
 {
     Q_SRSTOP_t Q_SRSTOP;

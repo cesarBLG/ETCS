@@ -24,6 +24,7 @@
 #include "fixed_values.h"
 #include "train_data.h"
 #include <set>
+std::set<target*> target::targets;
 target::target() : is_valid(false), type(target_class::MRSP) {};
 target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type) 
 {
@@ -172,6 +173,7 @@ void set_supervised_targets()
 {
     changed = true;
     supervised_targets.clear();
+    if (mode != Mode::SR && mode != Mode::UN && mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) return;
     std::map<distance, double> MRSP = get_MRSP();
     if (!MRSP.empty()) {
         auto minMRSP = MRSP.begin();
@@ -182,14 +184,16 @@ void set_supervised_targets()
             prev = it;
         }
     }
-    if (SvL)
-        supervised_targets.push_back(target(*SvL, 0, target_class::SvL));
-    if (EoA)
-        supervised_targets.push_back(target(*EoA, 0, target_class::EoA));
-    if (SR_dist)
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
+        if (SvL)
+            supervised_targets.push_back(target(*SvL, 0, target_class::SvL));
+        if (EoA)
+            supervised_targets.push_back(target(*EoA, 0, target_class::EoA));
+        if (LoA)
+            supervised_targets.push_back(target(LoA->first, LoA->second, target_class::LoA));
+    }
+    if (SR_dist && mode == Mode::SR)
         supervised_targets.push_back(target(*SR_dist, 0, target_class::SR_distance));
-    if (LoA)
-        supervised_targets.push_back(target(LoA->first, LoA->second, target_class::LoA));
 }
 bool supervised_targets_changed()
 {
@@ -218,9 +222,9 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
     std::map<distance,int> redadh;
     redadh[distance(0)] = 0;
-    acceleration A_gradient = get_A_gradient(gradient);
-    acceleration A_brake_emergency = get_A_brake_emergency();
-    acceleration A_brake_service = get_A_brake_service();
+    acceleration A_gradient = get_A_gradient(gradient, default_gradient);
+    acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
+    acceleration A_brake_service = get_A_brake_service(use_brake_combination);
     acceleration A_brake_normal_service = get_A_brake_normal_service(A_brake_service);
     acceleration A_brake_safe;
     if (conversion_model_used) {
