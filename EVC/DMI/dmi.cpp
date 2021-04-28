@@ -64,22 +64,22 @@ void start_dmi()
 {
     printf("Starting Driver Machine Interface...\n");
 #ifndef _WIN32
-    /*dmi_pid = fork();
+    dmi_pid = fork();
     if(dmi_pid == 0)
     {
-        chdir("../DMI");*/
+        chdir("../DMI");
         /*int fd = open("dmi.log.o", O_RDWR);
         dup2(fd, 2);*/
-        /*execl("dmi", "dmi", nullptr);
-    }*/
+        execl("dmi", "dmi", nullptr);
+    }
     sleep(1);
 #else
-    /*STARTUPINFO si;
+    STARTUPINFO si;
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
     TCHAR cmd[] = TEXT("../DMI/dmi.exe");
-    CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../DMI", &si, &pi);*/
+    CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../DMI", &si, &pi);
     Sleep(1000);
     WSADATA wsa;
     WSAStartup(MAKEWORD(2,2), &wsa);

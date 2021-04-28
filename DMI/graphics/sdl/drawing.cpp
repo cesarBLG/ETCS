@@ -55,7 +55,7 @@ void init_video()
         running = false;
         return;
     }
-    startDisplay(true);
+    startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
     //SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)

@@ -33,7 +33,7 @@
 #include "../monitor.h"
 #include "../sound/sound.h"
 #include "../messages/messages.h"
-#include "../time.h"
+#include "../time_etcs.h"
 #include "../planning/planning.h"
 #include "../graphics/drawing.h"
 #include "../state/gps_pos.h"

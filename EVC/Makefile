@@ -19,7 +19,7 @@ LIB = evc.dll
 CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -I.
-LDFLAGS = -lstdc++ -lwsock32 -L. -Bdynamic -lorts
+LDFLAGS = -lstdc++ -lwsock32 -L. -Bdynamic -lorts -limagehlp
 DEBUG=-g
 endif
 all: evc

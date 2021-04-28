@@ -17,7 +17,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "gps_pos.h"
-#include "../time.h"
 Component gps_pos(120,50,display_gps);
 static bool show_pos = false;
 static bool f = false;
