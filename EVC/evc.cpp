@@ -39,6 +39,7 @@
 #include "TrainSubsystems/subsystems.h"
 
 #ifdef __ANDROID__
+#include <android/log.h>
 #elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
@@ -144,6 +145,7 @@ int main()
 {
     run = true;
 #ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_DEBUG, "EVC", "\n Starting European Train Control System... \n");
 #else
 #ifdef __unix__
     signal(SIGSEGV, crash_handler);
@@ -161,8 +163,11 @@ int main()
 
 #ifdef __ANDROID__
 #include <jni.h>
-extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz)
+std::string filesDir;
+extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
+    jboolean b;
+    filesDir = std::string(env->GetStringUTFChars(stringObject, &b));
     main();
 }
 extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
@@ -184,7 +189,6 @@ void start()
 }
 void update()
 {
-    std::unique_lock<std::mutex> lck(loop_mtx);
     update_odometer();
     update_geographical_position();
     check_eurobalise_passed();
@@ -196,15 +200,17 @@ void update()
     update_national_functions();
     update_train_subsystems();
 }
+std::condition_variable evc_cv;
 void loop()
 {
     while(run)
     {
+        std::unique_lock<std::mutex> lck(loop_mtx);
         auto prev = std::chrono::system_clock::now();
         update();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
         //if (d>1000) std::cout<<d<<std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(80));
+        evc_cv.wait_for(lck, std::chrono::milliseconds(80));
     }
 }

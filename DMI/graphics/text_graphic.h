@@ -19,11 +19,10 @@
 #define _TEXT_GRAPHIC_H
 #include "texture.h"
 #include <string>
-using namespace std;
 class text_graphic : public texture
 {
     public:
-    string text;
+    std::string text;
     float size;
     float offx;
     float offy;

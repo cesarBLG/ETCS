@@ -287,11 +287,11 @@ void parseData(string str)
 extern bool running;
 void read()
 {
-    int result = recv(client, data, BUFF_SIZE-1, 0);
+    int result = recv(client, ::data, BUFF_SIZE-1, 0);
     if(result>0)
     {
-        data[result] = 0;
-        buffer += data;
+        ::data[result] = 0;
+        buffer += ::data;
         int end;
         while ((end=buffer.find_first_of(';'))!=string::npos) {
             int start = buffer.find_first_not_of("\n\r ;");

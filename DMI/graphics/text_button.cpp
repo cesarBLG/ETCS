@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "text_button.h"
+using namespace std;
 TextButton::TextButton(string text, float sx, float sy, function<void()> pressed, int size) : size(size), caption(text)
 {
     setSize(sx, sy);

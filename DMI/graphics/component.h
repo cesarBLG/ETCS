@@ -28,7 +28,6 @@
 #include <cmath>
 #include <vector>
 extern float offset[];
-using namespace std;
 class Component
 {
     public:
@@ -61,10 +60,10 @@ class Component
     }
     Color bgColor = DarkBlue;
     Color fgColor = White;
-    vector<graphic*> graphics;
+    std::vector<graphic*> graphics;
     bool ack = false;
-    function<void()> pressedAction;
-    function<void()> display = nullptr;
+    std::function<void()> pressedAction;
+    std::function<void()> display = nullptr;
     public:
     void clear();
     bool isButton = false;
@@ -79,12 +78,12 @@ class Component
     float touch_left = 0;
     float touch_right = 0;
     Component(){}
-    Component(float sx, float sy, function<void()> display = nullptr);
+    Component(float sx, float sy, std::function<void()> display = nullptr);
     virtual ~Component();
     void setPressed();
-    void setPressedAction(function<void()> action);
-    void setAck(function<void()> ackAction);
-    void setDisplayFunction(function<void()> display);
+    void setPressedAction(std::function<void()> action);
+    void setAck(std::function<void()> ackAction);
+    void setDisplayFunction(std::function<void()> display);
     void setSize(float sx, float sy);
     void setLocation(float x, float y);
     virtual void paint();
@@ -101,21 +100,21 @@ class Component
     void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
     void drawTexture(SDL_Texture *tex, float cx, float cy, float sx, float sy);
     void add(graphic *g) { graphics.push_back(g); }
-    void drawText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-    void addText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-    text_graphic *getText(string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-    void getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect);
-    void drawImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
-    void addImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
-    image_graphic *getImage(string path, float cx=0, float cy=0, float sx=0, float sy=0);
-    void getImageGraphic(texture *t, string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    void drawText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    text_graphic *getText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    void getTextGraphic(texture *t, std::string text, float x, float y, float size, Color col, int align, int aspect);
+    void drawImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    void addImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    image_graphic *getImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    void getImageGraphic(texture *t, std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
     void setBackgroundColor(Color c);
     void setForegroundColor(Color c);
-    string text;
+    std::string text;
     float text_size;
     Color text_color;
-    void setLabel(string text, float size, Color c);
-    void setText(string text, float size, Color c);
+    void setLabel(std::string text, float size, Color c);
+    void setText(std::string text, float size, Color c);
     void setBorder(Color c);
 };
 extern Component Z;

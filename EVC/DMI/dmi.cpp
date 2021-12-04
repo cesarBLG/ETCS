@@ -64,6 +64,7 @@ void start_dmi()
 {
     printf("Starting Driver Machine Interface...\n");
 #ifndef _WIN32
+#ifndef __ANDROID__
     dmi_pid = fork();
     if(dmi_pid == 0)
     {
@@ -71,7 +72,9 @@ void start_dmi()
         /*int fd = open("dmi.log.o", O_RDWR);
         dup2(fd, 2);*/
         execl("dmi", "dmi", nullptr);
+        return;
     }
+#endif
     sleep(1);
 #else
     STARTUPINFO si;
@@ -197,7 +200,7 @@ int64_t lastor;
 void send_command(string command, string value)
 {
     lines += command+"("+value+");\n";
-    //if(sendtoor && s_client != nullptr && s_client->connected) s_client->WriteLine("noretain(etcs::dmi::command="+command+"("+value+"))");
+    if(sendtoor && s_client != nullptr && s_client->connected) s_client->WriteLine("noretain(etcs::dmi::command="+command+"("+value+"))");
 }
 double calc_ceiling_limit();
 void dmi_comm()
@@ -206,7 +209,7 @@ void dmi_comm()
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(5010);
-    std::cout<<"Ip del DMI"<<std::endl;
+    //std::cout<<"Ip del DMI"<<std::endl;
     string ip="127.0.0.1";
     //std::cin>>ip;
     addr.sin_addr.s_addr = inet_addr(ip.c_str());

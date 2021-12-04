@@ -17,7 +17,7 @@
  */
 #include "../TrackConditions/track_condition.h"
 bool main_power_switch_status=true;
-bool main_power_on_available=false;
+bool main_power_on_available=true;
 bool main_power_off_available=true;
 bool pantograph_status = true;
 bool raise_pantograph_available=false;
@@ -33,12 +33,12 @@ void update_power_status()
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         track_condition tc = *it->get();
         if (tc.condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch) {
-            if (tc.get_distance_to_train() < V_est * 3 && tc.get_end_distance_to_train() > 0) {
+            if (tc.get_distance_to_train() < V_est * 3 && tc.get_end_distance_to_train() > -L_TRAIN) {
                 power = false;
             }
         }
         if (tc.condition == TrackConditions::PowerLessSectionLowerPantograph) {
-            if (tc.get_distance_to_train() < V_est * 10 && tc.get_end_distance_to_train() > 0) {
+            if (tc.get_distance_to_train() < V_est * 10 && tc.get_end_distance_to_train() > -L_TRAIN) {
                 panto = false;
             }
         }

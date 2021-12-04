@@ -22,4 +22,6 @@ LOCAL_SRC_FILES := evc.cpp DMI/dmi.cpp Supervision/national_values.cpp Supervisi
 
 LOCAL_SHARED_LIBRARIES := orts
 
+LOCAL_LDLIBS := -llog
+
 include $(BUILD_SHARED_LIBRARY)

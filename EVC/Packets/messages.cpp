@@ -27,6 +27,7 @@
 #include "../Procedures/override.h"
 #include "../TrainSubsystems/brake.h"
 #include <algorithm>
+#include <iostream>
 static int reading_nid_bg=-1;
 static int reading_nid_c=-1;
 static std::vector<eurobalise_telegram> telegrams;
@@ -108,6 +109,7 @@ void check_linking()
         bool c2 = (!isexpected || link_expected->max() < bg_referencemin) && link_expected->max() < d_minsafefront(0);
         bool c3 = linked && link_bg!=linking.end() && link_bg != link_expected;
         if (c1 || c2 || c3) {
+            std::cout<<"Balise read error: check_linking() c1="<<c1<<" c2="<<c2<<" c3="<<c3<<std::endl;
             trigger_reaction(link_expected->reaction);
             expect_next_linking();
             if (c3)
@@ -139,8 +141,10 @@ void balise_group_passed()
         linking_rejected = true;
         for (link_data l : linking) {
             if (l.nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
-                if (dir != -1 && dir != l.reverse_dir)
+                if (dir != -1 && dir != l.reverse_dir) {
+                    std::cout<<"Balise error: group passed in wrong direction. Expected "<<l.reverse_dir<<", passed "<<dir<<std::endl;
                     trigger_condition(66);
+                }
                 if (l.max() >= bg_referencemin && l.min() <= bg_referencemax)
                     linking_rejected = false;
                 break;
@@ -175,6 +179,12 @@ void check_eurobalise_passed()
         eurobalise_telegram t = pending_telegrams.front().first;
         distance passed_dist = pending_telegrams.front().second;
         pending_telegrams.pop_front();
+
+        {
+            extern double odometer_reference;
+            std::cout<<"Passed at "<<passed_dist.get()+odometer_reference<<std::endl;
+        }
+
         last_passed_distance = passed_dist;
         reading = true;
         if (!t.readerror) {
@@ -345,6 +355,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     bool accepted = accepted1 && accepted2;
     if (!accepted) {
         if (containedinlinking) {
+            std::cout<<"Balise error. Linked BG not accepted. accepted1="<<accepted1<<", accepted2="<<accepted2<<std::endl;
             trigger_reaction(balise_link.reaction);
         } else {
             if (accepted2) {
@@ -360,6 +371,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
                     }
                 }
             }
+            std::cout<<"Balise error. Telegram not accepted. accepted1="<<accepted1<<", accepted2="<<accepted2<<std::endl;
             trigger_reaction(1);
         }
         return;
@@ -715,10 +727,12 @@ bool second_filter(std::shared_ptr<etcs_information> info, std::list<std::shared
 {
     if (!info->fromRBC)
         return true;
-    return false;
+    return true;
 }
 bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
 {
+    if (info->infill && mode != Mode::FS && mode != Mode::LS)
+        return false;
     accepted_condition s = mode_filter_index[{info->index, mode}];
     return !s.reject;
 }

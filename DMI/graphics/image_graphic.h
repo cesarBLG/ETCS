@@ -19,11 +19,10 @@
 #define _IMAGE_GRAPHIC_H
 #include "texture.h"
 #include <string>
-using namespace std;
 class image_graphic : public texture
 {
     public:
-    string path;
+    std::string path;
     float sx;
     float sy;
     float cx;

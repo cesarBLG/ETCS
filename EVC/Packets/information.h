@@ -44,7 +44,7 @@
 #include "../Position/geographical.h"
 struct national_values_information : etcs_information
 {
-    national_values_information() : etcs_information(1) {}
+    national_values_information() : etcs_information(0) {}
     void handle() override
     {
         NationalValues nv = *(NationalValues*)linked_packets.front().get();

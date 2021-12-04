@@ -173,7 +173,7 @@ struct NationalValues : ETCS_directional_packet
             r.read(&M_NVKTINT);
         }
     }
-    NationalValues *create(bit_read_temp &r)
+    NationalValues *create(bit_read_temp &r) override
     {
         return new NationalValues(r);
     }

@@ -20,13 +20,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include "color.h"
+#include <string>
 #define CENTER 0
 #define RIGHT 1
 #define LEFT 2
 #define UP 4
 #define DOWN 8
-extern char *fontPath;
-extern char *fontPathb;
+extern std::string fontPath;
+extern std::string fontPathb;
 extern SDL_Window *sdlwin;
 extern SDL_Renderer *sdlren;
 extern Color renderColor;
@@ -37,7 +38,7 @@ void display();
 void quitDisplay();
 void clear();
 void setColor(Color color);
-TTF_Font *openFont(char *text, float size);
+TTF_Font *openFont(std::string text, float size);
 void getFontSize(TTF_Font *font, const char *str, float *width, float *height);
 void init_video();
 void repaint();

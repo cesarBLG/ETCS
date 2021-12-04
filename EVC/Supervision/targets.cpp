@@ -28,8 +28,8 @@ std::set<target*> target::targets;
 target::target() : is_valid(false), type(target_class::MRSP) {};
 target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type) 
 {
-    calculate_decelerations();
     is_EBD_based = type != target_class::EoA;
+    calculate_decelerations();
 }
 distance target::get_distance_curve(double velocity) const
 {
@@ -127,7 +127,7 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
     calculate_times();
     if (is_EBD_based) {
         A_est1 = std::max(0.0, A_est);
-        A_est1 = std::max(0.0, std::min(0.4, A_est));
+        A_est2 = std::max(0.0, std::min(0.4, A_est));
         double V_delta0 = Q_NVINHSMICPERM ? 0 : V_delta;
         double V_delta1 = A_est1*T_traction;
         double V_delta2 = A_est2*T_berem;
@@ -192,8 +192,9 @@ void set_supervised_targets()
         if (LoA)
             supervised_targets.push_back(target(LoA->first, LoA->second, target_class::LoA));
     }
-    if (SR_dist && mode == Mode::SR)
+    if (SR_dist && mode == Mode::SR) {
         supervised_targets.push_back(target(*SR_dist, 0, target_class::SR_distance));
+    }
 }
 bool supervised_targets_changed()
 {
@@ -220,7 +221,7 @@ void target::calculate_decelerations()
 }
 void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
-    std::map<distance,int> redadh;
+    std::map<distance,int> redadh = std::map<distance,int>();
     redadh[distance(0)] = 0;
     acceleration A_gradient = get_A_gradient(gradient, default_gradient);
     acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
@@ -255,7 +256,7 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     
     A_normal_service = A_brake_normal_service + A_gradient;
     A_normal_service.accel = [=](double V, distance d) {
-        double grad = (--get_gradient().upper_bound(d))->second;
+        double grad = (--gradient.upper_bound(d))->second;
         double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
         return A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
     };

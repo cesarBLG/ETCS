@@ -201,7 +201,8 @@ void load_national_values(NationalValues nv)
     nv_changed();
 
 #ifdef __ANDROID__
-    std::ofstream file("/data/data/com.etcs.dmi/nationalvalues.bin", std::ios::binary);
+    extern std::string filesDir;
+    std::ofstream file(filesDir+"/nationalvalues.bin", std::ios::binary);
 #else
     std::ofstream file("nationalvalues.bin", std::ios::binary);
 #endif
@@ -236,7 +237,8 @@ void national_values_received(NationalValues nv, distance reference)
 void setup_national_values()
 {
 #ifdef __ANDROID__
-    std::ifstream file("/data/data/com.etcs.dmi/nationalvalues.bin", std::ios::binary);
+    extern std::string filesDir;
+    std::ifstream file(filesDir+"/nationalvalues.bin", std::ios::binary);
 #else
     std::ifstream file("nationalvalues.bin", std::ios::binary);
 #endif

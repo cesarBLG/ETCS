@@ -20,13 +20,13 @@
 #include "button.h"
 class TextButton : public Button
 {
-    string caption;
+    std::string caption;
     text_graphic *enabled_text;
     text_graphic *disabled_text;
     int size;
     public:
     void paint() override;
-    TextButton(string text, float sx, float sy, function<void()> pressed = nullptr, int size = 12);
+    TextButton(std::string text, float sx, float sy, std::function<void()> pressed = nullptr, int size = 12);
     ~TextButton();
 };
 #endif

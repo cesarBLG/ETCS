@@ -19,6 +19,7 @@
 #include "../monitor.h"
 #include "../tcp/server.h"
 #include "../sound/sound.h"
+using namespace std;
 void dispAcks();
 Component c234(37*3, 50, nullptr);
 Component c2(37, 50, nullptr);

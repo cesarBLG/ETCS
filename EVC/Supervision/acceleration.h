@@ -28,7 +28,7 @@ struct acceleration
     {
         return accel(V,d);
     }
-    friend acceleration operator+(const acceleration a1, const acceleration a2);
+    friend acceleration operator+(const acceleration &a1, const acceleration &a2);
     
 };
-acceleration operator+(const acceleration a1, const acceleration a2);
+acceleration operator+(const acceleration &a1, const acceleration &a2);

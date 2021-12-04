@@ -15,16 +15,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <thread>
 #include "monitor.h"
 #include "graphics/drawing.h"
 #include "control/control.h"
 #include "tcp/server.h"
-#include <thread>
-using namespace std;
 bool running = true;
 void quit()
 {
-    unique_lock<mutex> lck(window_mtx);
+    std::unique_lock<std::mutex> lck(window_mtx);
     running = false;
     window_cv.notify_one();
     printf("quit\n");
@@ -145,6 +144,7 @@ void crash_handler(int sig)
 #endif
 #ifdef __ANDROID__
 #include <jni.h>
+std::string filesDir;
 extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 {
     running = false;
@@ -153,6 +153,7 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 int main(int argc, char** argv)
 {
 #ifdef __ANDROID__
+    filesDir = SDL_AndroidGetExternalStoragePath();
 #else
 #ifdef __unix__
     signal(SIGINT, sighandler);
@@ -166,8 +167,8 @@ int main(int argc, char** argv)
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
-    thread video(init_video);
-    thread tcp(startSocket);
+    std::thread video(init_video);
+    std::thread tcp(startSocket);
     manage_windows();
     tcp.join();
     video.join();

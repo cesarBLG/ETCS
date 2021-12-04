@@ -2,11 +2,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := main
+LOCAL_MODULE := dmi
 
-SDL_PATH := ../SDL
+SDL_PATH := SDL
 
-LOCAL_C_INCLUDES := $(LOCAL_PATH)/$(SDL_PATH)/include $(LOCAL_PATH)/../include
+LOCAL_C_INCLUDES := $(JNI_PATH)/$(SDL_PATH)/include $(JNI_PATH)/include
 
 LOCAL_C_FLAGS +=
 
@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphi
                    		window/train_data.cpp window/fixed_train_data.cpp window/keyboard.cpp window/input_data.cpp \
                    		graphics/sdl/gfx_primitives.cpp
 
-LOCAL_SHARED_LIBRARIES := SDL2 SDL2_ttf SDL2_net dummy
+LOCAL_SHARED_LIBRARIES := SDL2 SDL2_ttf SDL2_net
 
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 

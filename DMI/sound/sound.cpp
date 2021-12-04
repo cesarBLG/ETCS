@@ -36,15 +36,16 @@ time_t last_sinfo;
 void start_sound()
 {
 #ifdef __ANDROID__
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S_info.wav", &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
+    extern std::string filesDir;
+    SDL_LoadWAV((filesDir+"/sound/S2_warning.wav").c_str(), &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
+    SDL_LoadWAV((filesDir+"/sound/S_info.wav").c_str(), &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
+    SDL_LoadWAV((filesDir+"/sound/S1_toofast.wav").c_str(), &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
+    SDL_LoadWAV((filesDir+"/sound/click.wav").c_str(), &click.wavSpec, &click.wavBuffer, &click.wavLength);
 #else
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S_info.wav", &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
-    SDL_LoadWAV("/data/data/com.etcs.dmi/sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
+    SDL_LoadWAV("sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
+    SDL_LoadWAV("sound/S_info.wav", &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
+    SDL_LoadWAV("sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
+    SDL_LoadWAV("sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
 #endif
     deviceId = SDL_OpenAudioDevice(NULL, 0, &sinfo.wavSpec, NULL, 0);
     last_sinfo = time(nullptr)-1;

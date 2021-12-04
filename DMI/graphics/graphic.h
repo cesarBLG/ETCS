@@ -18,7 +18,6 @@
 #ifndef _GRAPHIC_H
 #define _GRAPHIC_H
 #include "color.h"
-using namespace std;
 enum graphic_type
 {
     TEXTURE,

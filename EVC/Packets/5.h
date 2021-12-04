@@ -42,7 +42,7 @@ struct Linking : ETCS_directional_packet
             elements.push_back(LinkingElement(r));
         }
     }
-    Linking *create(bit_read_temp &r)
+    Linking *create(bit_read_temp &r) override
     {
         return new Linking(r);
     }

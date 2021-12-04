@@ -22,7 +22,8 @@
 #include <string>
 #include <mutex>
 using namespace ORserver;
-using namespace std;
+using std::mutex;
+using std::string;
 extern ParameterManager manager;
 bool AKT=false;
 bool CON=true;
@@ -50,8 +51,7 @@ void initialize_asfa()
     p->SetValue = [](string val) {
         detected = val.length() > 0;
         connected = val == "1";
-        if (detected)
-        {
+        if (detected) {
             if (connected) add_message(text_message("ASFA conectado en C.G.", false, false, false, [](text_message &t){return !connected || !detected;}));
             else add_message(text_message("ASFA anulado en C.G.", false, false, false, [](text_message &t){return connected || !detected;}));
         }
@@ -60,14 +60,32 @@ void initialize_asfa()
 
     register_parameter("asfa::conectado");
 }
+extern double V_NVUNFIT;
+#include "../Position/distance.h"
+#include "../Supervision/speed_profile.h"
+extern optional<speed_restriction> UN_speed;
 void update_asfa()
 {
-    if (!detected || !connected)
+    /*if (mode == Mode::UN) {
+        double supervisionSpeed = detected && connected ? 200/3.6 : V_NVUNFIT;
+        if (UN_speed->get_speed() != supervisionSpeed) {
+            UN_speed = speed_restriction(supervisionSpeed, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
+            recalculate_MRSP();
+        }
+    }*/
+    if (!detected || !connected) {
         return;
+    }
     if (mode == Mode::UN) {
+        if (!CON)
+        {
+        }
         AKT = false;
         CON = true;
     } else if (level != Level::N0 && level != Level::Unknown && mode != Mode::UN && mode != Mode::SH && mode != Mode::SB && mode != Mode::IS && mode != Mode::SL) {
+        if (CON)
+        {
+        }
         AKT = true;
         CON = false;
     }

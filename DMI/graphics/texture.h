@@ -29,7 +29,7 @@ class texture : public graphic
     float height;
     float x;
     float y;
-    function<void()> load_function;
+    std::function<void()> load_function;
     virtual void load()
     {
         if(load_function!=nullptr) load_function();

@@ -178,7 +178,7 @@ void update_monitor_transitions(bool suptargchang, const std::list<target> &supe
     for (const target &t : supervised_targets) {
         bool ct = (t.get_target_speed()<=V_est) && ((t.is_EBD_based ? d_maxsafefront(t.d_I.get_reference()) : d_estfront) > t.d_I);
         c1 |= ct && (t.get_target_speed() > 0 || V_est>=V_release);
-        if (MRDT == t/* || (MRDT.type == t.type && MRDT.get_target_speed() == t.get_target_speed() && std::abs(MRDT.get_target_position()-t.get_target_position())<2)*/)
+        if (MRDT == t)
             mrdt = true;
     }
     bool c2 = V_release>0 && (RSMtarget.is_EBD_based ? d_maxsafefront(d_startRSM.get_reference()) : d_estfront) > d_startRSM;
@@ -258,6 +258,8 @@ void update_supervision()
     double V_MRSP = calc_ceiling_limit();
     if (LoA && d_maxsafefront(LoA->first.get_reference())>LoA->first)
         V_MRSP = std::min(LoA->second, V_MRSP);
+
+    bool prevTSM = monitoring == TSM || monitoring == RSM;
     double prev_V_perm = V_perm;
     double prev_D_target = D_target;
     double prev_V_sbi = V_sbi;
@@ -504,5 +506,11 @@ void update_supervision()
             EB = true;
         if (r0)
             EB = false;
+    }
+    if (monitoring == TSM || monitoring == RSM && prevTSM && prev_V_perm >= V_target)
+    {
+        V_perm = std::min(V_perm, prev_V_perm);
+        D_target = std::min(D_target, prev_D_target);
+        V_sbi = std::min(V_sbi, prev_V_sbi);
     }
 }

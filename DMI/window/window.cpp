@@ -19,6 +19,7 @@
 #include "../graphics/button.h"
 #include "../sound/sound.h"
 #include <chrono>
+using namespace std;
 bool isInside(Component *comp, float x, float y)
 {
     return (comp->x-comp->touch_left)<x && (comp->x + comp->sx + comp->touch_right)>x

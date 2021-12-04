@@ -14,7 +14,8 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */#ifndef _SERVER_H
+ */
+#ifndef _SERVER_H
 #define _SERVER_H
 #include <string>
 void startSocket();

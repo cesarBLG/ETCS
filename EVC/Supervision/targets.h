@@ -43,7 +43,7 @@ protected:
 public:
     target_class type;
     bool is_EBD_based;
-    double default_gradient;
+    double default_gradient=0;
     target();
     target(distance dist, double speed, target_class type);
     double get_target_speed() const { return V_target; }
@@ -96,7 +96,7 @@ public:
     {
         if (!is_valid || !t.is_valid)
             return false;
-        return V_target == t.V_target && d_target==t.d_target && (int)type==(int)t.type;
+        return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
     }
     static std::set<target*> targets; 
     static void recalculate_all_decelerations()
@@ -119,7 +119,7 @@ class PBD_target : public target
     }
     void calculate_decelerations() override
     {
-        std::map<distance,double> gradient;
+        std::map<distance,double> gradient = std::map<distance,double>();
         target::calculate_decelerations(gradient);
     }
 };

@@ -22,16 +22,16 @@
 class window
 {
     Layout *l;
-    function<void()> constructfun;
+    std::function<void()> constructfun;
     public:
     bool active = true;
     Component *pressedButton = nullptr;
-    window(function<void()> constructfun = nullptr) : constructfun(constructfun)
+    window(std::function<void()> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();
     }
     virtual ~window();
-    vector<LayoutElement>& getLayoutElements()
+    std::vector<LayoutElement>& getLayoutElements()
     {
         return l->getElements();
     }

@@ -210,7 +210,8 @@ void displayLines()
         size = i%longinterval!=0 ? -110 : -100;
         if(!inited && ((maxSpeed != 400 && i%20==0) || (maxSpeed == 400 && i%50==0 && i!=250 && i!=350)))
         {
-            const char *str = to_string(i).c_str();
+            std::string s = to_string(i);
+            const char *str = s.c_str();
             float hx = 0;
             float hy = 12/2.0;
             TTF_Font *font = openFont(fontPath, 16);

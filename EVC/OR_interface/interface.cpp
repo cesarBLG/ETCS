@@ -38,6 +38,7 @@ using std::endl;
 using std::thread;
 using std::mutex;
 extern mutex loop_mtx;
+extern std::condition_variable evc_cv;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
@@ -84,7 +85,8 @@ void SetParameters()
         }
         bit_read_temp r(message);
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,d_estfront});
+        pending_telegrams.push_back({t,distance(odometer_value-odometer_reference)});
+        evc_cv.notify_all();
     };
     manager.AddParameter(p);
 
@@ -109,6 +111,12 @@ void SetParameters()
     p = new Parameter("etcs::main_power_switch");
     p->GetValue = []() {
         return main_power_switch_status ? "1" : "0";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::atf");
+    p->GetValue = []() {
+        return mode==Mode::FS?std::to_string(V_target):"-1";
     };
     manager.AddParameter(p);
 
@@ -178,6 +186,7 @@ void register_parameter(string parameter)
 {
     s_client->WriteLine("register("+parameter+")");
 }
+#include <unistd.h>
 void polling()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));

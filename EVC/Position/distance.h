@@ -122,5 +122,6 @@ distance d_maxsafe(distance d, double reference);
 distance d_minsafe(distance d, double reference);
 extern distance d_estfront;
 extern double odometer_value;
+extern double odometer_reference;
 void update_odometer();
 void reset_odometer(double dist);

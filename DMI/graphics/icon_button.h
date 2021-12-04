@@ -24,9 +24,9 @@ class IconButton : public Button
     image_graphic *disabled_image = nullptr;
     public:
     void paint() override;
-    void setEnabledImage(string path);
-    void setDisabledImage(string path);
-    IconButton(string enabled_path, float sx, float sy, function<void()> pressed = nullptr, string disabled_path = "");
+    void setEnabledImage(std::string path);
+    void setDisabledImage(std::string path);
+    IconButton(std::string enabled_path, float sx, float sy, std::function<void()> pressed = nullptr, std::string disabled_path = "");
     ~IconButton();
 };
 #endif

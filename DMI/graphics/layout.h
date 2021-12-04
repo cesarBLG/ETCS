@@ -19,7 +19,6 @@
 #define _LAYOUT_H
 #include "component.h"
 #include <vector>
-using namespace std;
 enum AlignType
 {
     CONSECUTIVE,
@@ -59,13 +58,13 @@ struct LayoutElement
 };
 class Layout
 {
-    vector<LayoutElement> elements;
+    std::vector<LayoutElement> elements;
     public:
-    vector<Component*> order;
+    std::vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
     void removeAll();
     void update();
     void updateLocations();
-    vector<LayoutElement>& getElements();
+    std::vector<LayoutElement>& getElements();
 };
 #endif

@@ -22,8 +22,8 @@
 #include <condition_variable> 
 class window;
 class subwindow;
-extern mutex window_mtx;
-extern condition_variable window_cv;
+extern std::mutex window_mtx;
+extern std::condition_variable window_cv;
 void manage_windows();
 void right_menu(subwindow *w);
 void exit(subwindow *w);

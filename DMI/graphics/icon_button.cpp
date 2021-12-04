@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "icon_button.h"
+using namespace std;
 IconButton::IconButton(string enabled_path, float sx, float sy, function<void()> pressed, string disabled_path)
 {
     setEnabledImage(enabled_path);

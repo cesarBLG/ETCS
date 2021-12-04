@@ -20,7 +20,8 @@ CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -I.
 LDFLAGS = -lstdc++ -lwsock32 -L. -Bdynamic -lorts -limagehlp
-DEBUG=-g
+DEBUG=-g 
+#-D_GLIBCXX_DEBUG
 endif
 all: evc
 evc: $(OBJECTS)
@@ -32,3 +33,6 @@ $(LIB): $(OBJECTS)
 	$(CXX) -shared -o evc.dll $(OBJECTS) $(LDFLAGS) -g
 $(ARCHIVE): $(OBJECTS)
 	ar rcs
+
+clean:
+	rm $(OBJECTS)

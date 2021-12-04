@@ -282,11 +282,7 @@ void Component::addImage(string path, float cx, float cy, float sx, float sy)
 image_graphic *Component::getImage(string path, float cx, float cy, float sx, float sy)
 {
     image_graphic *ig = new image_graphic();
-#ifdef __ANDROID__
-    ig->path = "/data/data/com.etcs.dmi/"+path;
-#else
     ig->path = path;
-#endif
     ig->cx = cx;
     ig->cy = cy;
     ig->sx = sx;
@@ -296,6 +292,10 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
 }
 void Component::getImageGraphic(texture *t, string path, float cx, float cy, float sx, float sy)
 {
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    path = filesDir+"/"+path;
+#endif
     SDL_Surface *surf = SDL_LoadBMP(path.c_str());
     if(surf == nullptr)
     {

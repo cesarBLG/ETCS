@@ -33,13 +33,8 @@ using namespace std;
 extern mutex draw_mtx;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;
-#ifdef __ANDROID__
-char *fontPath = "/data/data/com.etcs.dmi/fonts/swiss.ttf";
-char *fontPathb = "/data/data/com.etcs.dmi/fonts/swissb.ttf";
-#else
-char *fontPath = "fonts/swiss.ttf";
-char *fontPathb = "fonts/swissb.ttf";
-#endif
+std::string fontPath = "fonts/swiss.ttf";
+std::string fontPathb = "fonts/swissb.ttf";
 #define PI 3.14159265358979323846264338327950288419716939937510
 float scale = 1;
 float offset[2] = {0, 0};
@@ -226,12 +221,16 @@ void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
     *width = w/scale;
     *height = h/scale;
 }
-TTF_Font *openFont(char *text, float size)
+TTF_Font *openFont(std::string text, float size)
 {
-    TTF_Font *f = TTF_OpenFont(text, getScale(size)*1.4);
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    text = filesDir+"/"+text;
+#endif
+    TTF_Font *f = TTF_OpenFont(text.c_str(), getScale(size)*1.4);
     if(f == nullptr)
     {
-        printf("Error loading font %s. SDL Error: \n", text, SDL_GetError());
+        printf("Error loading font %s. SDL Error: %s\n", text.c_str(), SDL_GetError());
         return nullptr;
     }
     /*float height = TTF_FontAscent(f)/scale;
