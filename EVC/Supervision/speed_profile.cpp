@@ -21,6 +21,7 @@
 #include "../MA/movement_authority.h"
 #include "fixed_values.h"
 #include "national_values.h"
+#include "../LX/level_crossing.h"
 #include <vector>
 #include <map>
 #include <list>
@@ -103,6 +104,11 @@ void recalculate_MRSP()
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN)
         for (auto it=TSRs.begin(); it!=TSRs.end(); ++it)
             restrictions.insert(it->restriction);
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
+        for (auto it=level_crossings.begin(); it!=level_crossings.end(); ++it) {
+            if (!it->lx_protected && it->svl_replaced) restrictions.insert(speed_restriction(it->V_LX, it->svl_replaced_loc, it->start+it->length, false));
+        }
+    }
     if (train_speed && 
         (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN || mode == Mode::RV))
         restrictions.insert(*train_speed);
@@ -147,16 +153,12 @@ std::map<distance,double> get_MRSP()
 void update_SSP(std::vector<SSP_element> nSSP)
 {
     std::set<speed_restriction> rest;
-    for (auto it=nSSP.begin(); it!=--nSSP.end(); ++it) {
+    for (auto it=nSSP.begin(); it!=nSSP.end(); ++it) {
         auto next = it;
-        next++;
-        while (next->start==it->start)
-        {
-            next++;
-            if (next == nSSP.end()) break;
-        }
-        if (next == nSSP.end()) break;
-        rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, next->start, it->compensate_train_length));
+        if (it->restrictions[0][0]<0) break;
+        ++next;
+        distance end = next==nSSP.end() ? distance(std::numeric_limits<double>::max()) : next->start;
+        rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, end, it->compensate_train_length));
     }
     auto it_start = SSP.lower_bound(*rest.begin());
     SSP.erase(it_start, SSP.end());

@@ -60,6 +60,13 @@ struct bit_read_temp
         var->rawdata = value;
     }
     bit_read_temp(std::vector<bool> bits) : bits(bits), position(0) {}
+    bit_read_temp(unsigned char *data, int count) : position(0) {
+        for (int i=0; i<count; i++) {
+            for (int j=7; j>=0; j--) {
+                bits.push_back(((data[i]>>j) & 1));
+            }
+        }
+    }
 };
 struct bit_write
 {

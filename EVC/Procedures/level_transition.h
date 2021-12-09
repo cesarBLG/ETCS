@@ -73,7 +73,7 @@ struct level_transition_information
             }
         }
         for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1) {
+            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2) {
                 leveldata = priorities[i];
                 return;
             }

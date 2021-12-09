@@ -3,7 +3,7 @@ Supervision/curve_calc.o  Supervision/conversion_model.o  Position/distance.o\
 Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
 Supervision/acceleration.o antenna.o MA/movement_authority.o MA/mode_profile.o Position/linking.o \
 OR_interface/interface.o SSP/ssp.o Packets/packets.o Procedures/mode_transition.o LX/level_crossing.o \
-Packets/messages.o Procedures/override.o Procedures/train_trip.o Procedures/level_transition.o \
+Packets/messages.o Packets/radio.o Procedures/override.o Procedures/train_trip.o Procedures/level_transition.o \
 TrackConditions/track_conditions.o Time/clock.o Position/geographical.o \
 DMI/text_messages.o TrainSubsystems/power.o TrainSubsystems/brake.o \
 $(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))

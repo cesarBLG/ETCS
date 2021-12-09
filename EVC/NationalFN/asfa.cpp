@@ -19,6 +19,7 @@
 #include "../Supervision/supervision.h"
 #include "../orts/common.h"
 #include "../DMI/text_message.h"
+#include "../Time/clock.h"
 #include <string>
 #include <mutex>
 using namespace ORserver;
@@ -52,8 +53,10 @@ void initialize_asfa()
         detected = val.length() > 0;
         connected = val == "1";
         if (detected) {
-            if (connected) add_message(text_message("ASFA conectado en C.G.", false, false, false, [](text_message &t){return !connected || !detected;}));
-            else add_message(text_message("ASFA anulado en C.G.", false, false, false, [](text_message &t){return connected || !detected;}));
+            int64_t time = get_milliseconds();
+            add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
+                return time+30000<get_milliseconds();
+            }));
         }
     };
     manager.AddParameter(p);
@@ -73,12 +76,16 @@ void update_asfa()
             recalculate_MRSP();
         }
     }*/
-    if (!detected || !connected) {
+    if (!detected) {
         return;
     }
     if (mode == Mode::UN) {
         if (!CON)
         {
+            int64_t time = get_milliseconds();
+            add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
+                return time+30000<get_milliseconds();
+            }));
         }
         AKT = false;
         CON = true;

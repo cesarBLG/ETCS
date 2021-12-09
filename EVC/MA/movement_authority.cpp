@@ -18,6 +18,7 @@
 
 #include "movement_authority.h"
 #include "../Supervision/supervision.h"
+#include "../LX/level_crossing.h"
 optional<distance> EoA_ma;
 optional<distance> SvL_ma;
 optional<std::pair<distance,double>> LoA_ma;
@@ -25,6 +26,51 @@ float V_releaseSvL_ma;
 movement_authority::movement_authority(distance start, Level1_MA ma, int64_t time) : start(start), time_stamp(time)
 {
     v_main = ma.V_MAIN.get_value();
+    v_ema = ma.V_EMA.get_value();
+    distance cumdist = start;
+    for (int i=0; i<ma.N_ITER; i++) {
+        ma_section section;
+        section.length = ma.sections[i].L_SECTION.get_value(ma.Q_SCALE);
+        if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+            section.stimer = section_timer(ma.sections[i].T_SECTIONTIMER, cumdist + ma.sections[i].D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
+        sections.push_back(section);
+        cumdist += section.length;
+    }
+    ma_section endsection;
+    endsection.length = ma.L_ENDSECTION.get_value(ma.Q_SCALE);
+    if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+        endsection.stimer = section_timer(ma.T_SECTIONTIMER, cumdist + ma.D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
+    sections.push_back(endsection);
+    cumdist += endsection.length;
+    if (ma.Q_ENDTIMER && ma.T_ENDTIMER != T_SECTIONTIMER_t::Infinity)
+        endtimer = end_timer(ma.T_ENDTIMER, cumdist-ma.D_ENDTIMERSTARTLOC.get_value(ma.Q_SCALE));
+    if (ma.Q_OVERLAP) {
+        overlap ov;
+        ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
+        if (ma.V_RELEASEOL == V_RELEASE_t::CalculateOnBoard)
+            ov.vrelease = -2;
+        else if (ma.V_RELEASEOL == V_RELEASE_t::UseNationalValue)
+            ov.vrelease = -1;
+        else
+            ov.vrelease = ma.V_RELEASEOL.get_value();
+        if (ma.T_OL != T_OL_t::Infinity)
+            ov.ovtimer = end_timer(ma.T_OL, cumdist-ma.D_STARTOL.get_value(ma.Q_SCALE));
+        ol = ov;
+    }
+    if (ma.Q_DANGERPOINT) {
+        danger_point d;
+        d.distance = ma.D_DP.get_value(ma.Q_SCALE);
+        if (ma.V_RELEASEDP == V_RELEASE_t::CalculateOnBoard)
+            d.vrelease = -2;
+        else if (ma.V_RELEASEDP == V_RELEASE_t::UseNationalValue)
+            d.vrelease = -1;
+        else
+            d.vrelease = ma.V_RELEASEDP.get_value();
+        dp = d;
+    }
+}
+movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t time) : start(start), time_stamp(time)
+{
     v_ema = ma.V_EMA.get_value();
     distance cumdist = start;
     for (int i=0; i<ma.N_ITER; i++) {
@@ -106,8 +152,9 @@ void movement_authority::update_timers()
 				EoA_ma = cumdist;
 				SvL_ma = cumdist;
 				LoA_ma = {};
-				recalculate_MRSP();
+                V_releaseSvL_ma = 0;
                 sections.erase(sections.begin()+i, sections.end());
+				calculate_SvL();
                 break;
 			}
 		}
@@ -146,7 +193,15 @@ void calculate_SvL()
             V_releaseSvL = 0;
         }
     }
-    // TODO: Level crossings
+
+    for (auto it = level_crossings.begin(); it != level_crossings.end(); ++it) {
+        if (!it->lx_protected && (!SvL || it->start < *SvL) && !it->svl_replaced) {
+            EoA = SvL = it->start;
+            V_releaseSvL = 0;
+            break;
+        }
+    }
+
     if (EoA && SvL) V_release = calculate_V_release();
     else V_release = 0;
     recalculate_MRSP();

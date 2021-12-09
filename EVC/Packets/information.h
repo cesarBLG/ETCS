@@ -20,6 +20,7 @@
 #include "messages.h"
 #include "3.h"
 #include "12.h"
+#include "15.h"
 #include "16.h"
 #include "21.h"
 #include "27.h"
@@ -32,6 +33,7 @@
 #include "72.h"
 #include "79.h"
 #include "80.h"
+#include "88.h"
 #include "132.h"
 #include "136.h"
 #include "137.h"
@@ -42,6 +44,7 @@
 #include "../TrackConditions/track_condition.h"
 #include "../DMI/text_message.h"
 #include "../Position/geographical.h"
+#include "../LX/level_crossing.h"
 struct national_values_information : etcs_information
 {
     national_values_information() : etcs_information(0) {}
@@ -81,6 +84,27 @@ struct ma_information : etcs_information
     void handle() override
     {
         Level1_MA ma = *(Level1_MA*)linked_packets.front().get();
+        movement_authority MA = movement_authority(ref, ma, timestamp);
+        if (infill)
+            MA_infill(MA);
+        else
+            replace_MA(MA);
+        bool mp = false;
+        for (auto it = ++linked_packets.begin(); it != linked_packets.end(); ++it) {
+            if (it->get()->NID_PACKET == 80) {
+                set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
+                mp = true;
+            }
+        }
+        if (!mp) reset_mode_profile(ref, infill);
+    }
+};
+struct ma_information_lv2 : etcs_information
+{
+    ma_information_lv2() : etcs_information(3) {}
+    void handle() override
+    {
+        Level2_3_MA ma = *(Level2_3_MA*)linked_packets.front().get();
         movement_authority MA = movement_authority(ref, ma, timestamp);
         if (infill)
             MA_infill(MA);
@@ -225,7 +249,7 @@ struct danger_for_SH_information : etcs_information
 };
 struct track_condition_information : etcs_information
 {
-    track_condition_information() : etcs_information(35) {}
+    track_condition_information() : etcs_information(34,35) {}
     void handle() override
     {
         if (linked_packets.front()->NID_PACKET == 68) {
@@ -239,11 +263,20 @@ struct track_condition_information : etcs_information
 };
 struct track_condition_big_metal_information : etcs_information
 {
-    track_condition_big_metal_information() : etcs_information(36) {}
+    track_condition_big_metal_information() : etcs_information(35,37) {}
     void handle() override
     {
         TrackConditionBigMetalMasses tc = *(TrackConditionBigMetalMasses*)linked_packets.front().get();
         load_track_condition_bigmetal(tc, ref);
+    }
+};
+struct level_crossing_information : etcs_information
+{
+    level_crossing_information() : etcs_information(58,60) {}
+    void handle() override
+    {
+        LevelCrossingInformation lx = *(LevelCrossingInformation*)linked_packets.front().get();
+        load_lx(lx, ref);
     }
 };
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);

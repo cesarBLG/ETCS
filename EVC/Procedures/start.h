@@ -20,7 +20,7 @@
 #include "mode_transition.h"
 void start_mission()
 {
-    if (train_data_valid()) {
+    if (train_data_valid() && mode == Mode::SB && V_est == 0) {
         if (level == Level::N0) {
             mode_to_ack = Mode::UN;
             mode_acknowledgeable = true;

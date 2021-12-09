@@ -19,6 +19,7 @@
 #define _MOVEMENT_AUTHORITY_H
 #include <vector>
 #include "../Packets/12.h"
+#include "../Packets/15.h"
 #include "../Supervision/speed_profile.h"
 #include "../Supervision/targets.h"
 #include "../optional.h"
@@ -87,6 +88,7 @@ class movement_authority
     int64_t time_stamp;
 public:
     movement_authority(distance start, Level1_MA ma, int64_t first_balise_passed_time);
+    movement_authority(distance start, Level2_3_MA ma, int64_t first_balise_passed_time);
     distance get_end()
     {
         distance end=start;

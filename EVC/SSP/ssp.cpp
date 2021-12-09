@@ -25,7 +25,7 @@ std::vector<SSP_element> get_SSP(distance start, InternationalSSP issp)
     for (int i=0; i<elements.size(); i++)
     {
         SSP_element e;
-        e.compensate_train_length = elements[i].Q_FRONT;
+        e.compensate_train_length = elements[i].Q_FRONT == Q_FRONT_t::TrainLengthDelay;
         double dist = elements[i].D_STATIC.get_value(issp.Q_SCALE);
         start += dist;
         e.start = start;

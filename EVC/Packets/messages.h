@@ -19,9 +19,11 @@
 #include "variables.h"
 #include "types.h"
 #include "packets.h"
+#include "radio.h"
 #include "../Position/linking.h"
 #include "../MA/movement_authority.h"
 #include "../Supervision/speed_profile.h"
+#include "radio.h"
 #include <vector>
 #include <memory>
 #include <algorithm>
@@ -77,6 +79,7 @@ struct message_packet
     bool fromRBC;
 };
 extern std::deque<std::pair<eurobalise_telegram,distance>> pending_telegrams;
+extern std::deque<std::shared_ptr<euroradio_message>> pending_messages;
 extern std::list<link_data>::iterator link_expected;
-void check_eurobalise_passed();
+void update_track_comm();
 void set_message_filters();

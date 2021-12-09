@@ -89,6 +89,19 @@ void SetParameters()
         evc_cv.notify_all();
     };
     manager.AddParameter(p);
+    
+    p = new Parameter("etcs::message");
+    p->SetValue = [](string val) {
+        std::vector<bool> message;
+        for (int i=0; i<val.size(); i++) {
+            message.push_back(val[i]=='1');
+        }
+        bit_read_temp r(message);
+        std::shared_ptr<euroradio_message> m = euroradio_message::build(r);
+        pending_messages.push_back(m);
+        evc_cv.notify_all();
+    };
+    manager.AddParameter(p);
 
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {
@@ -211,6 +224,7 @@ void start_or_iface()
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(acceleration)");
     s_client->WriteLine("register(etcs::telegram)");
+    s_client->WriteLine("register(etcs::message)");
     s_client->WriteLine("register(cruise_speed)");
     s_client->WriteLine("register(etcs::dmi::feedback)");
     SetParameters();

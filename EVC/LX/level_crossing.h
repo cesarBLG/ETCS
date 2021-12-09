@@ -17,9 +17,11 @@
  */
 #pragma once
 #include "../Position/distance.h"
+#include "../Packets/88.h"
 #include <set>
 class level_crossing
 {
+    public:
     int id;
     distance start;
     double length;
@@ -27,9 +29,27 @@ class level_crossing
     double V_LX;
     bool stop;
     double stoplength;
+    mutable bool svl_replaced;
+    mutable distance svl_replaced_loc;
+    level_crossing(LevelCrossingInformation lx, distance ref)
+    {
+        id = lx.NID_LX;
+        start = ref+lx.D_LX.get_value(lx.Q_SCALE);
+        length = lx.L_LX.get_value(lx.Q_SCALE);
+        lx_protected = lx.Q_LXSTATUS == Q_LXSTATUS_t::Protected;
+        if (!lx_protected)
+        {
+            V_LX = lx.V_LX.get_value();
+            stop = lx.Q_STOPLX == Q_STOPLX_t::StopRequired;
+            if (stop) stoplength = lx.L_STOPLX.get_value(lx.Q_SCALE);
+        }
+        svl_replaced = false;
+    }
     bool operator<(const level_crossing l) const
     {
         return start<l.start;
     }
 };
 extern std::set<level_crossing> level_crossings;
+void load_lx(LevelCrossingInformation lx, distance ref);
+void update_lx();

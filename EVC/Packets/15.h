@@ -52,7 +52,7 @@ struct Level2_3_MA : ETCS_directional_packet
         r.read(&T_EMA);
         r.read(&N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            sections.push_back(Level1_MA_Section(r));
+            sections.push_back(Level2_3_MA_Section(r));
         }
         r.read(&L_ENDSECTION);
         r.read(&Q_SECTIONTIMER);

@@ -37,6 +37,7 @@
 #include "NationalFN/nationalfn.h"
 #include "TrackConditions/track_condition.h"
 #include "TrainSubsystems/subsystems.h"
+#include "LX/level_crossing.h"
 
 #ifdef __ANDROID__
 #include <android/log.h>
@@ -183,6 +184,7 @@ void start()
     setup_national_values();
     initialize_mode_transitions();
     ETCS_packet::initialize();
+    euroradio_message::initialize();
     set_message_filters();
     initialize_national_functions();
     started = true;
@@ -191,10 +193,11 @@ void update()
 {
     update_odometer();
     update_geographical_position();
-    check_eurobalise_passed();
+    update_track_comm();
     update_national_values();
     update_procedures();
     update_supervision();
+    update_lx();
     update_track_conditions();
     update_messages();
     update_national_functions();

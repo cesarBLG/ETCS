@@ -23,7 +23,8 @@
 #include "messages.h"
 struct etcs_information
 {
-    int index;
+    int index_level;
+    int index_mode;
     virtual void handle() = 0;
     distance ref;
     int64_t timestamp;
@@ -32,6 +33,7 @@ struct etcs_information
     int dir;
     bg_id nid_bg;
     std::list<std::shared_ptr<ETCS_packet>> linked_packets;
-    etcs_information() : index(-1){}
-    etcs_information(int index) : index(index){}
+    etcs_information() : index_mode(-1), index_level(-1){}
+    etcs_information(int index) : index_mode(index), index_level(index){}
+    etcs_information(int index_level, int index_mode) : index_mode(index_level), index_level(index_mode){}
 };

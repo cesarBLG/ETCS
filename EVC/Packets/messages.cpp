@@ -51,10 +51,12 @@ static distance bg_referencemin;
 static bool stop_checking_linking=false;
 std::list<link_data>::iterator link_expected=linking.end();
 std::deque<std::pair<eurobalise_telegram, distance>> pending_telegrams;
+std::deque<std::shared_ptr<euroradio_message>> pending_messages;
 void trigger_reaction(int reaction);
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg);
+void handle_radio_message(std::shared_ptr<euroradio_message> message);
 void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp);
-void check_eurobalise_passed();
+void update_track_comm();
 void balise_group_passed();
 void check_linking();
 void expect_next_linking();
@@ -155,7 +157,7 @@ void balise_group_passed()
     linking.erase(linking.begin(), link_expected);
     reset_eurobalise_data();
 }
-void check_eurobalise_passed()
+void update_track_comm()
 {
     if (pending_telegrams.empty()) {
         check_linking();
@@ -232,7 +234,13 @@ void check_eurobalise_passed()
             refpassed = true;
             check_linking();
         }
-        check_eurobalise_passed();
+        update_track_comm();
+    }
+    if (!pending_messages.empty())
+    {
+        std::shared_ptr<euroradio_message> m = pending_messages.front();
+        pending_messages.pop_front();
+        handle_radio_message(m);
     }
 }
 void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_reference, bool linked, int64_t timestamp)
@@ -317,6 +325,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         if (reject)
             accepted1 = false;
     }
+
     std::vector<eurobalise_telegram> message;
     for (int i=0; i<read_telegrams.size(); i++) {
         eurobalise_telegram t = read_telegrams[i];
@@ -377,18 +386,21 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         return;
     }
     
-    bg_reference = distance(0,update_location_reference({nid_c, nid_bg}, bg_reference, linked));
     if (dir == -1 && containedinlinking)
         dir = balise_link.reverse_dir;
+    bg_reference = distance(0,update_location_reference({nid_c, nid_bg}, dir, bg_reference, linked));
+
     handle_telegrams(message, bg_reference, dir, timestamp, {nid_c, nid_bg});
     if (dir != -1)
         geographical_position_handle_bg_passed({nid_c, nid_bg}, bg_reference, dir == 1);
 }
 bool info_compare(const std::shared_ptr<etcs_information> &i1, const std::shared_ptr<etcs_information> &i2)
 {
-    if ((i1->index == 8 || i1->index == 9) && (i2->index != 8 && i2->index != 9))
+    if (!i1->infill && i2->infill)
         return true;
-    if (i2->index == 3 && i1->index != 3)
+    if ((i1->index_level == 8 || i1->index_level == 9) && (i2->index_level != 8 && i2->index_level != 9))
+        return true;
+    if (i2->index_level == 3 && i1->index_level != 3)
         return true;
     return false;
 }
@@ -430,7 +442,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                     break;
             } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
                 for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
-                    if (it->get()->index == 3) {
+                    if (it->get()->index_level == 3) {
                         it->get()->linked_packets.push_back(t.packets[j]);
                         break;
                     }
@@ -447,6 +459,80 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                 info[i]->nid_bg = nid_bg;
                 ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
             }
+        }
+    }
+    ordered_info.sort(info_compare);
+    for (auto it = ordered_info.begin(); it!=ordered_info.end(); ++it)
+    {
+        try_handle_information(*it, ordered_info);
+    }
+}
+void handle_radio_message(std::shared_ptr<euroradio_message> message)
+{
+    if (!message->valid || message->readerror) return;
+    if (!ongoing_transition) {
+        transition_buffer.clear();
+    } else {
+        if (transition_buffer.size() == 3)
+            transition_buffer.pop_front();
+        transition_buffer.push_back({});
+    }
+
+    std::list<std::shared_ptr<etcs_information>> ordered_info;
+    bg_id lrbg = message->NID_LRBG.get_value();
+    distance ref = distance(0);
+    bool valid_lrbg = false;
+    int dir = -1;
+    for (lrbg_info info : lrbgs) {
+        if (info.nid_lrbg == lrbg) {
+            valid_lrbg = true;
+            ref = info.position;
+            std::cout<<"Ref: "<<ref.get()<<std::endl;
+            dir = info.dir;
+            break;
+        }
+    }
+    if (!valid_lrbg && message->NID_LRBG!=NID_LRBG_t::Unknown) return;
+    bool infill=false;
+    for (int j=0; j<message->packets.size(); j++) {
+        ETCS_packet *p = message->packets[j].get();
+        if (p->directional) {
+            auto *dp = (ETCS_directional_packet*)p;
+            if ((dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                continue;
+        }
+        if (p->NID_PACKET == 136) {
+            InfillLocationReference ilr = *((InfillLocationReference*)p);
+            bool found = false;
+            for (auto it = link_expected; it!=linking.end(); ++it) {
+                link_data &l = *it;
+                if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? lrbg.NID_C : ilr.NID_C, (int)ilr.NID_BG})) {
+                    found = true;
+                    infill = true;
+                    ref = l.dist;
+                    break;
+                }
+            }
+            if (!found)
+                break;
+        } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
+            for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
+                if (it->get()->index_level == 3) {
+                    it->get()->linked_packets.push_back(message->packets[j]);
+                    break;
+                }
+            }
+        }
+        std::vector<etcs_information*> info = construct_information(p->NID_PACKET);
+        for (int i=0; i<info.size(); i++) {
+            info[i]->linked_packets.push_back(message->packets[j]);
+            info[i]->ref = ref;
+            info[i]->dir = dir;
+            info[i]->fromRBC = true;
+            info[i]->nid_bg = lrbg;
+            info[i]->infill = infill;
+            info[i]->timestamp = message->T_TRAIN.get_value();
+            ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
         }
     }
     ordered_info.sort(info_compare);
@@ -478,7 +564,7 @@ struct accepted_condition
 std::map<level_filter_data, accepted_condition> level_filter_index;
 bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message) 
 {
-    accepted_condition s = level_filter_index[{info->index, level, info->fromRBC}];
+    accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC}];
     if (!s.reject) {
         if (s.exceptions.find(3) != s.exceptions.end()) {
             //TODO: RBC dependent
@@ -733,7 +819,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_p
 {
     if (info->infill && mode != Mode::FS && mode != Mode::LS)
         return false;
-    accepted_condition s = mode_filter_index[{info->index, mode}];
+    accepted_condition s = mode_filter_index[{info->index_mode, mode}];
     return !s.reject;
 }
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
@@ -753,6 +839,8 @@ std::vector<etcs_information*> construct_information(int packet_num)
     } else if (packet_num == 12) {
         info.push_back(new ma_information());
         info.push_back(new signalling_information());
+    } else if (packet_num == 15) {
+        info.push_back(new ma_information_lv2());
     } else if (packet_num == 16) {
         info.push_back(new repositioning_information());
     } else if (packet_num == 21) {
@@ -775,6 +863,8 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new plain_text_information());
     } else if (packet_num == 79) {
         info.push_back(new geographical_position_information());
+    } else if (packet_num == 88) {
+        info.push_back(new level_crossing_information());
     } else if (packet_num == 132) {
         info.push_back(new danger_for_SH_information());
     } else if (packet_num == 137) {

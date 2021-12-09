@@ -49,7 +49,7 @@ class speed_restriction
     distance end_distance;
     bool compensate_train_length;
 public:
-    speed_restriction(double spd, distance start, distance end, bool compensate_trainlength) : speed(spd), start_distance(start), end_distance(end), compensate_train_length(true) {}
+    speed_restriction(double spd, distance start, distance end, bool compensate_trainlength) : speed(spd), start_distance(start), end_distance(end), compensate_train_length(compensate_trainlength) {}
     double get_speed() const { return speed; }
     distance get_start() const { return start_distance; }
     distance get_end() const { return end_distance + compensate_train_length*L_TRAIN; }

@@ -19,15 +19,6 @@
 #include "distance.h"
 #include "../Packets/5.h"
 #include <list>
-struct bg_id
-{
-    int NID_C;
-    int NID_BG;
-    bool operator==(const bg_id &o) const
-    {
-        return NID_C == o.NID_C && NID_BG == o.NID_BG;
-    }
-};
 struct link_data
 {
     bg_id nid_bg;
@@ -44,9 +35,15 @@ struct link_data
         return dist-locacc;
     }
 };
+struct lrbg_info
+{
+    bg_id nid_lrbg;
+    int dir;
+    distance position;
+    int locacc;
+};
 extern std::list<link_data> linking;
-extern bg_id NID_LRBG;
-extern double Q_LOCACC_LRBG;
-double update_location_reference(bg_id nid_bg, distance group_pos, bool linked=true);
+extern std::list<lrbg_info> lrbgs;
+double update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked=true);
 void update_linking(distance start, Linking link, bool infill, bg_id this_bg);
 void delete_linking();

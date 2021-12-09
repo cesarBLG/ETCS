@@ -94,7 +94,7 @@ distance get_d_startRSM(double V_release)
             tSvL = &*it;
     }
     int alpha = level==Level::N1;
-    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_LOCACC_LRBG+10+d_EoA.get()/10,d_maxsafefront(d_EoA.get_reference())-d_minsafefront(d_EoA.get_reference()));
+    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*(lrbgs.empty() ? Q_NVLOCACC : lrbgs.back().locacc)+10+d_EoA.get()/10,d_maxsafefront(d_EoA.get_reference())-d_minsafefront(d_EoA.get_reference()));
     
     distance d_startRSM;
     
@@ -137,7 +137,7 @@ double calculate_V_release()
     distance d_EoA = *EoA;
     std::list<target> supervised_targets = get_supervised_targets();
     int alpha = level==Level::N1;
-    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*Q_LOCACC_LRBG+10+d_EoA.get()/10,d_maxsafefront(d_EoA.get_reference())-d_minsafefront(d_EoA.get_reference()));
+    distance d_tripEoA = d_EoA+alpha*L_antenna_front + std::max(2*(lrbgs.empty() ? Q_NVLOCACC : lrbgs.back().locacc)+10+d_EoA.get()/10,d_maxsafefront(d_EoA.get_reference())-d_minsafefront(d_EoA.get_reference()));
     double V_release = calc_ceiling_limit(d_EoA, d_SvL);
     std::list<target*> candidates;
     target *tSvL;
@@ -266,15 +266,15 @@ void update_supervision()
     V_perm = V_target = V_MRSP;
     V_sbi = V_MRSP + dV_sbi(V_MRSP);
     
-    target tEoA;
-    target tSvL;
+    const target *tEoA1;
+    const target *tSvL1;
     const std::list<target> &supervised_targets = get_supervised_targets();
     for (auto it=supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
         it->calculate_curves();
         if (it->type == target_class::SvL)
-            tSvL = *it;
+            tSvL1 = &(*it);
         if (it->type == target_class::EoA)
-            tEoA = *it;
+            tEoA1 = &(*it);
     }
     if (EoA && SvL && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
         if (V_release != 0)
@@ -383,10 +383,16 @@ void update_supervision()
         bool t12=false;
         bool t13=false;
         bool t15=false;
-        bool r0 = true;
-        bool r1 = true;
-        bool r3 = true;
+        bool revokeEB=true;
+        bool revokeSB=true;
+        bool revokeTCO=true;
+        bool revokeOvS=true;
+        bool revokeWaS=true;
+        bool revokeIntS=false;
         for (const target &t : supervised_targets) {
+            bool r0 = true;
+            bool r1 = true;
+            bool r3 = true;
             double V_target = t.get_target_speed();
             distance &d_EBI = t.d_EBI;
             distance &d_SBI2 = t.d_SBI2;
@@ -428,6 +434,12 @@ void update_supervision()
                 r1 &= V_est<=0;
                 r3 &= 0<V_est && V_est<=V_MRSP && d_maxsafe<t.d_P;
             }
+            revokeOvS &= r1 || r3;
+            revokeWaS &= r1 || r3;
+            revokeIntS &= r0 || (r1 && (!EB || V_target == 0 || Q_NVEMRRLS)) || (r3 && (!EB || Q_NVEMRRLS));
+            revokeTCO &= r1 || r3;
+            revokeSB &= r1 || r3;
+            revokeEB &= r0 || (r1 && (V_target == 0 || Q_NVEMRRLS)) || (r3 && Q_NVEMRRLS);
             V_perm = std::min(V_perm, t.V_P);
             TTP = std::min(TTP, (d_P - (t.is_EBD_based ? d_maxsafefront(d_P.get_reference()) : d_estfront))/V_est);
         }
@@ -439,7 +451,12 @@ void update_supervision()
             D_target = std::max(MRDT.d_P-d_maxsafefront(MRDT.get_target_position().get_reference()), 0.0);
         
         if (EoA && SvL) {
-            distance d_maxsafe = d_maxsafefront(EoA->get_reference());
+            bool r0 = true;
+            bool r1 = true;
+            bool r3 = true;
+            const target &tSvL = *tSvL1;
+            const target &tEoA = *tEoA1;
+            distance d_maxsafe = d_maxsafefront(SvL->get_reference());
             t3 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafe<=tSvL.d_P && d_estfront<=tEoA.d_P);
             t4 |= V_release<V_est && V_est<=V_MRSP && (d_maxsafe>tSvL.d_P || d_estfront > tEoA.d_P);
             t6 |= V_MRSP<V_est && V_est <= V_MRSP + dV_warning(V_MRSP) && (d_maxsafe>tSvL.d_I || d_estfront>tEoA.d_I) && (d_maxsafe<=tSvL.d_W && d_estfront <= tEoA.d_W);
@@ -452,6 +469,12 @@ void update_supervision()
             r0 &= V_est == 0;
             r1 &= V_est<=V_release;
             r3 &= V_release<V_est && V_est<=V_MRSP && d_estfront<tEoA.d_P && d_maxsafe<tSvL.d_P;
+            revokeOvS &= r1 || r3;
+            revokeWaS &= r1 || r3;
+            revokeIntS &= r0 || (r1 && (!EB || V_release == 0 || Q_NVEMRRLS)) || (r3 && (!EB || Q_NVEMRRLS));
+            revokeTCO &= r1 || r3;
+            revokeSB &= r1 || r3;
+            revokeEB &= r0 || (r1 && (V_release == 0 || Q_NVEMRRLS)) || (r3 && Q_NVEMRRLS);
         }
         if (t3 && supervision == NoS)
             supervision = IndS;
@@ -461,9 +484,7 @@ void update_supervision()
             supervision = WaS;
         if ((t10 || t12 || t13 || t15) && (supervision == NoS || supervision == IndS || supervision == OvS || supervision == WaS))
             supervision = IntS;
-        if ((r1 || r3) && (supervision == WaS || supervision == OvS))
-            supervision = IndS;
-        if ((r0 || ((r1 || r3) && (!EB || Q_NVEMRRLS))) && supervision == IntS)
+        if ((revokeWaS && supervision == WaS) || (revokeOvS && supervision == OvS) || (revokeIntS && supervision == IntS))
             supervision = IndS;
         if (t7 || t9)
             TCO = true;
@@ -471,20 +492,12 @@ void update_supervision()
             SB = true;
         if (t13 || t15)
             EB= true;
-        if (r0)
+        if (revokeEB)
             EB = false;
-        if (r1) {
-            TCO = false;
+        if (revokeSB)
             SB = false;
-            if (Q_NVEMRRLS)
-                EB = false;
-        }
-        if (r3) {
+        if (revokeTCO)
             TCO = false;
-            SB = false;
-            if (Q_NVEMRRLS)
-                EB = false;
-        }
     } else if (monitoring == RSM) {
         for (const target &t : supervised_targets) {
             V_perm = std::min(V_perm, t.V_P);
@@ -507,7 +520,7 @@ void update_supervision()
         if (r0)
             EB = false;
     }
-    if (monitoring == TSM || monitoring == RSM && prevTSM && prev_V_perm >= V_target)
+    if ((monitoring == TSM || monitoring == RSM) && prevTSM && prev_V_perm >= V_target)
     {
         V_perm = std::min(V_perm, prev_V_perm);
         D_target = std::min(D_target, prev_D_target);

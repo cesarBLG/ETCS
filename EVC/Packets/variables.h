@@ -35,6 +35,19 @@ struct ETCS_variable
         return invalid.find(rawdata)==invalid.end();
     }
 };
+struct bg_id
+{
+    int NID_C;
+    int NID_BG;
+    bool operator==(const bg_id &o) const
+    {
+        return NID_C == o.NID_C && NID_BG == o.NID_BG;
+    }
+    bool operator!=(const bg_id &o) const
+    {
+        return NID_C != o.NID_C || NID_BG != o.NID_BG;
+    }
+};
 struct Q_SCALE_t : ETCS_variable
 {
     static const uint32_t cm10 = 0;
@@ -202,10 +215,6 @@ struct L_NVKRINT_t : ETCS_variable
             return 100*(rawdata-4);
     }
 };
-struct L_PACKET_t : ETCS_variable
-{
-    L_PACKET_t() : ETCS_variable(13) {}
-};
 struct L_ACKLEVELTR_t : D_t
 {
 };
@@ -221,6 +230,14 @@ struct L_LX_t : D_t
 struct L_MAMODE_t : D_t
 {
     static const uint32_t Infinity=32767;
+};
+struct L_PACKET_t : ETCS_variable
+{
+    L_PACKET_t() : ETCS_variable(13) {}
+};
+struct L_MESSAGE_t : ETCS_variable
+{
+    L_MESSAGE_t() : ETCS_variable(10) {}
 };
 struct L_SECTION_t : D_t
 {
@@ -251,6 +268,13 @@ struct M_AIRTIGHT_t : ETCS_variable
         invalid.insert(2);
         invalid.insert(3);
     }
+};
+
+struct M_ACK_t : ETCS_variable
+{
+    static const uint32_t NoAcknowledgement=0;
+    static const uint32_t AcknowledgementRequired=1;
+    M_ACK_t() : ETCS_variable(1) {}
 };
 struct M_DUP_t : ETCS_variable
 {
@@ -617,9 +641,23 @@ struct NID_C_t : ETCS_variable
 {
     NID_C_t() : ETCS_variable(10) {}
 };
+struct NID_LRBG_t : ETCS_variable
+{
+    static const uint32_t Unknown=16777215;
+    NID_LRBG_t() : ETCS_variable(24) {}
+    bg_id get_value()
+    {
+        if (rawdata == Unknown) return {-1, -1};
+        return {rawdata>>14, rawdata&16383};
+    }
+};
 struct NID_LX_t : ETCS_variable
 {
     NID_LX_t() : ETCS_variable(8) {}
+};
+struct NID_MESSAGE_t : ETCS_variable
+{
+    NID_MESSAGE_t() : ETCS_variable(8) {}
 };
 struct NID_NTC_t : ETCS_variable
 {
@@ -973,6 +1011,15 @@ struct T_SECTIONTIMER_t : T_t
 struct T_TEXTDISPLAY_t : T_t
 {
     static const uint32_t NoTimeLimited=1023;
+};
+struct T_TRAIN_t : ETCS_variable
+{
+    static const uint32_t Unknown=4294967295ULL;
+    T_TRAIN_t() : ETCS_variable(32) {}
+    int64_t get_value() 
+    {
+        return rawdata;
+    }
 };
 struct V_t : ETCS_variable
 {
