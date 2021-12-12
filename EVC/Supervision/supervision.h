@@ -73,5 +73,6 @@ extern double D_target;
 extern double V_release;
 extern double T_bs1;
 extern double T_bs2;
+double calc_ceiling_limit();
 void update_supervision();
 double calculate_V_release();

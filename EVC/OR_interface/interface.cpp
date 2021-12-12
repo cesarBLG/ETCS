@@ -44,11 +44,14 @@ double V_set;
 extern distance d_estfront;
 extern bool EB_commanded;
 extern bool SB_commanded;
+extern bool desk_open;
+extern bool sleep_signal;
 double or_dist;
 POSIXclient *s_client;
 ParameterManager manager;
 mutex iface_mtx;
 static threadwait *poller;
+//std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str, bool lock);
 void SetParameters()
 {
@@ -74,6 +77,13 @@ void SetParameters()
     p = new Parameter("acceleration");
     p->SetValue = [](string val) {
         A_est = stof(val);
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("master_key");
+    p->SetValue = [](string val) {
+        desk_open = val == "1";
+        sleep_signal = !desk_open;
     };
     manager.AddParameter(p);
 
@@ -227,6 +237,7 @@ void start_or_iface()
     s_client->WriteLine("register(etcs::message)");
     s_client->WriteLine("register(cruise_speed)");
     s_client->WriteLine("register(etcs::dmi::feedback)");
+    s_client->WriteLine("register(master_key)");
     SetParameters();
     thread t(polling);
     t.detach();

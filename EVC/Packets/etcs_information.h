@@ -35,5 +35,5 @@ struct etcs_information
     std::list<std::shared_ptr<ETCS_packet>> linked_packets;
     etcs_information() : index_mode(-1), index_level(-1){}
     etcs_information(int index) : index_mode(index), index_level(index){}
-    etcs_information(int index_level, int index_mode) : index_mode(index_level), index_level(index_mode){}
+    etcs_information(int index_level, int index_mode) : index_level(index_level), index_mode(index_mode){}
 };

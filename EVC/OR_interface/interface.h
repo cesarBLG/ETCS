@@ -16,4 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <list>
+#include "../Packets/radio.h"
 void start_or_iface();
+//extern std::list<euroradio_message_traintotrack> pendingmessages;

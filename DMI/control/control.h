@@ -17,6 +17,7 @@
  */
 #ifndef _CONTROL_H
 #define _CONTROL_H
+#include <functional>
 #include "../window/window.h"
 #include <mutex>
 #include <condition_variable> 
@@ -27,4 +28,6 @@ extern std::condition_variable window_cv;
 void manage_windows();
 void right_menu(subwindow *w);
 void exit(subwindow *w);
+void set_procedure(std::function<void()> proc);
+void start_procedure();
 #endif

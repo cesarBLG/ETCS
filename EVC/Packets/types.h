@@ -79,4 +79,11 @@ struct bit_write
             bits.push_back((value>>count)&1);
         }
     }
+    void replace(ETCS_variable *var, int pos)
+    {
+        if (var->size + pos > bits.size()) return;
+        for (int i=0; i<var->size; i++) {
+            bits[pos+i] = (var->rawdata>>(var->size-i-1)) & 1;
+        }
+    }
 };

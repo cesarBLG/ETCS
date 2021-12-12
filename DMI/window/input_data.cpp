@@ -21,6 +21,7 @@
 input_data::input_data(string label_text) : label(label_text), data_get([this] {return getData();}), 
 data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
 {
+    holdcursor = {0};
     if(label!="")
     {
         label_comp = new Component(204,50);

@@ -33,7 +33,19 @@ struct ETCS_packet
     {
         return new ETCS_packet(r);
     }
-    virtual void serialize(bit_write &w) {}
+    virtual void serialize(bit_write &w) 
+    {
+        std::cout<<"TODO: serialize() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
+        w.write(&NID_PACKET);
+        w.write(&L_PACKET);
+    }
+    virtual void write_to(bit_write &w)
+    {
+        int start = w.bits.size();
+        serialize(w);
+        L_PACKET.rawdata = w.bits.size()-start;
+        w.replace(&L_PACKET, start+8);
+    }
     static std::map<int, ETCS_packet*> packet_factory;
     static void initialize();
     static ETCS_packet *construct(bit_read_temp &r);
@@ -59,6 +71,20 @@ struct ETCS_directional_packet : ETCS_packet
         r.read(&Q_DIR);
         r.read(&L_PACKET);
         r.position = L_PACKET - L_PACKET.size - Q_DIR.size - NID_PACKET.size;
+    }
+    virtual void serialize(bit_write &w) override
+    {
+        std::cout<<"TODO: serialize() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
+        w.write(&NID_PACKET);
+        w.write(&Q_DIR);
+        w.write(&L_PACKET);
+    }
+    void write_to(bit_write &w) override
+    {
+        int start = w.bits.size();
+        serialize(w);
+        L_PACKET.rawdata = w.bits.size()-start;
+        w.replace(&L_PACKET, start+10);
     }
     ETCS_packet *create(bit_read_temp &r) override
     {

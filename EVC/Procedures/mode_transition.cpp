@@ -30,22 +30,26 @@ Mode mode=Mode::SB;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
 Mode mode_to_ack;
+bool desk_open=true;
+bool sleep_signal=false;
 void set_mode_deleted_data();
 void initialize_mode_transitions()
 {
     cond *c = mode_conditions;
     c[1] = [](){return false;};
-    c[2] = [](){return true;};
-    c[3] = [](){return V_est == 0;};
+    c[2] = [](){return desk_open;};
+    c[3] = [](){return !sleep_signal && V_est == 0;};
     c[4] = [](){return true;};
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
     c[10] = [](){return train_data_valid() && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
     c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(EoA->get_reference())-L_antenna_front);};
+    c[14] = [](){return !desk_open && V_est == 0 && sleep_signal;};
     c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(EoA->get_reference());};
     c[21] = [](){return level == Level::N0;};
     c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
+    c[28] = [](){return !desk_open;};
     c[37] = [](){return false;};
     c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
     c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
@@ -131,6 +135,9 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::UN, Mode::OS, {34}, 7});
     transitions.push_back({Mode::PT, Mode::OS, {15}, 5});
     transitions.push_back({Mode::SN, Mode::OS, {34}, 7});
+
+    transitions.push_back({Mode::SB, Mode::SL, {14}, 5});
+    transitions.push_back({Mode::PS, Mode::SL, {14}, 4});
 
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);

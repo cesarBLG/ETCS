@@ -76,7 +76,7 @@ void displayObjects()
         planning_element p = planning_elements[i];
         if(p.distance>divs[8]*planning_scale || p.distance<0) continue;
         string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
-        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-25,20,20);
+        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
     }
 }
 vector<gradient_element> gradient_elements;
@@ -158,7 +158,7 @@ void displayPASP()
         }
         if(oth1 && prev.speed<cur.speed) oth2 = true;
     }
-    if(imarker.start_distance>0) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
+    if(imarker.start_distance>0 && imarker.start_distance <= divs[8]*planning_scale) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
 }
 void displaySpeed()
 {

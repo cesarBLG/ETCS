@@ -21,6 +21,8 @@
 #include "../LX/level_crossing.h"
 optional<distance> EoA_ma;
 optional<distance> SvL_ma;
+optional<distance> d_perturbation_eoa;
+optional<distance> d_perturbation_svl;
 optional<std::pair<distance,double>> LoA_ma;
 float V_releaseSvL_ma;
 movement_authority::movement_authority(distance start, Level1_MA ma, int64_t time) : start(start), time_stamp(time)
@@ -206,7 +208,50 @@ void calculate_SvL()
     else V_release = 0;
     recalculate_MRSP();
 }
-
+void calculate_perturbation_location()
+{
+    d_perturbation_eoa = {};
+    d_perturbation_svl = {};
+    const std::map<distance, double> &mrsp = get_MRSP();
+    if (EoA_ma) {
+        target eoa(*EoA_ma, 0, target_class::EoA);
+        for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
+            auto next = it;
+            ++next;
+            eoa.calculate_curves(it->second, 0, 0);
+            distance d_I_eoa=eoa.d_I;
+            distance start = it->first;
+            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max()) : next->first;
+            if (d_I_eoa < start) {
+                d_perturbation_eoa = start; // TODO: to be revised 
+            } else if (d_I_eoa > start && d_I_eoa <= end) {
+                d_perturbation_eoa = d_I_eoa;
+            } else if (d_I_eoa > end && next != mrsp.end()) {
+                eoa.calculate_curves(next->second, 0, 0);
+                if (eoa.d_I < end)
+                    d_perturbation_eoa = end;
+            }
+        }
+    }
+    if (SvL_ma || LoA_ma) {
+        target svl(LoA_ma ? LoA_ma->first : *SvL_ma, LoA_ma ? LoA_ma->second : 0, LoA_ma ? target_class::SvL : target_class::LoA);
+        for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
+            auto next = it;
+            ++next;
+            svl.calculate_curves(it->second, 0, 0);
+            distance d_I_svl=svl.d_I;
+            distance start = it->first;
+            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max()) : next->first;
+            if (d_I_svl > start && d_I_svl <= end) {
+                d_perturbation_svl = d_I_svl;
+            } else if (d_I_svl > end && next != mrsp.end()) {
+                svl.calculate_curves(next->second, 0, 0);
+                if (svl.d_I < end)
+                    d_perturbation_svl = end;
+            }
+        }
+    }
+}
 optional<movement_authority> MA;
 std::set<speed_restriction> signal_speeds;
 void set_data()

@@ -144,6 +144,7 @@ void recalculate_MRSP()
         if (MRSP.size()==0 || (--MRSP.upper_bound(*it))->second!=spd)
             MRSP[*it] = spd;
     }
+    calculate_perturbation_location();
     set_supervised_targets();
 }
 std::map<distance,double> get_MRSP()

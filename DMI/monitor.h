@@ -26,21 +26,23 @@ enum struct Level
 };
 enum struct Mode
 {
-    SH,
-    PT,
-    TR,
+    FS,
+    LS,
     OS,
     SR,
-    FS,
-    NL,
-    SB,
-    RV,
+    SH,
     UN,
-    IS,
+    PS,
+    SL,
+    SB,
+    TR,
+    PT,
     SF,
-    NS,
-    LS,
-    SN
+    IS,
+    NP,
+    NL,
+    SN,
+    RV
 };
 extern Level level;
 extern bool level_valid;

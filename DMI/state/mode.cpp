@@ -65,7 +65,7 @@ void displayMode()
         case Mode::SF:
             num = 18;
             break;
-        case Mode::NS:
+        case Mode::SN:
             num = 19;
             break;
         case Mode::LS:

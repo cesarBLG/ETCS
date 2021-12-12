@@ -1,7 +1,7 @@
 #pragma once
-#include "types.h"
-#include "variables.h"
-#include "packets.h"
+#include "../types.h"
+#include "../variables.h"
+#include "../packets.h"
 #include <vector>
 
 struct PositionReport : ETCS_packet

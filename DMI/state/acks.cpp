@@ -61,7 +61,7 @@ void dispAcks()
             case Mode::UN:
                 num = 17;
                 break;
-            case Mode::NS:
+            case Mode::SN:
                 num = 20;
                 break;
             case Mode::LS:

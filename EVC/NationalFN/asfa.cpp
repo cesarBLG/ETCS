@@ -20,6 +20,7 @@
 #include "../orts/common.h"
 #include "../DMI/text_message.h"
 #include "../Time/clock.h"
+#include "../Procedures/level_transition.h"
 #include <string>
 #include <mutex>
 using namespace ORserver;
@@ -67,6 +68,16 @@ extern double V_NVUNFIT;
 #include "../Position/distance.h"
 #include "../Supervision/speed_profile.h"
 extern optional<speed_restriction> UN_speed;
+int64_t akt_time=0;
+void conectar_asfa()
+{
+    int64_t time = get_milliseconds();
+    add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
+        return time+30000<get_milliseconds();
+    }));
+    CON = true;
+    akt_time = get_milliseconds();
+}
 void update_asfa()
 {
     /*if (mode == Mode::UN) {
@@ -79,21 +90,16 @@ void update_asfa()
     if (!detected) {
         return;
     }
-    if (mode == Mode::UN) {
+    if (ongoing_transition && ongoing_transition->leveldata.level == Level::N0 && !CON) {
+        conectar_asfa();
+    }
+    if (level == Level::N0) {
         if (!CON)
-        {
-            int64_t time = get_milliseconds();
-            add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
-                return time+30000<get_milliseconds();
-            }));
-        }
-        AKT = false;
-        CON = true;
-    } else if (level != Level::N0 && level != Level::Unknown && mode != Mode::UN && mode != Mode::SH && mode != Mode::SB && mode != Mode::IS && mode != Mode::SL) {
-        if (CON)
-        {
-        }
+            conectar_asfa();
+        if (akt_time == 0 || get_milliseconds()-akt_time > 500) AKT = false;
+    } else {
         AKT = true;
         CON = false;
+        akt_time = 0;
     }
 }

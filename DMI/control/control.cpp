@@ -32,6 +32,13 @@ mutex window_mtx;
 mutex draw_mtx;
 condition_variable window_cv;
 bool wake_fun(){return exit_menu||c!=nullptr||proc!=nullptr||!running;}
+void set_procedure(function<void()> p)
+{
+    std::unique_lock<mutex> lck(window_mtx);
+    ::proc = p;
+    lck.unlock();
+    window_cv.notify_one();
+}
 void wait(subwindow *w)
 {
     draw_mtx.lock();
@@ -47,7 +54,11 @@ void wait(subwindow *w)
         repaint();
         unique_lock<mutex> lck(window_mtx);
         window_cv.wait(lck, wake_fun);
-        if(!running) break;
+        if(!running || proc != nullptr)
+        {
+            lck.unlock();
+            break;
+        }
         if(c!=nullptr)
         {
             bool e = exit_menu;
@@ -85,6 +96,7 @@ void start_procedure()
     while(running && (driverid=="" || !driverid_valid))
     {
         wait(new driver_window());
+        if (proc != nullptr) return;
         std::this_thread::sleep_for(100ms);
     }
     while(running && (level==Level::Unknown || !level_valid))
@@ -92,12 +104,16 @@ void start_procedure()
         if (level != Level::Unknown) 
         {
             wait(new level_validation_window());
+        if (proc != nullptr) return;
             std::this_thread::sleep_for(100ms);
         }
         if (level_valid) break;
         wait(new level_window());
+        if (proc != nullptr) return;
         std::this_thread::sleep_for(100ms);
     }
+    navigation_bar.active = true;
+    planning_area.active = true;
 }
 void manage_windows()
 {
@@ -109,7 +125,6 @@ void manage_windows()
     active_windows.insert(&planning_area);
     navigation_bar.active = true;
     planning_area.active = true;
-    proc = start_procedure;
     while(running)
     {
         unique_lock<mutex> lck(window_mtx);

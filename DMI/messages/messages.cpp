@@ -75,6 +75,8 @@ bool operator < (Message a, Message b)
 }
 void displayMessages()
 {
+    upArrow.enabled = current>0;
+    downArrow.enabled = line>5+current;
     /*if(messageList.empty())
     {
         addMsg(Message(4,BaliseReadError, 11, 9));
@@ -142,15 +144,11 @@ void disp()
             line++;
         }
     }
-    upArrow.enabled = current>0;
-    downArrow.enabled = line>(5+current);
 }
 void arrowUp()
 {
     if(current==0) return;
     current--;
-    upArrow.enabled = current>0;
-    downArrow.enabled = line<=5+current;
     disp();
 }
 void arrowDown()
@@ -158,7 +156,5 @@ void arrowDown()
     if(line<=5+current) return;
     current++;
     if(current>line-5) current = line-5;
-    upArrow.enabled = current>0;
-    downArrow.enabled = line<=5+current;
     disp();
 }

@@ -54,7 +54,8 @@ void level_window::sendInformation()
     level_valid = true;
     write_command("setLevel",data);
 }
-level_input::level_input(bool echo) : input_data(echo ? "Level" : "")
+string str[] = {"Level 0","Level 1", "Level 2", "Level 3", "LZB", "EBICAB"};
+level_input::level_input(bool echo) : input_data(echo ? str[(int)level] : "")
 {
     keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, this);
 }

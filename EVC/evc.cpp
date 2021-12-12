@@ -185,6 +185,7 @@ void start()
     initialize_mode_transitions();
     ETCS_packet::initialize();
     euroradio_message::initialize();
+    euroradio_message_traintotrack::initialize();
     set_message_filters();
     initialize_national_functions();
     started = true;

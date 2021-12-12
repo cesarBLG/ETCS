@@ -159,6 +159,7 @@ void balise_group_passed()
 }
 void update_track_comm()
 {
+    update_radio();
     if (pending_telegrams.empty()) {
         check_linking();
         if (reading) {

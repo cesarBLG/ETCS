@@ -89,9 +89,12 @@ void parseData(string str)
         else if(value == "SH") m = Mode::SH;
         else if(value == "SB") m = Mode::SB;
         else if(value == "SR") m = Mode::SR;
+        else if(value == "SN") m = Mode::SN;
         else if(value == "UN") m = Mode::UN;
         else if(value == "TR") m = Mode::TR;
         else if(value == "PT") m = Mode::PT;
+        else if(value == "NP") m = Mode::NP;
+        else if(value == "SL") m = Mode::SL;
         mode = m;
     }
     if(command == "setModeTransition")

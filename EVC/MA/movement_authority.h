@@ -119,7 +119,10 @@ public:
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
+extern optional<distance> d_perturbation_eoa;
+extern optional<distance> d_perturbation_svl;
 void calculate_SvL();
+void calculate_perturbation_location();
 void replace_MA(movement_authority ma);
 void delete_MA();
 void set_signalling_restriction(movement_authority ma, bool infill);

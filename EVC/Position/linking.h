@@ -40,7 +40,7 @@ struct lrbg_info
     bg_id nid_lrbg;
     int dir;
     distance position;
-    int locacc;
+    double locacc;
 };
 extern std::list<link_data> linking;
 extern std::list<lrbg_info> lrbgs;
