@@ -9,14 +9,12 @@ struct TC_station_element_packet
     L_TRACKCOND_t L_TRACKCOND;
     M_PLATFORM_t M_PLATFORM;
     Q_PLATFORM_t Q_PLATFORM;
-    
-    TC_station_element_packet() = default;
-    TC_station_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_TRACKCOND);
-        r.read(&L_TRACKCOND);
-        r.read(&M_PLATFORM);
-        r.read(&Q_PLATFORM);
+        D_TRACKCOND.copy(r);
+        L_TRACKCOND.copy(r);
+        M_PLATFORM.copy(r);
+        Q_PLATFORM.copy(r);
     }
 };
 
@@ -28,26 +26,22 @@ struct TrackConditionStationPlatforms : ETCS_directional_packet
     Q_TRACKINIT_t Q_TRACKINIT;
     D_TRACKINIT_t D_TRACKINIT;
     std::vector<TC_station_element_packet> elements;
-    TrackConditionStationPlatforms() = default;
-    TrackConditionStationPlatforms(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&Q_TRACKINIT);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        Q_TRACKINIT.copy(r);
         if (Q_TRACKINIT == 1) {
-            r.read(&D_TRACKINIT);
+            D_TRACKINIT.copy(r);
         } else {      
-            element = TC_station_element_packet(r);
-            r.read(&N_ITER);
+            element.copy(r);
+            N_ITER.copy(r);
+            elements.resize(N_ITER);
             for (int i=0; i<N_ITER; i++) {
-                elements.push_back(TC_station_element_packet(r));
+                elements[i].copy(r);
             }
         } 
-    }
-    TrackConditionStationPlatforms *create(bit_read_temp &r) override
-    {
-        return new TrackConditionStationPlatforms(r);
     }
 };

@@ -10,17 +10,16 @@ struct LinkingElement
     Q_LINKORIENTATION_t Q_LINKORIENTATION;
     Q_LINKREACTION_t Q_LINKREACTION;
     Q_LOCACC_t Q_LOCACC;
-    LinkingElement(){}
-    LinkingElement(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_LINK);
-        r.read(&Q_NEWCOUNTRY);
+        D_LINK.copy(r);
+        Q_NEWCOUNTRY.copy(r);
         if (Q_NEWCOUNTRY)
-            r.read(&NID_C);
-        r.read(&NID_BG);
-        r.read(&Q_LINKORIENTATION);
-        r.read(&Q_LINKREACTION);
-        r.read(&Q_LOCACC);
+            NID_C.copy(r);
+        NID_BG.copy(r);
+        Q_LINKORIENTATION.copy(r);
+        Q_LINKREACTION.copy(r);
+        Q_LOCACC.copy(r);
     }
 };
 struct Linking : ETCS_directional_packet
@@ -29,21 +28,17 @@ struct Linking : ETCS_directional_packet
     LinkingElement element;
     N_ITER_t N_ITER;
     std::vector<LinkingElement> elements;
-    Linking() {}
-    Linking(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        element = LinkingElement(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(LinkingElement(r));
+            elements[i].copy(r);
         }
-    }
-    Linking *create(bit_read_temp &r) override
-    {
-        return new Linking(r);
     }
 };

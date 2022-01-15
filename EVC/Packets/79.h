@@ -11,17 +11,15 @@ struct GeographicalPosition_element_packet
     D_POSOFF_t D_POSOFF;
     Q_MPOSITION_t Q_MPOSITION;
     M_POSITION_t M_POSITION;
-
-    GeographicalPosition_element_packet() = default;
-    GeographicalPosition_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&Q_NEWCOUNTRY);
+        Q_NEWCOUNTRY.copy(r);
         if (Q_NEWCOUNTRY)
-            r.read(&NID_C);
-        r.read(&NID_BG);
-        r.read(&D_POSOFF);
-        r.read(&Q_MPOSITION);
-        r.read(&M_POSITION);
+            NID_C.copy(r);
+        NID_BG.copy(r);
+        D_POSOFF.copy(r);
+        Q_MPOSITION.copy(r);
+        M_POSITION.copy(r);
     }
 };
 
@@ -31,22 +29,18 @@ struct GeographicalPosition : ETCS_directional_packet
     GeographicalPosition_element_packet element;
     N_ITER_t N_ITER;
     std::vector<GeographicalPosition_element_packet> elements;
-    GeographicalPosition() = default;
-    GeographicalPosition(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
 
-        element = GeographicalPosition_element_packet(r);
-        r.read(&N_ITER);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(GeographicalPosition_element_packet(r));
+            elements[i].copy(r);
         }
-    }
-    GeographicalPosition *create(bit_read_temp &r) override
-    {
-        return new GeographicalPosition(r);
     }
 };

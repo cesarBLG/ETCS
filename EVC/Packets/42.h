@@ -10,22 +10,16 @@ struct SessionManagement : ETCS_directional_packet
     NID_C_t NID_C;
     NID_RBC_t NID_RBC;
     NID_RADIO_t NID_RADIO;
-    NID_SLEEPSESSION_t NID_SLEEPSESSION;
-
-    SessionManagement() = default;
-    SessionManagement(bit_read_temp &r)
+    Q_SLEEPSESSION_t Q_SLEEPSESSION;
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_RBC);
-        r.read(&NID_C);
-        r.read(&NID_RBC);
-        r.read(&NID_RADIO);
-        r.read(&NID_SLEEPSESSION);
-    }
-    SessionManagement *create(bit_read_temp &r) override
-    {
-        return new SessionManagement(r);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_RBC.copy(r);
+        NID_C.copy(r);
+        NID_RBC.copy(r);
+        NID_RADIO.copy(r);
+        Q_SLEEPSESSION.copy(r);
     }
 };

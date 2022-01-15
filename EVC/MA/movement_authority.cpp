@@ -19,6 +19,7 @@
 #include "movement_authority.h"
 #include "../Supervision/supervision.h"
 #include "../LX/level_crossing.h"
+#include "../Procedures/stored_information.h"
 optional<distance> EoA_ma;
 optional<distance> SvL_ma;
 optional<distance> d_perturbation_eoa;
@@ -73,6 +74,7 @@ movement_authority::movement_authority(distance start, Level1_MA ma, int64_t tim
 }
 movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t time) : start(start), time_stamp(time)
 {
+    v_main = std::numeric_limits<double>::max();
     v_ema = ma.V_EMA.get_value();
     distance cumdist = start;
     for (int i=0; i<ma.N_ITER; i++) {
@@ -120,33 +122,32 @@ void set_data();
 void movement_authority::update_timers()
 {
 	if (endtimer) {
-		if (!endtimer->started && endtimer->startloc < d_maxsafefront(endtimer->startloc.get_reference()))
+		if (!endtimer->started && endtimer->startloc < d_maxsafefront(endtimer->startloc))
 			endtimer->start();
 		if (endtimer->triggered()) {
-			V_release = 0;
-			EoA_ma = d_estfront;
-			LoA_ma = {};
-			recalculate_MRSP();
+            endtimer = {};
+            train_shorten('e');
 		}
 	}
 	if (ol && ol->ovtimer) {
 		if (!ol->ovtimer->started &&
-			ol->ovtimer->startloc < d_maxsafefront(ol->ovtimer->startloc.get_reference()))
+			ol->ovtimer->startloc < d_maxsafefront(ol->ovtimer->startloc))
 			ol->ovtimer->start();
 		if (ol->ovtimer->triggered() || (ol->ovtimer->started && V_est <= 0)) {
 			v_ema = 0;
 			ol = {};
 			set_data();
+            svl_shorten('d');
 		}
 	}
 	distance cumdist = start;
 	for (int i = 0; i < sections.size(); i++) {
 		if (sections[i].stimer) {
 			if (!sections[i].stimer->started &&
-				sections[i].stimer->stoploc > d_minsafefront(sections[i].stimer->stoploc.get_reference())) {
+				sections[i].stimer->stoploc > d_minsafefront(sections[i].stimer->stoploc)) {
 				sections[i].stimer->start(time_stamp);
 			}
-			if (sections[i].stimer->stoploc <= d_minsafefront(sections[i].stimer->stoploc.get_reference())) {
+			if (sections[i].stimer->stoploc <= d_minsafefront(sections[i].stimer->stoploc)) {
 				sections[i].stimer->started = false;
 			}
 			if (sections[i].stimer->triggered()) {
@@ -157,6 +158,7 @@ void movement_authority::update_timers()
                 V_releaseSvL_ma = 0;
                 sections.erase(sections.begin()+i, sections.end());
 				calculate_SvL();
+                svl_shorten('c');
                 break;
 			}
 		}
@@ -168,6 +170,7 @@ void movement_authority::update_timers()
 		if (loa_timer->triggered()) {
 			v_ema = 0;
 			set_data();
+            svl_shorten('n');
 		}
 	}
 }
@@ -189,7 +192,7 @@ void calculate_SvL()
     V_releaseSvL = V_releaseSvL_ma;
 
     for (auto it = mode_profiles.begin(); it != mode_profiles.end(); ++it) {
-        if (it->start_SvL && mode != it->mode && ((LoA && LoA->first > it->start) || (SvL && *SvL > it->start)) && it->start > d_maxsafefront(it->start.get_reference())) {
+        if (it->start_SvL && mode != it->mode && ((LoA && LoA->first > it->start) || (SvL && *SvL > it->start)) && it->start > d_maxsafefront(it->start)) {
             EoA = SvL = it->start;
             LoA = {};
             V_releaseSvL = 0;
@@ -197,8 +200,9 @@ void calculate_SvL()
     }
 
     for (auto it = level_crossings.begin(); it != level_crossings.end(); ++it) {
-        if (!it->lx_protected && (!SvL || it->start < *SvL) && !it->svl_replaced) {
+        if (!it->lx_protected && ((LoA && LoA->first > it->start) || (SvL && *SvL > it->start)) && !it->svl_replaced) {
             EoA = SvL = it->start;
+            LoA = {};
             V_releaseSvL = 0;
             break;
         }
@@ -221,7 +225,7 @@ void calculate_perturbation_location()
             eoa.calculate_curves(it->second, 0, 0);
             distance d_I_eoa=eoa.d_I;
             distance start = it->first;
-            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max()) : next->first;
+            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max(), 0, 0) : next->first;
             if (d_I_eoa < start) {
                 d_perturbation_eoa = start; // TODO: to be revised 
             } else if (d_I_eoa > start && d_I_eoa <= end) {
@@ -241,7 +245,7 @@ void calculate_perturbation_location()
             svl.calculate_curves(it->second, 0, 0);
             distance d_I_svl=svl.d_I;
             distance start = it->first;
-            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max()) : next->first;
+            distance end = next == mrsp.end() ? distance(std::numeric_limits<double>::max(), 0, 0) : next->first;
             if (d_I_svl > start && d_I_svl <= end) {
                 d_perturbation_svl = d_I_svl;
             } else if (d_I_svl > end && next != mrsp.end()) {
@@ -279,17 +283,17 @@ void set_data()
 }
 void replace_MA(movement_authority ma)
 {
-    if (MA && MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+    if (MA && MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc)) {
         ma.endtimer->started = true;
         ma.endtimer->start_time = MA->endtimer->start_time;
-    } else if ((!MA || !MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+    } else if ((!MA || !MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc)) {
         ma.endtimer->started = true;
         ma.endtimer->start_time = get_milliseconds() - ma.endtimer->time;
     }
-    if (MA && MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+    if (MA && MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc)) {
         ma.ol->ovtimer->started = true;
         ma.ol->ovtimer->start_time = MA->ol->ovtimer->start_time;
-    } else if ((!MA || !MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+    } else if ((!MA || !MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc)) {
         ma.ol->ovtimer->started = true;
         ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
     }
@@ -298,7 +302,7 @@ void replace_MA(movement_authority ma)
     MA = ma;
     set_data();
     if ((prevSvL && SvL_ma && *prevSvL>*SvL_ma) || (SvL_ma && prevLoA)) {
-        //MA shortening
+        svl_shorten('b');
     }
 }
 void MA_infill(movement_authority ma)
@@ -309,17 +313,17 @@ void MA_infill(movement_authority ma)
     if (MA->get_end() < dist)
         return;
 
-    if (MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+    if (MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc)) {
         ma.endtimer->started = true;
         ma.endtimer->start_time = MA->endtimer->start_time;
-    } else if ((!MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc.get_reference())) {
+    } else if ((!MA->endtimer || !MA->endtimer->started) && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc)) {
         ma.endtimer->started = true;
         ma.endtimer->start_time = get_milliseconds() - ma.endtimer->time;
     }
-    if (MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+    if (MA->ol && MA->ol->ovtimer && MA->ol->ovtimer->started && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc)) {
         ma.ol->ovtimer->started = true;
         ma.ol->ovtimer->start_time = MA->ol->ovtimer->start_time;
-    } else if ((!MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc.get_reference())) {
+    } else if ((!MA->ol || !MA->ol->ovtimer || !MA->ol->ovtimer->started) && ma.ol && ma.ol->ovtimer && ma.ol->ovtimer->startloc < d_maxsafefront(ma.ol->ovtimer->startloc)) {
         ma.ol->ovtimer->started = true;
         ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
     }
@@ -347,7 +351,7 @@ void MA_infill(movement_authority ma)
     MA->time_stamp = ma.time_stamp;
     set_data();
     if ((prevSvL && SvL_ma && *prevSvL>*SvL_ma) || (SvL_ma && prevLoA)) {
-        //MA shortening
+        svl_shorten('b');
     }
 }
 void delete_MA()
@@ -359,10 +363,10 @@ void delete_MA()
     V_releaseSvL_ma = 0;
     calculate_SvL();
 }
-void delete_MA(distance d)
+void delete_MA(distance eoa, distance svl)
 {
     if (MA)
-        MA->shorten(d);
+        MA->shorten(eoa, svl);
 }
 void set_signalling_restriction(movement_authority ma, bool infill)
 {
@@ -373,16 +377,17 @@ void set_signalling_restriction(movement_authority ma, bool infill)
         signal_speeds.insert(speed_restriction(MA->v_main, MA->start, ma.start, false));
     signal_speeds.insert(speed_restriction(ma.v_main, ma.start, ma.get_end(), false));
 }
-void movement_authority::shorten(distance d)
+void movement_authority::shorten(distance eoa, distance svl)
 {
     ol = {};
-    dp = {};
+    dp = {(int)(svl-eoa), 0};
+    v_main = 0;
     distance cum = start;
     for (int i=0; i<sections.size(); i++) {
         cum += sections[i].length;
-        if (cum > d) {
+        if (cum > eoa) {
             sections.erase(sections.begin()+i+1, sections.end());
-            sections[i].length -= cum-d;
+            sections[i].length -= cum-eoa;
             if (sections[i].length <= 0)
                 sections.erase(sections.begin()+i);
             break;
@@ -401,4 +406,13 @@ void movement_authority::reposition(distance current, double new_length)
         }
     }
     set_data();
+}
+bool movement_authority::timers_to_expire(int64_t threshold)
+{
+	for (int i = 0; i < sections.size(); i++) {
+		if (sections[i].stimer && sections[i].stimer->started && sections[i].stimer->remaining() < threshold)
+            return true;
+	}
+	if (loa_timer && loa_timer->started && loa_timer->remaining() < threshold)
+        return true;
 }

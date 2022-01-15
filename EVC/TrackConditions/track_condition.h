@@ -43,45 +43,96 @@ enum struct TrackConditions
     SwitchOffMagneticShoe,
     StationPlatform
 };
+enum struct TrackConditionType_DMI
+{
+    None,
+    LowerPantograph,
+    RaisePantograph,
+    NeutralSectionAnnouncement,
+    EndOfNeutralSection,
+    NonStoppingArea,
+    RadioHole,
+    MagneticShoeInhibition,
+    EddyCurrentBrakeInhibition,
+    RegenerativeBrakeInhibition,
+    OpenAirIntake,
+    CloseAirIntake,
+    SoundHorn,
+    TractionSystemChange,
+    // Legacy conditions used in old DMIs
+    Tunnel,
+    Bridge,
+    Station,
+    EndOfTrack
+};
+enum struct TractionSystem_DMI
+{
+    NonFitted,
+    AC25kV,
+    AC15kV,
+    DC3000V,
+    DC1500V,
+    DC750V
+};
+struct PlanningTrackCondition
+{
+    TrackConditionType_DMI Type;
+    float DistanceToTrainM;
+    bool YellowColour;
+    TractionSystem_DMI TractionSystem;
+    PlanningTrackCondition(TrackConditionType_DMI type, bool isYellowColour)
+    {
+        Type = type;
+        YellowColour = isYellowColour;
+    }
+    PlanningTrackCondition(TractionSystem_DMI tractionSystem, bool isYellowColour)
+    {
+        Type = TrackConditionType_DMI::TractionSystemChange;
+        YellowColour = isYellowColour;
+        TractionSystem = tractionSystem;
+    }
+};
 struct track_condition
 {
     TrackConditions condition;
     distance start;
     bool profile;
     distance end;
-    int start_symbol;
-    int end_symbol;
+    PlanningTrackCondition start_symbol;
+    PlanningTrackCondition end_symbol;
     int active_symbol;
     int announcement_symbol;
     int end_active_symbol;
+    double announce_distance;
     bool announce;
     bool order;
     bool display_end;
+    bool end_displayed;
     int64_t end_time;
-    track_condition() 
+    track_condition() : start_symbol(TrackConditionType_DMI::None, false), end_symbol(TrackConditionType_DMI::None, false)
     {
-        start_symbol = end_symbol = active_symbol = announcement_symbol = end_active_symbol = -1;
-        announce = order = display_end = false;
+        active_symbol = announcement_symbol = end_active_symbol = -1;
+        announce = order = display_end = end_displayed = false;
     }
     virtual double get_distance_to_train()
     {
         if (condition == TrackConditions::BigMetalMasses)
-            return start-d_maxsafefront(start.get_reference())+L_antenna_front;
+            return start-d_maxsafefront(start)+L_antenna_front;
         if (condition == TrackConditions::TunnelStoppingArea || condition == TrackConditions::SoundHorn)
             return start-d_estfront;
-        return start-d_maxsafefront(start.get_reference());
+        return start-d_maxsafefront(start);
     }
     double get_end_distance_to_train()
     {
         if (!profile)
             return get_distance_to_train();
         if (condition == TrackConditions::BigMetalMasses)
-            return end-d_minsafefront(end.get_reference())+L_antenna_front;
+            return end-d_minsafefront(end)+L_antenna_front;
         if (condition == TrackConditions::TunnelStoppingArea || condition == TrackConditions::SoundHorn)
             return end-d_estfront;
         if (condition == TrackConditions::PowerLessSectionLowerPantograph || condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || condition == TrackConditions::StationPlatform)
-            return end-d_minsafefront(end.get_reference());
-        return end-d_minsafefront(end.get_reference())+L_TRAIN;
+            return end-d_minsafefront(end);
+        return end-d_minsafefront(end)+L_TRAIN;
     }
 };
 struct track_condition_platforms : track_condition
@@ -93,6 +144,7 @@ struct track_condition_platforms : track_condition
 extern std::list<std::shared_ptr<track_condition>> track_conditions;
 extern optional<distance> restore_initial_states_various;
 void update_track_conditions();
+void update_brake_contributions();
 void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref);
 void load_track_condition_various(TrackCondition cond, distance ref);
 void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref);

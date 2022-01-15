@@ -7,12 +7,11 @@ struct GradientElement
     D_GRADIENT_t D_GRADIENT;
     Q_GDIR_t Q_GDIR;
     G_A_t G_A;
-    GradientElement() {}
-    GradientElement(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_GRADIENT);
-        r.read(&Q_GDIR);
-        r.read(&G_A);
+        D_GRADIENT.copy(r);
+        Q_GDIR.copy(r);
+        G_A.copy(r);
     }
 };
 struct GradientProfile : ETCS_directional_packet
@@ -21,21 +20,17 @@ struct GradientProfile : ETCS_directional_packet
     GradientElement element;
     N_ITER_t N_ITER;
     std::vector<GradientElement> elements;
-    GradientProfile() {}
-    GradientProfile(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        element = GradientElement(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(GradientElement(r));
+            elements[i].copy(r);
         }
-    }
-    GradientProfile *create(bit_read_temp &r) override
-    {
-        return new GradientProfile(r);
     }
 };

@@ -17,6 +17,7 @@
  */
 #pragma once
 #include "../Position/distance.h"
+#include <string>
 enum MonitoringStatus
 {
     CSM,
@@ -62,6 +63,12 @@ enum struct Mode
 };
 const char Mode_str[][3] = {"FS","LS","OS","SR","SH","UN","PS","SL","SB","TR","PT","SF","IS","NP","NL","SN","RV"};
 extern Level level;
+extern int nid_ntc;
+extern bool level_valid;
+extern std::string driver_id;
+extern bool driver_id_valid;
+extern int train_running_number;
+extern bool train_running_number_valid;
 extern Mode mode;
 extern double V_est;
 extern double V_ura;

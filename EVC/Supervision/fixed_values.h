@@ -46,3 +46,9 @@ extern const double T_ACK;
 extern const double D_Metal;
  
 extern const double D_keep_information;
+
+extern const int N_tries_radio;
+extern const int N_message_repetition;
+extern const double T_message_repetition;
+extern const double T_keep_session;
+extern const double T_connection_status;

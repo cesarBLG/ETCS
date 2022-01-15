@@ -20,50 +20,27 @@ struct PositionReport : ETCS_packet
     M_MODE_t M_MODE;
     M_LEVEL_t M_LEVEL;
     NID_NTC_t NID_NTC;
-
-    PositionReport() = default;
-    PositionReport(bit_read_temp &r)
+    void copy(bit_manipulator &w) override
     {
-        r.read(&NID_PACKET);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&NID_LRBG);
-        r.read(&L_DOUBTOVER);
-        r.read(&L_DOUBTUNDER);
-        r.read(&Q_LENGTH);
+        NID_PACKET.copy(w);
+        L_PACKET.copy(w);
+        Q_SCALE.copy(w);
+        NID_LRBG.copy(w);
+        D_LRBG.copy(w);
+        Q_DIRLRBG.copy(w);
+        Q_DLRBG.copy(w);
+        L_DOUBTOVER.copy(w);
+        L_DOUBTUNDER.copy(w);
+        Q_LENGTH.copy(w);
         if (Q_LENGTH == 1 || Q_LENGTH == 2) {
-            r.read(&L_TRAININT);
+            L_TRAININT.copy(w);
         }
-        r.read(&V_TRAIN);
-        r.read(&Q_DIRTRAIN);
-        r.read(&M_MODE);
-        r.read(&M_LEVEL);
+        V_TRAIN.copy(w);
+        Q_DIRTRAIN.copy(w);
+        M_MODE.copy(w);
+        M_LEVEL.copy(w);
         if (M_LEVEL == 1) {
-            r.read(&NID_NTC);
-        }
-    }
-    PositionReport *create(bit_read_temp &r) override
-    {
-        return new PositionReport(r);
-    }
-    void serialize(bit_write &w) override
-    {
-        w.write(&NID_PACKET);
-        w.write(&L_PACKET);
-        w.write(&Q_SCALE);
-        w.write(&NID_LRBG);
-        w.write(&L_DOUBTOVER);
-        w.write(&L_DOUBTUNDER);
-        w.write(&Q_LENGTH);
-        if (Q_LENGTH == 1 || Q_LENGTH == 2) {
-            w.write(&L_TRAININT);
-        }
-        w.write(&V_TRAIN);
-        w.write(&Q_DIRTRAIN);
-        w.write(&M_MODE);
-        w.write(&M_LEVEL);
-        if (M_LEVEL == 1) {
-            w.write(&NID_NTC);
+            NID_NTC.copy(w);
         }
     }
 };

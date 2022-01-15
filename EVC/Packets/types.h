@@ -18,35 +18,55 @@
 #pragma once
 #include <stdint.h>
 #include <vector>
-#include "variables.h"
 #include <typeinfo>
 #include <iostream>
 #include <string>
-struct bit_read_temp
+template<typename T>
+class ETCS_variable_custom;
+struct bit_manipulator
 {
     std::vector<bool> bits;
+    bool write_mode;
     int position;
     bool error=false;
     bool sparefound=false;
-    void read(ETCS_variable *var)
+    bit_manipulator()
     {
-        uint32_t value=0;
-        int count=var->size;
-        while(count-->0) {
-            if (bits.size() <= position) {
-                error = true;
-                return;
-            }
-            value = value<<1 | bits[position++];
-        }
-        var->rawdata = value;
-        if (!var->is_valid())
-            sparefound = true;
-        std::string tip = typeid(*var).name();
-        tip = tip.substr(tip.find_first_not_of("0123456789"));
-        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
+        write_mode = true;
     }
-    void peek(ETCS_variable *var, int offset=0)
+    bit_manipulator(std::vector<bool> bits) : bits(bits), position(0)
+    {
+        write_mode = false;
+    }
+    bit_manipulator(unsigned char *data, int count) : position(0) {
+        write_mode = false;
+        for (int i=0; i<count; i++) {
+            for (int j=7; j>=0; j--) {
+                bits.push_back(((data[i]>>j) & 1));
+            }
+        }
+    }
+    template<typename T>
+    void read(ETCS_variable_custom<T> *var)
+    {
+        T value=0;
+            int count=var->size;
+            while(count-->0) {
+                if (bits.size() <= position) {
+                    error = true;
+                    return;
+                }
+                value = value<<1 | bits[position++];
+            }
+            var->rawdata = value;
+            if (!var->is_valid())
+                sparefound = true;
+            std::string tip = typeid(*var).name();
+            tip = tip.substr(tip.find_first_not_of("0123456789"));
+            std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
+    }
+    template<typename T>
+    void peek(ETCS_variable_custom<T> *var, int offset=0)
     {
         int position = this->position+offset;
         uint32_t value=0;
@@ -59,31 +79,43 @@ struct bit_read_temp
         }
         var->rawdata = value;
     }
-    bit_read_temp(std::vector<bool> bits) : bits(bits), position(0) {}
-    bit_read_temp(unsigned char *data, int count) : position(0) {
-        for (int i=0; i<count; i++) {
-            for (int j=7; j>=0; j--) {
-                bits.push_back(((data[i]>>j) & 1));
-            }
-        }
-    }
-};
-struct bit_write
-{
-    std::vector<bool> bits;
-    void write(ETCS_variable *var)
+    template<typename T>
+    void write(ETCS_variable_custom<T> *var)
     {
-        uint32_t value=var->rawdata;
+        T value=var->rawdata;
         int count=var->size;
         while(count-->0) {
             bits.push_back((value>>count)&1);
         }
+        std::string tip = typeid(*var).name();
+        tip = tip.substr(tip.find_first_not_of("0123456789"));
+        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
     }
-    void replace(ETCS_variable *var, int pos)
+    template<typename T>
+    void replace(ETCS_variable_custom<T> *var, int pos)
     {
         if (var->size + pos > bits.size()) return;
         for (int i=0; i<var->size; i++) {
             bits[pos+i] = (var->rawdata>>(var->size-i-1)) & 1;
+        }
+    }
+    void get_bytes(unsigned char *data)
+    {
+        int div = bits.size()/8;
+        int rem = bits.size()%8;
+        for (int i=0; i<div; i++) {
+            char c = 0;
+            for (int j=0; j<8; j++) {
+                c |= bits[8*i+j]<<(7-j);
+            }
+            data[i] = c;
+        }
+        if (rem > 0) {
+            char c = 0;
+            for (int i=0; i<rem; i++) {
+                c |= bits[8*div+i]<<(7-i);
+            }
+            data[div] = c;
         }
     }
 };

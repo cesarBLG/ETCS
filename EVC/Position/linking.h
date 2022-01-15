@@ -19,6 +19,7 @@
 #include "distance.h"
 #include "../Packets/5.h"
 #include <list>
+#include "../optional.h"
 struct link_data
 {
     bg_id nid_bg;
@@ -44,6 +45,8 @@ struct lrbg_info
 };
 extern std::list<link_data> linking;
 extern std::list<lrbg_info> lrbgs;
-double update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked=true);
+extern bool position_valid;
+distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link);
 void update_linking(distance start, Linking link, bool infill, bg_id this_bg);
 void delete_linking();
+void delete_linking(distance from);

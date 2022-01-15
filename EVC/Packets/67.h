@@ -7,12 +7,10 @@ struct TC_bigmetal_element_packet
 {
     D_TRACKCOND_t D_TRACKCOND;
     L_TRACKCOND_t L_TRACKCOND;
-    
-    TC_bigmetal_element_packet() = default;
-    TC_bigmetal_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_TRACKCOND);
-        r.read(&L_TRACKCOND);
+        D_TRACKCOND.copy(r);
+        L_TRACKCOND.copy(r);
     }
 };
 
@@ -22,21 +20,17 @@ struct TrackConditionBigMetalMasses : ETCS_directional_packet
     TC_bigmetal_element_packet element;
     N_ITER_t N_ITER;
     std::vector<TC_bigmetal_element_packet> elements;
-    TrackConditionBigMetalMasses() = default;
-    TrackConditionBigMetalMasses(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        element = TC_bigmetal_element_packet(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(TC_bigmetal_element_packet(r));
+            elements[i].copy(r);
         }
-    }
-    TrackConditionBigMetalMasses *create(bit_read_temp &r) override
-    {
-        return new TrackConditionBigMetalMasses(r);
     }
 };

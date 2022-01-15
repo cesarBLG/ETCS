@@ -17,8 +17,11 @@
  */
 #pragma once
 #include "../DMI/text_message.h"
+extern bool brake_acknowledgeable;
+extern bool brake_acknowledged;
 struct brake_command_information
 {
+    int reason;
     text_message *msg;
     std::function<bool(brake_command_information &i)> revoke;
 };

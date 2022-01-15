@@ -8,16 +8,11 @@
 struct TemporarySpeedRestrictionRevocation : ETCS_directional_packet
 {
     NID_TSR_t NID_TSR;
-    TemporarySpeedRestrictionRevocation() = default;
-    TemporarySpeedRestrictionRevocation(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&NID_TSR);
-    }
-    TemporarySpeedRestrictionRevocation *create(bit_read_temp &r) override
-    {
-        return new TemporarySpeedRestrictionRevocation(r);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        NID_TSR.copy(r);
     }
 };

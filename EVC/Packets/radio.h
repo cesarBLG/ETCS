@@ -24,7 +24,20 @@
 #include "packets.h"
 #include "TrainToTrack/0.h"
 #include "TrainToTrack/1.h"
+#include "TrainToTrack/11.h"
 #include "../optional.h"
+#include "15.h"
+extern bool ma_rq_reasons[5];
+extern int position_report_reasons[12];
+struct position_report_parameters
+{
+    int64_t T_sendreport;
+    double D_sendreport;
+    optional<distance> location_front; 
+    optional<distance> location_rear; 
+    bool LRBG;
+};
+extern optional<position_report_parameters> pos_report_params;
 struct euroradio_message
 {
     NID_MESSAGE_t NID_MESSAGE;
@@ -32,53 +45,31 @@ struct euroradio_message
     T_TRAIN_t T_TRAIN;
     M_ACK_t M_ACK;
     NID_LRBG_t NID_LRBG;
-    static std::map<int, euroradio_message*> message_factory;
     std::vector<std::shared_ptr<ETCS_packet>> packets;
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
     bool valid;
     bool readerror;
     euroradio_message() {}
-    euroradio_message(bit_read_temp &r)
+    virtual void copy(bit_manipulator &r)
     {
-        r.read(&NID_MESSAGE);
-        r.read(&L_MESSAGE);
-        r.read(&T_TRAIN);
-        r.read(&M_ACK);
-        r.read(&NID_LRBG);
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
     }
-    static void initialize();
-    virtual euroradio_message* create(bit_read_temp &r) {return new euroradio_message(r);}
-    static std::shared_ptr<euroradio_message> build(unsigned char* data, int size)
+    void write_to(bit_manipulator &w)
     {
-        bit_read_temp r(data, size);
-        build(r);
-    }
-    static std::shared_ptr<euroradio_message> build(bit_read_temp &r)
-    {
-        int size = r.bits.size()/8;
-        NID_MESSAGE_t nid;
-        r.peek(&nid);
-        std::shared_ptr<euroradio_message> msg;
-        if (message_factory.find(nid) == message_factory.end()) {
-            r.sparefound = true;
-            msg = std::shared_ptr<euroradio_message>(new euroradio_message(r));
-        } else {
-            msg = std::shared_ptr<euroradio_message>(message_factory[nid]->create(r));
+        copy(w);
+        for (auto pack : optional_packets) {
+            pack->write_to(w);
         }
-        while (!r.error && r.position<=r.bits.size()-8)
-        {
-            NID_PACKET_t NID_PACKET;
-            r.peek(&NID_PACKET);
-            if (NID_PACKET==255)
-                break;
-            msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r)));
-        }
-        msg->packets.insert(msg->packets.end(), msg->optional_packets.begin(), msg->optional_packets.end());
-        if (msg->L_MESSAGE != size) r.error=true;
-        msg->readerror = r.error;
-        msg->valid = !r.sparefound;
-        return msg;
+        while(w.bits.size()%8) w.bits.push_back(false);
+        L_MESSAGE_t L_MESSAGE;
+        L_MESSAGE.rawdata = w.bits.size()/8;
+        w.replace(&L_MESSAGE, 8);
     }
+    static std::shared_ptr<euroradio_message> build(bit_manipulator &r);
 };
 struct euroradio_message_traintotrack
 {
@@ -93,80 +84,269 @@ struct euroradio_message_traintotrack
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
     bool valid;
     bool readerror;
-    euroradio_message_traintotrack() {}
-    euroradio_message_traintotrack(bit_read_temp &r)
+    euroradio_message_traintotrack()
     {
-        r.read(&NID_MESSAGE);
-        r.read(&L_MESSAGE);
-        r.read(&T_TRAIN);
-        r.read(&NID_ENGINE);
+        L_MESSAGE.rawdata = 0;
     }
-    void read_position_report(bit_read_temp &r)
+    euroradio_message_traintotrack(bit_manipulator &r)
     {
-        NID_PACKET_t NID_PACKET;
-        r.peek(&NID_PACKET);
-        PositionReport1BG = {};
-        PositionReport2BG = {};
-        if (NID_PACKET == 0)
-            PositionReport1BG = std::shared_ptr<PositionReport>(new PositionReport(r));
-        else if (NID_PACKET == 1)
-            PositionReport2BG = std::shared_ptr<PositionReportBasedOnTwoBaliseGroups>(new PositionReportBasedOnTwoBaliseGroups(r));
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
     }
-    void write_position_report(bit_write &w)
+    void copy_position_report(bit_manipulator &r)
     {
-        if (PositionReport1BG)
-            (*PositionReport1BG)->write_to(w);
-        else if (PositionReport2BG)
-            (*PositionReport2BG)->write_to(w);
-    }
-    static void initialize();
-    virtual euroradio_message_traintotrack* create(bit_read_temp &r) {return new euroradio_message_traintotrack(r);}
-    static std::shared_ptr<euroradio_message_traintotrack> build(unsigned char* data, int size)
-    {
-        bit_read_temp r(data, size);
-        build(r);
-    }
-    static std::shared_ptr<euroradio_message_traintotrack> build(bit_read_temp &r)
-    {
-        int size = r.bits.size()/8;
-        NID_MESSAGE_t nid;
-        r.peek(&nid);
-        std::shared_ptr<euroradio_message_traintotrack> msg;
-        if (message_factory.find(nid) == message_factory.end()) {
-            r.sparefound = true;
-            msg = std::shared_ptr<euroradio_message_traintotrack>(new euroradio_message_traintotrack(r));
+        if (r.write_mode) {
+            if (PositionReport1BG)
+                (*PositionReport1BG)->write_to(r);
+            else if (PositionReport2BG)
+                (*PositionReport2BG)->write_to(r);
         } else {
-            msg = std::shared_ptr<euroradio_message_traintotrack>(message_factory[nid]->create(r));
-        }
-        while (!r.error && r.position<=r.bits.size()-8)
-        {
             NID_PACKET_t NID_PACKET;
             r.peek(&NID_PACKET);
-            if (NID_PACKET==255)
-                break;
-            msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r)));
+            PositionReport1BG = {};
+            PositionReport2BG = {};
+            if (NID_PACKET == 0) {
+                PositionReport1BG = std::shared_ptr<PositionReport>(new PositionReport());
+                (*PositionReport1BG)->copy(r);
+            } else if (NID_PACKET == 1) {
+                PositionReport2BG = std::shared_ptr<PositionReportBasedOnTwoBaliseGroups>(new PositionReportBasedOnTwoBaliseGroups());
+                (*PositionReport2BG)->copy(r);
+            }
         }
-        msg->packets.insert(msg->packets.end(), msg->optional_packets.begin(), msg->optional_packets.end());
-        if (msg->L_MESSAGE != size) r.error=true;
-        msg->readerror = r.error;
-        msg->valid = !r.sparefound;
-        return msg;
     }
-    virtual void serialize(bit_write &w) 
+    static std::shared_ptr<euroradio_message_traintotrack> build(bit_manipulator &r);
+    virtual void copy(bit_manipulator &w) 
     {
-        std::cout<<"TODO: serialize() not implemented for message "+NID_MESSAGE.rawdata<<std::endl;
-        w.write(&NID_MESSAGE);
-        w.write(&L_MESSAGE);
-        w.write(&T_TRAIN);
-        w.write(&NID_ENGINE);
+        NID_MESSAGE.copy(w);
+        L_MESSAGE.copy(w);
+        T_TRAIN.copy(w);
+        NID_ENGINE.copy(w);
     }
-    void write_to(bit_write &w)
+    void write_to(bit_manipulator &w)
     {
-        serialize(w);
+        copy(w);
+        for (auto pack : optional_packets) {
+            pack->write_to(w);
+        }
         while(w.bits.size()%8) w.bits.push_back(false);
         L_MESSAGE_t L_MESSAGE;
         L_MESSAGE.rawdata = w.bits.size()/8;
         w.replace(&L_MESSAGE, 8);
     }
 };
+
+struct MA_message : euroradio_message
+{
+    std::shared_ptr<Level2_3_MA> MA;
+    MA_message()
+    {
+        MA = std::shared_ptr<Level2_3_MA>(new Level2_3_MA());
+        packets.push_back(MA);
+    }
+    virtual void copy(bit_manipulator &w) override
+    {
+        NID_MESSAGE.copy(w);
+        L_MESSAGE.copy(w);
+        T_TRAIN.copy(w);
+        M_ACK.copy(w);
+        NID_LRBG.copy(w);
+        MA->copy(w);
+    }
+};
+struct train_data_acknowledgement : euroradio_message
+{
+    T_TRAIN_t T_TRAINack;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        T_TRAINack.copy(r);
+    }
+};
+struct SR_authorisation : euroradio_message
+{
+    Q_SCALE_t Q_SCALE;
+    D_SR_t D_SR;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        Q_SCALE.copy(r);
+        D_SR.copy(r);
+    }
+};
+struct SH_refused : euroradio_message
+{
+    T_TRAIN_t T_TRAINack;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        T_TRAINack.copy(r);
+    }
+};
+struct SH_authorised : euroradio_message
+{
+    T_TRAIN_t T_TRAINack;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        T_TRAINack.copy(r);
+    }
+};
+struct RBC_version : euroradio_message
+{
+    M_VERSION_t M_VERSION;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        M_VERSION.copy(r);
+    }
+};
+struct ack_session_termination : euroradio_message
+{
+};
+struct train_rejected : euroradio_message
+{
+};
+struct train_accepted : euroradio_message
+{
+};
+struct som_position_confirmed : euroradio_message
+{
+};
+struct SH_request : euroradio_message_traintotrack
+{
+    SH_request() 
+    {
+        NID_MESSAGE.rawdata = 130;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        copy_position_report(r);
+    }
+};
+struct MA_request : euroradio_message_traintotrack
+{
+    Q_MARQSTREASON_t Q_MARQSTREASON;
+    MA_request() 
+    {
+        NID_MESSAGE.rawdata = 132;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        Q_MARQSTREASON.copy(r);
+        copy_position_report(r);
+    }
+};
+struct position_report : euroradio_message_traintotrack
+{
+    position_report()
+    {
+        NID_MESSAGE.rawdata = 136;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        copy_position_report(r);
+    }
+};
+struct SoM_position_report : euroradio_message_traintotrack
+{
+    Q_STATUS_t Q_STATUS;
+    SoM_position_report()
+    {
+        NID_MESSAGE.rawdata = 157;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        Q_STATUS.copy(r);
+        copy_position_report(r);
+    }
+};
+struct validated_train_data_message : euroradio_message_traintotrack
+{
+    std::shared_ptr<TrainDataPacket> TrainData;
+    validated_train_data_message()
+    {
+        NID_MESSAGE.rawdata = 129;
+        TrainData = std::shared_ptr<TrainDataPacket>(new TrainDataPacket());
+        packets.push_back(TrainData);
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        copy_position_report(r);
+        TrainData->copy(r);
+    }
+};
+struct init_communication_session : euroradio_message_traintotrack
+{
+    init_communication_session()
+    {
+        NID_MESSAGE.rawdata = 155;
+    }
+};
+struct terminate_communication_session : euroradio_message_traintotrack
+{
+    terminate_communication_session()
+    {
+        NID_MESSAGE.rawdata = 156;
+    }
+};
+struct acknowledgement_message : euroradio_message_traintotrack
+{
+    T_TRAIN_t T_TRAINack;
+    acknowledgement_message()
+    {
+        NID_MESSAGE.rawdata = 146;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        T_TRAINack.copy(r);
+    }
+};
 void update_radio();
+void send_position_report(bool som=false);
+void fill_message(euroradio_message_traintotrack *msg);

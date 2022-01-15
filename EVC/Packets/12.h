@@ -8,14 +8,13 @@ struct Level1_MA_Section
     Q_SECTIONTIMER_t Q_SECTIONTIMER;
     T_SECTIONTIMER_t T_SECTIONTIMER; 
     D_SECTIONTIMERSTOPLOC_t D_SECTIONTIMERSTOPLOC;
-    Level1_MA_Section() = default;
-    Level1_MA_Section(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&L_SECTION);
-        r.read(&Q_SECTIONTIMER);
+        L_SECTION.copy(r);
+        Q_SECTIONTIMER.copy(r);
         if (Q_SECTIONTIMER) {
-            r.read(&T_SECTIONTIMER);
-            r.read(&D_SECTIONTIMERSTOPLOC);
+            T_SECTIONTIMER.copy(r);
+            D_SECTIONTIMERSTOPLOC.copy(r);
         }
     }
 };
@@ -42,46 +41,42 @@ struct Level1_MA : ETCS_directional_packet
     T_OL_t T_OL;
     D_OL_t D_OL;
     V_RELEASEOL_t V_RELEASEOL;
-    Level1_MA() {}
-    Level1_MA(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&V_MAIN);
-        r.read(&V_EMA);
-        r.read(&T_EMA);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        V_MAIN.copy(r);
+        V_EMA.copy(r);
+        T_EMA.copy(r);
+        N_ITER.copy(r);
+        sections.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            sections.push_back(Level1_MA_Section(r));
+            sections[i].copy(r);
         }
-        r.read(&L_ENDSECTION);
-        r.read(&Q_SECTIONTIMER);
+        L_ENDSECTION.copy(r);
+        Q_SECTIONTIMER.copy(r);
         if (Q_SECTIONTIMER) {
-            r.read(&T_SECTIONTIMER);
-            r.read(&D_SECTIONTIMERSTOPLOC);
+            T_SECTIONTIMER.copy(r);
+            D_SECTIONTIMERSTOPLOC.copy(r);
         }
-        r.read(&Q_ENDTIMER);
+        Q_ENDTIMER.copy(r);
         if (Q_ENDTIMER) {
-            r.read(&T_ENDTIMER);
-            r.read(&D_ENDTIMERSTARTLOC);
+            T_ENDTIMER.copy(r);
+            D_ENDTIMERSTARTLOC.copy(r);
         }
-        r.read(&Q_DANGERPOINT);
+        Q_DANGERPOINT.copy(r);
         if (Q_DANGERPOINT) {
-            r.read(&D_DP);
-            r.read(&V_RELEASEDP);
+            D_DP.copy(r);
+            V_RELEASEDP.copy(r);
         }
-        r.read(&Q_OVERLAP);
+        Q_OVERLAP.copy(r);
         if (Q_OVERLAP) {
-            r.read(&D_STARTOL);
-            r.read(&T_OL);
-            r.read(&D_OL);
-            r.read(&V_RELEASEOL);
+            D_STARTOL.copy(r);
+            T_OL.copy(r);
+            D_OL.copy(r);
+            V_RELEASEOL.copy(r);
         }
-    }
-    Level1_MA *create(bit_read_temp &r) override
-    {
-        return new Level1_MA(r);
     }
 };

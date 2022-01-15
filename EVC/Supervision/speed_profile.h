@@ -26,9 +26,13 @@
 #include "train_data.h"
 void recalculate_MRSP();
 void delete_track_info();
+void delete_track_info(distance from);
 void delete_SSP();
+void delete_SSP(distance from);
 void delete_gradient();
+void delete_gradient(distance from);
 void delete_TSR();
+void delete_TSR(distance from);
 std::map<distance,double> get_MRSP();
 inline double dV_ebi(double vel)
 {
@@ -81,6 +85,7 @@ struct TSR
 };
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
+extern bool inhibit_revokable_tsr;
 extern optional<speed_restriction> SR_speed;
 extern optional<speed_restriction> SH_speed;
 extern optional<speed_restriction> UN_speed;

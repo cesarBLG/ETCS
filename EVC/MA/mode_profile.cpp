@@ -9,7 +9,7 @@ void update_mode_profile()
 {
     if (mode_timer_started && mode_timer + T_ACK*1000 < get_milliseconds()) {
         mode_timer_started = false;
-        brake_conditions.push_back({nullptr, [](brake_command_information &i) {
+        brake_conditions.push_back({-1, nullptr, [](brake_command_information &i) {
             if (mode_acknowledged || mode_to_ack != mode || !mode_acknowledgeable)
                 return true;
             return false;
@@ -21,7 +21,7 @@ void update_mode_profile()
         return;
     }
     mode_profile first = mode_profiles.front();
-    if (first.mode != Mode::SH && first.length < std::numeric_limits<float>::max() && first.start + first.length < d_minsafefront(first.start.get_reference())) {
+    if (first.mode != Mode::SH && first.length < std::numeric_limits<float>::max() && first.start + first.length < d_minsafefront(first.start)) {
         mode_profiles.pop_front();
         update_mode_profile();
         calculate_SvL();
@@ -29,7 +29,7 @@ void update_mode_profile()
     }
     if (mode_profiles.size() > 1) {
         mode_profile second = *(++mode_profiles.begin());
-        if (second.start < d_maxsafefront(second.start.get_reference())) {
+        if (second.start < d_maxsafefront(second.start)) {
             mode_profiles.pop_front();
             update_mode_profile();
             calculate_SvL();
@@ -56,7 +56,7 @@ void update_mode_profile()
             }
         }
     }
-    if (d_maxsafefront(first.start.get_reference()) > first.start) {
+    if (d_maxsafefront(first.start) > first.start) {
         requested_mode_profile = first;
         if (mode != first.mode) {
             mode_timer_started = true;

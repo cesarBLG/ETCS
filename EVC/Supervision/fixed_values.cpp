@@ -47,3 +47,9 @@ const double T_ACK = 5;
 const double D_Metal = 300;
 
 const double D_keep_information = 300;
+
+const int N_tries_radio = 3;
+const int N_message_repetition = 3;
+const double T_message_repetition = 15;
+const double T_keep_session = 300; 
+const double T_connection_status = 45; 

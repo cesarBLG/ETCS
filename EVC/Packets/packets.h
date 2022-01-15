@@ -24,31 +24,26 @@ struct ETCS_packet
     NID_PACKET_t NID_PACKET;
     L_PACKET_t L_PACKET;
     ETCS_packet() {}
-    ETCS_packet(bit_read_temp &r)
+    ETCS_packet(bit_manipulator &r)
     {
         r.read(&NID_PACKET);
     }
     bool directional=false;
-    virtual ETCS_packet *create(bit_read_temp &r)
+    virtual void copy(bit_manipulator &w) 
     {
-        return new ETCS_packet(r);
+        std::cout<<"TODO: copy() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
+        NID_PACKET.copy(w);
+        L_PACKET.copy(w);
     }
-    virtual void serialize(bit_write &w) 
-    {
-        std::cout<<"TODO: serialize() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
-        w.write(&NID_PACKET);
-        w.write(&L_PACKET);
-    }
-    virtual void write_to(bit_write &w)
+    virtual void write_to(bit_manipulator &w)
     {
         int start = w.bits.size();
-        serialize(w);
+        copy(w);
         L_PACKET.rawdata = w.bits.size()-start;
         w.replace(&L_PACKET, start+8);
     }
-    static std::map<int, ETCS_packet*> packet_factory;
-    static void initialize();
-    static ETCS_packet *construct(bit_read_temp &r);
+    //static std::map<int, ETCS_packet*> packet_factory;
+    static ETCS_packet *construct(bit_manipulator &r);
 };
 struct ETCS_nondirectional_packet : ETCS_packet
 {
@@ -64,30 +59,26 @@ struct ETCS_directional_packet : ETCS_packet
     {
         directional = true;
     }
-    ETCS_directional_packet(bit_read_temp &r)
+    /*ETCS_directional_packet(bit_manipulator &r)
     {
         directional = true;
         r.read(&NID_PACKET);
         r.read(&Q_DIR);
         r.read(&L_PACKET);
-        r.position = L_PACKET - L_PACKET.size - Q_DIR.size - NID_PACKET.size;
-    }
-    virtual void serialize(bit_write &w) override
+        r.position += L_PACKET - L_PACKET.size - Q_DIR.size - NID_PACKET.size;
+    }*/
+    virtual void copy(bit_manipulator &w) override
     {
         std::cout<<"TODO: serialize() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
-        w.write(&NID_PACKET);
-        w.write(&Q_DIR);
-        w.write(&L_PACKET);
+        NID_PACKET.copy(w);
+        Q_DIR.copy(w);
+        L_PACKET.copy(w);
     }
-    void write_to(bit_write &w) override
+    void write_to(bit_manipulator &w) override
     {
         int start = w.bits.size();
-        serialize(w);
+        copy(w);
         L_PACKET.rawdata = w.bits.size()-start;
         w.replace(&L_PACKET, start+10);
-    }
-    ETCS_packet *create(bit_read_temp &r) override
-    {
-        return new ETCS_directional_packet(r);
     }
 };

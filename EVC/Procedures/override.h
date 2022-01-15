@@ -22,3 +22,5 @@ extern bool overrideProcedure;
 extern optional<distance> formerEoA;
 void start_override();
 void update_override();
+void override_stopsr();
+void override_stopsh();

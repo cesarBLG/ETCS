@@ -17,8 +17,7 @@
  */
 #include "text_message.h"
 #include "../Time/clock.h"
-#include <list>
-int idcount=0;
+unsigned int idcount=0;
 text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
     : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)
 {
@@ -50,20 +49,19 @@ void send(text_message t) {
 }
 void update_messages()
 {
-    for (auto it = messages.begin(); it!=messages.end(); ++it) {
+    for (auto it = messages.begin(); it!=messages.end();) {
         if (it->end_condition(*it)) {
-            auto next = it;
-            ++next;
             sendtoor=true;
             send_command("setRevokeMessage", std::to_string(it->id));
-            messages.erase(it);
-            it = --next;
+            it = messages.erase(it);
+            continue;
         } else if (!it->shown && it->start_condition(*it)) {
             it->shown = true;
-            it->first_distance = d_estfront;
+            it->first_distance = d_estfront_dir[odometer_orientation == -1];
             send(*it);
             it->first_displayed = get_milliseconds();
         }
+        ++it;
     }
 }
 void add_message(PlainTextMessage m, distance ref)

@@ -18,6 +18,7 @@
 #pragma once
 #include <list>
 #include <memory>
+#include <functional>
 #include "../Position/distance.h"
 #include "../Position/linking.h"
 #include "messages.h"
@@ -25,15 +26,17 @@ struct etcs_information
 {
     int index_level;
     int index_mode;
-    virtual void handle() = 0;
+    std::function<void()> handle_fun;
+    virtual void handle() {handle_fun();}
     distance ref;
     int64_t timestamp;
     bool infill;
-    bool fromRBC;
+    communication_session *fromRBC;
     int dir;
     bg_id nid_bg;
+    optional<std::shared_ptr<euroradio_message>> message;
     std::list<std::shared_ptr<ETCS_packet>> linked_packets;
     etcs_information() : index_mode(-1), index_level(-1){}
     etcs_information(int index) : index_mode(index), index_level(index){}
-    etcs_information(int index_level, int index_mode) : index_level(index_level), index_mode(index_mode){}
+    etcs_information(int index_level, int index_mode, std::function<void()> fun = nullptr) : index_level(index_level), index_mode(index_mode), handle_fun(fun) {}
 };

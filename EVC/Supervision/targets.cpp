@@ -75,7 +75,7 @@ double target::get_speed_curve(distance dist) const
 }
 distance target::get_distance_gui_curve(double velocity) const
 {
-    distance guifoot(0);
+    distance guifoot;
     if (type == target_class::EoA || type == target_class::SvL) {
         guifoot = d_target;
     } else {
@@ -87,7 +87,7 @@ distance target::get_distance_gui_curve(double velocity) const
 }
 double target::get_speed_gui_curve(distance dist) const
 {
-    distance guifoot(0);
+    distance guifoot;
     if (type == target_class::EoA || type == target_class::SvL) {
         guifoot = d_target;
     } else {
@@ -141,11 +141,11 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         d_I = d_P - T_indication*V_est;
         
         double D_be_display = (V_est+V_delta0+V_delta1/2)*T_traction + (V_est + V_delta0 + V_delta1 + V_delta2/2)*T_berem;
-        distance v_sbi_dappr = d_maxsafefront(d_target.get_reference()) + V_est*T_bs2 + D_be_display;
+        distance v_sbi_dappr = d_maxsafefront(d_target) + V_est*T_bs2 + D_be_display;
         V_SBI2 = v_sbi_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_sbi_dappr)-(V_delta0+V_delta1+V_delta2),V_target + dV_sbi(V_target)) : (V_target + dV_sbi(V_target));
         
         //GUI disabled
-        distance v_p_dappr = d_maxsafefront(d_target.get_reference()) + V_est*(T_driver+T_bs2) + D_be_display;
+        distance v_p_dappr = d_maxsafefront(d_target) + V_est*(T_driver+T_bs2) + D_be_display;
         V_P = v_p_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_p_dappr) - (V_delta0+V_delta1+V_delta2), V_target) : V_target;
     } else {
         d_SBI1 = get_distance_curve(V_est) - T_bs1*V_est;
@@ -154,11 +154,11 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         double T_indication = std::max(0.8*T_bs, 5.0) + T_driver;
         d_I = d_P - T_indication*V_est;
         
-        distance v_sbi_dappr = d_estfront + V_est*T_bs1;
+        distance v_sbi_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*T_bs1;
         V_SBI1 = v_sbi_dappr < d_target ? get_speed_curve(v_sbi_dappr) : 0;
             
         //GUI disabled
-        distance v_p_dappr = d_estfront + V_est*(T_driver + T_bs1);
+        distance v_p_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*(T_driver + T_bs1);
         V_P = v_p_dappr < d_target ? get_speed_curve(v_p_dappr) : 0;
     }
 }
@@ -179,7 +179,7 @@ void set_supervised_targets()
         auto minMRSP = MRSP.begin();
         auto prev = minMRSP;
         for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
-            if (it->second < prev->second && d_maxsafefront(it->first.get_reference())<it->first)
+            if (it->second < prev->second && d_maxsafefront(it->first)<it->first)
                 supervised_targets.push_back(target(it->first, it->second, target_class::MRSP));
             prev = it;
         }
@@ -199,10 +199,12 @@ void set_supervised_targets()
 bool supervised_targets_changed()
 {
     bool removed = false;
-    for (auto it = supervised_targets.begin(); it!=supervised_targets.end(); ++it) {
-        if (it->type == target_class::MRSP && d_maxsafefront(it->get_target_position().get_reference()) >= it->get_target_position()) {
+    for (auto it = supervised_targets.begin(); it!=supervised_targets.end(); ) {
+        if (it->type == target_class::MRSP && d_maxsafefront(it->get_target_position()) >= it->get_target_position()) {
             removed = true;
-            it = --supervised_targets.erase(it);
+            it = supervised_targets.erase(it);
+        } else {
+            ++it;
         }
     }
     if (changed || removed) {
@@ -222,7 +224,7 @@ void target::calculate_decelerations()
 void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
     std::map<distance,int> redadh = std::map<distance,int>();
-    redadh[distance(0)] = 0;
+    redadh[distance(std::numeric_limits<double>::lowest(), 0, 0)] = 0;
     acceleration A_gradient = get_A_gradient(gradient, default_gradient);
     acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
     acceleration A_brake_service = get_A_brake_service(use_brake_combination);

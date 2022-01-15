@@ -39,6 +39,5 @@ extern int brake_percentage;
 extern int cant_deficiency;
 extern std::set<int> other_train_categories;
 extern std::string special_train_data;
-bool train_data_valid();
-void validate_train_data();
-void invalidate_train_data();
+extern bool train_data_valid;
+void set_train_data(std::string spec);

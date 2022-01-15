@@ -25,11 +25,17 @@
 #include "../optional.h"
 #include <vector>
 #include <list>
+struct level_information
+{
+    Level level;
+    int nid_ntc;
+};
+extern std::vector<level_information> priority_levels;
 struct target_level_information
 {
     distance startack;
     Level level;
-    int ntc_id;
+    int nid_ntc;
 };
 struct level_transition_information
 {
@@ -37,20 +43,26 @@ struct level_transition_information
     bool acknowledged = false;
     distance start;
     target_level_information leveldata;
+    std::vector<level_information> priority_table;
     level_transition_information(LevelTransitionOrder o, distance ref)
     {
-        if (o.D_LEVELTR == D_LEVELTR_t::Now)
+        if (o.D_LEVELTR == D_LEVELTR_t::Now) {
             immediate = true;
-        else
+            start = ref;
+        } else {
             immediate = false;
-        start = ref+o.D_LEVELTR.get_value(o.Q_SCALE);
+            start = ref+o.D_LEVELTR.get_value(o.Q_SCALE);
+        }
         std::vector<target_level_information> priorities;
-        priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level()});
+        priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level(),(int)o.element.NID_NTC});
         for (int i=0; i<o.elements.size(); i++) {
             priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
         }
         for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1) {
+            priority_table.push_back({priorities[i].level, priorities[i].nid_ntc});
+        }
+        for (int i=0; i<priorities.size(); i++) {
+            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2) {
                 leveldata = priorities[i];
                 return;
             }

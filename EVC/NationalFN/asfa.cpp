@@ -33,6 +33,7 @@ extern mutex loop_mtx;
 extern mutex iface_mtx;
 bool detected = false;
 bool connected = false;
+bool active = false;
 void register_parameter(std::string parameter);
 void initialize_asfa()
 {
@@ -53,12 +54,6 @@ void initialize_asfa()
     p->SetValue = [](string val) {
         detected = val.length() > 0;
         connected = val == "1";
-        if (detected) {
-            int64_t time = get_milliseconds();
-            add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
-                return time+30000<get_milliseconds();
-            }));
-        }
     };
     manager.AddParameter(p);
 
@@ -69,37 +64,62 @@ extern double V_NVUNFIT;
 #include "../Supervision/speed_profile.h"
 extern optional<speed_restriction> UN_speed;
 int64_t akt_time=0;
-void conectar_asfa()
+void send_msg()
 {
+    bool con = CON;
+    std::string nivel="";
+    if (level == Level::N0 || CON) nivel = "Nivel 0 - ";
+    else if (level == Level::N1) nivel = "Nivel 1 - ";
+    else if (level == Level::N2) nivel = "Nivel 2 - ";
+    else if (level == Level::N3) nivel = "Nivel 3 - ";
     int64_t time = get_milliseconds();
-    add_message(text_message(connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G.", false, false, false, [time](text_message &m) {
-        return time+30000<get_milliseconds();
+    add_message(text_message(nivel + (connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G."), false, false, false, [time,con](text_message &m) {
+        return time+30000<get_milliseconds() || con != CON;
     }));
-    CON = true;
-    akt_time = get_milliseconds();
+}
+void connect_asfa(bool con)
+{
+    CON = con;
+    if (con) akt_time = get_milliseconds();
+    else
+    {
+        AKT = false;
+        akt_time = 0;
+    }
 }
 void update_asfa()
 {
-    /*if (mode == Mode::UN) {
-        double supervisionSpeed = detected && connected ? 200/3.6 : V_NVUNFIT;
-        if (UN_speed->get_speed() != supervisionSpeed) {
-            UN_speed = speed_restriction(supervisionSpeed, distance(std::numeric_limits<double>::lowest()), distance(std::numeric_limits<double>::max()), false);
-            recalculate_MRSP();
-        }
-    }*/
-    if (!detected) {
+    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown) {
+        AKT = false;
+        CON = true;
+        active = false;
         return;
     }
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::N0 && !CON) {
-        conectar_asfa();
+    bool msg = false;
+    if (!active) {
+        active = true;
+        msg = true;
     }
-    if (level == Level::N0) {
-        if (!CON)
-            conectar_asfa();
-        if (akt_time == 0 || get_milliseconds()-akt_time > 500) AKT = false;
+    if (ongoing_transition && ongoing_transition->leveldata.level == Level::N0) {
+        if (!CON) {
+            connect_asfa(true);
+            msg = true;
+        }
+    } else if (level == Level::N0) {
+        if (!CON) {
+            connect_asfa(true);
+            msg = true;
+        }
+        else if (AKT && get_milliseconds()-akt_time > 500)
+            AKT = false;
     } else {
-        AKT = true;
-        CON = false;
-        akt_time = 0;
+        if (!AKT)
+            AKT = true;
+        if (CON) {
+            connect_asfa(false);
+            msg = true;
+        }
     }
+    if (msg)
+        send_msg();
 }

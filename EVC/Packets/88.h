@@ -14,28 +14,22 @@ struct LevelCrossingInformation : ETCS_directional_packet
     V_LX_t V_LX;
     Q_STOPLX_t Q_STOPLX;
     L_STOPLX_t L_STOPLX;
-
-    LevelCrossingInformation() = default;
-    LevelCrossingInformation(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&NID_LX);
-        r.read(&D_LX);
-        r.read(&L_LX);
-        r.read(&Q_LXSTATUS);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        NID_LX.copy(r);
+        D_LX.copy(r);
+        L_LX.copy(r);
+        Q_LXSTATUS.copy(r);
         if(Q_LXSTATUS == 1) {
-            r.read(&V_LX);
-            r.read(&Q_STOPLX);
+            V_LX.copy(r);
+            Q_STOPLX.copy(r);
             if(Q_STOPLX == 1) {
-                r.read(&L_STOPLX);
+                L_STOPLX.copy(r);
             }
         }
-    }
-    LevelCrossingInformation *create(bit_read_temp &r) override
-    {
-        return new LevelCrossingInformation(r);
     }
 };

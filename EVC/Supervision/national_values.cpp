@@ -206,18 +206,12 @@ void load_national_values(NationalValues nv)
 #else
     std::ofstream file("nationalvalues.bin", std::ios::binary);
 #endif
-    bit_write w;
-    nv.serialize(w);
-    for (int i=0; i<w.bits.size()/8; i++) {
-        char value = 0;
-        for (int j=0; j<8; j++) {
-            int index = i*8 + j;
-            bool bit = false;
-            if (index < w.bits.size() && w.bits[index]) bit = true;
-            value = (value<<1) | bit;
-        }
-        file.write(&value, 1);
-    }
+    bit_manipulator w;
+    nv.copy(w);
+    int size = (w.bits.size()+7)/8;
+    char buff[size];
+    w.get_bytes((unsigned char*)buff);
+    file.write(buff, size);
 }
 struct StoredNationalValueSet
 {
@@ -250,8 +244,9 @@ void setup_national_values()
             message.push_back((c>>i)&1);
         }
     }
-    bit_read_temp r(message);
-    NationalValues nv = NationalValues(r);
+    bit_manipulator r(message);
+    NationalValues nv = NationalValues();
+    nv.copy(r);
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {
         set_default_national();
         nv_changed();

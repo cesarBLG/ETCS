@@ -39,7 +39,7 @@ optional<speed_restriction> override_speed;
 static std::map<distance, double> gradient;
 void delete_back_info()
 {
-    const distance mindist = d_minsafefront(0)-L_TRAIN-D_keep_information; //For unlinked balise groups, change this, losing efficiency
+    const distance mindist = d_minsafefront(odometer_orientation, 0)-L_TRAIN-D_keep_information; //For unlinked balise groups, change this, losing efficiency
     for (auto it = SSP.lower_bound(speed_restriction(0,mindist,mindist,false)); it!=SSP.begin(); --it) {
         auto prev = it;
         --prev;
@@ -124,7 +124,7 @@ void recalculate_MRSP()
         restrictions.insert(*UN_speed);
     if (override_speed && (mode == Mode::SH || mode == Mode::SR || mode == Mode::UN))
         restrictions.insert(*override_speed);
-    if (MA) // TODO: also in SR mode
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)
         restrictions.insert(signal_speeds.begin(), signal_speeds.end());
     if (restrictions.empty()) {
         set_supervised_targets();
@@ -158,7 +158,7 @@ void update_SSP(std::vector<SSP_element> nSSP)
         auto next = it;
         if (it->restrictions[0][0]<0) break;
         ++next;
-        distance end = next==nSSP.end() ? distance(std::numeric_limits<double>::max()) : next->start;
+        distance end = next==nSSP.end() ? distance(std::numeric_limits<double>::max(), 0, 0) : next->start;
         rest.insert(speed_restriction(it->get_speed(cant_deficiency,other_train_categories), it->start, end, it->compensate_train_length));
     }
     auto it_start = SSP.lower_bound(*rest.begin());
@@ -192,9 +192,10 @@ const std::map<distance, double> &get_gradient()
 }
 void set_train_max_speed(double vel)
 {
-    train_speed = speed_restriction(V_train, ::distance(std::numeric_limits<double>::lowest()), ::distance(std::numeric_limits<double>::max()), false);
+    train_speed = speed_restriction(V_train, ::distance(std::numeric_limits<double>::lowest(), 0, 0), ::distance(std::numeric_limits<double>::max(), 0, 0), false);
     recalculate_MRSP();
 }
+bool inhibit_revokable_tsr;
 void insert_TSR(TSR rest)
 {
     revoke_TSR(rest.id);
@@ -219,7 +220,7 @@ speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end
     double V_pbd=0;
     double V_test = 1;
     double V_max_appr = std::max(std::sqrt(2*2*d_PBD),600/3.6);
-    PBD_target pbd_ebd(distance(d_PBD), true, g);
+    /*PBD_target pbd_ebd(distance(d_PBD), true, g);
     if (EB) {
         while (V_test<V_max_appr) {
             double dvebi = dV_ebi(V_test);
@@ -235,6 +236,6 @@ speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end
         }
     } else {
 
-    }
+    }*/
     return speed_restriction((((int)(V_pbd*3.6))/5)*5/3.6, start, end, false);
 }

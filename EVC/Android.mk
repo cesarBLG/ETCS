@@ -15,7 +15,7 @@ LOCAL_SRC_FILES := evc.cpp DMI/dmi.cpp Supervision/national_values.cpp Supervisi
                    Supervision/acceleration.cpp antenna.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp \
                    OR_interface/interface.cpp SSP/ssp.cpp Packets/packets.cpp Procedures/mode_transition.cpp LX/level_crossing.cpp \
                    Packets/messages.cpp Packets/radio.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp \
-                   TrackConditions/track_conditions.cpp Time/clock.cpp Position/geographical.cpp \
+                   Procedures/stored_information.cpp TrackConditions/track_conditions.cpp Time/clock.cpp Position/geographical.cpp \
                    DMI/text_messages.cpp TrainSubsystems/power.cpp TrainSubsystems/brake.cpp \
                    NationalFN/nationalfn.cpp NationalFN/asfa.cpp \
                    $(wildcard NationalFN/*.cpp)

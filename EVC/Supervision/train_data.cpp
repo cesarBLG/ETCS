@@ -47,15 +47,13 @@ int brake_percentage=0;
 int cant_deficiency=0;
 std::set<int> other_train_categories;
 brake_position_types brake_position = PassengerP;
-bool valid = false;
+bool train_data_valid = false;
 std::string special_train_data;
 std::list<traction_type> traction_systems;
-bool train_data_valid()
+void set_train_data(std::string spec)
 {
-    return valid && L_TRAIN > 0 && V_train > 0;
-}
-void validate_train_data()
-{
+    train_data_valid = false;
+    special_train_data = spec;
     if (!special_train_data.empty()) {
 #ifdef __ANDROID__
         extern std::string filesDir;
@@ -93,18 +91,12 @@ void validate_train_data()
                 int info = (*it)["nid_ctraction"].get<int>();
                 traction_systems.push_back({elec,info});
             }
-            valid = true;
+            train_data_valid = true;
         }
     } else {
-        valid = true;
+        train_data_valid = true;
     }
     set_train_max_speed(V_train);
-    if (!train_data_valid()) 
-        valid = false;
-    else
+    if (train_data_valid) 
         set_conversion_model();
-}
-void invalidate_train_data()
-{
-    valid = false;
 }

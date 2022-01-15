@@ -18,6 +18,8 @@
 #pragma once
 #include "etcs_information.h"
 #include "messages.h"
+#include "radio.h"
+#include "../Euroradio/session.h"
 #include "3.h"
 #include "12.h"
 #include "15.h"
@@ -25,6 +27,7 @@
 #include "21.h"
 #include "27.h"
 #include "41.h"
+#include "42.h"
 #include "65.h"
 #include "66.h"
 #include "67.h"
@@ -43,6 +46,7 @@
 #include "../Procedures/override.h"
 #include "../TrackConditions/track_condition.h"
 #include "../DMI/text_message.h"
+#include "../DMI/windows.h"
 #include "../Position/geographical.h"
 #include "../LX/level_crossing.h"
 struct national_values_information : etcs_information
@@ -104,8 +108,13 @@ struct ma_information_lv2 : etcs_information
     ma_information_lv2() : etcs_information(3) {}
     void handle() override
     {
+        if (active_dialog == dialog_sequence::Main && active_dialog_step == "S7")
+            active_dialog = dialog_sequence::None;
         Level2_3_MA ma = *(Level2_3_MA*)linked_packets.front().get();
         movement_authority MA = movement_authority(ref, ma, timestamp);
+        for (int i=0; i<5; i++) {
+            ma_rq_reasons[i] = false;
+        }
         if (infill)
             MA_infill(MA);
         else
@@ -145,6 +154,8 @@ struct gradient_information : etcs_information
             d += e.D_GRADIENT.get_value(grad.Q_SCALE);
             gradient[d] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_A;
         }
+        if (elements.back().G_A != G_A_t::EndOfGradient)
+            gradient[distance(std::numeric_limits<double>::max(), ref.get_orientation(), ref.get_reference())] = 0;
         update_gradient(gradient);
     }
 };
@@ -159,7 +170,7 @@ struct issp_information : etcs_information
 };
 struct leveltr_order_information : etcs_information
 {
-    leveltr_order_information() : etcs_information(8) {}
+    leveltr_order_information() : etcs_information(8, 10) {}
     void handle() override
     {
         LevelTransitionOrder LTO = *(LevelTransitionOrder*)linked_packets.front().get();
@@ -168,48 +179,86 @@ struct leveltr_order_information : etcs_information
 };
 struct condleveltr_order_information : etcs_information
 {
-    condleveltr_order_information() : etcs_information(9) {}
+    condleveltr_order_information() : etcs_information(9, 10) {}
     void handle() override
     {
         ConditionalLevelTransitionOrder CLTO = *(ConditionalLevelTransitionOrder*)linked_packets.front().get();
         level_transition_received(level_transition_information(CLTO, ref));
     }
 };
+struct session_management_information : etcs_information
+{
+    session_management_information() : etcs_information(10, 11) {}
+    void handle() override
+    {
+        SessionManagement &session = *(SessionManagement*)linked_packets.front().get();
+        if (mode != Mode::SL || session.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
+            contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
+            if (session.Q_RBC == Q_RBC_t::EstablishSession) {
+                set_supervising_rbc(info);
+                if (supervising_rbc && mode != Mode::SH && mode != Mode::PS)
+                    supervising_rbc->open(0);
+            } else {
+                terminate_session(info);
+            }
+        }
+    }
+};
+struct SR_authorisation_info : etcs_information
+{
+    SR_authorisation_info() : etcs_information(14,15) {}
+    void handle() override
+    {
+        auto *sr = (SR_authorisation*)message->get();
+        // TODO: balises allowed
+        if (mode == Mode::SR) {
+            if (sr->D_SR != D_SR_t::Infinity) {
+                SR_dist = ref+sr->D_SR.get_value(sr->Q_SCALE);
+                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
+            } else {
+                SR_dist = {};
+                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+            }
+            recalculate_MRSP();
+        } else {
+            mode_to_ack = Mode::SR;
+            mode_acknowledgeable = true;
+            mode_acknowledged = false;
+        }
+        if (active_dialog == dialog_sequence::Main && active_dialog_step == "S7")
+            active_dialog = dialog_sequence::None;
+    }
+};
 struct stop_if_in_SR_information : etcs_information
 {
-    stop_if_in_SR_information() : etcs_information(15) {}
+    stop_if_in_SR_information() : etcs_information(15,16) {}
     void handle() override
     {
         StopIfInSR s = *(StopIfInSR*)linked_packets.front().get();
         // TODO: balises allowed
         if (s.Q_SRSTOP == Q_SRSTOP_t::StopIfInSR) {
-            formerEoA = {};
             if (!overrideProcedure)
                 trigger_condition(54);
+            else
+                override_stopsr();
         }
     }
 };
 struct TSR_information : etcs_information
 {
-    TSR_information() : etcs_information(17) {}
+    TSR_information() : etcs_information(17,18) {}
     void handle() override
     {
         TemporarySpeedRestriction t = *(TemporarySpeedRestriction*)linked_packets.front().get();
-        std::vector<TSR_element_packet> elements;
-        elements.push_back(t.element);
-        elements.insert(elements.end(), t.elements.begin(), t.elements.end());
-        distance start = ref;
-        for (auto it = t.elements.begin(); it != t.elements.end(); ++it) {
-            start += it->D_TSR.get_value(t.Q_SCALE);
-            speed_restriction p(it->V_TSR.get_value(), start, start+it->L_TSR.get_value(t.Q_SCALE), it->Q_FRONT==Q_FRONT_t::TrainLengthDelay);
-            TSR tsr = {tsr.id = it->NID_TSR, it->NID_TSR != NID_TSR_t::NonRevocable, p};
-            insert_TSR(tsr);
-        }
+        distance start = ref + t.D_TSR.get_value(t.Q_SCALE);
+        speed_restriction p(t.V_TSR.get_value(), start, start+t.L_TSR.get_value(t.Q_SCALE), t.Q_FRONT==Q_FRONT_t::TrainLengthDelay);
+        TSR tsr = {(int)t.NID_TSR, t.NID_TSR != NID_TSR_t::NonRevocable, p};
+        insert_TSR(tsr);
     }
 };
 struct TSR_revocation_information : etcs_information
 {
-    TSR_revocation_information() : etcs_information(18) {}
+    TSR_revocation_information() : etcs_information(18,19) {}
     void handle() override
     {
         TemporarySpeedRestrictionRevocation r = *(TemporarySpeedRestrictionRevocation*)linked_packets.front().get();
@@ -218,7 +267,7 @@ struct TSR_revocation_information : etcs_information
 };
 struct plain_text_information : etcs_information
 {
-    plain_text_information() : etcs_information(23) {}
+    plain_text_information() : etcs_information(23,24) {}
     void handle() override
     {
         PlainTextMessage m = *(PlainTextMessage*)linked_packets.front().get();
@@ -227,7 +276,7 @@ struct plain_text_information : etcs_information
 };
 struct geographical_position_information : etcs_information
 {
-    geographical_position_information() : etcs_information(25) {}
+    geographical_position_information() : etcs_information(25,26) {}
     void handle() override
     {
         GeographicalPosition m = *(GeographicalPosition*)linked_packets.front().get();
@@ -236,7 +285,7 @@ struct geographical_position_information : etcs_information
 };
 struct danger_for_SH_information : etcs_information
 {
-    danger_for_SH_information() : etcs_information(27) {}
+    danger_for_SH_information() : etcs_information(27,28) {}
     void handle() override
     {
         DangerForShunting s = *(DangerForShunting*)linked_packets.front().get();
@@ -244,6 +293,8 @@ struct danger_for_SH_information : etcs_information
         if (s.Q_ASPECT == Q_ASPECT_t::StopIfInSH) {
             if (!overrideProcedure)
                 trigger_condition(49);
+            else
+                override_stopsh();
         }
     }
 };

@@ -7,12 +7,11 @@ struct CLTO_element_packet
 {
     M_LEVELTR_t M_LEVELTR;
     NID_NTC_t NID_NTC;
-    CLTO_element_packet() = default;
-    CLTO_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&M_LEVELTR);
+        M_LEVELTR.copy(r);
         if (M_LEVELTR == 1)  
-            r.read(&NID_NTC);
+            NID_NTC.copy(r);
     }
 };
 
@@ -21,21 +20,17 @@ struct ConditionalLevelTransitionOrder : ETCS_directional_packet
     CLTO_element_packet element;
     N_ITER_t N_ITER;
     std::vector<CLTO_element_packet> elements;
-    ConditionalLevelTransitionOrder() = default;
-    ConditionalLevelTransitionOrder(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        element = CLTO_element_packet(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(CLTO_element_packet(r));
+            elements[i].copy(r);
         }
 
-    }
-    ConditionalLevelTransitionOrder *create(bit_read_temp &r) override
-    {
-        return new ConditionalLevelTransitionOrder(r);
     }
 };

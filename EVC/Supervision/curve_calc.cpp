@@ -22,7 +22,7 @@
 distance distance_curve(acceleration a, distance dref, double vref, double vel)
 {
     if (a.speed_step.empty() || vref<*a.speed_step.begin() || a.dist_step.empty() || dref<*a.dist_step.begin())
-        return distance(0);
+        return distance(std::numeric_limits<float>::min(), 0, 0);
     auto v = --a.speed_step.upper_bound(vref);
     auto d = --a.dist_step.upper_bound(dref);
     bool dec = 1; //Decceleration curve

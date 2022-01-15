@@ -27,13 +27,15 @@ optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
 std::map<track_condition*, std::vector<target>> track_condition_targets; 
 void add_condition();
+bool ep_available = true;
 void update_brake_contributions()
 {
-    std::map<distance, int> active;
-    active[std::numeric_limits<double>::lowest()] = 15;
+    std::map<distance, std::pair<int,int>> active;
+    std::pair<int,int> def = {1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE, 1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE | 1<<MAGNETIC_AVAILABLE};
+    active[distance(std::numeric_limits<double>::lowest(), 0, 0)] = def;
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
-        active[(*it)->start]=15;
-        if ((*it)->profile) active[(*it)->end]=15;
+        active[(*it)->start]=def;
+        if ((*it)->profile) active[(*it)->end]=def;
     }
     for (auto it = active.begin(); it != active.end(); ++it) {
         distance d = it->first;
@@ -63,14 +65,14 @@ void update_brake_contributions()
                 }
             }
         }
-        it->second = (reg?8:0)+(shoe?4:0)+(eddyemerg?2:0)+(eddyserv?1:0);
+        it->second = {reg<<REGENERATIVE_AVAILABLE | eddyserv<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE, reg<<REGENERATIVE_AVAILABLE | eddyemerg<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE | shoe<<MAGNETIC_AVAILABLE};
     }
     active_combination = active;
     target::recalculate_all_decelerations();
 }
 void update_track_conditions()
 {
-    if (restore_initial_states_various && *restore_initial_states_various<d_minsafefront(restore_initial_states_various->get_reference())) {
+    if (restore_initial_states_various && *restore_initial_states_various<d_minsafefront(*restore_initial_states_various)) {
         for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
             if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
@@ -87,7 +89,7 @@ void update_track_conditions()
         restore_initial_states_various = {};
         update_brake_contributions();
     }
-    if (restore_initial_states_platforms && *restore_initial_states_platforms<d_minsafefront(restore_initial_states_platforms->get_reference())) {
+    if (restore_initial_states_platforms && *restore_initial_states_platforms<d_minsafefront(*restore_initial_states_platforms)) {
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
             TrackConditions c = it->get()->condition;
             if (c == TrackConditions::StationPlatform) {
@@ -98,14 +100,22 @@ void update_track_conditions()
         }
         restore_initial_states_platforms = {};
     }
+    neutral_section_info = {{},{}};
+    lower_pantograph_info = {{},{}};
+    air_tightness_info = {{},{}};
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         track_condition *c = it->get();
         double end = c->get_end_distance_to_train();
-        if (end < (c->condition == TrackConditions::BigMetalMasses ? -D_keep_information : 0) && !c->display_end) {
+        if (end < 0 && !c->end_displayed) {
             c->display_end = true;
+            c->end_displayed = true;
             c->end_time = get_milliseconds() + T_delete_condition * 1000;
         }
         if (c->display_end && c->end_time < get_milliseconds()) {
+            c->display_end = false;
+        }
+        if (end < -L_TRAIN - D_keep_information && c->end_displayed && !c->display_end) {
+
             track_condition_targets.erase(it->get());
             it = track_conditions.erase(it);
             continue;
@@ -123,11 +133,12 @@ void update_track_conditions()
             target &SBIg = l[1];
             SBId.calculate_curves();
             SBIg.calculate_curves();
-            distance max = d_maxsafefront(c->start.get_reference());
-            distance min = d_minsafefront(c->start.get_reference());
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start);
             if (max<SBId.d_SBI1 || min > SBIg.d_SBI1) {
                 c->order = c->announce = false;
             }
+            c->announce_distance = SBId.d_SBI1 - max;
             if (max > SBId.d_SBI1 && min < SBIg.d_SBI1) {
                 if (max < c->start) {
                     c->announce = true;
@@ -138,9 +149,20 @@ void update_track_conditions()
                 }
             }
         } else if (c->condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch) {
-            distance pointC = c->start - V_est * 11;
-            distance max = d_maxsafefront(c->start.get_reference());
-            distance min = d_minsafefront(c->start.get_reference());
+            distance pointC = c->start - V_est * 10;
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start);
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            if (pointC-max < 0) {
+                track_condition_profile_external info = {{},{}};
+                if (pointD-max > -L_TRAIN)
+                    info.start = pointD-max;
+                if (pointE-min > -L_TRAIN)
+                    info.end = pointE-min;
+                if (!neutral_section_info.start && !neutral_section_info.end) neutral_section_info = info;
+            }
+            c->announce_distance = pointC-max;
             if (min > c->end) {
                 c->announce = false;
                 c->order = false;
@@ -153,8 +175,19 @@ void update_track_conditions()
             }
         } else if (c->condition == TrackConditions::PowerLessSectionLowerPantograph) {
             distance pointC = c->start - V_est * 20;
-            distance max = d_maxsafefront(c->start.get_reference());
-            distance min = d_minsafefront(c->start.get_reference());
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start);
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            if (pointC-max < 0) {
+                track_condition_profile_external info = {{},{}};
+                if (pointD-max > -L_TRAIN)
+                    info.start = pointD-max;
+                if (pointE-min > -L_TRAIN)
+                    info.end = pointE-min;
+                if (!lower_pantograph_info.start && !lower_pantograph_info.end) lower_pantograph_info = info;
+            }
+            c->announce_distance = pointC-max;
             if (min > c->end) {
                 c->announce = false;
                 c->order = false;
@@ -167,10 +200,22 @@ void update_track_conditions()
             }
         } else if (c->condition == TrackConditions::SoundHorn) {
             distance pointC = c->start - V_est * T_horn;
+            c->announce_distance = pointC-d_estfront;
         } else if (c->condition == TrackConditions::AirTightness) {
             distance pointC = c->start - V_est * 10;
-            distance max = d_maxsafefront(c->start.get_reference());
-            distance min = d_minsafefront(c->start.get_reference());
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start);
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            if (pointC-max < 0) {
+                track_condition_profile_external info = {{},{}};
+                if (pointD-max > 0)
+                    info.start = pointD-max;
+                if (pointE-min > -L_TRAIN)
+                    info.end = pointE-min;
+                if (!air_tightness_info.start && !air_tightness_info.end) air_tightness_info = info;
+            }
+            c->announce_distance = pointC-max;
             if (min + L_TRAIN > c->end) {
                 c->announce = false;
                 c->order = false;
@@ -212,7 +257,7 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
 void load_track_condition_various(TrackCondition cond, distance ref)
 {
     if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        restore_initial_states_various = cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        restore_initial_states_various = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
         return;
     }
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
@@ -243,8 +288,8 @@ void load_track_condition_various(TrackCondition cond, distance ref)
             case M_TRACKCOND_t::AirTightness:
                 tc->condition = TrackConditions::AirTightness;
                 if (Q_airtight) {
-                    tc->start_symbol = 19;
-                    tc->end_symbol = 20;
+                    tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::CloseAirIntake, false);
+                    tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::OpenAirIntake, false);
                     tc->announcement_symbol = 21;
                     tc->active_symbol = 19;
                     tc->end_active_symbol = 22;
@@ -255,49 +300,49 @@ void load_track_condition_various(TrackCondition cond, distance ref)
                 break;
             case M_TRACKCOND_t::NonStoppingArea:
                 tc->condition = TrackConditions::NonStoppingArea;
-                tc->start_symbol = 9;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NonStoppingArea, true);
                 tc->active_symbol = 10;
                 tc->announcement_symbol = 11;
                 break;
             case M_TRACKCOND_t::SoundHorn:
                 tc->condition = TrackConditions::SoundHorn;
-                tc->start_symbol = 24;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::SoundHorn, true);
                 break;
             case M_TRACKCOND_t::PowerlessLowerPantograph:
                 tc->condition = TrackConditions::PowerLessSectionLowerPantograph;
-                tc->start_symbol = lower_pantograph_available ? 1 : 2;
-                tc->end_symbol = raise_pantograph_available ? 2 : 3;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::LowerPantograph, !lower_pantograph_available);
+                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::RaisePantograph, !raise_pantograph_available);
                 tc->announcement_symbol = raise_pantograph_available ? 2 : 3;
                 tc->active_symbol = 1;
                 tc->end_active_symbol = raise_pantograph_available ? 4 : 5;
                 break;
             case M_TRACKCOND_t::PowerlessSwitchOffPower:
                 tc->condition = TrackConditions::PowerLessSectionSwitchMainPowerSwitch;
-                tc->start_symbol = main_power_off_available ? 5 : 6;
-                tc->end_symbol = main_power_on_available ? 7 : 8;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NeutralSectionAnnouncement, !main_power_off_available);
+                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::EndOfNeutralSection, !main_power_on_available);
                 tc->announcement_symbol = main_power_off_available ? 6 : 7;
                 tc->active_symbol = 6;
                 tc->end_active_symbol = main_power_on_available ? 8 : 9;
                 break;
             case M_TRACKCOND_t::RadioHole:
                 tc->condition = TrackConditions::RadioHole;
-                tc->start_symbol = 11;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RadioHole, false);
                 break;
             case M_TRACKCOND_t::SwitchOffRegenerative:
                 tc->condition = TrackConditions::SwitchOffRegenerativeBrake;
-                tc->start_symbol = 16;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, false);
                 break;
             case M_TRACKCOND_t::SwitchOffShoe:
                 tc->condition = TrackConditions::SwitchOffMagneticShoe;
-                tc->start_symbol = 12;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, false);
                 break;
             case M_TRACKCOND_t::SwitchOffEddyService:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentServiceBrake;
-                tc->start_symbol = 14;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, false);
                 break;
             case M_TRACKCOND_t::SwitchOffEddyEmergency:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentEmergencyBrake;
-                tc->start_symbol = 14;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, false);
                 break;
         }
         bool exists = false;
@@ -323,7 +368,7 @@ void load_track_condition_various(TrackCondition cond, distance ref)
 void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref)
 {
     if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        restore_initial_states_platforms = cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        restore_initial_states_platforms = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
         return;
     }
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);

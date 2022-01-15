@@ -24,40 +24,35 @@ struct FixedTextMessage : ETCS_directional_packet
     NID_C_t NID_C;
     NID_RBC_t NID_RBC;
     Q_TEXT_t Q_TEXT;
-    FixedTextMessage() = default;
-    FixedTextMessage(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&Q_TEXTCLASS);
-        r.read(&Q_TEXTDISPLAY);
-        r.read(&D_TEXTDISPLAY);
-        r.read(&M_MODETEXTDISPLAY1);
-        r.read(&M_LEVELTEXTDISPLAY1);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        Q_TEXTCLASS.copy(r);
+        Q_TEXTDISPLAY.copy(r);
+        D_TEXTDISPLAY.copy(r);
+        M_MODETEXTDISPLAY1.copy(r);
+        M_LEVELTEXTDISPLAY1.copy(r);
         if (M_LEVELTEXTDISPLAY1 == 1)
-            r.read(&NID_NTC1);
-        r.read(&L_TEXTDISPLAY);
-        r.read(&T_TEXTDISPLAY);
-        r.read(&M_MODETEXTDISPLAY2);
-        r.read(&M_LEVELTEXTDISPLAY2);
+            NID_NTC1.copy(r);
+        L_TEXTDISPLAY.copy(r);
+        T_TEXTDISPLAY.copy(r);
+        M_MODETEXTDISPLAY2.copy(r);
+        M_LEVELTEXTDISPLAY2.copy(r);
         if (M_LEVELTEXTDISPLAY2 == 1)
-            r.read(&NID_NTC2);
-        r.read(&Q_TEXTCONFIRM);
+            NID_NTC2.copy(r);
+        Q_TEXTCONFIRM.copy(r);
         if (Q_TEXTCONFIRM != 0) {
-            r.read(&Q_CONFTEXTDISPLAY);
-            r.read(&Q_TEXTREPORT);
+            Q_CONFTEXTDISPLAY.copy(r);
+            Q_TEXTREPORT.copy(r);
             if (Q_TEXTREPORT == 1) {
-                r.read(&NID_TEXTMESSAGE);
-                r.read(&NID_C);
-                r.read(&NID_RBC);
+                NID_TEXTMESSAGE.copy(r);
+                NID_C.copy(r);
+                NID_RBC.copy(r);
             }
         }
-        r.read(&Q_TEXT);
-    }
-    FixedTextMessage *create(bit_read_temp &r) override
-    {
-        return new FixedTextMessage(r);
+        Q_TEXT.copy(r);
     }
 };

@@ -18,17 +18,48 @@
 #pragma once
 #include "../Supervision/train_data.h"
 #include "mode_transition.h"
-void start_mission()
+#include "../Packets/radio.h"
+enum som_step
 {
-    if (train_data_valid() && mode == Mode::SB && V_est == 0) {
-        if (level == Level::N0) {
-            mode_to_ack = Mode::UN;
-            mode_acknowledgeable = true;
-            mode_acknowledged = false;
-        } else {
-            mode_to_ack = Mode::SR;
-            mode_acknowledgeable = true;
-            mode_acknowledged = false;
-        }
-    }
-}
+    S0,
+    S1,
+    D2,
+    D3,
+    D7,
+    S2,
+    S3,
+    S4,
+    A29,
+    S10,
+    S12,
+    D12,
+    S13,
+    D10,
+    D11,
+    S11,
+    S20,
+    S21,
+    S22,
+    S23,
+    S24,
+    S25,
+    A31,
+    D31,
+    A32,
+    D32,
+    A33,
+    A34,
+    D33,
+    A35,
+    D22,
+    A23,
+    A24,
+    A38,
+    A39,
+    A40
+};
+extern som_step som_status;
+extern bool som_active;
+extern bool ongoing_mission;
+void update_SoM();
+void start_pressed();

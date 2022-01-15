@@ -9,15 +9,14 @@ struct SSP_diff
     NC_CDDIFF_t NC_CDDIFF;
     NC_DIFF_t NC_DIFF;
     V_DIFF_t V_DIFF;
-    SSP_diff() = default;
-    SSP_diff(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&Q_DIFF);
+        Q_DIFF.copy(r);
         if (Q_DIFF == 0)
-            r.read(&NC_CDDIFF);
+            NC_CDDIFF.copy(r);
         else
-            r.read(&NC_DIFF);
-        r.read(&V_DIFF);
+            NC_DIFF.copy(r);
+        V_DIFF.copy(r);
     }
 };
 struct SSP_element_packet
@@ -27,15 +26,15 @@ struct SSP_element_packet
     Q_FRONT_t Q_FRONT;
     N_ITER_t N_ITER;
     std::vector<SSP_diff> diffs;
-    SSP_element_packet() = default;
-    SSP_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_STATIC);
-        r.read(&V_STATIC);
-        r.read(&Q_FRONT);
-        r.read(&N_ITER);
+        D_STATIC.copy(r);
+        V_STATIC.copy(r);
+        Q_FRONT.copy(r);
+        N_ITER.copy(r);
+        diffs.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            diffs.push_back(SSP_diff(r));
+            diffs[i].copy(r);
         }
     }
 };
@@ -45,22 +44,18 @@ struct InternationalSSP : ETCS_directional_packet
     SSP_element_packet element;
     N_ITER_t N_ITER;
     std::vector<SSP_element_packet> elements;
-    InternationalSSP() = default;
-    InternationalSSP(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        element = SSP_element_packet(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++)
         {
-            elements.push_back(SSP_element_packet(r));
+            elements[i].copy(r);
         }
-    }
-    InternationalSSP *create(bit_read_temp &r) override
-    {
-        return new InternationalSSP(r);
     }
 };

@@ -23,6 +23,7 @@
 #include "../Position/linking.h"
 #include "../MA/movement_authority.h"
 #include "../Supervision/speed_profile.h"
+#include "../Euroradio/session.h"
 #include "radio.h"
 #include <vector>
 #include <memory>
@@ -44,7 +45,7 @@ struct eurobalise_telegram
     std::vector<std::shared_ptr<ETCS_packet>> packets;
     bool valid;
     bool readerror;
-    eurobalise_telegram(bit_read_temp &r)
+    eurobalise_telegram(bit_manipulator &r)
     {
         extern double or_dist;
         //std::cout<<"Decoding telegram "<<get_milliseconds()/1000<<" "<<or_dist<<std::endl;
@@ -79,7 +80,7 @@ struct message_packet
     bool fromRBC;
 };
 extern std::deque<std::pair<eurobalise_telegram,distance>> pending_telegrams;
-extern std::deque<std::shared_ptr<euroradio_message>> pending_messages;
 extern std::list<link_data>::iterator link_expected;
 void update_track_comm();
+void handle_radio_message(std::shared_ptr<euroradio_message> msg, communication_session *session);
 void set_message_filters();

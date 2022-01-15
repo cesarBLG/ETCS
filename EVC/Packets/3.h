@@ -6,18 +6,11 @@ struct KVINT_step_element
     V_NVKVINT_t V_NVKVINT;
     M_NVKVINT_t M_NVKVINT1;
     M_NVKVINT_t M_NVKVINT2;
-    KVINT_step_element() {}
-    KVINT_step_element(bit_read_temp &r, Q_NVKVINTSET_t Q_NVKVINTSET)
+    void copy(bit_manipulator &w, Q_NVKVINTSET_t Q_NVKVINTSET)
     {
-        r.read(&V_NVKVINT);
-        r.read(&M_NVKVINT1);
-        if (Q_NVKVINTSET == 1) r.read(&M_NVKVINT2);
-    }
-    void serialize(bit_write &w, Q_NVKVINTSET_t Q_NVKVINTSET)
-    {
-        w.write(&V_NVKVINT);
-        w.write(&M_NVKVINT1);
-        if (Q_NVKVINTSET == 1) w.write(&M_NVKVINT2);
+        V_NVKVINT.copy(w);
+        M_NVKVINT1.copy(w);
+        if (Q_NVKVINTSET == 1) M_NVKVINT2.copy(w);
     }
 };
 struct KVINT_element
@@ -28,31 +21,18 @@ struct KVINT_element
     KVINT_step_element element;
     N_ITER_t N_ITER;
     std::vector<KVINT_step_element> elements;
-    KVINT_element() {}
-    KVINT_element(bit_read_temp &r)
+    void copy(bit_manipulator &w)
     {
-        r.read(&Q_NVKVINTSET);
+        Q_NVKVINTSET.copy(w);
         if (Q_NVKVINTSET == 1) {
-            r.read(&A_NVP12);
-            r.read(&A_NVP23);
+            A_NVP12.copy(w);
+            A_NVP23.copy(w);
         }
-        element = KVINT_step_element(r, Q_NVKVINTSET);
-        r.read(&N_ITER);
+        element.copy(w, Q_NVKVINTSET);
+        N_ITER.copy(w);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(KVINT_step_element(r, Q_NVKVINTSET));
-        }
-    }
-    void serialize(bit_write &w)
-    {
-        w.write(&Q_NVKVINTSET);
-        if (Q_NVKVINTSET == 1) {
-            w.write(&A_NVP12);
-            w.write(&A_NVP23);
-        }
-        element.serialize(w, Q_NVKVINTSET);
-        w.write(&N_ITER);
-        for (int i=0; i<N_ITER; i++) {
-            elements[i].serialize(w, Q_NVKVINTSET);
+            elements[i].copy(w, Q_NVKVINTSET);
         }
     }
 };
@@ -60,16 +40,10 @@ struct KRINT_element
 {
     L_NVKRINT_t L_NVKRINT;
     M_NVKRINT_t M_NVKRINT;
-    KRINT_element() {}
-    KRINT_element(bit_read_temp &r)
+    void copy(bit_manipulator &w)
     {
-        r.read(&L_NVKRINT);
-        r.read(&M_NVKRINT);
-    }
-    void serialize(bit_write &w)
-    {
-        w.write(&L_NVKRINT);
-        w.write(&M_NVKRINT);
+        L_NVKRINT.copy(w);
+        M_NVKRINT.copy(w);
     }
 };
 struct NationalValues : ETCS_directional_packet
@@ -115,121 +89,62 @@ struct NationalValues : ETCS_directional_packet
     N_ITER_t N_ITER_kr;
     std::vector<KRINT_element> elements_kr;
     M_NVKTINT_t M_NVKTINT;
-    NationalValues() {}
-    NationalValues(bit_read_temp &r)
+    void copy(bit_manipulator &w) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&D_VALIDNV);
-        r.read(&NID_C);
-        r.read(&N_ITER_c);
+        NID_PACKET.copy(w);
+        Q_DIR.copy(w);
+        L_PACKET.copy(w);
+        Q_SCALE.copy(w);
+        D_VALIDNV.copy(w);
+        NID_C.copy(w);
+        N_ITER_c.copy(w);
+        NID_Cs.resize(N_ITER_c);
         for (int i=0; i<N_ITER_c; i++) {
-            NID_C_t nid_c;
-            r.read(&nid_c);
-            NID_Cs.push_back(nid_c);
+            NID_Cs[i].copy(w);
         }
-        r.read(&V_NVSHUNT);
-        r.read(&V_NVSTFF);
-        r.read(&V_NVONSIGHT);
-        r.read(&V_NVLIMSUPERV);
-        r.read(&V_NVUNFIT);
-        r.read(&V_NVREL);
-        r.read(&D_NVROLL);
-        r.read(&Q_NVSBTSMPERM);
-        r.read(&Q_NVEMRRLS);
-        r.read(&Q_NVGUIPERM);
-        r.read(&Q_NVSBFBPERM);
-        r.read(&Q_NVINHSMICPERM);
-        r.read(&V_NVALLOWOVTRP);
-        r.read(&V_NVSUPOVTRP);
-        r.read(&D_NVOVTRP);
-        r.read(&T_NVOVTRP);
-        r.read(&D_NVPOTRP);
-        r.read(&M_NVCONTACT);
-        r.read(&T_NVCONTACT);
-        r.read(&M_NVDERUN);
-        r.read(&D_NVSTFF);
-        r.read(&Q_NVDRIVER_ADHES);
-        r.read(&A_NVMAXREDADH1);
-        r.read(&A_NVMAXREDADH2);
-        r.read(&A_NVMAXREDADH3);
-        r.read(&Q_NVLOCACC);
-        r.read(&M_NVAVADH);
-        r.read(&M_NVEBCL);
-        r.read(&Q_NVKINT);
+        V_NVSHUNT.copy(w);
+        V_NVSTFF.copy(w);
+        V_NVONSIGHT.copy(w);
+        V_NVLIMSUPERV.copy(w);
+        V_NVUNFIT.copy(w);
+        V_NVREL.copy(w);
+        D_NVROLL.copy(w);
+        Q_NVSBTSMPERM.copy(w);
+        Q_NVEMRRLS.copy(w);
+        Q_NVGUIPERM.copy(w);
+        Q_NVSBFBPERM.copy(w);
+        Q_NVINHSMICPERM.copy(w);
+        V_NVALLOWOVTRP.copy(w);
+        V_NVSUPOVTRP.copy(w);
+        D_NVOVTRP.copy(w);
+        T_NVOVTRP.copy(w);
+        D_NVPOTRP.copy(w);
+        M_NVCONTACT.copy(w);
+        T_NVCONTACT.copy(w);
+        M_NVDERUN.copy(w);
+        D_NVSTFF.copy(w);
+        Q_NVDRIVER_ADHES.copy(w);
+        A_NVMAXREDADH1.copy(w);
+        A_NVMAXREDADH2.copy(w);
+        A_NVMAXREDADH3.copy(w);
+        Q_NVLOCACC.copy(w);
+        M_NVAVADH.copy(w);
+        M_NVEBCL.copy(w);
+        Q_NVKINT.copy(w);
         if (Q_NVKINT == 1) {
-            element_kv = KVINT_element(r);
-            r.read(&N_ITER_kv);
+            element_kv.copy(w);
+            N_ITER_kv.copy(w);
+            elements_kv.resize(N_ITER_kv);
             for (int i=0; i<N_ITER_kv; i++) {
-                elements_kv.push_back(KVINT_element(r));
+                elements_kv[i].copy(w);
             }
-            element_kr = KRINT_element(r);
-            r.read(&N_ITER_kr);
+            element_kr.copy(w);
+            N_ITER_kr.copy(w);
+            elements_kr.resize(N_ITER_kr);
             for (int i=0; i<N_ITER_kr; i++) {
-                elements_kr.push_back(KRINT_element(r));
+                elements_kr[i].copy(w);
             }
-            r.read(&M_NVKTINT);
-        }
-    }
-    NationalValues *create(bit_read_temp &r) override
-    {
-        return new NationalValues(r);
-    }
-    void serialize(bit_write &w) override
-    {
-        w.write(&NID_PACKET);
-        w.write(&Q_DIR);
-        w.write(&L_PACKET);
-        w.write(&Q_SCALE);
-        w.write(&D_VALIDNV);
-        w.write(&NID_C);
-        w.write(&N_ITER_c);
-        for (int i=0; i<N_ITER_c; i++) {
-            w.write(&NID_Cs[i]);
-        }
-        w.write(&V_NVSHUNT);
-        w.write(&V_NVSTFF);
-        w.write(&V_NVONSIGHT);
-        w.write(&V_NVLIMSUPERV);
-        w.write(&V_NVUNFIT);
-        w.write(&V_NVREL);
-        w.write(&D_NVROLL);
-        w.write(&Q_NVSBTSMPERM);
-        w.write(&Q_NVEMRRLS);
-        w.write(&Q_NVGUIPERM);
-        w.write(&Q_NVSBFBPERM);
-        w.write(&Q_NVINHSMICPERM);
-        w.write(&V_NVALLOWOVTRP);
-        w.write(&V_NVSUPOVTRP);
-        w.write(&D_NVOVTRP);
-        w.write(&T_NVOVTRP);
-        w.write(&D_NVPOTRP);
-        w.write(&M_NVCONTACT);
-        w.write(&T_NVCONTACT);
-        w.write(&M_NVDERUN);
-        w.write(&D_NVSTFF);
-        w.write(&Q_NVDRIVER_ADHES);
-        w.write(&A_NVMAXREDADH1);
-        w.write(&A_NVMAXREDADH2);
-        w.write(&A_NVMAXREDADH3);
-        w.write(&Q_NVLOCACC);
-        w.write(&M_NVAVADH);
-        w.write(&M_NVEBCL);
-        w.write(&Q_NVKINT);
-        if (Q_NVKINT == 1) {
-            element_kv.serialize(w);
-            w.write(&N_ITER_kv);
-            for (int i=0; i<N_ITER_kv; i++) {
-                elements_kv[i].serialize(w);
-            }
-            element_kr.serialize(w);
-            w.write(&N_ITER_kr);
-            for (int i=0; i<N_ITER_kr; i++) {
-                elements_kr[i].serialize(w);
-            }
-            w.write(&M_NVKTINT);
+            M_NVKTINT.copy(w);
         }
     }
 };

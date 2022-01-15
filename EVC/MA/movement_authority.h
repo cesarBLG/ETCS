@@ -45,6 +45,10 @@ public:
     {
         return started && start_time+time<get_milliseconds();
     }
+    int64_t remaining()
+    {
+        return start_time+time-get_milliseconds();
+    }
 };
 class section_timer : public timer
 {
@@ -111,19 +115,23 @@ public:
         return v_main;
     }
     void update_timers();
-    void shorten(distance d);
+    void shorten(distance eoa, distance svl);
     void reposition(distance current, double new_length);
+    bool timers_to_expire(int64_t threshold);
     friend void MA_infill(movement_authority ma);
     friend void replace_MA(movement_authority ma);
     friend void set_data();
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
+extern optional<distance> EoA_ma;
+extern optional<distance> SvL_ma;
 extern optional<distance> d_perturbation_eoa;
 extern optional<distance> d_perturbation_svl;
 void calculate_SvL();
 void calculate_perturbation_location();
 void replace_MA(movement_authority ma);
 void delete_MA();
+void delete_MA(distance eoa, distance svl);
 void set_signalling_restriction(movement_authority ma, bool infill);
 #endif // _MOVEMENT_AUTHORITY_H

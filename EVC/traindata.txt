@@ -24,14 +24,14 @@
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 0.5,
-                    "validity": "1..."
+                    "validity": "1.."
                 },
                 "no_dynamic": {
                     "curves": [
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 5,
-                    "validity": "0..."
+                    "validity": "0.."
                 }
             },
             "normal_service": {
@@ -88,14 +88,14 @@
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 5,
-                    "validity": "1..."
+                    "validity": "1.."
                 },
                 "no_dynamic": {
                     "curves": [
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 5,
-                    "validity": "0..."
+                    "validity": "0.."
                 }
             },
             "normal_service": {
@@ -151,14 +151,14 @@
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 5,
-                    "validity": "1..."
+                    "validity": "1.."
                 },
                 "no_dynamic": {
                     "curves": [
                         {"speed": 0, "value": 1.0}
                     ],
                     "build_up_time": 5,
-                    "validity": "0..."
+                    "validity": "0.."
                 }
             },
             "normal_service": {

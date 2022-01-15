@@ -30,6 +30,7 @@
 #include <thread>
 #include <string>
 #include <sstream>
+#include <list>
 #include <map>
 #include "../Supervision/supervision.h"
 #include "../Supervision/targets.h"
@@ -38,9 +39,9 @@
 #include <chrono>
 #include "../Supervision/train_data.h"
 #include "../Supervision/speed_profile.h"
+#include "../Euroradio/session.h"
 #include "../Position/distance.h"
 #include "../Position/geographical.h"
-#include "../Procedures/start.h"
 #include "../Procedures/override.h"
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
@@ -48,6 +49,7 @@
 #include "text_message.h"
 #include <orts/client.h>
 #include <orts/common.h>
+#include "windows.h"
 using std::thread;
 using std::mutex;
 using std::unique_lock;
@@ -99,8 +101,8 @@ extern double V_sbi;
 extern double D_target;
 extern double TTI;
 extern double TTP;
-extern bool EB;
-extern bool SB;
+extern bool EB_commanded;
+extern bool SB_commanded;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
 #ifdef WIN32
@@ -116,64 +118,35 @@ void parse_command(string str, bool lock=true)
     string command = str.substr(0, index);
     string value = str.substr(index+1, str.find_last_of(')')-index-1);
     if (lock) unique_lock<mutex> lck(loop_mtx);
-    if (command == "setTrainData") {
-        special_train_data = value;
-        validate_train_data();
-    } else if (command == "setLtrain") {
-        L_TRAIN = stof(value);
-        special_train_data = "";
-        validate_train_data();
-    } else if (command == "setBrakePercentage") {
-        brake_percentage = stof(value);
-        special_train_data = "";
-        validate_train_data();
-    } else if (command == "setVtrain") {
-        V_train = stof(value)/3.6;
-        special_train_data = "";
-        validate_train_data();
-    } else if (command == "setCantDeficiency") {
-        cant_deficiency = stoi(value);
-        special_train_data = "";
-        validate_train_data();
-    } else if (command == "setTrainCategory") {
-        special_train_data = "";
-        int val = stoi(value);
-        other_train_categories.clear();
-        other_train_categories.insert(val);
-        switch (val)
+    if (command == "json")
+    {
+        json j = json::parse(value);
+        if (j.contains("DriverSelection"))
         {
-            case 0:
-                brake_position = FreightP;
-                break;
-            case 1:
-                brake_position = FreightG;
-                break;
-            case 2:
-                brake_position = PassengerP;
-                break;
+            std::string selection = j["DriverSelection"].get<std::string>();
+            if (selection == "ModeAcknowledge") {
+                mode_acknowledgeable = false;
+                mode_acknowledged = true;
+            } else if (selection == "LevelAcknowledge") {
+                level_acknowledgeable = false;
+                level_acknowledged = true;
+            } else if (selection == "BrakeAcknowledge") {
+                brake_acknowledgeable = false;
+                brake_acknowledged = true;
+            } else if (selection == "MessageAcknowledge") {
+                message_acked(j["MessageId"]);
+            } else if (selection == "FunctionRequest") {
+                update_dialog_step(selection, "");
+            } else if (selection == "ValidateDataEntry") {
+                json &res = j["DataInputResult"];
+                std::string window = j["WindowTitle"];
+                validate_data_entry(window, res);
+            } else if (selection == "CloseWindow") {
+                close_window();
+            }
         }
-        validate_train_data();
-    } else if (command == "setLevel") {
-        level = (Level)stoi(value);
-    } else if (command == "startMission") {
-        start_mission();
-    } else if (command == "override") {
-        start_override();
-    } else if (command == "shunting") {
-        if (V_est == 0 && mode == Mode::SH)
-            trigger_condition(19);
-        if (V_est == 0 && (level==Level::N0 || level==Level::NTC || level==Level::N1) && mode != Mode ::SH) {
-            trigger_condition(5);
-        }
-    } else if (command == "messageAcked") {
-        message_acked(stoi(value));
-    } else if (command == "modeAcked") {
-        mode_acknowledgeable = false;
-        mode_acknowledged = true;
-    } else if (command == "levelAcked") {
-        level_acknowledgeable = false;
-        level_acknowledged = true;
     }
+    update_dialog_step(command, value);
 }
 void dmi_recv()
 {
@@ -203,6 +176,39 @@ void send_command(string command, string value)
     if(sendtoor && s_client != nullptr && s_client->connected) s_client->WriteLine("noretain(etcs::dmi::command="+command+"("+value+"))");
 }
 double calc_ceiling_limit();
+struct speed_element
+{
+    double Distance;
+    double Speed;
+};
+struct gradient_element
+{
+    double Distance;
+    int Gradient;
+};
+void to_json(json&j, const speed_element &e)
+{
+    j["DistanceToTrainM"] = e.Distance;
+    j["TargetSpeedMpS"] = e.Speed;
+}
+void to_json(json&j, const gradient_element &e)
+{
+    j["DistanceToTrainM"] = e.Distance;
+    j["GradientPerMille"] = e.Gradient;
+}
+void to_json(json&j, const PlanningTrackCondition &e)
+{
+    j["DistanceToTrainM"] = e.DistanceToTrainM;
+    j["YellowColour"] = e.YellowColour;
+    j["Type"] = e.Type;
+    j["TractionSystem"] = e.TractionSystem;
+}
+void to_json(json&j, const text_message &t)
+{
+    j["Text"] = t.text;
+    j["FirstGroup"] = t.firstGroup;
+    j["Acknowledge"] = t.ack;
+}
 void dmi_comm()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -220,151 +226,151 @@ void dmi_comm()
         unique_lock<mutex> lck(loop_mtx);
         sendtoor = get_milliseconds() - lastor > 250;
         if (sendtoor) lastor = get_milliseconds();
-        send_command("setMode", Mode_str[(int)mode]);
-        if (mode_acknowledgeable) {
-            send_command("setModeTransition", Mode_str[(int)mode_to_ack]);
-        } else {
-            send_command("setModeTransition", "");
-        }
-        send_command("setLevel", to_string((int)level));
+        json j;
+        j["AllowedSpeedMpS"] = V_perm;
+        j["InterventionSpeedMpS"] = V_sbi;
+        j["TargetSpeedMpS"] = V_target;
+        j["TargetDistanceM"] = D_target;
+        j["SpeedMpS"] = V_est;
+        j["ReleaseSpeedMpS"] = V_release;
+        j["CurrentMonitoringStatus"] = (int)monitoring;
+        j["CurrentSupervisionStatus"] = (int)supervision;
+        j["ActiveWindow"] = active_window_dmi;
+        j["CurrentMode"] = (int)mode;
+        j["CurrentLevel"] = (int)level;
+        j["TimeToPermittedS"] = TTP;
+        j["TimeToIndicationS"] = TTI;
+        if (mode_acknowledgeable) j["ModeAcknowledgement"] = (int)mode_to_ack;
+        else j["ModeAcknowledgement"] = nullptr;
         if (ongoing_transition || level_acknowledgeable) {
-            send_command("setLevelTransition", to_string((int)level_to_ack) + (level_acknowledgeable ? ",2" : ",1"));
+            j["LevelTransition"]["Acknowledge"] = level_acknowledgeable;
+            j["LevelTransition"]["Level"] = (int)level_to_ack;
         } else {
-            send_command("setLevelTransition", "");
+            j["LevelTransition"] = nullptr;
         }
-        send_command("setMonitor",  monitoring == TSM ? "TSM" : (monitoring == RSM ? "RSM" : "CSM"));
-        string s = "";
-        switch(supervision)
+        j["OverrideActive"] = overrideProcedure;
+        j["RadioStatus"] = (int)radio_status_driver;
+        j["BrakeCommanded"] = EB_commanded || SB_commanded;
+        j["BrakeAcknowledge"] = brake_acknowledgeable;
+        if (valid_geo_reference) j["GeographicalPositionKM"] = valid_geo_reference->get_position(d_estfront);
+        else j["GeographicalPositionKM"]=nullptr;
+        j["TextMessages"] = messages;
+        if (mode == Mode::FS || mode == Mode::OS)
         {
-            case NoS:
-                s += "NoS";
-                break;
-            case IndS:
-                s += "IndS";
-                break;
-            case OvS:
-                s += "OvS";
-                break;
-            case WaS:
-                s += "WaS";
-                break;
-            case IntS:
-                s += "IntS";
-                break;
-        }
-        send_command("setSupervision", s);
-        send_command("setVperm", to_string(V_perm*3.6));
-        send_command("setVtarget", to_string(V_target*3.6));
-        send_command("setVest", to_string(V_est*3.6));
-        send_command("setVset", to_string(V_set*3.6));
-        send_command("setVsbi", to_string(V_sbi*3.6));
-        send_command("setVrelease", to_string(V_release*3.6));
-        send_command("setDtarget", to_string(D_target));
-        send_command("setEB", EB ? "true" : "false");
-        send_command("setSB", SB ? "true" : "false");
-        send_command("setOverride", overrideProcedure ? "true" : "false");
-        send_command("setTTP", to_string(TTP));
-        send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
-        auto m = mode;
-        if (mode == Mode::FS) {
-            string speeds="";
-            double v = calc_ceiling_limit()*3.6;
-            speeds += "0,"+to_string(v);
+            std::vector<speed_element> speeds;
+            double v = calc_ceiling_limit();
+            speeds.push_back({0,v});
             std::map<::distance,double> MRSP = get_MRSP();
-            extern target indication_target;
+            extern const target* indication_target;
             extern double indication_distance;
-            double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end().get_reference()) : 0;
+            double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end()) : 0;
             const std::list<target> &targets = get_supervised_targets();
             for (const target &t : targets)
             {
                 distance td = t.get_target_position();
-                double d = td - (t.is_EBD_based ? d_maxsafefront(td.get_reference()) : d_estfront);
+                double d = td - (t.is_EBD_based ? d_maxsafefront(td) : d_estfront);
                 if (t.get_target_speed() == 0 && d<last_distance)
                     last_distance = d;
             }
+            j["IndicationMarkerTarget"] = nullptr;
+            j["IndicationMarkerDistanceM"] = nullptr;
             for (auto it=MRSP.begin(); it!=MRSP.end(); ++it) {
                 distance dist = it->first;
-                float safedist = dist-d_maxsafefront(dist.get_reference());
+                float safedist = dist-d_maxsafefront(dist);
                 if (safedist < 0)
                     continue;
                 if (safedist > last_distance + 1)
                     break;
-                if (target(dist, it->second, target_class::MRSP) == indication_target && monitoring == CSM)
-                    speeds+= ",im,"+to_string(indication_distance);
-                speeds += ","+to_string(safedist)+","+to_string(it->second*3.6);
+                if (indication_target != nullptr && indication_target->get_target_position() == dist && indication_target->get_target_speed() == it->second && indication_target->type == target_class::MRSP && monitoring == CSM) {
+                    j["IndicationMarkerTarget"]["TargetSpeedMpS"] = indication_target->get_target_speed();
+                    j["IndicationMarkerTarget"]["DistanceToTrainM"] = safedist;
+                    j["IndicationMarkerDistanceM"] = indication_distance;
+                }
+                speeds.push_back({safedist, it->second});
             }
-            if (SvL && *SvL-d_maxsafefront(SvL->get_reference()) <= last_distance + 1) {
-                if (monitoring == CSM && (indication_target.type == target_class::SvL || indication_target.type == target_class::EoA))
-                    speeds+= ",im,"+to_string(indication_distance);
-                speeds += ","+to_string(*SvL-d_maxsafefront(SvL->get_reference()))+",0";
-                last_distance = *SvL-d_maxsafefront(SvL->get_reference());
+            if (SvL && *SvL-d_maxsafefront(*SvL) <= last_distance + 1) {
+                if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::SvL || indication_target->type == target_class::EoA)){
+                    j["IndicationMarkerTarget"]["TargetSpeedMpS"] = 0;
+                    j["IndicationMarkerTarget"]["DistanceToTrainM"] = *SvL-d_maxsafefront(*SvL);
+                    j["IndicationMarkerDistanceM"] = indication_distance;
+                }
+                speeds.push_back({*SvL-d_maxsafefront(*SvL), 0});
+                last_distance = *SvL-d_maxsafefront(*SvL);
             }
             else if (EoA && *EoA-d_estfront <= last_distance + 1) {
-                if (monitoring == CSM && (indication_target.type == target_class::SvL || indication_target.type == target_class::EoA))
-                    speeds+= ",im,"+to_string(indication_distance);
-                speeds += ","+to_string(*EoA-d_estfront)+",0";
+                if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::SvL || indication_target->type == target_class::EoA)) {
+                    j["IndicationMarkerTarget"]["TargetSpeedMpS"] = 0;
+                    j["IndicationMarkerTarget"]["DistanceToTrainM"] = *EoA-d_estfront;
+                    j["IndicationMarkerDistanceM"] = indication_distance;
+                }
+                speeds.push_back({*EoA-d_estfront, 0});
                 last_distance = *EoA-d_estfront;
             }
-            if (LoA && LoA->first-d_maxsafefront(LoA->first.get_reference()) <= last_distance + 1) {
-                if (monitoring == CSM && (indication_target.type == target_class::LoA))
-                    speeds+= ",im,"+to_string(indication_distance);
-                speeds += ","+to_string(LoA->first-d_maxsafefront(LoA->first.get_reference()))+","+to_string(LoA->second*3.6);
-                last_distance = LoA->first-d_maxsafefront(LoA->first.get_reference());
+            if (LoA && LoA->first-d_maxsafefront(LoA->first) <= last_distance + 1) {
+                if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::LoA)) {
+                    j["IndicationMarkerTarget"]["TargetSpeedMpS"] = LoA->second;
+                    j["IndicationMarkerTarget"]["DistanceToTrainM"] = LoA->first-d_maxsafefront(LoA->first);
+                    j["IndicationMarkerDistanceM"] = indication_distance;
+                }
+                speeds.push_back({LoA->first-d_maxsafefront(LoA->first), LoA->second});
+                last_distance = LoA->first-d_maxsafefront(LoA->first);
             }
-            send_command("setPlanningSpeeds",speeds);
+            j["SpeedTargets"] = speeds;
             std::map<::distance,double> gradient = get_gradient();
-            string grad="0,"+to_string((--gradient.upper_bound(d_estfront))->second*1000);
+            std::vector<gradient_element> grad;
+            grad.push_back({0, (--gradient.upper_bound(d_estfront))->second*1000});
             for (auto it=gradient.upper_bound(d_estfront); it!=gradient.end(); ++it) {
                 float dist = it->first-d_estfront;
                 if (dist >= last_distance + 1)
                     break;
-                grad+=","+to_string(dist)+","+to_string(it->second*1000);
+                grad.push_back({dist,it->second*1000});
             }
-            grad += ","+to_string(last_distance)+","+"0";
-            send_command("setPlanningGradients",grad);
-
-            std::vector<std::string> objs;
+            grad.push_back({std::max(last_distance, 0.0),0});
+            j["GradientProfile"] = grad;
+            std::vector<PlanningTrackCondition> objs;
             for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
                 track_condition *tc = it->get();
-                double start = tc->get_distance_to_train();
+                double start = tc->announce_distance;
                 double end = tc->get_end_distance_to_train();
-                if (tc->start_symbol != -1 && start > 0 && start <= last_distance + 1) {
-                    objs.push_back(to_string(tc->start_symbol));
-                    objs.push_back(to_string((int)start));
+                tc->start_symbol.DistanceToTrainM = start;
+                tc->end_symbol.DistanceToTrainM = end;
+                if (tc->start_symbol.Type != TrackConditionType_DMI::None && start > 0 && start <= last_distance + 1) {
+                    objs.push_back(tc->start_symbol);
                 }
-                if (tc->end_symbol != -1 && end > 0 && end <= last_distance + 1) {
-                    objs.push_back(to_string(tc->end_symbol));
-                    objs.push_back(to_string((int)end));
+                if (tc->end_symbol.Type != TrackConditionType_DMI::None && end > 0 && end <= last_distance + 1) {
+                    objs.push_back(tc->end_symbol);
                 }
             }
-            std::string ob = objs.empty() ? "": objs[0];
-            for (int i=1; i<objs.size(); i++) {
-                ob += ","+objs[i];
-            }
-            send_command("setPlanningObjects", ob);
-
-            std::vector<string> active_symbols;
+            j["PlanningTrackConditions"] = objs;
+            std::set<int> active_symbols;
             for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
                 track_condition *tc = it->get();
                 if (tc->active_symbol != -1 && tc->order)
-                    active_symbols.push_back(to_string(tc->active_symbol));
+                    active_symbols.insert(tc->active_symbol);
                 else if (tc->announcement_symbol != -1 && tc->announce)
-                    active_symbols.push_back(to_string(tc->announcement_symbol));
+                    active_symbols.insert(tc->announcement_symbol);
                 else if (tc->end_active_symbol != -1 && tc->display_end) {
-                    active_symbols.push_back(to_string(tc->end_active_symbol));
+                    active_symbols.insert(tc->end_active_symbol);
                 }
             }
-            std::string aob = active_symbols.empty() ? "" : active_symbols[0];
-            for (int i=1; i<active_symbols.size(); i++) {
-                aob += ","+active_symbols[i];
-            }
-            send_command("setActiveConditions", aob);
-        } else {
-            send_command("setPlanningObjects", "");
-            send_command("setPlanningGradients", "");
-            send_command("setPlanningSpeeds", "");
-            send_command("setActiveConditions", "");
+            extern bool inform_lx;
+            if (inform_lx) active_symbols.insert(100);
+            j["ActiveTrackConditions"] = active_symbols;
         }
+        else
+        {
+            j["PlanningTrackConditions"] = "[]"_json;
+            j["GradientProfile"] = "[]"_json;
+            j["SpeedTargets"] = "[]"_json;
+            j["ActiveTrackConditions"] = "[]"_json;
+        }
+        
+        send_command("json", j.dump());
+        /*
+        send_command("setVset", to_string(V_set*3.6));
+        send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
+        auto m = mode;
+        */
         write(fd, lines.c_str(), lines.size());
         lines = "";
         lck.unlock();

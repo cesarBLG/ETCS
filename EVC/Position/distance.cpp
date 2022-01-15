@@ -22,155 +22,166 @@
 #include <limits>
 #include <iostream>
 #define DISTANCE_COW
-std::unordered_set<_dist_base*> distance::distances;
+distance *distance::begin = nullptr;
+distance *distance::end = nullptr;
 void distance::update_distances(double expected, double estimated)
 {
-    for(_dist_base *d : distances) {
-        
+    distance *d = begin;
+    while (d != nullptr) {
         if (d->ref == 0) {
             if (d->dist>std::numeric_limits<double>::lowest() && d->dist<std::numeric_limits<double>::max())
                 d->dist -= expected;
         } else {
             d->ref -= estimated;
         }
+        d = d->next;
     }
     update_odometer();
     V_release = calculate_V_release();
 }
 void distance::update_unlinked_reference(double newref)
 {
-    for(_dist_base *d : distances) {
+    distance *d = begin;
+    while (d != nullptr) {
         if (d->ref !=0 ) {
             double offset = newref-d->ref;
             d->ref = newref;
             if (d->dist>std::numeric_limits<double>::lowest() && d->dist<std::numeric_limits<double>::max())
                 d->dist -= offset;
         }
+        d = d->next;
     }
 }
-#ifdef DISTANCE_COW
-distance::distance()
+distance::distance() : dist(0), ref(0), orientation(0)
 {
-    base = nullptr;
+    if (begin == nullptr)
+        begin = this;
+    else
+        prev = end;
+    if (end != nullptr)
+        end->next = this;
+    end = this;
 }
-distance::distance(double val, double ref)
+distance::distance(double val, int orientation, double ref) : dist(val), ref(ref), orientation(orientation)
 {
-    base = new _dist_base(val, ref);
-    distances.insert(base);
+    if (begin == nullptr)
+        begin = this;
+    else
+        prev = end;
+    if (end != nullptr)
+        end->next = this;
+    end = this;
 }
-distance::distance(const distance &d)
+distance::distance(const distance &d) : dist(d.dist), ref(d.ref), orientation(d.orientation)
 {
-    base = d.base;
-    if (base != nullptr)
-        base->refcount++;
+    if (begin == nullptr)
+        begin = this;
+    else
+        prev = end;
+    if (end != nullptr)
+        end->next = this;
+    end = this;
 }
-distance::distance(distance &&d)
+distance::distance(distance &&d) : dist(d.dist),ref(d.ref),orientation(d.orientation)
 {
-    base = d.base;
-    d.base = nullptr;
+    if (begin == nullptr)
+        begin = this;
+    else
+        prev = end;
+    if (end != nullptr)
+        end->next = this;
+    end = this;
 }
 distance::~distance()
 {
-    if (base != nullptr) {
-        base->refcount--;
-        if (base->refcount < 1) {
-            distances.erase(base);
-            delete base;
-        }
-    }
+    if (prev == nullptr)
+        begin = next;
+    else
+        prev->next = next;
+    if (next == nullptr)
+        end = prev;
+    else
+        next->prev = prev;
 }
 distance &distance::operator = (const distance& d)
 {
-    if (base != nullptr) {
-        base->refcount--;
-        if (base->refcount < 1) {
-            distances.erase(base);
-            delete base;
-        }
-    }
-    base = d.base;
-    if (base != nullptr)
-        base->refcount++;
+    dist = d.dist;
+    ref = d.ref;
+    orientation = d.orientation;
     return *this;
 }
 distance &distance::operator = (distance&& d)
 {
-    if (base != nullptr) {
-        base->refcount--;
-        if (base->refcount < 1) {
-            distances.erase(base);
-            delete base;
-        }
-    }
-    base = d.base;
-    d.base = nullptr;
+    dist = d.dist;
+    ref = d.ref;
+    orientation = d.orientation;
     return *this;
 }
-#else
-distance::distance() : base_allocation(0, 0)
+bool distance::operator<(const distance d) const
 {
-    base = nullptr;
+    if (orientation * d.orientation < 0) abort();
+    int dir = 1;
+    if (orientation == -1 || d.orientation == -1) dir = -1;
+    if (dist <= std::numeric_limits<double>::lowest() ||
+    d.dist <= std::numeric_limits<double>::lowest() ||
+    dist >= std::numeric_limits<double>::max() ||
+    d.dist >= std::numeric_limits<double>::max()) dir = 1;
+    return dir == -1 ? get()>d.get() : get()<d.get();
 }
-distance::distance(double val, double ref) : base_allocation(val, ref)
+distance &distance::operator+=(const double d)
 {
-    base = &base_allocation;
-    distances.insert(base);
-}
-distance::distance(const distance &d) : base_allocation(d.base_allocation)
-{
-    base = &base_allocation;
-    distances.insert(base);
-}
-distance::distance(distance &&d) : base_allocation(d.base_allocation)
-{
-    base = &base_allocation;
-    distances.insert(base);
-}
-distance::~distance()
-{
-    distances.erase(base);
-}
-distance &distance::operator = (const distance& d)
-{
-    if (base != nullptr)
-        distances.erase(base);
-    base_allocation = d.base_allocation;
-    base = &base_allocation;
-    distances.insert(base);
+    if (dist <= std::numeric_limits<double>::lowest() || dist >= std::numeric_limits<double>::max()) return *this;
+    if (orientation == 0) { abort();}
+    dist += orientation * d;
     return *this;
 }
-distance &distance::operator = (distance&& d)
+double distance::operator-(const distance d) const
 {
-    if (base != nullptr)
-        distances.erase(base);
-    base_allocation = d.base_allocation;
-    base = &base_allocation;
-    distances.insert(base);
-    return *this;
+    int dir = 1;
+    if (orientation * d.orientation < 0) abort();
+    if (orientation == -1 || d.orientation == -1) dir = -1;
+    return dir*(dist+ref-d.dist-d.ref);
 }
-#endif
-distance d_maxsafefront(double reference)
+distance d_maxsafefront(int orientation, double reference)
 {
-    return distance((d_estfront.get()-reference)*1.01+(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), reference);
+    return distance((d_estfront.get()-reference)*1.01+odometer_orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
 }
-distance d_minsafefront(double reference)
+distance d_minsafefront(int orientation, double reference)
 {
-    return distance((d_estfront.get()-reference)*0.99-(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), reference);
+    return distance((d_estfront.get()-reference)*0.99-odometer_orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
 }
-distance d_maxsafe(distance d, double reference)
+distance d_maxsafefront(const distance&ref)
 {
-    return distance((d.get()-reference)*1.01+(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), reference);
+    return d_maxsafefront(ref.get_orientation(), ref.get_reference());
 }
-distance d_minsafe(distance d, double reference)
+distance d_minsafefront(const distance&ref)
 {
-    return distance((d.get()-reference)*0.99-(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), reference);
+    return d_minsafefront(ref.get_orientation(), ref.get_reference());
 }
-distance d_estfront(0);
+distance d_maxsafe(distance &d)
+{
+    int orientation = d.get_orientation();
+    double reference = d.get_reference();
+    return distance((d.get()-reference)*1.01+orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
+}
+distance d_minsafe(distance &d)
+{
+    int orientation = d.get_orientation();
+    double reference = d.get_reference();
+    return distance((d.get()-reference)*0.99-orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
+}
+distance d_estfront(0,0,0);
+distance d_estfront_dir[2] = {distance(0,1,0),distance(0,-1,0)};
 double odometer_value=0;
 double odometer_reference;
+int odometer_orientation=1;
+int current_odometer_orientation=1;
+int odometer_direction=1;
 void update_odometer()
 {
-    d_estfront = distance(odometer_value-odometer_reference);
+    d_estfront = distance(odometer_value-odometer_reference,0,0);
+    d_estfront_dir[0] = distance(odometer_value-odometer_reference,1,0);
+    d_estfront_dir[1] = distance(odometer_value-odometer_reference,-1,0);
 }
 void reset_odometer(double dist)
 {

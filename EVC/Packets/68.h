@@ -8,13 +8,11 @@ struct TC_element_packet
     D_TRACKCOND_t D_TRACKCOND;
     L_TRACKCOND_t L_TRACKCOND;
     M_TRACKCOND_t M_TRACKCOND;
-    
-    TC_element_packet() = default;
-    TC_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&D_TRACKCOND);
-        r.read(&L_TRACKCOND);
-        r.read(&M_TRACKCOND);
+        D_TRACKCOND.copy(r);
+        L_TRACKCOND.copy(r);
+        M_TRACKCOND.copy(r);
     }
 };
 
@@ -26,26 +24,22 @@ struct TrackCondition : ETCS_directional_packet
     Q_TRACKINIT_t Q_TRACKINIT;
     D_TRACKINIT_t D_TRACKINIT;
     std::vector<TC_element_packet> elements;
-    TrackCondition() = default;
-    TrackCondition(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&Q_TRACKINIT);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        Q_TRACKINIT.copy(r);
         if (Q_TRACKINIT == 1) {
-            r.read(&D_TRACKINIT);
+            D_TRACKINIT.copy(r);
         } else {      
-            element = TC_element_packet(r);
-            r.read(&N_ITER);
+            element.copy(r);
+            N_ITER.copy(r);
+            elements.resize(N_ITER);
             for (int i=0; i<N_ITER; i++) {
-                elements.push_back(TC_element_packet(r));
+                elements[i].copy(r);
             }
         } 
-    }
-    TrackCondition *create(bit_read_temp &r) override
-    {
-        return new TrackCondition(r);
     }
 };

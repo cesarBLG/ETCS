@@ -6,16 +6,11 @@
 struct DangerForShunting : ETCS_directional_packet
 {
     Q_ASPECT_t Q_ASPECT;
-    DangerForShunting() = default;
-    DangerForShunting(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_ASPECT);
-    }
-    DangerForShunting *create(bit_read_temp &r) override
-    {
-        return new DangerForShunting(r);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_ASPECT.copy(r);
     }
 };

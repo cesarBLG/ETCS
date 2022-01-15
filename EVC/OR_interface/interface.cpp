@@ -53,24 +53,47 @@ mutex iface_mtx;
 static threadwait *poller;
 //std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str, bool lock);
+static unsigned char base_64_dec[256];
+const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+std::vector<bool> base64_decode(std::string str, bool remove_padding=true)
+{
+    std::vector<bool> bits;
+    for (int i=0; i<str.size(); i++) {
+        if (str[i] == '=') break;
+        unsigned char c = base_64_dec[str[i]];
+        for (int j=5; j>=0; j--) {
+            bits.push_back(((c>>j) & 1));
+        }
+    }
+    if (remove_padding) bits.erase(bits.end()-bits.size()%8, bits.end());
+    return bits;
+}
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
     Parameter *p = new Parameter("distance");
     p->SetValue = [](string val) {
         or_dist = stof(val);
+        if (odometer_value > or_dist)
+            odometer_direction = -1;
+        else if (odometer_value < or_dist)
+            odometer_direction = 1;
+        
         odometer_value = or_dist;
     };
     manager.AddParameter(p);
 
     p = new Parameter("speed");
     p->SetValue = [](string val) {
+        double prev = V_est;
         V_est = stof(val)/3.6;
         V_ura = 0.007*V_est;
         if (V_est < 0.2)
         {
             V_est = V_ura = 0;
         }
+        if (prev != 0 && V_est == 0)
+            position_report_reasons[0] = true;
     };
     manager.AddParameter(p);
 
@@ -87,31 +110,40 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new Parameter("controller::direction");
+    p->SetValue = [](string val) {
+        reverser_direction = stoi(val);
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("train_orientation");
+    p->SetValue = [](string val) {
+        current_odometer_orientation = stoi(val);
+    };
+    manager.AddParameter(p);
+
     p = new Parameter("etcs::telegram");
     p->SetValue = [](string val) {
         std::vector<bool> message;
         for (int i=0; i<val.size(); i++) {
             message.push_back(val[i]=='1');
         }
-        bit_read_temp r(message);
+        bit_manipulator r(message);
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,distance(odometer_value-odometer_reference)});
+        pending_telegrams.push_back({t,distance(odometer_value-odometer_reference, odometer_orientation, 0)});
         evc_cv.notify_all();
     };
     manager.AddParameter(p);
     
-    p = new Parameter("etcs::message");
+    /*p = new Parameter("etcs::message");
     p->SetValue = [](string val) {
-        std::vector<bool> message;
-        for (int i=0; i<val.size(); i++) {
-            message.push_back(val[i]=='1');
-        }
+        std::vector<bool> message = base64_decode(val);
         bit_read_temp r(message);
         std::shared_ptr<euroradio_message> m = euroradio_message::build(r);
         pending_messages.push_back(m);
         evc_cv.notify_all();
     };
-    manager.AddParameter(p);
+    manager.AddParameter(p);*/
 
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {
@@ -131,21 +163,21 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::main_power_switch");
+    p = new Parameter("etcs::neutral_section");
     p->GetValue = []() {
-        return main_power_switch_status ? "1" : "0";
+        return (neutral_section_info.start ? std::to_string(*neutral_section_info.start) : "")+";"+(neutral_section_info.end ? std::to_string(*neutral_section_info.end) : "");
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::lower_pantographs");
+    p->GetValue = []() {
+        return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
     };
     manager.AddParameter(p);
 
     p = new Parameter("etcs::atf");
     p->GetValue = []() {
         return mode==Mode::FS?std::to_string(V_target):"-1";
-    };
-    manager.AddParameter(p);
-
-    p = new Parameter("etcs::pantographs");
-    p->GetValue = []() {
-        return pantograph_status ? "1" : "0";
     };
     manager.AddParameter(p);
 
@@ -228,16 +260,22 @@ void polling()
 }
 void start_or_iface()
 {
+    for (int i=0; i<64; i++)
+    {
+        base_64_dec[base64_table[i]]=i;
+    }
+	base_64_dec['='] = 0;
     poller = new threadwait();
     s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(acceleration)");
     s_client->WriteLine("register(etcs::telegram)");
-    s_client->WriteLine("register(etcs::message)");
     s_client->WriteLine("register(cruise_speed)");
     s_client->WriteLine("register(etcs::dmi::feedback)");
     s_client->WriteLine("register(master_key)");
+    s_client->WriteLine("register(controller::direction)");
+    s_client->WriteLine("register(train_orientation)");
     SetParameters();
     thread t(polling);
     t.detach();

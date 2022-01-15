@@ -4,16 +4,11 @@
 struct StopIfInSR : ETCS_directional_packet
 {
     Q_SRSTOP_t Q_SRSTOP;
-    StopIfInSR() = default;
-    StopIfInSR(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SRSTOP);
-    }
-    StopIfInSR *create(bit_read_temp &r) override
-    {
-        return new StopIfInSR(r);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SRSTOP.copy(r);
     }
 };

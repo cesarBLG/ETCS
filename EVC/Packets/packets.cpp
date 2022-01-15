@@ -23,6 +23,7 @@
 #include "21.h"
 #include "27.h"
 #include "41.h"
+#include "42.h"
 #include "47.h"
 #include "65.h"
 #include "66.h"
@@ -37,42 +38,38 @@
 #include "132.h"
 #include "136.h"
 #include "137.h"
-std::map<int, ETCS_packet*> ETCS_packet::packet_factory;
-void ETCS_packet::initialize()
-{
-    packet_factory[3] = new NationalValues();
-    packet_factory[5] = new Linking();
-    packet_factory[12] = new Level1_MA();
-    packet_factory[16] = new RepositioningInformation();
-    packet_factory[21] = new GradientProfile();
-    packet_factory[27] = new InternationalSSP();
-    packet_factory[41] = new LevelTransitionOrder();
-    packet_factory[47] = new ConditionalLevelTransitionOrder();
-    packet_factory[65] = new TemporarySpeedRestriction();
-    packet_factory[66] = new TemporarySpeedRestrictionRevocation();
-    packet_factory[67] = new TrackConditionBigMetalMasses();
-    packet_factory[68] = new TrackCondition();
-    packet_factory[69] = new TrackConditionStationPlatforms();
-    packet_factory[72] = new PlainTextMessage();
-    packet_factory[76] = new FixedTextMessage();
-    packet_factory[79] = new GeographicalPosition();
-    packet_factory[80] = new ModeProfile();
-    packet_factory[88] = new LevelCrossingInformation();
-    packet_factory[132] = new DangerForShunting();
-    packet_factory[136] = new InfillLocationReference();
-    packet_factory[137] = new StopIfInSR();
-}
-ETCS_packet *ETCS_packet::construct(bit_read_temp &r)
+ETCS_packet *ETCS_packet::construct(bit_manipulator &r)
 {
     int pos = r.position;
     NID_PACKET_t NID_PACKET;
     r.peek(&NID_PACKET);
     ETCS_packet *p;
-    if (packet_factory.find(NID_PACKET) == packet_factory.end()) {
-        p = new ETCS_directional_packet(r);
-    } else {
-        p = packet_factory[NID_PACKET]->create(r);
+    switch ((unsigned char)NID_PACKET) {
+        case 3: p = new NationalValues(); break;
+        case 5: p = new Linking(); break;
+        case 12: p = new Level1_MA(); break;
+        case 16: p = new RepositioningInformation(); break;
+        case 21: p = new GradientProfile(); break;
+        case 27: p = new InternationalSSP(); break;
+        case 41: p = new LevelTransitionOrder(); break;
+        case 42: p = new SessionManagement(); break;
+        case 47: p = new ConditionalLevelTransitionOrder(); break;
+        case 65: p = new TemporarySpeedRestriction(); break;
+        case 66: p = new TemporarySpeedRestrictionRevocation(); break;
+        case 67: p = new TrackConditionBigMetalMasses(); break;
+        case 68: p = new TrackCondition(); break;
+        case 69: p = new TrackConditionStationPlatforms(); break;
+        case 72: p = new PlainTextMessage(); break;
+        case 76: p = new FixedTextMessage(); break;
+        case 79: p = new GeographicalPosition(); break;
+        case 80: p = new ModeProfile(); break;
+        case 88: p = new LevelCrossingInformation(); break;
+        case 132: p = new DangerForShunting(); break;
+        case 136: p = new InfillLocationReference(); break;
+        case 137: p = new StopIfInSR(); break;
+        default: p = new ETCS_directional_packet(); break;
     }
+    p->copy(r);
     if (r.position-pos != p->L_PACKET)
          r.error = true;
     return p;

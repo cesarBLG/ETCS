@@ -20,13 +20,17 @@
 #include <limits>
 #include <set>
 #include "../Supervision/supervision.h"
-struct ETCS_variable
+#include "../Time/clock.h"
+#include "types.h"
+template<typename T>
+class ETCS_variable_custom
 {
+    public:
     int size;
-    uint32_t rawdata;
-    std::set<uint32_t> invalid;
-    ETCS_variable(int size) : size(size){}
-    operator uint32_t() const
+    T rawdata;
+    std::set<T> invalid;
+    ETCS_variable_custom(int size) : size(size){}
+    operator T() const
     {
         return rawdata;
     }
@@ -34,7 +38,16 @@ struct ETCS_variable
     {
         return invalid.find(rawdata)==invalid.end();
     }
+    void copy(bit_manipulator &b)
+    {
+        if (b.write_mode)
+            b.write(this);
+        else
+            b.read(this);
+    }
+    virtual ~ETCS_variable_custom(){}
 };
+typedef ETCS_variable_custom<uint32_t> ETCS_variable;
 struct bg_id
 {
     int NID_C;
@@ -160,6 +173,12 @@ struct D_NVROLL_t : D_t
 struct D_NVSTFF_t : D_t
 {
     static const uint32_t Infinity=32767;
+    double get_value(Q_SCALE_t scale) const
+    {
+        if (rawdata == Infinity)
+            return std::numeric_limits<double>::infinity();
+        return D_t::get_value(scale);
+    }
 };
 struct D_OL_t : D_t
 {
@@ -185,6 +204,10 @@ struct D_REF_t : ETCS_variable
 };
 struct D_SECTIONTIMERSTOPLOC_t : D_t
 {
+};
+struct D_SR_t : D_t
+{
+    static const uint32_t Infinity=32767;
 };
 struct D_STATIC_t : D_t
 {
@@ -237,11 +260,23 @@ struct L_DOUBTOVER_t : D_t
 {
     static const uint32_t Unknown=32767;
     L_DOUBTOVER_t &operator=(uint32_t data) {rawdata=data; return *this;}
+    void set_value(double val, Q_SCALE_t scale)
+    {
+        if (scale == Q_SCALE_t::cm10) rawdata = val/10;
+        else if (scale == Q_SCALE_t::m1) rawdata = val;
+        else rawdata = 10*val;
+    }
 };
 struct L_DOUBTUNDER_t : D_t
 {
     static const uint32_t Unknown=32767;
     L_DOUBTUNDER_t &operator=(uint32_t data) {rawdata=data; return *this;}
+    void set_value(double val, Q_SCALE_t scale)
+    {
+        if (scale == Q_SCALE_t::cm10) rawdata = val/10;
+        else if (scale == Q_SCALE_t::m1) rawdata = val;
+        else rawdata = 10*val;
+    }
 };
 struct L_ENDSECTION_t : D_t
 {
@@ -278,6 +313,18 @@ struct L_TEXTDISPLAY_t : D_t
 struct L_TRACKCOND_t : D_t
 {
 };
+struct L_TRAIN_t : ETCS_variable
+{
+    L_TRAIN_t() : ETCS_variable(12) {}
+    double get_value() const
+    {
+        return rawdata;
+    }
+    void set_value(double length)
+    {
+        rawdata = length;
+    }
+};
 struct L_TRAININT_t : ETCS_variable
 {
     L_TRAININT_t() : ETCS_variable(15) {}
@@ -289,6 +336,12 @@ struct L_TRAININT_t : ETCS_variable
 struct L_TSR_t : D_t
 {
 };
+struct M_ACK_t : ETCS_variable
+{
+    static const uint32_t NoAcknowledgement=0;
+    static const uint32_t AcknowledgementRequired=1;
+    M_ACK_t() : ETCS_variable(1) {}
+};
 struct M_AIRTIGHT_t : ETCS_variable
 {
     static const uint32_t NotFitted=0;
@@ -299,12 +352,26 @@ struct M_AIRTIGHT_t : ETCS_variable
         invalid.insert(3);
     }
 };
-
-struct M_ACK_t : ETCS_variable
+struct M_AXLELOADCAT_t : ETCS_variable
 {
-    static const uint32_t NoAcknowledgement=0;
-    static const uint32_t AcknowledgementRequired=1;
-    M_ACK_t() : ETCS_variable(1) {}
+    static const uint32_t A=0;
+    static const uint32_t HS17=1;
+    static const uint32_t B1=2;
+    static const uint32_t B2=3;
+    static const uint32_t C2=4;
+    static const uint32_t C3=5;
+    static const uint32_t C4=6;
+    static const uint32_t D2=7;
+    static const uint32_t D3=8;
+    static const uint32_t D4=9;
+    static const uint32_t D4XL=10;
+    static const uint32_t E4=11;
+    static const uint32_t E5=12;
+    M_AXLELOADCAT_t() : ETCS_variable(7) {}
+    bool is_valid() override
+    {
+        return rawdata < 13;
+    }
 };
 struct M_DUP_t : ETCS_variable
 {
@@ -424,14 +491,26 @@ struct M_LEVELTR_t : ETCS_variable
 };
 struct M_LINEGAUGE_t : ETCS_variable
 {
-    static const uint32_t G1 = 1;
-    static const uint32_t GA = 2;
-    static const uint32_t GB = 4;
-    static const uint32_t GC = 8;
+    static const uint32_t BitG1 = 1;
+    static const uint32_t BitGA = 2;
+    static const uint32_t BitGB = 4;
+    static const uint32_t BitGC = 8;
     M_LINEGAUGE_t() : ETCS_variable(8) {}
     bool is_valid() override
     {
         return rawdata!=0 && (rawdata&0xF0)==0;
+    }
+};
+struct M_LOADINGGAUGE_t : ETCS_variable
+{
+    static const uint32_t G1 = 0;
+    static const uint32_t GA = 1;
+    static const uint32_t GB = 2;
+    static const uint32_t GC = 3;
+    M_LOADINGGAUGE_t() : ETCS_variable(8) {}
+    bool is_valid() override
+    {
+        return rawdata<4;
     }
 };
 struct M_MAMODE_t : ETCS_variable
@@ -781,12 +860,113 @@ struct M_VERSION_t : ETCS_variable
         return rawdata<17 || rawdata>31;
     }
 };
+struct M_VOLTAGE_t : ETCS_variable
+{
+    static const uint32_t NonFitted=0;
+    static const uint32_t AC25kV50Hz=1;
+    static const uint32_t AC15kV16Hz7=2;
+    static const uint32_t DC3kV=3;
+    static const uint32_t DC1k5V=4;
+    static const uint32_t DC600V=5;
+    M_VOLTAGE_t() : ETCS_variable(4) {}
+    bool is_valid() override
+    {
+        return rawdata<6;
+    }
+};
 struct NC_CDDIFF_t : ETCS_variable
 {
     NC_CDDIFF_t() : ETCS_variable(4) {}
     bool is_valid() override
     {
         return rawdata<11;
+    }
+    void set_value(int def)
+    {
+        if (def >= 300)
+            rawdata = 10;
+        else if (def >= 275)
+            rawdata = 9;
+        else if (def >= 245)
+            rawdata = 8;
+        else if (def >= 225)
+            rawdata = 7;
+        else if (def >= 210)
+            rawdata = 6;
+        else if (def >= 180)
+            rawdata = 5;
+        else if (def >= 165)
+            rawdata = 4;
+        else if (def >= 150)
+            rawdata = 3;
+        else if (def >= 130)
+            rawdata = 2;
+        else if (def >= 100)
+            rawdata = 1;
+        else
+            rawdata = 0;
+    }
+    int get_value()
+    {
+        switch (rawdata)
+        {
+            case 0:
+            default:
+                return 80;
+            case 1:
+                return 100;
+            case 2:
+                return 130;
+            case 3:
+                return 150;
+            case 4:
+                return 165;
+            case 5:
+                return 180;
+            case 6:
+                return 210;
+            case 7:
+                return 225;
+            case 8:
+                return 245;
+            case 9:
+                return 275;
+            case 10:
+                return 300;
+        }
+    }
+};
+struct NC_CDTRAIN_t : ETCS_variable
+{
+    NC_CDTRAIN_t() : ETCS_variable(4) {}
+    bool is_valid() override
+    {
+        return rawdata<11;
+    }
+    void set_value(int def)
+    {
+        if (def >= 300)
+            rawdata = 10;
+        else if (def >= 275)
+            rawdata = 9;
+        else if (def >= 245)
+            rawdata = 8;
+        else if (def >= 225)
+            rawdata = 7;
+        else if (def >= 210)
+            rawdata = 6;
+        else if (def >= 180)
+            rawdata = 5;
+        else if (def >= 165)
+            rawdata = 4;
+        else if (def >= 150)
+            rawdata = 3;
+        else if (def >= 130)
+            rawdata = 2;
+        else if (def >= 100)
+            rawdata = 1;
+        else
+            rawdata = 0;
     }
     int get_value()
     {
@@ -829,6 +1009,17 @@ struct NC_DIFF_t : ETCS_variable
         return rawdata<3;
     }
 };
+struct NC_TRAIN_t : ETCS_variable
+{
+    static const uint32_t FreightPBit=0;
+    static const uint32_t FreightGBit=1;
+    static const uint32_t PassengerBit=2;
+    NC_TRAIN_t() : ETCS_variable(4) {}
+    bool is_valid() override
+    {
+        return rawdata<8;
+    }
+};
 struct NID_BG_t : ETCS_variable
 {
     NID_BG_t() : ETCS_variable(14) {}
@@ -836,6 +1027,10 @@ struct NID_BG_t : ETCS_variable
 struct NID_C_t : ETCS_variable
 {
     NID_C_t() : ETCS_variable(10) {}
+};
+struct NID_CTRACTION_t : ETCS_variable
+{
+    NID_CTRACTION_t() : ETCS_variable(10) {}
 };
 struct NID_ENGINE_t : ETCS_variable
 {
@@ -889,6 +1084,11 @@ struct NID_NTC_t : ETCS_variable
 {
     NID_NTC_t() : ETCS_variable(8) {}
 };
+struct NID_RADIO_t : ETCS_variable_custom<uint64_t>
+{   
+    static const uint64_t UseShortNumber=std::numeric_limits<uint64_t>::max();
+    NID_RADIO_t() : ETCS_variable_custom<uint64_t>(64) {}
+};
 struct NID_RBC_t : ETCS_variable
 {
     static const uint32_t ContactLastRBC=16383;
@@ -935,6 +1135,11 @@ struct NID_TSR_t : ETCS_variable
 {
     static const uint32_t NonRevocable=255;
     NID_TSR_t() : ETCS_variable(8) {}
+};
+struct N_AXLE_t : ETCS_variable
+{
+    static const uint32_t Unknown=1023;
+    N_AXLE_t() : ETCS_variable(10) {}
 };
 struct N_ITER_t : ETCS_variable
 {
@@ -1205,17 +1410,39 @@ struct Q_SECTIONTIMER_t : ETCS_variable
     static const uint32_t HasTimer=1;
     Q_SECTIONTIMER_t() : ETCS_variable(1) {}
 };
+struct Q_SLEEPSESSION_t : ETCS_variable
+{
+    static const uint32_t IgnoreOrder=0;
+    static const uint32_t ExecuteOrder=1;
+    Q_SLEEPSESSION_t() : ETCS_variable(1) {}
+};
 struct Q_SRSTOP_t : ETCS_variable
 {
     static const uint32_t StopIfInSR=0;
     static const uint32_t GoIfInSR=1;
     Q_SRSTOP_t() : ETCS_variable(1) {}
 };
+struct Q_STATUS_t : ETCS_variable
+{
+    static const uint32_t Invalid=0;
+    static const uint32_t Valid=1;
+    static const uint32_t Unknown=2;
+    Q_STATUS_t() : ETCS_variable(2)
+    {
+        invalid.insert(3);
+    }
+};
 struct Q_STOPLX_t : ETCS_variable
 {
     static const uint32_t NoStopRequired=0;
     static const uint32_t StopRequired=1;
     Q_STOPLX_t() : ETCS_variable(1) {}
+};
+struct Q_RBC_t : ETCS_variable
+{
+    static const uint32_t TerminateSession=0;
+    static const uint32_t EstablishSession=1;
+    Q_RBC_t() : ETCS_variable(1) {}
 };
 struct Q_TEXT_t : ETCS_variable
 {
@@ -1308,7 +1535,13 @@ struct T_TRAIN_t : ETCS_variable
     T_TRAIN_t() : ETCS_variable(32) {}
     int64_t get_value() 
     {
-        return rawdata;
+        int64_t time = get_milliseconds();
+        int64_t timestamp = time + rawdata*10LL-10LL*(uint32_t)(time/10);
+        if (time-timestamp > 2147483647LL)
+            timestamp += 1ULL<<32;
+        else if (time-timestamp < -2147483647LL)
+            timestamp -= 1ULL<<32;
+        return timestamp;
     }
 };
 struct V_t : ETCS_variable
@@ -1316,7 +1549,7 @@ struct V_t : ETCS_variable
     V_t() : ETCS_variable(7) {}
     double get_value()
     {
-        return rawdata*(5/3.6);
+        return (rawdata*5)/3.6;
     }
     void set_value(double val)
     {
@@ -1346,6 +1579,9 @@ struct V_MAMODE_t : V_t
     {
         return rawdata<121 || rawdata>126;
     }
+};
+struct V_MAXTRAIN_t : V_t
+{
 };
 struct V_NVALLOWOVTRP_t : V_t
 {

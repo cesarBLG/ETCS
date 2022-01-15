@@ -19,6 +19,10 @@
 #include <map>
 #include "acceleration.h"
 #include "../Parser/nlohmann/json.hpp"
+#define REGENERATIVE_AVAILABLE 0
+#define EDDY_AVAILABLE 1
+#define EP_AVAILABLE 2
+#define MAGNETIC_AVAILABLE 3
 using json = nlohmann::json;
 void set_brake_model(json &traindata);
 void set_conversion_model();
@@ -39,4 +43,4 @@ extern std::map<double,double> Kn[2];
 extern bool conversion_model_used;
 double Kdry_rst(double V, double EBCL, distance d);
 double Kwet_rst(double V, distance d);
-extern std::map<distance,int> active_combination;
+extern std::map<distance,std::pair<int,int>> active_combination;

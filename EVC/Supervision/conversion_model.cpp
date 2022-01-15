@@ -19,6 +19,7 @@
 #include "national_values.h"
 #include "fixed_values.h"
 #include "train_data.h"
+#include "../TrackConditions/track_condition.h"
 #include "../Position/distance.h"
 #include "acceleration.h"
 #include <map>
@@ -41,7 +42,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient, double default_
         else
             return g*grad/(1000+10*((grad>0) ? M_rotating_max : M_rotating_min));
     };
-    A_gradient.dist_step.insert(std::numeric_limits<double>::lowest());
+    A_gradient.dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
         A_gradient.dist_step.insert(it->first-L_TRAIN);
@@ -55,7 +56,7 @@ double T_brake_service_cmt;
 acceleration A_brake_emergency;
 acceleration A_brake_service;
 acceleration A_brake_normal_service;
-std::map<distance,int> active_combination;
+std::map<distance,std::pair<int,int>> active_combination;
 std::map<int,std::map<double, double>> A_brake_emergency_combination;
 std::map<int,std::map<double, double>> A_brake_service_combination;
 std::map<int,std::map<double,std::map<double, double>>> A_brake_normal_service_combination;
@@ -76,7 +77,7 @@ acceleration get_A_brake_emergency(bool use_active_combination)
     }
     ac.accel = [use_active_combination](double V, distance d)
     {
-        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second : 0;
+        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.second : 15;
         return (--A_brake_emergency_combination[comb].upper_bound(V))->second;
     };
     return ac;
@@ -94,7 +95,7 @@ acceleration get_A_brake_service(bool use_active_combination)
     }
     ac.accel = [use_active_combination](double V, distance d)
     {
-        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second : 0;
+        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.first : 7;
         return (--A_brake_service_combination[comb].upper_bound(V))->second;
     };
     return ac;
@@ -116,19 +117,19 @@ acceleration get_A_brake_normal_service(acceleration service)
 }
 double get_T_brake_emergency(distance d)
 {
-    return T_brake_emergency_combination[(--active_combination.upper_bound(d))->second];
+    return T_brake_emergency_combination[(--active_combination.upper_bound(d))->second.second];
 }
 double get_T_brake_service(distance d)
 {
-    return T_brake_service_combination[(--active_combination.upper_bound(d))->second];
+    return T_brake_service_combination[(--active_combination.upper_bound(d))->second.first];
 }
 double Kdry_rst(double V, double EBCL, distance d)
 {
-    return (--((--Kdry_rst_combination[(--active_combination.upper_bound(d))->second].upper_bound(V))->second.upper_bound(EBCL)))->second;
+    return (--((--Kdry_rst_combination[(--active_combination.upper_bound(d))->second.second].upper_bound(V))->second.upper_bound(EBCL)))->second;
 }
 double Kwet_rst(double V, distance d)
 {
-    return (--Kwet_rst_combination[(--active_combination.upper_bound(d))->second].upper_bound(V))->second;
+    return (--Kwet_rst_combination[(--active_combination.upper_bound(d))->second.second].upper_bound(V))->second;
 }
 std::map<double,double> Kn[2];
 void set_brake_model(json &traindata)
@@ -184,9 +185,9 @@ void set_brake_model(json &traindata)
             double spd = step["speed"].get<double>()/3.6;
             accel[spd] = step["value"].get<double>();
         }
-        for (int i=0; i<16; i++) {
+        for (int i=0; i<8; i++) {
             bool applies = true;
-            for (int j=0; j<4; j++) {
+            for (int j=0; j<3; j++) {
                 if (valid[j]!='.') {
                     int num = valid[j]-'0';
                     if (num != ((i>>j)&1)) {
@@ -227,7 +228,7 @@ void set_brake_model(json &traindata)
             }
         }
     }
-    active_combination[distance(std::numeric_limits<double>::lowest())] = 15;
+    update_brake_contributions();
 }
 std::map<double, double> Kv_int;
 std::map<double, double> Kr_int;
@@ -289,7 +290,7 @@ void convmodel_basic_accel(int lambda, acceleration &A_brake_emergency, accelera
     A_ebmax=0;
 
     for (double spd : A_brake_emergency.speed_step) {
-        A_ebmax = std::max(A_ebmax, A_brake_emergency.accel(spd, distance(0)));
+        A_ebmax = std::max(A_ebmax, A_brake_emergency.accel(spd, distance(0, 0, 0)));
     }
 }
 void convmodel_brake_build_up(brake_position_types brake_position, double L_TRAIN, double &T_brake_emergency_cm0, double &T_brake_emergency_cmt, double &T_brake_service_cm0, double &T_brake_service_cmt)

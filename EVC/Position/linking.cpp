@@ -21,28 +21,31 @@
 #include "../Packets/messages.h"
 std::list<link_data> linking;
 std::list<lrbg_info> lrbgs;
-double update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked)
+bool position_valid=false;//TODO
+distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link)
 {
     if (!linked) {
         double offset = group_pos.get();
         distance::update_unlinked_reference(offset);
-        return offset;
-    } else if (linking.empty()) {
+        return distance(0, group_pos.get_orientation(), offset);
+    } else if (link) {
+        double offset = link->dist.get();
+        reset_odometer(group_pos.get());
+        distance::update_distances(offset, group_pos.get());
+        group_pos = distance(0, group_pos.get_orientation(), 0);
+        lrbgs.push_back({nid_bg, link->reverse_dir, group_pos, link->locacc});
+        if (!pos_report_params || pos_report_params->LRBG)
+            position_report_reasons[9] = true;
+        return group_pos;
+    } else {
         double offset = group_pos.get();
         reset_odometer(offset);
         distance::update_distances(offset, offset);
         lrbgs.push_back({nid_bg, dir, group_pos, Q_NVLOCACC});
-        return 0;
-    } else if (linking.begin()->nid_bg==nid_bg) {
-        double offset = linking.begin()->dist.get();
-        reset_odometer(group_pos.get());
-        distance::update_distances(offset, group_pos.get());
-        group_pos = distance(0);
-        lrbgs.push_back({nid_bg, linking.front().reverse_dir, group_pos, linking.front().locacc});
-        return 0;
+        if (!pos_report_params || pos_report_params->LRBG)
+            position_report_reasons[9] = true;
+        return distance(0, group_pos.get_orientation(), 0);
     }
-    //Never reach this point
-    return group_pos.get();
 }
 void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
 {
@@ -64,6 +67,10 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
         links.push_back(d);
         cumdist = d.dist;
     }
+    bool expecting_linking = link_expected != linking.end();
+    bg_id expected_bg;
+    if (expecting_linking)
+        expected_bg = link_expected->nid_bg;
     if (infill) {
         linking.erase(linking.begin(), link_expected);
         for (auto it = linking.begin(); it!=linking.end(); ++it) {
@@ -75,20 +82,32 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
         linking.insert(linking.end(), links.begin(), links.end());
     } else {
         linking.erase(linking.begin(), link_expected);
+        distance d_lrbg = distance(0, odometer_orientation, 0);
         for (auto it = linking.begin(); it!=linking.end(); ++it) {
-            if (it->dist > distance(0)) {
+            if (it->dist > d_lrbg) {
                 linking.erase(it, linking.end());
                 break;
             }
         }
         for (auto it = links.begin(); it!=links.end(); ++it) {
-            if (it->dist > distance(0)) {
+            if (it->dist > d_lrbg) {
                 linking.insert(linking.end(), it, links.end());
                 break;
             }
         }
     }
-    link_expected = linking.begin();
+    bool prev_expected_found = false;
+    if (expecting_linking) {
+        for (auto it = linking.begin(); it!=linking.end(); ++it) {
+            if (it->nid_bg == expected_bg) {
+                link_expected = it;
+                prev_expected_found = true;
+                break;
+            }
+        }
+    }
+    if (!prev_expected_found)
+        link_expected = linking.begin();
 }
 void delete_linking()
 {

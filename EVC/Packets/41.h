@@ -8,13 +8,12 @@ struct LTO_element_packet
     M_LEVELTR_t M_LEVELTR;
     NID_NTC_t NID_NTC;
     L_ACKLEVELTR_t L_ACKLEVELTR;
-    LTO_element_packet() = default;
-    LTO_element_packet(bit_read_temp &r)
+    void copy(bit_manipulator &r)
     {
-        r.read(&M_LEVELTR);
+        M_LEVELTR.copy(r);
         if (M_LEVELTR == 1)  
-            r.read(&NID_NTC);
-        r.read(&L_ACKLEVELTR);
+            NID_NTC.copy(r);
+        L_ACKLEVELTR.copy(r);
     }
 };
 
@@ -25,23 +24,19 @@ struct LevelTransitionOrder : ETCS_directional_packet
     LTO_element_packet element;
     N_ITER_t N_ITER;
     std::vector<LTO_element_packet> elements;
-    LevelTransitionOrder() = default;
-    LevelTransitionOrder(bit_read_temp &r)
+    void copy(bit_manipulator &r) override
     {
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.read(&Q_SCALE);
-        r.read(&D_LEVELTR);
-        element = LTO_element_packet(r);
-        r.read(&N_ITER);
+        NID_PACKET.copy(r);
+        Q_DIR.copy(r);
+        L_PACKET.copy(r);
+        Q_SCALE.copy(r);
+        D_LEVELTR.copy(r);
+        element.copy(r);
+        N_ITER.copy(r);
+        elements.resize(N_ITER);
         for (int i=0; i<N_ITER; i++) {
-            elements.push_back(LTO_element_packet(r));
+            elements[i].copy(r);
         }
 
-    }
-    LevelTransitionOrder *create(bit_read_temp &r) override
-    {
-        return new LevelTransitionOrder(r);
     }
 };

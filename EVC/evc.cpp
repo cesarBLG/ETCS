@@ -21,6 +21,7 @@
 #include <condition_variable>
 #include "DMI/dmi.h"
 #include "DMI/text_message.h"
+#include "DMI/windows.h"
 #include <iostream>
 #include <chrono>
 #include "Packets/messages.h"
@@ -183,9 +184,6 @@ void start()
     start_or_iface();
     setup_national_values();
     initialize_mode_transitions();
-    ETCS_packet::initialize();
-    euroradio_message::initialize();
-    euroradio_message_traintotrack::initialize();
     set_message_filters();
     initialize_national_functions();
     started = true;
@@ -203,6 +201,7 @@ void update()
     update_messages();
     update_national_functions();
     update_train_subsystems();
+    update_dmi_windows();
 }
 std::condition_variable evc_cv;
 void loop()
@@ -214,7 +213,7 @@ void loop()
         update();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
-        //if (d>1000) std::cout<<d<<std::endl;
+        //if (d>500) std::cout<<d<<std::endl;
         evc_cv.wait_for(lck, std::chrono::milliseconds(80));
     }
 }
