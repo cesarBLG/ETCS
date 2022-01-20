@@ -318,12 +318,12 @@ void dmi_comm()
             j["SpeedTargets"] = speeds;
             std::map<::distance,double> gradient = get_gradient();
             std::vector<gradient_element> grad;
-            grad.push_back({0, (--gradient.upper_bound(d_estfront))->second*1000});
+            grad.push_back({0, (int)((--gradient.upper_bound(d_estfront))->second*1000)});
             for (auto it=gradient.upper_bound(d_estfront); it!=gradient.end(); ++it) {
                 float dist = it->first-d_estfront;
                 if (dist >= last_distance + 1)
                     break;
-                grad.push_back({dist,it->second*1000});
+                grad.push_back({dist,(int)(it->second*1000)});
             }
             grad.push_back({std::max(last_distance, 0.0),0});
             j["GradientProfile"] = grad;

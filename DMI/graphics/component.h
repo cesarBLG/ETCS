@@ -60,11 +60,11 @@ class Component
     }
     Color bgColor = DarkBlue;
     Color fgColor = White;
-    std::vector<graphic*> graphics;
     bool ack = false;
     std::function<void()> pressedAction;
     std::function<void()> display = nullptr;
     public:
+    std::vector<graphic*> graphics;
     void clear();
     bool isButton = false;
     bool dispBorder = true;

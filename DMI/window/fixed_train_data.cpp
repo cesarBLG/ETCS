@@ -21,27 +21,35 @@
 #include "keyboard.h"
 #include "../tcp/server.h"
 #include "../../EVC/Parser/nlohmann/json.hpp"
+#include "../monitor.h"
+#include "running_number.h"
 #include <fstream>
 using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window() : input_window("Train Data", 1), SelectType("Select\ntype",60,50)
+fixed_train_data_window::fixed_train_data_window(std::string data) : input_window("Train Data", 1), SelectType("Select\ntype",60,50)
 {
     inputs[0] = new fixed_train_data_input();
     SelectType.setPressedAction([this]() {
-        exit(this);
-        right_menu(new train_data_window());
+        //exit(this);
+        //right_menu(new train_data_window());
     });
+    if (data != "")
+    {
+        inputs[0]->data = data;
+        inputs[0]->setAccepted(true);
+    }
     create();
 }
 void fixed_train_data_window::sendInformation()
 {
-    write_command("setTrainData", inputs[0]->getData());
+    write_command("setAcceptedTrainData", inputs[0]->getData());
+    //right_menu(new fixed_train_data_validation_window(inputs[0]->getData()));
 }
 void fixed_train_data_window::setLayout()
 {
     input_window::setLayout();
     addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
 }
-fixed_train_data_input::fixed_train_data_input()
+fixed_train_data_input::fixed_train_data_input(std::string data) : input_data(data)
 {
 #ifdef __ANDROID__
     extern std::string filesDir;
@@ -60,4 +68,19 @@ fixed_train_data_input::fixed_train_data_input()
 void fixed_train_data_input::validate()
 {
     valid = true;
+}
+fixed_train_data_validation_window::fixed_train_data_validation_window(std::string data) : validation_window("Validate train data", {new fixed_train_data_input("Train type")}), data(data)
+{
+    validation_data[0]->data = data;
+    validation_data[0]->setAccepted(true);
+}
+void fixed_train_data_validation_window::sendInformation()
+{
+    write_command("setTrainData", data);
+    //if (!trn_valid) right_menu(new trn_window());
+}
+void fixed_train_data_validation_window::notValidated()
+{
+    write_command("setTrainData", "");
+    //right_menu(new fixed_train_data_window());
 }

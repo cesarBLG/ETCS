@@ -17,18 +17,43 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "menu.h"
+#include <chrono>
 menu::menu(const char *title) : subwindow(title)
 {
-    for(int i=0; i<8; i++)
+    for(int i=0; i<10; i++)
     {
-        buttons[i] = nullptr;
+        empty_button[i] = new Button(102,50);
+        empty_button[i]->showBorder = false;
+        buttons[i] = empty_button[i];
     }
+    hourGlass = new Component(264, 20);
 }
 menu::~menu()
 {
-    for(int i=0; i<8; i++)
+    for(int i=0; i<10; i++)
     {
-        if(buttons[i]!=nullptr) delete buttons[i];
+        if(empty_button[i] != buttons[i]) delete buttons[i];
+        delete empty_button[i];
+    }
+}
+void menu::setHourGlass(bool show)
+{
+    if (show)
+    {
+        if (!hourGlass->graphics.empty()) return;
+        auto t = std::chrono::system_clock::now();
+        hourGlass->setDisplayFunction([this,t] {
+
+            std::chrono::duration<double> diff = std::chrono::system_clock::now() - t;
+            int d = std::chrono::duration_cast<std::chrono::duration<int, std::milli>>(diff).count();
+            ((texture*)hourGlass->graphics[0])->x = 264/2+d*26/1000%254;
+        });
+        hourGlass->addImage("symbols/Status/ST_05.bmp",-264/2);
+    }
+    else
+    {
+        hourGlass->clear();
+        hourGlass->setDisplayFunction(nullptr);
     }
 }
 void menu::setLayout()
@@ -42,4 +67,7 @@ void menu::setLayout()
     addToLayout(buttons[5], new ConsecutiveAlignment(buttons[4],RIGHT,0));
     addToLayout(buttons[6], new ConsecutiveAlignment(buttons[4],DOWN,0));
     addToLayout(buttons[7], new ConsecutiveAlignment(buttons[6],RIGHT,0));
+    addToLayout(buttons[8], new ConsecutiveAlignment(buttons[6],DOWN,0));
+    addToLayout(buttons[9], new ConsecutiveAlignment(buttons[8],RIGHT,0));
+    addToLayout(hourGlass, new RelativeAlignment(&title_bar, 10+42, 10, 0));
 }

@@ -20,22 +20,24 @@
 #define _LEVEL_WINDOW_H
 #include "data_entry.h"
 #include "data_validation.h"
+#include "../monitor.h"
 class level_window : public input_window
 {
     public:
-    level_window();
+    level_window(Level level);
     void sendInformation() override;
 };
 class level_input : public input_data
 {
     public:
-    level_input(bool echo=false);
+    level_input(Level level, bool echo=false);
     void validate() override;
 };
 class level_validation_window : public validation_window
 {
     public:
-    level_validation_window();
+    level_validation_window(Level level);
     void sendInformation() override;
+    void notValidated() override;
 };
 #endif

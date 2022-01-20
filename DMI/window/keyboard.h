@@ -37,4 +37,5 @@ vector<Button*> getNumericKeyboard(input_data *input);
 vector<Button*> getAlphaNumericKeyboard(input_data *input);
 vector<Button*> getSingleChoiceKeyboard(vector<string> posibilities, input_data *input);
 vector<Button*> getYesNoKeyboard(input_data *input);
+vector<Button*> getKeyboard(const json &j, input_data *input);
 #endif

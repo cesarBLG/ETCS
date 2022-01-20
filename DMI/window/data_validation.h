@@ -40,8 +40,8 @@ class validation_window : public subwindow
     Button* emptybuttons[12];
     Button* buttons[12];
     input_data *confirmation;
-    std::vector<input_data *> validation_data;
     protected:
+    std::vector<input_data *> validation_data;
     virtual void setLayout() override
     {
         clearLayout();
@@ -83,7 +83,11 @@ class validation_window : public subwindow
             {
                 sendInformation();
             }
-            exit(this);
+            else
+            {
+                notValidated();
+            }
+            //exit(this);
         });
         setLayout();
         confirmation->setSelected(true);
@@ -95,6 +99,7 @@ class validation_window : public subwindow
         }
     }
     virtual void sendInformation() {}
+    virtual void notValidated() {}
     virtual ~validation_window()
     {
         delete confirmation;

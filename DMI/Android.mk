@@ -14,10 +14,10 @@ LOCAL_C_FLAGS +=
 LOCAL_SRC_FILES := init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl/component.cpp graphics/button.cpp \
                    		graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp \
                    		speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp \
-                   		state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp messages/messages.cpp graphics/flash.cpp \
+                   		state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp messages/messages.cpp graphics/flash.cpp \
                    		window/window_main.cpp state/time_hour.cpp window/subwindow.cpp  window/data_entry.cpp\
                    		window/nav_buttons.cpp window/menu.cpp window/menu_main.cpp window/menu_override.cpp \
-                   		window/menu_spec.cpp window/menu_settings.cpp \
+                   		window/menu_spec.cpp window/menu_settings.cpp window/menu_radio.cpp \
                    		window/driver_id.cpp window/running_number.cpp window/level_window.cpp \
                    		planning/planning.cpp control/control.cpp state/gps_pos.cpp \
                    		window/train_data.cpp window/fixed_train_data.cpp window/keyboard.cpp window/input_data.cpp \

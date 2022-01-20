@@ -63,7 +63,8 @@ extern double V_NVUNFIT;
 #include "../Position/distance.h"
 #include "../Supervision/speed_profile.h"
 extern optional<speed_restriction> UN_speed;
-int64_t akt_time=0;
+int64_t akt_delay=0;
+int64_t con_delay=0;
 void send_msg()
 {
     bool con = CON;
@@ -77,16 +78,15 @@ void send_msg()
         return time+30000<get_milliseconds() || con != CON;
     }));
 }
-void connect_asfa(bool con)
+/*void connect_asfa(bool con)
 {
-    CON = con;
     if (con) akt_time = get_milliseconds();
     else
     {
         AKT = false;
         akt_time = 0;
     }
-}
+}*/
 void update_asfa()
 {
     if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown) {
@@ -102,23 +102,28 @@ void update_asfa()
     }
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::N0) {
         if (!CON) {
-            connect_asfa(true);
+            CON = true;
+            akt_delay = get_milliseconds();
             msg = true;
         }
     } else if (level == Level::N0) {
         if (!CON) {
-            connect_asfa(true);
+            CON = true;
+            akt_delay = get_milliseconds();
             msg = true;
         }
-        else if (AKT && get_milliseconds()-akt_time > 500)
+        else if (AKT && get_milliseconds()-akt_delay > 500)
             AKT = false;
     } else {
-        if (!AKT)
-            AKT = true;
         if (CON) {
-            connect_asfa(false);
-            msg = true;
+            if (!AKT)
+                con_delay = get_milliseconds();
+            if (get_milliseconds()-con_delay > 500) {
+                CON = false;
+                msg = true;
+            }
         }
+        AKT = true;
     }
     if (msg)
         send_msg();

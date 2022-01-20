@@ -45,7 +45,7 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
             }
             if (valid) {
                 sendInformation();
-                exit(this);
+                //exit(this);
             }
         });
         button_yes.showBorder = false;
@@ -90,7 +90,7 @@ void input_window::create()
             inputs[0]->validate();
             if (inputs[0]->isValid()) {
                 sendInformation();
-                exit(this);
+                //exit(this);
             }
         });
     }
@@ -187,6 +187,20 @@ void input_window::setLayout()
     addToLayout(buttons[9], new ConsecutiveAlignment(buttons[6],DOWN,0));
     addToLayout(buttons[10], new ConsecutiveAlignment(buttons[9],RIGHT,0));
     addToLayout(buttons[11], new ConsecutiveAlignment(buttons[10],RIGHT,0));
+}
+void input_window::build_from(json &j)
+{
+    for (int i=0; i<nfields; i++) {
+        json &input = j["Inputs"][i];
+        inputs[i] = new input_data(input["Label"]);
+        inputs[i]->keys = getKeyboard(input["Keyboard"], inputs[i]);
+        if (input.contains("AcceptedValue"))
+        {
+            inputs[i]->data = input["AcceptedValue"].get<std::string>();
+            inputs[i]->setAccepted(true);
+        }
+    }
+    create();
 }
 input_window::~input_window()
 {

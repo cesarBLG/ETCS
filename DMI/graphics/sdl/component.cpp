@@ -258,7 +258,7 @@ void Component::getTextGraphic(texture *t, string text, float x, float y, float 
     if (align & LEFT) x = x + sx / 2;
     else if (align & RIGHT) x = (this->sx - x) - sx / 2;
     else x = x + this->sx / 2;
-    SDL_Surface *surf = TTF_RenderText_Blended_Wrapped(font, text.c_str(), color, getScale(sx));
+    SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
     if(surf==nullptr) printf("Error rendering text: %s\n", text.c_str());
     TTF_CloseFont(font);
     SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlren, surf);
@@ -311,8 +311,8 @@ void Component::getImageGraphic(texture *t, string path, float cx, float cy, flo
     }
     else
     {
-        t->width = getAntiScale(surf->w);
-        t->height = getAntiScale(surf->h);
+        t->width = surf->w;
+        t->height = surf->h;
         t->x = this->sx/2;
         t->y = this->sy/2;
     }

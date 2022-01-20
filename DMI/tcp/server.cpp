@@ -37,6 +37,8 @@
 #include "../planning/planning.h"
 #include "../graphics/drawing.h"
 #include "../state/gps_pos.h"
+#include "../state/acks.h"
+#include "../control/control.h"
 #include <mutex>
 using namespace std;
 int server;
@@ -51,6 +53,143 @@ void notifyDataReceived()
     //repaint();
 }
 #include <iostream>
+template<class T>
+void fill_non_existent(json &j, std::string str, T def)
+{
+    if (!j.contains("str" || j.is_null())) j[str] = def;
+}
+void fill_non_existent(json &j, std::string str, nullptr_t null)
+{
+    if (!j.contains("str")) j[str] = nullptr;
+}
+void from_json(const json&j, speed_element &e)
+{
+    e.distance = j["DistanceToTrainM"].get<double>();
+    e.speed = j["TargetSpeedMpS"].get<double>()*3.6;
+}
+void from_json(const json&j, gradient_element &e)
+{
+    e.distance = j["DistanceToTrainM"].get<double>();
+    e.val = j["GradientPerMille"].get<double>();
+}
+enum struct TrackConditionType
+{
+    Custom,
+    LowerPantograph,
+    RaisePantograph,
+    NeutralSectionAnnouncement,
+    EndOfNeutralSection,
+    NonStoppingArea,
+    RadioHole,
+    MagneticShoeInhibition,
+    EddyCurrentBrakeInhibition,
+    RegenerativeBrakeInhibition,
+    OpenAirIntake,
+    CloseAirIntake,
+    SoundHorn,
+    TractionSystemChange,
+    // Legacy conditions used in old DMIs
+    Tunnel,
+    Bridge,
+    Station,
+    EndOfTrack
+};
+enum struct TractionSystem
+{
+    NonFitted,
+    AC25kV,
+    AC15kV,
+    DC3000V,
+    DC1500V,
+    DC750V
+};
+void from_json(const json&j, planning_element &e)
+{
+    e.distance = j["DistanceToTrainM"].get<double>();
+    TrackConditionType type = (TrackConditionType)j["Type"].get<int>();
+    bool yellow = j["YellowColour"].get<bool>();
+    int tex = 0;
+    switch(type)
+    {
+        case TrackConditionType::LowerPantograph:
+            tex = yellow ? 2 : 1;
+            break;
+        case TrackConditionType::RaisePantograph:
+            tex = yellow ? 4 : 3;
+            break;
+        case TrackConditionType::NeutralSectionAnnouncement:
+            tex = yellow ? 6 : 5;
+            break;
+        case TrackConditionType::EndOfNeutralSection:
+            tex = yellow ? 8 : 7;
+            break;
+        case TrackConditionType::NonStoppingArea:
+            tex = 9;
+            break;
+        case TrackConditionType::RadioHole:
+            tex = 10;
+            break;
+        case TrackConditionType::MagneticShoeInhibition:
+            tex = yellow ? 12 : 11;
+            break;
+        case TrackConditionType::EddyCurrentBrakeInhibition:
+            tex = yellow ? 14 : 13;
+            break;
+        case TrackConditionType::RegenerativeBrakeInhibition:
+            tex = yellow ? 16 : 15;
+            break;
+        case TrackConditionType::CloseAirIntake:
+            tex = yellow ? 19 : 17;
+            break;
+        case TrackConditionType::OpenAirIntake:
+            tex = yellow ? 20 : 18;
+            break;
+        case TrackConditionType::SoundHorn:
+            tex = 35;
+            break;
+        case TrackConditionType::TractionSystemChange:{
+            TractionSystem traction = (TractionSystem)j["TractionSystem"].get<int>();
+            switch(traction)
+            {
+                case TractionSystem::NonFitted:
+                    tex = yellow ? 26 : 25;
+                    break;
+                case TractionSystem::AC25kV:
+                    tex = yellow ? 28 : 27;
+                    break;
+                case TractionSystem::AC15kV:
+                    tex = yellow ? 30 : 29;
+                    break;
+                case TractionSystem::DC3000V:
+                    tex = yellow ? 32 : 31;
+                    break;
+                case TractionSystem::DC1500V:
+                    tex = yellow ? 34 : 33;
+                    break;
+                case TractionSystem::DC750V:
+                    tex = yellow ? 36 : 35;
+                    break;
+                default:
+                    break;
+            }
+            break;}
+        case TrackConditionType::Tunnel:
+            tex = 40;
+            break;
+        case TrackConditionType::Bridge:
+            tex = 41;
+            break;
+        case TrackConditionType::Station:
+            tex = 42;
+            break;
+        case TrackConditionType::EndOfTrack:
+            tex = 43;
+            break;
+        default:
+            break;
+    }
+    e.condition = tex;
+}
 void parseData(string str)
 {
     extern mutex draw_mtx;
@@ -58,208 +197,10 @@ void parseData(string str)
     int index = str.find_first_of('(');
     string command = str.substr(0, index);
     string value = str.substr(index+1, str.find_first_of(')')-index-1);
-    if(command == "setVperm") Vperm = stof(value);
-    if(command == "setVsbi") Vsbi = stof(value);
-    if(command == "setVtarget") Vtarget = stof(value);
-    if(command == "setVest") Vest = stof(value);
-    if(command == "setVrelease") Vrelease = stof(value);
-    if(command == "setVset") Vset = stof(value);
-    if(command == "setDtarget") Dtarg = stof(value);
-    if(command == "setTTI") TTI = stof(value);
-    if(command == "setTTP") TTP = stof(value);
-    if(command == "setLevel") level = value== "NTC" ? Level::NTC : (Level)stoi(value);
-    if(command == "setLevelTransition") {
-        if (value.empty()) {
-            levelAck = 0;
-        } else {
-            int ind = value.find_first_of(',');
-            string lev = value.substr(0,ind);
-            ackLevel = lev== "NTC" ? Level::NTC : (Level)stoi(lev);
-            levelAck = stoi(value.substr(ind+1));
-        }
-    }
-    if(command == "setEB") EB = value!="false";
-    if(command == "setOverride") ovEOA = value!="false";
-    if(command == "setMode")
-    {
-        Mode m=mode;
-        if(value == "FS") m = Mode::FS;
-        else if(value == "LS") m = Mode::LS;
-        else if(value == "OS") m = Mode::OS;
-        else if(value == "SH") m = Mode::SH;
-        else if(value == "SB") m = Mode::SB;
-        else if(value == "SR") m = Mode::SR;
-        else if(value == "SN") m = Mode::SN;
-        else if(value == "UN") m = Mode::UN;
-        else if(value == "TR") m = Mode::TR;
-        else if(value == "PT") m = Mode::PT;
-        else if(value == "NP") m = Mode::NP;
-        else if(value == "SL") m = Mode::SL;
-        mode = m;
-    }
-    if(command == "setModeTransition")
-    {
-        Mode m;
-        modeAck = true;
-        if (value.empty()) modeAck = false;
-        else if(value == "FS") m = Mode::FS;
-        else if(value == "LS") m = Mode::LS;
-        else if(value == "OS") m = Mode::OS;
-        else if(value == "SH") m = Mode::SH;
-        else if(value == "SB") m = Mode::SB;
-        else if(value == "SR") m = Mode::SR;
-        else if(value == "UN") m = Mode::UN;
-        else if(value == "TR") m = Mode::TR;
-        ackMode = m;
-    }
-    if(command == "setMonitor") setMonitor(value == "CSM" ? CSM : (value == "TSM" ? TSM : RSM));
-    if(command == "setSupervision")
-    {
-        SupervisionStatus s=IntS;
-        if(value == "NoS") s = NoS;
-        else if(value == "IndS") s = IndS;
-        else if(value == "OvS") s = OvS;
-        else if(value == "WaS") s = WaS;
-        else if(value == "IntS") s = IntS;
-        setSupervision(s);
-    }
-    if(command == "setGeoPosition") pk = stof(value);
-    if(command == "setPlanningObjects")
-    {
-        planning_elements.clear();
-        if (value.empty())
-            return;
-
-        vector<string> val;
-
-        int valsep = value.find(',');
-        while(valsep!=string::npos)
-        {
-            string param = value.substr(0,valsep);
-            value = value.substr(valsep+1);
-            valsep = value.find(',');
-            val.push_back(param);
-        }
-        if (!value.empty()) val.push_back(value);
-
-        for(int i = 0; i < val.size(); i+=2)
-        {
-            planning_element p;
-            p.condition = stoi(val[i]);
-            p.distance = stoi(val[i+1]);
-            planning_elements.push_back(p);
-        }
-    }
-    if(command == "setPlanningGradients")
-    {
-        vector<string> val;
-
-        int valsep = value.find(',');
-        while(valsep!=string::npos)
-        {
-            string param = value.substr(0,valsep);
-            value = value.substr(valsep+1);
-            valsep = value.find(',');
-            val.push_back(param);
-        }
-        if (!value.empty()) val.push_back(value);
-
-        gradient_elements.clear();
-        for(int i = 0; i < val.size(); i+=2)
-        {
-            gradient_element g;
-            g.distance = (int)round(stof(val[i]));
-            g.val = (int)round(stof(val[i+1]));;
-            gradient_elements.push_back(g);
-        }
-    }
-    if(command == "setPlanningSpeeds")
-    {
-        extern bool planning_unchanged;
-        vector<string> val;
-
-        int valsep = value.find(',');
-        while(valsep!=string::npos)
-        {
-            string param = value.substr(0,valsep);
-            value = value.substr(valsep+1);
-            valsep = value.find(',');
-            val.push_back(param);
-        }
-        if (!value.empty()) val.push_back(value);
-
-        speed_elements.clear();
-        bool imark=false;
-        for(int i = 0; i < val.size(); i+=2)
-        {
-            speed_element s;
-            bool isim=false;
-            int inddist;
-            if(val[i]=="im")
-            {
-                i++;
-                isim = true;
-                imark = true;
-                inddist = (int)round(stof(val[i]));
-                i++;
-            }
-            s.distance = (int)round(stof(val[i]));
-            s.speed = (int)round(stof(val[i+1]));
-            if(isim)
-            {
-                imarker.element = s;
-                imarker.start_distance=inddist;
-            }
-            speed_elements.push_back(s);
-        }
-        if(!imark) imarker.start_distance = 0;
-        planning_unchanged = false;
-    }
-    if(command == "setActiveConditions")
-    {
-        vector<string> val;
-
-        int valsep = value.find(',');
-        while(valsep!=string::npos)
-        {
-            string param = value.substr(0,valsep);
-            value = value.substr(valsep+1);
-            valsep = value.find(',');
-            val.push_back(param);
-        }
-        if (!value.empty()) val.push_back(value);
-
-        std::set<int> syms;
-        for(int i = 0; i<val.size(); i++)
-        {
-            syms.insert(stoi(val[i]));
-        }
-        extern int track_conditions[];
-        std::set<int> asig;
-        for (int i=0; i<3; i++) 
-        {
-            if (syms.find(track_conditions[i]) == syms.end()) track_conditions[i] = 0;
-            if (track_conditions[i] != 0) asig.insert(track_conditions[i]);
-        }
-        for (int s : syms)
-        {
-            if (asig.size()>=3) break;
-            if (asig.find(s) != asig.end()) continue;
-            for (int i=0; i<3; i++)
-            {
-                if (track_conditions[i] == 0)
-                {
-                    track_conditions[i] = s;
-                    asig.insert(s);
-                    break;
-                }
-            }
-        }
-    }
     if (command == "setMessage")
     {
         int valsep = value.find(',');
-        int id = stoi(value.substr(0,valsep));
+        unsigned int id = stoi(value.substr(0,valsep));
         value = value.substr(valsep+1);
         valsep = value.find(',');
         int size = stoi(value.substr(0,valsep));
@@ -283,6 +224,85 @@ void parseData(string str)
     {
         revokeMessage(stoi(value));
     }
+    if (command != "json") return;
+    json j = json::parse(value);
+    /*fill_non_existent(j, "TargetSpeedMpS", 1000);
+    fill_non_existent(j, "ReleaseSpeedMpS", 0);
+    fill_non_existent(j, "ModeAcknowledgement", nullptr);
+    fill_non_existent(j, "LevelTransition", nullptr);*/
+    Vperm = j["AllowedSpeedMpS"].get<double>()*3.6;
+    Vtarget = j["TargetSpeedMpS"].get<double>()*3.6;
+    Vsbi = j["InterventionSpeedMpS"].get<double>()*3.6;
+    Dtarg = j["TargetDistanceM"].get<double>();
+    Vrelease = round(j["ReleaseSpeedMpS"].get<double>()*3.6);
+    Vest = j["SpeedMpS"].get<double>()*3.6;
+    TTP = j["TimeToPermittedS"].get<double>();
+    TTI = j["TimeToIndicationS"].get<double>();
+    setMonitor((MonitoringStatus)j["CurrentMonitoringStatus"].get<int>());
+    setSupervision((SupervisionStatus)j["CurrentSupervisionStatus"].get<int>());
+    mode = (Mode)j["CurrentMode"].get<int>();
+    level = (Level)j["CurrentLevel"].get<int>();
+    if (j["GeographicalPositionKM"].is_null()) pk = -1;
+    else pk = j["GeographicalPositionKM"].get<double>();
+    if (!j["ModeAcknowledgement"].is_null())
+    {
+        ackMode = (Mode)j["ModeAcknowledgement"].get<int>();
+        setAck(AckType::Mode, 0, true);
+    }
+    else
+    {
+        setAck(AckType::Mode, 0, false);
+    }
+    if (!j["LevelTransition"].is_null())
+    {
+        ackLevel = (Level)j["LevelTransition"]["Level"].get<int>();
+        setAck(AckType::Level, j["LevelTransition"]["Acknowledge"].get<bool>()+1, true);
+    }
+    else
+    {
+        setAck(AckType::Level, 0, false);
+    }
+    setWindow(j["ActiveWindow"]);
+    ovEOA = j["OverrideActive"].get<bool>();
+    radioStatus = j["RadioStatus"].get<int>();
+    EB = SB = j["BrakeCommanded"].get<bool>();
+    setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
+    {
+        extern bool planning_unchanged;
+        speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();
+        if (j["IndicationMarkerDistanceM"].is_null()) imarker.start_distance = 0;
+        else imarker.start_distance = j["IndicationMarkerDistanceM"].get<double>();
+        if (!j["IndicationMarkerTarget"].is_null()) imarker.element = j["IndicationMarkerTarget"].get<speed_element>();
+        planning_unchanged = false;
+        gradient_elements = j["GradientProfile"].get<std::vector<gradient_element>>();
+        planning_elements = j["PlanningTrackConditions"].get<std::vector<planning_element>>();
+        
+    }
+    {
+        std::set<int> syms = j["ActiveTrackConditions"].get<std::set<int>>();
+        extern int track_conditions[];
+        std::set<int> asig;
+        for (int i=0; i<3; i++) 
+        {
+            if (syms.find(track_conditions[i]) == syms.end()) track_conditions[i] = 0;
+            if (track_conditions[i] != 0) asig.insert(track_conditions[i]);
+        }
+        for (int s : syms)
+        {
+            if (asig.size()>=3) break;
+            if (asig.find(s) != asig.end()) continue;
+            for (int i=0; i<3; i++)
+            {
+                if (track_conditions[i] == 0)
+                {
+                    track_conditions[i] = s;
+                    asig.insert(s);
+                    break;
+                }
+            }
+        }
+    }
+    /*if(command == "setVset") Vset = stof(value);*/
     if (command == "playSinfo") playSinfo();
     update();
     notifyDataReceived();

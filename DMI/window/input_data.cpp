@@ -18,6 +18,7 @@
  */
 #include "input_data.h"
 #include "../graphics/flash.h"
+#include "keyboard.h"
 input_data::input_data(string label_text) : label(label_text), data_get([this] {return getData();}), 
 data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
 {

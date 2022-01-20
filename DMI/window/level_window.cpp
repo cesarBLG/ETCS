@@ -17,14 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "level_window.h"
-#include "../monitor.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-level_window::level_window() : input_window("Level", 1)
+level_window::level_window(Level level) : input_window("Level", 1)
 {
-    inputs[0] = new level_input();
+    inputs[0] = new level_input(level);
     create();
-    if (level_valid && level != Level::Unknown)
+    if (level != Level::Unknown)
     {
         string data = "";
         switch(level)
@@ -51,12 +50,12 @@ void level_window::sendInformation()
 {
     string data = inputs[0]->getData();
     data = data.substr(6,1);
-    level_valid = true;
     write_command("setLevel",data);
 }
-string str[] = {"Level 0","Level 1", "Level 2", "Level 3", "LZB", "EBICAB"};
-level_input::level_input(bool echo) : input_data(echo ? str[(int)level] : "")
+string str[] = {"Level 0","Level 1", "Level 2", "Level 3", "", ""};
+level_input::level_input(Level level, bool echo) : input_data(echo ? "Level" : "")
 {
+    setData(str[(int)level]);
     keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, this);
 }
 void level_input::validate()
@@ -65,10 +64,16 @@ void level_input::validate()
     valid = true;
 }
 
-level_validation_window::level_validation_window() : validation_window("Level validation", {new level_input(true)})
+level_validation_window::level_validation_window(Level level) : validation_window("Level validation", {new level_input(level, true)})
 {
 }
 void level_validation_window::sendInformation()
 {
-    level_valid = true;
+    string data = validation_data[0]->getData();
+    data = data.substr(6,1);
+    write_command("setLevel",data);
+}
+void level_validation_window::notValidated()
+{
+    write_command("setLevel","");
 }

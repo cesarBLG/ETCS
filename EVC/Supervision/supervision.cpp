@@ -258,17 +258,19 @@ void update_supervision()
         rollaway_applied = false;
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::SR || mode == Mode::LS || mode == Mode::PT || mode == Mode::RV) {
-        bool rev = mode == Mode::PT || mode == Mode::RV;
-        if (!rmp_position || (rev && d_estfront < *rmp_position) || (!rev && d_estfront > *rmp_position))
-            rmp_position = d_estfront_dir[odometer_orientation == -1];
+        int dir = odometer_orientation * ((mode == Mode::PT || mode == Mode::RV) ? -1 : 1);
+        if (rmp_position && rmp_position->get_orientation() != dir)
+            rmp_position = {};
+        if (!rmp_position || d_estfront > *rmp_position)
+            rmp_position = d_estfront_dir[dir == -1];
         if (!rmp_applied) {
-            if ((rev && d_estfront - *rmp_position > D_NVROLL) || (!rev && *rmp_position - d_estfront > D_NVROLL)) {
+            if (*rmp_position - d_estfront > D_NVROLL) {
                 rmp_applied = true;
                 trigger_brake_reason(1);
             }
         }
         if (brake_acknowledged) {
-            rmp_position = d_estfront_dir[odometer_orientation == -1];
+            rmp_position = d_estfront_dir[dir == -1];
             rmp_applied = false;
         }
     } else {

@@ -22,7 +22,7 @@
 class trn_window : public input_window
 {
     public:
-    trn_window();
+    trn_window(int trn);
     void sendInformation() override;
 };
 class trn_input : public input_data

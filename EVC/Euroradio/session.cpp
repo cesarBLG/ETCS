@@ -230,13 +230,6 @@ void update_euroradio()
             ++it;
         }
     }
-    /*if (!supervising_rbc) {
-        supervising_rbc = new rbc_session();
-        supervising_rbc->phone_number = 0;
-        supervising_rbc->nid_rbc = 20;
-        supervising_rbc->status = session_status::Inactive;
-        supervising_rbc->radio_status = safe_radio_status::Disconnected;
-    }*/
     if (supervising_rbc) {
         bool c1 = supervising_rbc->status == session_status::Inactive && supervising_rbc->radio_status == safe_radio_status::Failed && som_active;
         bool c2 = supervising_rbc->connection_timer && get_milliseconds()-supervising_rbc->last_active>T_connection_status*1000;

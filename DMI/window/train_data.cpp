@@ -20,6 +20,8 @@
 #include "fixed_train_data.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
+#include "../monitor.h"
+#include "running_number.h"
 train_data_window::train_data_window() : input_window("Train Data", 6), SelectType("Select\ntype",60,50)
 {
     inputs[0] = new input_data("Length (m)");
@@ -38,17 +40,37 @@ train_data_window::train_data_window() : input_window("Train Data", 6), SelectTy
         "FP 1","FP2","FP 3","FP 4","FG 1","FG 2","FG 3","FG 4"}, inputs[4]);
     inputs[5]->keys = getSingleChoiceKeyboard({"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}, inputs[5]);
     SelectType.setPressedAction([this]() {
-        exit(this);
-        right_menu(new fixed_train_data_window());
+        /*exit(this);
+        right_menu(new fixed_train_data_window());*/
     });
     create();
 }
 void train_data_window::sendInformation()
 {
-    write_command("setLtrain", inputs[0]->getData());
-    write_command("setBrakePercentage", inputs[1]->getData());
-    write_command("setVtrain", inputs[2]->getData());
-    string str = inputs[4]->getData();
+    std::vector<input_data*> data;
+    for (auto i : inputs)
+    {
+        input_data *i2 = new input_data(i.second->label);
+        i2->setData(i.second->data_accepted);
+        i2->setAccepted(true);
+        data.push_back(i2);
+    }
+}
+void train_data_window::setLayout()
+{
+    input_window::setLayout();
+    addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
+}
+train_data_validation_window::train_data_validation_window(std::vector<input_data*> data) : validation_window("Validate train data", data)
+{
+
+}
+void train_data_validation_window::sendInformation()
+{
+    write_command("setLtrain", validation_data[0]->getData());
+    write_command("setBrakePercentage", validation_data[1]->getData());
+    write_command("setVtrain", validation_data[2]->getData());
+    string str = validation_data[4]->getData();
     int cant;
     int cat;
     if (str == "PASS1") {
@@ -108,9 +130,9 @@ void train_data_window::sendInformation()
     }
     write_command("setTrainCategory", to_string(cat));
     write_command("setCantDeficiency", to_string(cant));
+    //if (!trn_valid) right_menu(new trn_window());
 }
-void train_data_window::setLayout()
+void train_data_validation_window::notValidated()
 {
-    input_window::setLayout();
-    addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
+    //right_menu(new train_data_window());
 }

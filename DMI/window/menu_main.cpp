@@ -29,51 +29,80 @@
 #include "../control/control.h"
 #include "../tcp/server.h"
 
+#include <chrono>
 menu_main::menu_main() : menu("Main")
 {
     buttons[0] = new TextButton("Start", 153, 50);
     buttons[1] = new TextButton("Driver ID", 153, 50);
     buttons[2] = new TextButton("Train Data", 153, 50);
-    buttons[3] = new TextButton("Maintain shunting", 153, 50);
     buttons[4] = new TextButton("Level", 153, 50);
     buttons[5] = new TextButton("Train running number", 153, 50);
     buttons[6] = new TextButton(mode == Mode::SH ? "Exit Shunting" : "Shunting", 153, 50);
     buttons[7] = new TextButton("Non-Leading", 153, 50);
-    buttons[0]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (Vest == 0 && mode == Mode::PT && level == Level::N1);
-    buttons[2]->enabled = Vest==0;
-    buttons[3]->enabled = false;
-    buttons[4]->enabled = Vest==0 && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
-    buttons[5]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
-    buttons[6]->enabled = Vest == 0;
+    buttons[8] = new TextButton("Maintain shunting", 153, 50);
+    buttons[9] = new TextButton("Radio data", 153, 50);
+    buttons[6]->delayType = true;
+    /*if (wait_rbc)
+    {
+        for (int i=0; i<8; i++) buttons[i]->enabled = false;
+        exit_button.enabled = false;
+    }
+    else
+    {
+        buttons[0]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (Vest == 0 && mode == Mode::PT && level == Level::N1);
+        buttons[2]->enabled = Vest==0;
+        buttons[3]->enabled = false;
+        buttons[4]->enabled = Vest==0 && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
+        buttons[5]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
+        buttons[6]->enabled = Vest == 0;
+    }*/
     buttons[0]->setPressedAction([this]
     {
-        write_command("startMission","");
-        exit(this);
+        write_command("Start","");
     });
     buttons[1]->setPressedAction([this] 
     {
-        right_menu(new driver_window());
+        write_command("DriverID","");
     });
     buttons[2]->setPressedAction([this] 
     {
-        right_menu(new fixed_train_data_window());
+        write_command("TrainData","");
     });
     buttons[4]->setPressedAction([this] 
     {
-        right_menu(new level_window());
+        write_command("Level","");
     });
     buttons[5]->setPressedAction([this] 
     {
-        right_menu(new trn_window());
+        write_command("TrainRunningNumber","");
     });
     buttons[6]->setPressedAction([this]
     {
-        write_command("shunting","");
-        exit(this);
+        write_command("Shunting","");
     });
     buttons[7]->setPressedAction([this]
     { 
         
     });
+    buttons[8]->setPressedAction([this]
+    { 
+        
+    });
+    buttons[9]->setPressedAction([this]
+    { 
+        write_command("RadioData","");
+    });
     setLayout();
+}
+void menu_main::setEnabled(bool start, bool driverid, bool traindata, bool level, bool trn, bool sh, bool nl, bool maintainsh, bool radiodata)
+{
+    buttons[0]->setEnabled(start);
+    buttons[1]->setEnabled(driverid);
+    buttons[2]->setEnabled(traindata);
+    buttons[4]->setEnabled(level);
+    buttons[5]->setEnabled(trn);
+    buttons[6]->setEnabled(sh);
+    buttons[7]->setEnabled(nl);
+    buttons[8]->setEnabled(maintainsh);
+    buttons[9]->setEnabled(radiodata);
 }

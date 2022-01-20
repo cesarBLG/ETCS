@@ -24,7 +24,7 @@ class driver_window : public input_window
     TextButton TRN;
     IconButton settings;
     public:
-    driver_window();
+    driver_window(std::string id, bool show_trn);
     void setLayout() override;
     void sendInformation() override;
 };

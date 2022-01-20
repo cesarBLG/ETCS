@@ -23,19 +23,20 @@
 #include "running_number.h"
 #include "menu_settings.h"
 #include "keyboard.h"
-driver_window::driver_window() : input_window("Driver ID", 1), TRN("TRN",82,50), settings("symbols/Setting/SE_04.bmp",82,50)
+#include "../tcp/server.h"
+driver_window::driver_window(std::string id, bool show_trn) : input_window("Driver ID", 1), TRN("TRN",82,50), settings("symbols/Setting/SE_04.bmp",82,50)
 {
     inputs[0] = new driverid_input();
     TRN.setPressedAction([this] 
     {
-        right_menu(new trn_window());
+        write_command("TrainRunningNumber","");
     });
     settings.setPressedAction([this] 
     {
-        right_menu(new menu_settings());
+        //right_menu(new menu_settings());
     });
     create();
-    inputs[0]->data = driverid;
+    inputs[0]->data = id;
     inputs[0]->setAccepted(true);
 }
 void driver_window::setLayout()
@@ -46,8 +47,7 @@ void driver_window::setLayout()
 }
 void driver_window::sendInformation()
 {
-    driverid = inputs[0]->getData();
-    driverid_valid = true;
+    write_command("setDriverID",inputs[0]->getData());
 }
 void driverid_input::validate()
 {

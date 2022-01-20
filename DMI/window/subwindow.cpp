@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "subwindow.h"
-subwindow::subwindow(string title, bool full) : window(), fullscreen(full), exit_button("symbols/Navigation/NA_11.bmp", 82, 50), title_bar(full ? 334 : 306,24)
+#include "../tcp/server.h"
+subwindow::subwindow(string title, bool full) : window(), fullscreen(full), exit_button("symbols/Navigation/NA_11.bmp", 82, 50, nullptr, "symbols/Navigation/NA_12.bmp"), title_bar(full ? 334 : 306,24)
 {
     title_bar.addText(title,4,0,12,White, full ? RIGHT : LEFT);
     if (full) title_bar.setBackgroundColor(Black);
     exit_button.setPressedAction([this] 
     {
-        exit(this);
+        write_command("json",R"({"DriverSelection":"CloseWindow"})");
     });
 }
 void subwindow::setLayout()

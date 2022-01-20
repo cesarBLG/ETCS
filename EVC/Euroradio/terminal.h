@@ -7,8 +7,8 @@
 class communication_session;
 struct contact_info
 {
-    int country;
-    int id;
+    unsigned int country;
+    unsigned int id;
     uint64_t phone_number;
     bool operator<(const contact_info &o) const
     {

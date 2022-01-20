@@ -18,7 +18,9 @@
 #define _DATA_ENTRY_H
 #include "subwindow.h"
 #include "input_data.h"
+#include "../../EVC/Parser/nlohmann/json.hpp"
 #include <map>
+using json = nlohmann::json;
 class input_window : public subwindow
 {
     TextButton button_yes;
@@ -36,6 +38,7 @@ class input_window : public subwindow
     void create();
     public:
     input_window(string name, int nfields);
+    void build_from(json &j);
     virtual ~input_window();
 };
 #endif

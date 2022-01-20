@@ -19,6 +19,9 @@
 #include "../monitor.h"
 #include "../tcp/server.h"
 #include "../sound/sound.h"
+#include "../messages/messages.h"
+#include "acks.h"
+#include <list>
 using namespace std;
 void dispAcks();
 Component c234(37*3, 50, nullptr);
@@ -30,13 +33,16 @@ Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
 bool prevAck = false;
 int prevlevel = 0;
+bool level_announce = false;
+AckType AllowedAck = AckType::None;
+list<pair<AckType, int>> pendingAcks;
 void dispAcks()
 {
     if (modeAck == prevAck && prevlevel == levelAck) return;
-    if (modeAck || levelAck == 2) playSinfo();
     prevAck = modeAck;
     prevlevel = levelAck;
     c1.clear();
+    c1.delayType = false;
     if(modeAck)
     {
         string path = "symbols/Mode/MO_";
@@ -69,9 +75,10 @@ void dispAcks()
                 break;
         }
         if(num<10) path+="0";
+        c1.delayType = num == 10;
         path+=to_string(num);
         path+=".bmp";
-        c1.setAck([](){write_command("modeAcked","");});
+        c1.setAck([](){write_command("json",R"({"DriverSelection":"ModeAcknowledge"})");});
         c1.addImage(path.c_str());
     }
     else if(levelAck>0)
@@ -103,8 +110,91 @@ void dispAcks()
         //If NTC is LZB/PZB, path+="a";
         path+=".bmp";
         c1.addImage(path.c_str());
-        if(levelAck == 2) c1.setAck([](){write_command("levelAcked","");});
+        if(levelAck == 2) c1.setAck([](){write_command("json",R"({"DriverSelection":"LevelAcknowledge"})");});
         else c1.setAck(nullptr);
     }
     else c1.setAck(nullptr);
+}
+#include <chrono>
+int64_t get_milliseconds()
+{
+    return (std::chrono::duration_cast<std::chrono::milliseconds>
+        (std::chrono::system_clock::now().time_since_epoch())).count();
+}
+int64_t lastAck;
+void updateAcks()
+{
+    if (AllowedAck == AckType::None && lastAck + 1000 < get_milliseconds() && !pendingAcks.empty())
+    {
+        AckType type = pendingAcks.front().first;
+        switch (type)
+        {
+            case AckType::Message:
+                break;
+            case AckType::Mode:
+                playSinfo();
+                modeAck = true;
+                break;
+            case AckType::Level:
+                playSinfo();
+                levelAck = 2;
+                break;
+            case AckType::Brake:
+                playSinfo();
+                brakeAck = true;
+                break;
+        }
+        AllowedAck = type;
+        if (AllowedAck == AckType::Message) updateMessages();
+    }
+    if (level_announce)
+    {
+        if (AllowedAck != AckType::Mode && AllowedAck != AckType::Level)
+        {
+            if (levelAck == 0) playSinfo();
+            levelAck = 1;
+        }
+    }
+    else if (levelAck == 1) levelAck = 0;
+
+}
+void setAck(AckType type, int id, bool ack)
+{
+    if (ack)
+    {
+        if (type == AckType::Level && id == 1)
+        {
+            level_announce = true;
+            setAck(AckType::Level, 2, false);
+            return;
+        }
+        for (auto it = pendingAcks.begin(); it != pendingAcks.end(); ++it)
+        {
+            if (it->first == type && it->second == id) return;
+        }
+        pendingAcks.push_back({type, id});
+    }
+    else
+    {
+        if (type == AckType::Level && id == 0) level_announce = false;
+        for (auto it = pendingAcks.begin(); it != pendingAcks.end(); )
+        {
+            if (it->first == type && (type != AckType::Message || it->second == id))
+            {
+                if (it == pendingAcks.begin())
+                {
+                    if (AllowedAck == AckType::Mode) modeAck = false;
+                    else if (AllowedAck == AckType::Brake) brakeAck = false;
+                    else if (AllowedAck == AckType::Level)
+                    {
+                        levelAck = level_announce ? 1 : 0;
+                    }
+                    lastAck = get_milliseconds();
+                    AllowedAck = AckType::None;
+                }
+                it = pendingAcks.erase(it);
+            }
+            else ++it;
+        }
+    }
 }

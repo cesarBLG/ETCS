@@ -1,6 +1,5 @@
 /*
  * European Train Control System
- * Copyright (C) 2019  Iván Izquierdo
  * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -16,30 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "running_number.h"
+#include "../graphics/component.h"
 #include "../monitor.h"
-#include "keyboard.h"
-#include "../tcp/server.h"
-trn_window::trn_window(int trn) : input_window("Train running number", 1)
+void displayRadio();
+Component e1(54, 25, displayRadio);
+static int prevRadio;
+void displayRadio()
 {
-    inputs[0] = new trn_input();
-    create();
-    if (trn != 0)
-    {
-        inputs[0]->prev_data = inputs[0]->data = to_string(trn);
-        inputs[0]->updateText();
-    }
-}
-void trn_window::sendInformation()
-{
-    write_command("setTRN", inputs[0]->getData());
-}
-trn_input::trn_input()
-{
-    keys = getNumericKeyboard(this);
-}
-void trn_input::validate()
-{
-    if(data.size()>6) return;
-    valid = true;
+    if(prevRadio == radioStatus) return;
+    prevRadio = radioStatus;
+    e1.clear();
+    if(radioStatus == 1) e1.addImage("symbols/Status/ST_04.bmp");
+    else if(radioStatus == 2) e1.addImage("symbols/Status/ST_03.bmp");
 }

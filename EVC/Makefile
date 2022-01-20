@@ -10,12 +10,14 @@ DMI/text_messages.o DMI/windows.o TrainSubsystems/power.o TrainSubsystems/brake.
 $(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))
 LIB = evc.so
 ARCHIVE = evc.a
+EXE = evc
 CXX = g++
 CC = gcc
 DEBUG=-g -rdynamic -D_GLIBCXX_DEBUG
 LDFLAGS = -lorts
 CXXFLAGS = -std=c++11
 ifeq ($(TARGET),WIN32)
+EXE = evc.exe
 LIB = evc.dll
 CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
@@ -26,8 +28,8 @@ DEBUG=-g
 WINDRES = x86_64-w64-mingw32-windres
 #-D_GLIBCXX_DEBUG
 endif
-all: evc
-evc: $(OBJECTS)
+all: $(EXE)
+$(EXE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -Wall
 %.o: %.cpp
 	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall -Wno-sign-compare $(CXXFLAGS) -fpic

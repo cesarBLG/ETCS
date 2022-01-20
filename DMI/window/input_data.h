@@ -24,7 +24,9 @@
 #include "../graphics/button.h"
 #include "../graphics/text_button.h"
 #include "../graphics/icon_button.h"
+#include "../../EVC/Parser/nlohmann/json.hpp"
 using namespace std;
+using json = nlohmann::json;
 class input_data
 {
     protected:

@@ -23,9 +23,9 @@
 bool running = true;
 void quit()
 {
-    std::unique_lock<std::mutex> lck(window_mtx);
+    //std::unique_lock<std::mutex> lck(window_mtx);
     running = false;
-    window_cv.notify_one();
+    //window_cv.notify_one();
     printf("quit\n");
 }
 #ifdef __ANDROID__
@@ -167,10 +167,12 @@ int main(int argc, char** argv)
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
-    std::thread video(init_video);
+    //std::thread video(init_video);
     std::thread tcp(startSocket);
-    manage_windows();
+    startWindows();
+    init_video();
+    //manage_windows();
     tcp.join();
-    video.join();
+    //video.join();
     return 0;
 }

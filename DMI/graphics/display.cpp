@@ -21,27 +21,19 @@
 #include "../window/menu.h"
 #include "../monitor.h"
 #include "../control/control.h"
+#include "../state/acks.h"
 using namespace std;
 unordered_set<window*> active_windows;
 unordered_set<window*> old_windows;
 extern Mode mode;
 #include <iostream>
-bool started=false;
 void displayETCS()
 {
     if (mode == Mode::SL || mode == Mode::NP)
     {
-        started = false;
-        driverid_valid = false;
-        level_valid = false;
-        train_data_valid = false;
         return;
     }
-    if (!started)
-    {
-        started = true;
-        set_procedure(start_procedure);
-    }
+    updateAcks();
     for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
     {
         window *w = *it;

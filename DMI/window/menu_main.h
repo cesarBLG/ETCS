@@ -21,7 +21,9 @@
 #include "menu.h"
 class menu_main : public menu
 {
+    Component *hourGlass=nullptr;
     public:
     menu_main();
+    void setEnabled(bool start, bool driverid, bool traindata, bool level, bool trn, bool sh, bool nl, bool maintainsh, bool radiodata);
 };
 #endif

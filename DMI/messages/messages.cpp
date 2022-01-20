@@ -22,13 +22,13 @@
 #include "../sound/sound.h"
 #include "../graphics/icon_button.h"
 #include "../tcp/server.h"
+#include "../state/acks.h"
 #include "text_strings.h"
 #include <string>
 #include <deque>
 #include <vector>
 #include <algorithm>
 using namespace std;
-Component e1(54, 25, nullptr);
 Component e2(54, 25, nullptr);
 Component e3(54, 25, nullptr);
 Component e4(54, 25, nullptr);
@@ -41,29 +41,32 @@ IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, 50, arrowDown, "symbols
 deque <Message> messageList;
 int line;
 int current=0;
-void disp();
 void addMsg(Message m)
 {
     bool found = false;
     for (auto it = messageList.begin(); it != messageList.end(); ++it) {
         if (it->Id == m.Id) {
+            if (it->ack != m.ack) setAck(AckType::Message, m.Id, m.ack);
             *it = m;
             found = true;
         }
     }
     current = 0;
-    if (!found)
+    if (!found) {
+        if (m.ack) setAck(AckType::Message, m.Id, true);
         messageList.push_back(m);
-    disp();
+    }
+    updateMessages();
 }
-void revokeMessage(int id)
+void revokeMessage(unsigned int id)
 {
     current = 0;
     for(int i=0; i<messageList.size(); i++)
     {
         if(messageList[i].Id == id) messageList.erase(messageList.begin() + i);
     }
-    disp();
+    setAck(AckType::Message, id, false);
+    updateMessages();
 }
 bool operator < (Message a, Message b)
 {
@@ -77,15 +80,8 @@ void displayMessages()
 {
     upArrow.enabled = current>0;
     downArrow.enabled = line>5+current;
-    /*if(messageList.empty())
-    {
-        addMsg(Message(4,BaliseReadError, 11, 9));
-        addMsg(Message(5,SHrefused, 11, 8));
-        addMsg(Message(2,UnauthorizedPassingEOA, 11, 11, true, true, true));
-        addMsg(Message(3,EnteringFS, 11, 9, true));
-    }*/
 }
-void disp()
+void updateMessages()
 {
     sort(messageList.begin(), messageList.end());
     vector<Message*> displayMsg;
@@ -106,13 +102,14 @@ void disp()
             displayMsg.push_back(&messageList[i]);
         }
     }
-    if(ack)
+    if(ack && AllowedAck == AckType::Message)
     {
         Message *msg = displayMsg[0];
         textArea.setAck([msg]() {
             msg->ack = false;
-            write_command("messageAcked", to_string(msg->Id));
-            disp();
+            setAck(AckType::Message, msg->Id, false);
+            write_command("json", R"({"DriverSelection":"MessageAcknowledge,"MessageId:")"+to_string(msg->Id)+"}");
+            updateMessages();
         });
     }
     else textArea.setAck(nullptr);
@@ -123,10 +120,10 @@ void disp()
         Message &m = *displayMsg[i];
         string date = to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + to_string(m.minute);
         string text = "";
-        if (m.reason == 1) 
+        /*if (m.reason == 1) 
             text += "Train TRIP - ";
         else if (m.reason == 2) 
-            text += "Train brake - ";
+            text += "Train brake - ";*/
         text += m.text;
         int last = text.size();
         if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
@@ -149,12 +146,12 @@ void arrowUp()
 {
     if(current==0) return;
     current--;
-    disp();
+    updateMessages();
 }
 void arrowDown()
 {
     if(line<=5+current) return;
     current++;
     if(current>line-5) current = line-5;
-    disp();
+    updateMessages();
 }

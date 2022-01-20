@@ -17,17 +17,60 @@
  */
 #ifndef _CONTROL_H
 #define _CONTROL_H
-#include <functional>
-#include "../window/window.h"
-#include <mutex>
-#include <condition_variable> 
+#include <string>
+#include "../../EVC/Parser/nlohmann/json.hpp"
+using json = nlohmann::json;
+/*enum som_step
+{
+    S0,
+    S1,
+    D2,
+    D3,
+    D7,
+    S2,
+    S3,
+    S4,
+    A29,
+    S10,
+    S12,
+    D12,
+    S13,
+    D10,
+    D11,
+    S11,
+    S20,
+    S21,
+    S22,
+    S23,
+    S24,
+    S25,
+    A31,
+    D31,
+    A32,
+    D32,
+    A33,
+    A34,
+    D33,
+    A35,
+    D22,
+    A23,
+    A24,
+    A38,
+    A39,
+    A40
+};
+extern bool som_active;
+extern som_step som_status;
 class window;
 class subwindow;
 extern std::mutex window_mtx;
 extern std::condition_variable window_cv;
 void manage_windows();
 void right_menu(subwindow *w);
+void exit_all();
 void exit(subwindow *w);
 void set_procedure(std::function<void()> proc);
-void start_procedure();
+void start_dialog();*/
+void startWindows();
+void setWindow(json &j);
 #endif

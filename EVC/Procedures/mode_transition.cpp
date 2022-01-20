@@ -52,7 +52,10 @@ void initialize_mode_transitions()
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(*EoA);};
     c[21] = [](){return level == Level::N0;};
     c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
+    c[27] = [](){return !desk_open;};
     c[28] = [](){return !desk_open;};
+    c[29] = [](){return false;};
+    c[30] = [](){return !desk_open;};
     c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
     c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
     c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
@@ -64,6 +67,7 @@ void initialize_mode_transitions()
     c[44] = [](){return overrideProcedure && level == Level::N1;};
     c[50] = [](){return mode_to_ack==Mode::SH && mode_acknowledged;};
     c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    c[59] = [](){return V_est == 0 && mode_to_ack == Mode::RV && mode_acknowledged;};
     c[60] = [](){return mode_to_ack==Mode::UN && mode_acknowledged;};
     c[61] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start) && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
     c[62] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && train_data_valid && mode_acknowledged;;};
@@ -143,6 +147,10 @@ void initialize_mode_transitions()
 
     transitions.push_back({Mode::SB, Mode::SL, {14}, 5});
     transitions.push_back({Mode::PS, Mode::SL, {14}, 4});
+
+    transitions.push_back({Mode::FS, Mode::UN, {59}, 6});
+    transitions.push_back({Mode::LS, Mode::UN, {59}, 6});
+    transitions.push_back({Mode::OS, Mode::UN, {59}, 6});
 
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);

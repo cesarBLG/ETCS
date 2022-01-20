@@ -23,11 +23,11 @@
 #include "../graphics/text_button.h"
 class subwindow : public window
 {
+    protected:
     string title;
     Component title_bar;
-    protected:
-    IconButton exit_button;
     public:
+    IconButton exit_button;
     bool fullscreen;
     subwindow(string title, bool full = false);
     virtual void setLayout();

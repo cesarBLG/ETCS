@@ -24,8 +24,12 @@ menu_override::menu_override() : menu("Override")
     buttons[0] = new TextButton("EoA", 153, 50);
     buttons[0]->setPressedAction([this]
     {
-        write_command("override","");
-        exit(this);
+        write_command("Override","");
+        //exit(this);
     });
     setLayout();
 };
+void menu_override::setEnabled(bool eoa)
+{
+    buttons[0]->enabled = eoa;
+}

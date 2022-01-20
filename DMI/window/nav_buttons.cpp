@@ -28,32 +28,38 @@
 #include "data_view.h"
 #include "../state/time_hour.h"
 #include "../state/gps_pos.h"
+#include "../tcp/server.h"
 void construct_nav();
 window navigation_bar(construct_nav);
 TextButton main_button("Main", 60, 50, mainbut_pressed);
 void mainbut_pressed()
 {
-    right_menu(new menu_main());
+    write_command("navButton","main");
+    //right_menu(new menu_main());
 }
 TextButton override_button("Over-\nride", 60, 50, overridebut_pressed);
 void overridebut_pressed()
 {
-    right_menu(new menu_override());
+    write_command("navButton","override");
+    //right_menu(new menu_override());
 }
 TextButton dataview_button("Data\nview", 60, 50, dataviewbut_pressed);
 void dataviewbut_pressed()
 {
-    right_menu(new data_view_window());
+    write_command("navButton","dataview");
+    //right_menu(new data_view_window());
 }
 TextButton special_button("Spec", 60, 50, specbut_pressed);
 void specbut_pressed()
 {
-    right_menu(new menu_spec());
+    write_command("navButton","spec");
+    //right_menu(new menu_spec());
 }
 IconButton config_button("symbols/Setting/SE_04.bmp", 60, 50, configbut_pressed);
 void configbut_pressed()
 {
-    right_menu(new menu_settings());
+    write_command("navButton","settings");
+    //right_menu(new menu_settings());
 }
 void construct_nav()
 {

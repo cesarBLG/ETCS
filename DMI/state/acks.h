@@ -1,7 +1,6 @@
 /*
- * European Train Control System
- * Copyright (C) 2019  Iván Izquierdo
- * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * European Train Control System 
+ * Copyright (C) 2022  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +15,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _MENU_H
-#define _MENU_H
-#include "subwindow.h"
-class menu : public subwindow
+#ifndef _ACKS_H
+#define _ACKS_H
+enum struct AckType
 {
-    protected:
-    Button *empty_button[10];
-    Component *hourGlass=nullptr;
-    Button* buttons[10];
-    public:
-    menu(const char *title);
-    ~menu();
-    void setLayout() override;
-    void setHourGlass(bool show);
+    None,
+    Brake,
+    Level,
+    Mode,
+    Message
 };
+extern AckType AllowedAck;
+void setAck(AckType type, int id, bool ack);
+void updateAcks();
 #endif

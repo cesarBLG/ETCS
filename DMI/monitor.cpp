@@ -21,6 +21,7 @@
 MonitoringStatus monitoring;
 SupervisionStatus supervision;
 Level level = Level::Unknown;
+int radioStatus;
 bool level_valid;
 int levelAck;
 Level ackLevel;
@@ -39,6 +40,7 @@ float TTI = 20;
 float TTP = 20;
 bool SB;
 bool EB;
+bool brakeAck;
 int trn;
 bool trn_valid;
 std::string driverid;
@@ -78,42 +80,4 @@ void setSupervision(SupervisionStatus status)
     if(status == WaS) playSwarning();
     else if(supervision == WaS) stopSwarning();
     supervision = status;
-}
-//Note: this should be computed in EVC
-void updateSupervision()
-{
-    /*float P = Vperm;
-    float SBI = Vsbi<Vperm ? Vperm + 5 : Vsbi;
-    float W = (Vperm+Vsbi)/2;
-    SupervisionStatus status = supervision;
-    //if(supervision == IntS && !speedMonitorBrake) supervision = NoS;
-    if(monitoring == CSM)
-    {
-        if(supervision != IntS)
-        {
-            if(Vest>SBI) status = IntS;
-            else if(Vest>W) status = WaS;
-            else if(Vest>P) status = OvS;
-            else status = NoS;
-        }
-    }
-    if(monitoring == TSM)
-    {
-        if(supervision != IntS)
-        {
-            if(Vest>SBI) status = IntS;
-            else if(Vest>W) status = WaS;
-            else if(Vest>P) status = OvS;
-            else status = IndS;
-        }
-    }
-    if(monitoring == RSM)
-    {
-        if(supervision != IntS)
-        {
-            if(Vest>Vrelease) status = IntS;
-            else status = IndS;
-        }
-    }
-    setSupervision(status);*/
 }

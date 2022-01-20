@@ -52,7 +52,7 @@ void init_video()
     }
     startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
-    //SDL_AddTimer(100, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
+    SDL_AddTimer(50, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)
     {
         printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());
@@ -62,9 +62,9 @@ void init_video()
     start_sound();
     SDL_Event ev;
     int count = 0;
+    SDL_Event touchEv;
+    bool touchEvent=false;
     chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
-    SDL_Event lastPressEvent;
-    bool pressEventReceived = false;
     while(running)
     {
         if(SDL_WaitEvent(&ev) != 0)
@@ -83,22 +83,21 @@ void init_video()
                 quit();
                 break;
             }
-            if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_FINGERDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_FINGERUP || ev.type == SDL_MOUSEMOTION || ev.type == SDL_FINGERMOTION)
-            {
-                pressEventReceived = true;
-                lastPressEvent = ev;
+            if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION /*|| ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION*/) {
+                touchEvent = true;
+                touchEv = ev;
             }
-			if (pressEventReceived)
-			{
-                auto prevev = ev;
-				ev = lastPressEvent;
+            if (touchEvent) {
+                SDL_Event ev2 = ev;
+                ev  = touchEv;
 				float scrx;
 				float scry;
 				bool pressed;
 				if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
 				{
 					SDL_TouchFingerEvent tfe = ev.tfinger;
-					pressed = tfe.pressure > 0.1;
+					if (ev.type == SDL_FINGERMOTION) pressed = tfe.pressure>0;
+					else pressed = ev.type == SDL_FINGERDOWN;
 					scrx = tfe.x;
 					scry = tfe.y;
 				}
@@ -131,9 +130,9 @@ void init_video()
 					if (windows[i]->active) windows[i]->event(pressed, x, y);
                     else windows[i]->event(0, -100, -100);
 				}
-                ev = prevev;
+				ev = ev2;
 			}
-            if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT) 
+            if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT)
             {
                 auto now = chrono::system_clock::now();
                 chrono::duration<double> diff = now - lastrender;
@@ -191,7 +190,6 @@ void quitDisplay()
     SDL_DestroyRenderer(sdlren);
     SDL_DestroyWindow(sdlwin);
     SDL_Quit();
-    exit(nullptr);
 }
 void clear()
 {

@@ -19,6 +19,7 @@
 #ifndef _TRAIN_DATA_WINDOW_H
 #define _TRAIN_DATA_WINDOW_H
 #include "data_entry.h"
+#include "data_validation.h"
 class train_data_window : public input_window
 {
     public:
@@ -30,5 +31,12 @@ class train_data_window : public input_window
     }
     void sendInformation() override;
     void setLayout() override;
+};
+class train_data_validation_window : public validation_window
+{
+    public:
+    train_data_validation_window(vector<input_data*> data);
+    void sendInformation() override;
+    void notValidated() override;
 };
 #endif

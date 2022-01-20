@@ -50,7 +50,7 @@ using namespace std;
 };*/
 struct Message
 {
-    int Id;
+    unsigned int Id;
     int hour;
     int minute;
     bool ack;
@@ -58,7 +58,7 @@ struct Message
     bool firstGroup;
     bool shown;
     string text;
-    Message(int id, string text, int hour, int minute, 
+    Message(unsigned int id, string text, int hour, int minute, 
             bool firstGroup = false, bool ack = false, int reason = 0) : 
             Id(id), hour(hour), minute(minute), firstGroup(firstGroup), ack(ack), reason(reason),
             shown(false), text(text)
@@ -67,5 +67,6 @@ struct Message
     }
 };
 void addMsg(Message m);
-void revokeMessage(int id);
+void revokeMessage(unsigned int id);
 void displayMessages();
+void updateMessages();

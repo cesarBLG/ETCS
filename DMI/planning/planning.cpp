@@ -36,6 +36,7 @@ Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
 bool planning_unchanged= false;
+extern bool showSpeeds;
 void displayScaleUp();
 void displayScaleDown();
 void speedLines();
@@ -69,19 +70,27 @@ void displayPlanning()
         else planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
     }
 }
+std::map<int,texture*> object_textures;
 void displayObjects()
 {
+    if (mode == Mode::OS && !showSpeeds) return;
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
-        if(p.distance>divs[8]*planning_scale || p.distance<0) continue;
-        string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
-        planning_distance.drawImage(name.c_str(),object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
+        if(p.distance>divs[8]*planning_scale || p.distance<0 || (i>2 && getPlanningHeight(planning_elements[i-3].distance)-getPlanningHeight(p.distance) < 20)) continue;
+        if (object_textures.find(p.condition) == object_textures.end()) {
+            texture *t = new texture();
+            string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
+            planning_distance.getImageGraphic(t, name, 0, 0, 20, 20);
+            object_textures[p.condition] = t;
+        }
+        planning_distance.drawTexture(object_textures[p.condition]->tex,object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
     }
 }
 vector<gradient_element> gradient_elements;
 void displayGradient()
 {
+    if (mode == Mode::OS && !showSpeeds) return;
     for(int i=0; i+1<gradient_elements.size(); i++)
     {
         gradient_element &e = gradient_elements[i];
@@ -115,7 +124,7 @@ bool check_spdov(int i, int j)
     float a = getPlanningHeight(cur.distance)-15;
     float b = getPlanningHeight(chk.distance)-15;
     if(abs(a-b)>18) return false;
-    return chk==imarker.element || (cur!=imarker.element && cur.speed>chk.speed);
+    return chk==imarker.element || (cur!=imarker.element && (cur.speed>chk.speed || (cur.speed == chk.speed && cur.distance > chk.distance)));
 }
 indication_marker imarker;
 void displayPASP()
@@ -123,6 +132,7 @@ void displayPASP()
     PASP.clear();
     PASP.drawRectangle(14, 0, 99, 270, PASPdark);
     
+    if (mode == Mode::OS && !showSpeeds) return;
     if(speed_elements.size() == 0) return;
     speed_element prev_pasp = speed_elements[0];
     bool oth1 = false;
@@ -165,6 +175,7 @@ void displaySpeed()
     if(planning_unchanged) return;
     planning_unchanged = true;
     planning_speed.clear();
+    if (mode == Mode::OS && !showSpeeds) return;
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
     {
@@ -190,7 +201,7 @@ void displaySpeed()
             planning_speed.addImage(im ? "symbols/Planning/PL_23.bmp" : "symbols/Planning/PL_22.bmp", 14, a+7, 20, 20);
             planning_speed.addText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT);
         }
-        else
+        else if (prev.speed != cur.speed)
         {
             planning_speed.addImage("symbols/Planning/PL_21.bmp", 14, a-7, 20, 20);
             planning_speed.addText(to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT);

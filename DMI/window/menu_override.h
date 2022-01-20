@@ -23,5 +23,6 @@ class menu_override : public menu
 {
     public:
     menu_override();
+    void setEnabled(bool eoa);
 };
 #endif

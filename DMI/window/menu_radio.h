@@ -16,30 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "running_number.h"
-#include "../monitor.h"
-#include "keyboard.h"
-#include "../tcp/server.h"
-trn_window::trn_window(int trn) : input_window("Train running number", 1)
+#ifndef _MENU_RADIO_H
+#define _MENU_RADIO_H
+#include "menu.h"
+class menu_radio : public menu
 {
-    inputs[0] = new trn_input();
-    create();
-    if (trn != 0)
-    {
-        inputs[0]->prev_data = inputs[0]->data = to_string(trn);
-        inputs[0]->updateText();
-    }
-}
-void trn_window::sendInformation()
-{
-    write_command("setTRN", inputs[0]->getData());
-}
-trn_input::trn_input()
-{
-    keys = getNumericKeyboard(this);
-}
-void trn_input::validate()
-{
-    if(data.size()>6) return;
-    valid = true;
-}
+    public:
+    menu_radio();
+    void setEnabled(bool contactlast, bool shortno, bool enterdata, bool radionetwork);
+};
+#endif

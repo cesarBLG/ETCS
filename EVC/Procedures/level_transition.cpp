@@ -52,8 +52,6 @@ void perform_transition()
             try_handle_information(*it2, *it);
         }
     }
-    /*if ((prevlevel == Level::N2 || prevlevel == Level::N3) && level != Level::N2 && level != Level::N3 && supervising_rbc)
-        transition_border = lti.start;*/
     transition_buffer.clear();
     if (level_acknowledgeable && !level_acknowledged) {
         level_timer_started = true;

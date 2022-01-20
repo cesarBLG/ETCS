@@ -19,103 +19,23 @@
 #include "../graphics/display.h"
 #include "../graphics/drawing.h"
 #include "../monitor.h"
+#include "../window/window.h"
 #include "../window/level_window.h"
+#include "../window/fixed_train_data.h"
 #include "../window/driver_id.h"
+#include "../window/running_number.h"
+#include "../window/menu_main.h"
+#include "../window/menu_radio.h"
+#include "../window/menu_override.h"
 #include <thread>
-#include <iostream>
-using namespace std;
-extern bool running;
-static bool exit_menu = false;
-static subwindow *c = nullptr;
-static function<void()> proc = nullptr;
-mutex window_mtx;
+#include <functional>
+#include <mutex>
+#include <condition_variable>
+subwindow *active = nullptr;
+std::string active_name;
 mutex draw_mtx;
-condition_variable window_cv;
-bool wake_fun(){return exit_menu||c!=nullptr||proc!=nullptr||!running;}
-void set_procedure(function<void()> p)
-{
-    std::unique_lock<mutex> lck(window_mtx);
-    ::proc = p;
-    lck.unlock();
-    window_cv.notify_one();
-}
-void wait(subwindow *w)
-{
-    draw_mtx.lock();
-    active_windows.insert(w);
-    draw_mtx.unlock();
-    while(!exit_menu)
-    {
-        draw_mtx.lock();
-        navigation_bar.active = false;
-        planning_area.active = false;
-        if(w->fullscreen) main_window.active = false;
-        draw_mtx.unlock();
-        repaint();
-        unique_lock<mutex> lck(window_mtx);
-        window_cv.wait(lck, wake_fun);
-        if(!running || proc != nullptr)
-        {
-            lck.unlock();
-            break;
-        }
-        if(c!=nullptr)
-        {
-            bool e = exit_menu;
-            subwindow *w1 = c;
-            c = nullptr;
-            exit_menu = false;
-            draw_mtx.lock();
-            w->active = false;
-            draw_mtx.unlock();
-            lck.unlock();
-            wait(w1);
-            window_mtx.lock();
-            draw_mtx.lock();
-            w->active = true;
-            exit_menu = e;
-            draw_mtx.unlock();
-            window_mtx.unlock();
-        }
-    }
-    window_mtx.lock();
-    exit_menu = false;
-    window_mtx.unlock();
-    draw_mtx.lock();
-    active_windows.erase(w);
-    old_windows.insert(w);
-    if(w->fullscreen) main_window.active = true;
-    navigation_bar.active = true;
-    planning_area.active = true;
-    draw_mtx.unlock();
-}
-void start_procedure()
-{
-    navigation_bar.active = false;
-    planning_area.active = false;
-    while(running && (driverid=="" || !driverid_valid))
-    {
-        wait(new driver_window());
-        if (proc != nullptr) return;
-        std::this_thread::sleep_for(100ms);
-    }
-    while(running && (level==Level::Unknown || !level_valid))
-    {
-        if (level != Level::Unknown) 
-        {
-            wait(new level_validation_window());
-        if (proc != nullptr) return;
-            std::this_thread::sleep_for(100ms);
-        }
-        if (level_valid) break;
-        wait(new level_window());
-        if (proc != nullptr) return;
-        std::this_thread::sleep_for(100ms);
-    }
-    navigation_bar.active = true;
-    planning_area.active = true;
-}
-void manage_windows()
+#include <iostream>
+void startWindows()
 {
     main_window.construct();
     navigation_bar.construct();
@@ -125,38 +45,100 @@ void manage_windows()
     active_windows.insert(&planning_area);
     navigation_bar.active = true;
     planning_area.active = true;
-    while(running)
-    {
-        unique_lock<mutex> lck(window_mtx);
-        window_cv.wait(lck, wake_fun);
-        if(!running) break;
-        if (proc!=nullptr)
-        {
-            auto p = proc;
-            proc = nullptr;
-            lck.unlock();
-            p();
+    active_name = "default";
+}
+void setWindow(json &j)
+{
+    subwindow *w = nullptr;
+    std::string name = j["active"].get<std::string>();
+    if (name == "default") {
+        navigation_bar.active = planning_area.active = main_window.active = true;
+    } else {
+        bool same = name == active_name;
+        if (name == "menu_main") {
+            menu_main *m;
+            if (same) m = (menu_main*)active;
+            else m = new menu_main();
+            json &enabled = j["enabled"];
+            m->setEnabled(enabled["Start"].get<bool>(),enabled["Driver ID"].get<bool>(),enabled["Train Data"].get<bool>(),enabled["Level"].get<bool>(),enabled["Train Running Number"].get<bool>(),enabled["Shunting"].get<bool>(),enabled["Non Leading"].get<bool>(),enabled["Maintain Shunting"].get<bool>(),enabled["Radio Data"].get<bool>());
+            m->setHourGlass(j.contains("hour_glass") && j["hour_glass"].get<bool>());
+            w = m;
+        } else if (name == "menu_radio") {
+            menu_radio *m;
+            if (same) m = (menu_radio*)active;
+            else m = new menu_radio();
+            json &enabled = j["enabled"];
+            m->setEnabled(enabled["Contact last RBC"].get<bool>(),enabled["Use short number"].get<bool>(),enabled["Enter RBC data"].get<bool>(),enabled["Radio Network ID"].get<bool>());
+            m->setHourGlass(j.contains("hour_glass") && j["hour_glass"].get<bool>());
+            w = m;
+        } else if (name == "menu_override") {
+            menu_override *m;
+            if (same) m = (menu_override*)active;
+            else m = new menu_override();
+            json &enabled = j["enabled"];
+            m->setEnabled(enabled["EoA"].get<bool>());
+            w = m;
+        } else if (name == "driver_window") {
+            driver_window *d;
+            if (same) d = (driver_window*)active;
+            else d = new driver_window(j["driver_id"].get<std::string>(), j["show_trn"].get<bool>());
+            w = d;
+        } else if (name == "trn_window") {
+            trn_window *d;
+            if (same) d = (trn_window*)active;
+            else d = new trn_window(j["trn"].get<int>());
+            w = d;
+        } else if (name == "level_window") {
+            level_window *l;
+            if (same) l = (level_window*)active;
+            else l = new level_window((Level)j["level"].get<int>());
+            w = l;
+        } else if (name == "level_validation_window") {
+            level_validation_window *l;
+            if (same) l = (level_validation_window*)active;
+            else l = new level_validation_window((Level)j["level"].get<int>());
+            w = l;
+        } else if (name == "fixed_train_data_window") {
+            fixed_train_data_window *t;
+            if (same) t = (fixed_train_data_window*)active;
+            else t = new fixed_train_data_window(j["train_data"].get<std::string>());
+            w = t;
+        } else if (name == "fixed_train_data_validation_window") {
+            fixed_train_data_validation_window *t;
+            if (same) t = (fixed_train_data_validation_window*)active;
+            else t = new fixed_train_data_validation_window(j["train_data"].get<std::string>());
+            w = t;
+        } else {
+            if (same) w = active;
+            else
+            {
+                json& def = j["WindowDefinition"];
+                std::string type = def["WindowType"].get<std::string>();
+                if (type == "DataEntry")
+                {
+                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size());
+                    ((input_window*)w)->build_from(def);
+                }
+                
+                /*else if (type == "Menu") w = new menu(j["WindowDefinitionW"]);*/
+            }
         }
-        else if(c!=nullptr)
+        if (w != nullptr)
         {
-            subwindow *w = c;
-            c = nullptr;
-            lck.unlock();
-            wait(w);
+            w->exit_button.enabled = !j.contains("enabled") || !j["enabled"].contains("Exit") || j["enabled"]["Exit"].get<bool>();
         }
+        navigation_bar.active = planning_area.active = false;
+        main_window.active = w == nullptr || !w->fullscreen;
     }
-}
-void right_menu(subwindow *w)
-{
-    unique_lock<mutex> lck(window_mtx);
-    c = w;
-    lck.unlock();
-    window_cv.notify_one();
-}
-void exit(subwindow *w)
-{
-    unique_lock<mutex> lck(window_mtx);
-    exit_menu = true;
-    lck.unlock();
-    window_cv.notify_one();
+    active_name = name;
+    if (active != w) {
+        if (active != nullptr) {
+            old_windows.insert(active);
+            active_windows.erase(active);
+        }
+        active = w;
+        if (active != nullptr)
+            active_windows.insert(w);
+        repaint();
+    }
 }
