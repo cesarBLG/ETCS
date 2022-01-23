@@ -5,6 +5,7 @@
 #include "../DMI/windows.h"
 #include "../Position/linking.h"
 #include "../Packets/radio.h"
+#include "stored_information.h"
 som_step som_status = S0;
 som_step prev_status = S0;
 bool som_active;
@@ -14,6 +15,8 @@ bool status_changed;
 void update_SoM()
 {
     som_step save_status = som_status;
+    if (som_active && !desk_open)
+        desk_closed_som();
     if (mode != Mode::SB || !desk_open) {
         som_active = false;
         som_status = S0;

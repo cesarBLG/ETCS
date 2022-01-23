@@ -85,18 +85,39 @@ struct A_NVMAXREDADH1_t : A_t
     static const uint32_t NoMaximumDisplayTargetInformation=61;
     static const uint32_t NoMaximumDisplayTTI=62;
     static const uint32_t NoMaximumNoDisplay=63;
+    double get_value() const override
+    {
+        if (rawdata == NoMaximumDisplayTargetInformation) return -1;
+        if (rawdata == NoMaximumDisplayTTI) return -2;
+        if (rawdata == NoMaximumNoDisplay) return -3;
+        return rawdata * 0.05;
+    }
 };
 struct A_NVMAXREDADH2_t : A_t
 {
     static const uint32_t NoMaximumDisplayTargetInformation=61;
     static const uint32_t NoMaximumDisplayTTI=62;
     static const uint32_t NoMaximumNoDisplay=63;
+    double get_value() const override
+    {
+        if (rawdata == NoMaximumDisplayTargetInformation) return -1;
+        if (rawdata == NoMaximumDisplayTTI) return -2;
+        if (rawdata == NoMaximumNoDisplay) return -3;
+        return rawdata * 0.05;
+    }
 };
 struct A_NVMAXREDADH3_t : A_t
 {
     static const uint32_t NoMaximumDisplayTargetInformation=61;
     static const uint32_t NoMaximumDisplayTTI=62;
     static const uint32_t NoMaximumNoDisplay=63;
+    double get_value() const override
+    {
+        if (rawdata == NoMaximumDisplayTargetInformation) return -1;
+        if (rawdata == NoMaximumDisplayTTI) return -2;
+        if (rawdata == NoMaximumNoDisplay) return -3;
+        return rawdata * 0.05;
+    }
 };
 struct A_NVP12_t : A_t
 {
@@ -117,6 +138,12 @@ struct D_t : ETCS_variable
         return fact*rawdata;
     }
 };
+struct D_ADHESION_t : D_t
+{
+};
+struct D_CURRENT_t : D_t
+{
+};
 struct D_CYCLOC_t : D_t
 {
     static const uint32_t NoCyclicalReportPosition=32767;
@@ -135,6 +162,9 @@ struct D_LEVELTR_t : D_t
     static const uint32_t Now=32767;
 };
 struct D_LINK_t : D_t
+{
+};
+struct D_LOC_t : D_t
 {
 };
 struct D_LRBG_t : D_t
@@ -219,6 +249,9 @@ struct D_TEXTDISPLAY_t : D_t
 {
     static const uint32_t NotDistanceLimited=32767;
 };
+struct D_TRACTION_t : D_t
+{
+};
 struct D_TRACKCOND_t : D_t
 {
 };
@@ -254,6 +287,9 @@ struct L_ACKLEVELTR_t : D_t
 {
 };
 struct L_ACKMAMODE_t : D_t
+{
+};
+struct L_ADHESION_t : D_t
 {
 };
 struct L_DOUBTOVER_t : D_t
@@ -342,6 +378,12 @@ struct M_ACK_t : ETCS_variable
     static const uint32_t AcknowledgementRequired=1;
     M_ACK_t() : ETCS_variable(1) {}
 };
+struct M_ADHESION_t : ETCS_variable
+{
+    static const uint32_t SlipperyRail=0;
+    static const uint32_t NonSlipperyRail=1;
+    M_ADHESION_t() : ETCS_variable(1) {}
+};
 struct M_AIRTIGHT_t : ETCS_variable
 {
     static const uint32_t NotFitted=0;
@@ -371,6 +413,15 @@ struct M_AXLELOADCAT_t : ETCS_variable
     bool is_valid() override
     {
         return rawdata < 13;
+    }
+};
+struct M_CURRENT_t : ETCS_variable
+{
+    static const uint32_t NoRestriction=1023;
+    M_CURRENT_t() : ETCS_variable(10) {}
+    int get_value()
+    {
+        return rawdata * 10;
     }
 };
 struct M_DUP_t : ETCS_variable
@@ -511,6 +562,17 @@ struct M_LOADINGGAUGE_t : ETCS_variable
     bool is_valid() override
     {
         return rawdata<4;
+    }
+};
+struct M_LOC_t : ETCS_variable
+{
+    static const uint32_t Now = 0;
+    static const uint32_t EveryLRBG = 1;
+    static const uint32_t NotEveryLRBG = 2;
+    M_LOC_t() : ETCS_variable(3) {}
+    bool is_valid() override
+    {
+        return rawdata<3;
     }
 };
 struct M_MAMODE_t : ETCS_variable
@@ -1136,6 +1198,10 @@ struct NID_TSR_t : ETCS_variable
     static const uint32_t NonRevocable=255;
     NID_TSR_t() : ETCS_variable(8) {}
 };
+struct NID_VBCMK_t : ETCS_variable
+{
+    NID_VBCMK_t() : ETCS_variable(6) {}
+};
 struct N_AXLE_t : ETCS_variable
 {
     static const uint32_t Unknown=1023;
@@ -1262,6 +1328,12 @@ struct Q_LENGTH_t : ETCS_variable
     static const uint32_t TrainIntegrityLost=3;
     Q_LENGTH_t() : ETCS_variable(2) {}
     Q_LENGTH_t &operator=(uint32_t data) {rawdata=data; return *this;}
+};
+struct Q_LGTLOC_t : ETCS_variable
+{
+    static const uint32_t MinSafeRearEnd=0;
+    static const uint32_t MaxSafeFrontEnd=1;
+    Q_LGTLOC_t() : ETCS_variable(1) {}
 };
 struct Q_LINK_t : ETCS_variable
 {
@@ -1490,6 +1562,12 @@ struct Q_TRACKINIT_t : ETCS_variable
     static const uint32_t InitialState=1;
     Q_TRACKINIT_t() : ETCS_variable(1) {}
 };
+struct Q_VBCO_t : ETCS_variable
+{
+    static const uint32_t RemoveVBC=0;
+    static const uint32_t SetVBC=1;
+    Q_VBCO_t() : ETCS_variable(1) {}
+};
 struct Q_UPDOWN_t : ETCS_variable
 {
     static const uint32_t TrainToTrack=0;
@@ -1500,6 +1578,16 @@ struct T_t : ETCS_variable
 {
     T_t() : ETCS_variable(10) {}
 };
+struct T_CYCRQST_t : ETCS_variable
+{
+    static const uint32_t NoRepetition=255;
+    T_CYCRQST_t() : ETCS_variable(8) {}
+};
+struct T_CYCLOC_t : ETCS_variable
+{
+    static const uint32_t Infinity=255;
+    T_CYCLOC_t() : ETCS_variable(8) {}
+};
 struct T_EMA_t : T_t
 {
     static const uint32_t NoTimeout=1023;
@@ -1507,6 +1595,11 @@ struct T_EMA_t : T_t
 struct T_ENDTIMER_t : T_t
 {
     static const uint32_t Infinity=1023;
+};
+struct T_MAR_t : ETCS_variable
+{
+    static const uint32_t NoMaRequest=255;
+    T_MAR_t() : ETCS_variable(8) {}
 };
 struct T_NVCONTACT_t : ETCS_variable
 {
@@ -1529,6 +1622,10 @@ struct T_TEXTDISPLAY_t : T_t
 {
     static const uint32_t NoTimeLimited=1023;
 };
+struct T_TIMEOUTRQST_t : T_t
+{
+    static const uint32_t NoMaRequest=1023;
+};
 struct T_TRAIN_t : ETCS_variable
 {
     static const uint32_t Unknown=4294967295ULL;
@@ -1542,6 +1639,14 @@ struct T_TRAIN_t : ETCS_variable
         else if (time-timestamp < -2147483647LL)
             timestamp -= 1ULL<<32;
         return timestamp;
+    }
+};
+struct T_VBC_t : ETCS_variable
+{
+    T_VBC_t() : ETCS_variable(8) {}
+    int64_t get_value()
+    {
+        return rawdata*86400000ULL;
     }
 };
 struct V_t : ETCS_variable

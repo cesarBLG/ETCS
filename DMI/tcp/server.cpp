@@ -65,7 +65,7 @@ void fill_non_existent(json &j, std::string str, nullptr_t null)
 void from_json(const json&j, speed_element &e)
 {
     e.distance = j["DistanceToTrainM"].get<double>();
-    e.speed = j["TargetSpeedMpS"].get<double>()*3.6;
+    e.speed = std::round(j["TargetSpeedMpS"].get<double>()*3.6);
 }
 void from_json(const json&j, gradient_element &e)
 {

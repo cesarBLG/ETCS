@@ -134,16 +134,6 @@ void SetParameters()
         evc_cv.notify_all();
     };
     manager.AddParameter(p);
-    
-    /*p = new Parameter("etcs::message");
-    p->SetValue = [](string val) {
-        std::vector<bool> message = base64_decode(val);
-        bit_read_temp r(message);
-        std::shared_ptr<euroradio_message> m = euroradio_message::build(r);
-        pending_messages.push_back(m);
-        evc_cv.notify_all();
-    };
-    manager.AddParameter(p);*/
 
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {

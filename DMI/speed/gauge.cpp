@@ -254,7 +254,7 @@ void displayVrelease()
         {
             releaseSignShown = true;
             releaseRegion.clear();
-            releaseRegion.addText(to_string((int)Vrelease).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
+            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
             prevVrelease = Vrelease;
         }
     } else {

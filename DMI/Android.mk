@@ -23,7 +23,7 @@ LOCAL_SRC_FILES := init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphi
                    		window/train_data.cpp window/fixed_train_data.cpp window/keyboard.cpp window/input_data.cpp \
                    		graphics/sdl/gfx_primitives.cpp
 
-LOCAL_SHARED_LIBRARIES := SDL2 SDL2_ttf SDL2_net
+LOCAL_SHARED_LIBRARIES := SDL2 SDL2_ttf
 
 LOCAL_LDLIBS := -lGLESv1_CM -lGLESv2 -llog
 

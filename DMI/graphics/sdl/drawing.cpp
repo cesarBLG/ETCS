@@ -215,7 +215,7 @@ void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
 {
     int w;
     int h;
-    TTF_SizeText(font, str, &w, &h);
+    TTF_SizeUTF8(font, str, &w, &h);
     *width = w/scale;
     *height = h/scale;
 }

@@ -1,5 +1,5 @@
 CPP = g++
-OBJECTS = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.o graphics/button.o \
+FILES = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.o graphics/button.o \
 		graphics/display.o window/window.o graphics/layout.o graphics/text_button.o graphics/icon_button.o \
 		speed/gauge.o sound/sound.o distance/distance.o tcp/server.o state/level.o state/mode.o \
 		state/brake.o state/conditions.o state/acks.o state/override.o state/radio.o \
@@ -17,14 +17,18 @@ ifeq ($(TARGET),WIN32)
 EXE = dmi.exe
 CPP = x86_64-w64-mingw32-g++ -m64 -mwindows
 LDFLAGS = -mwindows -static-libgcc -static-libstdc++ -Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf -lwsock32 -limagehlp
+BUILD_DIR = build/win32/
 else
 EXE = dmi
 CFLAGS += -rdynamic
+BUILD_DIR = build/linux/
 endif
+OBJECTS = $(addprefix $(BUILD_DIR), $(FILES))
 all: $(EXE)
 $(EXE): $(OBJECTS)
 	$(CPP) $(OBJECTS) -o dmi $(CFLAGS) $(LDFLAGS)
-%.o: %.cpp
+$(BUILD_DIR)%.o: %.cpp
+	@mkdir -p $(@D)
 	$(CPP) -c $< -o $@ $(CFLAGS)
 clean:
 	rm $(OBJECTS)

@@ -119,12 +119,7 @@ void updateMessages()
     {
         Message &m = *displayMsg[i];
         string date = to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + to_string(m.minute);
-        string text = "";
-        /*if (m.reason == 1) 
-            text += "Train TRIP - ";
-        else if (m.reason == 2) 
-            text += "Train brake - ";*/
-        text += m.text;
+        string &text = m.text;
         int last = text.size();
         if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
         if(line<5+current && line>=current)

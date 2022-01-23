@@ -1,4 +1,4 @@
-OBJECTS = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
+FILES = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
 Supervision/curve_calc.o  Supervision/conversion_model.o  Position/distance.o\
 Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
 Supervision/acceleration.o antenna.o MA/movement_authority.o MA/mode_profile.o Position/linking.o \
@@ -16,22 +16,26 @@ CC = gcc
 DEBUG=-g -rdynamic -D_GLIBCXX_DEBUG
 LDFLAGS = -lorts
 CXXFLAGS = -std=c++11
+BUILD_DIR = build/linux/
 ifeq ($(TARGET),WIN32)
 EXE = evc.exe
 LIB = evc.dll
 CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -I.
-OBJECTS += resource.res
+FILES += resource.res
 LDFLAGS = -lstdc++ -lwsock32 -L. -Bdynamic -lorts -limagehlp
-DEBUG=-g
+DEBUG=
 WINDRES = x86_64-w64-mingw32-windres
 #-D_GLIBCXX_DEBUG
+BUILD_DIR = build/win32/
 endif
+OBJECTS = $(addprefix $(BUILD_DIR), $(FILES))
 all: $(EXE)
 $(EXE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -Wall
-%.o: %.cpp
+$(BUILD_DIR)%.o: %.cpp
+	@mkdir -p $(@D)
 	$(CXX) $(DEBUG) -c $< -o $@ $(CFLAGS) -Wall -Wno-sign-compare $(CXXFLAGS) -fpic
 
 $(LIB): $(OBJECTS)
@@ -39,8 +43,8 @@ $(LIB): $(OBJECTS)
 $(ARCHIVE): $(OBJECTS)
 	ar rcs
 
-resource.res: resource.rc
-	$(WINDRES) resource.rc -O coff -o resource.res
+$(BUILD_DIR)resource.res: resource.rc
+	$(WINDRES) resource.rc -O coff -o $(BUILD_DIR)resource.res
 
 clean:
 	rm $(OBJECTS)

@@ -40,17 +40,17 @@
 #include "TrainSubsystems/subsystems.h"
 #include "LX/level_crossing.h"
 
+#include <signal.h>
 #ifdef __ANDROID__
 #include <android/log.h>
 #elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
-LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
+void print_stack(CONTEXT &context)
 {
     HANDLE process = GetCurrentProcess();
     HANDLE thread = GetCurrentThread();
-    
-    CONTEXT context = *(ExceptionInfo->ContextRecord);
+
     /*memset(&context, 0, sizeof(CONTEXT));
     context.ContextFlags = CONTEXT_FULL;
     RtlCaptureContext(&context);*/
@@ -97,7 +97,10 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
         &stackframe, &context, NULL, 
         SymFunctionTableAccess64, SymGetModuleBase64, NULL);
         
-        if (!result) { break; }
+        if (!result) { 
+            if (i == 0) fprintf(file, "Failed to get stack trace: error %d\n", GetLastError()); 
+            break;
+        }
         
         char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
         PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
@@ -115,13 +118,24 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
     fclose(file);
     
     SymCleanup(process);
+}
+void crash_handler(int sig)
+{
+    CONTEXT context;
+    memset(&context, 0, sizeof(CONTEXT));
+    context.ContextFlags = CONTEXT_FULL;
+    RtlCaptureContext(&context);
+    print_stack(context);
+}
+LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
+{
+    print_stack(*(ExceptionInfo->ContextRecord));
     return EXCEPTION_EXECUTE_HANDLER;
 }
 #else
 #include <execinfo.h>
 #include <cxxabi.h>
 #include <unistd.h>
-#include <signal.h>
 void crash_handler(int sig)
 {
     void *bt[20];
@@ -149,10 +163,10 @@ int main()
 #ifdef __ANDROID__
     __android_log_print(ANDROID_LOG_DEBUG, "EVC", "\n Starting European Train Control System... \n");
 #else
-#ifdef __unix__
+//#ifdef __unix__
     signal(SIGSEGV, crash_handler);
     signal(SIGABRT, crash_handler);
-#endif
+//#endif
 #endif
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);

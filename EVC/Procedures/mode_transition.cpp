@@ -25,6 +25,7 @@
 #include "../TrackConditions/track_condition.h"
 #include "../Packets/radio.h"
 #include "../Euroradio/session.h"
+#include "../LX/level_crossing.h"
 #include <map>
 cond mode_conditions[75];
 static std::vector<mode_transition> transitions;
@@ -365,6 +366,8 @@ void set_mode_deleted_data()
     information_list[5].delete_info = []() {delete_SSP();};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear();};
     information_list[18].delete_info = []() {signal_speeds.clear();};
+    information_list[22].delete_info = []() {messages.clear();}; // TODO: only from trackside
+    information_list[23].delete_info = []() {messages.clear();};
     information_list[25].delete_info = []() {reset_mode_profile(distance(), false);};
     information_list[29].delete_info = []() {
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
@@ -401,8 +404,11 @@ void set_mode_deleted_data()
     };
     information_list[35].invalidate_info = []() {train_data_valid = false;};
     information_list[36].invalidate_info = []() {level_valid = false;};
+    information_list[38].delete_info = []() {driver_id = "";};
     information_list[38].invalidate_info = []() {driver_id_valid = false;};
     information_list[41].invalidate_info = []() {train_running_number_valid = false;};
+    information_list[41].delete_info = []() {train_running_number = 0;};
+    information_list[46].delete_info = []() {level_crossings.clear();};
 }
 void trigger_condition(int num)
 {

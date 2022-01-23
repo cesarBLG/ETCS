@@ -16,20 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "packets.h"
+#include "0.h"
 #include "3.h"
 #include "5.h"
+#include "6.h"
 #include "12.h"
 #include "16.h"
 #include "21.h"
 #include "27.h"
+#include "39.h"
+#include "40.h"
 #include "41.h"
 #include "42.h"
-#include "47.h"
+#include "46.h"
+#include "57.h"
+#include "58.h"
+#include "64.h"
 #include "65.h"
 #include "66.h"
 #include "67.h"
 #include "68.h"
 #include "69.h"
+#include "71.h"
 #include "72.h"
 #include "76.h"
 #include "79.h"
@@ -45,20 +53,28 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r)
     r.peek(&NID_PACKET);
     ETCS_packet *p;
     switch ((unsigned char)NID_PACKET) {
+        case 0: p = new VirtualBaliseCoverMarker(); break;
         case 3: p = new NationalValues(); break;
         case 5: p = new Linking(); break;
+        case 6: p = new VirtualBaliseCoverOrder(); break;
         case 12: p = new Level1_MA(); break;
         case 16: p = new RepositioningInformation(); break;
         case 21: p = new GradientProfile(); break;
         case 27: p = new InternationalSSP(); break;
+        case 39: p = new TrackConditionChangeTractionSystem(); break;
+        case 40: p = new TrackConditionChangeCurrentConsumption(); break;
         case 41: p = new LevelTransitionOrder(); break;
         case 42: p = new SessionManagement(); break;
-        case 47: p = new ConditionalLevelTransitionOrder(); break;
+        case 46: p = new ConditionalLevelTransitionOrder(); break;
+        case 57: p = new MovementAuthorityRequestParameters(); break;
+        case 58: p = new PositionReportParameters(); break;
+        case 64: p = new InhibitionOfRevocableTSRL23(); break;
         case 65: p = new TemporarySpeedRestriction(); break;
         case 66: p = new TemporarySpeedRestrictionRevocation(); break;
         case 67: p = new TrackConditionBigMetalMasses(); break;
         case 68: p = new TrackCondition(); break;
         case 69: p = new TrackConditionStationPlatforms(); break;
+        case 71: p = new AdhesionFactor(); break;
         case 72: p = new PlainTextMessage(); break;
         case 76: p = new FixedTextMessage(); break;
         case 79: p = new GeographicalPosition(); break;
@@ -70,7 +86,7 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r)
         default: p = new ETCS_directional_packet(); break;
     }
     p->copy(r);
-    if (r.position-pos != p->L_PACKET)
+    if (NID_PACKET != 0 && r.position-pos != p->L_PACKET)
          r.error = true;
     return p;
 }

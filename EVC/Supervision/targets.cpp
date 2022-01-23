@@ -223,8 +223,8 @@ void target::calculate_decelerations()
 }
 void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
-    std::map<distance,int> redadh = std::map<distance,int>();
-    redadh[distance(std::numeric_limits<double>::lowest(), 0, 0)] = 0;
+    std::map<distance,bool> redadh = std::map<distance,bool>();
+    redadh[distance(std::numeric_limits<double>::lowest(), 0, 0)] = false;
     acceleration A_gradient = get_A_gradient(gradient, default_gradient);
     acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
     acceleration A_brake_service = get_A_brake_service(use_brake_combination);
@@ -249,8 +249,11 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     for (auto it=redadh.begin(); it!=redadh.end(); ++it)
         A_safe.dist_step.insert(it->first);
     A_safe.accel = [=](double V, distance d) {
-        int adh = (--redadh.upper_bound(d))->second;
-        double A_MAXREDADH = (adh == 3 ? A_NVMAXREDADH3 : (adh == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
+        bool slip = (--redadh.upper_bound(d))->second;
+        int brake = 1;
+        double A_MAXREDADH = (brake == 3 ? A_NVMAXREDADH3 : (brake == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
+        if (!slip || A_MAXREDADH < 0)
+            A_MAXREDADH = std::numeric_limits<double>::max();
         return std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d); 
     };
         
