@@ -1,4 +1,5 @@
 #include "start.h"
+#include "../Supervision/emergency_stop.h"
 #include "../Supervision/supervision.h"
 #include "../Euroradio/session.h"
 #include "../DMI/text_message.h"
@@ -167,7 +168,7 @@ void update_SoM()
 void start_pressed()
 {
     bool c1 = V_est == 0 && mode == Mode::SB && train_data_valid && level != Level::Unknown/* && som_active && som_status == S20*/;
-    bool c2 = V_est == 0 && mode == Mode::PT && train_data_valid && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established));
+    bool c2 = V_est == 0 && mode == Mode::PT && train_data_valid && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()));
     bool c3 = mode == Mode::SR && (level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established;
     if (c1 || c2 || c3) {
         if (level == Level::NTC) {

@@ -19,7 +19,7 @@
 #include "../Position/distance.h"
 #include "../Supervision/supervision.h"
 #include "../Packets/41.h"
-#include "../Packets/47.h"
+#include "../Packets/46.h"
 #include "../Packets/messages.h"
 #include "../Packets/etcs_information.h"
 #include "../optional.h"
@@ -96,6 +96,7 @@ struct level_transition_information
 void update_level_status();
 void level_transition_received(level_transition_information info);
 extern optional<level_transition_information> ongoing_transition;
+extern optional<level_transition_information> sh_transition;
 extern optional<distance> max_ack_distance;
 extern std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer;
 extern bool level_acknowledgeable;

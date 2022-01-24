@@ -20,6 +20,7 @@
 #include "mode_transition.h"
 #include <string>
 bool trip_acknowledged = false;
+bool trip_exit_acknowledged = false;
 void train_trip(int reason)
 {
     std::string str;
@@ -80,5 +81,6 @@ void update_trip()
         mode_acknowledgeable = true;
         mode_acknowledged = false;
         trip_acknowledged = true;
+        trip_exit_acknowledged = false;
     }
 }

@@ -38,7 +38,7 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
-        double vd2 = dend ? (inc ? 1e9 : -1) : dac*((dnext->get()==std::numeric_limits<double>::lowest()) ? dnext->get() : *dnext-pos)+v02;
+        double vd2 = (dend || dnext->get() <= std::numeric_limits<double>::lowest() || dnext->get() >= std::numeric_limits<double>::max()) ? (inc ? 1e9 : -1) : dac*(*dnext-pos)+v02;
         if (inc ? (v2<=std::min(vv2,vd2)) : (v2>=std::max(vv2,vd2))) {
             pos += (v2-v02)/dac;
             v02 = v2;
@@ -88,8 +88,8 @@ double speed_curve(acceleration a, distance dref, double vref, distance dist)
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
-        double vd2 = dend ? (inc ? 1e9 : -1) : dac*((dnext->get()==std::numeric_limits<double>::lowest()) ? dnext->get() : *dnext-pos)+v02;
-        double v2 = dac*(dist-pos)+v02;
+        double vd2 = (dend || dnext->get() <= std::numeric_limits<double>::lowest() || dnext->get() >= std::numeric_limits<double>::max()) ? (inc ? 1e9 : -1) : dac*(*dnext-pos)+v02;
+        double v2 = std::max(dac*(dist-pos)+v02, 0.0);
         if (inc ? (v2<=std::min(vv2,vd2)) : (v2>=std::max(vv2,vd2))) {
             pos = dist;
             v02 = v2;

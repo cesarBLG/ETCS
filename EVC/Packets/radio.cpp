@@ -38,15 +38,21 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
     {
         case 2: msg = new SR_authorisation(); break;
         case 3: msg = new MA_message(); break;
+        case 6: msg = new TR_exit_recognition(); break;
         case 8: msg = new train_data_acknowledgement(); break;
+        case 15: msg = new conditional_emergency_stop(); break;
+        case 16: msg = new unconditional_emergency_stop(); break;
+        case 18: msg = new emergency_stop_revocation(); break;
         case 24: msg = new euroradio_message(); break;
         case 27: msg = new SH_refused(); break;
         case 28: msg = new SH_authorised(); break;
         case 32: msg = new RBC_version(); break;
+        case 33: msg = new MA_shifted_message(); break;
         case 39: msg = new ack_session_termination(); break;
         case 40: msg = new train_rejected(); break;
         case 41: msg = new train_accepted(); break;
         case 43: msg = new som_position_confirmed(); break;
+        case 45: msg = new coordinate_system_assignment(); break;
         default: r.sparefound = true; msg = new euroradio_message(); break;
     }
     msg->copy(r);

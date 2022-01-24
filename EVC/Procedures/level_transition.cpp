@@ -21,6 +21,7 @@
 #include "../DMI/text_message.h"
 #include "../TrainSubsystems/brake.h"
 optional<level_transition_information> ongoing_transition;
+optional<level_transition_information> sh_transition;
 std::vector<level_information> priority_levels;
 optional<distance> transition_border;
 Level level = Level::Unknown;
@@ -34,7 +35,8 @@ bool level_timer_started = false;
 int64_t level_timer;
 void perform_transition()
 {
-    if (!ongoing_transition) return;
+    if(!ongoing_transition)
+        return;
     level_transition_information lti = *ongoing_transition;
     if (level == Level::N2 || level == Level::N3)
         transition_border = lti.start;
@@ -73,6 +75,12 @@ void update_level_status()
         position_report_reasons[5] = true;
         transition_border = {};
     }
+    if (sh_transition && mode != Mode::SH && mode != Mode::PS) {
+        ongoing_transition = sh_transition;
+        sh_transition = {};
+        level_to_ack = ongoing_transition->leveldata.level;
+        perform_transition();
+    }
     if (!ongoing_transition) return;
     if (ongoing_transition->start<=d_estfront)
         perform_transition();
@@ -93,6 +101,12 @@ void level_transition_received(level_transition_information info)
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {
         ongoing_transition = {};
         priority_levels = info.priority_table;
+        return;
+    }
+    if (mode == Mode::SH || mode == Mode::PS) {
+        sh_transition = info;
+        priority_levels = info.priority_table;
+        ongoing_transition = {};
         return;
     }
     ongoing_transition = info;

@@ -136,7 +136,6 @@ struct euroradio_message_traintotrack
         w.replace(&L_MESSAGE, 8);
     }
 };
-
 struct MA_message : euroradio_message
 {
     std::shared_ptr<Level2_3_MA> MA;
@@ -155,6 +154,9 @@ struct MA_message : euroradio_message
         MA->copy(w);
     }
 };
+struct TR_exit_recognition : euroradio_message
+{
+};
 struct train_data_acknowledgement : euroradio_message
 {
     T_TRAIN_t T_TRAINack;
@@ -166,6 +168,53 @@ struct train_data_acknowledgement : euroradio_message
         M_ACK.copy(r);
         NID_LRBG.copy(r);
         T_TRAINack.copy(r);
+    }
+};
+struct conditional_emergency_stop : euroradio_message
+{
+    NID_EM_t NID_EM;
+    Q_SCALE_t Q_SCALE;
+    D_REF_t D_REF;
+    Q_DIR_t Q_DIR;
+    D_EMERGENCYSTOP_t D_EMERGENCYSTOP;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        NID_EM.copy(r);
+        Q_SCALE.copy(r);
+        D_REF.copy(r);
+        Q_DIR.copy(r);
+        D_EMERGENCYSTOP.copy(r);
+    }
+};
+struct unconditional_emergency_stop : euroradio_message
+{
+    NID_EM_t NID_EM;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        NID_EM.copy(r);
+    }
+};
+struct emergency_stop_revocation : euroradio_message
+{
+    NID_EM_t NID_EM;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        NID_EM.copy(r);
     }
 };
 struct SR_authorisation : euroradio_message
@@ -222,6 +271,28 @@ struct RBC_version : euroradio_message
         M_VERSION.copy(r);
     }
 };
+struct MA_shifted_message : euroradio_message
+{
+    Q_SCALE_t Q_SCALE;
+    D_REF_t D_REF;
+    std::shared_ptr<Level2_3_MA> MA;
+    MA_shifted_message()
+    {
+        MA = std::shared_ptr<Level2_3_MA>(new Level2_3_MA());
+        packets.push_back(MA);
+    }
+    virtual void copy(bit_manipulator &w) override
+    {
+        NID_MESSAGE.copy(w);
+        L_MESSAGE.copy(w);
+        T_TRAIN.copy(w);
+        M_ACK.copy(w);
+        NID_LRBG.copy(w);
+        Q_SCALE.copy(w);
+        D_REF.copy(w);
+        MA->copy(w);
+    }
+};
 struct ack_session_termination : euroradio_message
 {
 };
@@ -233,6 +304,19 @@ struct train_accepted : euroradio_message
 };
 struct som_position_confirmed : euroradio_message
 {
+};
+struct coordinate_system_assignment : euroradio_message
+{
+    Q_ORIENTATION_t Q_ORIENTATION;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        Q_ORIENTATION.copy(r);
+    }
 };
 struct SH_request : euroradio_message_traintotrack
 {

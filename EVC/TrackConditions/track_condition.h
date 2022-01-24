@@ -18,6 +18,8 @@
 #pragma once
 #include "../Position/distance.h"
 #include "../Supervision/train_data.h"
+#include "../Packets/39.h"
+#include "../Packets/40.h"
 #include "../Packets/67.h"
 #include "../Packets/68.h"
 #include "../Packets/69.h"
@@ -124,8 +126,11 @@ struct track_condition
     }
     double get_end_distance_to_train()
     {
-        if (!profile)
+        if (!profile) {
+            if (condition == TrackConditions::ChangeOfTractionSystem)
+                return start-d_minsafefront(start)+L_TRAIN;
             return get_distance_to_train();
+        }
         if (condition == TrackConditions::BigMetalMasses)
             return end-d_minsafefront(end)+L_antenna_front;
         if (condition == TrackConditions::TunnelStoppingArea || condition == TrackConditions::SoundHorn)
@@ -146,5 +151,6 @@ extern optional<distance> restore_initial_states_various;
 void update_track_conditions();
 void update_brake_contributions();
 void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref);
-void load_track_condition_various(TrackCondition cond, distance ref);
+void load_track_condition_various(TrackCondition cond, distance ref, bool special);
 void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref);
+void load_track_condition_traction(TrackConditionChangeTractionSystem cond, distance ref);

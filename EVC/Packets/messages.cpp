@@ -22,10 +22,12 @@
 #include "27.h"
 #include "41.h"
 #include "136.h"
+#include "../Supervision/emergency_stop.h"
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
 #include "../Procedures/start.h"
+#include "../Procedures/train_trip.h"
 #include "../TrainSubsystems/brake.h"
 #include <algorithm>
 #include <iostream>
@@ -527,10 +529,17 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
     if (!valid_lrbg && message->NID_LRBG!=NID_LRBG_t::Unknown)
         return;
     switch (message->NID_MESSAGE) {
-        case 15:
-        case 33:
+        case 15: {
+            auto *emerg = (conditional_emergency_stop*)message.get();
+            ref += emerg->D_REF.get_value(emerg->Q_SCALE);
+            break;
+        }
+        case 33: {
+            auto *ma = (MA_shifted_message*)message.get();
+            ref += ma->D_REF.get_value(ma->Q_SCALE);
+            break;
+        }
         case 34:
-            //ref -= message->D_REF.get(message->Q_SCALE); TODO
             break;
         default:
             break;
@@ -541,11 +550,43 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             case 2:
                 info = new SR_authorisation_info();
                 break;
+            case 6:
+                info = new etcs_information(37, 39, []() {
+                    trip_exit_acknowledged = true;
+                });
+                break;
+            case 8:
+                info = new etcs_information(38, 40, [session]() {
+                    session->train_data_ack_pending = false;
+                });
+                break;
+            case 15:
+                info = new etcs_information(41, 43, [message,ref]() {
+                    auto *emerg = (conditional_emergency_stop*)message.get();
+                    handle_conditional_emergency_stop(emerg->NID_EM, ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE));
+                });
+                break;
+            case 16:
+                info = new etcs_information(40, 42, [message]() {
+                    auto *emerg = (unconditional_emergency_stop*)message.get();
+                    handle_unconditional_emergency_stop(emerg->NID_EM);
+                });
+                break;
+            case 18:
+                info = new etcs_information(42, 44, [message]() {
+                    auto *emerg = (emergency_stop_revocation*)message.get();
+                    revoke_emergency_stop(emerg->NID_EM);
+                });
+                break;
             case 27:
-                update_dialog_step("SH refused", "");
+                info = new etcs_information(43, 45, []() {
+                    update_dialog_step("SH refused", "");
+                });
                 break;
             case 28:
-                update_dialog_step("SH authorised", "");
+                info = new etcs_information(44, 46, []() {
+                    update_dialog_step("SH authorised", "");
+                });
                 break;
             case 40:
                 info = new etcs_information(50, 52, []() {
@@ -561,6 +602,10 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                 break;
             case 43:
                 info = new etcs_information(52, 54, [](){ position_valid = true; });
+                break;
+            case 45:
+                info = new coordinate_system_information();
+                break;
             default:
                 break;
         }
@@ -669,6 +714,10 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                 if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
                     return false;   
             }
+        }
+        if (s.exceptions.find(5) != s.exceptions.end()) {
+            if (!emergency_stops.empty())
+                return false;
         }
         if (s.exceptions.find(8) != s.exceptions.end()) {
             TemporarySpeedRestriction tsr = *((TemporarySpeedRestriction*)info->linked_packets.begin()->get());
@@ -1026,6 +1075,8 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new gradient_information());
     } else if (packet_num == 27) {
         info.push_back(new issp_information());
+    } else if (packet_num == 39) {
+        info.push_back(new track_condition_information());
     } else if (packet_num == 41) {
         info.push_back(new leveltr_order_information());
     } else if (packet_num == 42) {
@@ -1038,7 +1089,10 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new TSR_revocation_information());
     } else if (packet_num == 67) {
         info.push_back(new track_condition_big_metal_information());
-    } else if (packet_num == 68 || packet_num == 69) {
+    } else if (packet_num == 68) {
+        info.push_back(new track_condition_information());
+        info.push_back(new track_condition_information2());
+    } else if (packet_num == 69) {
         info.push_back(new track_condition_information());
     } else if (packet_num == 72) {
         info.push_back(new plain_text_information());

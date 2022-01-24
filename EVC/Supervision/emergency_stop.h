@@ -1,6 +1,6 @@
 /*
  * European Train Control System
- * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * Copyright (C) 2022  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "../DMI/text_message.h"
-extern bool trip_exit_acknowledged;
-void train_trip(int reason);
-void update_trip();
+#include "../Position/distance.h"
+#include "../optional.h"
+#include <map>
+extern std::map<int, optional<distance>> emergency_stops;
+void handle_unconditional_emergency_stop(int id);
+int handle_conditional_emergency_stop(int id, distance location);
+void revoke_emergency_stop(int id);

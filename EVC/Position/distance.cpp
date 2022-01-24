@@ -140,6 +140,12 @@ double distance::operator-(const distance d) const
     int dir = 1;
     if (orientation * d.orientation < 0) abort();
     if (orientation == -1 || d.orientation == -1) dir = -1;
+    if (dist <= std::numeric_limits<double>::lowest() ||
+    d.dist >= std::numeric_limits<double>::max())
+        return std::numeric_limits<double>::lowest();
+    if (dist >= std::numeric_limits<double>::max() ||
+    d.dist <= std::numeric_limits<double>::lowest())
+        return std::numeric_limits<double>::max();
     return dir*(dist+ref-d.dist-d.ref);
 }
 distance d_maxsafefront(int orientation, double reference)

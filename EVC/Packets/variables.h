@@ -151,6 +151,9 @@ struct D_CYCLOC_t : D_t
 struct D_DP_t : D_t
 {
 };
+struct D_EMERGENCYSTOP_t : D_t
+{
+};
 struct D_ENDTIMERSTARTLOC_t : D_t
 {
 };
@@ -432,6 +435,23 @@ struct M_DUP_t : ETCS_variable
     M_DUP_t() : ETCS_variable(2)
     {
         invalid.insert(3);
+    }
+};
+struct M_ERROR_t : ETCS_variable
+{
+    static const uint32_t BaliseGroupLinkingConsistencyError=0;
+    static const uint32_t LinkedMessageConsistencyError=1;
+    static const uint32_t UnlinkedMessageConsistencyError=2;
+    static const uint32_t RadioMessageConsistencyError=3;
+    static const uint32_t RadioSequenceError=4;
+    static const uint32_t SafeRadioConnectionError=5;
+    static const uint32_t SafetyCriticalFault=6;
+    static const uint32_t DoubleLinkingError=7;
+    static const uint32_t DoubleRepositioningError=8;
+    M_ERROR_t() : ETCS_variable(8) {}
+    bool is_valid() override
+    {
+        return rawdata < 9;
     }
 };
 struct M_LEVEL_t : ETCS_variable
@@ -1094,6 +1114,10 @@ struct NID_CTRACTION_t : ETCS_variable
 {
     NID_CTRACTION_t() : ETCS_variable(10) {}
 };
+struct NID_EM_t : ETCS_variable
+{
+    NID_EM_t() : ETCS_variable(4) {}
+};
 struct NID_ENGINE_t : ETCS_variable
 {
     NID_ENGINE_t() : ETCS_variable(24) {}
@@ -1459,6 +1483,12 @@ struct Q_NVSBTSMPERM_t : ETCS_variable
     static const uint32_t No=0;
     static const uint32_t Yes=1;
     Q_NVSBTSMPERM_t() : ETCS_variable(1) {}
+};
+struct Q_ORIENTATION_t : ETCS_variable
+{
+    static const uint32_t Reverse=0;
+    static const uint32_t Nominal=1;
+    Q_ORIENTATION_t() : ETCS_variable(1) {}
 };
 struct Q_OVERLAP_t : ETCS_variable
 {

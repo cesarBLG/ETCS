@@ -19,6 +19,7 @@
 #include "train_trip.h"
 #include "override.h"
 #include "start.h"
+#include "../Supervision/emergency_stop.h"
 #include "../Position/linking.h"
 #include "../DMI/text_message.h"
 #include "level_transition.h"
@@ -66,6 +67,16 @@ void initialize_mode_transitions()
     c[42] = [](){return SR_dist && *SR_dist < d_estfront && !overrideProcedure;};
     c[43] = [](){return !overrideProcedure && formerEoA && *formerEoA<d_minsafefront(*formerEoA)-L_antenna_front;};
     c[44] = [](){return overrideProcedure && level == Level::N1;};
+    c[45] = [](){
+        if (overrideProcedure && (level == Level::N2 || level == Level::N3)) {
+            for (auto it = emergency_stops.begin(); it != emergency_stops.end(); ++it) {
+                if (!it->second)
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    };
     c[50] = [](){return mode_to_ack==Mode::SH && mode_acknowledged;};
     c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[59] = [](){return V_est == 0 && mode_to_ack == Mode::RV && mode_acknowledged;};
@@ -192,7 +203,6 @@ void update_mode_status()
     if (!prev_desk_open && desk_open) {
         if (odometer_orientation != current_odometer_orientation) {
             odometer_orientation = current_odometer_orientation;
-            lrbgs.reverse();
             for (auto &lrbg : lrbgs) {
                 if (lrbg.dir != -1)
                     lrbg.dir = 1-lrbg.dir;
@@ -364,7 +374,7 @@ void set_mode_deleted_data()
     information_list[3].delete_info = []() {delete_MA();};
     information_list[4].delete_info = []() {delete_gradient();};
     information_list[5].delete_info = []() {delete_SSP();};
-    information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear();};
+    information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
     information_list[18].delete_info = []() {signal_speeds.clear();};
     information_list[22].delete_info = []() {messages.clear();}; // TODO: only from trackside
     information_list[23].delete_info = []() {messages.clear();};
@@ -402,6 +412,8 @@ void set_mode_deleted_data()
             }
         }
     };
+    information_list[32].delete_info = []() {emergency_stops.clear();};
+    information_list[33].delete_info = []() {emergency_stops.clear();};
     information_list[35].invalidate_info = []() {train_data_valid = false;};
     information_list[36].invalidate_info = []() {level_valid = false;};
     information_list[38].delete_info = []() {driver_id = "";};

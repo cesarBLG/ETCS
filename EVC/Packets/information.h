@@ -26,6 +26,8 @@
 #include "16.h"
 #include "21.h"
 #include "27.h"
+#include "39.h"
+#include "40.h"
 #include "41.h"
 #include "42.h"
 #include "65.h"
@@ -298,18 +300,44 @@ struct danger_for_SH_information : etcs_information
         }
     }
 };
+struct coordinate_system_information : etcs_information
+{
+    coordinate_system_information() : etcs_information(32, 33) {}
+    void handle() override
+    {
+        auto &msg = *(coordinate_system_assignment*)message->get();
+        for (auto it = lrbgs.begin(); it != lrbgs.end(); ++it) {
+            if (it->nid_lrbg == msg.NID_LRBG.get_value()) {
+                it->dir = msg.Q_ORIENTATION == Q_ORIENTATION_t::Reverse;
+            }
+        }
+    }
+};
 struct track_condition_information : etcs_information
 {
     track_condition_information() : etcs_information(34,35) {}
     void handle() override
     {
-        if (linked_packets.front()->NID_PACKET == 68) {
-            TrackCondition tc = *(TrackCondition*)linked_packets.front().get();
-            load_track_condition_various(tc, ref);
-        } else if (linked_packets.front()->NID_PACKET == 69) {
-            TrackConditionStationPlatforms tc = *(TrackConditionStationPlatforms*)linked_packets.front().get();
+        int nid = linked_packets.front()->NID_PACKET;
+        if (nid == 68) {
+            TrackCondition &tc = *(TrackCondition*)linked_packets.front().get();
+            load_track_condition_various(tc, ref, false);
+        } else if (nid == 69) {
+            TrackConditionStationPlatforms &tc = *(TrackConditionStationPlatforms*)linked_packets.front().get();
             load_track_condition_platforms(tc, ref);
+        } else if (nid == 39) {
+            TrackConditionChangeTractionSystem &tc = *(TrackConditionChangeTractionSystem*)linked_packets.front().get();
+            load_track_condition_traction(tc, ref);
         }
+    }
+};
+struct track_condition_information2 : etcs_information
+{
+    track_condition_information2() : etcs_information(34,36) {}
+    void handle() override
+    {
+        TrackCondition &tc = *(TrackCondition*)linked_packets.front().get();
+        load_track_condition_various(tc, ref, true);
     }
 };
 struct track_condition_big_metal_information : etcs_information

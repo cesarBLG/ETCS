@@ -34,6 +34,7 @@ distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bo
         distance::update_distances(offset, group_pos.get());
         group_pos = distance(0, group_pos.get_orientation(), 0);
         lrbgs.push_back({nid_bg, link->reverse_dir, group_pos, link->locacc});
+        if (lrbgs.size() > 10) lrbgs.pop_front();
         if (!pos_report_params || pos_report_params->LRBG)
             position_report_reasons[9] = true;
         return group_pos;
@@ -42,6 +43,7 @@ distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bo
         reset_odometer(offset);
         distance::update_distances(offset, offset);
         lrbgs.push_back({nid_bg, dir, group_pos, Q_NVLOCACC});
+        if (lrbgs.size() > 10) lrbgs.pop_front();
         if (!pos_report_params || pos_report_params->LRBG)
             position_report_reasons[9] = true;
         return distance(0, group_pos.get_orientation(), 0);

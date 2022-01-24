@@ -249,7 +249,7 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     for (auto it=redadh.begin(); it!=redadh.end(); ++it)
         A_safe.dist_step.insert(it->first);
     A_safe.accel = [=](double V, distance d) {
-        bool slip = (--redadh.upper_bound(d))->second;
+        bool slip = (--redadh.upper_bound(d))->second/* || driver_slippery_rail*/;
         int brake = 1;
         double A_MAXREDADH = (brake == 3 ? A_NVMAXREDADH3 : (brake == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
         if (!slip || A_MAXREDADH < 0)

@@ -131,7 +131,8 @@ void communication_session::update()
             }
             int64_t timestamp = msg->T_TRAIN.get_value();
             if (timestamp < last_valid_timestamp) {
-                continue;// TODO : Accept if high priority
+                if (msg->NID_MESSAGE != 15 && msg->NID_MESSAGE != 16)
+                    continue;
             } else {
                 last_valid_timestamp = timestamp;
             }
@@ -143,8 +144,6 @@ void communication_session::update()
             } else if (msg->NID_MESSAGE == 39) {
                 finalize();
                 break;
-            } else if (msg->NID_MESSAGE == 8) {
-                train_data_ack_pending = false;
             }
             if (msg->M_ACK == M_ACK_t::AcknowledgementRequired) {
                 auto ack = std::shared_ptr<acknowledgement_message>(new acknowledgement_message());

@@ -64,6 +64,8 @@ bool mobile_terminal::setup(communication_session *session)
                 }
                 cv.wait(lck);
             }
+            shutdown(fd, SHUT_RDWR);
+            close(fd);
             released--;
         });
         write.detach();

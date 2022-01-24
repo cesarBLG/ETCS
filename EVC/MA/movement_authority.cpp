@@ -20,6 +20,7 @@
 #include "../Supervision/supervision.h"
 #include "../LX/level_crossing.h"
 #include "../Procedures/stored_information.h"
+#include "../Supervision/emergency_stop.h"
 optional<distance> EoA_ma;
 optional<distance> SvL_ma;
 optional<distance> d_perturbation_eoa;
@@ -208,6 +209,14 @@ void calculate_SvL()
         }
     }
 
+    for (auto it = emergency_stops.begin(); it != emergency_stops.end(); ++it) {
+        if (it->second && ((LoA && LoA->first > *it->second) || (SvL && *SvL > *it->second))) {
+            EoA = SvL = *it->second;
+            LoA = {};
+            V_releaseSvL = 0;
+        }
+    }
+
     if (EoA && SvL) V_release = calculate_V_release();
     else V_release = 0;
     recalculate_MRSP();
@@ -238,7 +247,7 @@ void calculate_perturbation_location()
         }
     }
     if (SvL_ma || LoA_ma) {
-        target svl(LoA_ma ? LoA_ma->first : *SvL_ma, LoA_ma ? LoA_ma->second : 0, LoA_ma ? target_class::SvL : target_class::LoA);
+        target svl(LoA_ma ? LoA_ma->first : *SvL_ma, LoA_ma ? LoA_ma->second : 0, LoA_ma ? target_class::LoA : target_class::SvL);
         for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
             auto next = it;
             ++next;
@@ -379,6 +388,10 @@ void set_signalling_restriction(movement_authority ma, bool infill)
 }
 void movement_authority::shorten(distance eoa, distance svl)
 {
+    if (get_abs_end() < svl)
+        return;
+    if (get_end() < eoa)
+        eoa = get_end();
     ol = {};
     dp = {(int)(svl-eoa), 0};
     v_main = 0;

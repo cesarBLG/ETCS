@@ -1,8 +1,10 @@
 #include "windows.h"
+#include "../Supervision/emergency_stop.h"
 #include "../Supervision/supervision.h"
 #include "../Euroradio/session.h"
 #include "../Procedures/start.h"
 #include "../Procedures/override.h"
+#include "../Procedures/train_trip.h"
 #include <fstream>
 dialog_sequence active_dialog;
 std::string active_dialog_step;
@@ -244,7 +246,7 @@ void update_dmi_windows()
     if (active == "menu_main" && !active_window_dmi.contains("hour_glass")) {
         json &enabled = active_window_dmi["enabled"];
         bool c1 = V_est == 0 && mode == Mode::SB && train_data_valid && level != Level::Unknown;
-        bool c2 = V_est == 0 && mode == Mode::PT && train_data_valid && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established));
+        bool c2 = V_est == 0 && mode == Mode::PT && train_data_valid && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && trip_exit_acknowledged && supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()));
         bool c3 = mode == Mode::SR && (level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established;
         enabled["Start"] = c1 || c2 || c3;
         enabled["Driver ID"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) || ((M_NVDERUN || (!M_NVDERUN && V_est == 0)) &&
@@ -257,8 +259,9 @@ void update_dmi_windows()
         enabled["Train Running Number"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) ||
             (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
         enabled["Shunting"] = (mode == Mode::SH && V_est == 0) ||
-            (V_est == 0 && driver_id_valid) ||
-            (V_est == 0 && mode == Mode::PT);
+            (V_est == 0 && driver_id_valid && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN)
+                && level_valid && (level == Level::N0 || level == Level::N1 || level == Level::NTC || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established))) ||
+            (V_est == 0 && mode == Mode::PT && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && trip_exit_acknowledged && supervising_rbc && supervising_rbc->status == session_status::Established && !emergency_stops.empty())));
         enabled["Non Leading"] = false;
         enabled["Radio Data"] = V_est == 0 && driver_id_valid && level_valid &&
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT || mode == Mode::UN || mode == Mode::SN);;
@@ -388,7 +391,7 @@ void update_dialog_step(std::string step, std::string step2)
                 trigger_condition(5);
             }
             if (V_est == 0 && (level == Level::N2 || level == Level::N3)) {
-                if (supervising_rbc && supervising_rbc->status == session_status::Established) {
+                if (supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()) {
                     SH_request *req = new SH_request();
                     fill_message(req);
                     supervising_rbc->send(std::shared_ptr<SH_request>(req));

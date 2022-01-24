@@ -226,9 +226,50 @@ void update_track_conditions()
                 c->announce = true;
                 c->order = false;
             }
+        } else if (c->condition == TrackConditions::ChangeOfTractionSystem) {
+            distance pointC = c->start - V_est * 20;
+            distance max = d_maxsafefront(c->start);
+            distance &pointF = c->start;
+            c->announce_distance = pointC-max;
+            if (c->end_displayed) {
+                c->announce = false;
+                c->order = false;
+            } else if (max>pointF) {
+                c->announce = false;
+                c->order = true;
+            } else if (max > pointC) {
+                c->announce = false;
+                c->order = true;
+            }
         }
         ++it;
     }
+}
+void load_track_condition_traction(TrackConditionChangeTractionSystem cond, distance ref)
+{
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+        if (it->get()->condition == TrackConditions::ChangeOfTractionSystem)
+            it = track_conditions.erase(it);
+        else
+            ++it;
+    }
+    track_condition *tc = new track_condition();
+    tc->start = ref + cond.D_TRACTION.get_value(cond.Q_SCALE);
+    tc->condition = TrackConditions::ChangeOfTractionSystem;
+    TractionSystem_DMI traction;
+    switch (cond.M_VOLTAGE.rawdata) {
+        case M_VOLTAGE_t::NonFitted: traction = TractionSystem_DMI::NonFitted; break;
+        case M_VOLTAGE_t::DC600V: traction = TractionSystem_DMI::DC750V; break;
+        case M_VOLTAGE_t::DC1k5V: traction = TractionSystem_DMI::DC1500V; break;
+        case M_VOLTAGE_t::DC3kV: traction = TractionSystem_DMI::DC3000V; break;
+        case M_VOLTAGE_t::AC15kV16Hz7: traction = TractionSystem_DMI::AC15kV; break;
+        case M_VOLTAGE_t::AC25kV50Hz: traction = TractionSystem_DMI::AC25kV; break;
+    }
+    tc->start_symbol = PlanningTrackCondition(traction, true);
+    tc->announcement_symbol = 25 + cond.M_VOLTAGE.rawdata*2 + 1;
+    tc->active_symbol = 25 + cond.M_VOLTAGE.rawdata*2;
+    tc->end_active_symbol = tc->active_symbol;
+    track_conditions.push_back(std::shared_ptr<track_condition>(tc));
 }
 void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref)
 {
@@ -254,7 +295,7 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
         track_conditions.push_back(std::shared_ptr<track_condition>(tc));
     }
 }
-void load_track_condition_various(TrackCondition cond, distance ref)
+void load_track_condition_various(TrackCondition cond, distance ref, bool special)
 {
     if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
         restore_initial_states_various = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
@@ -279,6 +320,11 @@ void load_track_condition_various(TrackCondition cond, distance ref)
     elements.insert(elements.end(), cond.elements.begin(), cond.elements.end());
     distance curr = ref;
     for (auto it = elements.begin(); it != elements.end(); ++it) {
+        bool s = it->M_TRACKCOND == M_TRACKCOND_t::NonStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::TunnelStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::SoundHorn;
+        if (s != special) {
+            curr += it->D_TRACKCOND.get_value(cond.Q_SCALE);
+            continue;
+        }
         track_condition *tc = new track_condition();
         tc->start = curr + it->D_TRACKCOND.get_value(cond.Q_SCALE);
         curr = tc->start;
@@ -361,6 +407,8 @@ void load_track_condition_various(TrackCondition cond, distance ref)
         }
         if (!exists) {
             track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+        } else {
+            delete tc;
         }
     }
     update_brake_contributions();

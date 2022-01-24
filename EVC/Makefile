@@ -1,6 +1,7 @@
 FILES = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
 Supervision/curve_calc.o  Supervision/conversion_model.o  Position/distance.o\
 Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
+Supervision/emergency_stop.o \
 Supervision/acceleration.o antenna.o MA/movement_authority.o MA/mode_profile.o Position/linking.o \
 OR_interface/interface.o SSP/ssp.o Packets/packets.o Procedures/mode_transition.o LX/level_crossing.o \
 Packets/messages.o Packets/radio.o  Euroradio/session.o Euroradio/terminal.o \
