@@ -29,14 +29,11 @@ class train_data_window : public input_window
     {
 
     }
-    void sendInformation() override;
     void setLayout() override;
 };
 class train_data_validation_window : public validation_window
 {
     public:
     train_data_validation_window(vector<input_data*> data);
-    void sendInformation() override;
-    void notValidated() override;
 };
 #endif

@@ -241,6 +241,14 @@ void update_track_conditions()
                 c->announce = false;
                 c->order = true;
             }
+        } else if (c->condition == TrackConditions::ChangeOfAllowedCurrentConsumption) {
+            distance pointC = c->start - V_est * 20;
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start) - L_TRAIN;
+            distance &pointF = c->start;
+            if (min < pointF) {
+                
+            }
         }
         ++it;
     }
@@ -304,10 +312,10 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         TrackConditions c = it->get()->condition;
-        if ((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
-            c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
+        if ((((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea) && special) ||
+            ((c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
             c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
-            c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe)
+            c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) && !special))
             && it->get()->start >= first) {
             track_condition_targets.erase(it->get());    
             it = track_conditions.erase(it);

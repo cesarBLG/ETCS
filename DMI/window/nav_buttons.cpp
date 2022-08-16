@@ -46,7 +46,7 @@ void overridebut_pressed()
 TextButton dataview_button("Data\nview", 60, 50, dataviewbut_pressed);
 void dataviewbut_pressed()
 {
-    write_command("navButton","dataview");
+    write_command("navButton","data_view");
     //right_menu(new data_view_window());
 }
 TextButton special_button("Spec", 60, 50, specbut_pressed);

@@ -4,10 +4,10 @@ FILES = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.o 
 		speed/gauge.o sound/sound.o distance/distance.o tcp/server.o state/level.o state/mode.o \
 		state/brake.o state/conditions.o state/acks.o state/override.o state/radio.o \
 		messages/messages.o graphics/flash.o \
-		window/window_main.o state/time_hour.o window/subwindow.o  window/data_entry.o\
+		window/window_main.o state/time_hour.o window/subwindow.o window/data_entry.o window/data_validation.o \
 		window/nav_buttons.o window/menu.o window/menu_main.o window/menu_override.o window/menu_radio.o \
-		window/menu_spec.o window/menu_settings.o \
-		window/driver_id.o window/running_number.o window/level_window.o \
+		window/menu_spec.o window/menu_settings.o window/set_vbc.o window/track_ahead_free.o \
+		window/driver_id.o window/running_number.o window/level_window.o window/sr_data.o \
 		planning/planning.o control/control.o state/gps_pos.o \
 		window/train_data.o window/fixed_train_data.o window/keyboard.o window/input_data.o \
 		graphics/sdl/gfx_primitives.o

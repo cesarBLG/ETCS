@@ -16,17 +16,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+//#include <functional>
 #include <set>
-#include <functional>
+#include <map>
 #include "../Position/distance.h"
 struct acceleration
 {
+    std::map<distance, std::map<double, double>> accelerations;
     std::set<distance> dist_step;
     std::set<double> speed_step;
-    std::function<double(const double, const distance)> accel;
-    double operator()(const double V, const distance d) const
+    acceleration()
     {
-        return accel(V,d);
+        accelerations[distance(std::numeric_limits<double>::lowest(), 0, 0)][0] = 0;
+        dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
+        speed_step.insert(0);
+    }
+    double operator()(const double V, const distance &d) const
+    {
+        return (--(--accelerations.upper_bound(d))->second.upper_bound(V))->second;
     }
     friend acceleration operator+(const acceleration &a1, const acceleration &a2);
     

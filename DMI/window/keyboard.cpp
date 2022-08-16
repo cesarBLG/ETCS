@@ -20,6 +20,7 @@
 #include "../graphics/text_button.h"
 vector<Button*> getNumericKeyboard(input_data *input)
 {
+    input->character_separation = true;
     vector<Button*> keys;
     for(int i=0; i<9; i++)
     {
@@ -45,6 +46,7 @@ vector<Button*> getNumericKeyboard(input_data *input)
 }
 vector<Button*> getAlphaNumericKeyboard(input_data *input)
 {
+    input->character_separation = true;
     vector<Button*> keys;
     for(int i=0; i<9; i++)
     {

@@ -21,9 +21,9 @@
 #include <string>
 enum brake_position_types
 {
-    PassengerP,
     FreightP,
-    FreightG
+    FreightG,
+    PassengerP,
 };
 extern brake_position_types brake_position;
 extern double A_ebmax;

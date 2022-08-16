@@ -66,6 +66,8 @@ double M_NVKTINT;
 double A_NVMAXREDADH1;
 double A_NVMAXREDADH2;
 double A_NVMAXREDADH3;
+
+std::set<int> NV_NID_Cs;
 #include <fstream>
 void nv_changed()
 {
@@ -74,8 +76,9 @@ void nv_changed()
     SR_speed;
     recalculate_MRSP();*/
 }
-void set_default_national()
+void set_default_nv()
 {
+    NV_NID_Cs.clear();
     Q_NVDRIVER_ADHES = false;
     V_NVSHUNT = TO_MPS(30);
     V_NVSTFF = TO_MPS(40);
@@ -125,7 +128,9 @@ void set_default_national()
 }
 void load_national_values(NationalValues nv)
 {
-    set_default_national();
+    set_default_nv();
+    NV_NID_Cs.insert(nv.NID_C);
+    NV_NID_Cs.insert(nv.NID_Cs.begin(), nv.NID_Cs.end());
     V_NVSHUNT = nv.V_NVSHUNT.get_value();
     V_NVSTFF = nv.V_NVSTFF.get_value();
     V_NVONSIGHT = nv.V_NVONSIGHT.get_value();
@@ -248,8 +253,7 @@ void setup_national_values()
     NationalValues nv = NationalValues();
     nv.copy(r);
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {
-        set_default_national();
-        nv_changed();
+        reset_national_values();
     } else{
         load_national_values(nv);
     }
@@ -260,4 +264,15 @@ void update_national_values()
         load_national_values(not_yet_applicable_nv->nv);
         not_yet_applicable_nv = {};
     }
+}
+void reset_national_values()
+{
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    remove(filesDir+"/nationalvalues.bin");
+#else
+    remove("nationalvalues.bin");
+#endif
+    set_default_nv();
+    nv_changed();
 }

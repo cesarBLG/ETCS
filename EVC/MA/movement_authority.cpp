@@ -228,7 +228,7 @@ void calculate_perturbation_location()
     const std::map<distance, double> &mrsp = get_MRSP();
     if (EoA_ma) {
         target eoa(*EoA_ma, 0, target_class::EoA);
-        for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
+        for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_eoa; ++it) {
             auto next = it;
             ++next;
             eoa.calculate_curves(it->second, 0, 0);

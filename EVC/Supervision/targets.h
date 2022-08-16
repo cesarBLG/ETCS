@@ -126,6 +126,7 @@ class PBD_target : public target
 extern optional<distance> EoA;
 extern optional<distance> SvL;
 extern optional<distance> SR_dist;
+extern optional<double> D_STFF_rbc;
 extern optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();

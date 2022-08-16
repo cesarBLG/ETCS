@@ -17,10 +17,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "menu_spec.h"
+#include "../tcp/server.h"
 menu_spec::menu_spec() : menu("Special")
 {
     buttons[0] = new TextButton("Adhesion", 153, 50);
     buttons[1] = new TextButton("SR Speed/Distance", 153, 50);
     buttons[2] = new TextButton("Train integrity", 153, 50);
+    buttons[2]->delayType = true;
+    buttons[0]->setPressedAction([this]
+    {
+        write_command("Adhesion","");
+    });
+    buttons[1]->setPressedAction([this] 
+    {
+        write_command("SRspeed","");
+    });
+    buttons[2]->setPressedAction([this] 
+    {
+        write_command("TrainIntegrity","");
+    });
     setLayout();
+}
+void menu_spec::setEnabled(bool adhesion, bool sr, bool integrity)
+{
+    buttons[0]->setEnabled(adhesion);
+    buttons[1]->setEnabled(sr);
+    buttons[2]->setEnabled(integrity);
 }

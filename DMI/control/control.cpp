@@ -20,13 +20,20 @@
 #include "../graphics/drawing.h"
 #include "../monitor.h"
 #include "../window/window.h"
+#include "../window/data_view.h"
 #include "../window/level_window.h"
+#include "../window/train_data.h"
 #include "../window/fixed_train_data.h"
 #include "../window/driver_id.h"
 #include "../window/running_number.h"
+#include "../window/sr_data.h"
 #include "../window/menu_main.h"
 #include "../window/menu_radio.h"
 #include "../window/menu_override.h"
+#include "../window/menu_spec.h"
+#include "../window/menu_settings.h"
+#include "../window/set_vbc.h"
+#include "../window/track_ahead_free.h"
 #include <thread>
 #include <functional>
 #include <mutex>
@@ -40,11 +47,12 @@ void startWindows()
     main_window.construct();
     navigation_bar.construct();
     planning_area.construct();
+    taf_window.construct();
     active_windows.insert(&main_window);
     active_windows.insert(&navigation_bar);
     active_windows.insert(&planning_area);
-    navigation_bar.active = true;
-    planning_area.active = true;
+    active_windows.insert(&taf_window);
+    taf_window.active = false;
     active_name = "default";
 }
 void setWindow(json &j)
@@ -52,7 +60,9 @@ void setWindow(json &j)
     subwindow *w = nullptr;
     std::string name = j["active"].get<std::string>();
     if (name == "default") {
-        navigation_bar.active = planning_area.active = main_window.active = true;
+        navigation_bar.active = main_window.active = true;
+        planning_area.active = !display_taf;
+        taf_window.active = display_taf;
     } else {
         bool same = name == active_name;
         if (name == "menu_main") {
@@ -78,6 +88,20 @@ void setWindow(json &j)
             json &enabled = j["enabled"];
             m->setEnabled(enabled["EoA"].get<bool>());
             w = m;
+        } else if (name == "menu_spec") {
+            menu_spec *m;
+            if (same) m = (menu_spec*)active;
+            else m = new menu_spec();
+            json &enabled = j["enabled"];
+            m->setEnabled(enabled["Adhesion"].get<bool>(), enabled["SRspeed"].get<bool>(), enabled["TrainIntegrity"].get<bool>());
+            w = m;
+        } else if (name == "menu_settings") {
+            menu_settings *m;
+            if (same) m = (menu_settings*)active;
+            else m = new menu_settings();
+            json &enabled = j["enabled"];
+            m->setEnabled(enabled["Language"].get<bool>(), enabled["Volume"].get<bool>(), enabled["Brightness"].get<bool>(), enabled["SystemVersion"].get<bool>(), enabled["SetVBC"].get<bool>(), enabled["RemoveVBC"].get<bool>());
+            w = m;
         } else if (name == "driver_window") {
             driver_window *d;
             if (same) d = (driver_window*)active;
@@ -91,13 +115,18 @@ void setWindow(json &j)
         } else if (name == "level_window") {
             level_window *l;
             if (same) l = (level_window*)active;
-            else l = new level_window((Level)j["level"].get<int>());
+            else l = new level_window((Level)j["level"].get<int>(), j["Levels"].get<std::vector<std::string>>());
             w = l;
         } else if (name == "level_validation_window") {
             level_validation_window *l;
             if (same) l = (level_validation_window*)active;
             else l = new level_validation_window((Level)j["level"].get<int>());
             w = l;
+        } else if (name == "train_data_window") {
+            train_data_window *t;
+            if (same) t = (train_data_window*)active;
+            else t = new train_data_window();
+            w = t;
         } else if (name == "fixed_train_data_window") {
             fixed_train_data_window *t;
             if (same) t = (fixed_train_data_window*)active;
@@ -108,6 +137,38 @@ void setWindow(json &j)
             if (same) t = (fixed_train_data_validation_window*)active;
             else t = new fixed_train_data_validation_window(j["train_data"].get<std::string>());
             w = t;
+        } else if (name == "set_vbc_window") {
+            set_vbc_window *t;
+            if (same) t = (set_vbc_window*)active;
+            else t = new set_vbc_window();
+            w = t;
+        } else if (name == "remove_vbc_window") {
+            remove_vbc_window *t;
+            if (same) t = (remove_vbc_window*)active;
+            else t = new remove_vbc_window();
+            w = t;
+        } else if (name == "sr_data_window") {
+            sr_data_window *t;
+            if (same) t = (sr_data_window*)active;
+            else t = new sr_data_window();
+            w = t;
+        } else if (name == "data_view_window") {
+            data_view_window *t;
+            if (same)
+            {
+                t = (data_view_window*)active;
+            }
+            else
+            {
+                std::vector<std::pair<std::string,std::string>> data;
+                json &fields = j["Fields"];
+                for (auto it = fields.begin(); it!=fields.end(); ++it)
+                {
+                    data.push_back({it.key(), it.value().get<std::string>()});
+                }
+                t = new data_view_window(data);
+            }
+            w = t;
         } else {
             if (same) w = active;
             else
@@ -116,7 +177,7 @@ void setWindow(json &j)
                 std::string type = def["WindowType"].get<std::string>();
                 if (type == "DataEntry")
                 {
-                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size());
+                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size(), false);
                     ((input_window*)w)->build_from(def);
                 }
                 

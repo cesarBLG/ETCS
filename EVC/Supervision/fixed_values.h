@@ -52,3 +52,4 @@ extern const int N_message_repetition;
 extern const double T_message_repetition;
 extern const double T_keep_session;
 extern const double T_connection_status;
+extern const double T_disconnect_radio;

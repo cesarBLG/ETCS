@@ -95,9 +95,12 @@ struct level_transition_information
 };
 void update_level_status();
 void level_transition_received(level_transition_information info);
+void driver_set_level(Level level);
 extern optional<level_transition_information> ongoing_transition;
 extern optional<level_transition_information> sh_transition;
 extern optional<distance> max_ack_distance;
+extern std::vector<level_information> priority_levels;
+extern bool priority_levels_valid;
 extern std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer;
 extern bool level_acknowledgeable;
 extern bool level_acknowledged;

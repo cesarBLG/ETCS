@@ -248,6 +248,9 @@ struct D_STATIC_t : D_t
 struct D_STARTOL_t : D_t
 {
 };
+struct D_TAFDISPLAY_t : D_t
+{
+};
 struct D_TEXTDISPLAY_t : D_t
 {
     static const uint32_t NotDistanceLimited=32767;
@@ -339,6 +342,9 @@ struct L_SECTION_t : D_t
 {
 };
 struct L_STOPLX_t : D_t
+{
+};
+struct L_TAFDISPLAY_t : D_t
 {
 };
 struct L_TEXT_t : ETCS_variable
@@ -1325,6 +1331,14 @@ struct Q_DLRBG_t : ETCS_variable
         rawdata = reverse ? Reverse : Nominal;
     }
     Q_DLRBG_t &operator=(uint32_t data) {rawdata=data; return *this;}
+};
+struct Q_EMERGENCYSTOP_t : ETCS_variable
+{
+    static const uint32_t AcceptedEoAChanged=0;
+    static const uint32_t AcceptedEoAUnchanged=1;
+    static const uint32_t NotRelevant=2;
+    static const uint32_t Rejected=3;
+    Q_EMERGENCYSTOP_t() : ETCS_variable(2) {}
 };
 struct Q_ENDTIMER_t : ETCS_variable
 {

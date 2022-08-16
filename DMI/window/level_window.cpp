@@ -19,9 +19,9 @@
 #include "level_window.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-level_window::level_window(Level level) : input_window("Level", 1)
+level_window::level_window(Level level, std::vector<std::string> levels) : input_window("Level", 1, false)
 {
-    inputs[0] = new level_input(level);
+    inputs[0] = new level_input(level, levels);
     create();
     if (level != Level::Unknown)
     {
@@ -53,10 +53,10 @@ void level_window::sendInformation()
     write_command("setLevel",data);
 }
 string str[] = {"Level 0","Level 1", "Level 2", "Level 3", "", ""};
-level_input::level_input(Level level, bool echo) : input_data(echo ? "Level" : "")
+level_input::level_input(Level level, std::vector<std::string> levels, bool echo) : input_data(echo ? "Level" : "")
 {
     setData(str[(int)level]);
-    keys = getSingleChoiceKeyboard({"Level 1", "Level 2", "Level 3", "Level 0", "LZB", "EBICAB"}, this);
+    keys = getSingleChoiceKeyboard(levels, this);
 }
 void level_input::validate()
 {
@@ -64,16 +64,6 @@ void level_input::validate()
     valid = true;
 }
 
-level_validation_window::level_validation_window(Level level) : validation_window("Level validation", {new level_input(level, true)})
+level_validation_window::level_validation_window(Level level) : validation_window("Level validation", {new level_input(level, {""}, true)})
 {
-}
-void level_validation_window::sendInformation()
-{
-    string data = validation_data[0]->getData();
-    data = data.substr(6,1);
-    write_command("setLevel",data);
-}
-void level_validation_window::notValidated()
-{
-    write_command("setLevel","");
 }

@@ -1,6 +1,6 @@
 /*
  * European Train Control System
- * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * Copyright (C) 2022  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,27 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _SUBWINDOW_H
-#define _SUBWINDOW_H
-#include "window.h"
-#include "../graphics/display.h"
-#include "../graphics/icon_button.h"
-#include "../graphics/text_button.h"
-class subwindow : public window
+#include "sr_data.h"
+#include "keyboard.h"
+#include "../tcp/server.h"
+#include "../monitor.h"
+sr_data_window::sr_data_window() : input_window("SR speed/distance", 2, true)
 {
-    protected:
-    string title;
-    Component title_bar;
-    int current_page=1;
-    int page_count;
-    IconButton prev_button;
-    IconButton next_button;
-    public:
-    IconButton exit_button;
-    bool fullscreen;
-    subwindow(string title, bool full = false, int npages=1);
-    virtual void setLayout();
-    void updatePage(int newpage);
-    void updateTitle();
-};
-#endif
+    inputs[0] = new input_data("SR speed (km/h)");
+    inputs[1] = new input_data("SR distance (m)");
+    for(int i=0; i<2; i++)
+    {
+        inputs[i]->keys = getNumericKeyboard(inputs[i]);
+    }
+    create();
+}
+void sr_data_window::sendInformation()
+{
+    write_command("setSRspeed", inputs[0]->getData()+","+inputs[1]->getData());
+}

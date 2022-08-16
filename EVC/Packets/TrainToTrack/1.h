@@ -27,6 +27,7 @@ struct PositionReportBasedOnTwoBaliseGroups : ETCS_packet
         L_PACKET.copy(w);
         Q_SCALE.copy(w);
         NID_LRBG.copy(w);
+        NID_PRVLRBG.copy(w);
         D_LRBG.copy(w);
         Q_DIRLRBG.copy(w);
         Q_DLRBG.copy(w);

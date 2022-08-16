@@ -79,15 +79,7 @@ class validation_window : public subwindow
         }
         confirmation->data_comp->setPressedAction([this]
         {
-            if (confirmation->getData() == "Yes")
-            {
-                sendInformation();
-            }
-            else
-            {
-                notValidated();
-            }
-            //exit(this);
+            sendInformation();
         });
         setLayout();
         confirmation->setSelected(true);
@@ -98,8 +90,7 @@ class validation_window : public subwindow
             data[i]->setAccepted(true);
         }
     }
-    virtual void sendInformation() {}
-    virtual void notValidated() {}
+    virtual void sendInformation();
     virtual ~validation_window()
     {
         delete confirmation;

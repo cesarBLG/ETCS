@@ -31,7 +31,7 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
         data_echo = new Component(100,16);
     }
     else data_comp = new Component(204+102,50);
-    data_tex = data_comp->getText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
     data_comp->setDisplayFunction([this]
     {
@@ -49,9 +49,10 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
     if(label!="")
     {
         label_comp->setBackgroundColor(DarkGrey);
+        label_comp->addBorder(MediumGrey);
         label_comp->addText(label.c_str(), 10, 0, 12, Grey, RIGHT);
         label_echo->addText(label, 5, 0, 12, White, RIGHT);
-        data_echo->addText(prev_data, 4, 0, 12, White, LEFT);
+        data_echo->addText(getFormattedData(prev_data), 4, 0, 12, White, LEFT);
     }
 }
 void input_data::setData(string s)
@@ -88,7 +89,7 @@ void input_data::updateText()
 {
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
     data_comp->clear();
-    data_tex = data_comp->getText(data,10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
     if(label!="")
     {
@@ -101,7 +102,7 @@ void input_data::updateText()
             data_echo->addText("++++", 4, 0, 12, Yellow, LEFT);
         if (operatcross_invalid)
             data_echo->addText("????", 4, 0, 12, Yellow, LEFT);
-        data_echo->addText(data, 4, 0, 12, accepted ? White : Grey, LEFT);
+        data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : Grey, LEFT);
     }
 }
 input_data::~input_data()

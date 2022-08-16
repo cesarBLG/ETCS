@@ -25,12 +25,11 @@
 #include "running_number.h"
 #include <fstream>
 using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window(std::string data) : input_window("Train Data", 1), SelectType("Select\ntype",60,50)
+fixed_train_data_window::fixed_train_data_window(std::string data) : input_window("Train Data", 1, false), SelectType("Enter\ndata",60,50)
 {
     inputs[0] = new fixed_train_data_input();
     SelectType.setPressedAction([this]() {
-        //exit(this);
-        //right_menu(new train_data_window());
+        write_command("EnterData", "");
     });
     if (data != "")
     {
@@ -73,14 +72,4 @@ fixed_train_data_validation_window::fixed_train_data_validation_window(std::stri
 {
     validation_data[0]->data = data;
     validation_data[0]->setAccepted(true);
-}
-void fixed_train_data_validation_window::sendInformation()
-{
-    write_command("setTrainData", data);
-    //if (!trn_valid) right_menu(new trn_window());
-}
-void fixed_train_data_validation_window::notValidated()
-{
-    write_command("setTrainData", "");
-    //right_menu(new fixed_train_data_window());
 }

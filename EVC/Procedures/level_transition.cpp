@@ -20,9 +20,11 @@
 #include "../Packets/information.h"
 #include "../DMI/text_message.h"
 #include "../TrainSubsystems/brake.h"
+#include "../TrainSubsystems/cold_movement.h"
 optional<level_transition_information> ongoing_transition;
 optional<level_transition_information> sh_transition;
 std::vector<level_information> priority_levels;
+bool priority_levels_valid = false;
 optional<distance> transition_border;
 Level level = Level::Unknown;
 int nid_ntc;
@@ -33,6 +35,29 @@ bool level_acknowledged = false;
 Level level_to_ack;
 bool level_timer_started = false;
 int64_t level_timer;
+#include <fstream>
+void load_level()
+{
+    //std::ifstream file("level.dat");
+    if (cold_movement_status == NoColdMovement) {
+        level_valid = true;
+        priority_levels_valid = true;
+    } else {
+        level_valid = false;
+        priority_levels.clear();
+    }
+}
+void save_level()
+{
+    //std::ofstream file("level.dat");
+}
+void driver_set_level(Level lv)
+{
+    level_valid = lv != Level::Unknown;
+    level = lv;
+    position_report_reasons[6] = 2;
+    save_level();
+}
 void perform_transition()
 {
     if(!ongoing_transition)
@@ -43,6 +68,7 @@ void perform_transition()
     else
         transition_border = {};
     priority_levels = lti.priority_table;
+    priority_levels_valid = true;
     ongoing_transition = {};
     if (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0)
         level_acknowledgeable = !level_acknowledged;
@@ -60,6 +86,7 @@ void perform_transition()
         level_timer = get_milliseconds();
     }
     position_report_reasons[6] = true;
+    save_level();
 }
 void update_level_status()
 {
@@ -101,12 +128,16 @@ void level_transition_received(level_transition_information info)
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {
         ongoing_transition = {};
         priority_levels = info.priority_table;
+        priority_levels_valid = true;
+        save_level();
         return;
     }
     if (mode == Mode::SH || mode == Mode::PS) {
         sh_transition = info;
         priority_levels = info.priority_table;
         ongoing_transition = {};
+        priority_levels_valid = true;
+        save_level();
         return;
     }
     ongoing_transition = info;

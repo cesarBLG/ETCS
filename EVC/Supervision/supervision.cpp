@@ -421,8 +421,12 @@ void update_supervision()
                     break;
             }
             const target &newMRDT = *MRDT[MRDT.size()-1];
-            if (::MRDT.type != newMRDT.type || ::MRDT.get_target_speed() != newMRDT.get_target_speed())
+            if (::MRDT.type != newMRDT.type || ::MRDT.get_target_speed() != newMRDT.get_target_speed()) {
                 send_command("playSinfo","");
+                prev_D_target = 1e9;
+                prev_V_perm = 1e9;
+                prev_V_sbi = 1e9;
+            }
             ::MRDT = newMRDT;
         }
         TTP = 20;
@@ -553,8 +557,8 @@ void update_supervision()
     } else if (monitoring == RSM) {
         for (const target &t : supervised_targets) {
             V_perm = std::min(V_perm, t.V_P);
-            D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
         }
+        D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
         V_target = 0;
         V_sbi = std::min(V_sbi, V_release);
         bool t1 = V_est <= V_release;
@@ -572,10 +576,10 @@ void update_supervision()
         if (r0)
             EB = false;
     }
-    if ((monitoring == TSM || monitoring == RSM) && prevTSM && prev_V_perm >= V_target)
+    /*if ((monitoring == TSM || monitoring == RSM) && prevTSM && prev_V_perm >= V_target)
     {
         V_perm = std::min(V_perm, prev_V_perm);
         D_target = std::min(D_target, prev_D_target);
         V_sbi = std::min(V_sbi, prev_V_sbi);
-    }
+    }*/
 }

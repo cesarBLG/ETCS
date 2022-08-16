@@ -19,7 +19,7 @@
 #include <iostream>
 #include <cmath>
 #include "conversion_model.h"
-distance distance_curve(acceleration a, distance dref, double vref, double vel)
+distance distance_curve(const acceleration &a, const distance &dref, double vref, double vel)
 {
     if (a.speed_step.empty() || vref<*a.speed_step.begin() || a.dist_step.empty() || dref<*a.dist_step.begin())
         return distance(std::numeric_limits<float>::min(), 0, 0);
@@ -34,7 +34,7 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
     double v02 = vref*vref;
     double v2 = vel*vel;
     for (;;) {
-        double dac = (dec ? -2 : 2)*a.accel(*v,*d);
+        double dac = (dec ? -2 : 2)*a(*v,*d);
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
@@ -43,8 +43,7 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
             pos += (v2-v02)/dac;
             v02 = v2;
             break;
-        }
-        else if (inc ? (vv2<vd2) : (vv2>vd2)) {
+        } else if (inc ? (vv2<vd2) : (vv2>vd2)) {
             pos += (vv2-v02)/dac;
             v02 = vv2;
             if (inc) {
@@ -67,8 +66,8 @@ distance distance_curve(acceleration a, distance dref, double vref, double vel)
         }
     }
     return pos;
-}
-double speed_curve(acceleration a, distance dref, double vref, distance dist)
+};
+double speed_curve(const acceleration &a, const distance &dref, double vref, distance dist)
 {
     if (a.speed_step.empty() || vref<*a.speed_step.begin() || a.dist_step.empty() || dref<*a.dist_step.begin())
         return 0;
@@ -84,7 +83,7 @@ double speed_curve(acceleration a, distance dref, double vref, distance dist)
     distance pos = dref;
     double v02 = vref*vref;
     for (;;) {
-        double dac = (dec ? -2 : 2)*a.accel(*v,*d);
+        double dac = (dec ? -2 : 2)*a(*v,*d);
         bool vend = vnext == a.speed_step.end();
         bool dend = dnext == a.dist_step.end();
         double vv2 = vend ? (inc ? 1e9 : -1) : (*vnext)*(*vnext);
@@ -94,8 +93,7 @@ double speed_curve(acceleration a, distance dref, double vref, distance dist)
             pos = dist;
             v02 = v2;
             break;
-        }
-        else if (inc ? (vv2<vd2) : (vv2>vd2)) {
+        } else if (inc ? (vv2<vd2) : (vv2>vd2)) {
             pos += (vv2-v02)/dac;
             v02 = vv2;
             if (inc) {

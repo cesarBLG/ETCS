@@ -167,7 +167,10 @@ void SetParameters()
 
     p = new Parameter("etcs::atf");
     p->GetValue = []() {
-        return mode==Mode::FS?std::to_string(V_target):"-1";
+        if (mode != Mode::FS) return std::string("-1");
+        double atf = V_perm;
+        if (V_target < V_perm) atf = std::max(V_perm - 1, V_target);
+        return std::to_string(atf);
     };
     manager.AddParameter(p);
 

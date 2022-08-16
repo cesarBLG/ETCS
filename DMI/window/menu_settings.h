@@ -23,5 +23,6 @@ class menu_settings : public menu
 {
     public:
     menu_settings();
+    void setEnabled(bool language, bool volume, bool brightness, bool version, bool setvbc, bool removevbc);
 };
 #endif

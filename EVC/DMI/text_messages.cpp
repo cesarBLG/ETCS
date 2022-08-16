@@ -118,6 +118,7 @@ void add_message(PlainTextMessage m, distance ref)
     };
     text_message t(text, m.Q_TEXTCLASS == Q_TEXTCLASS_t::ImportantInformation, m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm, 0, end);
     t.start_condition = start;
+    t.type = text_message_type::FixedText;
     add_message(t);
 }
 void message_acked(int id)

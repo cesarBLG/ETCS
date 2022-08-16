@@ -54,6 +54,7 @@ void set_train_data(std::string spec)
 {
     train_data_valid = false;
     special_train_data = spec;
+    conversion_model_used = false;
     if (!special_train_data.empty()) {
 #ifdef __ANDROID__
         extern std::string filesDir;
@@ -97,6 +98,6 @@ void set_train_data(std::string spec)
         train_data_valid = true;
     }
     set_train_max_speed(V_train);
-    if (train_data_valid) 
-        set_conversion_model();
+    /*if (train_data_valid) 
+        set_conversion_model();*/
 }

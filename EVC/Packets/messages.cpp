@@ -17,6 +17,9 @@
  */
 #include "messages.h"
 #include "information.h"
+#include "radio.h"
+#include "vbc.h"
+#include "0.h"
 #include "12.h"
 #include "21.h"
 #include "27.h"
@@ -29,6 +32,7 @@
 #include "../Procedures/start.h"
 #include "../Procedures/train_trip.h"
 #include "../TrainSubsystems/brake.h"
+#include "../DMI/track_ahead_free.h"
 #include <algorithm>
 #include <iostream>
 static int reading_nid_bg=-1;
@@ -56,6 +60,7 @@ static distance bg_referencemin;
 static bool stop_checking_linking=false;
 std::list<link_data>::iterator link_expected=linking.end();
 std::deque<std::pair<eurobalise_telegram, distance>> pending_telegrams;
+optional<link_data> rams_reposition_mitigation;
 void trigger_reaction(int reaction);
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg);
 void handle_radio_message(std::shared_ptr<euroradio_message> message);
@@ -103,32 +108,42 @@ void expect_next_linking()
 }
 void check_linking(bool group_passed)
 {
-    if (link_expected == linking.end()) rams_lost_count = 0;
+    if (mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) {
+        rams_lost_count = 0;
+        rams_reposition_mitigation = {};
+    }
+    if (rams_reposition_mitigation && rams_reposition_mitigation->max() < d_minsafefront(rams_reposition_mitigation->max())-L_antenna_front)
+        rams_reposition_mitigation = {};
+    if (link_expected == linking.end())
+        rams_lost_count = 0;
     if (link_expected!=linking.end() && !stop_checking_linking) {
         auto link_bg=linking.end();
         for (auto it = link_expected; it!=linking.end(); ++it) {
-            if (it->nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
+            if (it->nid_bg == bg_id({reading_nid_c, reading_nid_bg}) || (it->nid_bg.NID_C == reading_nid_c && it->nid_bg.NID_BG == 16383)) {
                 link_bg = it;
                 break;
             }
         }
         bool isexpected = linked && refpassed && link_expected==link_bg;
-        bool c1 = isexpected && link_expected->min() > bg_referencemax;
+        bool c1 = isexpected && (link_expected->min() > bg_referencemax || link_expected->nid_bg.NID_BG == 16383);
         bool c2 = (!isexpected || link_expected->max() < bg_referencemin) && link_expected->max() < d_minsafefront(odometer_orientation, 0)-L_antenna_front;
         bool c3 = linked && link_bg!=linking.end() && link_bg != link_expected;
         if (c1 || c2 || c3) {
-            std::cout<<"Balise read error: check_linking() c1="<<c1<<" c2="<<c2<<" c3="<<c3<<std::endl;
+            // TODO: If check_linking() were not called in other modes, what would happen to link_expected when entering FS,OS,LS?
+            if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
+                std::cout<<"Balise read error: check_linking() c1="<<c1<<" c2="<<c2<<" c3="<<c3<<std::endl;
             
-            if (c2 || c3)
-                rams_lost_count++;
-            if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
-                trigger_reaction(1);
-                rams_lost_count = 0;
-            } else {
-                trigger_reaction(link_expected->reaction);
+                if (c2 || c3)
+                    rams_lost_count++;
+                if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
+                    trigger_reaction(1);
+                    rams_lost_count = 0;
+                } else {
+                    trigger_reaction(link_expected->reaction);
+                }
+                if (rams_lost_count > 1)
+                    rams_lost_count = 0;
             }
-            if (rams_lost_count > 1)
-                rams_lost_count = 0;
             expect_next_linking();
             if (c3)
                 check_linking();
@@ -155,17 +170,67 @@ void balise_group_passed()
     }
     check_linking(true);
     bool linking_rejected=false;
-    if (linked && reffound && !linking.empty()) {
+    if (linked && reffound && !linking.empty() && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
         linking_rejected = true;
-        for (link_data l : linking) {
+        for (auto it = linking.begin(); it != linking.end(); ++it) {
+            link_data &l = *it;
             if (l.nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
                 if (dir != -1 && dir != l.reverse_dir) {
                     std::cout<<"Balise error: group passed in wrong direction. Expected "<<l.reverse_dir<<", passed "<<dir<<std::endl;
                     trigger_condition(66);
                 }
+                rams_reposition_mitigation = {};
                 if (l.max() >= bg_referencemin && l.min() <= bg_referencemax)
                     linking_rejected = false;
                 break;
+            }
+            if (l.nid_bg.NID_C == reading_nid_c && l.nid_bg.NID_BG == 16383) {
+                bool repositioning = false;
+                for (auto tel : telegrams) {
+                    for (auto pack : tel.packets) {
+                        if (pack->NID_PACKET == 16) {
+                            int Q_DIR = ((ETCS_directional_packet*)pack.get())->Q_DIR;
+                            if (Q_DIR == Q_DIR_t::Both || (Q_DIR == Q_DIR_t::Nominal && dir == 0) || (Q_DIR == Q_DIR_t::Reverse && dir == 1)) {
+                                repositioning = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (repositioning)
+                        break;
+                }
+                if (dir != -1 && dir == l.reverse_dir && repositioning && l.max() >= bg_referencemin) {
+                    if (it != linking.begin()) {
+                        auto it2 = it;
+                        --it2;
+                        if (it2->dist <= bg_referencemax)
+                            linking_rejected = false;
+                    } else {
+                        linking_rejected = false;
+                    }
+                }
+                break;
+            }
+        }
+        if (rams_reposition_mitigation) {
+            bool repositioning = false;
+            for (auto tel : telegrams) {
+                for (auto pack : tel.packets) {
+                    if (pack->NID_PACKET == 16) {
+                        int Q_DIR = ((ETCS_directional_packet*)pack.get())->Q_DIR;
+                        if (Q_DIR == Q_DIR_t::Both || (Q_DIR == Q_DIR_t::Nominal && dir == 0) || (Q_DIR == Q_DIR_t::Reverse && dir == 1)) {
+                            repositioning = true;
+                            break;
+                        }
+                    }
+                }
+                if (repositioning)
+                    break;
+            }
+            if (dir != -1 && dir == rams_reposition_mitigation->reverse_dir && repositioning && rams_reposition_mitigation->max() >= bg_referencemin) {
+                linking_rejected = true;
+                rams_reposition_mitigation = {};
+                trigger_reaction(1);
             }
         }
     }
@@ -179,7 +244,7 @@ void update_track_comm()
     if (pending_telegrams.empty()) {
         check_linking();
         if (reading) {
-            double elapsed = d_estfront-last_passed_distance;
+            double elapsed = d_estfront_dir[odometer_orientation == -1]-L_antenna_front-last_passed_distance;
             if (prevpig==-1) {
                 if (elapsed > 12*8)
                     balise_group_passed();
@@ -284,6 +349,12 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     if (dir == 1)
         std::reverse(read_telegrams.begin(), read_telegrams.end());
 
+    if (orientation == -1) {
+        if (odometer_direction == -odometer_orientation)
+            orientation = 1;
+        else if (odometer_direction == odometer_orientation)
+            orientation = 0;
+    }
     if (orientation == 1) {
         if (mode == Mode::SH || mode == Mode::PS || mode == Mode::SL) {
             bg_reference = distance(bg_reference.get(), -odometer_orientation, 0);
@@ -300,13 +371,16 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     link_data balise_link;
     bool containedinlinking=false;
     if (linked && !linking.empty()) {
+        bool unknown = false;
         for (link_data l : linking) {
+            if (l.nid_bg.NID_C == nid_c && l.nid_bg.NID_BG == 16383)
+                unknown = true;
             if (l.nid_bg == bg_id({nid_c, nid_bg})) {
                 containedinlinking = true;
                 balise_link = l;
             }
         }
-        if (!containedinlinking)
+        if (!containedinlinking && !unknown && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS))
             return;
     }
 
@@ -331,7 +405,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         for (int i=0; i<read_telegrams.size(); i++) {
             eurobalise_telegram t = read_telegrams[i];
             if ((t.M_DUP == M_DUP_t::DuplicateOfNext && t.N_PIG+1==pig) || (t.M_DUP == M_DUP_t::DuplicateOfPrev && t.N_PIG==pig+1)) {
-                if (containedinlinking) {
+                if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
                     reject = false;
                 } else {
                     if (dir!=-1) {
@@ -360,6 +434,16 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         bool c1 = t.M_DUP == M_DUP_t::NoDuplicates;
         bool c2 = t.M_DUP == M_DUP_t::DuplicateOfNext && i+1<read_telegrams.size() && t.N_PIG+1==read_telegrams[i+1].N_PIG;
         bool c3 = t.M_DUP == M_DUP_t::DuplicateOfPrev && i>1 && t.N_PIG==read_telegrams[i-1].N_PIG+1;
+        bool ignored = false;
+        for (auto p : t.packets) {
+            if (p->NID_PACKET != 0)
+                break;
+            VirtualBaliseCoverMarker *vbc = (VirtualBaliseCoverMarker*)p.get();
+            if (vbc_ignored(nid_c, vbc->NID_VBCMK))
+                ignored = true;
+        }
+        if (ignored)
+            continue;
         if (c1 || !(c2||c3))
             message.push_back(t);
         if ((c2 && dir==0) || (c3 && dir==1)) {
@@ -391,7 +475,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     }
     bool accepted = accepted1 && accepted2;
     if (!accepted) {
-        if (containedinlinking) {
+        if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
             std::cout<<"Balise error. Linked BG not accepted. accepted1="<<accepted1<<", accepted2="<<accepted2<<std::endl;
             trigger_reaction(balise_link.reaction);
         } else {
@@ -415,7 +499,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         return;
     }
     
-    if (dir == -1 && containedinlinking)
+    if (dir == -1 && containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS))
         dir = balise_link.reverse_dir;
     if (dir == -1 && orientation == -1)
         bg_reference = distance(bg_reference.get(), 0, 0);
@@ -447,6 +531,14 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
         transition_buffer.push_back({});
     }
 
+    if (NV_NID_Cs.find(nid_bg.NID_C) == NV_NID_Cs.end())
+        reset_national_values();
+    std::set<virtual_balise_cover> old_vbcs = vbcs;
+    for (auto it = old_vbcs.begin(); it != old_vbcs.end(); ++it) {
+        if (it->NID_C != nid_bg.NID_C)
+            remove_vbc(*it);
+    }
+
     std::list<std::shared_ptr<etcs_information>> ordered_info;
     for (int i=0; i<message.size(); i++) {
         eurobalise_telegram t = message[i];
@@ -462,6 +554,14 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
             if (p->NID_PACKET == 136) {
                 if ((level != Level::N1 && (!ongoing_transition || ongoing_transition->leveldata.level != Level::N1 || (level != Level::N2 && level != Level::N3))) || (mode != Mode::FS && mode != Mode::OS))
                     break;
+
+                ordered_info.sort(info_compare);
+                for (auto it = ordered_info.begin(); it!=ordered_info.end(); ++it)
+                {
+                    try_handle_information(*it, ordered_info);
+                }
+                ordered_info.clear();
+
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
                 bool found = false;
                 for (auto it = link_expected; it!=linking.end(); ++it) {
@@ -474,7 +574,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                     }
                 }
                 if (!found)
-                    break;
+                    return;
             } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
                 for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
                     if (it->get()->index_level == 3) {
@@ -539,8 +639,11 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             ref += ma->D_REF.get_value(ma->Q_SCALE);
             break;
         }
-        case 34:
+        case 34: {
+            auto *taf = (taf_request_message*)message.get();
+            ref += taf->D_REF.get_value(taf->Q_SCALE);
             break;
+        }
         default:
             break;
     }
@@ -560,16 +663,29 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                     session->train_data_ack_pending = false;
                 });
                 break;
-            case 15:
-                info = new etcs_information(41, 43, [message,ref]() {
-                    auto *emerg = (conditional_emergency_stop*)message.get();
-                    handle_conditional_emergency_stop(emerg->NID_EM, ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE));
-                });
+            case 15:{
+                auto *emerg = (conditional_emergency_stop*)message.get();
+                if (!((emerg->Q_DIR == Q_DIR_t::Nominal && dir == 1) && (emerg->Q_DIR == Q_DIR_t::Reverse && dir == 0))) {
+                    info = new etcs_information(41, 43, [emerg,ref]() {
+                        int result = handle_conditional_emergency_stop(emerg->NID_EM, ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE));
+                        emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
+                        ack->NID_EM = emerg->NID_EM;
+                        ack->Q_EMERGENCYSTOP.rawdata = result;
+                        fill_message(ack);
+                        supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
+                    });
+                }
                 break;
+            }
             case 16:
                 info = new etcs_information(40, 42, [message]() {
                     auto *emerg = (unconditional_emergency_stop*)message.get();
                     handle_unconditional_emergency_stop(emerg->NID_EM);
+                    emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
+                    ack->NID_EM = emerg->NID_EM;
+                    ack->Q_EMERGENCYSTOP.rawdata = 2;
+                    fill_message(ack);
+                    supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
                 });
                 break;
             case 18:
@@ -588,6 +704,17 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                     update_dialog_step("SH authorised", "");
                 });
                 break;
+            case 34:{
+                auto *taf = (taf_request_message*)message.get();
+                if (!((taf->Q_DIR == Q_DIR_t::Nominal && dir == 1) && (taf->Q_DIR == Q_DIR_t::Reverse && dir == 0))) {
+                    info = new etcs_information(47, 49, [taf,ref]() {
+                        distance dist = ref + taf->D_TAFDISPLAY.get_value(taf->Q_SCALE);
+                        double length = taf->L_TAFDISPLAY.get_value(taf->Q_SCALE);
+                        request_track_ahead_free(dist, length);
+                    });
+                }
+                break;
+            }
             case 40:
                 info = new etcs_information(50, 52, []() {
                     if (som_status == D33 || som_status == D22)
@@ -649,7 +776,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                     break;
                 }
             }
-        } else if (p->NID_PACKET == 49) {
+        } else if (p->NID_PACKET == 49) { // FIXME
             for (auto it = ordered_info.begin(); it!=ordered_info.end(); ++it) {
                 if (it->get()->index_level == 14) {
                     it->get()->linked_packets.push_back(message->packets[j]);
@@ -702,7 +829,8 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
     accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC}];
     if (!s.reject) {
         if (s.exceptions.find(3) != s.exceptions.end()) {
-            //TODO: RBC dependent
+            if (supervising_rbc && supervising_rbc->train_data_ack_pending)
+                return false;
         }
         if (s.exceptions.find(4) != s.exceptions.end()) {
             if (info->linked_packets.begin()->get()->NID_PACKET == 12) {
@@ -997,7 +1125,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_p
         return false;
     } else {
         if (s.exceptions.find(1) != s.exceptions.end()) {
-            if (level == Level::N1) return false;
+            if (level == Level::N1 || !trip_exit_acknowledged/*|| info->timestamp < trip_exit_timestamp*/) return false;
         }
         if (s.exceptions.find(2) != s.exceptions.end()) {
             extern bool desk_open;
@@ -1064,6 +1192,8 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new national_values_information());
     } else if (packet_num == 5) {
         info.push_back(new linking_information());
+    } else if (packet_num == 6) {
+        info.push_back(new vbc_order());
     } else if (packet_num == 12) {
         info.push_back(new ma_information());
         info.push_back(new signalling_information());
@@ -1077,12 +1207,18 @@ std::vector<etcs_information*> construct_information(int packet_num)
         info.push_back(new issp_information());
     } else if (packet_num == 39) {
         info.push_back(new track_condition_information());
+    } else if (packet_num == 40) {
+        info.push_back(new track_condition_information());
     } else if (packet_num == 41) {
         info.push_back(new leveltr_order_information());
     } else if (packet_num == 42) {
         info.push_back(new session_management_information());
     } else if (packet_num == 46) {
         info.push_back(new condleveltr_order_information());
+    } else if (packet_num == 57) {
+        info.push_back(new ma_request_params_info());
+    } else if (packet_num == 58) {
+        info.push_back(new position_report_params_info());
     } else if (packet_num == 65) {
         info.push_back(new TSR_information());
     } else if (packet_num == 66) {

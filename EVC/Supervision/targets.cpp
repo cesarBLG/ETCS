@@ -49,29 +49,25 @@ distance target::get_distance_curve(double velocity) const
             std::cout<<diff<<std::endl;
         return a;
     }*/
-    distance dist;
     if (is_EBD_based) {
         if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
-            dist = distance_curve(A_safe, d_target, 0, velocity);
+            return distance_curve(A_safe, d_target, 0, velocity);
         else
-            dist = distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
+            return distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity);
     } else {
-        dist = distance_curve(A_expected, d_target, 0, velocity);
+        return distance_curve(A_expected, d_target, 0, velocity);
     }
-    return dist;
 }
 double target::get_speed_curve(distance dist) const
 {
-    double spd;
     if (is_EBD_based) {
         if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
-            spd = speed_curve(A_safe, d_target, 0, dist);
+            return speed_curve(A_safe, d_target, 0, dist);
         else
-            spd = speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
+            return speed_curve(A_safe, d_target, V_target+dV_ebi(V_target), dist);
     } else {
-        spd = speed_curve(A_expected, d_target, 0, dist);
+        return speed_curve(A_expected, d_target, 0, dist);
     }
-    return spd;
 }
 distance target::get_distance_gui_curve(double velocity) const
 {
@@ -133,6 +129,7 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         double V_delta2 = A_est2*T_berem;
         double V_bec = std::max(V_est+V_delta0+V_delta1, V_target)+V_delta2;
         double D_bec = std::max(V_est+V_delta0+V_delta1/2, V_target)*T_traction + (std::max(V_est+V_delta0+V_delta1, V_target)+V_delta2/2)*T_berem;
+        
         d_EBI = get_distance_curve(V_bec)-D_bec;
         d_SBI2 = d_EBI - V_est*T_bs2;
         d_W = d_SBI2 - V_est*T_warning;
@@ -165,6 +162,7 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
 optional<distance> EoA;
 optional<distance> SvL;
 optional<distance> SR_dist;
+optional<double> D_STFF_rbc;
 optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
 static std::list<target> supervised_targets;
@@ -232,41 +230,50 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     acceleration A_brake_safe;
     if (conversion_model_used) {
         A_brake_safe = A_brake_emergency;
-        A_brake_safe.accel = [A_brake_emergency](double V, distance d) {
-            return (--Kv_int.upper_bound(V))->second*(--Kr_int.upper_bound(L_TRAIN))->second*A_brake_emergency(V,d);
-        };
         for (auto it=Kv_int.begin(); it!=Kv_int.end(); ++it)
             A_brake_safe.speed_step.insert(it->first);
+
+        for (auto &d : A_brake_safe.dist_step) {
+            for (auto &V : A_brake_safe.speed_step) {
+                A_brake_safe.accelerations[d][V] = (--Kv_int.upper_bound(V))->second*(--Kr_int.upper_bound(L_TRAIN))->second*A_brake_emergency(V,d);
+            }
+        }
     } else {
         A_brake_safe = A_brake_emergency;
-        A_brake_safe.accel = [=](double V, distance d) {
-            double wet = Kwet_rst(V,d);
-            return Kdry_rst(V,M_NVEBCL,d)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
-        };
+        for (auto &d : A_brake_safe.dist_step) {
+            for (auto &V : A_brake_safe.speed_step) {
+                double wet = Kwet_rst(V,d);
+                A_brake_safe.accelerations[d][V] = Kdry_rst(V,M_NVEBCL,d)*(wet+M_NVAVADH*(1-wet))*A_brake_emergency(V,d);
+            }
+        }
     }
 
     A_safe = A_brake_safe + A_gradient;
     for (auto it=redadh.begin(); it!=redadh.end(); ++it)
         A_safe.dist_step.insert(it->first);
-    A_safe.accel = [=](double V, distance d) {
-        bool slip = (--redadh.upper_bound(d))->second/* || driver_slippery_rail*/;
-        int brake = 1;
-        double A_MAXREDADH = (brake == 3 ? A_NVMAXREDADH3 : (brake == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
-        if (!slip || A_MAXREDADH < 0)
-            A_MAXREDADH = std::numeric_limits<double>::max();
-        return std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d); 
-    };
+    for (auto &d : A_safe.dist_step) {
+        for (auto &V : A_safe.speed_step) {
+            bool slip = (--redadh.upper_bound(d))->second/* || driver_slippery_rail*/;
+            int brake = 1;
+            double A_MAXREDADH = (brake == 3 ? A_NVMAXREDADH3 : (brake == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
+            if (!slip || A_MAXREDADH < 0)
+                A_MAXREDADH = std::numeric_limits<double>::max();
+            A_safe.accelerations[d][V] =  std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d);
+        }
+    }
         
     A_expected = A_brake_service + A_gradient;
     
     A_normal_service = A_brake_normal_service + A_gradient;
-    A_normal_service.accel = [=](double V, distance d) {
-        double grad = (--gradient.upper_bound(d))->second;
-        double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
-        return A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
-    };
     for (auto it=Kn[0].begin(); it!=Kn[0].end(); ++it)
         A_normal_service.speed_step.insert(it->first);
     for (auto it=Kn[1].begin(); it!=Kn[1].end(); ++it)
         A_normal_service.speed_step.insert(it->first);
+    for (auto &d : A_normal_service.dist_step) {
+        for (auto &V : A_normal_service.speed_step) {
+            double grad = (gradient.empty() || gradient.begin()->first > d) ? default_gradient : (--gradient.upper_bound(d))->second;
+            double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
+            A_normal_service.accelerations[d][V] = A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
+        }
+    }
 }

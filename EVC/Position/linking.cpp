@@ -19,9 +19,19 @@
 #include "distance.h"
 #include "../Supervision/national_values.h"
 #include "../Packets/messages.h"
+#include "../TrainSubsystems/cold_movement.h"
 std::list<link_data> linking;
 std::list<lrbg_info> lrbgs;
-bool position_valid=false;//TODO
+bool position_valid=false;
+void load_train_position()
+{
+    //TODO: load lrbgs
+    position_valid = cold_movement_status == NoColdMovement;
+}
+void save_train_position()
+{
+
+}
 distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link)
 {
     if (!linked) {
@@ -57,8 +67,7 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
     std::list<link_data> links;
     distance cumdist=start;
     int current_NID_C = this_bg.NID_C;
-    for (LinkingElement l : elements)
-    {
+    for (LinkingElement l : elements) {
         link_data d;
         d.dist = cumdist+l.D_LINK.get_value(link.Q_SCALE);
         d.locacc = l.Q_LOCACC;
@@ -68,6 +77,10 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg)
         current_NID_C = d.nid_bg.NID_C;
         links.push_back(d);
         cumdist = d.dist;
+        for (auto &lrbg : lrbgs) {
+            if (lrbg.nid_lrbg == d.nid_bg)
+                lrbg.locacc = d.locacc;
+        }
     }
     bool expecting_linking = link_expected != linking.end();
     bg_id expected_bg;

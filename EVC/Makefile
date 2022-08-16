@@ -4,10 +4,10 @@ Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supe
 Supervision/emergency_stop.o \
 Supervision/acceleration.o antenna.o MA/movement_authority.o MA/mode_profile.o Position/linking.o \
 OR_interface/interface.o SSP/ssp.o Packets/packets.o Procedures/mode_transition.o LX/level_crossing.o \
-Packets/messages.o Packets/radio.o  Euroradio/session.o Euroradio/terminal.o \
+Packets/messages.o Packets/radio.o Packets/vbc.o Euroradio/session.o Euroradio/terminal.o \
 Procedures/start.o Procedures/override.o Procedures/train_trip.o Procedures/level_transition.o \
 Procedures/stored_information.o TrackConditions/track_conditions.o Time/clock.o Position/geographical.o \
-DMI/text_messages.o DMI/windows.o TrainSubsystems/power.o TrainSubsystems/brake.o \
+DMI/text_messages.o DMI/windows.o DMI/track_ahead_free.o TrainSubsystems/power.o TrainSubsystems/brake.o \
 $(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))
 LIB = evc.so
 ARCHIVE = evc.a

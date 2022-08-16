@@ -25,9 +25,13 @@ acceleration operator+(const acceleration &a1, const acceleration &a2)
     an.speed_step = a1.speed_step;
     an.dist_step.insert(a2.dist_step.begin(), a2.dist_step.end());
     an.speed_step.insert(a2.speed_step.begin(), a2.speed_step.end());
-
-    auto ac1 = a1.accel;
+    for (auto &d : an.dist_step) {
+        for (auto &V : an.speed_step) {
+            an.accelerations[d][V] = a1(V, d) + a2(V, d);
+        }
+    }
+    /*auto ac1 = a1.accel;
     auto ac2 = a2.accel;
-    an.accel = [ac1,ac2](double V, distance d) {return ac1(V,d) + ac2(V,d);};
+    an.accel = [ac1,ac2](double V, distance d) {return ac1(V,d) + ac2(V,d);};*/
     return an;
 }

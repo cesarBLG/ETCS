@@ -10,6 +10,7 @@ enum struct dialog_sequence
     Override,
     Special,
     Settings,
+    DataView
 };
 extern dialog_sequence active_dialog;
 extern std::string active_dialog_step;

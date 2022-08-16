@@ -21,6 +21,7 @@
 #include "../Time/clock.h"
 #include "brake.h"
 #include "../Procedures/stored_information.h"
+#include "../Euroradio/session.h"
 extern bool SB;
 extern bool EB;
 bool SB_commanded;
@@ -63,6 +64,28 @@ void trigger_brake_reason(int reason)
             if (V_est == 0 && !brake_acknowledgeable) {
                 brake_acknowledgeable = true;
                 brake_acknowledged = false;
+            }
+            return false;
+        }});
+    } else if (reason == 2) {
+        text_message msg("Communication error", true, false, 2, [](text_message &msg){return false;});
+        text_message *m = &add_message(msg);
+        brake_conditions.push_back({reason, m, [](brake_command_information &i) {
+            if (V_est == 0) {
+                int64_t time = get_milliseconds();
+                i.msg->end_condition = [time](text_message &m) {
+                    return time+30000<get_milliseconds();
+                };
+                train_shorten('i');
+                send_command("playSinfo","");
+                return true;
+            }
+            if (!radio_reaction_applied) {
+                i.msg->end_condition = [](text_message &m) {
+                    return m.first_displayed+30000<get_milliseconds();
+                };
+                send_command("playSinfo","");
+                return true;
             }
             return false;
         }});

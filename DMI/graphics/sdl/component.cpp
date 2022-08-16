@@ -325,6 +325,13 @@ void Component::setBorder(Color c)
     SDL_Rect r = {getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0)};
     SDL_RenderDrawRect(sdlren, &r);
 }
+void Component::addBorder(Color c)
+{
+    addRectangle(0,0,1,sy,MediumGrey);
+    addRectangle(sx-1,0,1,sy,MediumGrey);
+    addRectangle(0,0,sx,1,MediumGrey);
+    addRectangle(0,sy-1,sx,1,MediumGrey);
+}
 void Component::setBackgroundColor(Color c)
 {
     bgColor = c;

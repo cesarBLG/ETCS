@@ -73,7 +73,10 @@ extern double M_NVKTINT;
 extern double A_NVMAXREDADH1;
 extern double A_NVMAXREDADH2;
 extern double A_NVMAXREDADH3;
- 
+
+extern std::set<int> NV_NID_Cs; 
+
 void setup_national_values();
 void national_values_received(NationalValues nv, distance reference);
 void update_national_values();
+void reset_national_values();

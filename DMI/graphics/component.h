@@ -115,6 +115,7 @@ class Component
     Color text_color;
     void setLabel(std::string text, float size, Color c);
     void setText(std::string text, float size, Color c);
+    void addBorder(Color c);
     void setBorder(Color c);
 };
 extern Component Z;

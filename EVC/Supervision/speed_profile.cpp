@@ -192,6 +192,7 @@ const std::map<distance, double> &get_gradient()
 }
 void set_train_max_speed(double vel)
 {
+    V_train = vel;
     train_speed = speed_restriction(V_train, ::distance(std::numeric_limits<double>::lowest(), 0, 0), ::distance(std::numeric_limits<double>::max(), 0, 0), false);
     recalculate_MRSP();
 }

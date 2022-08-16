@@ -45,12 +45,20 @@ class communication_session
     void close();
     void send(std::shared_ptr<euroradio_message_traintotrack> msg, bool lock = true);
     void update();
+    void reset_radio()
+    {
+        if (terminal != nullptr) {
+            terminal->status = safe_radio_status::Failed;
+            terminal->cv.notify_all();
+        }
+    }
 };
 extern communication_session *supervising_rbc;
 extern communication_session *accepting_rbc;
 extern communication_session *handing_over_rbc;
 extern optional<contact_info> rbc_contact;
 extern bool rbc_contact_valid;
+extern bool radio_reaction_applied;
 void update_euroradio();
 void set_supervising_rbc(contact_info info);
 void terminate_session(contact_info info);

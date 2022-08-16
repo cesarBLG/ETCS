@@ -28,16 +28,14 @@ class input_window : public subwindow
     int cursor=0;
     int nfields;
     protected:
-    IconButton prev_button;
-    IconButton next_button;
     Component confirmation_label;
     map<int, input_data*> inputs;
     Button* buttons[12];
     virtual void setLayout() override;
-    virtual void sendInformation() {}
+    virtual void sendInformation();
     void create();
     public:
-    input_window(string name, int nfields);
+    input_window(string name, int nfields, bool fullscreen);
     void build_from(json &j);
     virtual ~input_window();
 };

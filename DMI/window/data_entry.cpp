@@ -20,8 +20,8 @@
 #include "../graphics/button.h"
 #include "../graphics/display.h"
 #include "data_validation.h"
-input_window::input_window(string title, int nfields) : subwindow(title, nfields>1), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
-    next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), confirmation_label(330, 40), button_yes("Yes",330,40), 
+#include "../tcp/server.h"
+input_window::input_window(string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes("Yes",330,40), 
     nfields(nfields)
 {
     for(int i=0; i<12; i++)
@@ -30,7 +30,7 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
         empty_button[i]->showBorder = false;
         buttons[i] = empty_button[i];
     }
-    if(nfields > 1)
+    if(fullscreen)
     {
         button_yes.setBackgroundColor(DarkGrey);
         button_yes.setForegroundColor(Black);
@@ -50,39 +50,13 @@ input_window::input_window(string title, int nfields) : subwindow(title, nfields
         });
         button_yes.showBorder = false;
         button_yes.touch_up = 50;
-        prev_button.enabled = false;
-        next_button.enabled = false;
     }
-    if(nfields > 4)
-    {
-        next_button.setPressedAction([this, nfields]
-        {
-            if((cursor/4)<(nfields/4))
-            {
-                next_button.enabled = false;
-                prev_button.enabled = true;
-                cursor = 4*(cursor/4+1);
-                setLayout();
-            }
-        });
-        prev_button.setPressedAction([this, nfields]
-        {
-            if(cursor>3)
-            {
-                next_button.enabled = true;
-                prev_button.enabled = false;
-                cursor = 4*(cursor/4-1);
-                setLayout();
-            }
-        });
-        next_button.enabled = true;
-    }
-    confirmation_label.addText(string(title) + " entry complete?", 0, 0, 12, White);
+    confirmation_label.addText(title + " entry complete?", 0, 0, 12, White);
 }
 void input_window::create()
 {
     setLayout();
-    if(nfields == 1)
+    if(!fullscreen)
     {
         inputs[0]->data_comp->setPressedAction([this]
         {
@@ -117,7 +91,7 @@ void input_window::create()
                         button_yes.setBackgroundColor(DarkGrey);
                 }
                 else cursor = i;
-                setLayout();
+                updatePage(cursor/4+1);
             });
         }
     }
@@ -126,12 +100,13 @@ void input_window::setLayout()
 {   
     clearLayout();
     subwindow::setLayout();
+    if (cursor/4 + 1 != current_page) cursor = (current_page-1)*4;
     for(int i=0; i<nfields; i++)
     {
         if(i!=cursor) inputs[i]->setSelected(false);
     }
     inputs[cursor]->setSelected(true);
-    if(nfields == 1)
+    if(!fullscreen)
     {
         addToLayout(inputs[0]->data_comp, new RelativeAlignment(nullptr, 334, 65, 0));
     }
@@ -187,6 +162,16 @@ void input_window::setLayout()
     addToLayout(buttons[9], new ConsecutiveAlignment(buttons[6],DOWN,0));
     addToLayout(buttons[10], new ConsecutiveAlignment(buttons[9],RIGHT,0));
     addToLayout(buttons[11], new ConsecutiveAlignment(buttons[10],RIGHT,0));
+}
+void input_window::sendInformation()
+{
+    json j = R"({"DriverSelection":"ValidateDataEntry"})"_json;
+    j["WindowTitle"] = title;
+    for (auto i : inputs)
+    {
+        j["DataInputResult"][i.second->label] = i.second->data_accepted;
+    }
+    write_command("json", j.dump());
 }
 void input_window::build_from(json &j)
 {

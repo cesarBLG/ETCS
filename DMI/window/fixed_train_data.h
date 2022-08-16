@@ -43,7 +43,5 @@ class fixed_train_data_validation_window : public validation_window
     public:
     std::string data;
     fixed_train_data_validation_window(std::string data);
-    void sendInformation() override;
-    void notValidated() override;
 };
 #endif

@@ -19,6 +19,7 @@
 #include <vector>
 #include <map>
 #include <memory>
+#include <list>
 #include "variables.h"
 #include "types.h"
 #include "packets.h"
@@ -33,8 +34,8 @@ struct position_report_parameters
 {
     int64_t T_sendreport;
     double D_sendreport;
-    optional<distance> location_front; 
-    optional<distance> location_rear; 
+    std::list<distance> location_front; 
+    std::list<distance> location_rear; 
     bool LRBG;
 };
 extern optional<position_report_parameters> pos_report_params;
@@ -318,6 +319,27 @@ struct coordinate_system_assignment : euroradio_message
         Q_ORIENTATION.copy(r);
     }
 };
+struct taf_request_message : euroradio_message
+{
+    Q_SCALE_t Q_SCALE;
+    D_REF_t D_REF;
+    Q_DIR_t Q_DIR;
+    D_TAFDISPLAY_t D_TAFDISPLAY;
+    L_TAFDISPLAY_t L_TAFDISPLAY;
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        M_ACK.copy(r);
+        NID_LRBG.copy(r);
+        Q_SCALE.copy(r);
+        D_REF.copy(r);
+        Q_DIR.copy(r);
+        D_TAFDISPLAY.copy(r);
+        L_TAFDISPLAY.copy(r);
+    }
+};
 struct SH_request : euroradio_message_traintotrack
 {
     SH_request() 
@@ -415,6 +437,25 @@ struct terminate_communication_session : euroradio_message_traintotrack
         NID_MESSAGE.rawdata = 156;
     }
 };
+struct emergency_acknowledgement_message : euroradio_message_traintotrack
+{
+    NID_EM_t NID_EM;
+    Q_EMERGENCYSTOP_t Q_EMERGENCYSTOP;
+    emergency_acknowledgement_message()
+    {
+        NID_MESSAGE.rawdata = 147;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        NID_EM.copy(r);
+        Q_EMERGENCYSTOP.copy(r);
+        copy_position_report(r);
+    }
+};
 struct acknowledgement_message : euroradio_message_traintotrack
 {
     T_TRAIN_t T_TRAINack;
@@ -429,6 +470,21 @@ struct acknowledgement_message : euroradio_message_traintotrack
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
         T_TRAINack.copy(r);
+    }
+};
+struct taf_granted : euroradio_message_traintotrack
+{
+    taf_granted()
+    {
+        NID_MESSAGE.rawdata = 149;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        copy_position_report(r);
     }
 };
 void update_radio();

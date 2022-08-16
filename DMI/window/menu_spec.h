@@ -23,5 +23,6 @@ class menu_spec: public menu
 {
     public:
     menu_spec();
+    void setEnabled(bool adhesion, bool sr, bool integrity);
 };
 #endif

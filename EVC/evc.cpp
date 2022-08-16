@@ -19,12 +19,15 @@
 #include <cstdio>
 #include <mutex>
 #include <condition_variable>
+#include "TrainSubsystems/cold_movement.h"
 #include "DMI/dmi.h"
 #include "DMI/text_message.h"
 #include "DMI/windows.h"
+#include "DMI/track_ahead_free.h"
 #include <iostream>
 #include <chrono>
 #include "Packets/messages.h"
+#include "Packets/vbc.h"
 #include "Supervision/speed_profile.h"
 #include "Supervision/targets.h"
 #include "Supervision/supervision.h"
@@ -192,11 +195,14 @@ extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 }
 #endif
 bool started=false;
+int cold_movement_status;
 void start()
 {
+    cold_movement_status = ColdMovementUnknown;
     start_dmi();
     start_or_iface();
     setup_national_values();
+    load_vbcs();
     initialize_mode_transitions();
     set_message_filters();
     initialize_national_functions();
@@ -216,6 +222,7 @@ void update()
     update_national_functions();
     update_train_subsystems();
     update_dmi_windows();
+    update_track_ahead_free_request();
 }
 std::condition_variable evc_cv;
 void loop()
@@ -227,7 +234,7 @@ void loop()
         update();
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
         int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
-        //if (d>500) std::cout<<d<<std::endl;
+        /*if (d>500) std::cout<<d<<std::endl;*/
         evc_cv.wait_for(lck, std::chrono::milliseconds(80));
     }
 }

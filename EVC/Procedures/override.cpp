@@ -24,8 +24,8 @@
 #include "../Time/clock.h"
 #include "../DMI/windows.h"
 bool overrideProcedure = false;
-distance override_end_distance;
-int64_t override_end_time;
+distance override_start_distance;
+int64_t override_start_time;
 optional<distance> formerEoA;
 optional<distance> formerSRdist;
 void start_override()
@@ -37,9 +37,9 @@ void start_override()
         }
         overrideProcedure = true;
         formerSRdist = {};
-        override_end_distance = d_estfront_dir[odometer_orientation == -1]+D_NVOVTRP;
-        override_speed = speed_restriction(V_NVSUPOVTRP, distance(std::numeric_limits<double>::lowest(), 0, 0), override_end_distance, false);
-        override_end_time = get_milliseconds() + T_NVOVTRP*1000;
+        override_start_distance = d_estfront_dir[odometer_orientation == -1];
+        override_speed = speed_restriction(V_NVSUPOVTRP, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+        override_start_time = get_milliseconds();
         if (mode == Mode::OS || mode == Mode::LS || mode == Mode::FS) {
             if (EoA)
                 formerEoA = EoA;
@@ -49,8 +49,13 @@ void start_override()
             formerEoA = d_estfront_dir[odometer_orientation == -1];
         } else if (mode == Mode::SR) {
             formerSRdist = SR_dist;
-            if (std::isfinite(D_NVSTFF))
+            if (std::isfinite(D_NVSTFF)) {
                 SR_dist = d_estfront_dir[odometer_orientation == -1]+D_NVSTFF;
+                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
+            } else {
+                SR_dist = {};
+                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+            }
         }
         recalculate_MRSP();
         trigger_condition(37);
@@ -61,7 +66,7 @@ bool stopsh_received=false;
 void update_override()
 {
     if (overrideProcedure) {
-        if (d_estfront > override_end_distance || get_milliseconds() > override_end_time)
+        if (d_estfront - override_start_distance > D_NVOVTRP || get_milliseconds() - override_start_time >  T_NVOVTRP*1000)
             overrideProcedure = false;
         if (mode != Mode::UN && mode != Mode::SN) {
             if (stopsr_received || stopsh_received ||

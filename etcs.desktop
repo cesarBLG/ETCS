@@ -1,0 +1,18 @@
+[Desktop Entry]
+Comment[es_ES]=
+Comment=
+Encoding=UTF-8
+Exec='/home/pi/ETCS/EVC/evc'
+Icon=/home/pi/ETCS/EVC/ETCS.ico
+MimeType=
+Name=ETCS
+Path=/home/pi/ETCS/EVC
+StartupNotify=true
+Terminal=true
+TerminalOptions=
+Type=Application
+Version=1.0
+X-DBUS-ServiceName=
+X-DBUS-StartupType=
+X-KDE-SubstituteUID=false
+X-KDE-Username=

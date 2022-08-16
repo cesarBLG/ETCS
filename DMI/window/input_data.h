@@ -34,6 +34,7 @@ class input_data
     bool accepted = false;
     bool valid = false;
     public:
+    bool character_separation = false;
     bool techrange_invalid=false;
     bool techresol_invalid=false;
     bool techcross_invalid=false;
@@ -65,6 +66,16 @@ class input_data
     string getData()
     {
         return data;
+    }
+    string getFormattedData(std::string data)
+    {
+        if (!character_separation) return data;
+        std::string format = "";
+        for (int i=0; i<data.size(); i++) {
+            if (i>0 && i%5 == 0) format += " ";
+            format += data[i];
+        }
+        return format;
     }
     void updateText();
     virtual ~input_data();

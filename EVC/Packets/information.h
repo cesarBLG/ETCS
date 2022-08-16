@@ -19,8 +19,10 @@
 #include "etcs_information.h"
 #include "messages.h"
 #include "radio.h"
+#include "vbc.h"
 #include "../Euroradio/session.h"
 #include "3.h"
+#include "6.h"
 #include "12.h"
 #include "15.h"
 #include "16.h"
@@ -30,6 +32,8 @@
 #include "40.h"
 #include "41.h"
 #include "42.h"
+#include "57.h"
+#include "58.h"
 #include "65.h"
 #include "66.h"
 #include "67.h"
@@ -206,6 +210,33 @@ struct session_management_information : etcs_information
         }
     }
 };
+struct ma_request_params_info : etcs_information
+{
+    ma_request_params_info() : etcs_information(12, 13) {}
+    void handle() override
+    {
+        auto *params = (MovementAuthorityRequestParameters*)linked_packets.front().get();
+    }
+};
+struct position_report_params_info : etcs_information
+{
+    position_report_params_info() : etcs_information(13, 14) {}
+    void handle() override
+    {
+        auto *params = (PositionReportParameters*)linked_packets.front().get();
+        position_report_parameters p;
+        p.D_sendreport = params->D_CYCLOC.get_value(params->Q_SCALE);
+        p.T_sendreport = params->T_CYCLOC * 1000;
+        p.LRBG = params->M_LOC != M_LOC_t::NotEveryLRBG;
+        distance pos = ref;
+        for (auto &e : params->elements) {
+            pos += e.D_LOC.get_value(params->Q_SCALE);
+            if (e.Q_LGTLOC == Q_LGTLOC_t::MaxSafeFrontEnd) p.location_front.push_back(pos);
+            else p.location_rear.push_back(pos);
+        }
+        pos_report_params = p;
+    }
+};
 struct SR_authorisation_info : etcs_information
 {
     SR_authorisation_info() : etcs_information(14,15) {}
@@ -226,6 +257,10 @@ struct SR_authorisation_info : etcs_information
             mode_to_ack = Mode::SR;
             mode_acknowledgeable = true;
             mode_acknowledged = false;
+            if (sr->D_SR != D_SR_t::Infinity)
+                D_STFF_rbc = sr->D_SR.get_value(sr->Q_SCALE);
+            else
+                D_STFF_rbc = std::numeric_limits<double>::infinity();
         }
         if (active_dialog == dialog_sequence::Main && active_dialog_step == "S7")
             active_dialog = dialog_sequence::None;
@@ -328,6 +363,8 @@ struct track_condition_information : etcs_information
         } else if (nid == 39) {
             TrackConditionChangeTractionSystem &tc = *(TrackConditionChangeTractionSystem*)linked_packets.front().get();
             load_track_condition_traction(tc, ref);
+        } else if (nid == 40) {
+            TrackConditionChangeCurrentConsumption &tc = *(TrackConditionChangeCurrentConsumption*)linked_packets.front().get();
         }
     }
 };
@@ -356,6 +393,19 @@ struct level_crossing_information : etcs_information
     {
         LevelCrossingInformation lx = *(LevelCrossingInformation*)linked_packets.front().get();
         load_lx(lx, ref);
+    }
+};
+struct vbc_order : etcs_information
+{
+    vbc_order() : etcs_information(59,61) {}
+    void handle() override
+    {
+        VirtualBaliseCoverOrder vbco = *(VirtualBaliseCoverOrder*)linked_packets.front().get();
+        virtual_balise_cover vbc = {vbco.NID_C, vbco.NID_VBCMK, get_milliseconds()+vbco.T_VBC.get_value()};
+        if (vbco.Q_VBCO == Q_VBCO_t::SetVBC)
+            set_vbc(vbc);
+        else
+            remove_vbc(vbc);
     }
 };
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);

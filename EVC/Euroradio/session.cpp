@@ -2,6 +2,7 @@
 #include "../Packets/messages.h"
 #include "../Supervision/train_data.h"
 #include "../Procedures/start.h"
+#include "../TrainSubsystems/cold_movement.h"
 #include <thread>
 #include <map>
 communication_session *supervising_rbc = nullptr;
@@ -212,6 +213,9 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
     }
 }
 std::string RadioNetworkId = "GSMR-A";
+int64_t first_supervised_timestamp;
+bool radio_reaction_applied = false;
+bool radio_reaction_reconnected = false;
 void update_euroradio()
 {
     for (mobile_terminal &t : mobile_terminals) {
@@ -250,9 +254,50 @@ void update_euroradio()
     } else {
         radio_status_driver = safe_radio_status::Disconnected;
     }
+    bool radio_hole = false;
+    if (radio_hole || ((level == Level::N2 || level == Level::N3) && (!supervising_rbc || supervising_rbc->status != session_status::Established))) {
+        first_supervised_timestamp = -1;
+    }
+    if (!radio_hole && (level == Level::N2 || level == Level::N3) && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
+        if (first_supervised_timestamp < 0)
+            first_supervised_timestamp = get_milliseconds();
+        int64_t supervised_timestamp = first_supervised_timestamp;
+        if (supervising_rbc && supervising_rbc->last_valid_timestamp > first_supervised_timestamp)
+            supervised_timestamp = supervising_rbc->last_valid_timestamp;
+        if (get_milliseconds() - supervised_timestamp > T_NVCONTACT*1000 && !radio_reaction_applied) {
+            radio_reaction_applied = true;
+            switch (M_NVCONTACT) {
+                case 2:
+                    break;
+                case 1:
+                    trigger_brake_reason(2);
+                    break;
+                default:
+                    trigger_condition(41);
+                    break;
+            }
+        }
+        if (supervising_rbc && get_milliseconds() - supervising_rbc->last_valid_timestamp < T_NVCONTACT*1000) {
+            radio_reaction_applied = false;
+            radio_reaction_reconnected = false;
+        }
+        if (get_milliseconds() - supervised_timestamp > (T_NVCONTACT + T_disconnect_radio)*1000 && !radio_reaction_reconnected) {
+            radio_reaction_reconnected = true;
+            if (supervising_rbc && supervising_rbc->status == session_status::Established)
+                supervising_rbc->reset_radio();
+        }
+    } else {
+        radio_reaction_applied = false;
+        radio_reaction_reconnected = false;
+    }
 }
 optional<contact_info> rbc_contact;
 bool rbc_contact_valid;
+void load_contact_info()
+{
+    //TODO: Radio Network
+    rbc_contact_valid = cold_movement_status == NoColdMovement;
+}
 void set_supervising_rbc(contact_info info)
 {
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {

@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "menu_settings.h"
+#include "../tcp/server.h"
 menu_settings::menu_settings() : menu("Settings")
 {
     buttons[0] = new IconButton("symbols/Setting/SE_03.bmp", 153, 50);
@@ -25,5 +26,38 @@ menu_settings::menu_settings() : menu("Settings")
     buttons[3] = new TextButton("System version", 153, 50);
     buttons[4] = new TextButton("Set VBC", 153, 50);
     buttons[5] = new TextButton("Remove VBC", 153, 50);
+    buttons[0]->setPressedAction([this]
+    {
+        write_command("Language","");
+    });
+    buttons[1]->setPressedAction([this] 
+    {
+        write_command("Volume","");
+    });
+    buttons[2]->setPressedAction([this] 
+    {
+        write_command("Brightness","");
+    });
+    buttons[3]->setPressedAction([this] 
+    {
+        write_command("SystemVersion","");
+    });
+    buttons[4]->setPressedAction([this] 
+    {
+        write_command("SetVBC","");
+    });
+    buttons[5]->setPressedAction([this] 
+    {
+        write_command("RemoveVBC","");
+    });
     setLayout();
 };
+void menu_settings::setEnabled(bool language, bool volume, bool brightness, bool version, bool setvbc, bool removevbc)
+{
+    buttons[0]->setEnabled(language);
+    buttons[1]->setEnabled(volume);
+    buttons[2]->setEnabled(brightness);
+    buttons[3]->setEnabled(version);
+    buttons[4]->setEnabled(setvbc);
+    buttons[5]->setEnabled(removevbc);
+}

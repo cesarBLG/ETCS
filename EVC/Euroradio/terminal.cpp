@@ -64,8 +64,13 @@ bool mobile_terminal::setup(communication_session *session)
                 }
                 cv.wait(lck);
             }
+#ifdef _WIN32
+            shutdown(fd, SD_BOTH);
+            closesocket(fd);
+#else
             shutdown(fd, SHUT_RDWR);
             close(fd);
+#endif
             released--;
         });
         write.detach();

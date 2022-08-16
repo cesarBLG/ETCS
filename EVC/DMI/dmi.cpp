@@ -31,6 +31,7 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <algorithm>
 #include <map>
 #include "../Supervision/supervision.h"
 #include "../Supervision/targets.h"
@@ -46,6 +47,7 @@
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../TrackConditions/track_condition.h"
+#include "track_ahead_free.h"
 #include "text_message.h"
 #include <orts/client.h>
 #include <orts/common.h>
@@ -143,6 +145,8 @@ void parse_command(string str, bool lock=true)
                 validate_data_entry(window, res);
             } else if (selection == "CloseWindow") {
                 close_window();
+            } else if (selection == "TrackAheadFree") {
+                track_ahead_free_granted();
             }
         }
     }
@@ -209,6 +213,7 @@ void to_json(json&j, const text_message &t)
     j["FirstGroup"] = t.firstGroup;
     j["Acknowledge"] = t.ack;
 }
+static json j;
 void dmi_comm()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -226,7 +231,6 @@ void dmi_comm()
         unique_lock<mutex> lck(loop_mtx);
         sendtoor = get_milliseconds() - lastor > 250;
         if (sendtoor) lastor = get_milliseconds();
-        json j;
         j["AllowedSpeedMpS"] = V_perm;
         j["InterventionSpeedMpS"] = V_sbi;
         j["TargetSpeedMpS"] = V_target;
@@ -255,6 +259,7 @@ void dmi_comm()
         if (valid_geo_reference) j["GeographicalPositionKM"] = valid_geo_reference->get_position(d_estfront);
         else j["GeographicalPositionKM"]=nullptr;
         j["TextMessages"] = messages;
+        j["DisplayTAF"] = start_display_taf && !stop_display_taf;
         if (mode == Mode::FS || mode == Mode::OS)
         {
             std::vector<speed_element> speeds;
@@ -341,6 +346,7 @@ void dmi_comm()
                     objs.push_back(tc->end_symbol);
                 }
             }
+            std::sort(objs.begin(), objs.end(), [](PlanningTrackCondition x, PlanningTrackCondition y) {return x.DistanceToTrainM < y.DistanceToTrainM;});
             j["PlanningTrackConditions"] = objs;
             std::set<int> active_symbols;
             for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {

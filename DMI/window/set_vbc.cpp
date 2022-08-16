@@ -1,7 +1,6 @@
 /*
  * European Train Control System
- * Copyright (C) 2019  Iván Izquierdo
- * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * Copyright (C) 2022  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,30 +15,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "running_number.h"
-#include "../monitor.h"
-#include "keyboard.h"
+#include "set_vbc.h"
 #include "../tcp/server.h"
-trn_window::trn_window(int trn) : input_window("Train running number", 1, false)
+#include "keyboard.h"
+set_vbc_window::set_vbc_window() : input_window("Set VBC", 1, true)
 {
-    inputs[0] = new trn_input();
+    inputs[0] = new input_data("VBC code");
+    inputs[0]->keys = getNumericKeyboard(inputs[0]);
     create();
-    if (trn != 0)
-    {
-        inputs[0]->prev_data = inputs[0]->data = to_string(trn);
-        inputs[0]->updateText();
-    }
 }
-void trn_window::sendInformation()
+void set_vbc_window::sendInformation()
 {
-    write_command("setTRN", inputs[0]->getData());
+    write_command("addVBC", inputs[0]->getData());
 }
-trn_input::trn_input()
+remove_vbc_window::remove_vbc_window() : input_window("Remove VBC", 1, true)
 {
-    keys = getNumericKeyboard(this);
+    inputs[0] = new input_data("VBC code");
+    inputs[0]->keys = getNumericKeyboard(inputs[0]);
+    create();
 }
-void trn_input::validate()
+void remove_vbc_window::sendInformation()
 {
-    if(data.size()>6) return;
-    valid = true;
+    write_command("eraseVBC", inputs[0]->getData());
 }

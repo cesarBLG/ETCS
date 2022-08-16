@@ -47,6 +47,7 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
         case 27: msg = new SH_refused(); break;
         case 28: msg = new SH_authorised(); break;
         case 32: msg = new RBC_version(); break;
+        case 34: msg = new taf_request_message(); break;
         case 33: msg = new MA_shifted_message(); break;
         case 39: msg = new ack_session_termination(); break;
         case 40: msg = new train_rejected(); break;
@@ -143,7 +144,7 @@ void update_radio()
     update_euroradio();
     if (supervising_rbc) {
         double V_MRSP = calc_ceiling_limit();
-        double advance = (V_MRSP + dV_warning(V_MRSP))*ma_params.T_MAR;
+        double advance = (V_MRSP + dV_warning(V_MRSP))*ma_params.T_MAR/1000;
         ma_rq_reasons[1] = (d_perturbation_eoa && *d_perturbation_eoa-advance < d_estfront) || (d_perturbation_svl && *d_perturbation_svl-advance < d_maxsafefront(*d_perturbation_svl));
         ma_rq_reasons[2] = ma_params.T_TIMEOUTRQST > 0 && MA && MA->timers_to_expire(ma_params.T_TIMEOUTRQST);
         bool request = false;
@@ -156,7 +157,7 @@ void update_radio()
             }
             ma_rq_reasons_old[i] = ma_rq_reasons[i];
         }
-        if (ma_params.T_CYCRQSTD > 0 && any && get_milliseconds() > ma_asked + ma_params.T_CYCRQSTD)
+        if (ma_params.T_CYCRQSTD > 0 && any && get_milliseconds() - ma_asked > ma_params.T_CYCRQSTD)
             request = true;
         if (request) {
             ma_request(ma_rq_reasons[0], ma_rq_reasons[1], ma_rq_reasons[2], ma_rq_reasons[3], ma_rq_reasons[4]);
@@ -170,17 +171,25 @@ void update_radio()
             }
         }
         if (pos_report_params) {
-            if (std::abs(d_estfront-d_last_pos_rep) < pos_report_params->D_sendreport)
+            if (std::abs(d_estfront-d_last_pos_rep) > pos_report_params->D_sendreport)
                 rep = true;
-            if (get_milliseconds()-t_last_pos_rep < pos_report_params->T_sendreport)
+            if (get_milliseconds()-t_last_pos_rep > pos_report_params->T_sendreport)
                 rep = true;
-            if (pos_report_params->location_front && d_maxsafefront(*pos_report_params->location_front)>*pos_report_params->location_front) {
-                rep = true;
-                pos_report_params->location_front = {};
+            for (auto it = pos_report_params->location_front.begin(); it != pos_report_params->location_front.end(); ) {
+                if (d_maxsafefront(*it)>*it) {
+                    rep = true;
+                    it = pos_report_params->location_front.erase(it);
+                } else {
+                    ++it;
+                }
             }
-            if (pos_report_params->location_rear && d_minsafefront(*pos_report_params->location_rear)-L_TRAIN>*pos_report_params->location_rear) {
-                rep = true;
-                pos_report_params->location_rear = {};
+            for (auto it = pos_report_params->location_rear.begin(); it != pos_report_params->location_rear.end(); ) {
+                if (d_minsafefront(*it)-L_TRAIN>*it) {
+                    rep = true;
+                    it = pos_report_params->location_rear.erase(it);
+                } else {
+                    ++it;
+                }
             }
         }
         if (rep)
@@ -233,6 +242,7 @@ void ma_request(bool driver, bool perturb, bool timer, bool trackdel, bool taf)
     req->Q_MARQSTREASON.rawdata |= (taf<<Q_MARQSTREASON_t::TrackAheadFreeBit);
     supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(req));
 }
+int64_t last_sent_timestamp;
 void fill_message(euroradio_message_traintotrack *m)
 {
     m->NID_ENGINE.rawdata = 0;
@@ -244,7 +254,11 @@ void fill_message(euroradio_message_traintotrack *m)
     else
         m->PositionReport1BG = std::shared_ptr<PositionReport>((PositionReport*)pos);
 
-    m->T_TRAIN.rawdata = get_milliseconds()/10;
+    int64_t timestamp = get_milliseconds()/10;
+    if (last_sent_timestamp >= timestamp)
+        timestamp = last_sent_timestamp + 1;
+    m->T_TRAIN.rawdata = timestamp;
+    last_sent_timestamp = timestamp;
 }
 ETCS_packet *get_position_report()
 {

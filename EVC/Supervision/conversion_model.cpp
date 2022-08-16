@@ -29,23 +29,27 @@ acceleration get_A_gradient(std::map<distance, double> gradient, double default_
 {
     acceleration A_gradient;
     A_gradient = acceleration();
-    A_gradient.accel = [gradient, default_gradient](double V, distance d) {
-        if (gradient.empty() || d-L_TRAIN<gradient.begin()->first || (--gradient.end())->first >= d)
-            return default_gradient; 
-        double grad = 50000;
-        for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
-            grad = std::min(grad, it->second);
-        }
-        const double g = 9.81;
-        if (M_rotating_nom > 0)
-            return g*grad/(1000+10*M_rotating_nom);
-        else
-            return g*grad/(1000+10*((grad>0) ? M_rotating_max : M_rotating_min));
-    };
     A_gradient.dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
         A_gradient.dist_step.insert(it->first-L_TRAIN);
+    }
+    for (auto &d : A_gradient.dist_step) {
+        for (auto &V : A_gradient.speed_step) {
+            if (gradient.empty() || d-L_TRAIN<gradient.begin()->first || (--gradient.end())->first >= d) {
+                A_gradient.accelerations[d][V] = default_gradient;
+                continue;
+            }
+            double grad = 50000;
+            for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
+                grad = std::min(grad, it->second);
+            }
+            const double g = 9.81;
+            if (M_rotating_nom > 0)
+                A_gradient.accelerations[d][V] = g*grad/(1000+10*M_rotating_nom);
+            else
+                A_gradient.accelerations[d][V] = g*grad/(1000+10*((grad>0) ? M_rotating_max : M_rotating_min));
+        }
     }
     return A_gradient;
 }
@@ -75,11 +79,12 @@ acceleration get_A_brake_emergency(bool use_active_combination)
         for (auto it = A_brake_emergency_combination[i].begin(); it!=A_brake_emergency_combination[i].end(); ++it)
             ac.speed_step.insert(it->first);
     }
-    ac.accel = [use_active_combination](double V, distance d)
-    {
-        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.second : 15;
-        return (--A_brake_emergency_combination[comb].upper_bound(V))->second;
-    };
+    for (auto &d : ac.dist_step) {
+        for (auto &V : ac.speed_step) {
+            int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.second : 15;
+            ac.accelerations[d][V] = (--A_brake_emergency_combination[comb].upper_bound(V))->second;
+        }
+    }
     return ac;
 }
 acceleration get_A_brake_service(bool use_active_combination)
@@ -93,26 +98,30 @@ acceleration get_A_brake_service(bool use_active_combination)
         for (auto it = A_brake_service_combination[i].begin(); it!=A_brake_service_combination[i].end(); ++it)
             ac.speed_step.insert(it->first);
     }
-    ac.accel = [use_active_combination](double V, distance d)
-    {
-        int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.first : 7;
-        return (--A_brake_service_combination[comb].upper_bound(V))->second;
-    };
+    for (auto &d : ac.dist_step) {
+        for (auto &V : ac.speed_step) {
+            int comb = use_active_combination ? (--active_combination.upper_bound(d))->second.first : 7;
+            ac.accelerations[d][V] = (--A_brake_service_combination[comb].upper_bound(V))->second;
+        }
+    }
     return ac;
 }
 acceleration get_A_brake_normal_service(acceleration service)
 {
+    if (conversion_model_used && A_brake_normal_service_combination.empty())
+        return A_brake_normal_service;
     acceleration ac;
     for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
         ac.dist_step.insert(it->first);
-    for (auto it = A_brake_normal_service_combination[brake_position != PassengerP].begin(); it!=A_brake_normal_service_combination[brake_position].end(); ++it) {
+    for (auto it = A_brake_normal_service_combination[brake_position != PassengerP].begin(); it!=A_brake_normal_service_combination[brake_position != PassengerP].end(); ++it) {
         for (auto it2 = it->second.begin(); it2!=it->second.end(); ++it2)
             ac.speed_step.insert(it->first);
     }
-    ac.accel = [service](double V, distance d)
-    {
-        return (--(--A_brake_normal_service_combination[brake_position != PassengerP].upper_bound(service(0,d)))->second.upper_bound(V))->second;
-    };
+    for (auto &d : ac.dist_step) {
+        for (auto &V : ac.speed_step) {
+            ac.accelerations[d][V] = (--(--A_brake_normal_service_combination[brake_position != PassengerP].upper_bound(service(0,d)))->second.upper_bound(V))->second;
+        }
+    }
     return ac;
 }
 double get_T_brake_emergency(distance d)
@@ -272,9 +281,12 @@ acceleration conversion_acceleration(double lambda_0)
     for (auto it=AD.begin(); it!=AD.end(); ++it) {
         a_calculated.speed_step.insert(it->first/3.6);
     }
-    a_calculated.accel = [AD](double V, distance d) {
-        return (--AD.upper_bound(V*3.6))->second;
-    };
+
+    for (auto &d : a_calculated.dist_step) {
+        for (auto &V : a_calculated.speed_step) {
+            a_calculated.accelerations[d][V] = (--AD.upper_bound(V*3.6))->second;
+        }
+    }
     return a_calculated;
 }
 inline double T_brake_basic(double L, double a, double b, double c)
@@ -287,10 +299,12 @@ void convmodel_basic_accel(int lambda, acceleration &A_brake_emergency, accelera
     
     A_brake_service = conversion_acceleration(std::min(lambda, 135));
 
+    A_brake_normal_service = A_brake_service;
+
     A_ebmax=0;
 
     for (double spd : A_brake_emergency.speed_step) {
-        A_ebmax = std::max(A_ebmax, A_brake_emergency.accel(spd, distance(0, 0, 0)));
+        A_ebmax = std::max(A_ebmax, A_brake_emergency(spd, distance(0, 0, 0)));
     }
 }
 void convmodel_brake_build_up(brake_position_types brake_position, double L_TRAIN, double &T_brake_emergency_cm0, double &T_brake_emergency_cmt, double &T_brake_service_cm0, double &T_brake_service_cmt)
@@ -346,7 +360,7 @@ void set_conversion_correction_values()
 bool conversion_model_used = false;
 void set_conversion_model()
 {
-    if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6) {
+    if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6 && L_TRAIN < (brake_position == PassengerP ? 900 : 1500)) {
         conversion_model_used = true;
         convmodel_basic_accel(brake_percentage, A_brake_emergency, A_brake_service);
         convmodel_brake_build_up(brake_position, L_TRAIN, T_brake_emergency_cmt, T_brake_emergency_cm0, T_brake_service_cmt, T_brake_service_cm0);

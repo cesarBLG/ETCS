@@ -201,13 +201,11 @@ bool prev_desk_open;
 void update_mode_status()
 {
     if (!prev_desk_open && desk_open) {
-        if (odometer_orientation != current_odometer_orientation) {
-            odometer_orientation = current_odometer_orientation;
-            for (auto &lrbg : lrbgs) {
-                if (lrbg.dir != -1)
-                    lrbg.dir = 1-lrbg.dir;
-                lrbg.position = distance(lrbg.position.get(), odometer_orientation, lrbg.position.get_reference());
-            }
+        odometer_orientation = current_odometer_orientation;
+        for (auto &lrbg : lrbgs) {
+            if (lrbg.dir != -1 && lrbg.position.get_orientation() != odometer_orientation)
+                lrbg.dir = 1-lrbg.dir;
+            lrbg.position = distance(lrbg.position.get(), odometer_orientation, 0);
         }
     }
     prev_desk_open = desk_open;
@@ -235,14 +233,18 @@ void update_mode_status()
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {
-            if (std::isfinite(D_NVSTFF)) {
-                SR_dist = d_estfront_dir[odometer_orientation == -1]+D_NVSTFF;
+            double D_STFF = D_NVSTFF;
+            if (D_STFF_rbc)
+                D_STFF = *D_STFF_rbc;
+            if (std::isfinite(D_STFF)) {
+                SR_dist = d_estfront_dir[odometer_orientation == -1]+D_STFF;
                 SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
             } else {
                 SR_dist = {};
                 SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
             }
         } else {
+            D_STFF_rbc = {};
             SR_dist = {};
             SR_speed = {};
             formerEoA = {};
@@ -319,7 +321,6 @@ void set_mode_deleted_data()
         {"D","D","D","D","U","U","U","U","D","D","U","U","U","NR","NR","D","D"},
         {"D","D","D","D","U","U","D","U","D","D","D","D","U","NR","NR","D","D"},
         {"D","D","D","D","U","U","D","U","D","D","D","D","U","NR","NR","D","D"},
-        {"D","D","D","D","U","U","D","U","D","D","D","D","U","NR","NR","D","D"},
         {"R","R","R","R","U","U","U","U","R","R","U","U","U","NR","NR","R","U"},
         {"R","R","R","R","U","U","U","U","R","R","U","U","U","NR","NR","U","U"},
         {"D","D","D","D","U","U","U","U","D","D","U","U","U","NR","NR","D","U"},
@@ -361,7 +362,7 @@ void set_mode_deleted_data()
             std::string s = infos[i][j];
             deleted_information info;
             info.index = i;
-            info.deleted = !s.empty() && s[0] == 'D';
+            info.deleted = !s.empty() && (s[0] == 'D' || s[0] == 'R');
             info.invalidated = s == "TBR";
             if (s == "D1" || s == "D1,2")
                 info.exceptions.insert(1);
@@ -376,46 +377,51 @@ void set_mode_deleted_data()
     information_list[5].delete_info = []() {delete_SSP();};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
     information_list[18].delete_info = []() {signal_speeds.clear();};
-    information_list[22].delete_info = []() {messages.clear();}; // TODO: only from trackside
-    information_list[23].delete_info = []() {messages.clear();};
+    information_list[22].delete_info = []() {
+        for (auto &m : messages) {
+            if (m.type == text_message_type::PlainText)
+                m.end_condition = [](text_message&m){return true;};
+        }
+    };
+    information_list[23].delete_info = []() {
+        for (auto &m : messages) {
+            if (m.type == text_message_type::FixedText)
+                m.end_condition = [](text_message&m){return true;};
+        }
+    };
     information_list[25].delete_info = []() {reset_mode_profile(distance(), false);};
     information_list[29].delete_info = []() {
-        for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
-            if (c != TrackConditions::SoundHorn && c != TrackConditions::NonStoppingArea && c != TrackConditions::TunnelStoppingArea && c!= TrackConditions::BigMetalMasses) {
-                auto next = it;
-                ++next;
-                track_conditions.erase(it);
-                it = --next;
-            }
+            if (c != TrackConditions::SoundHorn && c != TrackConditions::NonStoppingArea && c != TrackConditions::TunnelStoppingArea && c!= TrackConditions::BigMetalMasses)
+                it = track_conditions.erase(it);
+            else
+                ++it;
         }
     };
     information_list[30].delete_info = []() {
-        for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
-            if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea) {
-                auto next = it;
-                ++next;
-                track_conditions.erase(it);
-                it = --next;
-            }
+            if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea)
+                it = track_conditions.erase(it);
+            else
+                ++it;
         }
     };
     information_list[31].delete_info = []() {
-        for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
-            if (c == TrackConditions::BigMetalMasses) {
-                auto next = it;
-                ++next;
-                track_conditions.erase(it);
-                it = --next;
-            }
+            if (c == TrackConditions::BigMetalMasses)
+                it = track_conditions.erase(it);
+            else
+                ++it;
         }
     };
     information_list[32].delete_info = []() {emergency_stops.clear();};
     information_list[33].delete_info = []() {emergency_stops.clear();};
     information_list[35].invalidate_info = []() {train_data_valid = false;};
     information_list[36].invalidate_info = []() {level_valid = false;};
+    information_list[37].invalidate_info = []() {priority_levels_valid = false;};
     information_list[38].delete_info = []() {driver_id = "";};
     information_list[38].invalidate_info = []() {driver_id_valid = false;};
     information_list[41].invalidate_info = []() {train_running_number_valid = false;};

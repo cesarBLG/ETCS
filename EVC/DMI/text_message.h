@@ -22,6 +22,12 @@
 #include "../Packets/72.h"
 #include <ctime>
 #include <list>
+enum struct text_message_type
+{
+    SystemStatus,
+    PlainText,
+    FixedText,
+};
 struct text_message
 {
     unsigned int id;
@@ -33,6 +39,7 @@ struct text_message
     int reason;
     bool acknowledged;
     bool shown;
+    text_message_type type = text_message_type::SystemStatus;
     int trackid;
     int64_t first_displayed;
     distance first_distance;

@@ -50,20 +50,20 @@ struct bit_manipulator
     void read(ETCS_variable_custom<T> *var)
     {
         T value=0;
-            int count=var->size;
-            while(count-->0) {
-                if (bits.size() <= position) {
-                    error = true;
-                    return;
-                }
-                value = value<<1 | bits[position++];
+        int count=var->size;
+        while(count-->0) {
+            if (bits.size() <= position) {
+                error = true;
+                return;
             }
-            var->rawdata = value;
-            if (!var->is_valid())
-                sparefound = true;
-            std::string tip = typeid(*var).name();
-            tip = tip.substr(tip.find_first_not_of("0123456789"));
-            std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
+            value = value<<1 | bits[position++];
+        }
+        var->rawdata = value;
+        if (!var->is_valid())
+            sparefound = true;
+        std::string tip = typeid(*var).name();
+        tip = tip.substr(tip.find_first_not_of("0123456789"));
+        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
     }
     template<typename T>
     void peek(ETCS_variable_custom<T> *var, int offset=0)
