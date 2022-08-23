@@ -5,6 +5,11 @@
 #include "../TrainSubsystems/cold_movement.h"
 #include <thread>
 #include <map>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#endif
 communication_session *supervising_rbc = nullptr;
 communication_session *accepting_rbc = nullptr;
 communication_session *handing_over_rbc = nullptr;
@@ -301,7 +306,7 @@ void load_contact_info()
 void set_supervising_rbc(contact_info info)
 {
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.phone_number = 5015;
+        info.phone_number = 5015 | ((uint64_t)inet_addr("127.0.0.1"))<<16;
     }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)

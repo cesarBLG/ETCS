@@ -199,7 +199,7 @@ struct session_management_information : etcs_information
     {
         SessionManagement &session = *(SessionManagement*)linked_packets.front().get();
         if (mode != Mode::SL || session.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
-            contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
+            contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO.get_value()};
             if (session.Q_RBC == Q_RBC_t::EstablishSession) {
                 set_supervising_rbc(info);
                 if (supervising_rbc && mode != Mode::SH && mode != Mode::PS)
@@ -401,7 +401,7 @@ struct vbc_order : etcs_information
     void handle() override
     {
         VirtualBaliseCoverOrder vbco = *(VirtualBaliseCoverOrder*)linked_packets.front().get();
-        virtual_balise_cover vbc = {vbco.NID_C, vbco.NID_VBCMK, get_milliseconds()+vbco.T_VBC.get_value()};
+        virtual_balise_cover vbc = {(int)vbco.NID_C, (int)vbco.NID_VBCMK, get_milliseconds()+vbco.T_VBC.get_value()};
         if (vbco.Q_VBCO == Q_VBCO_t::SetVBC)
             set_vbc(vbc);
         else

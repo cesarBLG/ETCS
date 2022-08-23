@@ -836,6 +836,7 @@ struct M_NVEBCL_t : ETCS_variable
             case 9:
                 return 0.999999999;
         }
+        return 0;
     }
     bool is_valid() override
     {
@@ -1180,6 +1181,20 @@ struct NID_RADIO_t : ETCS_variable_custom<uint64_t>
 {   
     static const uint64_t UseShortNumber=std::numeric_limits<uint64_t>::max();
     NID_RADIO_t() : ETCS_variable_custom<uint64_t>(64) {}
+    uint64_t get_value()
+    {
+        if (rawdata == UseShortNumber)
+            return rawdata;
+        uint64_t value=0;
+        for (int i=15; i>=0; i--)
+        {
+            int c = (rawdata>>(4*i))&15;
+            if (c == 15)
+                continue;
+            value = 10*value + c;
+        }
+        return value;
+    }
 };
 struct NID_RBC_t : ETCS_variable
 {
@@ -1200,7 +1215,7 @@ struct NID_OPERATIONAL_t : ETCS_variable
         {
             int c = (rawdata>>(4*i))&15;
             if (c == 15)
-                break;
+                continue;
             value = 10*value + c;
         }
         return value;

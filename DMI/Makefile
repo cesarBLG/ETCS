@@ -1,16 +1,17 @@
 CPP = g++
-FILES = init.o monitor.o time.o graphics/sdl/drawing.o graphics/sdl/component.o graphics/button.o \
-		graphics/display.o window/window.o graphics/layout.o graphics/text_button.o graphics/icon_button.o \
-		speed/gauge.o sound/sound.o distance/distance.o tcp/server.o state/level.o state/mode.o \
-		state/brake.o state/conditions.o state/acks.o state/override.o state/radio.o \
-		messages/messages.o graphics/flash.o \
-		window/window_main.o state/time_hour.o window/subwindow.o window/data_entry.o window/data_validation.o \
-		window/nav_buttons.o window/menu.o window/menu_main.o window/menu_override.o window/menu_radio.o \
-		window/menu_spec.o window/menu_settings.o window/set_vbc.o window/track_ahead_free.o \
-		window/driver_id.o window/running_number.o window/level_window.o window/sr_data.o \
-		planning/planning.o control/control.o state/gps_pos.o \
-		window/train_data.o window/fixed_train_data.o window/keyboard.o window/input_data.o \
-		graphics/sdl/gfx_primitives.o
+SOURCES = init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl/component.cpp graphics/button.cpp \
+		graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp \
+		speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp \
+		state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp \
+		messages/messages.cpp graphics/flash.cpp \
+		window/window_main.cpp state/time_hour.cpp window/subwindow.cpp window/data_entry.cpp window/data_validation.cpp \
+		window/nav_buttons.cpp window/menu.cpp window/menu_main.cpp window/menu_override.cpp window/menu_radio.cpp \
+		window/menu_spec.cpp window/menu_settings.cpp window/set_vbc.cpp window/track_ahead_free.cpp \
+		window/driver_id.cpp window/running_number.cpp window/level_window.cpp window/sr_data.cpp \
+		window/rbc_data.cpp window/input_data.cpp window/fixed_train_data.cpp window/keyboard.cpp \
+		window/train_data.cpp \
+		planning/planning.cpp control/control.cpp state/gps_pos.cpp \
+		graphics/sdl/gfx_primitives.cpp
 CFLAGS = -Wall -g
 LDFLAGS = -lSDL2 -lSDL2_ttf -pthread
 ifeq ($(TARGET),WIN32)
@@ -23,7 +24,7 @@ EXE = dmi
 CFLAGS += -rdynamic
 BUILD_DIR = build/linux/
 endif
-OBJECTS = $(addprefix $(BUILD_DIR), $(FILES))
+OBJECTS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD_DIR), $(SOURCES)))
 all: $(EXE)
 $(EXE): $(OBJECTS)
 	$(CPP) $(OBJECTS) -o dmi $(CFLAGS) $(LDFLAGS)

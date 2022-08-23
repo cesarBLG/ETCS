@@ -115,6 +115,11 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S3-2-3") {
             active_window_dmi = radio_window_radio_wait;
         } else if (active_dialog_step == "S3-3") {
+            active_window_dmi = R"({"active":"rbc_data_window"})"_json;
+            active_window_dmi["RBC id"] = rbc_contact ? rbc_contact->country<<14 | rbc_contact->id : 0;
+            active_window_dmi["RBC phone number"] = rbc_contact ? rbc_contact->phone_number : 0;
+            if (som_status != S3)
+                active_dialog_step = "A31";
         } else if (active_dialog_step == "S4") {
             active_window_dmi = main_window_radio_wait;
         } else if (active_dialog_step == "A29") {
@@ -215,6 +220,9 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S5-2-3") {
             active_window_dmi = radio_window_radio_wait;
         } else if (active_dialog_step == "S5-3") {
+            active_window_dmi = R"({"active":"rbc_data_window"})"_json;
+            active_window_dmi["RBC id"] = rbc_contact ? rbc_contact->country<<14 | rbc_contact->id : 0;
+            active_window_dmi["RBC phone number"] = rbc_contact ? rbc_contact->phone_number : 0;
         } else if (active_dialog_step == "S6") {
             active_window_dmi = R"({"active":"trn_window"})"_json;
             active_window_dmi["trn"] = train_running_number;
@@ -401,6 +409,8 @@ void close_window()
         active_dialog_step = "S1";
     else if (active == "menu_radio")
         active_dialog_step = "S1";
+    else if (active == "rbc_data_window")
+        active_dialog_step = "S5-1";
     else if (active == "menu_settings") {
         if (som_active && som_status == S1) {
             active_dialog = dialog_sequence::StartUp;
@@ -519,6 +529,18 @@ void update_dialog_step(std::string step, std::string step2)
     } else if (step == "setDriverID") {
         driver_id = step2;
         driver_id_valid = true;
+    } else if (step == "setRBCdata") {
+        int s = step2.find_first_of(',');
+        uint32_t id = atoll(step2.substr(0, s).c_str());
+        uint64_t number = atoll(step2.substr(s+1).c_str());
+        set_supervising_rbc(contact_info({id>>14,id&((1<<14) - 1),number}));
+        if (som_active && som_status == S3 ) {
+            som_status = A31;
+        } else {
+            if (supervising_rbc)
+                supervising_rbc->open(N_tries_radio);
+            active_dialog_step = "S8";
+        }
     }
     if (active_dialog == dialog_sequence::None) {
         if (step2 == "main") {
@@ -548,6 +570,8 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "ContactLastRBC" || step == "UseShortNumber") {
             set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,NID_RBC_t::ContactLastRBC,0}) : contact_info({0,0,NID_RADIO_t::UseShortNumber}));
             som_status = A31;
+        } else if (step == "EnterRBCdata") {
+            active_dialog_step = "S3-3";
         }
     } else if (active_dialog == dialog_sequence::Main) {
         if (step == "Start") {
@@ -606,6 +630,8 @@ void update_dialog_step(std::string step, std::string step2)
             if (supervising_rbc)
                 supervising_rbc->open(N_tries_radio);
             active_dialog_step = "S8";
+        } else if (step == "EnterRBCdata") {
+            active_dialog_step = "S5-3";
         } else if (step == "setAcceptedTrainData") {
             active_dialog_step = "S3-2";
             if (flexible_data_entry) {
@@ -668,11 +694,11 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog_step = "S7-1";
         else if (step == "addVBC") {
             uint32_t num = stoi(step2);
-            set_vbc({(num>>6) & 1023, num & 63, (num>>16)*86400000LL+get_milliseconds()});
+            set_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
         } else if (step == "eraseVBC") {
             uint32_t num = stoi(step2);
-            remove_vbc({(num>>6) & 1023, num & 63, (num>>16)*86400000LL+get_milliseconds()});
+            remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
         }
     }

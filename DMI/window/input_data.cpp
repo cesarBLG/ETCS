@@ -19,7 +19,7 @@
 #include "input_data.h"
 #include "../graphics/flash.h"
 #include "keyboard.h"
-input_data::input_data(string label_text) : label(label_text), data_get([this] {return getData();}), 
+input_data::input_data(string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
 data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
 {
     holdcursor = {0};
@@ -27,23 +27,38 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
     {
         label_comp = new Component(204,50);
         data_comp = new Component(204,50);
-        label_echo = new Component(100,16);
-        data_echo = new Component(100,16);
+        if (show_echo)
+        {
+            label_echo = new Component(100,16);
+            data_echo = new Component(100,16);
+        }
     }
     else data_comp = new Component(204+102,50);
     data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
+    font = openFont(fontPath, 12);
     data_comp->setDisplayFunction([this]
     {
         data_comp->setBorder(MediumGrey);
         if (selected && flash_state%2)
         {
-            float cur = data_tex->width+data_tex->offx;
+            float curx = data_tex->width+data_tex->offx;
+            float cury = 32;
+            std::string text = getFormattedData(data);
+            if (text.find('\n') != std::string::npos)
+            {
+                if (font == nullptr) return;
+                float x;
+                float y;
+                getFontSize(font, text.substr(text.find('\n')+1).c_str(), &x, &y);
+                curx = data_tex->offx + x;
+                cury = 42;
+            }
             time_t now;
             time(&now);
-            if (keybd_data.empty()) cur = data_tex->offx;
-            else if (difftime(now, holdcursor)<2) cur-=9;
-            data_comp->drawLine(cur, 32, cur+9, 32, Black);
+            if (keybd_data.empty()) curx = data_tex->offx;
+            else if (difftime(now, holdcursor)<2) curx-=9;
+            data_comp->drawLine(curx, cury, curx+9, cury, Black);
         }
     });
     if(label!="")
@@ -51,8 +66,11 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
         label_comp->setBackgroundColor(DarkGrey);
         label_comp->addBorder(MediumGrey);
         label_comp->addText(label.c_str(), 10, 0, 12, Grey, RIGHT);
-        label_echo->addText(label, 5, 0, 12, White, RIGHT);
-        data_echo->addText(getFormattedData(prev_data), 4, 0, 12, White, LEFT);
+        if (show_echo)
+        {
+            label_echo->addText(label, 5, 0, 12, White, RIGHT);
+            data_echo->addText(getFormattedData(prev_data), 4, 0, 12, White, LEFT);
+        }
     }
 }
 void input_data::setData(string s)
@@ -91,7 +109,7 @@ void input_data::updateText()
     data_comp->clear();
     data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
-    if(label!="")
+    if(label!="" && show_echo)
     {
         data_echo->clear();
         if (techrange_invalid || techresol_invalid)
@@ -115,4 +133,5 @@ input_data::~input_data()
     if(data_comp!=nullptr) delete data_comp;
     if(label_echo!=nullptr) delete label_echo;
     if(data_echo!=nullptr) delete data_echo;
+    if (font != nullptr) TTF_CloseFont(font);
 }

@@ -29,6 +29,7 @@ using namespace std;
 using json = nlohmann::json;
 class input_data
 {
+    TTF_Font *font;
     protected:
     bool selected = false;
     bool accepted = false;
@@ -40,6 +41,7 @@ class input_data
     bool techcross_invalid=false;
     bool operatrange_invalid=false;
     bool operatcross_invalid=false;
+    bool show_echo;
     string label;
     string data;
     string data_accepted;
@@ -59,7 +61,7 @@ class input_data
     vector<Button*> keys;
     int keypage=0;
     virtual void validate(){if (data!="") valid = true;}
-    input_data(string label_text="");
+    input_data(string label_text="", bool echo=true);
     function<string()> data_get;
     function<void(string)> data_set;
     void setData(string s);
@@ -72,7 +74,8 @@ class input_data
         if (!character_separation) return data;
         std::string format = "";
         for (int i=0; i<data.size(); i++) {
-            if (i>0 && i%5 == 0) format += " ";
+            if (i>0 && i%8 == 0) format += "\n";
+            else if (i>0 && i%4 == 0 && i != data.size() - 1) format += " ";
             format += data[i];
         }
         return format;

@@ -24,6 +24,7 @@
 #include "../window/level_window.h"
 #include "../window/train_data.h"
 #include "../window/fixed_train_data.h"
+#include "../window/rbc_data.h"
 #include "../window/driver_id.h"
 #include "../window/running_number.h"
 #include "../window/sr_data.h"
@@ -136,6 +137,11 @@ void setWindow(json &j)
             fixed_train_data_validation_window *t;
             if (same) t = (fixed_train_data_validation_window*)active;
             else t = new fixed_train_data_validation_window(j["train_data"].get<std::string>());
+            w = t;
+        } else if (name == "rbc_data_window") {
+            rbc_data_window *t;
+            if (same) t = (rbc_data_window*)active;
+            else t = new rbc_data_window(j["RBC id"].get<std::uint32_t>(), j["RBC phone number"].get<std::uint64_t>());
             w = t;
         } else if (name == "set_vbc_window") {
             set_vbc_window *t;

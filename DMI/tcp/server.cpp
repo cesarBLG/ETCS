@@ -39,9 +39,7 @@
 #include "../state/gps_pos.h"
 #include "../state/acks.h"
 #include "../control/control.h"
-#include "../window/track_ahead_free.h"
 #include <mutex>
-using namespace std;
 int server;
 int client;
 #define BUFF_SIZE 1024
@@ -266,6 +264,7 @@ void parseData(string str)
     ovEOA = j["OverrideActive"].get<bool>();
     radioStatus = j["RadioStatus"].get<int>();
     EB = SB = j["BrakeCommanded"].get<bool>();
+    extern bool display_taf;
     display_taf = j["DisplayTAF"].get<bool>();
     setWindow(j["ActiveWindow"]);
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());

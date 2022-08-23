@@ -1,14 +1,14 @@
-FILES = evc.o DMI/dmi.o Supervision/national_values.o Supervision/fixed_values.o \
-Supervision/curve_calc.o  Supervision/conversion_model.o  Position/distance.o\
-Supervision/speed_profile.o Supervision/supervision.o Supervision/targets.o Supervision/train_data.o \
-Supervision/emergency_stop.o \
-Supervision/acceleration.o antenna.o MA/movement_authority.o MA/mode_profile.o Position/linking.o \
-OR_interface/interface.o SSP/ssp.o Packets/packets.o Procedures/mode_transition.o LX/level_crossing.o \
-Packets/messages.o Packets/radio.o Packets/vbc.o Euroradio/session.o Euroradio/terminal.o \
-Procedures/start.o Procedures/override.o Procedures/train_trip.o Procedures/level_transition.o \
-Procedures/stored_information.o TrackConditions/track_conditions.o Time/clock.o Position/geographical.o \
-DMI/text_messages.o DMI/windows.o DMI/track_ahead_free.o TrainSubsystems/power.o TrainSubsystems/brake.o \
-$(patsubst %.cpp, %.o, $(wildcard NationalFN/*.cpp))
+SOURCES = evc.cpp DMI/dmi.cpp Supervision/national_values.cpp Supervision/fixed_values.cpp \
+Supervision/curve_calc.cpp  Supervision/conversion_model.cpp  Position/distance.cpp\
+Supervision/speed_profile.cpp Supervision/supervision.cpp Supervision/targets.cpp Supervision/train_data.cpp \
+Supervision/emergency_stop.cpp \
+Supervision/acceleration.cpp antenna.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp \
+OR_interface/interface.cpp SSP/ssp.cpp Packets/packets.cpp Procedures/mode_transition.cpp LX/level_crossing.cpp \
+Packets/messages.cpp Packets/radio.cpp Packets/vbc.cpp Euroradio/session.cpp Euroradio/terminal.cpp \
+Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp \
+Procedures/stored_information.cpp TrackConditions/track_conditions.cpp Time/clock.cpp Position/geographical.cpp \
+DMI/text_messages.cpp DMI/windows.cpp DMI/track_ahead_free.cpp TrainSubsystems/power.cpp TrainSubsystems/brake.cpp \
+$(wildcard NationalFN/*.cpp)
 LIB = evc.so
 ARCHIVE = evc.a
 EXE = evc
@@ -31,7 +31,7 @@ WINDRES = x86_64-w64-mingw32-windres
 #-D_GLIBCXX_DEBUG
 BUILD_DIR = build/win32/
 endif
-OBJECTS = $(addprefix $(BUILD_DIR), $(FILES))
+OBJECTS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD_DIR), $(SOURCES)))
 all: $(EXE)
 $(EXE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -Wall

@@ -31,7 +31,7 @@ struct ETCS_packet
     bool directional=false;
     virtual void copy(bit_manipulator &w) 
     {
-        std::cout<<"TODO: copy() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
+        std::cout<<"TODO: copy() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
         NID_PACKET.copy(w);
         L_PACKET.copy(w);
     }
@@ -69,7 +69,7 @@ struct ETCS_directional_packet : ETCS_packet
     }*/
     virtual void copy(bit_manipulator &w) override
     {
-        std::cout<<"TODO: serialize() not implemented for packet "+NID_PACKET.rawdata<<std::endl;
+        std::cout<<"TODO: serialize() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
         NID_PACKET.copy(w);
         Q_DIR.copy(w);
         L_PACKET.copy(w);

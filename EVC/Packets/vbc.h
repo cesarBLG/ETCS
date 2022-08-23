@@ -5,7 +5,7 @@ struct virtual_balise_cover
 {
     int NID_C;
     int NID_VBCMK;
-    long validity;
+    int64_t validity;
     bool operator<(const virtual_balise_cover &o) const
     {
         return NID_VBCMK < o.NID_VBCMK;

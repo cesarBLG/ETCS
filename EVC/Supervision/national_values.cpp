@@ -19,6 +19,7 @@
 #include "../optional.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
+#include <fstream>
 bool Q_NVDRIVER_ADHES;
 
 double V_NVSHUNT;
@@ -68,7 +69,6 @@ double A_NVMAXREDADH2;
 double A_NVMAXREDADH3;
 
 std::set<int> NV_NID_Cs;
-#include <fstream>
 void nv_changed()
 {
     /*set_conversion_correction_values();
@@ -269,7 +269,7 @@ void reset_national_values()
 {
 #ifdef __ANDROID__
     extern std::string filesDir;
-    remove(filesDir+"/nationalvalues.bin");
+    remove((filesDir+"/nationalvalues.bin").c_str());
 #else
     remove("nationalvalues.bin");
 #endif

@@ -126,6 +126,7 @@ void input_window::setLayout()
         }
         for(int i=0; i<nfields; i++)
         {
+            if (!inputs[i]->show_echo) continue;
             addToLayout(inputs[i]->data_echo, new RelativeAlignment(nullptr, 204, 100+i*16, 0));
             addToLayout(inputs[i]->label_echo, new ConsecutiveAlignment(inputs[i]->data_echo, LEFT, 0));
         }
