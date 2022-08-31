@@ -45,9 +45,11 @@ enum struct Mode
     RV
 };
 extern Level level;
+extern int nid_ntc;
 extern bool level_valid;
 extern int levelAck;
 extern Level ackLevel;
+extern int ackNTC;
 extern Mode mode;
 extern bool modeAck;
 extern Mode ackMode;

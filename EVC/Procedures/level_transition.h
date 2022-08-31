@@ -62,7 +62,7 @@ struct level_transition_information
             priority_table.push_back({priorities[i].level, priorities[i].nid_ntc});
         }
         for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2) {
+            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2 || (priorities[i].level == Level::NTC && priorities[i].nid_ntc == 0)) {
                 leveldata = priorities[i];
                 return;
             }
@@ -95,7 +95,7 @@ struct level_transition_information
 };
 void update_level_status();
 void level_transition_received(level_transition_information info);
-void driver_set_level(Level level);
+void driver_set_level(level_information level);
 extern optional<level_transition_information> ongoing_transition;
 extern optional<level_transition_information> sh_transition;
 extern optional<distance> max_ack_distance;
@@ -105,3 +105,4 @@ extern std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer
 extern bool level_acknowledgeable;
 extern bool level_acknowledged;
 extern Level level_to_ack;
+extern int ntc_to_ack;

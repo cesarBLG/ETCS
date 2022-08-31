@@ -265,15 +265,17 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     A_expected = A_brake_service + A_gradient;
     
     A_normal_service = A_brake_normal_service + A_gradient;
-    for (auto it=Kn[0].begin(); it!=Kn[0].end(); ++it)
-        A_normal_service.speed_step.insert(it->first);
-    for (auto it=Kn[1].begin(); it!=Kn[1].end(); ++it)
-        A_normal_service.speed_step.insert(it->first);
-    for (auto &d : A_normal_service.dist_step) {
-        for (auto &V : A_normal_service.speed_step) {
-            double grad = (gradient.empty() || gradient.begin()->first > d) ? default_gradient : (--gradient.upper_bound(d))->second;
-            double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
-            A_normal_service.accelerations[d][V] = A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
+    if (!Kn[0].empty() && !Kn[1].empty()) {
+        for (auto it=Kn[0].begin(); it!=Kn[0].end(); ++it)
+            A_normal_service.speed_step.insert(it->first);
+        for (auto it=Kn[1].begin(); it!=Kn[1].end(); ++it)
+            A_normal_service.speed_step.insert(it->first);
+        for (auto &d : A_normal_service.dist_step) {
+            for (auto &V : A_normal_service.speed_step) {
+                double grad = (gradient.empty() || gradient.begin()->first > d) ? default_gradient : (--gradient.upper_bound(d))->second;
+                double kn = (grad > 0) ? (--Kn[0].upper_bound(V))->second : (--Kn[1].upper_bound(V))->second;
+                A_normal_service.accelerations[d][V] = A_brake_normal_service(V,d) + A_gradient(V,d) - kn*grad/1000;
+            }
         }
     }
 }

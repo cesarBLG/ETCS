@@ -92,8 +92,8 @@ void sb_feedback()
 		Q_displaylocked_P = false;
         Q_displaylocked_SBI = false;
         Q_displaylocked_TD = false;
+    	prevMRDT = MRDT;
 	}
-    prevMRDT = MRDT;
 	if (p > p0)
 		p += 1.5;
 	if (p0 > p && p > p0 - 30)

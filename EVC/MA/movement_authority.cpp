@@ -428,4 +428,5 @@ bool movement_authority::timers_to_expire(int64_t threshold)
 	}
 	if (loa_timer && loa_timer->started && loa_timer->remaining() < threshold)
         return true;
+	return false;
 }

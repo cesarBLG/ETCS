@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <iostream>
 #include <deque>
-struct eurobalise_telegram
+struct eurobalise_telegram : public ETCS_message
 {
     Q_UPDOWN_t Q_UPDOWN;
     M_VERSION_t M_VERSION;
@@ -43,43 +43,51 @@ struct eurobalise_telegram
     NID_BG_t NID_BG;
     Q_LINK_t Q_LINK;
     std::vector<std::shared_ptr<ETCS_packet>> packets;
-    bool valid;
-    bool readerror;
-    eurobalise_telegram(bit_manipulator &r)
+    eurobalise_telegram(bit_manipulator &b)
     {
         extern double or_dist;
-        //std::cout<<"Decoding telegram "<<get_milliseconds()/1000<<" "<<or_dist<<std::endl;
-        r.read(&Q_UPDOWN);
-        r.read(&M_VERSION);
-        r.read(&Q_MEDIA);
-        r.read(&N_PIG);
-        r.read(&N_TOTAL);
-        r.read(&M_DUP);
-        r.read(&M_MCOUNT);
-        r.read(&NID_C);
-        r.read(&NID_BG);
-        r.read(&Q_LINK);
-        while (!r.error)
+        Q_UPDOWN.copy(b);
+        M_VERSION.copy(b);
+        Q_MEDIA.copy(b);
+        N_PIG.copy(b);
+        N_TOTAL.copy(b);
+        M_DUP.copy(b);
+        M_MCOUNT.copy(b);
+        NID_C.copy(b);
+        NID_BG.copy(b);
+        Q_LINK.copy(b);
+        while (!b.error)
         {
             NID_PACKET_t NID_PACKET;
-            r.peek(&NID_PACKET);
+            b.peek(&NID_PACKET);
             if (NID_PACKET==255)
                 break;
-            packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r)));
+            packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(b)));
         }
-        readerror = r.error;
-        valid = !r.sparefound;
+        readerror = b.error;
+        valid = !b.sparefound;
+    }
+    void write_to(bit_manipulator &b) override
+    {
+        Q_UPDOWN.copy(b);
+        M_VERSION.copy(b);
+        Q_MEDIA.copy(b);
+        N_PIG.copy(b);
+        N_TOTAL.copy(b);
+        M_DUP.copy(b);
+        M_MCOUNT.copy(b);
+        NID_C.copy(b);
+        NID_BG.copy(b);
+        Q_LINK.copy(b);
+        for (auto &pack : packets) {
+            pack->copy(b);
+        }
+        NID_PACKET_t NID_PACKET;
+        NID_PACKET.rawdata = 255;
+        NID_PACKET.copy(b);
     }
 };
-struct message_packet
-{
-    ETCS_packet *p;
-    distance dist;
-    bool infill;
-    int dir;
-    bool fromRBC;
-};
-extern std::deque<std::pair<eurobalise_telegram,distance>> pending_telegrams;
+extern std::deque<std::pair<eurobalise_telegram, std::pair<distance,int64_t>>> pending_telegrams;
 extern std::list<link_data>::iterator link_expected;
 void update_track_comm();
 void handle_radio_message(std::shared_ptr<euroradio_message> msg, communication_session *session);

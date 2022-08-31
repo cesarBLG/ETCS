@@ -145,8 +145,10 @@ void update_radio()
     if (supervising_rbc) {
         double V_MRSP = calc_ceiling_limit();
         double advance = (V_MRSP + dV_warning(V_MRSP))*ma_params.T_MAR/1000;
-        ma_rq_reasons[1] = (d_perturbation_eoa && *d_perturbation_eoa-advance < d_estfront) || (d_perturbation_svl && *d_perturbation_svl-advance < d_maxsafefront(*d_perturbation_svl));
-        ma_rq_reasons[2] = ma_params.T_TIMEOUTRQST > 0 && MA && MA->timers_to_expire(ma_params.T_TIMEOUTRQST);
+        if ((mode == Mode::FS || mode == Mode::LS || mode == Mode::OS) && (level == Level::N2 || level == Level::N3)) {
+            ma_rq_reasons[1] = (d_perturbation_eoa && *d_perturbation_eoa-advance < d_estfront) || (d_perturbation_svl && *d_perturbation_svl-advance < d_maxsafefront(*d_perturbation_svl));
+            ma_rq_reasons[2] = ma_params.T_TIMEOUTRQST > 0 && MA && MA->timers_to_expire(ma_params.T_TIMEOUTRQST);
+        }
         bool request = false;
         bool any = false;
         for (int i=0; i<5; i++) {
@@ -195,6 +197,10 @@ void update_radio()
         if (rep)
             send_position_report();
     }
+    if (!supervising_rbc || supervising_rbc->status != session_status::Established) {
+        for (auto &b : position_report_reasons)
+            b = false;
+    }
 }
 int position_report_reasons[12];
 void send_position_report(bool som)
@@ -218,7 +224,7 @@ void send_position_report(bool som)
         supervising_rbc->send(msg);
         std::set<int> acks;
         // TODO: 4 only for Handing Over RBC
-        if ((position_report_reasons[1] && mode == Mode::SH) || position_report_reasons[4] || position_report_reasons[5] || (position_report_reasons[6] == 2 && level != Level::N2 && level != Level::N3))
+        if ((position_report_reasons[1] && mode == Mode::SH) || position_report_reasons[4] || position_report_reasons[5] || position_report_reasons[6] == 2)
             acks.insert(-1);
         else if (position_report_reasons[1] && mode == Mode::PT)
             acks.insert(6);

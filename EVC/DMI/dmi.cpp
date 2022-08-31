@@ -242,6 +242,8 @@ void dmi_comm()
         j["ActiveWindow"] = active_window_dmi;
         j["CurrentMode"] = (int)mode;
         j["CurrentLevel"] = (int)level;
+        if (level == Level::NTC)
+            j["CurrentNTC"] = nid_ntc;
         j["TimeToPermittedS"] = TTP;
         j["TimeToIndicationS"] = TTI;
         if (mode_acknowledgeable) j["ModeAcknowledgement"] = (int)mode_to_ack;
@@ -249,6 +251,8 @@ void dmi_comm()
         if (ongoing_transition || level_acknowledgeable) {
             j["LevelTransition"]["Acknowledge"] = level_acknowledgeable;
             j["LevelTransition"]["Level"] = (int)level_to_ack;
+            if (level_to_ack == Level::NTC)
+                j["LevelTransition"]["NTC"] = ntc_to_ack;
         } else {
             j["LevelTransition"] = nullptr;
         }

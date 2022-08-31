@@ -21,10 +21,12 @@
 MonitoringStatus monitoring;
 SupervisionStatus supervision;
 Level level = Level::Unknown;
+int nid_ntc;
 int radioStatus;
 bool level_valid;
 int levelAck;
 Level ackLevel;
+int ackNTC;
 Mode mode;
 bool modeAck;
 Mode ackMode;

@@ -241,6 +241,7 @@ void parseData(string str)
     setSupervision((SupervisionStatus)j["CurrentSupervisionStatus"].get<int>());
     mode = (Mode)j["CurrentMode"].get<int>();
     level = (Level)j["CurrentLevel"].get<int>();
+    if (level == Level::NTC) nid_ntc = j["CurrentNTC"].get<int>();
     if (j["GeographicalPositionKM"].is_null()) pk = -1;
     else pk = j["GeographicalPositionKM"].get<double>();
     if (!j["ModeAcknowledgement"].is_null())
@@ -255,6 +256,7 @@ void parseData(string str)
     if (!j["LevelTransition"].is_null())
     {
         ackLevel = (Level)j["LevelTransition"]["Level"].get<int>();
+        if (ackLevel == Level::NTC) ackNTC = j["LevelTransition"]["NTC"].get<int>();
         setAck(AckType::Level, j["LevelTransition"]["Acknowledge"].get<bool>()+1, true);
     }
     else

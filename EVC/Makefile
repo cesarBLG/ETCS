@@ -5,6 +5,7 @@ Supervision/emergency_stop.cpp \
 Supervision/acceleration.cpp antenna.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp \
 OR_interface/interface.cpp SSP/ssp.cpp Packets/packets.cpp Procedures/mode_transition.cpp LX/level_crossing.cpp \
 Packets/messages.cpp Packets/radio.cpp Packets/vbc.cpp Euroradio/session.cpp Euroradio/terminal.cpp \
+Packets/logging.cpp \
 Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp \
 Procedures/stored_information.cpp TrackConditions/track_conditions.cpp Time/clock.cpp Position/geographical.cpp \
 DMI/text_messages.cpp DMI/windows.cpp DMI/track_ahead_free.cpp TrainSubsystems/power.cpp TrainSubsystems/brake.cpp \
@@ -24,14 +25,16 @@ LIB = evc.dll
 CXX = x86_64-w64-mingw32-g++ -m64
 CC = x86_64-w64-mingw32-gcc -m64
 CFLAGS = -I.
-FILES += resource.res
 LDFLAGS = -lstdc++ -lwsock32 -L. -Bdynamic -lorts -limagehlp
-DEBUG=
+DEBUG=-g
 WINDRES = x86_64-w64-mingw32-windres
 #-D_GLIBCXX_DEBUG
 BUILD_DIR = build/win32/
 endif
 OBJECTS = $(patsubst %.cpp,%.o,$(addprefix $(BUILD_DIR), $(SOURCES)))
+ifeq ($(TARGET),WIN32)
+OBJECTS += $(BUILD_DIR)resource.res
+endif
 all: $(EXE)
 $(EXE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEBUG) -o evc -pthread  $(LDFLAGS) -Wall

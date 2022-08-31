@@ -1,5 +1,6 @@
 #include "session.h"
 #include "../Packets/messages.h"
+#include "../Packets/logging.h"
 #include "../Supervision/train_data.h"
 #include "../Procedures/start.h"
 #include "../TrainSubsystems/cold_movement.h"
@@ -101,8 +102,10 @@ void communication_session::update()
         if (radio_status == safe_radio_status::Failed && !terminal->setting_up) {
             connection_timer = true;
             if (get_milliseconds()-last_active > T_keep_session * 1000) {
+                auto ack = pending_ack;
                 finalize();
                 open(0);
+                pending_ack = ack;
             } else {
                 terminal->setup(this);
             }
@@ -132,6 +135,7 @@ void communication_session::update()
         lck.unlock();
         for (auto it = msgs.begin(); it!=msgs.end(); ++it) {
             auto msg = *it;
+            log_message(msg, d_estfront, get_milliseconds());
             if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
                 continue;
             }
@@ -174,6 +178,7 @@ void communication_session::update()
                 msg.times_sent++;
                 msg.last_sent = get_milliseconds();
                 fill_message(msg.message.get());
+                log_message(msg.message, d_estfront, get_milliseconds());
                 if (terminal != nullptr) {
                     {
                         std::unique_lock<std::mutex> lck(terminal->mtx);
@@ -188,6 +193,7 @@ void communication_session::update()
 
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg, bool lock)
 {
+    log_message(msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
         return;
     std::set<int> ack;
@@ -306,7 +312,7 @@ void load_contact_info()
 void set_supervising_rbc(contact_info info)
 {
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.phone_number = 5015 | ((uint64_t)inet_addr("127.0.0.1"))<<16;
+        info.phone_number = 5015 | ((uint64_t)ntohl(inet_addr("127.0.0.1")))<<16;
     }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)

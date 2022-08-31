@@ -26,6 +26,7 @@ class ETCS_variable_custom;
 struct bit_manipulator
 {
     std::vector<bool> bits;
+    std::vector<std::pair<std::string,std::string>> log_entries;
     bool write_mode;
     int position;
     bool error=false;
@@ -34,7 +35,7 @@ struct bit_manipulator
     {
         write_mode = true;
     }
-    bit_manipulator(std::vector<bool> bits) : bits(bits), position(0)
+    bit_manipulator(std::vector<bool> &&bits) : bits(bits), position(0)
     {
         write_mode = false;
     }
@@ -45,6 +46,14 @@ struct bit_manipulator
                 bits.push_back(((data[i]>>j) & 1));
             }
         }
+    }
+    template<typename T>
+    void log(ETCS_variable_custom<T> *var)
+    {
+        std::string name = typeid(*var).name();
+        name = name.substr(name.find_first_not_of("0123456789"));
+        name = name.substr(0, name.size()-2);
+        log_entries.push_back({name, std::to_string(var->rawdata)});
     }
     template<typename T>
     void read(ETCS_variable_custom<T> *var)
@@ -61,9 +70,7 @@ struct bit_manipulator
         var->rawdata = value;
         if (!var->is_valid())
             sparefound = true;
-        std::string tip = typeid(*var).name();
-        tip = tip.substr(tip.find_first_not_of("0123456789"));
-        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
+        log(var);
     }
     template<typename T>
     void peek(ETCS_variable_custom<T> *var, int offset=0)
@@ -87,9 +94,7 @@ struct bit_manipulator
         while(count-->0) {
             bits.push_back((value>>count)&1);
         }
-        std::string tip = typeid(*var).name();
-        tip = tip.substr(tip.find_first_not_of("0123456789"));
-        std::cout<<tip.substr(0,tip.size()-2)<<"\t"<<var->rawdata<<std::endl;
+        log(var);
     }
     template<typename T>
     void replace(ETCS_variable_custom<T> *var, int pos)

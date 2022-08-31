@@ -221,6 +221,8 @@ optional<distance> rollaway_position;
 bool rollaway_applied;
 optional<distance> rmp_position;
 bool rmp_applied;
+optional<distance> pt_position;
+bool pt_applied;
 void update_supervision()
 {
     if (mode == Mode::TR) {
@@ -281,10 +283,27 @@ void update_supervision()
         rmp_position = {};
         rmp_applied = false;
     }
+    if (mode == Mode::PT) {
+        if (!pt_position)
+            pt_position = d_estfront_dir[odometer_orientation == -1] - D_NVPOTRP;
+        if (!pt_applied) {
+            if (*pt_position > d_estfront) {
+                pt_applied = true;
+                trigger_brake_reason(1);
+            }
+        }
+        if (pt_applied && brake_acknowledged) {
+            pt_position = d_estfront_dir[odometer_orientation == -1];
+            pt_applied = false;
+        }
+    } else {
+        pt_position = {};
+        pt_applied = false;
+    }
     brake_acknowledged = false;
     if (!(mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SN ||
         mode == Mode::SR || mode == Mode::SH || mode == Mode::UN || mode == Mode::RV)) {
-        EB = SB = false;
+        EB = SB = TCO = false;
         monitoring = CSM;
         return;
     }
@@ -374,10 +393,12 @@ void update_supervision()
         }
         if (indication_target != nullptr && A_NVMAXREDADH1 == -1) {
             V_target = indication_target->get_target_speed();
-            if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL)
+            if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {
                 D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
-            else
+            } else {
+                indication_target->calculate_curves(V_target);
                 D_target = std::max(indication_target->d_P-d_maxsafefront(indication_target->get_target_position()), 0.0);
+            }
         }
         if (indication_target != nullptr && A_NVMAXREDADH1 == -2 && V_est != 0) {
             TTI = indication_distance / V_est;
@@ -499,12 +520,13 @@ void update_supervision()
             V_perm = std::min(V_perm, t.V_P);
             if (V_est != 0) TTP = std::min(TTP, (d_P - (t.is_EBD_based ? d_maxsafefront(d_P) : d_estfront))/V_est);
         }
-        MRDT.calculate_curves(MRDT.get_target_speed());
         V_target = MRDT.get_target_speed();
-        if (MRDT.type == target_class::EoA || MRDT.type == target_class::SvL)
+        if (MRDT.type == target_class::EoA || MRDT.type == target_class::SvL) {
             D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
-        else
+        } else {
+            MRDT.calculate_curves(V_target);
             D_target = std::max(MRDT.d_P-d_maxsafefront(MRDT.get_target_position()), 0.0);
+        }
         
         if (EoA && SvL) {
             bool r0 = true;

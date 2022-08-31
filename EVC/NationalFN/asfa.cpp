@@ -78,15 +78,6 @@ void send_msg()
         return time+30000<get_milliseconds() || con != CON;
     }));
 }
-/*void connect_asfa(bool con)
-{
-    if (con) akt_time = get_milliseconds();
-    else
-    {
-        AKT = false;
-        akt_time = 0;
-    }
-}*/
 void update_asfa()
 {
     if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown) {
@@ -100,13 +91,13 @@ void update_asfa()
         active = true;
         msg = true;
     }
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::N0) {
+    if (ongoing_transition && (ongoing_transition->leveldata.level == Level::N0 || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();
             msg = true;
         }
-    } else if (level == Level::N0) {
+    } else if (level == Level::N0 || (level == Level::NTC && nid_ntc == 0)) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();

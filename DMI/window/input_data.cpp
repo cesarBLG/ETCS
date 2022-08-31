@@ -26,7 +26,7 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
     if(label!="")
     {
         label_comp = new Component(204,50);
-        data_comp = new Component(204,50);
+        data_comp = new Component(102,50);
         if (show_echo)
         {
             label_echo = new Component(100,16);

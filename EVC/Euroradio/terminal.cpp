@@ -29,7 +29,7 @@ bool mobile_terminal::setup(communication_session *session)
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port = htons(active_session->contact.phone_number&0xffff);
-        addr.sin_addr.s_addr = active_session->contact.phone_number>>16;
+        addr.sin_addr.s_addr = htonl(active_session->contact.phone_number>>16);
         if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             status = safe_radio_status::Failed;
             perror("connect");

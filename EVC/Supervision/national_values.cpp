@@ -17,6 +17,7 @@
  */
 #include "national_values.h"
 #include "../optional.h"
+#include "../Packets/logging.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
 #include <fstream>
@@ -249,9 +250,14 @@ void setup_national_values()
             message.push_back((c>>i)&1);
         }
     }
-    bit_manipulator r(message);
+    bit_manipulator r(std::move(message));
     NationalValues nv = NationalValues();
     nv.copy(r);
+    std::cout<<"Loading national values\n";
+    for (auto &var : r.log_entries)
+    {
+        std::cout<<var.first<<"\t"<<var.second;
+    }
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {
         reset_national_values();
     } else{

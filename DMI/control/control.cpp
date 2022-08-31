@@ -116,12 +116,12 @@ void setWindow(json &j)
         } else if (name == "level_window") {
             level_window *l;
             if (same) l = (level_window*)active;
-            else l = new level_window((Level)j["level"].get<int>(), j["Levels"].get<std::vector<std::string>>());
+            else l = new level_window(j["level"].get<std::string>(), j["Levels"].get<std::vector<std::string>>());
             w = l;
         } else if (name == "level_validation_window") {
             level_validation_window *l;
             if (same) l = (level_validation_window*)active;
-            else l = new level_validation_window((Level)j["level"].get<int>());
+            else l = new level_validation_window(j["level"].get<std::string>());
             w = l;
         } else if (name == "train_data_window") {
             train_data_window *t;

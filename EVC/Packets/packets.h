@@ -19,6 +19,12 @@
 #include "variables.h"
 #include "types.h"
 #include <map>
+struct ETCS_message
+{
+    bool valid;
+    bool readerror;
+    virtual void write_to(bit_manipulator &b) = 0;
+};
 struct ETCS_packet
 {
     NID_PACKET_t NID_PACKET;

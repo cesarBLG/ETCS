@@ -53,10 +53,11 @@ void trigger_brake_reason(int reason)
         extern bool standstill_applied;
         extern bool rollaway_applied;
         extern bool rmp_applied;
-        text_message msg("Runaway movement", true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied;});
+        extern bool pt_applied;
+        text_message msg("Runaway movement", true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
-            if (!standstill_applied && !rollaway_applied && !rmp_applied) {
+            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied) {
                 brake_acknowledgeable = false;
                 i.msg->end_condition = [](text_message&m){return true;};
                 return true;

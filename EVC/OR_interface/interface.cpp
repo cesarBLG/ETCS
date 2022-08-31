@@ -128,9 +128,9 @@ void SetParameters()
         for (int i=0; i<val.size(); i++) {
             message.push_back(val[i]=='1');
         }
-        bit_manipulator r(message);
+        bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,distance(odometer_value-odometer_reference, odometer_orientation, 0)});
+        pending_telegrams.push_back({t,{distance(odometer_value-odometer_reference, odometer_orientation, 0), get_milliseconds()}});
         evc_cv.notify_all();
     };
     manager.AddParameter(p);
@@ -168,9 +168,20 @@ void SetParameters()
     p = new Parameter("etcs::atf");
     p->GetValue = []() {
         if (mode != Mode::FS) return std::string("-1");
-        double atf = V_perm;
-        if (V_target < V_perm) atf = std::max(V_perm - 1, V_target);
-        return std::to_string(atf);
+        extern const target *indication_target;
+        extern target MRDT;
+        extern MonitoringStatus monitoring;
+        const target *t = (monitoring == CSM) ? indication_target : &MRDT;
+        if (t != nullptr) {
+            double speed = t->get_target_speed();
+            double dist;
+            if (t->type == target_class::EoA || t->type == target_class::SvL)
+                dist = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
+            else
+                dist = std::max(t->d_P-d_maxsafefront(t->get_target_position()), 0.0);
+            return std::to_string(V_perm)+";"+std::to_string(speed)+";"+std::to_string(dist);
+        }
+        else return std::to_string(V_perm);
     };
     manager.AddParameter(p);
 

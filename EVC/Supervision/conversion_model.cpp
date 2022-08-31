@@ -28,7 +28,6 @@
 acceleration get_A_gradient(std::map<distance, double> gradient, double default_gradient)
 {
     acceleration A_gradient;
-    A_gradient = acceleration();
     A_gradient.dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
@@ -59,7 +58,6 @@ double T_brake_service_cm0;
 double T_brake_service_cmt;
 acceleration A_brake_emergency;
 acceleration A_brake_service;
-acceleration A_brake_normal_service;
 std::map<distance,std::pair<int,int>> active_combination;
 std::map<int,std::map<double, double>> A_brake_emergency_combination;
 std::map<int,std::map<double, double>> A_brake_service_combination;
@@ -68,6 +66,18 @@ std::map<int,std::map<double,std::map<double,double>>> Kdry_rst_combination;
 std::map<int,std::map<double, double>> Kwet_rst_combination;
 std::map<int,double> T_brake_service_combination;
 std::map<int,double> T_brake_emergency_combination;
+void reset()
+{
+    A_brake_emergency_combination.clear();
+    T_brake_emergency_combination.clear();
+    A_brake_service_combination.clear();
+    T_brake_service_combination.clear();
+    A_brake_normal_service_combination.clear();
+    Kwet_rst_combination.clear();
+    Kdry_rst_combination.clear();
+    Kn[0].clear();
+    Kn[1].clear();
+}
 acceleration get_A_brake_emergency(bool use_active_combination)
 {
     if (conversion_model_used)
@@ -109,13 +119,13 @@ acceleration get_A_brake_service(bool use_active_combination)
 acceleration get_A_brake_normal_service(acceleration service)
 {
     if (conversion_model_used && A_brake_normal_service_combination.empty())
-        return A_brake_normal_service;
+        return A_brake_service;
     acceleration ac;
     for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
         ac.dist_step.insert(it->first);
     for (auto it = A_brake_normal_service_combination[brake_position != PassengerP].begin(); it!=A_brake_normal_service_combination[brake_position != PassengerP].end(); ++it) {
         for (auto it2 = it->second.begin(); it2!=it->second.end(); ++it2)
-            ac.speed_step.insert(it->first);
+            ac.speed_step.insert(it2->first);
     }
     for (auto &d : ac.dist_step) {
         for (auto &V : ac.speed_step) {
@@ -143,6 +153,7 @@ double Kwet_rst(double V, distance d)
 std::map<double,double> Kn[2];
 void set_brake_model(json &traindata)
 {
+    reset();
     json &brakes = traindata["brakes"];
     json &emergency = brakes["emergency"];
     for (auto it = emergency.begin(); it!=emergency.end(); ++it) {
@@ -228,7 +239,7 @@ void set_brake_model(json &traindata)
         }
         int p = position=="passenger" ? 0 : 1;
         for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
-            double sbaccel = stof(it2.key());
+            double sbaccel = stod(it2.key());
             json &curves = (*it2)["curves"];
             for (auto it3 = curves.begin(); it3!=curves.end(); ++it3) {
                 json &step = *it3;
@@ -299,8 +310,6 @@ void convmodel_basic_accel(int lambda, acceleration &A_brake_emergency, accelera
     
     A_brake_service = conversion_acceleration(std::min(lambda, 135));
 
-    A_brake_normal_service = A_brake_service;
-
     A_ebmax=0;
 
     for (double spd : A_brake_emergency.speed_step) {
@@ -337,6 +346,7 @@ void convmodel_brake_build_up(brake_position_types brake_position, double L_TRAI
 void set_conversion_correction_values()
 {
     if (brake_position == PassengerP) {
+        Kv_int.clear();
         for (auto it=NV_KVINT_pass.begin(); it!=NV_KVINT_pass.end(); ++it) {
             double a = it->second.a;
             double b = it->second.b;
@@ -362,8 +372,11 @@ void set_conversion_model()
 {
     if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6 && L_TRAIN < (brake_position == PassengerP ? 900 : 1500)) {
         conversion_model_used = true;
+        reset();
         convmodel_basic_accel(brake_percentage, A_brake_emergency, A_brake_service);
         convmodel_brake_build_up(brake_position, L_TRAIN, T_brake_emergency_cmt, T_brake_emergency_cm0, T_brake_service_cmt, T_brake_service_cm0);
         set_conversion_correction_values();
+    } else {
+        conversion_model_used = false;
     }
 }

@@ -33,6 +33,7 @@ optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
 optional<speed_restriction> SH_speed;
 optional<speed_restriction> UN_speed;
+optional<speed_restriction> STM_speed;
 optional<speed_restriction> OS_speed;
 optional<speed_restriction> LS_speed;
 optional<speed_restriction> override_speed;
@@ -122,6 +123,8 @@ void recalculate_MRSP()
         restrictions.insert(*SH_speed);
     if (UN_speed && mode == Mode::UN)
         restrictions.insert(*UN_speed);
+    if (STM_speed && mode == Mode::SN)
+        restrictions.insert(*STM_speed);
     if (override_speed && (mode == Mode::SH || mode == Mode::SR || mode == Mode::UN))
         restrictions.insert(*override_speed);
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)

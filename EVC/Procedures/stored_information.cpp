@@ -10,7 +10,8 @@ void svl_shorten(char condition)
     delete_linking(d);
     delete_gradient(d);
     if (condition != 'a' && condition != 'b' && condition != 'f')
-    ma_rq_reasons[3] = true;
+    if (level == Level::N2 || level == Level::N3)
+        ma_rq_reasons[3] = true;
 }
 void train_shorten(char condition)
 {
@@ -18,7 +19,8 @@ void train_shorten(char condition)
     delete_linking(d);
     delete_gradient(d);
     delete_MA(d_estfront, d);
-    ma_rq_reasons[3] = true;
+    if (level == Level::N2 || level == Level::N3)
+        ma_rq_reasons[3] = true;
 }
 void desk_closed_som()
 {

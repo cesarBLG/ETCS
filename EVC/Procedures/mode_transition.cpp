@@ -79,12 +79,15 @@ void initialize_mode_transitions()
     };
     c[50] = [](){return mode_to_ack==Mode::SH && mode_acknowledged;};
     c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    c[56] = [](){return level==Level::NTC;};
+    c[58] = [](){return level==Level::NTC && mode_to_ack == Mode::SN && mode_acknowledged;};
     c[59] = [](){return V_est == 0 && mode_to_ack == Mode::RV && mode_acknowledged;};
     c[60] = [](){return mode_to_ack==Mode::UN && mode_acknowledged;};
     c[61] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start) && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
-    c[62] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && train_data_valid && mode_acknowledged;;};
-    c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid && mode_acknowledged;;};
-    c[69] = [](){return get_SSP().begin()->get_start()>d_estfront || get_gradient().begin()->first>d_estfront || (--get_gradient().end())->first<d_estfront || (--get_SSP().end())->get_end()<d_estfront;};
+    c[62] = [](){return level==Level::N0 && V_est==0 && train_data_valid && mode_acknowledged;};
+    c[63] = [](){return level==Level::NTC && V_est==0 && train_data_valid && mode_acknowledged;};
+    c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid && mode_acknowledged;};
+    c[69] = [](){return get_SSP().empty() || get_SSP().begin()->get_start()>d_estfront || get_gradient().empty() || get_gradient().begin()->first>d_estfront;};
     c[70] = [](){return mode_to_ack==Mode::LS && mode_acknowledged;};
     c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
@@ -163,6 +166,14 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::FS, Mode::UN, {59}, 6});
     transitions.push_back({Mode::LS, Mode::UN, {59}, 6});
     transitions.push_back({Mode::OS, Mode::UN, {59}, 6});
+
+    transitions.push_back({Mode::SB, Mode::SN, {58}, 7});
+    transitions.push_back({Mode::FS, Mode::SN, {56}, 6});
+    transitions.push_back({Mode::LS, Mode::SN, {56}, 6});
+    transitions.push_back({Mode::SR, Mode::SN, {56}, 6});
+    transitions.push_back({Mode::OS, Mode::SN, {56}, 6});
+    transitions.push_back({Mode::UN, Mode::SN, {56}, 7});
+    transitions.push_back({Mode::TR, Mode::SN, {63}, 4});
 
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);

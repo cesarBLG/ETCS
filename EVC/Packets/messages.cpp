@@ -18,6 +18,7 @@
 #include "messages.h"
 #include "information.h"
 #include "radio.h"
+#include "logging.h"
 #include "vbc.h"
 #include "0.h"
 #include "12.h"
@@ -59,7 +60,7 @@ static distance bg_referencemax;
 static distance bg_referencemin;
 static bool stop_checking_linking=false;
 std::list<link_data>::iterator link_expected=linking.end();
-std::deque<std::pair<eurobalise_telegram, distance>> pending_telegrams;
+std::deque<std::pair<eurobalise_telegram, std::pair<distance,int64_t>>> pending_telegrams;
 optional<link_data> rams_reposition_mitigation;
 void trigger_reaction(int reaction);
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg);
@@ -138,6 +139,7 @@ void check_linking(bool group_passed)
                 if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
                     trigger_reaction(1);
                     rams_lost_count = 0;
+                    std::cout<<"RAMS supervision"<<std::endl;
                 } else {
                     trigger_reaction(link_expected->reaction);
                 }
@@ -261,13 +263,9 @@ void update_track_comm()
         }
     } else {
         eurobalise_telegram t = pending_telegrams.front().first;
-        distance passed_dist = pending_telegrams.front().second-L_antenna_front;
+        distance passed_dist = pending_telegrams.front().second.first-L_antenna_front;
+        log_message(std::shared_ptr<ETCS_message>(new eurobalise_telegram(t)), pending_telegrams.front().second.first, pending_telegrams.front().second.second);
         pending_telegrams.pop_front();
-
-        {
-            extern double odometer_reference;
-            std::cout<<"Passed at "<<passed_dist.get()+odometer_reference<<std::endl;
-        }
         extern optional<distance> rmp_position;
         bool rev = mode == Mode::PT || mode == Mode::RV;
         if (rmp_position && ((rev && *rmp_position < d_estfront) || (!rev && *rmp_position > d_estfront))) {
@@ -855,6 +853,20 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
             if (!ongoing_transition || (ongoing_transition->leveldata.level != Level::N2 && ongoing_transition->leveldata.level != Level::N3))
                 return false;
         }
+        if (s.exceptions.find(10) != s.exceptions.end()) {
+            auto &msg = *((coordinate_system_assignment*)info->message->get());
+            bg_id prvlrbg = {-1,-1};
+            bg_id memorized_lrbg;
+            for (auto &lrbg : lrbgs) {
+                if (lrbg.nid_lrbg == msg.NID_LRBG.get_value() && prvlrbg.NID_BG >= 0) {
+                    if (memorized_lrbg.NID_BG >= 0 && memorized_lrbg != prvlrbg)
+                        return false;
+                    else
+                        memorized_lrbg = prvlrbg;
+                }
+                prvlrbg = lrbg.nid_lrbg;
+            }
+        }
         if (s.exceptions.find(11) != s.exceptions.end()) {
             if (ongoing_transition)
                 return false;
@@ -889,7 +901,8 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
             return true;
         }
         if (s.exceptions.find(7) != s.exceptions.end()) {
-            //TODO: NTC dependent
+            if (!ongoing_transition || ongoing_transition->leveldata.level != Level::NTC/* || ongoing_transition->leveldata.nid_ntc != STM_id*/)
+                return false;
         }
         return true;
     } else {
@@ -903,11 +916,11 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                 transition_buffer.back().push_back(info);
             return false;
         }
-        /*if (s.exceptions.find(6) != s.exceptions.end()) {
-            if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == nid_ntc)
+        if (s.exceptions.find(6) != s.exceptions.end()) {
+            if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC/* && ongoing_transition->leveldata.nid_ntc == STM_id*/)
                 transition_buffer.back().push_back(info);
             return false;
-        }*/
+        }
         return false;
     }
     return false;

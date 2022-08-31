@@ -94,10 +94,6 @@ void set_train_data(std::string spec)
             }
             train_data_valid = true;
         }
-    } else {
-        train_data_valid = true;
     }
     set_train_max_speed(V_train);
-    /*if (train_data_valid) 
-        set_conversion_model();*/
 }

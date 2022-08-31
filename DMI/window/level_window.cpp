@@ -19,51 +19,32 @@
 #include "level_window.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-level_window::level_window(Level level, std::vector<std::string> levels) : input_window("Level", 1, false)
+level_window::level_window(std::string level, std::vector<std::string> levels) : input_window("Level", 1, false)
 {
     inputs[0] = new level_input(level, levels);
     create();
-    if (level != Level::Unknown)
+    if (level != "")
     {
-        string data = "";
-        switch(level)
-        {
-            case Level::N0:
-                data = "Level 0";
-                break;
-            case Level::N1:
-                data = "Level 1";
-                break;
-            case Level::N2:
-                data = "Level 2";
-                break;
-            case Level::N3:
-                data = "Level 3";
-                break;
-        }
-        inputs[0]->data = data;
-        inputs[0]->prev_data = data;
+        inputs[0]->data = level;
+        inputs[0]->prev_data = level;
         inputs[0]->updateText();
     }
 }
 void level_window::sendInformation()
 {
-    string data = inputs[0]->getData();
-    data = data.substr(6,1);
-    write_command("setLevel",data);
+    write_command("setLevel",inputs[0]->getData());
 }
-string str[] = {"Level 0","Level 1", "Level 2", "Level 3", "", ""};
-level_input::level_input(Level level, std::vector<std::string> levels, bool echo) : input_data(echo ? "Level" : "")
+level_input::level_input(std::string level, std::vector<std::string> levels, bool echo) : input_data(echo ? "Level" : "")
 {
-    setData(str[(int)level]);
+    setData(level);
     keys = getSingleChoiceKeyboard(levels, this);
 }
 void level_input::validate()
 {
-    if(data.size() < 7) return;
+    if(data.empty()) return;
     valid = true;
 }
 
-level_validation_window::level_validation_window(Level level) : validation_window("Level validation", {new level_input(level, {""}, true)})
+level_validation_window::level_validation_window(std::string level) : validation_window("Level validation", {new level_input(level, {""}, true)})
 {
 }

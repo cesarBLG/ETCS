@@ -25,18 +25,18 @@
 class level_window : public input_window
 {
     public:
-    level_window(Level level, std::vector<std::string> levels);
+    level_window(std::string level, std::vector<std::string> levels);
     void sendInformation() override;
 };
 class level_input : public input_data
 {
     public:
-    level_input(Level level, std::vector<std::string> levels, bool echo=false);
+    level_input(std::string, std::vector<std::string> levels, bool echo=false);
     void validate() override;
 };
 class level_validation_window : public validation_window
 {
     public:
-    level_validation_window(Level level);
+    level_validation_window(std::string);
 };
 #endif

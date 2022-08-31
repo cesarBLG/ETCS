@@ -33,6 +33,7 @@ std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer;
 bool level_acknowledgeable = false;
 bool level_acknowledged = false;
 Level level_to_ack;
+int ntc_to_ack;
 bool level_timer_started = false;
 int64_t level_timer;
 #include <fstream>
@@ -51,11 +52,12 @@ void save_level()
 {
     //std::ofstream file("level.dat");
 }
-void driver_set_level(Level lv)
+void driver_set_level(level_information li)
 {
-    level_valid = lv != Level::Unknown;
-    level = lv;
-    position_report_reasons[6] = 2;
+    level_valid = li.level != Level::Unknown;
+    position_report_reasons[6] = (li.level != Level::N2 && li.level != Level::N3 && (level == Level::N2 || level == Level::N3)) ? 2 : 1;
+    level = li.level;
+    nid_ntc = li.nid_ntc;
     save_level();
 }
 void perform_transition()
@@ -93,7 +95,7 @@ void update_level_status()
     if (level_timer_started && level_timer + T_ACK*1000 < get_milliseconds()) {
         level_timer_started = false;
         brake_conditions.push_back({-1, nullptr, [](brake_command_information &i) {
-            if (level_acknowledged || level_to_ack != level || !level_acknowledgeable)
+            if (level_acknowledged || level_to_ack != level || (level == Level::NTC && nid_ntc != ntc_to_ack) || !level_acknowledgeable)
                 return true;
             return false;
         }});
@@ -106,6 +108,7 @@ void update_level_status()
         ongoing_transition = sh_transition;
         sh_transition = {};
         level_to_ack = ongoing_transition->leveldata.level;
+        ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
         perform_transition();
     }
     if (!ongoing_transition) return;
@@ -142,6 +145,7 @@ void level_transition_received(level_transition_information info)
     }
     ongoing_transition = info;
     level_to_ack = ongoing_transition->leveldata.level;
+    ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
     if (ongoing_transition->immediate)
         perform_transition();
 }

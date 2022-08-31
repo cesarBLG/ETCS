@@ -50,11 +50,68 @@ json driver_id_window(bool trn)
     j["show_trn"] = trn;
     return j;
 }
+json level_window()
+{
+    json j = R"({"active":"level_window"})"_json;
+    std::string lv = "";
+    switch(level) {
+        case Level::N0:
+            lv = "Level 0";
+            break;
+        case Level::N1:
+            lv = "Level 1";
+            break;
+        case Level::N2:
+            lv = "Level 2";
+            break;
+        case Level::N3:
+            lv = "Level 3";
+            break;
+        case Level::NTC:
+            switch(nid_ntc) {
+                case 0:
+                    lv = "ASFA";
+                    break;
+            }
+            break;
+    }
+    j["level"] = lv;
+    std::vector<std::string> levels;
+    if (priority_levels_valid) {
+        for (auto lti : priority_levels) {
+            switch(lti.level) {
+                case Level::N0:
+                    levels.push_back("Level 0");
+                    break;
+                case Level::N1:
+                    levels.push_back("Level 1");
+                    break;
+                case Level::N2:
+                    levels.push_back("Level 2");
+                    break;
+                case Level::N3:
+                    levels.push_back("Level 3");
+                    break;
+                case Level::NTC:
+                    switch(lti.nid_ntc) {
+                        case 0:
+                            levels.push_back("ASFA");
+                            break;
+                    }
+                    break;
+            }
+        }
+    } else {
+        levels = {"Level 0", "ASFA", "Level 1", "Level 2"};
+    }
+    j["Levels"] = levels;
+    return j;
+}
 void update_dmi_windows()
 {
     any_button_pressed = any_button_pressed_async;
     any_button_pressed_async = false;
-    json prev_active = active_window_dmi;
+    //json prev_active = active_window_dmi;
     if (active_dialog == dialog_sequence::None) {
         active_window_dmi = default_window;
     } else if (active_dialog == dialog_sequence::StartUp) {
@@ -75,30 +132,7 @@ void update_dmi_windows()
             active_window_dmi = R"({"active":"trn_window"})"_json;
             active_window_dmi["trn"] = train_running_number;
         } else if (active_dialog_step == "S2") {
-            active_window_dmi = R"({"active":"level_window"})"_json;
-            active_window_dmi["level"] = (int)level;
-            std::vector<std::string> levels;
-            if (priority_levels_valid) {
-                for (auto lti : priority_levels) {
-                    switch(lti.level) {
-                        case Level::N0:
-                            levels.push_back("Level 0");
-                            break;
-                        case Level::N1:
-                            levels.push_back("Level 1");
-                            break;
-                        case Level::N2:
-                            levels.push_back("Level 2");
-                            break;
-                        case Level::N3:
-                            levels.push_back("Level 3");
-                            break;
-                    }
-                }
-            } else {
-                levels = {"Level 0", "Level 1", "Level 2"};
-            }
-            active_window_dmi["Levels"] = levels;
+            active_window_dmi = level_window();
             if (som_status != S2) {
                 if (level == Level::N2 || level == Level::N3)
                     active_dialog_step = "S3-1";
@@ -188,30 +222,7 @@ void update_dmi_windows()
             active_window_dmi = R"({"active":"trn_window"})"_json;
             active_window_dmi["trn"] = train_running_number;
         } else if (active_dialog_step == "S4") {
-            active_window_dmi = R"({"active":"level_window"})"_json;
-            active_window_dmi["level"] = (int)level;
-            std::vector<std::string> levels;
-            if (priority_levels_valid) {
-                for (auto lti : priority_levels) {
-                    switch(lti.level) {
-                        case Level::N0:
-                            levels.push_back("Level 0");
-                            break;
-                        case Level::N1:
-                            levels.push_back("Level 1");
-                            break;
-                        case Level::N2:
-                            levels.push_back("Level 2");
-                            break;
-                        case Level::N3:
-                            levels.push_back("Level 3");
-                            break;
-                    }
-                }
-            } else {
-                levels = {"Level 0", "Level 1", "Level 2"};
-            }
-            active_window_dmi["Levels"] = levels;
+            active_window_dmi = level_window();
         } else if (active_dialog_step == "S5-1") {
             active_window_dmi = R"({"active":"menu_radio"})"_json;
         } else if (active_dialog_step == "S5-2-1") {
@@ -433,10 +444,10 @@ void validate_data_entry(std::string name, json &result)
     } else if (name == "TrainRunningNumber") {
 
     } else if (name == "Train Data") {
+        train_data_valid = false;
         L_TRAIN = stoi(result["Length (m)"].get<std::string>());
         set_train_max_speed(stoi(result["Max speed (km/h)"].get<std::string>())/3.6);
         brake_percentage = stoi(result["Brake percentage"].get<std::string>());
-        train_data_valid = true;
         std::string str = result["Train category"].get<std::string>();
         int cant;
         int cat;
@@ -498,15 +509,18 @@ void validate_data_entry(std::string name, json &result)
         cant_deficiency = cant;
         brake_position = (brake_position_types)cat;
         set_conversion_model();
-        active_dialog_step = "D6";
+        train_data_valid = conversion_model_used;
+        active_dialog_step = train_data_valid ? "D6" : "S1";
     } else if (name == "Validate train data") {
         if (result["Validated"] != "Yes") {
             active_dialog_step = "S3-1";
         } else {
             active_dialog_step = "D6";
-            if (flexible_data_entry) {}
-            else
+            if (flexible_data_entry) {
+            } else {
                 set_train_data(result["Train type"].get<std::string>());
+                active_dialog_step = train_data_valid ? "D6" : "S3-1";
+            }
         }
     }
 }
@@ -516,10 +530,14 @@ void update_dialog_step(std::string step, std::string step2)
     std::string prev_step = active_dialog_step;
     if (step == "setLevel") {
         Level lv = Level::Unknown;
-        if (step2 == "0" || step2 == "1" || step2 == "2" || step2 == "3") {
-            lv = (Level)stoi(step2);
+        int nid_ntc = -1;
+        if (step2 == "Level 0" || step2 == "Level 1" || step2 == "Level 2" || step2 == "Level 3") {
+            lv = (Level)stoi(step2.substr(6));
+        } else if (step2 == "ASFA") {
+            lv = Level::NTC;
+            nid_ntc = 0;
         }
-        driver_set_level(lv);
+        driver_set_level({lv, nid_ntc});
     } else if (step == "setTRN") {
         train_running_number_valid = false;
         train_running_number = stoi(step2);

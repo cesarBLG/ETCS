@@ -39,7 +39,7 @@ struct position_report_parameters
     bool LRBG;
 };
 extern optional<position_report_parameters> pos_report_params;
-struct euroradio_message
+struct euroradio_message : public ETCS_message
 {
     NID_MESSAGE_t NID_MESSAGE;
     L_MESSAGE_t L_MESSAGE;
@@ -48,8 +48,6 @@ struct euroradio_message
     NID_LRBG_t NID_LRBG;
     std::vector<std::shared_ptr<ETCS_packet>> packets;
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
-    bool valid;
-    bool readerror;
     euroradio_message() {}
     virtual void copy(bit_manipulator &r)
     {
@@ -59,7 +57,7 @@ struct euroradio_message
         M_ACK.copy(r);
         NID_LRBG.copy(r);
     }
-    void write_to(bit_manipulator &w)
+    void write_to(bit_manipulator &w) override
     {
         copy(w);
         for (auto pack : optional_packets) {
@@ -69,10 +67,11 @@ struct euroradio_message
         L_MESSAGE_t L_MESSAGE;
         L_MESSAGE.rawdata = w.bits.size()/8;
         w.replace(&L_MESSAGE, 8);
+        w.log_entries[1].second = std::to_string(L_MESSAGE.rawdata);
     }
     static std::shared_ptr<euroradio_message> build(bit_manipulator &r);
 };
-struct euroradio_message_traintotrack
+struct euroradio_message_traintotrack : public ETCS_message
 {
     NID_MESSAGE_t NID_MESSAGE;
     L_MESSAGE_t L_MESSAGE;
@@ -83,8 +82,6 @@ struct euroradio_message_traintotrack
     static std::map<int, euroradio_message_traintotrack*> message_factory;
     std::vector<std::shared_ptr<ETCS_packet>> packets;
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
-    bool valid;
-    bool readerror;
     euroradio_message_traintotrack()
     {
         L_MESSAGE.rawdata = 0;
@@ -125,7 +122,7 @@ struct euroradio_message_traintotrack
         T_TRAIN.copy(w);
         NID_ENGINE.copy(w);
     }
-    void write_to(bit_manipulator &w)
+    void write_to(bit_manipulator &w) override
     {
         copy(w);
         for (auto pack : optional_packets) {
@@ -135,6 +132,7 @@ struct euroradio_message_traintotrack
         L_MESSAGE_t L_MESSAGE;
         L_MESSAGE.rawdata = w.bits.size()/8;
         w.replace(&L_MESSAGE, 8);
+        w.log_entries[1].second = std::to_string(L_MESSAGE.rawdata);
     }
 };
 struct MA_message : euroradio_message

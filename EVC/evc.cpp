@@ -27,6 +27,7 @@
 #include <iostream>
 #include <chrono>
 #include "Packets/messages.h"
+#include "Packets/logging.h"
 #include "Packets/vbc.h"
 #include "Supervision/speed_profile.h"
 #include "Supervision/targets.h"
@@ -49,6 +50,8 @@
 #elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
+#include <errhandlingapi.h>
+#include <psapi.h>
 void print_stack(CONTEXT &context)
 {
     HANDLE process = GetCurrentProcess();
@@ -92,6 +95,9 @@ void print_stack(CONTEXT &context)
     stackframe.AddrStack.Mode = AddrModeFlat;
     #endif*/
 
+    MODULEINFO moduleInfo;
+    GetModuleInformation(process, GetModuleHandleA(NULL), &moduleInfo, sizeof(MODULEINFO));
+
     FILE *file = fopen("error.log", "w+");
     for (size_t i = 0; i < 25; i++) {
         
@@ -112,9 +118,17 @@ void print_stack(CONTEXT &context)
         
         DWORD64 displacement = 0;
         if (SymFromAddr(process, stackframe.AddrPC.Offset, &displacement, symbol)) {
-            fprintf(file, "[%i] %s\n", i, symbol->Name);
+            fprintf(file, "[%i] %s", i, symbol->Name);
+            IMAGEHLP_LINE64 line;
+            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+            DWORD d;
+            if (SymGetLineFromAddr64(process, stackframe.AddrPC.Offset, &d, &line)) {
+                fprintf(file, " %s:%i\n", line.FileName, line.LineNumber);
+            } else {
+                fprintf(file, "\n");
+            }
         } else {
-            fprintf(file, "[%i] %p\n", i, (void*)stackframe.AddrPC.Offset);
+            fprintf(file, "[%i] %p\n", i, (void*)(stackframe.AddrPC.Offset-(unsigned long long)moduleInfo.lpBaseOfDll+0x140000000ULL));
         }
         
     }
@@ -201,6 +215,7 @@ void start()
     cold_movement_status = ColdMovementUnknown;
     start_dmi();
     start_or_iface();
+    start_logging();
     setup_national_values();
     load_vbcs();
     initialize_mode_transitions();

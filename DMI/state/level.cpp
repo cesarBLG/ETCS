@@ -52,7 +52,7 @@ void displayLevel()
     if (num == 0) return;
     if(num<10) path+="0";
     path+=to_string(num);
-    //If NTC is LZB/PZB, path+="a";
+    //if (level == Level::NTC) path += "_" + to_string(nid_ntc);
     path+=".bmp";
     levelRegion.addImage(path);
 }
