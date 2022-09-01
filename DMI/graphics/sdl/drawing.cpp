@@ -21,7 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <deque>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "../drawing.h"
 #include "../display.h"
 #include "../button.h"

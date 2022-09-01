@@ -17,8 +17,8 @@
  */
 #ifndef _DRAWING_H
 #define _DRAWING_H
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "color.h"
 #include <string>
 #define CENTER 0

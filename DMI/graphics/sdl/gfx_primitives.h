@@ -1,6 +1,6 @@
 #ifndef _GFX_PRIMITIVES_H
 #define _GFX_PRIMITIVES_H
-#include <SDL2/SDL.h>
+#include <SDL.h>
 int pixelRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 int pixelRGBAWeight(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, Uint32 weight);
 int vline(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2);

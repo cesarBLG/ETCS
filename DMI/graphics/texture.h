@@ -18,7 +18,7 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 #include "graphic.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <functional>
 #include <cstdio>
 class texture : public graphic

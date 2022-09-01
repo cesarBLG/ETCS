@@ -61,8 +61,9 @@ void setWindow(json &j)
     subwindow *w = nullptr;
     std::string name = j["active"].get<std::string>();
     if (name == "default") {
+        extern bool showSpeeds;
         navigation_bar.active = main_window.active = true;
-        planning_area.active = !display_taf;
+        planning_area.active = !display_taf && (mode == Mode::FS || (mode == Mode::OS && showSpeeds));
         taf_window.active = display_taf;
     } else {
         bool same = name == active_name;

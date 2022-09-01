@@ -18,7 +18,7 @@
 #ifndef _COMPONENT_H
 #define _COMPONENT_H
 #include "color.h"
-#include "SDL2/SDL.h"
+#include <SDL.h>
 #include "drawing.h"
 #include "graphic.h"
 #include "text_graphic.h"

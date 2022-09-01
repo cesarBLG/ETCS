@@ -17,7 +17,7 @@
  */
 #include "asfa.h"
 #include "../Supervision/supervision.h"
-#include "../orts/common.h"
+#include <orts/common.h>
 #include "../DMI/text_message.h"
 #include "../Time/clock.h"
 #include "../Procedures/level_transition.h"
