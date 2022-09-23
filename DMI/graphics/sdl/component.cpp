@@ -287,7 +287,7 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     ig->cy = cy;
     ig->sx = sx;
     ig->sy = sy;
-    ig->load_function = [this, ig]{getImageGraphic(ig,ig->path,ig->cx, ig->cy, ig->sx, ig->sy);};
+    ig->load_function = [ig,this]{getImageGraphic(ig,ig->path,ig->cx, ig->cy, ig->sx, ig->sy);};
     return ig;
 }
 void Component::getImageGraphic(texture *t, string path, float cx, float cy, float sx, float sy)

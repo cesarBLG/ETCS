@@ -33,10 +33,11 @@ optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
 optional<speed_restriction> SH_speed;
 optional<speed_restriction> UN_speed;
-optional<speed_restriction> STM_speed;
 optional<speed_restriction> OS_speed;
 optional<speed_restriction> LS_speed;
 optional<speed_restriction> override_speed;
+optional<speed_restriction> STM_system_speed;
+optional<speed_restriction> STM_max_speed;
 static std::map<distance, double> gradient;
 void delete_back_info()
 {
@@ -107,7 +108,7 @@ void recalculate_MRSP()
             restrictions.insert(it->restriction);
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         for (auto it=level_crossings.begin(); it!=level_crossings.end(); ++it) {
-            if (!it->lx_protected && it->svl_replaced) restrictions.insert(speed_restriction(it->V_LX, it->svl_replaced_loc, it->start+it->length, false));
+            if (!it->lx_protected && it->svl_replaced) restrictions.insert(speed_restriction(it->V_LX, *it->svl_replaced, it->start+it->length, false));
         }
     }
     if (train_speed && 
@@ -123,8 +124,10 @@ void recalculate_MRSP()
         restrictions.insert(*SH_speed);
     if (UN_speed && mode == Mode::UN)
         restrictions.insert(*UN_speed);
-    if (STM_speed && mode == Mode::SN)
-        restrictions.insert(*STM_speed);
+    if (STM_system_speed && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::UN))
+        restrictions.insert(*STM_system_speed);
+    if (STM_max_speed && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::UN || mode == Mode::SN))
+        restrictions.insert(*STM_max_speed);
     if (override_speed && (mode == Mode::SH || mode == Mode::SR || mode == Mode::UN))
         restrictions.insert(*override_speed);
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)

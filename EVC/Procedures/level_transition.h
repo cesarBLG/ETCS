@@ -44,54 +44,9 @@ struct level_transition_information
     distance start;
     target_level_information leveldata;
     std::vector<level_information> priority_table;
-    level_transition_information(LevelTransitionOrder o, distance ref)
-    {
-        if (o.D_LEVELTR == D_LEVELTR_t::Now) {
-            immediate = true;
-            start = ref;
-        } else {
-            immediate = false;
-            start = ref+o.D_LEVELTR.get_value(o.Q_SCALE);
-        }
-        std::vector<target_level_information> priorities;
-        priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level(),(int)o.element.NID_NTC});
-        for (int i=0; i<o.elements.size(); i++) {
-            priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
-        }
-        for (int i=0; i<priorities.size(); i++) {
-            priority_table.push_back({priorities[i].level, priorities[i].nid_ntc});
-        }
-        for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2 || (priorities[i].level == Level::NTC && priorities[i].nid_ntc == 0)) {
-                leveldata = priorities[i];
-                return;
-            }
-        }
-        leveldata = priorities.back();
-    }
-    level_transition_information(ConditionalLevelTransitionOrder o, distance ref)
-    {
-        immediate = true;
-        start = ref;
-        std::vector<target_level_information> priorities;
-        priorities.push_back({start, o.element.M_LEVELTR.get_level(), (int)o.element.NID_NTC});
-        for (int i=0; i<o.elements.size(); i++) {
-            priorities.push_back({start, o.elements[i].M_LEVELTR.get_level(), (int)o.elements[i].NID_NTC});
-        }
-        for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == level) {
-                leveldata = priorities[i];
-                return;
-            }
-        }
-        for (int i=0; i<priorities.size(); i++) {
-            if (priorities[i].level == Level::N0 || priorities[i].level == Level::N1 || priorities[i].level == Level::N2) {
-                leveldata = priorities[i];
-                return;
-            }
-        }
-        leveldata = priorities.back();
-    }
+    level_transition_information(LevelTransitionOrder o, distance ref);
+    level_transition_information(ConditionalLevelTransitionOrder o, distance ref);
+    void set_leveldata(std::vector<target_level_information> &priorities);
 };
 void update_level_status();
 void level_transition_received(level_transition_information info);
@@ -106,3 +61,4 @@ extern bool level_acknowledgeable;
 extern bool level_acknowledged;
 extern Level level_to_ack;
 extern int ntc_to_ack;
+extern std::map<int, std::string> ntc_names;

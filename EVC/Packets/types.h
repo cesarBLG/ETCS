@@ -21,31 +21,32 @@
 #include <typeinfo>
 #include <iostream>
 #include <string>
+#include <cstring>
 template<typename T>
 class ETCS_variable_custom;
 struct bit_manipulator
 {
-    std::vector<bool> bits;
+    std::vector<unsigned char> bits;
     std::vector<std::pair<std::string,std::string>> log_entries;
     bool write_mode;
     int position;
     bool error=false;
     bool sparefound=false;
-    bit_manipulator()
+    bit_manipulator() : position(0)
     {
         write_mode = true;
     }
-    bit_manipulator(std::vector<bool> &&bits) : bits(bits), position(0)
+    bit_manipulator(std::vector<unsigned char> &&bits) : bits(bits), position(0)
     {
         write_mode = false;
     }
     bit_manipulator(unsigned char *data, int count) : position(0) {
         write_mode = false;
-        for (int i=0; i<count; i++) {
-            for (int j=7; j>=0; j--) {
-                bits.push_back(((data[i]>>j) & 1));
-            }
-        }
+        bits.insert(bits.end(), data, data+count);
+    }
+    inline bool operator[](int pos)
+    {
+        return bits[pos>>3] & (1<<(7-(pos&7)));
     }
     template<typename T>
     void log(ETCS_variable_custom<T> *var)
@@ -61,11 +62,11 @@ struct bit_manipulator
         T value=0;
         int count=var->size;
         while(count-->0) {
-            if (bits.size() <= position) {
+            if ((bits.size()<<3) <= position) {
                 error = true;
                 return;
             }
-            value = value<<1 | bits[position++];
+            value = value<<1 | operator[](position++);
         }
         var->rawdata = value;
         if (!var->is_valid())
@@ -76,13 +77,13 @@ struct bit_manipulator
     void peek(ETCS_variable_custom<T> *var, int offset=0)
     {
         int position = this->position+offset;
-        uint32_t value=0;
+        T value=0;
         int count=var->size;
         while(count-->0) {
-            if (bits.size() <= position) {
+            if ((bits.size()<<3) <= position) {
                 return;
             }
-            value = value<<1 | bits[position++];
+            value = value<<1 | operator[](position++);
         }
         var->rawdata = value;
     }
@@ -92,35 +93,25 @@ struct bit_manipulator
         T value=var->rawdata;
         int count=var->size;
         while(count-->0) {
-            bits.push_back((value>>count)&1);
+            bool bit = (value>>count)&1;
+            if ((position & 7) == 0)
+                bits.push_back(bit<<7);
+            else if (bit)
+                bits[position>>3] |= 1<<(7 - (position&7));
+            ++position;
         }
         log(var);
     }
     template<typename T>
     void replace(ETCS_variable_custom<T> *var, int pos)
     {
-        if (var->size + pos > bits.size()) return;
+        if (var->size + pos > (bits.size()<<3)) return;
         for (int i=0; i<var->size; i++) {
-            bits[pos+i] = (var->rawdata>>(var->size-i-1)) & 1;
-        }
-    }
-    void get_bytes(unsigned char *data)
-    {
-        int div = bits.size()/8;
-        int rem = bits.size()%8;
-        for (int i=0; i<div; i++) {
-            char c = 0;
-            for (int j=0; j<8; j++) {
-                c |= bits[8*i+j]<<(7-j);
-            }
-            data[i] = c;
-        }
-        if (rem > 0) {
-            char c = 0;
-            for (int i=0; i<rem; i++) {
-                c |= bits[8*div+i]<<(7-i);
-            }
-            data[div] = c;
+            int off = 7-(pos&7);
+            int b = pos>>3;
+            bits[b] ^= ((bits[b]>>off)&1)<<off;
+            bits[b] |= ((var->rawdata>>(var->size-i-1)) & 1)<<off;
+            ++pos;
         }
     }
 };

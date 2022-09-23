@@ -202,13 +202,14 @@ static bool inited = false;
 void displayLines()
 {
     setColor(White);
-    for(int i = 0; i<=maxSpeed; i+=10)
+    int step = maxSpeed == 150 ? 5 : 10;
+    for(int i = 0; i<=maxSpeed; i+=step)
     {
         float size;
         float an = speedToAngle(i);
-        int longinterval = maxSpeed == 400 ? 50 : 20;
+        int longinterval = maxSpeed == 400 ? 50 : (maxSpeed == 150 ? 25 : 20);
         size = i%longinterval!=0 ? -110 : -100;
-        if(!inited && ((maxSpeed != 400 && i%20==0) || (maxSpeed == 400 && i%50==0 && i!=250 && i!=350)))
+        if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
             const char *str = s.c_str();

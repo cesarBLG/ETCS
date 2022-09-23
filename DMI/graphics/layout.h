@@ -60,6 +60,7 @@ class Layout
 {
     std::vector<LayoutElement> elements;
     public:
+    ~Layout();
     std::vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
     void removeAll();

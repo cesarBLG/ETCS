@@ -214,10 +214,7 @@ void load_national_values(NationalValues nv)
 #endif
     bit_manipulator w;
     nv.copy(w);
-    int size = (w.bits.size()+7)/8;
-    char buff[size];
-    w.get_bytes((unsigned char*)buff);
-    file.write(buff, size);
+    file.write((const char*)&w.bits[0], w.bits.size());
 }
 struct StoredNationalValueSet
 {
@@ -242,13 +239,11 @@ void setup_national_values()
 #else
     std::ifstream file("nationalvalues.bin", std::ios::binary);
 #endif
-    std::vector<bool> message;
+    std::vector<unsigned char> message;
     while (!file.eof() && !file.fail()) {
         char c;
         file.read(&c, 1);
-        for (int i=7; i>=0; i--) {
-            message.push_back((c>>i)&1);
-        }
+        message.push_back(c);
     }
     bit_manipulator r(std::move(message));
     NationalValues nv = NationalValues();
@@ -256,8 +251,9 @@ void setup_national_values()
     std::cout<<"Loading national values\n";
     for (auto &var : r.log_entries)
     {
-        std::cout<<var.first<<"\t"<<var.second;
+        std::cout<<var.first<<"\t"<<var.second<<"\n";
     }
+    std::cout<<std::endl;
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {
         reset_national_values();
     } else{

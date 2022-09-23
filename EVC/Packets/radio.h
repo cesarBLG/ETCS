@@ -63,9 +63,7 @@ struct euroradio_message : public ETCS_message
         for (auto pack : optional_packets) {
             pack->write_to(w);
         }
-        while(w.bits.size()%8) w.bits.push_back(false);
-        L_MESSAGE_t L_MESSAGE;
-        L_MESSAGE.rawdata = w.bits.size()/8;
+        L_MESSAGE.rawdata = w.bits.size();
         w.replace(&L_MESSAGE, 8);
         w.log_entries[1].second = std::to_string(L_MESSAGE.rawdata);
     }
@@ -84,7 +82,6 @@ struct euroradio_message_traintotrack : public ETCS_message
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
     euroradio_message_traintotrack()
     {
-        L_MESSAGE.rawdata = 0;
     }
     euroradio_message_traintotrack(bit_manipulator &r)
     {
@@ -128,9 +125,7 @@ struct euroradio_message_traintotrack : public ETCS_message
         for (auto pack : optional_packets) {
             pack->write_to(w);
         }
-        while(w.bits.size()%8) w.bits.push_back(false);
-        L_MESSAGE_t L_MESSAGE;
-        L_MESSAGE.rawdata = w.bits.size()/8;
+        L_MESSAGE.rawdata = w.bits.size();
         w.replace(&L_MESSAGE, 8);
         w.log_entries[1].second = std::to_string(L_MESSAGE.rawdata);
     }

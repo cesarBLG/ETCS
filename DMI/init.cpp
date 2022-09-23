@@ -32,6 +32,8 @@ void quit()
 #elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
+#include <errhandlingapi.h>
+#include <psapi.h>
 LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
 {
     HANDLE process = GetCurrentProcess();
@@ -76,6 +78,9 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
     stackframe.AddrStack.Mode = AddrModeFlat;
     #endif*/
 
+    MODULEINFO moduleInfo;
+    GetModuleInformation(process, GetModuleHandleA(NULL), &moduleInfo, sizeof(MODULEINFO));
+    
     FILE *file = fopen("error.log", "w+");
     for (size_t i = 0; i < 25; i++) {
         
@@ -93,9 +98,17 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
         
         DWORD64 displacement = 0;
         if (SymFromAddr(process, stackframe.AddrPC.Offset, &displacement, symbol)) {
-            fprintf(file, "[%i] %s\n", i, symbol->Name);
+            fprintf(file, "[%i] %s", i, symbol->Name);
+            IMAGEHLP_LINE64 line;
+            line.SizeOfStruct = sizeof(IMAGEHLP_LINE64);
+            DWORD d;
+            if (SymGetLineFromAddr64(process, stackframe.AddrPC.Offset, &d, &line)) {
+                fprintf(file, " %s:%i\n", line.FileName, line.LineNumber);
+            } else {
+                fprintf(file, "\n");
+            }
         } else {
-            fprintf(file, "[%i] %p\n", i, (void*)stackframe.AddrPC.Offset);
+            fprintf(file, "[%i] %p\n", i, (void*)(stackframe.AddrPC.Offset-(unsigned long long)moduleInfo.lpBaseOfDll+0x140000000ULL));
         }
         
     }
@@ -150,6 +163,7 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
     running = false;
 }
 #endif
+#include <fstream>
 int main(int argc, char** argv)
 {
 #ifdef __ANDROID__
@@ -169,6 +183,9 @@ int main(int argc, char** argv)
     setSupervision(NoS);
     //std::thread video(init_video);
     std::thread tcp(startSocket);
+    extern int maxSpeed;
+    std::ifstream file("speed.txt");
+    file>>maxSpeed;
     startWindows();
     init_video();
     //manage_windows();

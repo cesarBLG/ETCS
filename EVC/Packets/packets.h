@@ -24,6 +24,7 @@ struct ETCS_message
     bool valid;
     bool readerror;
     virtual void write_to(bit_manipulator &b) = 0;
+    virtual ~ETCS_message() {}
 };
 struct ETCS_packet
 {
@@ -43,12 +44,11 @@ struct ETCS_packet
     }
     virtual void write_to(bit_manipulator &w)
     {
-        int start = w.bits.size();
+        int start = w.position;
         copy(w);
-        L_PACKET.rawdata = w.bits.size()-start;
+        L_PACKET.rawdata = w.position-start;
         w.replace(&L_PACKET, start+8);
     }
-    //static std::map<int, ETCS_packet*> packet_factory;
     static ETCS_packet *construct(bit_manipulator &r);
 };
 struct ETCS_nondirectional_packet : ETCS_packet
@@ -65,26 +65,18 @@ struct ETCS_directional_packet : ETCS_packet
     {
         directional = true;
     }
-    /*ETCS_directional_packet(bit_manipulator &r)
-    {
-        directional = true;
-        r.read(&NID_PACKET);
-        r.read(&Q_DIR);
-        r.read(&L_PACKET);
-        r.position += L_PACKET - L_PACKET.size - Q_DIR.size - NID_PACKET.size;
-    }*/
     virtual void copy(bit_manipulator &w) override
     {
-        std::cout<<"TODO: serialize() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
+        std::cout<<"TODO: copy() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
         NID_PACKET.copy(w);
         Q_DIR.copy(w);
         L_PACKET.copy(w);
     }
     void write_to(bit_manipulator &w) override
     {
-        int start = w.bits.size();
+        int start = w.position;
         copy(w);
-        L_PACKET.rawdata = w.bits.size()-start;
+        L_PACKET.rawdata = w.position-start;
         w.replace(&L_PACKET, start+10);
     }
 };

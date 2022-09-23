@@ -29,7 +29,7 @@ class ETCS_variable_custom
     int size;
     T rawdata;
     std::set<T> invalid;
-    ETCS_variable_custom(int size) : size(size){}
+    ETCS_variable_custom(int size) : size(size), rawdata(T(0)) {}
     operator T() const
     {
         return rawdata;

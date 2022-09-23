@@ -30,12 +30,11 @@ extern ORserver::POSIXclient *s_client;
 std::vector<bool> base64_decode(std::string str, bool remove_padding);
 std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
 {
-    int size = r.bits.size()/8;
+    int size = r.bits.size();
     NID_MESSAGE_t nid;
     r.peek(&nid);
     euroradio_message* msg;
-    switch ((unsigned char)nid)
-    {
+    switch (nid.rawdata) {
         case 2: msg = new SR_authorisation(); break;
         case 3: msg = new MA_message(); break;
         case 6: msg = new TR_exit_recognition(); break;
@@ -57,7 +56,7 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
         default: r.sparefound = true; msg = new euroradio_message(); break;
     }
     msg->copy(r);
-    while (!r.error && r.position<=r.bits.size()-8)
+    while (!r.error && r.position<=(r.bits.size()*8-8))
     {
         NID_PACKET_t NID_PACKET;
         r.peek(&NID_PACKET);
@@ -73,11 +72,11 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
 }
 std::shared_ptr<euroradio_message_traintotrack> euroradio_message_traintotrack::build(bit_manipulator &r)
 {
-    int size = r.bits.size()/8;
+    int size = r.bits.size();
     NID_MESSAGE_t nid;
     r.peek(&nid);
     euroradio_message_traintotrack *msg;
-    switch ((unsigned char)nid) {
+    switch (nid.rawdata) {
         case 129: msg = new validated_train_data_message(); break;
         case 130: msg = new SH_request(); break;
         case 132: msg = new MA_request(); break;
@@ -86,7 +85,7 @@ std::shared_ptr<euroradio_message_traintotrack> euroradio_message_traintotrack::
         default: r.sparefound = true; msg = new euroradio_message_traintotrack(); break;
     }
     msg->copy(r);
-    while (!r.error && r.position<=r.bits.size()-8)
+    while (!r.error && r.position<=(r.bits.size()*8-8))
     {
         NID_PACKET_t NID_PACKET;
         r.peek(&NID_PACKET);

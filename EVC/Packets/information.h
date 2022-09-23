@@ -80,8 +80,10 @@ struct signalling_information : etcs_information
     {
         Level1_MA ma = *(Level1_MA*)linked_packets.front().get();
         if (ma.V_MAIN == 0) {
-            if (!overrideProcedure && !infill)
+            if (!overrideProcedure && !infill) {
                 trigger_condition(18);
+                trigger_condition(67);
+            }
         } else {
             movement_authority newMA = movement_authority(ref, ma, timestamp);
             set_signalling_restriction(newMA, infill);

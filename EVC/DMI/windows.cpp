@@ -7,6 +7,7 @@
 #include "../Procedures/train_trip.h"
 #include "../Procedures/level_transition.h"
 #include "../Packets/vbc.h"
+#include "../STM/stm.h"
 #include <fstream>
 dialog_sequence active_dialog;
 std::string active_dialog_step;
@@ -67,13 +68,15 @@ json level_window()
         case Level::N3:
             lv = "Level 3";
             break;
-        case Level::NTC:
-            switch(nid_ntc) {
-                case 0:
-                    lv = "ASFA";
-                    break;
+        case Level::NTC: {
+            auto it = ntc_names.find(nid_ntc);
+            if (it != ntc_names.end()) {
+                lv = it->second;
+            } else {
+                lv = "NTC "+std::to_string(nid_ntc);
             }
             break;
+        }
     }
     j["level"] = lv;
     std::vector<std::string> levels;
@@ -92,17 +95,27 @@ json level_window()
                 case Level::N3:
                     levels.push_back("Level 3");
                     break;
-                case Level::NTC:
-                    switch(lti.nid_ntc) {
-                        case 0:
-                            levels.push_back("ASFA");
-                            break;
+                case Level::NTC: {
+                    auto it = ntc_names.find(lti.nid_ntc);
+                    if (it != ntc_names.end()) {
+                        levels.push_back(it->second);
+                    } else {
+                        levels.push_back("NTC "+std::to_string(lti.nid_ntc));
                     }
                     break;
+                }
             }
         }
     } else {
-        levels = {"Level 0", "ASFA", "Level 1", "Level 2"};
+        levels = {"Level 0", "Level 1", "Level 2"};
+        for (auto &kvp : installed_stms) {
+            auto it = ntc_names.find(kvp.first);
+            if (it != ntc_names.end()) {
+                levels.push_back(it->second);
+            } else {
+                levels.push_back("NTC "+std::to_string(kvp.first));
+            }
+        }
     }
     j["Levels"] = levels;
     return j;
@@ -254,6 +267,13 @@ void update_dmi_windows()
                 active_dialog_step = "D2";
             else
                 active_dialog_step = "S1";
+            if (train_data_valid && som_active) {
+                for (auto kvp : installed_stms) {
+                    auto *stm = kvp.second;
+                    if (!stm->isolated && stm->state != stm_state::CO && stm->state != stm_state::CS && stm->state != stm_state::HS && stm->state != stm_state::DA)
+                        send_failed_msg(stm);
+                }
+            }
         } else if (active_dialog_step == "D2") {
             if (supervising_rbc && supervising_rbc->status == session_status::Established) {
                 active_dialog_step = "S9";
@@ -626,7 +646,15 @@ void update_dialog_step(std::string step, std::string step2)
                 trigger_condition(19);
             }
             if (V_est == 0 && (level==Level::N0 || level==Level::NTC || level==Level::N1) && mode != Mode ::SH) {
-                trigger_condition(5);
+                if (level == Level::NTC) {
+                    auto *stm = get_stm(nid_ntc);
+                    if (stm != nullptr && stm->national_trip)
+                        trigger_condition(35);
+                    else
+                        trigger_condition(5);
+                } else {
+                    trigger_condition(5);
+                }
             }
             if (V_est == 0 && (level == Level::N2 || level == Level::N3)) {
                 if (supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()) {

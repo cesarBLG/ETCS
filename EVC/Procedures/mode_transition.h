@@ -28,6 +28,8 @@
 extern bool mode_acknowledgeable;
 extern bool mode_acknowledged;
 extern Mode mode_to_ack;
+extern int64_t last_mode_change;
+extern bool desk_open;
 class cond
 {
     bool triggered;

@@ -18,6 +18,7 @@
 #include "train_trip.h"
 #include "../MA/movement_authority.h"
 #include "mode_transition.h"
+#include "../STM/stm.h"
 #include <string>
 bool trip_acknowledged = false;
 bool trip_exit_acknowledged = false;
@@ -65,6 +66,18 @@ void train_trip(int reason)
         case 69:
             str = "No track description";
             break;
+        case 38: {
+            std::string name = "NTC";
+            for (auto &kvp : installed_stms) {
+                if (kvp.second->national_trip) {
+                    auto it = ntc_names.find(kvp.first);
+                    if (it != ntc_names.end())
+                        name = it->second;
+                }
+            }
+            str = name+" brake demand";
+            break;
+        }
         default:
             break;
     }

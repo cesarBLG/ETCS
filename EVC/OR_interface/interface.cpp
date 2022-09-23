@@ -27,6 +27,7 @@
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
 #include "../TrainSubsystems/power.h"
+#include "../STM/stm.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -73,7 +74,7 @@ void SetParameters()
     std::unique_lock<mutex> lck(iface_mtx);
     Parameter *p = new Parameter("distance");
     p->SetValue = [](string val) {
-        or_dist = stof(val);
+        or_dist = stod(val);
         if (odometer_value > or_dist)
             odometer_direction = -1;
         else if (odometer_value < or_dist)
@@ -86,7 +87,7 @@ void SetParameters()
     p = new Parameter("speed");
     p->SetValue = [](string val) {
         double prev = V_est;
-        V_est = stof(val)/3.6;
+        V_est = stod(val)/3.6;
         V_ura = 0.007*V_est;
         if (V_est < 0.2)
         {
@@ -99,7 +100,7 @@ void SetParameters()
 
     p = new Parameter("acceleration");
     p->SetValue = [](string val) {
-        A_est = stof(val);
+        A_est = stod(val);
     };
     manager.AddParameter(p);
 
@@ -124,9 +125,10 @@ void SetParameters()
 
     p = new Parameter("etcs::telegram");
     p->SetValue = [](string val) {
-        std::vector<bool> message;
+        std::vector<unsigned char> message((val.size()+7)>>3);
         for (int i=0; i<val.size(); i++) {
-            message.push_back(val[i]=='1');
+            if (val[i]=='1')
+                message[i>>3] |= 1<<(7-(i&7));
         }
         bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
@@ -173,13 +175,15 @@ void SetParameters()
         extern MonitoringStatus monitoring;
         const target *t = (monitoring == CSM) ? indication_target : &MRDT;
         if (t != nullptr) {
+            //t->calculate_curves();
             double speed = t->get_target_speed();
             double dist;
             if (t->type == target_class::EoA || t->type == target_class::SvL)
                 dist = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
             else
-                dist = std::max(t->d_P-d_maxsafefront(t->get_target_position()), 0.0);
-            return std::to_string(V_perm)+";"+std::to_string(speed)+";"+std::to_string(dist);
+                dist = std::max(t->get_target_position()-d_maxsafefront(t->get_target_position()), 0.0);//std::max(t->d_P-d_maxsafefront(t->get_target_position()), 0.0);*/
+            float atf = std::max(speed, std::min(sqrt(2*0.4f*(dist-V_est*10-10) + speed * speed)-3/3.6, V_perm));
+            return std::to_string(atf);
         }
         else return std::to_string(V_perm);
     };
@@ -187,7 +191,7 @@ void SetParameters()
 
     p = new Parameter("cruise_speed");
     p->SetValue = [](string val) {
-        V_set = stof(val)/3.6;
+        V_set = stod(val)/3.6;
     };
     manager.AddParameter(p);
     
@@ -239,6 +243,57 @@ void SetParameters()
     p->SetValue = [](string val) {
         parse_command(val, false);
     };
+
+    p = new Parameter("stm::asfa::override");
+    p->SetValue = [](string val) {
+        if (installed_stms.find(0) != installed_stms.end())
+            installed_stms[0]->report_override();
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::asfa::trip");
+    p->SetValue = [](string val) {
+        if (installed_stms.find(0) != installed_stms.end())
+            installed_stms[0]->report_trip();
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::asfa::state");
+    p->SetValue = [](string val) {
+        if (installed_stms.find(0) == installed_stms.end()) {
+            installed_stms[0] = new stm_object();
+            installed_stms[0]->nid_stm = 0;
+        }
+        installed_stms[0]->report_received((stm_state)stoi(val));
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::asfa::request");
+    p->SetValue = [](string val) {
+        if (installed_stms.find(0) != installed_stms.end()) {
+            installed_stms[0]->request_state((stm_state)stoi(val));
+        }
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::asfa::order");
+    p->GetValue = []() {
+        string s = "";
+        if (installed_stms.find(0) != installed_stms.end()) {
+            auto *asfa = installed_stms[0];
+            if (asfa->last_order) {
+                s = std::to_string((int)asfa->last_order->state)+","+(asfa->last_order->conditional?"1":"0");
+            }
+        }
+        return s;
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::override");
+    p->GetValue = []() {
+        extern bool overrideProcedure;
+        return overrideProcedure ? "1" : "0";
+    };
     manager.AddParameter(p);
 }
 void register_parameter(string parameter)
@@ -280,6 +335,7 @@ void start_or_iface()
     s_client->WriteLine("register(master_key)");
     s_client->WriteLine("register(controller::direction)");
     s_client->WriteLine("register(train_orientation)");
+    s_client->WriteLine("register(stm::asfa::*)");
     SetParameters();
     thread t(polling);
     t.detach();

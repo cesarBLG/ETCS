@@ -22,6 +22,7 @@
 #include "brake.h"
 #include "../Procedures/stored_information.h"
 #include "../Euroradio/session.h"
+#include "../STM/stm.h"
 extern bool SB;
 extern bool EB;
 bool SB_commanded;
@@ -105,7 +106,17 @@ void handle_brake_command()
     SB_commanded = !brake_conditions.empty();
     SB_commanded |= SB;
     EB_commanded = EB;
+    EB_commanded |= stm_control_EB;
+    if (mode == Mode::SN) {
+        for (auto kvp : installed_stms) {
+            auto *stm = kvp.second;
+            if (stm->active()) {
+                SB_commanded |= stm->commands.SB;
+                EB_commanded |= stm->commands.EB;
+            }
+        }
+    }
     if ((prevEB || prevSB) && !EB_commanded && !SB_commanded) send_command("playSinfo","");
-    prevEB = EB;
-    prevSB = SB;
+    prevEB = EB_commanded;
+    prevSB = SB_commanded;
 }

@@ -21,6 +21,7 @@
 #include "../Packets/messages.h"
 #include "../TrainSubsystems/cold_movement.h"
 std::list<link_data> linking;
+std::list<link_data>::iterator link_expected = linking.end();
 std::list<lrbg_info> lrbgs;
 bool position_valid=false;
 void load_train_position()

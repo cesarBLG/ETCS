@@ -34,11 +34,13 @@ extern mutex iface_mtx;
 bool detected = false;
 bool connected = false;
 bool active = false;
+bool brake_commanded = false;
 void register_parameter(std::string parameter);
 void initialize_asfa()
 {
     std::unique_lock<mutex> lck(iface_mtx);
-    Parameter *p = new Parameter("asfa::akt");
+    Parameter *p;
+    /*p = new Parameter("asfa::akt");
     p->GetValue = []() {
         return AKT ? "1" : "0";
     };
@@ -48,7 +50,7 @@ void initialize_asfa()
     p->GetValue = []() {
         return CON ? "1" : "0";
     };
-    manager.AddParameter(p);
+    manager.AddParameter(p);*/
 
     p = new Parameter("asfa::conectado");
     p->SetValue = [](string val) {
@@ -65,17 +67,18 @@ extern double V_NVUNFIT;
 extern optional<speed_restriction> UN_speed;
 int64_t akt_delay=0;
 int64_t con_delay=0;
-void send_msg()
+text_message &send_msg()
 {
     bool con = CON;
     std::string nivel="";
-    if (level == Level::N0 || CON) nivel = "Nivel 0 - ";
+    if (level == Level::N0 || (ongoing_transition && ongoing_transition->leveldata.level == Level::N0)) nivel = "Nivel 0 - ";
+    else if ((level == Level::NTC && nid_ntc == 0) || (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0)) nivel = "";
     else if (level == Level::N1) nivel = "Nivel 1 - ";
     else if (level == Level::N2) nivel = "Nivel 2 - ";
     else if (level == Level::N3) nivel = "Nivel 3 - ";
     int64_t time = get_milliseconds();
-    add_message(text_message(nivel + (connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G."), false, false, false, [time,con](text_message &m) {
-        return time+30000<get_milliseconds() || con != CON;
+    return add_message(text_message(nivel + (connected ? "ASFA conectado en C.G." : "ASFA anulado en C.G."), false, false, false, [time,con](text_message &m) {
+        return !brake_commanded && (time+30000<get_milliseconds() || con != CON);
     }));
 }
 void update_asfa()
@@ -84,12 +87,27 @@ void update_asfa()
         AKT = false;
         CON = true;
         active = false;
+        brake_commanded = false;
         return;
     }
     bool msg = false;
     if (!active) {
         active = true;
         msg = true;
+    }
+    if (!connected && level == Level::NTC && nid_ntc == 0) {
+        CON = false;
+        AKT = true;
+        if (!brake_commanded) {
+            brake_commanded = true;
+            auto &msg = send_msg();
+            brake_conditions.push_back({10, &msg, [](brake_command_information &i) {
+                return !brake_commanded;
+            }});
+        }
+        return;
+    } else {
+        brake_commanded = false;
     }
     if (ongoing_transition && (ongoing_transition->leveldata.level == Level::N0 || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
         if (!CON) {

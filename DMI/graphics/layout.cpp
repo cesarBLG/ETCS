@@ -85,3 +85,7 @@ vector<LayoutElement>& Layout::getElements()
 {
     return elements;
 }
+Layout::~Layout()
+{
+    removeAll();
+}

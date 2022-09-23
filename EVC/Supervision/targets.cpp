@@ -141,9 +141,15 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         distance v_sbi_dappr = d_maxsafefront(d_target) + V_est*T_bs2 + D_be_display;
         V_SBI2 = v_sbi_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_sbi_dappr)-(V_delta0+V_delta1+V_delta2),V_target + dV_sbi(V_target)) : (V_target + dV_sbi(V_target));
         
-        //GUI disabled
         distance v_p_dappr = d_maxsafefront(d_target) + V_est*(T_driver+T_bs2) + D_be_display;
-        V_P = v_p_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_p_dappr) - (V_delta0+V_delta1+V_delta2), V_target) : V_target;
+        if (v_p_dappr < get_distance_curve(V_target) || (Q_NVGUIPERM && d_maxsafefront(d_target) < get_distance_gui_curve(V_target))) {
+            V_P = get_speed_curve(v_p_dappr) - (V_delta0+V_delta1+V_delta2);
+            if (Q_NVGUIPERM)
+                V_P = std::min(V_P, get_speed_gui_curve(d_maxsafefront(d_target)));
+            V_P = std::max(V_P, V_target);
+        } else {
+            V_P = V_target;
+        }
     } else {
         d_SBI1 = get_distance_curve(V_est) - T_bs1*V_est;
         d_W = d_SBI1 - T_warning*V_est;
@@ -154,9 +160,14 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         distance v_sbi_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*T_bs1;
         V_SBI1 = v_sbi_dappr < d_target ? get_speed_curve(v_sbi_dappr) : 0;
             
-        //GUI disabled
         distance v_p_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*(T_driver + T_bs1);
-        V_P = v_p_dappr < d_target ? get_speed_curve(v_p_dappr) : 0;
+        if (v_p_dappr < d_target) {
+            V_P = get_speed_curve(v_p_dappr);
+            if (Q_NVGUIPERM)
+                V_P = std::min(V_P, get_speed_gui_curve(d_estfront));
+        } else {
+            V_P = 0;
+        }
     }
 }
 optional<distance> EoA;

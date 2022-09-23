@@ -29,9 +29,9 @@
 #include "../LX/level_crossing.h"
 #include <map>
 cond mode_conditions[75];
-static std::vector<mode_transition> transitions;
 static std::vector<mode_transition> ordered_transitions[20];
 Mode mode=Mode::SB;
+int64_t last_mode_change;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
 Mode mode_to_ack;
@@ -89,9 +89,12 @@ void initialize_mode_transitions()
     c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid && mode_acknowledged;};
     c[69] = [](){return get_SSP().empty() || get_SSP().begin()->get_start()>d_estfront || get_gradient().empty() || get_gradient().begin()->first>d_estfront;};
     c[70] = [](){return mode_to_ack==Mode::LS && mode_acknowledged;};
+    c[71] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
+    c[72] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
 
+    std::vector<mode_transition> transitions;
     transitions.push_back({Mode::SB, Mode::SR, {8,37}, 7});
     transitions.push_back({Mode::FS, Mode::SR, {37}, 6});
     transitions.push_back({Mode::LS, Mode::SR, {37}, 6});
@@ -218,6 +221,8 @@ void update_mode_status()
                 lrbg.dir = 1-lrbg.dir;
             lrbg.position = distance(lrbg.position.get(), odometer_orientation, 0);
         }
+        void reset_eurobalise_data();
+        reset_eurobalise_data();
     }
     prev_desk_open = desk_open;
     update_mode_profile();
@@ -241,6 +246,7 @@ void update_mode_status()
         if (transition != mode_to_ack) mode_acknowledgeable = false;
         Mode prevmode = mode;
         mode = transition;
+        last_mode_change = get_milliseconds();
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {
@@ -386,6 +392,8 @@ void set_mode_deleted_data()
     information_list[3].delete_info = []() {delete_MA();};
     information_list[4].delete_info = []() {delete_gradient();};
     information_list[5].delete_info = []() {delete_SSP();};
+    information_list[7].delete_info = []() {STM_max_speed = {};};
+    information_list[8].delete_info = []() {STM_system_speed = {};};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
     information_list[18].delete_info = []() {signal_speeds.clear();};
     information_list[22].delete_info = []() {

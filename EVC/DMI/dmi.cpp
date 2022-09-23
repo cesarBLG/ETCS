@@ -213,7 +213,6 @@ void to_json(json&j, const text_message &t)
     j["FirstGroup"] = t.firstGroup;
     j["Acknowledge"] = t.ack;
 }
-static json j;
 void dmi_comm()
 {
     fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -231,6 +230,7 @@ void dmi_comm()
         unique_lock<mutex> lck(loop_mtx);
         sendtoor = get_milliseconds() - lastor > 250;
         if (sendtoor) lastor = get_milliseconds();
+        json j;
         j["AllowedSpeedMpS"] = V_perm;
         j["InterventionSpeedMpS"] = V_sbi;
         j["TargetSpeedMpS"] = V_target;
@@ -374,7 +374,6 @@ void dmi_comm()
             j["SpeedTargets"] = "[]"_json;
             j["ActiveTrackConditions"] = "[]"_json;
         }
-        
         send_command("json", j.dump());
         /*
         send_command("setVset", to_string(V_set*3.6));

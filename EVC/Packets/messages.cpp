@@ -59,7 +59,6 @@ static distance bg_reference;
 static distance bg_referencemax;
 static distance bg_referencemin;
 static bool stop_checking_linking=false;
-std::list<link_data>::iterator link_expected=linking.end();
 std::deque<std::pair<eurobalise_telegram, std::pair<distance,int64_t>>> pending_telegrams;
 optional<link_data> rams_reposition_mitigation;
 void trigger_reaction(int reaction);
@@ -900,10 +899,6 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                 return false;
             return true;
         }
-        if (s.exceptions.find(7) != s.exceptions.end()) {
-            if (!ongoing_transition || ongoing_transition->leveldata.level != Level::NTC/* || ongoing_transition->leveldata.nid_ntc != STM_id*/)
-                return false;
-        }
         return true;
     } else {
         if (s.exceptions.find(1) != s.exceptions.end()) {
@@ -913,11 +908,6 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
         }
         if (s.exceptions.find(2) != s.exceptions.end()) {
             if (ongoing_transition && (ongoing_transition->leveldata.level == Level::N2 || ongoing_transition->leveldata.level == Level::N3))
-                transition_buffer.back().push_back(info);
-            return false;
-        }
-        if (s.exceptions.find(6) != s.exceptions.end()) {
-            if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC/* && ongoing_transition->leveldata.nid_ntc == STM_id*/)
                 transition_buffer.back().push_back(info);
             return false;
         }

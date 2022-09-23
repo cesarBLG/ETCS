@@ -21,13 +21,14 @@
 #include "../DMI/text_message.h"
 #include "../TrainSubsystems/brake.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "../STM/stm.h"
 optional<level_transition_information> ongoing_transition;
 optional<level_transition_information> sh_transition;
 std::vector<level_information> priority_levels;
 bool priority_levels_valid = false;
 optional<distance> transition_border;
 Level level = Level::Unknown;
-int nid_ntc;
+int nid_ntc = -1;
 bool level_valid = false;
 std::list<std::list<std::shared_ptr<etcs_information>>> transition_buffer;
 bool level_acknowledgeable = false;
@@ -36,6 +37,7 @@ Level level_to_ack;
 int ntc_to_ack;
 bool level_timer_started = false;
 int64_t level_timer;
+std::map<int, std::string> ntc_names;
 #include <fstream>
 void load_level()
 {
@@ -54,10 +56,15 @@ void save_level()
 }
 void driver_set_level(level_information li)
 {
+    stm_level_change(li, true);
     level_valid = li.level != Level::Unknown;
     position_report_reasons[6] = (li.level != Level::N2 && li.level != Level::N3 && (level == Level::N2 || level == Level::N3)) ? 2 : 1;
     level = li.level;
-    nid_ntc = li.nid_ntc;
+    if (level == Level::NTC) {
+        nid_ntc = li.nid_ntc;
+    } else {
+        nid_ntc = -1;
+    }
     save_level();
 }
 void perform_transition()
@@ -65,6 +72,7 @@ void perform_transition()
     if(!ongoing_transition)
         return;
     level_transition_information lti = *ongoing_transition;
+    stm_level_change({lti.leveldata.level, lti.leveldata.nid_ntc}, false);
     if (level == Level::N2 || level == Level::N3)
         transition_border = lti.start;
     else
@@ -72,11 +80,16 @@ void perform_transition()
     priority_levels = lti.priority_table;
     priority_levels_valid = true;
     ongoing_transition = {};
+    STM_max_speed = {};
+    STM_system_speed = {};
     if (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0)
         level_acknowledgeable = !level_acknowledged;
     Level prevlevel = level;
     level = lti.leveldata.level;
-    nid_ntc = lti.leveldata.nid_ntc;
+    if (level == Level::NTC)
+        nid_ntc = lti.leveldata.nid_ntc;
+    else
+        nid_ntc = -1;
     for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
         for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
             try_handle_information(*it2, *it);
@@ -122,14 +135,20 @@ void update_level_status()
 }
 void level_transition_received(level_transition_information info)
 {
-    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level)
+    stm_level_transition_received(info);
+    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == info.leveldata.nid_ntc)) {
         level_acknowledged = false;
+        STM_max_speed = {};
+        STM_system_speed = {};
+    }
     level_acknowledgeable = false;
     level_timer_started = false;
     transition_buffer.clear();
     transition_buffer.push_back({});
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {
         ongoing_transition = {};
+        STM_max_speed = {};
+        STM_system_speed = {};
         priority_levels = info.priority_table;
         priority_levels_valid = true;
         save_level();
@@ -139,6 +158,8 @@ void level_transition_received(level_transition_information info)
         sh_transition = info;
         priority_levels = info.priority_table;
         ongoing_transition = {};
+        STM_max_speed = {};
+        STM_system_speed = {};
         priority_levels_valid = true;
         save_level();
         return;
@@ -148,4 +169,64 @@ void level_transition_received(level_transition_information info)
     ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
     if (ongoing_transition->immediate)
         perform_transition();
+}
+level_transition_information::level_transition_information(LevelTransitionOrder o, distance ref)
+{
+    if (o.D_LEVELTR == D_LEVELTR_t::Now) {
+        immediate = true;
+        start = ref;
+    } else {
+        immediate = false;
+        start = ref+o.D_LEVELTR.get_value(o.Q_SCALE);
+    }
+    std::vector<target_level_information> priorities;
+    priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level(),(int)o.element.NID_NTC});
+    for (int i=0; i<o.elements.size(); i++) {
+        priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
+    }
+    for (int i=0; i<priorities.size(); i++) {
+        priority_table.push_back({priorities[i].level, priorities[i].nid_ntc});
+    }
+    set_leveldata(priorities);
+}
+level_transition_information::level_transition_information(ConditionalLevelTransitionOrder o, distance ref)
+{
+    immediate = true;
+    start = ref;
+    std::vector<target_level_information> priorities;
+    priorities.push_back({start, o.element.M_LEVELTR.get_level(), (int)o.element.NID_NTC});
+    for (int i=0; i<o.elements.size(); i++) {
+        priorities.push_back({start, o.elements[i].M_LEVELTR.get_level(), (int)o.elements[i].NID_NTC});
+    }
+    for (int i=0; i<priorities.size(); i++) {
+        if (priorities[i].level == level && (level != Level::NTC || priorities[i].nid_ntc == nid_ntc)) {
+            leveldata = priorities[i];
+            return;
+        }
+    }
+    set_leveldata(priorities);
+}
+void level_transition_information::set_leveldata(std::vector<target_level_information> &priorities)
+{
+    for (auto &p : priorities) {
+        if (p.level == Level::NTC) {
+            assign_stm(p.nid_ntc, false);
+            auto *stm = get_stm(p.nid_ntc);
+            if (stm != nullptr && stm->available()) {
+                leveldata = p;
+                return;
+            }
+        }
+        if (p.level == Level::N2) {
+            for (auto &t : mobile_terminals) {
+                leveldata = p;
+                return;
+            }
+        }
+        if (p.level == Level::N0 || p.level == Level::N1) {
+            leveldata = p;
+            return;
+        }
+    }
+    leveldata = priorities.back();
 }

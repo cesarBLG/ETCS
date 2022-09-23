@@ -49,10 +49,7 @@ bool mobile_terminal::setup(communication_session *session)
                     lck.unlock();
                     bit_manipulator w;
                     msg->write_to(w);
-                    int size = (w.bits.size()+7)/8;
-                    unsigned char buff[size];
-                    w.get_bytes(buff);
-                    int result = ::send(fd, (char*)buff, size, 0);
+                    int result = ::send(fd, (char*)&w.bits[0], w.bits.size(), 0);
                     if (result < 0) {
                         released--;
                         if (status == safe_radio_status::Connected)

@@ -43,6 +43,7 @@
 #include "TrackConditions/track_condition.h"
 #include "TrainSubsystems/subsystems.h"
 #include "LX/level_crossing.h"
+#include "STM/stm.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -219,6 +220,7 @@ void start()
     setup_national_values();
     load_vbcs();
     initialize_mode_transitions();
+    setup_stm_control();
     set_message_filters();
     initialize_national_functions();
     started = true;
@@ -230,6 +232,7 @@ void update()
     update_track_comm();
     update_national_values();
     update_procedures();
+    update_stm_control();
     update_supervision();
     update_lx();
     update_track_conditions();

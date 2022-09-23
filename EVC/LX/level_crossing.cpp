@@ -25,8 +25,12 @@ void load_lx(LevelCrossingInformation lxi, distance ref)
 {
     level_crossing lx = level_crossing(lxi, ref);
     for (auto it=level_crossings.begin(); it!=level_crossings.end(); ) {
-        if (it->id == lx.id) it = level_crossings.erase(it);
-        else ++it;
+        if (it->id == lx.id) {
+            lx.svl_replaced = it->svl_replaced;
+            it = level_crossings.erase(it);
+        } else {
+            ++it;
+        }
     }
     level_crossings.insert(lx);
     calculate_SvL();
@@ -41,11 +45,10 @@ void update_lx()
         }
         if (it->svl_replaced && d_minsafefront(it->start) < it->start+it->length) inform_lx = true;
         if (V_est == 0 && it->stop && d_estfront > it->start-it->stoplength) {
-            it->svl_replaced = true;
-            it->svl_replaced_loc = d_estfront_dir[odometer_orientation == -1];
+            it->svl_replaced = d_estfront_dir[odometer_orientation == -1];
             calculate_SvL();
         }
-        if (EoA &&  *EoA == it->start && !it->svl_replaced) {
+        if (EoA && *EoA == it->start && !it->svl_replaced) {
             const std::list<target> &supervised_targets = get_supervised_targets();
             const target *tEoA, *tSvL;
             for (auto it = supervised_targets.begin(); it != supervised_targets.end(); ++it) {
@@ -64,8 +67,7 @@ void update_lx()
             bool c1 = tEoA->d_P < d_estfront;
             bool c2 = tSvL->d_P < d_maxsafefront(tSvL->d_P);
             if (c1 || c2) {
-                it->svl_replaced = true;
-                it->svl_replaced_loc = c1 ? d_estfront : d_maxsafefront(tSvL->d_P);
+                it->svl_replaced = c1 ? d_estfront : d_maxsafefront(tSvL->d_P);
                 calculate_SvL();
             }
         }

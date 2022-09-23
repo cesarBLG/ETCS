@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.14)
 project (ETCS)
-option(ETCS_VENDORED "Use vendored libraries" ON)
+option(ETCS_VENDORED "Use vendored libraries" OFF)
 if (ETCS_VENDORED)
     set(SDL2TTF_VENDORED ON CACHE BOOL "Vendored TTF libs")
     add_subdirectory(libs/SDL EXCLUDE_FROM_ALL)

@@ -108,7 +108,7 @@ void updateMessages()
         textArea.setAck([msg]() {
             msg->ack = false;
             setAck(AckType::Message, msg->Id, false);
-            write_command("json", R"({"DriverSelection":"MessageAcknowledge,"MessageId:")"+to_string(msg->Id)+"}");
+            write_command("json", R"({"DriverSelection":"MessageAcknowledge","MessageId":)"+to_string(msg->Id)+"}");
             updateMessages();
         });
     }

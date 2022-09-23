@@ -7,7 +7,6 @@
 ETCS.kdev4
 .directory
 Thumbs.db
-EVC/orts
 error.log
 MakeLists.txt.user
 CMakeCache.txt
@@ -20,3 +19,5 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+libs/
+build/

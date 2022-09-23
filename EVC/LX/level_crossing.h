@@ -18,6 +18,7 @@
 #pragma once
 #include "../Position/distance.h"
 #include "../Packets/88.h"
+#include "../optional.h"
 #include <set>
 class level_crossing
 {
@@ -29,8 +30,7 @@ class level_crossing
     double V_LX;
     bool stop;
     double stoplength;
-    mutable bool svl_replaced;
-    mutable distance svl_replaced_loc;
+    mutable optional<distance> svl_replaced;
     level_crossing(LevelCrossingInformation lx, distance ref)
     {
         id = lx.NID_LX;
@@ -43,7 +43,6 @@ class level_crossing
             stop = lx.Q_STOPLX == Q_STOPLX_t::StopRequired;
             if (stop) stoplength = lx.L_STOPLX.get_value(lx.Q_SCALE);
         }
-        svl_replaced = false;
     }
     bool operator<(const level_crossing l) const
     {

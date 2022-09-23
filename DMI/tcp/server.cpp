@@ -40,7 +40,8 @@
 #include "../control/control.h"
 #include <mutex>
 int server;
-int client;
+int clients[3];
+int active_channel;
 #define BUFF_SIZE 1024
 #define PORT 5010
 static char data[BUFF_SIZE];
@@ -310,9 +311,9 @@ void parseData(string str)
     notifyDataReceived();
 }
 extern bool running;
-void read()
+int read(int channel)
 {
-    int result = recv(client, ::data, BUFF_SIZE-1, 0);
+    int result = recv(clients[channel], ::data, BUFF_SIZE-1, 0);
     if(result>0)
     {
         ::data[result] = 0;
@@ -325,12 +326,40 @@ void read()
             buffer = buffer.substr(end+1);
         }
     }
-    if (result < 0) running = false;
+    return result;
 }
 void write_command(string command, string value)
 {
+    if (active_channel < 0)
+        return;
     string tosend = command+"("+value+");\n";
-    send(client, tosend.c_str(), tosend.size(), 0);
+    send(clients[active_channel], tosend.c_str(), tosend.size(), 0);
+}
+void listenChannels()
+{
+    while(active_channel == -1 && running)
+    {
+        struct sockaddr_in addr;
+        int c = sizeof(struct sockaddr_in);
+        int cl = accept(server, (struct sockaddr *)&addr, 
+#ifdef _WIN32
+        (int *)
+#else
+        (socklen_t *)
+#endif
+        &c);
+        if(cl == -1) {
+            perror("accept");
+            continue;
+        }
+        for (int i=0; i<3; i++) {
+            if (clients[i] < 0) {
+                clients[i] = cl;
+                active_channel = i;
+                break;
+            }
+        }
+    }
 }
 void startSocket()
 {
@@ -351,31 +380,28 @@ void startSocket()
         perror("bind");
         return;
     }
-    if (listen(server, 1) == -1) {
+    if (listen(server, 3) == -1) {
         perror("listen");
         return;
     }
-    client = -1;
-    while(client == -1 && running)
-    {
-        struct sockaddr_in addr;
-        int c = sizeof(struct sockaddr_in);
-        int cl = accept(server, (struct sockaddr *)&addr, 
-#ifdef _WIN32
-        (int *)
-#else
-        (socklen_t *)
-#endif
-        &c);
-        if(cl == -1) {
-            perror("accept");
-            continue;
-        }
-        client = cl;
-    }
+    active_channel = -1;
+    for (int i=0; i<3; i++)
+        clients[i] = -1;
+    listenChannels();
     while(running)
     {
-        read();
+        int res = read(active_channel);
+        if (res < 0)
+        {
+#ifdef _WIN32
+            closesocket(clients[active_channel]);
+#else
+            close(clients[active_channel]);
+#endif
+            clients[active_channel] = -1;
+            active_channel = -1;
+            if (running) listenChannels();
+        }
     }
     closeSocket();
 }
