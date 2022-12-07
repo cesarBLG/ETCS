@@ -29,6 +29,7 @@
 #include "../TrainSubsystems/power.h"
 #include "../STM/stm.h"
 #include <iostream>
+#include <sstream>
 #include <thread>
 #include <chrono>
 #include <mutex>
@@ -54,21 +55,6 @@ mutex iface_mtx;
 static threadwait *poller;
 //std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str, bool lock);
-static unsigned char base_64_dec[256];
-const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-std::vector<bool> base64_decode(std::string str, bool remove_padding=true)
-{
-    std::vector<bool> bits;
-    for (int i=0; i<str.size(); i++) {
-        if (str[i] == '=') break;
-        unsigned char c = base_64_dec[str[i]];
-        for (int j=5; j>=0; j--) {
-            bits.push_back(((c>>j) & 1));
-        }
-    }
-    if (remove_padding) bits.erase(bits.end()-bits.size()%8, bits.end());
-    return bits;
-}
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -244,55 +230,28 @@ void SetParameters()
         parse_command(val, false);
     };
 
-    p = new Parameter("stm::asfa::override");
-    p->SetValue = [](string val) {
-        if (installed_stms.find(0) != installed_stms.end())
-            installed_stms[0]->report_override();
-    };
-    manager.AddParameter(p);
-
-    p = new Parameter("stm::asfa::trip");
-    p->SetValue = [](string val) {
-        if (installed_stms.find(0) != installed_stms.end())
-            installed_stms[0]->report_trip();
-    };
-    manager.AddParameter(p);
-
-    p = new Parameter("stm::asfa::state");
-    p->SetValue = [](string val) {
-        if (installed_stms.find(0) == installed_stms.end()) {
-            installed_stms[0] = new stm_object();
-            installed_stms[0]->nid_stm = 0;
-        }
-        installed_stms[0]->report_received((stm_state)stoi(val));
-    };
-    manager.AddParameter(p);
-
-    p = new Parameter("stm::asfa::request");
-    p->SetValue = [](string val) {
-        if (installed_stms.find(0) != installed_stms.end()) {
-            installed_stms[0]->request_state((stm_state)stoi(val));
-        }
-    };
-    manager.AddParameter(p);
-
-    p = new Parameter("stm::asfa::order");
-    p->GetValue = []() {
-        string s = "";
-        if (installed_stms.find(0) != installed_stms.end()) {
-            auto *asfa = installed_stms[0];
-            if (asfa->last_order) {
-                s = std::to_string((int)asfa->last_order->state)+","+(asfa->last_order->conditional?"1":"0");
-            }
-        }
-        return s;
-    };
-    manager.AddParameter(p);
-
     p = new Parameter("stm::override");
     p->GetValue = []() {
         extern bool overrideProcedure;
         return overrideProcedure ? "1" : "0";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("stm::command");
+    p->SetValue = [](std::string val) {
+        std::vector<unsigned char> message((val.size()+7)>>3);
+        for (int i=0; i<val.size(); i++) {
+            if (val[i]=='1')
+                message[i>>3] |= 1<<(7-(i&7));
+        }
+        bit_manipulator r(std::move(message));
+        stm_message msg(r);
+        handle_stm_message(msg);
+        /*for (auto &var : r.log_entries)
+        {
+            std::cout<<var.first<<"\t"<<var.second<<"\n";
+        }*/
+        send_command("stmData", val);
     };
     manager.AddParameter(p);
 }
@@ -317,13 +276,22 @@ void polling()
         std::for_each(manager.parameters.begin(), manager.parameters.end(), [](Parameter* p){p->Send();});
     }
 }
+#ifdef _WIN32
+#include <processthreadsapi.h>
+#endif
 void start_or_iface()
 {
-    for (int i=0; i<64; i++)
-    {
-        base_64_dec[base64_table[i]]=i;
-    }
-	base_64_dec['='] = 0;
+#ifdef _WIN32
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory( &si, sizeof(si) );
+    si.cb = sizeof(si);
+    ZeroMemory( &pi, sizeof(pi) );
+    CreateProcess("server.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+    Sleep(1000);
+#endif
+    void init_io();
+    init_io();
     poller = new threadwait();
     s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(speed)");
@@ -335,7 +303,7 @@ void start_or_iface()
     s_client->WriteLine("register(master_key)");
     s_client->WriteLine("register(controller::direction)");
     s_client->WriteLine("register(train_orientation)");
-    s_client->WriteLine("register(stm::asfa::*)");
+    s_client->WriteLine("register(stm::command)");
     SetParameters();
     thread t(polling);
     t.detach();

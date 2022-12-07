@@ -21,83 +21,121 @@
 #include <string>
 #include <ctime>
 using namespace std;
-struct sdlsounddata
-{
-    Uint8 *wavBuffer;
-    SDL_AudioSpec wavSpec;
-    Uint32 wavLength;
-};
 sdlsounddata sinfo;
 sdlsounddata swarn;
 sdlsounddata stoofast;
 sdlsounddata click; 
+SDL_AudioSpec deviceSpec;
 SDL_AudioDeviceID deviceId;
 time_t last_sinfo;
 void start_sound()
 {
+    SDL_AudioSpec spec;
+    std::string soundpath;
 #ifdef __ANDROID__
     extern std::string filesDir;
-    SDL_LoadWAV((filesDir+"/sound/S2_warning.wav").c_str(), &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
-    SDL_LoadWAV((filesDir+"/sound/S_info.wav").c_str(), &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
-    SDL_LoadWAV((filesDir+"/sound/S1_toofast.wav").c_str(), &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
-    SDL_LoadWAV((filesDir+"/sound/click.wav").c_str(), &click.wavSpec, &click.wavBuffer, &click.wavLength);
+    soundpath = filesDir+"/sound/";
 #else
-    SDL_LoadWAV("sound/S2_warning.wav", &swarn.wavSpec, &swarn.wavBuffer, &swarn.wavLength);
-    SDL_LoadWAV("sound/S_info.wav", &sinfo.wavSpec, &sinfo.wavBuffer, &sinfo.wavLength);
-    SDL_LoadWAV("sound/S1_toofast.wav", &stoofast.wavSpec, &stoofast.wavBuffer, &stoofast.wavLength);
-    SDL_LoadWAV("sound/click.wav", &click.wavSpec, &click.wavBuffer, &click.wavLength);
+    soundpath = "sound/";
 #endif
-    deviceId = SDL_OpenAudioDevice(NULL, 0, &sinfo.wavSpec, NULL, 0);
+    SDL_LoadWAV((soundpath+"S2_warning.wav").c_str(), &spec, &swarn.wavBuffer, &swarn.wavLength);
+    SDL_LoadWAV((soundpath+"S_info.wav").c_str(), &spec, &sinfo.wavBuffer, &sinfo.wavLength);
+    SDL_LoadWAV((soundpath+"S1_toofast.wav").c_str(), &spec, &stoofast.wavBuffer, &stoofast.wavLength);
+    SDL_LoadWAV((soundpath+"click.wav").c_str(), &spec, &click.wavBuffer, &click.wavLength);
+
+    deviceId = SDL_OpenAudioDevice(NULL, 0, &spec, &deviceSpec, 0);
     last_sinfo = time(nullptr)-1;
 }
-Uint32 warnLength;
-Uint8 *warnBuffer = nullptr;
+sdlsounddata* loadSound(std::string file)
+{
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    file = filesDir+"/sound/"+file;
+#else
+    file = "sound/"+file;
+#endif
+    auto *snd = new sdlsounddata();
+    snd->freeAudio = 1;
+    SDL_AudioSpec spec;
+    SDL_LoadWAV(file.c_str(), &spec, &snd->wavBuffer, &snd->wavLength);
+    //snd->duration = snd->wavLength * 500 / spec.freq;
+    return snd;
+}
+sdlsounddata* loadSound(STMSoundDefinition &def)
+{
+    std::vector<Uint16> buff;
+    //int64_t duration = 0;
+    for (auto &part : def.parts)
+    {
+        float freq = (float)part.M_FREQ.get_value();
+        int nsteps = deviceSpec.freq * part.T_SOUND.get_value();
+        float factor = 2*M_PI*freq/deviceSpec.freq;
+        for (int i=0; i<nsteps; i++)
+        {
+            buff.push_back(freq == 0 ? 0 : 28000*sinf(i * factor));
+        }
+        //duration += part.T_SOUND.rawdata * 100;
+    }
+    auto *snd = new sdlsounddata();
+    snd->wavLength = buff.size() * 2;
+    snd->wavBuffer = new Uint8[snd->wavLength];
+    snd->freeAudio = 2;
+    //snd->duration = duration;
+    memcpy(snd->wavBuffer, &buff[0], snd->wavLength);
+    return snd;
+}
+sdlsounddata::~sdlsounddata()
+{
+    if (freeAudio == 1) SDL_FreeWAV(wavBuffer);
+    else if (freeAudio == 2) delete wavBuffer;
+}
+sdlsounddata *continuousSound;
 Uint32 refill(Uint32 interval, void *param)
 {
-    if(warnBuffer != NULL && SDL_GetQueuedAudioSize(deviceId) < 3*warnLength) SDL_QueueAudio(deviceId, warnBuffer, warnLength);
-    if(warnBuffer == NULL) return 0;
+    if(continuousSound == nullptr) return 0;
+    if(SDL_GetQueuedAudioSize(deviceId) < 3*continuousSound->wavLength) SDL_QueueAudio(deviceId, continuousSound->wavBuffer, continuousSound->wavLength);
     return interval;
 }
-void stop()
+void stopSound(sdlsounddata *d)
 {
+    if (d != nullptr && d != continuousSound) return;
     SDL_ClearQueuedAudio(deviceId);
-    warnBuffer = nullptr;
+    continuousSound = nullptr;
     SDL_PauseAudioDevice(deviceId, 1);
 }
-void play(sdlsounddata d, bool loop=false)
+void play(sdlsounddata *d, bool loop)
 {
-    if(warnBuffer != nullptr) stop();
+    if(continuousSound != nullptr) stopSound(continuousSound);
     
     SDL_ClearQueuedAudio(deviceId);
-    int success = SDL_QueueAudio(deviceId, d.wavBuffer, d.wavLength);
+    int success = SDL_QueueAudio(deviceId, d->wavBuffer, d->wavLength);
     SDL_PauseAudioDevice(deviceId, 0);
     if(loop)
     {
-        warnBuffer = d.wavBuffer;
-        warnLength = d.wavLength;
+        continuousSound = d;
         SDL_AddTimer(50, refill, NULL);
     }
 }
 void playSwarning()
 {
-    if (warnBuffer == nullptr)
-        play(swarn, true);
+    if (continuousSound == nullptr)
+        play(&swarn, true);
 }
 void stopSwarning()
 {
-    stop();
+    stopSound(&swarn);
 }
 void playSinfo()
 {
     if (time(nullptr)-last_sinfo<1) return;
     last_sinfo = time(nullptr);
-    play(sinfo);
+    play(&sinfo);
 }
 void playTooFast()
 {
-    play(stoofast);
+    play(&stoofast);
 }
 void playClick()
 {
-    play(click);
+    play(&click);
 }

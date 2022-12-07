@@ -21,6 +21,7 @@
 #include "../DMI/text_message.h"
 #include "../Time/clock.h"
 #include "../Procedures/level_transition.h"
+#include "../STM/stm.h"
 #include <string>
 #include <mutex>
 using namespace ORserver;
@@ -40,7 +41,7 @@ void initialize_asfa()
 {
     std::unique_lock<mutex> lck(iface_mtx);
     Parameter *p;
-    /*p = new Parameter("asfa::akt");
+    p = new Parameter("asfa::akt");
     p->GetValue = []() {
         return AKT ? "1" : "0";
     };
@@ -50,7 +51,7 @@ void initialize_asfa()
     p->GetValue = []() {
         return CON ? "1" : "0";
     };
-    manager.AddParameter(p);*/
+    manager.AddParameter(p);
 
     p = new Parameter("asfa::conectado");
     p->SetValue = [](string val) {
@@ -83,7 +84,7 @@ text_message &send_msg()
 }
 void update_asfa()
 {
-    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown) {
+    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || (installed_stms.find(0) != installed_stms.end())) {
         AKT = false;
         CON = true;
         active = false;
@@ -95,7 +96,7 @@ void update_asfa()
         active = true;
         msg = true;
     }
-    if (!connected && level == Level::NTC && nid_ntc == 0) {
+    if (!connected && (level == Level::N0 || (level == Level::NTC && nid_ntc == 0))) {
         CON = false;
         AKT = true;
         if (!brake_commanded) {

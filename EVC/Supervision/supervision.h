@@ -16,51 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "../Position/distance.h"
 #include <string>
-enum MonitoringStatus
-{
-    CSM,
-    TSM,
-    RSM,
-};
-enum SupervisionStatus
-{
-    NoS,
-    IndS,
-    OvS,
-    WaS,
-    IntS
-};
-enum struct Level 
-{
-    N0,
-    N1,
-    N2,
-    N3,
-    NTC,
-    Unknown
-};
-enum struct Mode
-{
-    FS,
-    LS,
-    OS,
-    SR,
-    SH,
-    UN,
-    PS,
-    SL,
-    SB,
-    TR,
-    PT,
-    SF,
-    IS,
-    NP,
-    NL,
-    SN,
-    RV
-};
+#include "common.h"
 const char Mode_str[][3] = {"FS","LS","OS","SR","SH","UN","PS","SL","SB","TR","PT","SF","IS","NP","NL","SN","RV"};
 extern Level level;
 extern int nid_ntc;

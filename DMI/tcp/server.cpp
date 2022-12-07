@@ -38,6 +38,7 @@
 #include "../state/gps_pos.h"
 #include "../state/acks.h"
 #include "../control/control.h"
+#include "../STM/stm_objects.h"
 #include <mutex>
 int server;
 int clients[3];
@@ -219,9 +220,21 @@ void parseData(string str)
         val.push_back(value);
         addMsg(Message(id, text, stoi(val[0]), stoi(val[1]), val[2]!="false", val[3]!="false", stoi(val[4])));
     }
-    if (command == "setRevokeMessage")
+    else if (command == "setRevokeMessage")
     {
         revokeMessage(stoi(value));
+    }
+    else if (command == "playSinfo") playSinfo();
+    else if (command == "stmData")
+    {
+        std::vector<unsigned char> message((value.size()+7)>>3);
+        for (int i=0; i<value.size(); i++) {
+            if (value[i]=='1')
+                message[i>>3] |= 1<<(7-(i&7));
+        }
+        bit_manipulator r(std::move(message));
+        stm_message msg(r);
+        parse_stm_message(msg);
     }
     if (command != "json") return;
     json j = json::parse(value);
@@ -229,11 +242,14 @@ void parseData(string str)
     fill_non_existent(j, "ReleaseSpeedMpS", 0);
     fill_non_existent(j, "ModeAcknowledgement", nullptr);
     fill_non_existent(j, "LevelTransition", nullptr);*/
-    Vperm = j["AllowedSpeedMpS"].get<double>()*3.6;
-    Vtarget = j["TargetSpeedMpS"].get<double>()*3.6;
-    Vsbi = j["InterventionSpeedMpS"].get<double>()*3.6;
-    Dtarg = j["TargetDistanceM"].get<double>();
-    Vrelease = round(j["ReleaseSpeedMpS"].get<double>()*3.6);
+    if (level != Level::NTC || (mode != Mode::SN && mode != Mode::NL))
+    {
+        Vperm = (int)(j["AllowedSpeedMpS"].get<double>()*3.6+0.01);
+        Vtarget = round(j["TargetSpeedMpS"].get<double>()*3.6);
+        Vsbi = (int)(j["InterventionSpeedMpS"].get<double>()*3.6+0.01);
+        Dtarg = round(j["TargetDistanceM"].get<double>());
+        Vrelease = round(j["ReleaseSpeedMpS"].get<double>()*3.6);
+    }
     Vest = j["SpeedMpS"].get<double>()*3.6;
     TTP = j["TimeToPermittedS"].get<double>();
     TTI = j["TimeToIndicationS"].get<double>();
@@ -306,7 +322,6 @@ void parseData(string str)
         }
     }
     /*if(command == "setVset") Vset = stof(value);*/
-    if (command == "playSinfo") playSinfo();
     update();
     notifyDataReceived();
 }

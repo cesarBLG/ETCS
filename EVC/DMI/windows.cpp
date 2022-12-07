@@ -96,11 +96,13 @@ json level_window()
                     levels.push_back("Level 3");
                     break;
                 case Level::NTC: {
-                    auto it = ntc_names.find(lti.nid_ntc);
-                    if (it != ntc_names.end()) {
-                        levels.push_back(it->second);
-                    } else {
-                        levels.push_back("NTC "+std::to_string(lti.nid_ntc));
+                    if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end()) {
+                        auto it = ntc_names.find(lti.nid_ntc);
+                        if (it != ntc_names.end()) {
+                            levels.push_back(it->second);
+                        } else {
+                            levels.push_back("NTC "+std::to_string(lti.nid_ntc));
+                        }
                     }
                     break;
                 }
@@ -275,13 +277,10 @@ void update_dmi_windows()
                 }
             }
         } else if (active_dialog_step == "D2") {
-            if (supervising_rbc && supervising_rbc->status == session_status::Established) {
+            if (supervising_rbc && supervising_rbc->status == session_status::Established)
                 active_dialog_step = "S9";
-                supervising_rbc->train_data_ack_pending = true;
-                supervising_rbc->train_data_ack_sent = false;
-            } else {
+            else
                 active_dialog_step = "S1";
-            }
         } else if (active_dialog_step == "D3") {
             if (supervising_rbc && supervising_rbc->status == session_status::Established)
                 active_dialog_step = "D4";
@@ -431,10 +430,6 @@ void close_window()
     if (active == "menu_main" || active == "menu_override" || active == "data_view_window" || active == "menu_spec")
         active_dialog = dialog_sequence::None;
     else if (active == "trn_window") {
-        if (active_dialog_step == "S3-3" && supervising_rbc) {
-            supervising_rbc->train_data_ack_pending = true;
-            supervising_rbc->train_data_ack_sent = false;
-        }
         active_dialog_step = "S1";   
     } else if (active == "fixed_train_data_window" || active == "level_window" || active == "fixed_train_data_validation_window" || active == "train_data_window" || active == "train_data_validation_window")
         active_dialog_step = "S1";
@@ -530,7 +525,24 @@ void validate_data_entry(std::string name, json &result)
         brake_position = (brake_position_types)cat;
         set_conversion_model();
         train_data_valid = conversion_model_used;
-        active_dialog_step = train_data_valid ? "D6" : "S1";
+        if (train_data_valid) {
+            if (supervising_rbc) {
+                supervising_rbc->train_data_ack_pending = true;
+                supervising_rbc->train_data_ack_sent = false;
+            }
+            active_dialog_step = "D6";
+            for (auto &kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->specific_data > 0) {
+                    active_dialog = dialog_sequence::NTCData;
+                    active_dialog_step = "S1";
+                    break;
+                }
+            }
+            stm_send_train_data();
+        } else {
+            active_dialog_step = "S1";
+        }
     } else if (name == "Validate train data") {
         if (result["Validated"] != "Yes") {
             active_dialog_step = "S3-1";
@@ -539,7 +551,24 @@ void validate_data_entry(std::string name, json &result)
             if (flexible_data_entry) {
             } else {
                 set_train_data(result["Train type"].get<std::string>());
-                active_dialog_step = train_data_valid ? "D6" : "S3-1";
+                if (train_data_valid) {
+                    if (supervising_rbc) {
+                        supervising_rbc->train_data_ack_pending = true;
+                        supervising_rbc->train_data_ack_sent = false;
+                    }
+                    active_dialog_step = "D6";
+                    for (auto &kvp : installed_stms) {
+                        auto *stm = kvp.second;
+                        if (stm->specific_data > 0) {
+                            active_dialog = dialog_sequence::NTCData;
+                            active_dialog_step = "S1";
+                            break;
+                        }
+                    }
+                    stm_send_train_data();
+                } else {
+                    active_dialog_step = "S3-1";
+                }
             }
         }
     }
@@ -553,9 +582,12 @@ void update_dialog_step(std::string step, std::string step2)
         int nid_ntc = -1;
         if (step2 == "Level 0" || step2 == "Level 1" || step2 == "Level 2" || step2 == "Level 3") {
             lv = (Level)stoi(step2.substr(6));
-        } else if (step2 == "ASFA") {
-            lv = Level::NTC;
-            nid_ntc = 0;
+        } else for (auto &kvp : ntc_names) {
+            if (kvp.second == step2) {
+                lv = Level::NTC;
+                nid_ntc = kvp.first;
+                break;
+            }
         }
         driver_set_level({lv, nid_ntc});
     } else if (step == "setTRN") {

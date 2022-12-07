@@ -17,6 +17,7 @@
  */
 #include "../graphics/component.h"
 #include "../monitor.h"
+#include "../STM/stm_objects.h"
 #include "distance.h"
 #include <string>
 using namespace std;
@@ -30,7 +31,12 @@ extern bool showSpeeds;
 static float prev_dist = 0;
 void displayDistanceText()
 {
-    if((monitoring == CSM && Vtarget>=Vperm) || (!showSpeeds && (mode == Mode::OS || mode == Mode::SR))) {
+    if (mode == Mode::SN) {
+        if (active_ntc_window == nullptr || !(active_ntc_window->monitoring_data.Dtarget_display & 1)) {
+            a2.clear();
+            return;
+        }
+    } else if((monitoring == CSM && Vtarget>=Vperm) || (!showSpeeds && (mode == Mode::OS || mode == Mode::SR))) {
         a2.clear();
         return;
     }
@@ -46,8 +52,13 @@ void displayDistanceText()
 void displayDistance()
 {
     float dist = Dtarg;
-    if(monitoring == CSM && Vtarget>=Vperm) return;
-    if(!showSpeeds && (mode == Mode::OS || mode == Mode::SR)) return;
+    if (mode == Mode::SN)
+    {
+        if (active_ntc_window == nullptr || active_ntc_window->monitoring_data.Dtarget_display < 2)
+            return;
+    }
+    else if(monitoring == CSM && Vtarget>=Vperm) return;
+    else if(!showSpeeds && (mode == Mode::OS || mode == Mode::SR)) return;
     for(int i=0; i<11; i++)
     {
         int dist = 1000-i*100;

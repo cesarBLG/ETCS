@@ -8,11 +8,14 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             window/menu_spec.cpp window/menu_settings.cpp window/set_vbc.cpp window/track_ahead_free.cpp 
             window/driver_id.cpp window/running_number.cpp window/level_window.cpp window/sr_data.cpp 
             window/rbc_data.cpp window/input_data.cpp window/fixed_train_data.cpp window/keyboard.cpp 
-            window/train_data.cpp 
+            window/train_data.cpp  STM/stm_objects.cpp ../EVC/Packets/STM/message.cpp
             planning/planning.cpp control/control.cpp state/gps_pos.cpp 
             graphics/sdl/gfx_primitives.cpp
 )
 
+if(WIN32)
+    list(APPEND SOURCES resource.rc)
+endif()
 
 if (NOT ETCS_VENDORED)
     find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)       
@@ -36,6 +39,15 @@ target_link_libraries(dmi PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf)
 
 if(WIN32)
     target_link_libraries(dmi PRIVATE imagehlp wsock32)
+
+    add_custom_command(TARGET dmi POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL2>              
+        $<TARGET_FILE_DIR:dmi>)
+    add_custom_command(TARGET dmi POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL2_ttf>              
+        $<TARGET_FILE_DIR:dmi>)
 endif()
 if(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)

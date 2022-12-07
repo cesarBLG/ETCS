@@ -24,7 +24,7 @@
 #include "../graphics/display.h"
 #include "../graphics/rectangle.h"
 
-void planningConstruct();
+void planningConstruct(window *w);
 window planning_area(planningConstruct);
 const int posy[] = {283,250,206,182,164,150,107,64,21};
 const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
@@ -220,22 +220,22 @@ void speedLines()
         }
     }
 }
-void planningConstruct()
+void planningConstruct(window *w)
 {
-    planning_area.addToLayout(&planning_distance, new RelativeAlignment(nullptr, 334,15));
-    planning_area.addToLayout(&planning_objects, new RelativeAlignment(nullptr, 334,15, 0));
-    planning_area.addToLayout(&zoomout, new RelativeAlignment(&planning_distance, 20,8,0));
-    planning_area.addToLayout(&zoomin, new RelativeAlignment(&planning_distance, 20,292,0));
-    planning_area.addToLayout(&planning_gradient, new RelativeAlignment(&planning_distance, 115+9, 15+135, 0));
-    planning_area.addToLayout(&PASP, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
-    planning_area.addToLayout(&planning_speed, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
-    planning_area.bringFront(&zoomin);
-    planning_area.bringFront(&zoomout);
-    planning_area.bringFront(&PASP);
-    planning_area.bringFront(&planning_distance);
-    planning_area.bringFront(&planning_objects);
-    planning_area.bringFront(&planning_gradient);
-    planning_area.bringFront(&planning_speed);
+    w->addToLayout(&planning_distance, new RelativeAlignment(nullptr, 334,15));
+    w->addToLayout(&planning_objects, new RelativeAlignment(nullptr, 334,15, 0));
+    w->addToLayout(&zoomout, new RelativeAlignment(&planning_distance, 20,8,0));
+    w->addToLayout(&zoomin, new RelativeAlignment(&planning_distance, 20,292,0));
+    w->addToLayout(&planning_gradient, new RelativeAlignment(&planning_distance, 115+9, 15+135, 0));
+    w->addToLayout(&PASP, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
+    w->addToLayout(&planning_speed, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
+    w->bringFront(&zoomin);
+    w->bringFront(&zoomout);
+    w->bringFront(&PASP);
+    w->bringFront(&planning_distance);
+    w->bringFront(&planning_objects);
+    w->bringFront(&planning_gradient);
+    w->bringFront(&planning_speed);
     zoomin.showBorder = false;
     zoomout.showBorder = false;
     zoomout.touch_down = 15;

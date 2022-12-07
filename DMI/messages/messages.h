@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma once
 #include <string>
+#include "../graphics/color.h"
 using namespace std;
 /*enum DriverMessage
 {
@@ -58,12 +60,14 @@ struct Message
     bool firstGroup;
     bool shown;
     string text;
+    Color fgColor;
+    Color bgColor;
+    Message() = default;
     Message(unsigned int id, string text, int hour, int minute, 
-            bool firstGroup = false, bool ack = false, int reason = 0) : 
+            bool firstGroup = false, bool ack = false, int reason = 0, Color fgColor = White, Color bgColor = DarkBlue) : 
             Id(id), hour(hour), minute(minute), firstGroup(firstGroup), ack(ack), reason(reason),
-            shown(false), text(text)
+            shown(false), text(text), fgColor(fgColor), bgColor(bgColor)
     {
-
     }
 };
 void addMsg(Message m);

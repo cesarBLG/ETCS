@@ -19,6 +19,7 @@
 #include "../graphics/texture.h"
 #include "../graphics/color.h"
 #include "../sound/sound.h"
+#include "../STM/stm_objects.h"
 #include "gauge.h"
 #include "../monitor.h"
 #include <string>
@@ -27,7 +28,8 @@
 #include <cstdio>
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
-int maxSpeed = 400;
+int etcsDialMaxSpeed = 400;
+int maxSpeed;
 const float ang00 = -239*PI/180.0;
 const float ang0 = -234*PI/180.0;
 const float amed = -42*PI/180.0;
@@ -52,15 +54,17 @@ float speedToAngle(float speed)
 void drawNeedle()
 {
     Color needleColor = Grey;
-    Color speedColor = Black;
     if(mode == Mode::SB)
     {
         needleColor = Grey;
     }
+    else if(mode == Mode::SN)
+    {
+        if (active_ntc_window != nullptr) needleColor = active_ntc_window->monitoring_data.needle_color;
+    }
     else if(supervision == IntS)
     {
         needleColor = Red;
-        speedColor = White;
     }
     else
     {        
@@ -75,6 +79,7 @@ void drawNeedle()
             needleColor = Orange;
         }
     }
+    Color speedColor = needleColor == Red ? White : Black;
     float an = speedToAngle(Vest);
     setColor(needleColor);
     csg.drawCircle(25,cx,cy);
@@ -135,6 +140,34 @@ void drawSetSpeed()
 bool showSpeeds = false;
 void displayCSG()
 {
+    if (mode == Mode::OS || mode == Mode::SR || mode == Mode::SH)
+    {
+        csg.setPressedAction([]() {showSpeeds = !showSpeeds;});
+    }
+    else
+    {
+        csg.setPressedAction(nullptr);
+    }
+    if (mode == Mode::SN)
+    {
+        if (active_ntc_window == nullptr) return;
+        stm_monitoring_data stm = active_ntc_window->monitoring_data;
+        if (stm.Vtarget_display & 2 || stm.Vperm_display & 2 || stm.Vsbi_display & 2 || stm.Vrelease_display & 2)
+        {
+            setColor(DarkGrey);
+            csg.drawSolidArc(ang00, ang0, 128, 137, cx, cy);
+        }
+        setColor(stm.Vsbi_color);
+        if (stm.Vsbi_display) drawGauge(Vperm, Vsbi, stm.Vsbi_color, stm.Vsbi_display == 2 ? 117 : 128);
+        setColor(stm.Vtarget_color);
+        if (stm.Vtarget_display & 2) drawGauge(stm.Vperm_display && Vperm < Vtarget ? Vperm : 0, Vtarget, stm.Vtarget_color);
+        if (stm.Vtarget_display & 1) drawHook(Vtarget);
+        setColor(stm.Vperm_color);
+        if (stm.Vperm_display & 2) drawGauge(stm.Vtarget_display && Vperm >= Vtarget ? Vtarget : 0, Vperm, stm.Vperm_color);
+        if (stm.Vperm_display & 1) drawHook(Vperm);
+        if (stm.Vrelease_display & 2) drawGauge(0,Vrelease,stm.Vrelease_color,133);
+        return;
+    }
     if(mode != Mode::FS)
     {
         if((mode == Mode::OS || mode == Mode::SR) && showSpeeds)
@@ -198,9 +231,12 @@ void displayCSG()
         }
     }
 }
-static bool inited = false;
+static int initSpeed = 0;
 void displayLines()
 {
+    bool inited = initSpeed != maxSpeed;
+    initSpeed = maxSpeed;
+    if (!inited) csg.clear();
     setColor(White);
     int step = maxSpeed == 150 ? 5 : 10;
     for(int i = 0; i<=maxSpeed; i+=step)
@@ -216,11 +252,7 @@ void displayLines()
             float hx = 0;
             float hy = 12/2.0;
             TTF_Font *font = openFont(fontPath, 16);
-            if (font == nullptr)
-            {
-                inited = true;
-                return;
-            }
+            if (font == nullptr) return;
             SDL_Color white = {(Uint8)White.R, (Uint8)White.G, (Uint8)White.B};
             float width;
             float height;
@@ -243,14 +275,21 @@ void displayLines()
         }
         csg.drawRadius(cx, cy, size, -125, an);
     }
-    inited = true;
 }
 Component releaseRegion(36,36, displayVrelease);
 static float prevVrelease=0;
 bool releaseSignShown=false;
 void displayVrelease()
 {
-    if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != Mode::OS || showSpeeds)) {
+    if (mode == Mode::SN && active_ntc_window != nullptr && active_ntc_window->monitoring_data.Vrelease_display & 1) {
+        if(prevVrelease!=Vrelease || !releaseSignShown)
+        {
+            releaseSignShown = true;
+            releaseRegion.clear();
+            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, active_ntc_window->monitoring_data.Vrelease_color, CENTER, 0);
+            prevVrelease = Vrelease;
+        }
+    } else if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != Mode::OS || showSpeeds) && mode != Mode::SN) {
         if(prevVrelease!=Vrelease || !releaseSignShown)
         {
             releaseSignShown = true;

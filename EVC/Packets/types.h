@@ -114,4 +114,5 @@ struct bit_manipulator
             ++pos;
         }
     }
+    std::string to_base64();
 };

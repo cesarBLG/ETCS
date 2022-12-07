@@ -107,7 +107,7 @@ void dispAcks()
         if(levelAck == 2) num++;
         if(num<10) path+="0";
         path+=to_string(num);
-        //if (ackLevel == Level::NTC) path += "_"+to_string(ackNTC);
+        if (ackLevel == Level::NTC && (ackNTC == 0 || ackNTC == 10)) path += "_"+to_string(ackNTC);
         path+=".bmp";
         c1.addImage(path.c_str());
         if(levelAck == 2) c1.setAck([](){write_command("json",R"({"DriverSelection":"LevelAcknowledge"})");});

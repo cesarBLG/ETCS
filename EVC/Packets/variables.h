@@ -19,7 +19,7 @@
 #include <stdint.h>
 #include <limits>
 #include <set>
-#include "../Supervision/supervision.h"
+#include "../Supervision/common.h"
 #include "../Time/clock.h"
 #include "types.h"
 template<typename T>
@@ -1103,7 +1103,7 @@ struct NC_TRAIN_t : ETCS_variable
     static const uint32_t FreightPBit=0;
     static const uint32_t FreightGBit=1;
     static const uint32_t PassengerBit=2;
-    NC_TRAIN_t() : ETCS_variable(4) {}
+    NC_TRAIN_t() : ETCS_variable(15) {}
     bool is_valid() override
     {
         return rawdata<8;
@@ -1774,7 +1774,7 @@ struct V_NVSTFF_t : V_t
 struct V_NVUNFIT_t : V_t
 {
 };
-struct V_RELEASE_t : V_t
+struct V_release_t : V_t
 {
     static const uint32_t CalculateOnBoard=126;
     static const uint32_t UseNationalValue=127;
@@ -1783,10 +1783,10 @@ struct V_RELEASE_t : V_t
         return rawdata<121 || rawdata>125;
     }
 };
-struct V_RELEASEDP_t : V_RELEASE_t
+struct V_RELEASEDP_t : V_release_t
 {
 };
-struct V_RELEASEOL_t : V_RELEASE_t
+struct V_RELEASEOL_t : V_release_t
 {
 };
 struct V_STATIC_t : V_t

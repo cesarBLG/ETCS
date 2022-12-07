@@ -181,6 +181,8 @@ bool changed = false;
 void set_supervised_targets()
 {
     changed = true;
+    extern const target *indication_target;
+    indication_target = nullptr;
     supervised_targets.clear();
     if (mode != Mode::SR && mode != Mode::UN && mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) return;
     std::map<distance, double> MRSP = get_MRSP();

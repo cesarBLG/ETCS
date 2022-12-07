@@ -1,10 +1,20 @@
-#include "../graphics/button.h"
-#include "../graphics/component.h"
-#include "../graphics/color.h"
+#include "stm_objects.h"
+#include "../monitor.h"
+#include "../graphics/display.h"
+#include "../graphics/text_button.h"
 #include "../messages/messages.h"
-#include "../window/window.h"
+#include "../time_etcs.h"
+#include "../../EVC/Packets/STM/15.h"
+#include "../../EVC/Packets/STM/32.h"
+#include "../../EVC/Packets/STM/35.h"
+#include "../../EVC/Packets/STM/38.h"
+#include "../../EVC/Packets/STM/39.h"
+#include <fstream>
 std::map<int, std::vector<int>> but_pos; 
 std::map<int, std::vector<int>> ind_pos;
+ntc_window *active_ntc_window;
+std::map<int,ntc_window*> ntc_windows;
+std::map<std::string, std::vector<int>> areas;
 void setup_areas()
 {
     areas["A1"] = {0, 15, 54, 54};
@@ -43,78 +53,46 @@ void setup_areas()
     areas["G11"] = {334, 415, 63, 50};
     areas["G12"] = {397, 415, 120, 50};
     areas["G13"] = {517, 415, 63, 50};
-} 
-class ntc_window : window
+}
+ntc_window::ntc_window(int nid_stm) : window(construct_main), nid_stm(nid_stm)
 {
-    int nid_stm;
-    std::map<int, Button*> buttons;
-    std::map<int, Component*> indicators;
-    std::map<int, image_graphic*> icons;
-    std::map<int, Message> messages;
-    texture *get_icon(int num)
+    #ifdef __ANDROID__
+    extern std::string filesDir;
+    std::ifstream file(filesDir+"/stm_windows.json");
+#else
+    std::ifstream file("stm_windows.json");
+#endif
+    json j;
+    file >> j;
+    for (json &stm : j["STM"])
     {
-        if (icons.find(num) == icons.end()) {
-            icons[num] = Component::getImage("symbols/STM/"+std::to_string(nid_stm)+"/"+std::to_string(num));
-        }
-        return icons[num];
-    }
-    Color get_color(int col, bool bg)
-    {
-        switch (col) {
-            case 0:
-                return bg ? DarkBlue : Black;
-            case 1:
-                return White;
-            case 2:
-                return Red;
-            case 3:
-                return Blue;
-            case 4:
-                return Green;
-            case 5:
-                return Yellow;
-            case 5:
-                return LightRed;
-            case 5:
-                return LightGreen;
+        if (stm["nid_stm"].get<int>() == nid_stm)
+        {
+            customized = new customized_dmi(stm);
+            break;
         }
     }
-    public:
-    ntc_window() : window(construct_main)
-    {
-
+}
+void ntc_window::display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton)
+{
+    auto it = indicators.find(id);
+    if (it != indicators.end()) {
+        remove(it->second);
+        delete it->second;
+        indicators.erase(it);
     }
-    void display_button(int id, int icon, std::string text, int properties)
+    bool displayed = (properties>>9)&1;
+    if (!displayed)
+        return;
+    std::vector<int> pos;
+    if (customized != nullptr)
     {
-        bool displayed = (properties>>9)&1;
-        if (!displayed) {
-            auto it = buttons.find(id);
-            if (it != buttons.end()) {
-                delete it->second;
-                buttons.erase(it);
-            }
+        if (customized->positions.find(position) == customized->positions.end())
             return;
-        }
-        Button *b = new TextButton(text);
-        if (icon > 0)
-            b->add(get_icon(icon));
-        bool counterflash = (properties>>8)&1;
-        int flash = (properties>>6)&3;
-        b->setBackgroundColor(get_color((properties>>3)&7, true));
-        b->setForegroundColor(get_color(properties&7, false));
-        buttons[id] = b;
+        pos = customized->positions[position];
     }
-    void display_indicator(int id, int position, int icon, std::string text, int properties)
+    else
     {
-        bool displayed = (properties>>9)&1;
-        if (!displayed) {
-            auto it = indicators.find(id);
-            if (it != indicators.end()) {
-                delete it->second;
-                indicators.erase(it);
-            }
-            return;
-        }
         std::string area;
         if (position < 4)
             area = "B"+std::to_string(position+2);
@@ -134,37 +112,298 @@ class ntc_window : window
         }*/
         if (areas.find(area) == areas.end())
             return;
-        auto pos = areas[area];
-        Component *c = new Component(pos[2],pos[3]);
-        Color bg = get_color((properties>>3)&7, true);
-        Color fg = get_color(properties&7, false);
-        c->setBackgroundColor(bg);
-        c->setForegroundColor(fg);
-        if (icon > 0)
-            c->add(get_icon(icon));
+        pos = areas[area];
+    }
+    Component *c = new Component(pos[2],pos[3]);
+    Color bg = get_color((properties>>3)&7, true);
+    Color fg = get_color(properties&7, false);
+    c->setBackgroundColor(bg);
+    c->setForegroundColor(fg);
+    bool text_also;
+    if (customized != nullptr)
+    {
+        bool text_also = true;
+        if (icon > 0 && customized->icons.find(icon) != customized->icons.end())
+        {
+            text_also = customized->icons[icon].text_also;
+            c->addImage("symbols/STM/"+customized->icons[icon].file);
+        }
+        if (text_also && text.size() > 0)
+        {
+            if (customized != nullptr && customized->indicators.find(id) != customized->indicators.end())
+            {
+                auto &ind = customized->indicators[id];
+                c->addText(text, 0, 0, ind.font_size, fg, ind.align);
+            }
+            else
+            {
+                c->addText(text, 0, 0, 12, fg);
+            }
+        }
+    }
+    else
+    {
         if (text.size() > 0)
             c->addText(text, 0, 0, 12, fg);
-        bool counterflash = (properties>>8)&1;
-        int flash = (properties>>6)&3;
-        indicators[id] = c;
-        addToLayout(c, new RelativeAlignment(nullptr, pos[0], pos[1]));
     }
-    ~ntc_window()
+    bool counterflash = (properties>>8)&1;
+    int flash = (properties>>6)&3;
+    if (flash != 0)
     {
-        for (auto it : buttons) {
-            delete it.second;
-        }
-        for (auto it : indicators) {
-            delete it.second;
-        }
-        for (auto it : icons) {
-            delete it.second;
-        }
-        for (auto it : icons) {
-            delete it.second;
-        }
-        for (auto it : messages) {
-            revokeMessage(it.second.Id);
+        c->flash_style = (flash-1) | (counterflash<<1);
+        if (customized != nullptr && customized->flash_style == 1) c->flash_style |= 4;
+    }
+    indicators[id] = c;
+    addToLayout(c, new RelativeAlignment(nullptr, pos[0], pos[1]));
+}
+void ntc_window::display_text(int id, bool ack, std::string text, int properties)
+{
+    bool firstGroup = ((properties>>9) & 1) == 0;
+    int flash = (properties>>6)&3;
+    bool counter = (properties>>8) & 1;
+    Color bg = get_color((properties>>3)&7, true);
+    Color fg = get_color(properties&7, false);
+    Message m(id|0xff00, text, getHour(), getMinute(), firstGroup, ack, 0, fg, bg);
+    messages[id] = m;
+    if (active_ntc_window == this) addMsg(m);
+}
+void initialize_stm_windows()
+{
+    setup_areas();
+
+    /*std::string val = "00101011""0000001100100""01""0100000000""0010000""0000000000""0100000010""000001000000000"
+        "000""010""11""011""10""000""00""101""00""11";
+    parse_stm_message(val);*/
+}
+void parse_stm_message(const stm_message &message)
+{
+    if (!message.valid) return;
+    int nid_stm = message.NID_STM.rawdata;
+    stm_state state = stm_state::NP;
+    for (auto &pack : message.packets)
+    {
+        if (pack->NID_PACKET == 15)
+        {
+            state = (stm_state)((STMStateReport*)pack.get())->NID_STMSTATE.rawdata;
         }
     }
-};
+    if (state != stm_state::DA && state != stm_state::HS)
+    {
+        if (ntc_windows.find(nid_stm) != ntc_windows.end())
+        {
+            ntc_windows[nid_stm]->state = state;
+        }
+        return;
+    }
+    if (ntc_windows.find(nid_stm) == ntc_windows.end())
+    {
+        ntc_windows[nid_stm] = new ntc_window(nid_stm);
+        ntc_windows[nid_stm]->construct();
+    }
+    auto *window = ntc_windows[nid_stm];
+    window->last_time = get_milliseconds();
+    window->state = state;
+    for (auto &pack : message.packets)
+    {
+        if (pack->NID_PACKET == 43)
+        {
+            STMSupervisionInformation &info = *((STMSupervisionInformation*)pack.get());
+            Vperm = info.V_PERMIT.rawdata;
+            Vtarget = info.V_TARGET.rawdata*5;
+            Vrelease = info.V_RELEASE.rawdata;
+            Vsbi = info.V_INTERV.rawdata;
+            Dtarg = (int)info.D_TARGET.get_value(info.Q_SCALE);
+            window->monitoring_data = stm_monitoring_data(info);
+        }
+        else if (pack->NID_PACKET == 32)
+        {
+            STMButtonRequest &buttons = *((STMButtonRequest*)pack.get());
+            for (auto &button : buttons.elements)
+            {
+                std::string text;
+                for (int i=0; i<button.X_CAPTION.size(); i++)
+                {
+                    unsigned char c = button.X_CAPTION[i];
+                    if (button.X_CAPTION[i] < 0x80)
+                    {
+                        text += c;
+                    }
+                    else
+                    {
+                        text += 0xc2+(c>0xbf);
+                        text += (c&0x3f)+0x80;
+                    }
+                }
+                window->display_indicator(button.NID_BUTTON, button.NID_BUTPOS, button.NID_ICON, text, button.M_BUT_ATTRIB, true);
+            }
+            /*for (auto &var : r.log_entries)
+            {
+                std::cout<<var.first<<"\t"<<var.second<<"\n";
+            }*/
+        }
+        else if (pack->NID_PACKET == 35)
+        {
+            STMIconRequest &icons = *((STMIconRequest*)pack.get());
+            for (auto &icon : icons.elements)
+            {
+                std::string text;
+                for (int i=0; i<icon.X_CAPTION.size(); i++)
+                {
+                    unsigned char c = icon.X_CAPTION[i];
+                    if (icon.X_CAPTION[i] < 0x80)
+                    {
+                        text += c;
+                    }
+                    else
+                    {
+                        text += 0xc2+(c>0xbf);
+                        text += (c&0x3f)+0x80;
+                    }
+                }
+                window->display_indicator(icon.NID_ICON, icon.NID_INDPOS, icon.NID_ICON, text, icon.M_IND_ATTRIB, false);
+            }
+            /*for (auto &var : r.log_entries)
+            {
+                std::cout<<var.first<<"\t"<<var.second<<"\n";
+            }*/
+        }
+        else if (pack->NID_PACKET == 38)
+        {
+            STMTextMessage &msg = *((STMTextMessage*)pack.get());
+            std::string text;
+            for (int i=0; i<msg.X_TEXT.size(); i++)
+            {
+                unsigned char c = msg.X_TEXT[i];
+                if (msg.X_TEXT[i] < 0x80)
+                {
+                    text += c;
+                }
+                else
+                {
+                    text += 0xc2+(c>0xbf);
+                    text += (c&0x3f)+0x80;
+                }
+            }
+            window->display_text(msg.NID_XMESSAGE.rawdata, msg.Q_ACK == Q_ACK_t::AcknowledgementRequired, text, msg.M_XATTRIBUTE.rawdata);
+        }
+        else if (pack->NID_PACKET == 39)
+        {
+            STMDeleteTextMessage &del = *((STMDeleteTextMessage*)pack.get());
+            window->messages.erase(del.NID_XMESSAGE);
+            if (active_ntc_window == window) revokeMessage(del.NID_XMESSAGE.rawdata | 0xff00);
+        } 
+        else if (pack->NID_PACKET == 46)
+        {
+            if (state != stm_state::DA) continue;
+            STMSoundCommand &snds = *((STMSoundCommand*)pack.get());
+
+            for (auto &snd : snds.sounds)
+            {
+                if (snd.Q_SOUND == Q_SOUND_t::Stop)
+                {
+                    if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
+                    {
+                        stopSound(window->customized->sounds[snd.NID_SOUND]);
+                    }
+                    for (auto it = window->generated_sounds.begin(); it != window->generated_sounds.end();)
+                    {
+                        if (it->first == snd.NID_SOUND)
+                        {
+                            stopSound(it->second);
+                            delete it->second;
+                            it = window->generated_sounds.erase(it);
+                            continue;
+                        }
+                        ++it;
+                    }
+                }
+                else
+                {
+                    sdlsounddata *s;
+                    if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
+                    {
+                        s = window->customized->sounds[snd.NID_SOUND];
+                    }
+                    else
+                    {
+                        s = loadSound(snd);
+                        window->generated_sounds.push_front({snd.NID_SOUND, s});
+                    }
+                    play(s, snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
+                }
+            }
+            int count = 0;
+            for (auto it = window->generated_sounds.begin(); it != window->generated_sounds.end();)
+            {
+                count++;
+                if (count > 2)
+                {
+                    stopSound(it->second);
+                    delete it->second;
+                    it = window->generated_sounds.erase(it);
+                    continue;
+                }
+                ++it;
+            }
+        }
+    }
+}
+void update_stm_windows()
+{
+    extern int maxSpeed;
+    extern int etcsDialMaxSpeed;
+    if (default_window == nullptr) return;
+    window *prev_default_window = default_window;
+    default_window = &etcs_default_window;
+    active_ntc_window = nullptr;
+    for (auto it = ntc_windows.begin(); it != ntc_windows.end(); )
+    {
+        if (get_milliseconds() - it->second->last_time > 2000 ||
+            (it->second->state != stm_state::DA && default_window == it->second) ||
+            (it->second->state != stm_state::DA && it->second->state != stm_state::HS))
+        {
+            if (it->second == default_window)
+            {
+                active_windows.erase(default_window);
+                prev_default_window = nullptr;
+                active_ntc_window = nullptr;
+            }
+            delete it->second;
+            it = ntc_windows.erase(it);
+            continue;
+        }
+        if (it->second->state == stm_state::DA)
+            default_window = active_ntc_window = it->second;
+        ++it;
+    }
+
+    if (default_window != prev_default_window)
+    {
+        if (prev_default_window != nullptr)
+        {
+            prev_default_window->active = false;
+            active_windows.erase(prev_default_window);
+            if (prev_default_window != &etcs_default_window)
+            {
+                auto *ntc = (ntc_window*)prev_default_window;
+                for (auto &kvp : ntc->messages)
+                {
+                    revokeMessage(kvp.first);
+                }
+            }
+        }
+        if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr && active_ntc_window->customized->etcs_dial_range > 0)
+            maxSpeed = active_ntc_window->customized->etcs_dial_range;
+        else
+            maxSpeed = etcsDialMaxSpeed;
+        default_window->active = true;
+        active_windows.insert(default_window);
+        if (active_ntc_window != nullptr)
+        {
+            for (auto &kvp : active_ntc_window->messages)
+            {
+                addMsg(kvp.second);
+            }
+        }
+    }
+}

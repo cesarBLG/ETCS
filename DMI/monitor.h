@@ -1,49 +1,7 @@
 #ifndef _MONITOR_H
 #define _MONITOR_H
 #include <string>
-enum MonitoringStatus
-{
-    CSM,
-    TSM,
-    RSM,
-};
-enum SupervisionStatus
-{
-    NoS,
-    IndS,
-    OvS,
-    WaS,
-    IntS
-};
-enum struct Level 
-{
-    N0,
-    N1,
-    N2,
-    N3,
-    NTC,
-    Unknown
-};
-enum struct Mode
-{
-    FS,
-    LS,
-    OS,
-    SR,
-    SH,
-    UN,
-    PS,
-    SL,
-    SB,
-    TR,
-    PT,
-    SF,
-    IS,
-    NP,
-    NL,
-    SN,
-    RV
-};
+#include "../EVC/Supervision/common.h"
 extern Level level;
 extern int nid_ntc;
 extern bool level_valid;

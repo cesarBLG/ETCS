@@ -19,6 +19,7 @@
 #include <limits>
 #include <map>
 #include "../Packets/3.h"
+#include "../Position/distance.h"
 extern bool Q_NVDRIVER_ADHES;
 
 extern double V_NVSHUNT;

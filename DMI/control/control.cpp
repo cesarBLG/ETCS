@@ -41,15 +41,20 @@
 #include <condition_variable>
 subwindow *active = nullptr;
 std::string active_name;
+window *default_window;
 mutex draw_mtx;
 #include <iostream>
 void startWindows()
 {
-    main_window.construct();
+    etcs_default_window.construct();
     navigation_bar.construct();
     planning_area.construct();
     taf_window.construct();
-    active_windows.insert(&main_window);
+    default_window = &etcs_default_window;
+    extern int maxSpeed;
+    extern int etcsDialMaxSpeed;
+    maxSpeed = etcsDialMaxSpeed;
+    active_windows.insert(default_window);
     active_windows.insert(&navigation_bar);
     active_windows.insert(&planning_area);
     active_windows.insert(&taf_window);
@@ -62,7 +67,7 @@ void setWindow(json &j)
     std::string name = j["active"].get<std::string>();
     if (name == "default") {
         extern bool showSpeeds;
-        navigation_bar.active = main_window.active = true;
+        navigation_bar.active = default_window->active = true;
         planning_area.active = !display_taf && (mode == Mode::FS || (mode == Mode::OS && showSpeeds));
         taf_window.active = display_taf;
     } else {
@@ -196,7 +201,7 @@ void setWindow(json &j)
             w->exit_button.enabled = !j.contains("enabled") || !j["enabled"].contains("Exit") || j["enabled"]["Exit"].get<bool>();
         }
         navigation_bar.active = planning_area.active = false;
-        main_window.active = w == nullptr || !w->fullscreen;
+        default_window->active = w == nullptr || !w->fullscreen;
     }
     active_name = name;
     if (active != w) {

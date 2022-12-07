@@ -26,8 +26,9 @@
 #include "TrainToTrack/0.h"
 #include "TrainToTrack/1.h"
 #include "TrainToTrack/11.h"
-#include "../optional.h"
 #include "15.h"
+#include "../optional.h"
+#include "../Position/distance.h"
 extern bool ma_rq_reasons[5];
 extern int position_report_reasons[12];
 struct position_report_parameters

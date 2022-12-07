@@ -27,6 +27,20 @@ void Layout::add(Component *comp, ComponentAlignment *alignment)
     if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();
 }
+void Layout::remove(Component *comp)
+{
+    if(comp == nullptr) return;
+    for(auto it = elements.begin(); it != elements.end(); )
+    {
+        if (it->comp == comp)
+        {
+            delete it->alignment;
+            it = elements.erase(it);
+            continue;
+        }
+        ++it;
+    }
+}
 void Layout::removeAll()
 {
     for(int i=0; i<elements.size(); i++)
@@ -56,7 +70,7 @@ void Layout::updateLocations()
     {
         Component *c = elements[i].comp;
         ComponentAlignment *align = elements[i].alignment;
-        if(align->alignType == RELATIVE)
+        if(align->alignType == AlignType::RELATIVE_ALIGN)
         {
             RelativeAlignment *offset = (RelativeAlignment *)align;
             if(align->relative!=nullptr)
@@ -65,7 +79,7 @@ void Layout::updateLocations()
             }
             else c->setLocation(offset->x, offset->y);
         }
-        if(align->alignType == CONSECUTIVE)
+        if(align->alignType == AlignType::CONSECUTIVE_ALIGN)
         {
             ConsecutiveAlignment *offset = (ConsecutiveAlignment *)align;
             int al = offset->align;

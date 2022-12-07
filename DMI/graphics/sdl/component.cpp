@@ -90,13 +90,24 @@ void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 }
 void Component::paint()
 {
-    if(bgColor != DarkBlue) drawRectangle(0, 0, sx, sy, bgColor);
-    for(int i=0; i<graphics.size(); i++)
+    bool show = true;;
+    if (flash_style != 0)
     {
-        draw(graphics[i]);
+        bool fast = flash_style & 1;
+        bool counter = (flash_style & 2)>>1;
+        show = (fast ? (flash_state&1) : ((flash_state>>1)&1)) == (counter ? 0 : 1);
     }
-    if(display != nullptr) display();
-    if(ack && (flash_state & 2)) setBorder(Yellow);
+    if (show || !(flash_style & 4))
+    {
+        if(bgColor != DarkBlue) drawRectangle(0, 0, sx, sy, bgColor);
+        for(int i=0; i<graphics.size(); i++)
+        {
+            draw(graphics[i]);
+        }
+        if(display != nullptr) display();
+    }
+    if (show && flash_style != 0 && !(flash_style & 4)) setBorder(Yellow);
+    else if (ack && (flash_state & 2)) setBorder(Yellow);
     else if(dispBorder)
     {
         drawLine(0, 0, 0, sy - 1, Black);

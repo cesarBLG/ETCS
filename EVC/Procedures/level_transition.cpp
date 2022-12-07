@@ -136,7 +136,7 @@ void update_level_status()
 void level_transition_received(level_transition_information info)
 {
     stm_level_transition_received(info);
-    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == info.leveldata.nid_ntc)) {
+    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc != info.leveldata.nid_ntc)) {
         level_acknowledged = false;
         STM_max_speed = {};
         STM_system_speed = {};

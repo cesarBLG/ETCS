@@ -51,9 +51,9 @@ movement_authority::movement_authority(distance start, Level1_MA ma, int64_t tim
     if (ma.Q_OVERLAP) {
         overlap ov;
         ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEOL == V_RELEASE_t::CalculateOnBoard)
+        if (ma.V_RELEASEOL == V_release_t::CalculateOnBoard)
             ov.vrelease = -2;
-        else if (ma.V_RELEASEOL == V_RELEASE_t::UseNationalValue)
+        else if (ma.V_RELEASEOL == V_release_t::UseNationalValue)
             ov.vrelease = -1;
         else
             ov.vrelease = ma.V_RELEASEOL.get_value();
@@ -64,9 +64,9 @@ movement_authority::movement_authority(distance start, Level1_MA ma, int64_t tim
     if (ma.Q_DANGERPOINT) {
         danger_point d;
         d.distance = ma.D_DP.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEDP == V_RELEASE_t::CalculateOnBoard)
+        if (ma.V_RELEASEDP == V_release_t::CalculateOnBoard)
             d.vrelease = -2;
-        else if (ma.V_RELEASEDP == V_RELEASE_t::UseNationalValue)
+        else if (ma.V_RELEASEDP == V_release_t::UseNationalValue)
             d.vrelease = -1;
         else
             d.vrelease = ma.V_RELEASEDP.get_value();
@@ -97,9 +97,9 @@ movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t t
     if (ma.Q_OVERLAP) {
         overlap ov;
         ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEOL == V_RELEASE_t::CalculateOnBoard)
+        if (ma.V_RELEASEOL == V_release_t::CalculateOnBoard)
             ov.vrelease = -2;
-        else if (ma.V_RELEASEOL == V_RELEASE_t::UseNationalValue)
+        else if (ma.V_RELEASEOL == V_release_t::UseNationalValue)
             ov.vrelease = -1;
         else
             ov.vrelease = ma.V_RELEASEOL.get_value();
@@ -110,9 +110,9 @@ movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t t
     if (ma.Q_DANGERPOINT) {
         danger_point d;
         d.distance = ma.D_DP.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEDP == V_RELEASE_t::CalculateOnBoard)
+        if (ma.V_RELEASEDP == V_release_t::CalculateOnBoard)
             d.vrelease = -2;
-        else if (ma.V_RELEASEDP == V_RELEASE_t::UseNationalValue)
+        else if (ma.V_RELEASEDP == V_release_t::UseNationalValue)
             d.vrelease = -1;
         else
             d.vrelease = ma.V_RELEASEDP.get_value();

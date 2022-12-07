@@ -19,10 +19,10 @@
 #define _LAYOUT_H
 #include "component.h"
 #include <vector>
-enum AlignType
+enum struct AlignType
 {
-    CONSECUTIVE,
-    RELATIVE
+    CONSECUTIVE_ALIGN,
+    RELATIVE_ALIGN
 };
 struct ComponentAlignment
 {
@@ -36,7 +36,7 @@ struct ComponentAlignment
 struct ConsecutiveAlignment : public ComponentAlignment
 {
     int align;
-    ConsecutiveAlignment(Component *rel, int align, int layer = -1) : ComponentAlignment(CONSECUTIVE, rel, layer)
+    ConsecutiveAlignment(Component *rel, int align, int layer = -1) : ComponentAlignment(AlignType::CONSECUTIVE_ALIGN, rel, layer)
     {
         this->align = align;
     }
@@ -45,7 +45,7 @@ struct RelativeAlignment : public ComponentAlignment
 {
     float x;
     float y;
-    RelativeAlignment(Component *rel, float x, float y, int layer = -1) : ComponentAlignment(RELATIVE, rel, layer)
+    RelativeAlignment(Component *rel, float x, float y, int layer = -1) : ComponentAlignment(AlignType::RELATIVE_ALIGN, rel, layer)
     {
         this->x = x;
         this->y = y;
@@ -63,6 +63,7 @@ class Layout
     ~Layout();
     std::vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
+    void remove(Component *comp);
     void removeAll();
     void update();
     void updateLocations();

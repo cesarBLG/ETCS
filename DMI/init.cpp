@@ -183,9 +183,9 @@ int main(int argc, char** argv)
     setSupervision(NoS);
     //std::thread video(init_video);
     std::thread tcp(startSocket);
-    extern int maxSpeed;
+    extern int etcsDialMaxSpeed;
     std::ifstream file("speed.txt");
-    file>>maxSpeed;
+    file>>etcsDialMaxSpeed;
     startWindows();
     init_video();
     //manage_windows();

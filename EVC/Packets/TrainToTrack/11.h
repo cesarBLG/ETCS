@@ -19,12 +19,16 @@ struct TrainDataPacket : ETCS_packet
     std::vector<NID_CTRACTION_t> NID_CTRACTIONs;
     N_ITER_t N_ITERntc;
     std::vector<NID_NTC_t> NID_NTCs;
+    TrainDataPacket()
+    {
+        NID_PACKET.rawdata = 11;
+    }
     void copy(bit_manipulator &w) override
     {
         NID_PACKET.copy(w);
         L_PACKET.copy(w);
-        NID_PACKET.copy(w);
-        L_PACKET.copy(w);
+        NC_CDTRAIN.copy(w);
+        NC_TRAIN.copy(w);
         L_TRAIN.copy(w);
         V_MAXTRAIN.copy(w);
         M_LOADINGGAUGE.copy(w);

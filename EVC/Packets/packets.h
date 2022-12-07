@@ -38,9 +38,9 @@ struct ETCS_packet
     bool directional=false;
     virtual void copy(bit_manipulator &w) 
     {
-        std::cout<<"TODO: copy() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
         NID_PACKET.copy(w);
         L_PACKET.copy(w);
+        w.position += L_PACKET.rawdata - 21;
     }
     virtual void write_to(bit_manipulator &w)
     {

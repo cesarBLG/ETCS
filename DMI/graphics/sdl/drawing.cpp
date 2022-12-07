@@ -65,6 +65,8 @@ void init_video()
     SDL_Event touchEv;
     bool touchEvent=false;
     chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
+    void initialize_stm_windows();
+    initialize_stm_windows();
     while(running)
     {
         if(SDL_WaitEvent(&ev) != 0)
@@ -139,6 +141,8 @@ void init_video()
                 if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 50)
                 {
                     lastrender = chrono::system_clock::now();
+                    void update_stm_windows();
+                    update_stm_windows();
                     display();
                 }
             }
@@ -203,7 +207,7 @@ void setColor(Color color)
     int res = SDL_SetRenderDrawColor(sdlren, color.R,color.G,color.B,255);
     if(res<0) printf("Failed to set render color. SDL Error: %s\n", SDL_GetError());
 }
-inline int getScale(float val)
+int getScale(float val)
 {
     return round(val*scale);
 }

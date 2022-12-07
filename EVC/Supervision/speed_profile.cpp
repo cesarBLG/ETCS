@@ -26,9 +26,9 @@
 #include <map>
 #include <list>
 #include <cmath>
-static std::map<distance,double> MRSP;
-static std::set<speed_restriction> SSP;
-static std::list<TSR> TSRs;
+std::map<distance,double> MRSP;
+std::set<speed_restriction> SSP;
+std::list<TSR> TSRs;
 optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
 optional<speed_restriction> SH_speed;
@@ -38,7 +38,7 @@ optional<speed_restriction> LS_speed;
 optional<speed_restriction> override_speed;
 optional<speed_restriction> STM_system_speed;
 optional<speed_restriction> STM_max_speed;
-static std::map<distance, double> gradient;
+std::map<distance, double> gradient;
 void delete_back_info()
 {
     const distance mindist = d_minsafefront(odometer_orientation, 0)-L_TRAIN-D_keep_information; //For unlinked balise groups, change this, losing efficiency
@@ -153,7 +153,7 @@ void recalculate_MRSP()
     calculate_perturbation_location();
     set_supervised_targets();
 }
-std::map<distance,double> get_MRSP()
+std::map<distance,double> &get_MRSP()
 {
     return MRSP;
 }
@@ -181,7 +181,7 @@ void update_SSP(std::vector<SSP_element> nSSP)
     SSP.insert(rest.begin(), rest.end());
     recalculate_MRSP();
 }
-std::set<speed_restriction> get_SSP()
+std::set<speed_restriction> &get_SSP()
 {
     return SSP;
 }

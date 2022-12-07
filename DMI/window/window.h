@@ -22,11 +22,11 @@
 class window
 {
     Layout *l;
-    std::function<void()> constructfun;
+    std::function<void(window*)> constructfun;
     public:
     bool active = true;
     Component *pressedButton = nullptr;
-    window(std::function<void()> constructfun = nullptr) : constructfun(constructfun)
+    window(std::function<void(window*)> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();
     }
@@ -39,6 +39,10 @@ class window
     {
         l->add(comp, alignment);
     }
+    void remove(Component *comp)
+    {
+        l->remove(comp);
+    }
     void bringFront(Component *comp)
     {
         l->order.push_back(comp);
@@ -49,7 +53,7 @@ class window
     }
     void construct()
     {
-        if(constructfun != nullptr) constructfun();
+        if(constructfun != nullptr) constructfun(this);
     }
     void display();
     void event(int evNo, float x, float y);

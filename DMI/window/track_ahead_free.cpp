@@ -1,14 +1,12 @@
 #include "track_ahead_free.h"
 #include "../tcp/server.h"
-void build_taf();
-window taf_window(build_taf);
 bool display_taf;
 Component question_part(162, 50);
 Component answer_part(82, 50);
-void build_taf()
+void build_taf(window *w)
 {
-    taf_window.addToLayout(&question_part, new RelativeAlignment(nullptr, 334, 15+50, 0));
-    taf_window.addToLayout(&answer_part, new ConsecutiveAlignment(&question_part, RIGHT, 0));
+    w->addToLayout(&question_part, new RelativeAlignment(nullptr, 334, 15+50, 0));
+    w->addToLayout(&answer_part, new ConsecutiveAlignment(&question_part, RIGHT, 0));
     question_part.clear();
     question_part.addImage("symbols/Driver Request/DR_02.bmp");
     question_part.setBackgroundColor(DarkGrey);
@@ -17,3 +15,4 @@ void build_taf()
     answer_part.addText("Yes",0,0,12,Black);
     answer_part.setPressedAction([](){write_command("json",R"({"DriverSelection":"TrackAheadFree"})");});
 }
+window taf_window(build_taf);

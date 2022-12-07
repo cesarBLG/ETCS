@@ -33,7 +33,7 @@ void delete_gradient();
 void delete_gradient(distance from);
 void delete_TSR();
 void delete_TSR(distance from);
-std::map<distance,double> get_MRSP();
+std::map<distance,double> &get_MRSP();
 inline double dV_ebi(double vel)
 {
     return std::max(dV_ebi_min, std::min(dV_ebi_min*(dV_ebi_max - dV_ebi_min)/(V_ebi_max-V_ebi_min)*(vel-V_ebi_min), dV_ebi_max));
@@ -61,9 +61,11 @@ public:
     bool operator<(const speed_restriction r) const
     {
         if (start_distance == r.start_distance) {
-            if (speed==r.speed)
-                return get_end()<r.get_end();
-            return speed<r.speed;
+            const distance &end1 = get_end();
+            const distance &end2 = r.get_end();
+            if (end1==end2)
+                return speed<r.speed;
+            return end1<end2;
         }
         return start_distance<r.start_distance;
     }
@@ -74,7 +76,7 @@ public:
 };
 void set_train_max_speed(double vel);
 void update_SSP(std::vector<SSP_element> nSSP);
-std::set<speed_restriction> get_SSP();
+std::set<speed_restriction> &get_SSP();
 void update_gradient(std::map<distance, double> grad);
 const std::map<distance, double> &get_gradient();
 struct TSR

@@ -5,22 +5,8 @@
 #include "../Procedures/level_transition.h"
 #include "../Supervision/supervision.h"
 #include "../optional.h"
-enum struct stm_state
-{
-    NP,
-    PO,
-    CO,
-    DE,
-    CS,
-    HS,
-    DA,
-    FA
-};
-struct stm_state_order
-{
-    stm_state state;
-    bool conditional;
-};
+#include "../Packets/STM/message.h"
+#include "stm_state.h"
 struct stm_commands
 {
     bool TCO;
@@ -45,9 +31,18 @@ struct stm_object
     int nid_stm;
     stm_commands commands;
     stm_state state;
-    optional<stm_state_order> last_order;
+    optional<stm_state> last_order;
     int64_t last_order_time;
     int64_t last_national_trip;
+    int specific_data;
+    int64_t data_entry_timer;
+    enum struct data_entry_state
+    {
+        Inactive,
+        Start,
+        Driver,
+        DataSent,
+    } data_entry;
     bool national_trip;
     bool isolated;
     bool control_request_EB;
@@ -56,9 +51,9 @@ struct stm_object
     bool active()
     {
         if (last_order) {
-            if (last_order->state == stm_state::DA)
+            if (*last_order == stm_state::DA)
                 return true;
-            if (last_order->state != stm_state::CS || !last_order->conditional)
+            if (*last_order != stm_state::CCS)
                 return false;
         }
         return state == stm_state::DA;
@@ -79,8 +74,11 @@ void send_failed_msg(stm_object *stm);
 void assign_stm(int nid_ntc, bool driver);
 void setup_stm_control();
 void update_stm_control();
+void handle_stm_message(const stm_message &msg);
+void stm_send_train_data();
 stm_object *get_stm(int nid_ntc);
 std::string get_ntc_name(int nid_ntc);
 extern std::map<int, stm_object*> installed_stms;
 extern std::map<int, int> ntc_to_stm;
+extern std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
 extern bool stm_control_EB;

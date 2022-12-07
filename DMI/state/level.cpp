@@ -52,7 +52,7 @@ void displayLevel()
     if (num == 0) return;
     if(num<10) path+="0";
     path+=to_string(num);
-    //if (level == Level::NTC) path += "_" + to_string(nid_ntc);
+    if (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10)) path += "_" + to_string(nid_ntc);
     path+=".bmp";
     levelRegion.addImage(path);
 }
