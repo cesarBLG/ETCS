@@ -78,6 +78,7 @@ stm_object::stm_object()
     last_order_time = 0;
     last_national_trip = 0;
     national_trip = isolated = false;
+    data_entry = data_entry_state::Inactive;
     specific_data = -1;
     conditions["A1"] = [this] {return state == stm_state::PO;};
     conditions["E4a"] = [] {return mode == Mode::SB;};
@@ -156,6 +157,12 @@ void fill_stm_transitions()
     stm_transitions.push_back({stm_state::CS, stm_state::FA, {"A16", "B16", "C16", "D16", "H16", "N16", "O16", "P16", "A17"}});
     stm_transitions.push_back({stm_state::HS, stm_state::FA, {"A16", "B16", "C16", "D16", "H16", "N16", "O16", "P16", "A17"}});
     stm_transitions.push_back({stm_state::DA, stm_state::FA, {"A16", "B16", "C16", "E16", "F16", "H16", "N16", "O16", "P16", "Q16", "A17"}});
+    stm_transitions.push_back({stm_state::PO, stm_state::NP, {"A15"}});
+    stm_transitions.push_back({stm_state::CO, stm_state::NP, {"A15"}});
+    stm_transitions.push_back({stm_state::DE, stm_state::NP, {"A15"}});
+    stm_transitions.push_back({stm_state::CS, stm_state::NP, {"A15"}});
+    stm_transitions.push_back({stm_state::HS, stm_state::NP, {"A15"}});
+    stm_transitions.push_back({stm_state::DA, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::FA, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::FA, stm_state::PO, {"A1"}});
     stm_transitions.push_back({stm_state::DA, stm_state::CCS, {"A4b","B4b"}});
@@ -179,7 +186,6 @@ void update_ntc_transitions()
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
-                    std::cout<<"STM: "<<type<<std::endl;
                     
                     auto *msg = new stm_message();
                     msg->NID_STM.rawdata = kvp.first;
@@ -323,7 +329,9 @@ void stm_object::report_received(stm_state newstate)
         }
         if (!allowed)
             trigger_condition("B16");
-        if (newstate == stm_state::FA)
+        if (newstate == stm_state::NP)
+            trigger_condition("A15");
+        else if (newstate == stm_state::FA)
             trigger_condition("A17");
     }
 
@@ -394,7 +402,7 @@ void update_stm_control()
 {
     if (level != Level::NTC)
         nid_ntc = -1;
-    if (mode != prev_mode && (mode == Mode::NP || mode == Mode::SB))
+    if (mode != prev_mode && (mode == Mode::NP/* || mode == Mode::SB*/))
         ntc_to_stm.clear();
     prev_mode = mode;
 

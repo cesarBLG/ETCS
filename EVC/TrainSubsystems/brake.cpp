@@ -60,7 +60,6 @@ void trigger_brake_reason(int reason)
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
             if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied) {
                 brake_acknowledgeable = false;
-                i.msg->end_condition = [](text_message&m){return true;};
                 return true;
             }
             if (V_est == 0 && !brake_acknowledgeable) {
