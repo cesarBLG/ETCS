@@ -41,5 +41,5 @@ void setColor(Color color);
 TTF_Font *openFont(std::string text, float size);
 void getFontSize(TTF_Font *font, const char *str, float *width, float *height);
 void init_video();
-void repaint();
+void loop_video();
 #endif

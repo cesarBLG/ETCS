@@ -22,13 +22,14 @@
 #include <algorithm>
 #include <deque>
 #include <SDL.h>
+#include <thread>
+#include <mutex>
 #include "../drawing.h"
 #include "../display.h"
 #include "../button.h"
 #include "../flash.h"
 #include "../../sound/sound.h"
 #include "../../messages/messages.h"
-#include <mutex>
 using namespace std;
 extern mutex draw_mtx;
 SDL_Window *sdlwin;
@@ -52,7 +53,6 @@ void init_video()
     }
     startDisplay(false);
     int timer = SDL_AddTimer(250, flash, nullptr);
-    SDL_AddTimer(50, [](Uint32 interval, void *) {repaint(); return interval;}, nullptr);
     if(timer == 0)
     {
         printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());
@@ -60,38 +60,21 @@ void init_video()
         return;
     }
     start_sound();
-    SDL_Event ev;
-    int count = 0;
-    SDL_Event touchEv;
-    bool touchEvent=false;
-    chrono::system_clock::time_point lastrender = chrono::system_clock::now() - chrono::hours(1);
-    void initialize_stm_windows();
-    initialize_stm_windows();
+}
+void loop_video()
+{
     while(running)
     {
-        if(SDL_WaitEvent(&ev) != 0)
+        auto prev = std::chrono::system_clock::now();
+        SDL_Event ev;
+        while(SDL_PollEvent(&ev) != 0)
         {
-            /*if(ev.type == SDL_KEYDOWN)
-            {
-                SDL_KeyboardEvent kev = ev.key;
-                if(kev.keysym.sym == SDLK_c)
-                {
-                    printf("quit\n");
-                    running = false;
-                }
-            }*/
 			if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
             {
                 quit();
                 break;
             }
-            if(ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION /*|| ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION*/) {
-                touchEvent = true;
-                touchEv = ev;
-            }
-            if (touchEvent) {
-                SDL_Event ev2 = ev;
-                ev  = touchEv;
+            if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION /*|| ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION*/) {
 				float scrx;
 				float scry;
 				bool pressed;
@@ -132,21 +115,27 @@ void init_video()
 					if (windows[i]->active) windows[i]->event(pressed, x, y);
                     else windows[i]->event(0, -100, -100);
 				}
-				ev = ev2;
 			}
-            if(ev.type == SDL_WINDOWEVENT || ev.type == SDL_USEREVENT)
+        }
+        if (!running) break;
+        void update_stm_windows();
+        update_stm_windows();
+        display();
+
+        std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
+        int d = std::chrono::duration_cast<std::chrono::duration<int, std::milli>>(diff).count();
+        int time = 50 - d;
+        if (time < 30)
+        {
+            time = 125 - d;
+            if (time < 60)
             {
-                auto now = chrono::system_clock::now();
-                chrono::duration<double> diff = now - lastrender;
-                if(chrono::duration_cast<chrono::duration<int, milli>>(diff).count() > 50)
-                {
-                    lastrender = chrono::system_clock::now();
-                    void update_stm_windows();
-                    update_stm_windows();
-                    display();
-                }
+                time = 250 - d;
+                if (time < 100) time = 2*d;
             }
         }
+        std::cout<<d<<std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(time));
     }
     quitDisplay();
 }
@@ -179,15 +168,11 @@ void startDisplay(bool fullscreen)
 }
 void display()
 {
-    auto start = chrono::system_clock::now();
     clear();
     unique_lock<mutex> lck(draw_mtx);
     displayETCS();
-    SDL_RenderPresent(sdlren);
     lck.unlock();
-    auto end = chrono::system_clock::now();
-    chrono::duration<double> diff = end-start;
-    //printf("%f\n", diff.count());
+    SDL_RenderPresent(sdlren);
 }
 void quitDisplay()
 {
@@ -223,28 +208,19 @@ void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
     *width = w/scale;
     *height = h/scale;
 }
+std::map<std::pair<std::string, float>, TTF_Font*> fonts;
 TTF_Font *openFont(std::string text, float size)
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    text = filesDir+"/"+text;
-#endif
-    TTF_Font *f = TTF_OpenFont(text.c_str(), getScale(size)*1.4);
-    if(f == nullptr)
+    auto it = fonts.find({text,size});
+    if (it == fonts.end())
     {
-        printf("Error loading font %s. SDL Error: %s\n", text.c_str(), SDL_GetError());
-        return nullptr;
+#ifdef __ANDROID__
+        extern std::string filesDir;
+        text = filesDir+"/"+text;
+#endif
+        TTF_Font *f = TTF_OpenFont(text.c_str(), getScale(size)*1.4);
+        if(f == nullptr) printf("Error loading font %s. SDL Error: %s\n", text.c_str(), SDL_GetError());
+        it = fonts.insert({{text,size}, f}).first;
     }
-    /*float height = TTF_FontAscent(f)/scale;
-    TTF_CloseFont(f);
-    f = TTF_OpenFont(text, getScale(size)*size/height);*/
-    return f;
-}
-void repaint()
-{
-    SDL_Event ev;
-    //unique_lock<mutex> l(ev_mtx);
-    ev.type = SDL_USEREVENT;
-    int result = SDL_PushEvent(&ev);
-    if(result < 0) printf("SDL Event error: %s\n", SDL_GetError());
+    return it->second;
 }

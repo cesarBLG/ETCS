@@ -133,5 +133,4 @@ input_data::~input_data()
     if(data_comp!=nullptr) delete data_comp;
     if(label_echo!=nullptr) delete label_echo;
     if(data_echo!=nullptr) delete data_echo;
-    if (font != nullptr) TTF_CloseFont(font);
 }

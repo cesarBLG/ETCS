@@ -40,7 +40,7 @@ void dispTc(int num, Component &b)
     path+= to_string(track_conditions[num]);
     path+= ".bmp";
     if (track_conditions[num] == 100) path = "symbols/Level Crossing/LX_01.bmp";
-    b.drawImage(path.c_str());
+    //b.drawImage(path.c_str());
 }
 void dispTc1(){dispTc(0, b3);}
 void dispTc2(){dispTc(1, b4);}

@@ -21,11 +21,14 @@ TextButton::TextButton(string text, float sx, float sy, function<void()> pressed
 {
     setSize(sx, sy);
     setPressedAction(pressed);
-    enabled_text = getText(caption, 0, 0, size, fgColor);
-    disabled_text = getText(caption, 0, 0, size, DarkGrey);
 }
 void TextButton::paint()
 {
+    if (enabled_text == nullptr)
+    {
+        enabled_text = getText(caption, 0, 0, size, fgColor);
+        disabled_text = getText(caption, 0, 0, size, DarkGrey);
+    }
     Button::paint();
     if(enabled)
     {

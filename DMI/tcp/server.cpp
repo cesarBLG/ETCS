@@ -48,10 +48,6 @@ int active_channel;
 static char data[BUFF_SIZE];
 string buffer;
 static SDL_Event ev;
-void notifyDataReceived()
-{
-    //repaint();
-}
 #include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
@@ -287,12 +283,10 @@ void parseData(string str)
     setWindow(j["ActiveWindow"]);
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
     {
-        extern bool planning_unchanged;
         speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();
         if (j["IndicationMarkerDistanceM"].is_null()) imarker.start_distance = 0;
         else imarker.start_distance = j["IndicationMarkerDistanceM"].get<double>();
         if (!j["IndicationMarkerTarget"].is_null()) imarker.element = j["IndicationMarkerTarget"].get<speed_element>();
-        planning_unchanged = false;
         gradient_elements = j["GradientProfile"].get<std::vector<gradient_element>>();
         planning_elements = j["PlanningTrackConditions"].get<std::vector<planning_element>>();
         
@@ -322,8 +316,6 @@ void parseData(string str)
         }
     }
     /*if(command == "setVset") Vset = stof(value);*/
-    update();
-    notifyDataReceived();
 }
 extern bool running;
 int read(int channel)

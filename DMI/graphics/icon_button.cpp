@@ -17,25 +17,30 @@
  */
 #include "icon_button.h"
 using namespace std;
-IconButton::IconButton(string enabled_path, float sx, float sy, function<void()> pressed, string disabled_path)
+IconButton::IconButton(string enabled_path, float sx, float sy, function<void()> pressed, string disabled_path) : enabled_path(enabled_path), disabled_path(disabled_path)
 {
-    setEnabledImage(enabled_path);
-    setDisabledImage(disabled_path);
     setSize(sx, sy);
     setPressedAction(pressed);
 }
 void IconButton::setEnabledImage(string path)
 {
     if(path=="") return;
+    enabled_path = path;
     enabled_image = getImage(path);
 }
 void IconButton::setDisabledImage(string path)
 {
     if(path=="") return;
+    disabled_path = path;
     disabled_image = getImage(path);
 }
 void IconButton::paint()
 {
+    if (enabled_image == nullptr)
+    {
+        setEnabledImage(enabled_path);
+        setDisabledImage(disabled_path);
+    }
     Button::paint();
     if(enabled || disabled_image == nullptr) draw(enabled_image);
     else draw(disabled_image);

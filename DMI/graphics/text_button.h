@@ -21,8 +21,8 @@
 class TextButton : public Button
 {
     std::string caption;
-    text_graphic *enabled_text;
-    text_graphic *disabled_text;
+    text_graphic *enabled_text=nullptr;
+    text_graphic *disabled_text=nullptr;
     int size;
     public:
     void paint() override;

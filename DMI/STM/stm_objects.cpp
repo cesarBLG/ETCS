@@ -358,7 +358,7 @@ void update_stm_windows()
     active_ntc_window = nullptr;
     for (auto it = ntc_windows.begin(); it != ntc_windows.end(); )
     {
-        if (get_milliseconds() - it->second->last_time > 2000 ||
+        if (/*get_milliseconds() - it->second->last_time > 2000 ||*/
             (it->second->state != stm_state::DA && default_window == it->second) ||
             (it->second->state != stm_state::DA && it->second->state != stm_state::HS))
         {

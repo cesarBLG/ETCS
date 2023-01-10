@@ -212,6 +212,5 @@ void setWindow(json &j)
         active = w;
         if (active != nullptr)
             active_windows.insert(w);
-        repaint();
     }
 }

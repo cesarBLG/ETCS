@@ -18,8 +18,8 @@
 #include <thread>
 #include "monitor.h"
 #include "graphics/drawing.h"
-#include "control/control.h"
 #include "tcp/server.h"
+#include "control/control.h"
 bool running = true;
 void quit()
 {
@@ -181,15 +181,16 @@ int main(int argc, char** argv)
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
-    //std::thread video(init_video);
-    std::thread tcp(startSocket);
     extern int etcsDialMaxSpeed;
     std::ifstream file("speed.txt");
     file>>etcsDialMaxSpeed;
-    startWindows();
     init_video();
-    //manage_windows();
+    void startWindows();
+    startWindows();
+    void initialize_stm_windows();
+    initialize_stm_windows();
+    std::thread tcp(startSocket);
+    loop_video();
     tcp.join();
-    //video.join();
     return 0;
 }

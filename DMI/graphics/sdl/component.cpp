@@ -159,17 +159,13 @@ void Component::rotateVertex(float *vx, float *vy, int pcount, float cx, float c
         vy[i] = cy - dy * s + dx * c;
     }
 }
-void Component::draw(graphic *graph, bool destroy)
+void Component::draw(graphic *graph)
 {
     if(graph == nullptr) return;
     switch(graph->type)
     {
         case TEXTURE:{
             texture *t = (texture*)graph;
-            if(t->tex == nullptr)
-            {
-                t->load();
-            }
             if(t->tex == nullptr) return;
             drawTexture(t->tex, t->x, t->y, t->width, t->height);
             break;}
@@ -188,7 +184,6 @@ void Component::draw(graphic *graph, bool destroy)
         default:
             break;
     }
-    if(destroy) delete graph;
 }
 void Component::drawPolygon(float *x, float *y, int n)
 {
@@ -223,16 +218,17 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(SDL_Texture *tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<sdl_texture> tex, float cx, float cy, float sx, float sy)
 {
     SDL_Rect rect = SDL_Rect({getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy)});
-    SDL_RenderCopy(sdlren, tex, nullptr, &rect);
+    SDL_RenderCopy(sdlren, tex->tex, nullptr, &rect);
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
-    add(getText(text,x,y,size,col,align,aspect));
+    if(text=="") return;
+    add(getText(text, x, y, size, col, align, aspect));
 }
-text_graphic* Component::getText(string text, float x, float y, float size, Color col, int align, int aspect) 
+text_graphic* Component::getText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
     text_graphic *t = new text_graphic();
     t->text = text;
@@ -242,66 +238,62 @@ text_graphic* Component::getText(string text, float x, float y, float size, Colo
     t->color = col;
     t->alignment = align;
     t->aspect = aspect;
-    t->load_function = [this, t]{getTextGraphic(t,t->text, t->offx, t->offy, t->size, t->color, t->alignment, t->aspect);};
-    return t;
-}
-void Component::drawText(string text, float x, float y, float size, Color col, int align, int aspect)
-{
-    texture *t = new texture();
-    getTextGraphic(t, text, x, y, size, col, align, aspect);
-    draw(t,true);
-}
-void Component::getTextGraphic(texture *t, string text, float x, float y, float size, Color col, int align, int aspect)
-{
-    if(text=="") return;
-    t->tex = nullptr;
-    TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
-    if (font == nullptr) return;
-    if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
     int v = text.find('\n');
-    SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};
-    getFontSize(font, text.substr(0,v).c_str(), &t->width, &t->height);
-    float sx = t->width;
-    float sy = t->height;
+    t->tex = getTextGraphic(text, size, col, aspect);
+    float sx = t->tex == nullptr ? 0 : t->tex->width;
+    float sy = t->tex == nullptr ? 0 : t->tex->height;
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
     if (align & LEFT) x = x + sx / 2;
     else if (align & RIGHT) x = (this->sx - x) - sx / 2;
     else x = x + this->sx / 2;
-    SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
-    if(surf==nullptr) printf("Error rendering text: %s\n", text.c_str());
-    TTF_CloseFont(font);
-    SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlren, surf);
-    t->tex = tex;
     t->x = x;
     t->y = y;
-    t->width = getAntiScale(surf->w);
-    t->height = getAntiScale(surf->h);
-    SDL_FreeSurface(surf);
+    t->width = getAntiScale(sx);
+    t->height = getAntiScale(sy);
+    return t;
 }
-void Component::drawImage(string name, float cx, float cy, float sx, float sy)
+std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, Color col, int aspect)
 {
-    texture *t = new texture();
-    getImageGraphic(t, name, cx, cy, sx, sy);
-    draw(t,true);
+    if (text == "") return nullptr;
+    TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
+    if (font == nullptr) return nullptr;
+    if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
+    SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};
+    SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
+    auto *tex = new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf));
+    tex->width = surf->w;
+    tex->height = surf->h;
+    SDL_FreeSurface(surf);
+    return std::shared_ptr<sdl_texture>(tex);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
 {
-    add(getImage(path,cx,cy,sx,sy));
+    add(getImage(path, cx, cy, sx, sy));
 }
 image_graphic *Component::getImage(string path, float cx, float cy, float sx, float sy)
 {
     image_graphic *ig = new image_graphic();
     ig->path = path;
-    ig->cx = cx;
-    ig->cy = cy;
-    ig->sx = sx;
-    ig->sy = sy;
-    ig->load_function = [ig,this]{getImageGraphic(ig,ig->path,ig->cx, ig->cy, ig->sx, ig->sy);};
+    ig->tex = getImageGraphic(ig->path);
+    if(sx > 0 && sy > 0)
+    {
+        ig->width = sx;
+        ig->height = sy;
+        ig->x = cx;
+        ig->y = cy;
+    }
+    else
+    {
+        ig->width = ig->tex->width;
+        ig->height = ig->tex->height;
+        ig->x = this->sx/2;
+        ig->y = this->sy/2;
+    }
     return ig;
 }
-void Component::getImageGraphic(texture *t, string path, float cx, float cy, float sx, float sy)
+std::shared_ptr<sdl_texture> Component::getImageGraphic(string path)
 {
 #ifdef __ANDROID__
     extern std::string filesDir;
@@ -311,24 +303,15 @@ void Component::getImageGraphic(texture *t, string path, float cx, float cy, flo
     if(surf == nullptr)
     {
         printf("Error loading BMP %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
-        return;
+        return nullptr;
     }
-    if(sx > 0 && sy > 0)
-    {
-        t->width = sx;
-        t->height = sy;
-        t->x = cx;
-        t->y = cy;
-    }
-    else
-    {
-        t->width = surf->w;
-        t->height = surf->h;
-        t->x = this->sx/2;
-        t->y = this->sy/2;
-    }
-    t->tex = SDL_CreateTextureFromSurface(sdlren, surf);
+    SDL_Texture *t = SDL_CreateTextureFromSurface(sdlren, surf);
+    if (t == nullptr) return nullptr;
+    sdl_texture *tex = new sdl_texture(t);
+    tex->width = surf->w;
+    tex->height = surf->h;
     SDL_FreeSurface(surf);
+    return std::shared_ptr<sdl_texture>(tex);
 }
 void Component::setBorder(Color c)
 {

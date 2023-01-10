@@ -85,8 +85,6 @@ void drawNeedle()
     csg.drawCircle(25,cx,cy);
     float px[] = {-4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5};
     float py[] = {-15,-15,-82,-90,-105,-105,-90,-82};
-    short psx[8];
-    short psy[8];
     csg.rotateVertex(px, py, 8, cx, cy, an);
     csg.drawPolygon(px, py, 8);
 
@@ -96,7 +94,7 @@ void drawNeedle()
         {
             if(spd_nums[i]!=nullptr) delete spd_nums[i];
             spd_nums[i] = csg.getText(to_string(i), 0, 0, 18, speedColor, RIGHT);
-            spd_nums[i]->load();
+            //spd_nums[i]->load();
         }
     }
     int spd = Vest;
@@ -264,13 +262,13 @@ void displayLines()
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
             float val = size + adjust;
             SDL_Surface *surf = TTF_RenderText_Blended(font, str, white);
-            TTF_CloseFont(font);
+            //TTF_CloseFont(font);
             texture *t = new texture();
             t->x = cx-val*cosf(an);
             t->y = cy-val*sinf(an);
             t->width = width;
             t->height = height;
-            t->tex = SDL_CreateTextureFromSurface(sdlren, surf);
+            t->tex = std::shared_ptr<sdl_texture>(new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf)));
             csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);
@@ -315,7 +313,7 @@ void displaya1()
 {
     if(mode == Mode::LS)
     {
-        a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
+        //a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
         //a1.addText("120", 12, 0, 0, White);
     }
     if((mode == Mode::FS || ((mode == Mode::OS || mode == Mode::SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)

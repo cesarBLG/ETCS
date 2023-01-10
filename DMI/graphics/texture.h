@@ -20,23 +20,15 @@
 #include "graphic.h"
 #include <SDL.h>
 #include <functional>
-#include <cstdio>
-class texture : public graphic
+#include <memory>
+class sdl_texture
 {
     public:
-    SDL_Texture *tex = nullptr;
-    float width;
-    float height;
-    float x;
-    float y;
-    std::function<void()> load_function;
-    virtual void load()
-    {
-        if(load_function!=nullptr) load_function();
-    }
-    texture() : graphic(TEXTURE){};
-    texture(SDL_Texture *tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
-    ~texture()
+    SDL_Texture *tex;
+    int width;
+    int height;
+    sdl_texture(SDL_Texture *tex) : tex(tex) {}
+    ~sdl_texture()
     {
         if(tex!=nullptr)
         {
@@ -44,5 +36,16 @@ class texture : public graphic
             tex = nullptr;
         }
     }
+};
+class texture : public graphic
+{
+    public:
+    std::shared_ptr<sdl_texture> tex;
+    float width;
+    float height;
+    float x;
+    float y;
+    texture() : graphic(TEXTURE){};
+    texture(std::shared_ptr<sdl_texture> tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
 };
 #endif

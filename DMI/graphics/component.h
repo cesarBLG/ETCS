@@ -90,7 +90,7 @@ class Component
     virtual void paint();
     void drawArc(float ang0, float ang1, float r, float cx, float cy);
     void rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle);
-    void draw(graphic *g, bool destroy = false);
+    void draw(graphic *g);
     void drawLine(float x1, float y1, float x2, float y2);
     void drawLine(float x1, float y1, float x2, float y2, Color c);
     void drawPolygon(float *x, float *y, int n);
@@ -99,16 +99,14 @@ class Component
     void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
     void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
     void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
-    void drawTexture(SDL_Texture *tex, float cx, float cy, float sx, float sy);
-    void add(graphic *g) { graphics.push_back(g); }
-    void drawText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    void drawTexture(std::shared_ptr<sdl_texture> tex, float cx, float cy, float sx, float sy);
+    void add(graphic* g) { graphics.push_back(g); }
     void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
     text_graphic *getText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-    void getTextGraphic(texture *t, std::string text, float x, float y, float size, Color col, int align, int aspect);
-    void drawImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    static std::shared_ptr<sdl_texture> getTextGraphic(std::string text, float size, Color col, int aspect);
     void addImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
     image_graphic *getImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
-    void getImageGraphic(texture *t, std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
+    static std::shared_ptr<sdl_texture> getImageGraphic(std::string path);
     void setBackgroundColor(Color c);
     void setForegroundColor(Color c);
     std::string text;

@@ -35,7 +35,6 @@ Component planning_objects(246,300, displayObjects);
 Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
-bool planning_unchanged= false;
 extern bool showSpeeds;
 void displayScaleUp();
 void displayScaleDown();
@@ -46,7 +45,6 @@ void zoominp()
     {
         planning_scale/=2;
         speedLines();
-        planning_unchanged = false;
     }
 }
 void zoomoutp()
@@ -55,7 +53,6 @@ void zoomoutp()
     {
         planning_scale*=2;
         speedLines();
-        planning_unchanged = false;
     }
 }
 IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
@@ -70,7 +67,7 @@ void displayPlanning()
         else planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
     }
 }
-std::map<int,texture*> object_textures;
+std::map<int,std::shared_ptr<sdl_texture>> object_textures;
 void displayObjects()
 {
     if (mode == Mode::OS && !showSpeeds) return;
@@ -79,17 +76,26 @@ void displayObjects()
         planning_element p = planning_elements[i];
         if(p.distance>divs[8]*planning_scale || p.distance<0 || (i>2 && getPlanningHeight(planning_elements[i-3].distance)-getPlanningHeight(p.distance) < 20)) continue;
         if (object_textures.find(p.condition) == object_textures.end()) {
-            texture *t = new texture();
             string name = string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + to_string(p.condition)+".bmp";
-            planning_distance.getImageGraphic(t, name, 0, 0, 20, 20);
-            object_textures[p.condition] = t;
+            object_textures[p.condition] = Component::getImageGraphic(name);
         }
-        planning_distance.drawTexture(object_textures[p.condition]->tex,object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
+        planning_distance.drawTexture(object_textures[p.condition],object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
     }
 }
 vector<gradient_element> gradient_elements;
+/*std::shared_ptr<sdl_texture> plus_white;
+std::shared_ptr<sdl_texture> plus_black;
+std::shared_ptr<sdl_texture> minus_white;
+std::shared_ptr<sdl_texture> minus_black;*/
 void displayGradient()
 {
+    /*if (plus_white == nullptr)
+    {
+        plus_white = Component::getTextGraphic("+", 10, White, 0);
+        plus_black = Component::getTextGraphic("+", 10, Black, 0);
+        minus_white = Component::getTextGraphic("-", 10, White, 0);
+        minus_black = Component::getTextGraphic("-", 10, Black, 0);
+    }*/
     if (mode == Mode::OS && !showSpeeds) return;
     for(int i=0; i+1<gradient_elements.size(); i++)
     {
@@ -106,13 +112,13 @@ void displayGradient()
         planning_gradient.drawLine(0, maxp-1, 17, maxp-1, Black);
         if(size>44)
         {
-            planning_gradient.drawText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val>=0 ? Black : White);
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val>=0 ? Black : White);
+            planning_gradient.draw(planning_gradient.getText(to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White));
+            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val>=0 ? Black : White));
+            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val>=0 ? Black : White));
         }
         else if(size>14)
         {
-            planning_gradient.drawText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White);
+            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White));
         }
     }
 }
@@ -170,11 +176,18 @@ void displayPASP()
     }
     if(imarker.start_distance>0 && imarker.start_distance <= divs[8]*planning_scale) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
 }
+std::shared_ptr<sdl_texture> pl21;
+std::shared_ptr<sdl_texture> pl22;
+std::shared_ptr<sdl_texture> pl23;
+//std::map<int, std::shared_ptr<sdl_texture>> plspeeds;
 void displaySpeed()
 {
-    if(planning_unchanged) return;
-    planning_unchanged = true;
-    planning_speed.clear();
+    if (pl21 == nullptr)
+    {
+        pl21 = Component::getImageGraphic("symbols/Planning/PL_21.bmp");
+        pl22 = Component::getImageGraphic("symbols/Planning/PL_22.bmp");
+        pl23 = Component::getImageGraphic("symbols/Planning/PL_23.bmp");
+    }
     if (mode == Mode::OS && !showSpeeds) return;
     int ld = 0;
     for(int i=1; i<speed_elements.size(); i++)
@@ -198,13 +211,13 @@ void displaySpeed()
         float a = getPlanningHeight(cur.distance)-15;
         if(im || prev.speed>cur.speed || cur.speed == 0)
         {
-            planning_speed.addImage(im ? "symbols/Planning/PL_23.bmp" : "symbols/Planning/PL_22.bmp", 14, a+7, 20, 20);
-            planning_speed.addText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT);
+            planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7, 20, 20);
+            planning_speed.draw(planning_speed.getText(to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT));
         }
         else if (prev.speed != cur.speed)
         {
-            planning_speed.addImage("symbols/Planning/PL_21.bmp", 14, a-7, 20, 20);
-            planning_speed.addText(to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT);
+            planning_speed.drawTexture(pl21, 14, a-7, 20, 20);
+            planning_speed.draw(planning_speed.getText(to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT));
         }
         if (cur.speed == 0) return;
     }
