@@ -91,5 +91,6 @@ void log_message(std::shared_ptr<ETCS_message> msg, distance &dist, int64_t time
     std::cout<<str;
     std::unique_lock<std::mutex> lck(mtx);
     pending_logs.push_back(str);
+    lck.unlock();
     cv.notify_all();
 }

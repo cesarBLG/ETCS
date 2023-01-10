@@ -41,13 +41,13 @@ void initialize_asfa()
 {
     std::unique_lock<mutex> lck(iface_mtx);
     Parameter *p;
-    p = new Parameter("asfa::akt");
+    p = new Parameter("asfa::akt::etcs");
     p->GetValue = []() {
         return AKT ? "1" : "0";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("asfa::con");
+    p = new Parameter("asfa::con::etcs");
     p->GetValue = []() {
         return CON ? "1" : "0";
     };
@@ -96,7 +96,7 @@ void update_asfa()
         active = true;
         msg = true;
     }
-    if (!connected && (level == Level::N0 || (level == Level::NTC && nid_ntc == 0))) {
+    if (!connected && (level == Level::N0 || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10)))) {
         CON = false;
         AKT = true;
         if (!brake_commanded) {
@@ -116,7 +116,7 @@ void update_asfa()
             akt_delay = get_milliseconds();
             msg = true;
         }
-    } else if (level == Level::N0 || (level == Level::NTC && nid_ntc == 0)) {
+    } else if (level == Level::N0 || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();
@@ -126,12 +126,8 @@ void update_asfa()
             AKT = false;
     } else {
         if (CON) {
-            if (!AKT)
-                con_delay = get_milliseconds();
-            if (get_milliseconds()-con_delay > 500) {
-                CON = false;
-                msg = true;
-            }
+            CON = false;
+            msg = true;
         }
         AKT = true;
     }

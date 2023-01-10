@@ -287,7 +287,7 @@ void start_or_iface()
     ZeroMemory( &si, sizeof(si) );
     si.cb = sizeof(si);
     ZeroMemory( &pi, sizeof(pi) );
-    CreateProcess("server.exe", NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+    CreateProcess("server.exe", NULL, NULL, NULL, FALSE, DETACHED_PROCESS, NULL, NULL, &si, &pi);
     Sleep(1000);
 #endif
     void init_io();

@@ -79,7 +79,7 @@ void start_dmi()
         return;
     }
 #endif
-    sleep(1);
+    sleep(2);
 #else
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
