@@ -79,6 +79,8 @@ class validation_window : public subwindow
         }
         confirmation->data_comp->setPressedAction([this]
         {
+            confirmation->setAccepted(true);
+            confirmation->validate();
             sendInformation();
         });
         setLayout();
