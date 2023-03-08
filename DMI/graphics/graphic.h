@@ -31,9 +31,6 @@ class graphic
     public:
     graphic_type type;
     graphic(graphic_type type) : type(type){}
-    virtual ~graphic()
-    {
-        
-    }
+    virtual ~graphic() = default;
 };
 #endif

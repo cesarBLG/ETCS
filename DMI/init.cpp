@@ -184,12 +184,13 @@ int main(int argc, char** argv)
     extern int etcsDialMaxSpeed;
     std::ifstream file("speed.txt");
     file>>etcsDialMaxSpeed;
+    startSocket();
     init_video();
     void startWindows();
     startWindows();
     void initialize_stm_windows();
     initialize_stm_windows();
-    std::thread tcp(startSocket);
+    std::thread tcp(loopSocket);
     loop_video();
     tcp.join();
     return 0;

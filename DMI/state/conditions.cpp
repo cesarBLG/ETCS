@@ -17,42 +17,48 @@
  */
 #include "../graphics/component.h"
 #include <string>
+#include <set>
 #include "../monitor.h"
 using namespace std;
 extern Component csg;
 int track_conditions[] = {0,0,0};
-void dispTc1();
-void dispTc2();
-void dispTc3();
-Component b3(36, 36, dispTc1);
-Component b4(36, 36, dispTc2);
-Component b5(36, 36, dispTc3);
-void dispTc(int num, Component &b)
+Component b3(36, 36);
+Component b4(36, 36);
+Component b5(36, 36);
+void updateTc(std::set<int> &syms)
 {
-    /*if(num == 1 && level == NTC)
+    Component* conds[] = {&b3,&b4,&b5};
+    std::set<int> asig;
+    for (int i=0; i<3; i++) 
     {
-        b.setText(to_string((int)Vtarget).c_str(), 15, Red);
-        return;
-    }*/
-    if(track_conditions[num]==0) return;
-    string path = "symbols/Track Conditions/TC_";
-    if(track_conditions[num]<10) path+= "0";
-    path+= to_string(track_conditions[num]);
-    path+= ".bmp";
-    if (track_conditions[num] == 100) path = "symbols/Level Crossing/LX_01.bmp";
-    //b.drawImage(path.c_str());
-}
-void dispTc1(){dispTc(0, b3);}
-void dispTc2(){dispTc(1, b4);}
-void dispTc3(){dispTc(2, b5);}
-void addTc(int newtc)
-{
-    for(int i=0; i<3; i++)
-    {
-        if(track_conditions[i]==0)
+        if (track_conditions[i] != 0)
         {
-            track_conditions[i] = newtc;
-            break;
+            if (syms.find(track_conditions[i]) == syms.end())
+            {
+                track_conditions[i] = 0;
+                conds[i]->clear();
+            }
+            else asig.insert(track_conditions[i]);
+        }
+    }
+    for (int s : syms)
+    {
+        if (asig.size()>=3) break;
+        if (asig.find(s) != asig.end()) continue;
+        for (int i=0; i<3; i++)
+        {
+            if (track_conditions[i] == 0)
+            {
+                track_conditions[i] = s;
+                string path = "symbols/Track Conditions/TC_";
+                if(s<10) path+= "0";
+                path+= to_string(s);
+                path+= ".bmp";
+                if (s == 100) path = "symbols/Level Crossing/LX_01.bmp";
+                conds[i]->addImage(path);
+                asig.insert(s);
+                break;
+            }
         }
     }
 }

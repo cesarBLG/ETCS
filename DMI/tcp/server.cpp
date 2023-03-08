@@ -292,28 +292,9 @@ void parseData(string str)
         
     }
     {
+        void updateTc(std::set<int> &syms);
         std::set<int> syms = j["ActiveTrackConditions"].get<std::set<int>>();
-        extern int track_conditions[];
-        std::set<int> asig;
-        for (int i=0; i<3; i++) 
-        {
-            if (syms.find(track_conditions[i]) == syms.end()) track_conditions[i] = 0;
-            if (track_conditions[i] != 0) asig.insert(track_conditions[i]);
-        }
-        for (int s : syms)
-        {
-            if (asig.size()>=3) break;
-            if (asig.find(s) != asig.end()) continue;
-            for (int i=0; i<3; i++)
-            {
-                if (track_conditions[i] == 0)
-                {
-                    track_conditions[i] = s;
-                    asig.insert(s);
-                    break;
-                }
-            }
-        }
+        updateTc(syms);
     }
     /*if(command == "setVset") Vset = stof(value);*/
 }
@@ -394,6 +375,9 @@ void startSocket()
     active_channel = -1;
     for (int i=0; i<3; i++)
         clients[i] = -1;
+}
+void loopSocket()
+{
     listenChannels();
     while(running)
     {

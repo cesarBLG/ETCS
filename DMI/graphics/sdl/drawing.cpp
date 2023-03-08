@@ -118,8 +118,13 @@ void loop_video()
 			}
         }
         if (!running) break;
+        {
+
+        }
         void update_stm_windows();
+        unique_lock<mutex> lck(draw_mtx);
         update_stm_windows();
+        lck.unlock();
         display();
 
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
@@ -134,7 +139,6 @@ void loop_video()
                 if (time < 100) time = 2*d;
             }
         }
-        std::cout<<d<<std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(time));
     }
     quitDisplay();

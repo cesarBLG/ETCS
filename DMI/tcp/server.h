@@ -19,6 +19,7 @@
 #define _SERVER_H
 #include <string>
 void startSocket();
+void loopSocket();
 void closeSocket();
 void write_command(std::string command, std::string value);
 #endif
