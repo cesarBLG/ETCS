@@ -22,14 +22,14 @@
 #include "../monitor.h"
 #include "running_number.h"
 #include "../tcp/server.h"
-train_data_window::train_data_window() : input_window("Train Data", 6, true), SelectType("Select\ntype",60,50)
+train_data_window::train_data_window() : input_window(gettext("Train Data"), 6, true), SelectType(gettext("Select\ntype"),60,50)
 {
-    inputs[0] = new input_data("Length (m)");
-    inputs[1] = new input_data("Brake percentage");
-    inputs[2] = new input_data("Max speed (km/h)");
-    inputs[3] = new input_data("Loading gauge");
-    inputs[4] = new input_data("Train category");
-    inputs[5] = new input_data("Axle load category");
+    inputs[0] = new input_data(gettext("Length (m)"));
+    inputs[1] = new input_data(gettext("Brake percentage"));
+    inputs[2] = new input_data(gettext("Max speed (km/h)"));
+    inputs[3] = new input_data(gettext("Loading gauge"));
+    inputs[4] = new input_data(gettext("Train category"));
+    inputs[5] = new input_data(gettext("Axle load category"));
     for(int i=0; i<3; i++)
     {
         inputs[i]->keys = getNumericKeyboard(inputs[i]);
@@ -49,7 +49,7 @@ void train_data_window::setLayout()
     input_window::setLayout();
     addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
 }
-train_data_validation_window::train_data_validation_window(std::vector<input_data*> data) : validation_window("Validate train data", data)
+train_data_validation_window::train_data_validation_window(std::vector<input_data*> data) : validation_window(gettext("Validate train data"), data)
 {
 
 }

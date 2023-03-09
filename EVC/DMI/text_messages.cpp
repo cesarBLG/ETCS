@@ -18,6 +18,7 @@
 #include "text_message.h"
 #include "../Time/clock.h"
 #include "../Supervision/supervision.h"
+#include <locale.h>
 unsigned char idcount=0;
 text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
     : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)

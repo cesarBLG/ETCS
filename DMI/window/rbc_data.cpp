@@ -18,11 +18,11 @@
 #include "rbc_data.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-rbc_data_window::rbc_data_window(uint32_t id, uint64_t number) : input_window("RBC data", 2, true)
+rbc_data_window::rbc_data_window(uint32_t id, uint64_t number) : input_window(gettext("RBC data"), 2, true)
 {
-    inputs[0] = new input_data("RBC ID", false);
+    inputs[0] = new input_data(gettext("RBC ID"), false);
     inputs[0]->keys = getNumericKeyboard(inputs[0]);
-    inputs[1] = new input_data("RBC phone number", false);
+    inputs[1] = new input_data(gettext("RBC phone number"), false);
     inputs[1]->keys = getNumericKeyboard(inputs[1]);
     if (id != 0)
     {

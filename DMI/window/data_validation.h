@@ -25,13 +25,13 @@ class validation_input : public input_data
     public:
     validation_input()
     {
-        data = "Yes";
+        data = gettext("Yes");
         accepted = true;
         keys = getYesNoKeyboard(this);
     }
     void validate() override
     {
-        if (data != "Yes" && data!="No") return;
+        if (data != gettext("Yes") && data!= gettext("No")) return;
         valid = true;
     }
 };
@@ -85,7 +85,7 @@ class validation_window : public subwindow
         });
         setLayout();
         confirmation->setSelected(true);
-        confirmation->setData("Yes");
+        confirmation->setData(gettext("Yes"));
         confirmation->setAccepted(true);
         for (int i=0; i<data.size(); i++)
         {

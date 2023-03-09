@@ -164,6 +164,7 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 }
 #endif
 #include <fstream>
+#include "graphics/text_button.h"
 int main(int argc, char** argv)
 {
 #ifdef __ANDROID__

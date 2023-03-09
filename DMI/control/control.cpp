@@ -35,6 +35,7 @@
 #include "../window/menu_settings.h"
 #include "../window/set_vbc.h"
 #include "../window/track_ahead_free.h"
+#include "../window/language_window.h"
 #include <thread>
 #include <functional>
 #include <mutex>
@@ -164,6 +165,11 @@ void setWindow(json &j)
             if (same) t = (sr_data_window*)active;
             else t = new sr_data_window();
             w = t;
+        } else if (name == "language_window") {
+            language_window *l;
+            if (same) l = (language_window*)active;
+            else l = new language_window(j["lang"].get<std::string>(), j["Languages"].get<std::vector<std::string>>());
+            w = l;
         } else if (name == "data_view_window") {
             data_view_window *t;
             if (same)

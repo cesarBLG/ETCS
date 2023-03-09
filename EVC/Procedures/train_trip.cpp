@@ -30,41 +30,41 @@ void train_trip(int reason)
         case 16:
         case 18:
         case 43:
-            str = "Unauthorized passing of EoA/LoA";
+            str = gettext("Unauthorized passing of EoA/LoA");
             break;
         case 17:
         case 66:
-            str = "Balise read error";
+            str = gettext("Balise read error");
             break;
         case 39:
         case 67:
-            str = "No MA received at level transition";
+            str = gettext("No MA received at level transition");
             break;
         case 41:
-            str = "Communication error";
+            str = gettext("Communication error");
             break;
         case 35:
-            str = "SH refused";
+            str = gettext("SH refused");
             break;
         case 65:
-            str = "Trackside not compatible";
+            str = gettext("Trackside not compatible");
             break;
         case 42:
-            str = "SR distance exceeded";
+            str = gettext("SR distance exceeded");
             break;
         case 49:
         case 52:
-            str = "SH stop order";
+            str = gettext("SH stop order");
             break;
         case 36:
         case 54:
-            str = "SR stop order";
+            str = gettext("SR stop order");
             break;
         case 20:
-            str = "Emergency stop";
+            str = gettext("Emergency stop");
             break;
         case 69:
-            str = "No track description";
+            str = gettext("No track description");
             break;
         case 38: {
             std::string name = "NTC";
@@ -75,7 +75,7 @@ void train_trip(int reason)
                         name = it->second;
                 }
             }
-            str = name+" brake demand";
+            str = name+gettext(" brake demand");
             break;
         }
         default:

@@ -17,6 +17,7 @@
  */
 #ifndef _WINDOW_H
 #define _WINDOW_H
+#include "../language/language.h"
 #include "../graphics/layout.h"
 #include "../control/control.h"
 class window

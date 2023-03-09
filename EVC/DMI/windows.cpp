@@ -180,7 +180,7 @@ void update_dmi_windows()
         } else if (active_dialog_step == "A32") {
             active_dialog_step = "S10";
         } else if (active_dialog_step == "A40") {
-            add_message(text_message("Train is rejected", true, false, 0, [](text_message &t){return any_button_pressed;})); // TODO
+            add_message(text_message(gettext("Train is rejected"), true, false, 0, [](text_message &t){return any_button_pressed;})); // TODO
             active_dialog_step = "S10";
         } else if (active_dialog_step == "D2") {
             if (level_valid)
@@ -329,7 +329,7 @@ void update_dmi_windows()
             if (!supervising_rbc || supervising_rbc->status != session_status::Established) {
                 active_dialog = dialog_sequence::Main;
                 active_dialog_step = "S1";
-                add_message(text_message("Shunting request failed", true, false, 0, [](text_message &t){return any_button_pressed;}));
+                add_message(text_message(gettext("Shunting request failed"), true, false, 0, [](text_message &t){return any_button_pressed;}));
             }
         }
     } else if (active_dialog == dialog_sequence::DataView) {
@@ -346,7 +346,9 @@ void update_dmi_windows()
         if (active_dialog_step == "S1") {
             active_window_dmi = R"({"active":"menu_settings"})"_json;
         } else if (active_dialog_step == "S2") {
-
+            active_window_dmi = R"({"active":"language_window"})"_json;
+            active_window_dmi["lang"] = language;
+            active_window_dmi["Languages"] = {"en", "es", "fr", "it", "pt", "de", "nl"};
         } else if (active_dialog_step == "S3") {
             
         } else if (active_dialog_step == "S4") {
@@ -544,7 +546,7 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "S1";
         }
     } else if (name == "Validate train data") {
-        if (result["Validated"] != "Yes") {
+        if (!result["Validated"]) {
             active_dialog_step = "S3-1";
         } else {
             active_dialog_step = "D6";
@@ -611,6 +613,8 @@ void update_dialog_step(std::string step, std::string step2)
                 supervising_rbc->open(N_tries_radio);
             active_dialog_step = "S8";
         }
+    } else if (step == "setLanguage") {
+        set_language(step2);
     }
     if (active_dialog == dialog_sequence::None) {
         if (step2 == "main") {
@@ -731,7 +735,7 @@ void update_dialog_step(std::string step, std::string step2)
         }
     } else if (active_dialog == dialog_sequence::Shunting) {
         if (step == "SH refused") {
-            add_message(text_message("SH refused", true, false, 0, [](text_message &t){return any_button_pressed;}));
+            add_message(text_message(gettext("SH refused"), true, false, 0, [](text_message &t){return any_button_pressed;}));
             active_dialog = dialog_sequence::Main;
             active_dialog_step = "S1";
         } else if (step == "SH authorised") {
@@ -758,15 +762,15 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog_step = "S1";
         }
     } else if (active_dialog == dialog_sequence::Settings) {
-        /*if (step == "Language")
+        if (step == "Language")
             active_dialog_step = "S2";
-        else if (step == "Volume")
+        /*else if (step == "Volume")
             active_dialog_step = "S3";
         else if (step == "Brightness")
             active_dialog_step = "S4";
         else if (step == "SystemVersion")
-            active_dialog_step = "S5";
-        else */if (step == "SetVBC")
+            active_dialog_step = "S5";*/
+        else if (step == "SetVBC")
             active_dialog_step = "S6-1";
         else if (step == "RemoveVBC")
             active_dialog_step = "S7-1";
@@ -777,6 +781,8 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "eraseVBC") {
             uint32_t num = stoi(step2);
             remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
+            active_dialog_step = "S1";
+        } else if (step == "setLanguage") {
             active_dialog_step = "S1";
         }
     }

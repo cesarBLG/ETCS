@@ -19,10 +19,10 @@
 #include "keyboard.h"
 #include "../tcp/server.h"
 #include "../monitor.h"
-sr_data_window::sr_data_window() : input_window("SR speed/distance", 2, true)
+sr_data_window::sr_data_window() : input_window(gettext("SR speed/distance"), 2, true)
 {
-    inputs[0] = new input_data("SR speed (km/h)");
-    inputs[1] = new input_data("SR distance (m)");
+    inputs[0] = new input_data(gettext("SR speed (km/h)"));
+    inputs[1] = new input_data(gettext("SR distance (m)"));
     for(int i=0; i<2; i++)
     {
         inputs[i]->keys = getNumericKeyboard(inputs[i]);

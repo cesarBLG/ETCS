@@ -19,7 +19,7 @@
 #include "level_window.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-level_window::level_window(std::string level, std::vector<std::string> levels) : input_window("Level", 1, false)
+level_window::level_window(std::string level, std::vector<std::string> levels) : input_window(gettext("Level"), 1, false)
 {
     inputs[0] = new level_input(level, levels);
     create();
@@ -34,7 +34,7 @@ void level_window::sendInformation()
 {
     write_command("setLevel",inputs[0]->getData());
 }
-level_input::level_input(std::string level, std::vector<std::string> levels, bool echo) : input_data(echo ? "Level" : "")
+level_input::level_input(std::string level, std::vector<std::string> levels, bool echo) : input_data(echo ? gettext("Level") : "")
 {
     setData(level);
     keys = getSingleChoiceKeyboard(levels, this);
@@ -45,6 +45,6 @@ void level_input::validate()
     valid = true;
 }
 
-level_validation_window::level_validation_window(std::string level) : validation_window("Level validation", {new level_input(level, {""}, true)})
+level_validation_window::level_validation_window(std::string level) : validation_window(gettext("Level validation"), {new level_input(level, {""}, true)})
 {
 }

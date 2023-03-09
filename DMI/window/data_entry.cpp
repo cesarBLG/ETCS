@@ -21,7 +21,7 @@
 #include "../graphics/display.h"
 #include "data_validation.h"
 #include "../tcp/server.h"
-input_window::input_window(string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes("Yes",330,40), 
+input_window::input_window(string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(gettext("Yes"),330,40), 
     nfields(nfields)
 {
     for(int i=0; i<12; i++)
@@ -51,7 +51,7 @@ input_window::input_window(string title, int nfields, bool full) : subwindow(tit
         button_yes.showBorder = false;
         button_yes.touch_up = 50;
     }
-    confirmation_label.addText(title + " entry complete?", 0, 0, 12, White);
+    confirmation_label.addText(title + gettext(" entry complete?"), 0, 0, 12, White);
 }
 void input_window::create()
 {

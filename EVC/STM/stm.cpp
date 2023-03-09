@@ -346,7 +346,7 @@ void stm_object::report_received(stm_state newstate)
 }
 void send_failed_msg(stm_object *stm)
 {
-    text_message msg(get_ntc_name(stm->nid_stm) + " failed", true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
+    text_message msg(get_ntc_name(stm->nid_stm) + gettext(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
     add_message(msg);
 }
 bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);
@@ -419,7 +419,7 @@ void update_stm_control()
         if (mode == Mode::SN || (mode == Mode::NL && get_milliseconds()-last_mode_change > 5000)) {
             if (!ntc_unavailable_msg) {
                 ntc_unavailable_msg = true;
-                text_message msg(get_ntc_name(nid_ntc) + " not available", true, false, 2, [stm](text_message &msg){
+                text_message msg(get_ntc_name(nid_ntc) + gettext(" not available"), true, false, 2, [stm](text_message &msg){
                     if (stm != get_stm(nid_ntc) || stm->available() || stm->isolated || (mode != Mode::SN && mode != Mode::NL)) {
                         ntc_unavailable_msg = false;
                         return true;

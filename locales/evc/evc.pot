@@ -1,0 +1,94 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-03-08 08:53+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../EVC/DMI/windows.cpp:183
+msgid "Train is rejected"
+msgstr ""
+
+#: ../EVC/DMI/windows.cpp:332
+msgid "Shunting request failed"
+msgstr ""
+
+#: ../EVC/DMI/windows.cpp:734 ../EVC/Procedures/train_trip.cpp:47
+msgid "SH refused"
+msgstr ""
+
+#: ../EVC/Procedures/mode_transition.cpp:279
+msgid "Entering FS"
+msgstr ""
+
+#: ../EVC/Procedures/mode_transition.cpp:286
+msgid "Entering OS"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:33
+msgid "Unauthorized passing of EoA/LoA"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:37 ../EVC/TrainSubsystems/brake.cpp:39
+msgid "Balise read error"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:41
+msgid "No MA received at level transition"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:44 ../EVC/TrainSubsystems/brake.cpp:72
+msgid "Communication error"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:50
+msgid "Trackside not compatible"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:53
+msgid "SR distance exceeded"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:57
+msgid "SH stop order"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:61
+msgid "SR stop order"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:64
+msgid "Emergency stop"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:67
+msgid "No track description"
+msgstr ""
+
+#: ../EVC/Procedures/train_trip.cpp:78
+msgid " brake demand"
+msgstr ""
+
+#: ../EVC/TrainSubsystems/brake.cpp:58
+msgid "Runaway movement"
+msgstr ""
+
+#: ../EVC/STM/stm.cpp:349
+msgid " failed"
+msgstr ""
+
+#: ../EVC/STM/stm.cpp:422
+msgid " not available"
+msgstr ""

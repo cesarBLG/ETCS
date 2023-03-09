@@ -24,7 +24,7 @@
 #include "menu_settings.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
-driver_window::driver_window(std::string id, bool show_trn) : input_window("Driver ID", 1, false), TRN("TRN",82,50), settings("symbols/Setting/SE_04.bmp",82,50)
+driver_window::driver_window(std::string id, bool show_trn) : input_window(gettext("Driver ID"), 1, false), TRN(gettext("TRN"),82,50), settings("symbols/Setting/SE_04.bmp",82,50)
 {
     inputs[0] = new driverid_input();
     TRN.setPressedAction([this] 

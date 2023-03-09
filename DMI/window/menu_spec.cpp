@@ -18,11 +18,11 @@
  */
 #include "menu_spec.h"
 #include "../tcp/server.h"
-menu_spec::menu_spec() : menu("Special")
+menu_spec::menu_spec() : menu(gettext("Special"))
 {
-    buttons[0] = new TextButton("Adhesion", 153, 50);
-    buttons[1] = new TextButton("SR Speed/Distance", 153, 50);
-    buttons[2] = new TextButton("Train integrity", 153, 50);
+    buttons[0] = new TextButton(gettext("Adhesion"), 153, 50);
+    buttons[1] = new TextButton(gettext("SR Speed/Distance"), 153, 50);
+    buttons[2] = new TextButton(gettext("Train integrity"), 153, 50);
     buttons[2]->delayType = true;
     buttons[0]->setPressedAction([this]
     {

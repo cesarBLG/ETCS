@@ -18,9 +18,9 @@
 #include "set_vbc.h"
 #include "../tcp/server.h"
 #include "keyboard.h"
-set_vbc_window::set_vbc_window() : input_window("Set VBC", 1, true)
+set_vbc_window::set_vbc_window() : input_window(gettext("Set VBC"), 1, true)
 {
-    inputs[0] = new input_data("VBC code");
+    inputs[0] = new input_data(gettext("VBC code"));
     inputs[0]->keys = getNumericKeyboard(inputs[0]);
     create();
 }
@@ -28,9 +28,9 @@ void set_vbc_window::sendInformation()
 {
     write_command("addVBC", inputs[0]->getData());
 }
-remove_vbc_window::remove_vbc_window() : input_window("Remove VBC", 1, true)
+remove_vbc_window::remove_vbc_window() : input_window(gettext("Remove VBC"), 1, true)
 {
-    inputs[0] = new input_data("VBC code");
+    inputs[0] = new input_data(gettext("VBC code"));
     inputs[0]->keys = getNumericKeyboard(inputs[0]);
     create();
 }

@@ -18,7 +18,7 @@
  */
 #include "menu.h"
 #include <chrono>
-menu::menu(const char *title) : subwindow(title)
+menu::menu(std::string title) : subwindow(title)
 {
     for(int i=0; i<10; i++)
     {

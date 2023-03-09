@@ -29,25 +29,25 @@
 #include "../state/time_hour.h"
 #include "../state/gps_pos.h"
 #include "../tcp/server.h"
-TextButton main_button("Main", 60, 50, mainbut_pressed);
+TextButton main_button(gettext("Main"), 60, 50, mainbut_pressed);
 void mainbut_pressed()
 {
     write_command("navButton","main");
     //right_menu(new menu_main());
 }
-TextButton override_button("Over-\nride", 60, 50, overridebut_pressed);
+TextButton override_button(gettext("Over-\nride"), 60, 50, overridebut_pressed);
 void overridebut_pressed()
 {
     write_command("navButton","override");
     //right_menu(new menu_override());
 }
-TextButton dataview_button("Data\nview", 60, 50, dataviewbut_pressed);
+TextButton dataview_button(gettext("Data\nview"), 60, 50, dataviewbut_pressed);
 void dataviewbut_pressed()
 {
     write_command("navButton","data_view");
     //right_menu(new data_view_window());
 }
-TextButton special_button("Spec", 60, 50, specbut_pressed);
+TextButton special_button(gettext("Spec"), 60, 50, specbut_pressed);
 void specbut_pressed()
 {
     write_command("navButton","spec");

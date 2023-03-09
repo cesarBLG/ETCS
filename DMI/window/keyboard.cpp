@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "keyboard.h"
-#include "../graphics/text_button.h"
+#include "../language/language.h"
 vector<Button*> getNumericKeyboard(input_data *input)
 {
     input->character_separation = true;
@@ -26,7 +26,7 @@ vector<Button*> getNumericKeyboard(input_data *input)
     {
         keys.push_back(new TextButton(to_string(i+1), 102, 50, nullptr, 16));
     }
-    keys.push_back(new TextButton("DEL", 102, 50, nullptr));
+    keys.push_back(new TextButton(gettext("DEL"), 102, 50, nullptr));
     keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50));
     for(int i=0; i<12; i++)
@@ -69,7 +69,7 @@ vector<Button*> getAlphaNumericKeyboard(input_data *input)
     keys[7]->addText("tuv",4,0,10);
     keys[8]->addText("9",-15,0,16);
     keys[8]->addText("wxyz",10,0,10);
-    keys.push_back(new TextButton("DEL", 102, 50, nullptr));
+    keys.push_back(new TextButton(gettext("DEL"), 102, 50, nullptr));
     keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50, nullptr));
     for(int i=0; i<12; i++)
@@ -182,15 +182,15 @@ vector<Button*> getYesNoKeyboard(input_data *input)
     for (int i=0; i<12; i++) {
         keys.push_back(nullptr);
     }
-    keys[6] = new TextButton("No", 102, 50);
-    keys[7] = new TextButton("Yes", 102, 50);
+    keys[6] = new TextButton(gettext("No"), 102, 50);
+    keys[7] = new TextButton(gettext("Yes"), 102, 50);
     keys[6]->setPressedAction([input]
     {
-            input->setData("No");
+        input->setData(gettext("No"));
     });
     keys[7]->setPressedAction([input]
     {
-            input->setData("Yes");
+        input->setData(gettext("Yes"));
     });
     keys[6]->upType = false;
     keys[7]->upType = false;

@@ -26,6 +26,11 @@ class TextButton : public Button
     int size;
     public:
     void paint() override;
+    void rename(std::string name)
+    {
+        caption = name;
+        enabled_text = disabled_text = nullptr;
+    }
     TextButton(std::string text, float sx, float sy, std::function<void()> pressed = nullptr, int size = 12);
     ~TextButton();
 };

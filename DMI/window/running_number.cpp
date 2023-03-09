@@ -20,7 +20,7 @@
 #include "../monitor.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
-trn_window::trn_window(int trn) : input_window("Train running number", 1, false)
+trn_window::trn_window(int trn) : input_window(gettext("Train running number"), 1, false)
 {
     inputs[0] = new trn_input();
     create();

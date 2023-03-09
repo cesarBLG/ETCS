@@ -16,19 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _MENU_H
-#define _MENU_H
-#include "subwindow.h"
-class menu : public subwindow
+#include "language_window.h"
+#include "../tcp/server.h"
+#include "keyboard.h"
+language_window::language_window(std::string lang, std::vector<std::string> language) : input_window(gettext("Language"), 1, false)
 {
-    protected:
-    Button *empty_button[10];
-    Component *hourGlass=nullptr;
-    Button* buttons[10];
-    public:
-    menu(std::string title);
-    ~menu();
-    void setLayout() override;
-    void setHourGlass(bool show);
-};
-#endif
+    inputs[0] = new language_input(lang, language);
+    create();
+    if (lang != "")
+    {
+        inputs[0]->data = lang;
+        inputs[0]->prev_data = lang;
+        inputs[0]->updateText();
+    }
+}
+void language_window::sendInformation()
+{
+    write_command("setLanguage",inputs[0]->getData());
+}
+language_input::language_input(std::string lang, std::vector<std::string> languages) : input_data("")
+{
+    setData(lang);
+    keys = getSingleChoiceKeyboard(languages, this);
+}
+void language_input::validate()
+{
+    if(data.empty()) return;
+    valid = true;
+}

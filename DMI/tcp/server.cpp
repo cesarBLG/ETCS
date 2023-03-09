@@ -39,6 +39,7 @@
 #include "../state/acks.h"
 #include "../control/control.h"
 #include "../STM/stm_objects.h"
+#include "../language/language.h"
 #include <mutex>
 int server;
 int clients[3];
@@ -231,6 +232,10 @@ void parseData(string str)
         bit_manipulator r(std::move(message));
         stm_message msg(r);
         parse_stm_message(msg);
+    }
+    else if (command == "language")
+    {
+        set_language(value);
     }
     if (command != "json") return;
     json j = json::parse(value);

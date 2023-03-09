@@ -16,19 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef _MENU_H
-#define _MENU_H
-#include "subwindow.h"
-class menu : public subwindow
+#ifndef _LANGUAGE_WINDOW_H
+#define _LANGUAGE_WINDOW_H
+#include "data_entry.h"
+#include "data_validation.h"
+#include "../monitor.h"
+#include <vector>
+class language_window : public input_window
 {
-    protected:
-    Button *empty_button[10];
-    Component *hourGlass=nullptr;
-    Button* buttons[10];
     public:
-    menu(std::string title);
-    ~menu();
-    void setLayout() override;
-    void setHourGlass(bool show);
+    language_window(std::string lang, std::vector<std::string> languages);
+    void sendInformation() override;
+};
+class language_input : public input_data
+{
+    public:
+    language_input(std::string lang, std::vector<std::string> languages);
+    void validate() override;
 };
 #endif

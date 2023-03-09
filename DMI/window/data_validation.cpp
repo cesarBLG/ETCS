@@ -8,6 +8,6 @@ void validation_window::sendInformation()
     {
         j["DataInputResult"][i->label] = i->data;
     }
-    j["DataInputResult"]["Validated"] = confirmation->data_accepted;
+    j["DataInputResult"]["Validated"] = confirmation->data_accepted == gettext("Yes");
     write_command("json", j.dump());
 }

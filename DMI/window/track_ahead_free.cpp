@@ -12,7 +12,7 @@ void build_taf(window *w)
     question_part.setBackgroundColor(DarkGrey);
     question_part.addBorder(MediumGrey);
     answer_part.setBackgroundColor(MediumGrey);
-    answer_part.addText("Yes",0,0,12,Black);
+    answer_part.addText(gettext("Yes"),0,0,12,Black);
     answer_part.setPressedAction([](){write_command("json",R"({"DriverSelection":"TrackAheadFree"})");});
 }
 window taf_window(build_taf);
