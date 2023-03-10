@@ -1,0 +1,288 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: ETCS EVC\n"
+"Language: nl\n"
+
+#: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
+msgid "Driver ID"
+msgstr "Chauffeur-ID"
+
+#: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
+#: DMI/windows.cpp:593
+msgid "Level 0"
+msgstr "Niveau 0"
+
+#: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
+#: DMI/windows.cpp:595
+msgid "Level 1"
+msgstr "Niveau 1"
+
+#: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
+#: DMI/windows.cpp:597
+msgid "Level 2"
+msgstr "Level 2"
+
+#: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
+msgid "Level 3"
+msgstr "Niveau 3"
+
+#: DMI/windows.cpp:135 DMI/windows.cpp:589
+msgid "Level"
+msgstr "Niveau"
+
+#: DMI/windows.cpp:141 DMI/windows.cpp:204 DMI/windows.cpp:616
+msgid "Train running number"
+msgstr "Lopende nummer van de trein"
+
+#: DMI/windows.cpp:148 DMI/windows.cpp:212 DMI/windows.cpp:743
+msgid "RBC ID"
+msgstr "RBC-ID"
+
+#: DMI/windows.cpp:149 DMI/windows.cpp:213 DMI/windows.cpp:744
+msgid "RBC phone number"
+msgstr "RBC-telefoonnummer"
+
+#: DMI/windows.cpp:151 DMI/windows.cpp:742
+msgid "RBC data"
+msgstr "RBC-gegevens"
+
+#: DMI/windows.cpp:171 DMI/windows.cpp:630
+msgid "Train data"
+msgstr "Trein gegevens"
+
+#: DMI/windows.cpp:178 DMI/windows.cpp:759
+msgid "SR speed (km/h)"
+msgstr "SR-snelheid (km/u)"
+
+#: DMI/windows.cpp:179 DMI/windows.cpp:760
+msgid "SR distance (m)"
+msgstr "SR-afstand (m)"
+
+#: DMI/windows.cpp:181 DMI/windows.cpp:757
+msgid "SR speed/distance"
+msgstr "SR snelheid/afstand"
+
+#: DMI/windows.cpp:187 DMI/windows.cpp:753
+msgid "Language"
+msgstr "Taal"
+
+#: DMI/windows.cpp:206 DMI/windows.cpp:648
+msgid "Length (m)"
+msgstr "Lengte (m)"
+
+#: DMI/windows.cpp:207
+msgid "Brake percentaje"
+msgstr "Rem percentage"
+
+#: DMI/windows.cpp:208
+msgid "Maximum speed (km/h)"
+msgstr "Maximale snelheid (km/u)"
+
+#: DMI/windows.cpp:209
+msgid "Airtight"
+msgstr "Luchtdicht"
+
+#: DMI/windows.cpp:209
+msgid "Yes"
+msgstr "Ja"
+
+#: DMI/windows.cpp:209
+msgid "No"
+msgstr "Nee"
+
+#: DMI/windows.cpp:223
+msgid "Data view"
+msgstr "Gegevensweergave"
+
+#: DMI/windows.cpp:298
+msgid "Train is rejected"
+msgstr "Trein wordt geweigerd"
+
+#: DMI/windows.cpp:457
+msgid "Shunting request failed"
+msgstr "Rangeerverzoek mislukt"
+
+#: DMI/windows.cpp:635 DMI/windows.cpp:642
+msgid "Validate train data"
+msgstr "Valideer treingegevens"
+
+#: DMI/windows.cpp:637 DMI/windows.cpp:714
+msgid "Train type"
+msgstr "Type trein"
+
+#: DMI/windows.cpp:649
+msgid "Max speed (km/h)"
+msgstr "Maximum snelheid (km/u)"
+
+#: DMI/windows.cpp:650
+msgid "Brake percentage"
+msgstr "Rem percentage"
+
+#: DMI/windows.cpp:651
+msgid "Train category"
+msgstr "Trein categorie"
+
+#: DMI/windows.cpp:654
+msgid "PASS 1"
+msgstr "PAS 1"
+
+#: DMI/windows.cpp:657
+msgid "PASS 2"
+msgstr "PAS 2"
+
+#: DMI/windows.cpp:660
+msgid "PASS 3"
+msgstr "PAS 3"
+
+#: DMI/windows.cpp:663
+msgid "TILT 1"
+msgstr "KANTELEN 1"
+
+#: DMI/windows.cpp:666
+msgid "TILT 2"
+msgstr "KANTELEN 2"
+
+#: DMI/windows.cpp:669
+msgid "TILT 3"
+msgstr "KANTELEN 3"
+
+#: DMI/windows.cpp:672
+msgid "TILT 4"
+msgstr "KANTELEN 4"
+
+#: DMI/windows.cpp:675
+msgid "TILT 5"
+msgstr "KANTELEN 5"
+
+#: DMI/windows.cpp:678
+msgid "TILT 6"
+msgstr "KANTELEN 6"
+
+#: DMI/windows.cpp:681
+msgid "TILT 7"
+msgstr "KANTELEN 7"
+
+#: DMI/windows.cpp:684
+msgid "FP 1"
+msgstr "KP 1"
+
+#: DMI/windows.cpp:687
+msgid "FP 2"
+msgstr "KP 2"
+
+#: DMI/windows.cpp:690
+msgid "FP 3"
+msgstr "KP 3"
+
+#: DMI/windows.cpp:693
+msgid "FP 4"
+msgstr "KP 4"
+
+#: DMI/windows.cpp:696
+msgid "FG 1"
+msgstr "FG 1"
+
+#: DMI/windows.cpp:699
+msgid "FG 2"
+msgstr "FG 2"
+
+#: DMI/windows.cpp:702
+msgid "FG 3"
+msgstr "FG 3"
+
+#: DMI/windows.cpp:705
+msgid "FG 4"
+msgstr "FG 4"
+
+#: DMI/windows.cpp:766
+msgid "Set VBC"
+msgstr "VBC instellen"
+
+#: DMI/windows.cpp:771 DMI/windows.cpp:784
+msgid "Validate set VBC"
+msgstr "Valideer ingestelde VBC"
+
+#: DMI/windows.cpp:775
+msgid "Remove VBC"
+msgstr "VBC verwijderen"
+
+#: DMI/windows.cpp:780 DMI/windows.cpp:792
+msgid "Validate remove VBC"
+msgstr "Valideer het verwijderen van VBC"
+
+#: DMI/windows.cpp:788 DMI/windows.cpp:796
+msgid "VBC code"
+msgstr "VBC-code"
+
+#: DMI/windows.cpp:902 Procedures/train_trip.cpp:47
+msgid "SH refused"
+msgstr "SH weigerde"
+
+#: Procedures/mode_transition.cpp:279
+msgid "Entering FS"
+msgstr "FS invoeren"
+
+#: Procedures/mode_transition.cpp:286
+msgid "Entering OS"
+msgstr "Besturingssysteem invoeren"
+
+#: Procedures/train_trip.cpp:33
+msgid "Unauthorized passing of EoA/LoA"
+msgstr "Ongeoorloofd doorgeven van EoA/LoA"
+
+#: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:39
+msgid "Balise read error"
+msgstr "Balise leesfout"
+
+#: Procedures/train_trip.cpp:41
+msgid "No MA received at level transition"
+msgstr "Geen MA ontvangen bij niveauovergang"
+
+#: Procedures/train_trip.cpp:44 TrainSubsystems/brake.cpp:72
+msgid "Communication error"
+msgstr "Communicatie fout"
+
+#: Procedures/train_trip.cpp:50
+msgid "Trackside not compatible"
+msgstr "Trackside niet compatibel"
+
+#: Procedures/train_trip.cpp:53
+msgid "SR distance exceeded"
+msgstr "SR-afstand overschreden"
+
+#: Procedures/train_trip.cpp:57
+msgid "SH stop order"
+msgstr "SH stopopdracht"
+
+#: Procedures/train_trip.cpp:61
+msgid "SR stop order"
+msgstr "SR stopopdracht"
+
+#: Procedures/train_trip.cpp:64
+msgid "Emergency stop"
+msgstr "Noodstop"
+
+#: Procedures/train_trip.cpp:67
+msgid "No track description"
+msgstr "Geen trackbeschrijving"
+
+#: Procedures/train_trip.cpp:78
+msgid " brake demand"
+msgstr " rem vraag"
+
+#: STM/stm.cpp:349
+msgid " failed"
+msgstr " mislukt"
+
+#: STM/stm.cpp:422
+msgid " not available"
+msgstr " niet beschikbaar"
+
+#: TrainSubsystems/brake.cpp:58
+msgid "Runaway movement"
+msgstr "Weggelopen beweging"
+

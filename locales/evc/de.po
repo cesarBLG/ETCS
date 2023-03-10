@@ -1,299 +1,288 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-10 10:16+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.2.2\n"
-"X-Poedit-Basepath: ../../EVC\n"
-"X-Poedit-SearchPath-0: .\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: ETCS EVC\n"
+"Language: de\n"
 
 #: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
 msgid "Driver ID"
-msgstr ""
+msgstr "Fahrer-ID"
 
 #: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
 #: DMI/windows.cpp:593
 msgid "Level 0"
-msgstr ""
+msgstr "Stufe 0"
 
 #: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
 #: DMI/windows.cpp:595
 msgid "Level 1"
-msgstr ""
+msgstr "Level 1"
 
 #: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
 #: DMI/windows.cpp:597
 msgid "Level 2"
-msgstr ""
+msgstr "Level 2"
 
 #: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
 msgid "Level 3"
-msgstr ""
+msgstr "Stufe 3"
 
 #: DMI/windows.cpp:135 DMI/windows.cpp:589
 msgid "Level"
-msgstr ""
+msgstr "Eben"
 
 #: DMI/windows.cpp:141 DMI/windows.cpp:204 DMI/windows.cpp:616
 msgid "Train running number"
-msgstr ""
+msgstr "Laufende Nummer des Zuges"
 
 #: DMI/windows.cpp:148 DMI/windows.cpp:212 DMI/windows.cpp:743
 msgid "RBC ID"
-msgstr ""
+msgstr "RBC-ID"
 
 #: DMI/windows.cpp:149 DMI/windows.cpp:213 DMI/windows.cpp:744
 msgid "RBC phone number"
-msgstr ""
+msgstr "RBC-Telefonnummer"
 
 #: DMI/windows.cpp:151 DMI/windows.cpp:742
 msgid "RBC data"
-msgstr ""
+msgstr "RBC-Daten"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:630
 msgid "Train data"
-msgstr ""
+msgstr "Zugdaten"
 
 #: DMI/windows.cpp:178 DMI/windows.cpp:759
 msgid "SR speed (km/h)"
-msgstr ""
+msgstr "SR-Geschwindigkeit (km/h)"
 
 #: DMI/windows.cpp:179 DMI/windows.cpp:760
 msgid "SR distance (m)"
-msgstr ""
+msgstr "SR-Abstand (m)"
 
 #: DMI/windows.cpp:181 DMI/windows.cpp:757
 msgid "SR speed/distance"
-msgstr ""
+msgstr "SR Geschwindigkeit/Distanz"
 
 #: DMI/windows.cpp:187 DMI/windows.cpp:753
 msgid "Language"
-msgstr ""
+msgstr "Sprache"
 
 #: DMI/windows.cpp:206 DMI/windows.cpp:648
 msgid "Length (m)"
-msgstr ""
+msgstr "Länge (m)"
 
 #: DMI/windows.cpp:207
 msgid "Brake percentaje"
-msgstr ""
+msgstr "Bremsprozentsatz"
 
 #: DMI/windows.cpp:208
 msgid "Maximum speed (km/h)"
-msgstr ""
+msgstr "Höchstgeschwindigkeit (km/h)"
 
 #: DMI/windows.cpp:209
 msgid "Airtight"
-msgstr ""
+msgstr "Luftdicht"
 
 #: DMI/windows.cpp:209
 msgid "Yes"
-msgstr ""
+msgstr "Ja"
 
 #: DMI/windows.cpp:209
 msgid "No"
-msgstr ""
+msgstr "NEIN"
 
 #: DMI/windows.cpp:223
 msgid "Data view"
-msgstr ""
+msgstr "Datenansicht"
 
 #: DMI/windows.cpp:298
 msgid "Train is rejected"
-msgstr ""
+msgstr "Zug wird abgelehnt"
 
 #: DMI/windows.cpp:457
 msgid "Shunting request failed"
-msgstr ""
+msgstr "Rangieranforderung fehlgeschlagen"
 
 #: DMI/windows.cpp:635 DMI/windows.cpp:642
 msgid "Validate train data"
-msgstr ""
+msgstr "Zugdaten validieren"
 
 #: DMI/windows.cpp:637 DMI/windows.cpp:714
 msgid "Train type"
-msgstr ""
+msgstr "Zugtyp"
 
 #: DMI/windows.cpp:649
 msgid "Max speed (km/h)"
-msgstr ""
+msgstr "Höchstgeschwindigkeit (km/h)"
 
 #: DMI/windows.cpp:650
 msgid "Brake percentage"
-msgstr ""
+msgstr "Bremsprozentsatz"
 
 #: DMI/windows.cpp:651
 msgid "Train category"
-msgstr ""
+msgstr "Zugkategorie"
 
 #: DMI/windows.cpp:654
 msgid "PASS 1"
-msgstr ""
+msgstr "PASS 1"
 
 #: DMI/windows.cpp:657
 msgid "PASS 2"
-msgstr ""
+msgstr "PASS 2"
 
 #: DMI/windows.cpp:660
 msgid "PASS 3"
-msgstr ""
+msgstr "PASS 3"
 
 #: DMI/windows.cpp:663
 msgid "TILT 1"
-msgstr ""
+msgstr "NEIGUNG 1"
 
 #: DMI/windows.cpp:666
 msgid "TILT 2"
-msgstr ""
+msgstr "NEIGUNG 2"
 
 #: DMI/windows.cpp:669
 msgid "TILT 3"
-msgstr ""
+msgstr "NEIGUNG 3"
 
 #: DMI/windows.cpp:672
 msgid "TILT 4"
-msgstr ""
+msgstr "NEIGUNG 4"
 
 #: DMI/windows.cpp:675
 msgid "TILT 5"
-msgstr ""
+msgstr "NEIGUNG 5"
 
 #: DMI/windows.cpp:678
 msgid "TILT 6"
-msgstr ""
+msgstr "NEIGUNG 6"
 
 #: DMI/windows.cpp:681
 msgid "TILT 7"
-msgstr ""
+msgstr "NEIGUNG 7"
 
 #: DMI/windows.cpp:684
 msgid "FP 1"
-msgstr ""
+msgstr "FP 1"
 
 #: DMI/windows.cpp:687
 msgid "FP 2"
-msgstr ""
+msgstr "FP2"
 
 #: DMI/windows.cpp:690
 msgid "FP 3"
-msgstr ""
+msgstr "FP 3"
 
 #: DMI/windows.cpp:693
 msgid "FP 4"
-msgstr ""
+msgstr "FP 4"
 
 #: DMI/windows.cpp:696
 msgid "FG 1"
-msgstr ""
+msgstr "FG 1"
 
 #: DMI/windows.cpp:699
 msgid "FG 2"
-msgstr ""
+msgstr "FG 2"
 
 #: DMI/windows.cpp:702
 msgid "FG 3"
-msgstr ""
+msgstr "FG 3"
 
 #: DMI/windows.cpp:705
 msgid "FG 4"
-msgstr ""
+msgstr "FG4"
 
 #: DMI/windows.cpp:766
 msgid "Set VBC"
-msgstr ""
+msgstr "VBC einstellen"
 
 #: DMI/windows.cpp:771 DMI/windows.cpp:784
 msgid "Validate set VBC"
-msgstr ""
+msgstr "VBC-Satz validieren"
 
 #: DMI/windows.cpp:775
 msgid "Remove VBC"
-msgstr ""
+msgstr "VBC entfernen"
 
 #: DMI/windows.cpp:780 DMI/windows.cpp:792
 msgid "Validate remove VBC"
-msgstr ""
+msgstr "Bestätigen Sie das Entfernen von VBC"
 
 #: DMI/windows.cpp:788 DMI/windows.cpp:796
 msgid "VBC code"
-msgstr ""
+msgstr "VBC-Code"
 
 #: DMI/windows.cpp:902 Procedures/train_trip.cpp:47
 msgid "SH refused"
-msgstr ""
+msgstr "SH lehnte ab"
 
 #: Procedures/mode_transition.cpp:279
 msgid "Entering FS"
-msgstr ""
+msgstr "FS eingeben"
 
 #: Procedures/mode_transition.cpp:286
 msgid "Entering OS"
-msgstr ""
+msgstr "Betriebssystem eingeben"
 
 #: Procedures/train_trip.cpp:33
 msgid "Unauthorized passing of EoA/LoA"
-msgstr ""
+msgstr "Unbefugte Weitergabe von EoA/LoA"
 
 #: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
-msgstr ""
+msgstr "Balise-Lesefehler"
 
 #: Procedures/train_trip.cpp:41
 msgid "No MA received at level transition"
-msgstr ""
+msgstr "Kein MA beim Levelwechsel erhalten"
 
 #: Procedures/train_trip.cpp:44 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
-msgstr ""
+msgstr "Kommunikationsfehler"
 
 #: Procedures/train_trip.cpp:50
 msgid "Trackside not compatible"
-msgstr ""
+msgstr "Streckenseitig nicht kompatibel"
 
 #: Procedures/train_trip.cpp:53
 msgid "SR distance exceeded"
-msgstr ""
+msgstr "SR-Distanz überschritten"
 
 #: Procedures/train_trip.cpp:57
 msgid "SH stop order"
-msgstr ""
+msgstr "SH-Stop-Order"
 
 #: Procedures/train_trip.cpp:61
 msgid "SR stop order"
-msgstr ""
+msgstr "SR-Stop-Order"
 
 #: Procedures/train_trip.cpp:64
 msgid "Emergency stop"
-msgstr ""
+msgstr "Not-Halt"
 
 #: Procedures/train_trip.cpp:67
 msgid "No track description"
-msgstr ""
+msgstr "Keine Streckenbeschreibung"
 
 #: Procedures/train_trip.cpp:78
 msgid " brake demand"
-msgstr ""
+msgstr " Bremsanforderung"
 
 #: STM/stm.cpp:349
 msgid " failed"
-msgstr ""
+msgstr " fehlgeschlagen"
 
 #: STM/stm.cpp:422
 msgid " not available"
-msgstr ""
+msgstr " Nicht verfügbar"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
-msgstr ""
+msgstr "Fluchtbewegung"
+
