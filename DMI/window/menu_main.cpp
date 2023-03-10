@@ -18,9 +18,7 @@
  */
 #include "menu_main.h"
 #include "window.h"
-#include "level_window.h"
 #include "driver_id.h"
-#include "running_number.h"
 #include "fixed_train_data.h"
 #include <algorithm>
 #include "../monitor.h"
@@ -42,20 +40,6 @@ menu_main::menu_main() : menu(gettext("Main"))
     buttons[8] = new TextButton(gettext("Maintain shunting"), 153, 50);
     buttons[9] = new TextButton(gettext("Radio data"), 153, 50);
     buttons[6]->delayType = true;
-    /*if (wait_rbc)
-    {
-        for (int i=0; i<8; i++) buttons[i]->enabled = false;
-        exit_button.enabled = false;
-    }
-    else
-    {
-        buttons[0]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (Vest == 0 && mode == Mode::PT && level == Level::N1);
-        buttons[2]->enabled = Vest==0;
-        buttons[3]->enabled = false;
-        buttons[4]->enabled = Vest==0 && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
-        buttons[5]->enabled = (Vest == 0 && mode == Mode::SB && level != Level::Unknown) || (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
-        buttons[6]->enabled = Vest == 0;
-    }*/
     buttons[0]->setPressedAction([this]
     {
         write_command("Start","");

@@ -20,36 +20,15 @@
 #include "fixed_train_data.h"
 #include "keyboard.h"
 #include "../monitor.h"
-#include "running_number.h"
 #include "../tcp/server.h"
-train_data_window::train_data_window() : input_window(gettext("Train Data"), 6, true), SelectType(gettext("Select\ntype"),60,50)
+train_data_window::train_data_window(std::string title) : input_window(title, 6, true), SelectType(gettext("Select\ntype"),60,50)
 {
-    inputs[0] = new input_data(gettext("Length (m)"));
-    inputs[1] = new input_data(gettext("Brake percentage"));
-    inputs[2] = new input_data(gettext("Max speed (km/h)"));
-    inputs[3] = new input_data(gettext("Loading gauge"));
-    inputs[4] = new input_data(gettext("Train category"));
-    inputs[5] = new input_data(gettext("Axle load category"));
-    for(int i=0; i<3; i++)
-    {
-        inputs[i]->keys = getNumericKeyboard(inputs[i]);
-    }
-    inputs[3]->keys = getSingleChoiceKeyboard({"G1", "GA", "GB", "GC", "Out of GC"}, inputs[3]);
-    inputs[4]->keys = getSingleChoiceKeyboard({"PASS 1","PASS 2","PASS 3",
-        "TILT 1","TILT 2","TILT 3","TILT 4","TILT 5","TILT 6","TILT 7",
-        "FP 1","FP2","FP 3","FP 4","FG 1","FG 2","FG 3","FG 4"}, inputs[4]);
-    inputs[5]->keys = getSingleChoiceKeyboard({"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}, inputs[5]);
     SelectType.setPressedAction([this]() {
         write_command("SelectType", "");
     });
-    create();
 }
 void train_data_window::setLayout()
 {
     input_window::setLayout();
     addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
-}
-train_data_validation_window::train_data_validation_window(std::vector<input_data*> data) : validation_window(gettext("Validate train data"), data)
-{
-
 }

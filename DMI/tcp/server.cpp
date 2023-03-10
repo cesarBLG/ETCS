@@ -193,7 +193,7 @@ void parseData(string str)
     unique_lock<mutex> lck(draw_mtx);
     int index = str.find_first_of('(');
     string command = str.substr(0, index);
-    string value = str.substr(index+1, str.find_first_of(')')-index-1);
+    string value = str.substr(index+1, str.find_last_of(')')-index-1);
     if (command == "setMessage")
     {
         int valsep = value.find(',');

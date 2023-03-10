@@ -13,7 +13,7 @@ void set_language(std::string lang)
 {
     if (lang == "en") {
         language = "en";
-    } else if (reader.ReadFile(("../locales/dmi/"+lang+".mo").c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
+    } else if (reader.ReadFile(("../locales/evc/"+lang+".mo").c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
         std::cout<<reader.GetErrorDescription()<<std::endl;
         language = "en";
     } else {

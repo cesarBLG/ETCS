@@ -24,16 +24,7 @@ class train_data_window : public input_window
 {
     public:
     TextButton SelectType;
-    train_data_window();
-    void validate(string dat, int field)
-    {
-
-    }
+    train_data_window(std::string title);
     void setLayout() override;
-};
-class train_data_validation_window : public validation_window
-{
-    public:
-    train_data_validation_window(vector<input_data*> data);
 };
 #endif

@@ -5,7 +5,7 @@ void write_vbcs()
 {
     std::ofstream file("vbcs.dat");
     for (auto vbc : vbcs) {
-        file<<vbc.NID_C<<" "<<vbc.NID_VBCMK<<" "<<vbc.validity;
+        file<<vbc.NID_C<<" "<<vbc.NID_VBCMK<<" "<<vbc.validity<<"\n";
     }
 }
 void load_vbcs()

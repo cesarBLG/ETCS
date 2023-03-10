@@ -27,6 +27,7 @@
 #include "../../EVC/Parser/nlohmann/json.hpp"
 using namespace std;
 using json = nlohmann::json;
+class input_window;
 class input_data
 {
     TTF_Font *font;
@@ -49,18 +50,17 @@ class input_data
     string keybd_data;
     text_graphic *data_tex;
     Component* label_comp = nullptr;
-    Component* data_comp = nullptr;
+    Button* data_comp = nullptr;
     Component* label_echo = nullptr;
     Component* data_echo = nullptr;
+    input_window* window = nullptr;
     time_t holdcursor;
     void setSelected(bool val);
     void setAccepted(bool val);
-    bool isValid() {return valid;}
     bool isAccepted() {return accepted;}
     IconButton more;
     vector<Button*> keys;
     int keypage=0;
-    virtual void validate(){if (data!="") valid = true;}
     input_data(string label_text="", bool echo=true);
     function<string()> data_get;
     function<void(string)> data_set;

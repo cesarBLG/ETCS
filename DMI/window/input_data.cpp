@@ -17,6 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "input_data.h"
+#include "data_entry.h"
 #include "../graphics/flash.h"
 #include "keyboard.h"
 input_data::input_data(string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
@@ -26,16 +27,17 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
     if(label!="")
     {
         label_comp = new Component(204,50);
-        data_comp = new Component(102,50);
+        data_comp = new Button(102,50);
         if (show_echo)
         {
             label_echo = new Component(100,16);
             data_echo = new Component(100,16);
         }
     }
-    else data_comp = new Component(204+102,50);
+    else data_comp = new Button(204+102,50);
     data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
+    data_comp->showBorder = false;
     font = openFont(fontPath, 12);
     data_comp->setDisplayFunction([this]
     {
@@ -75,6 +77,8 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
 }
 void input_data::setData(string s)
 {
+    if (window != nullptr) window->inputChanged(this);
+    techcross_invalid = techrange_invalid = techresol_invalid = operatcross_invalid = operatrange_invalid = false;
     data = s;
     keybd_data = s;
     prev_data = "";
@@ -114,13 +118,14 @@ void input_data::updateText()
         data_echo->clear();
         if (techrange_invalid || techresol_invalid)
             data_echo->addText("++++", 4, 0, 12, Red, LEFT);
-        if (techcross_invalid)
+        else if (techcross_invalid)
             data_echo->addText("????", 4, 0, 12, Red, LEFT);
-        if (operatrange_invalid)
+        else if (operatrange_invalid)
             data_echo->addText("++++", 4, 0, 12, Yellow, LEFT);
-        if (operatcross_invalid)
+        else if (operatcross_invalid)
             data_echo->addText("????", 4, 0, 12, Yellow, LEFT);
-        data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : Grey, LEFT);
+        else
+            data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : Grey, LEFT);
     }
 }
 input_data::~input_data()

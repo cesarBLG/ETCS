@@ -24,24 +24,7 @@ class fixed_train_data_window : public input_window
 {
     public:
     TextButton SelectType;
-    fixed_train_data_window(std::string data);
-    void validate(string dat, int field)
-    {
-
-    }
-    void sendInformation() override;
+    fixed_train_data_window(std::string title);
     void setLayout() override;
-};
-class fixed_train_data_input : public input_data
-{
-    public:
-    fixed_train_data_input(std::string data="");
-    void validate() override;
-};
-class fixed_train_data_validation_window : public validation_window
-{
-    public:
-    std::string data;
-    fixed_train_data_validation_window(std::string data);
 };
 #endif

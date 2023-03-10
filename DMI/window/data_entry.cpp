@@ -14,12 +14,13 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */#include "data_entry.h"
+ */
+#include "data_entry.h"
 #include "window.h"
+#include "keyboard.h"
 #include <algorithm>
 #include "../graphics/button.h"
 #include "../graphics/display.h"
-#include "data_validation.h"
 #include "../tcp/server.h"
 input_window::input_window(string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(gettext("Yes"),330,40), 
     nfields(nfields)
@@ -34,18 +35,17 @@ input_window::input_window(string title, int nfields, bool full) : subwindow(tit
     {
         button_yes.setBackgroundColor(DarkGrey);
         button_yes.setForegroundColor(Black);
+        button_yes.disabledColor = Black;
         button_yes.setPressedAction([this, nfields]
         {
             bool valid = true;
             for(int i=0; i<nfields; i++)
             {
-                inputs[i]->validate();
-                if (!inputs[i]->isValid())
+                if (!inputs[i]->isAccepted())
                     valid = false;
             }
             if (valid) {
                 sendInformation();
-                //exit(this);
             }
         });
         button_yes.showBorder = false;
@@ -60,12 +60,9 @@ void input_window::create()
     {
         inputs[0]->data_comp->setPressedAction([this]
         {
+            if (inputs[0]->data == "") return;
             inputs[0]->setAccepted(true);
-            inputs[0]->validate();
-            if (inputs[0]->isValid()) {
-                sendInformation();
-                //exit(this);
-            }
+            sendInformation();
         });
     }
     else 
@@ -76,22 +73,24 @@ void input_window::create()
             {
                 if (i == cursor)
                 {
-                    inputs[cursor]->operatrange_invalid = false;
-                    inputs[cursor]->setAccepted(true);
-                    if (i+1<nfields) cursor++;
-                    else cursor = 0;
-                    bool allaccepted = true;
-                    for (int j=0; j<nfields; j++) {
-                        if (!inputs[j]->isAccepted())
-                            allaccepted = false;
-                    }
-                    if (allaccepted)
-                        button_yes.setBackgroundColor(Grey);
-                    else
-                        button_yes.setBackgroundColor(DarkGrey);
+                    if (inputs[cursor]->techcross_invalid || inputs[cursor]->techrange_invalid || inputs[cursor]->data == "") return;
+                    /*json j;
+                    j["Label"] = inputs[i]->label;
+                    j["Value"] = inputs[i]->data;
+                    j["SkipOperationalCheck"] = inputs[i]->operatrange_invalid;*/
+                    json j;
+                    j["Label"] = inputs[i]->label;
+                    j["OperationalRange"] = true;
+                    j["TechnicalResolution"] = true;
+                    j["TechnicalRange"] = true;
+                    fieldCheckResult(j);
                 }
-                else cursor = i;
-                updatePage(cursor/4+1);
+                else
+                {
+                    if (inputs[cursor]->techcross_invalid || inputs[cursor]->techrange_invalid || inputs[cursor]->operatrange_invalid) return;
+                    cursor = i;
+                    updatePage(cursor/4+1);
+                }
             });
         }
     }
@@ -130,7 +129,7 @@ void input_window::setLayout()
             addToLayout(inputs[i]->data_echo, new RelativeAlignment(nullptr, 204, 100+i*16, 0));
             addToLayout(inputs[i]->label_echo, new ConsecutiveAlignment(inputs[i]->data_echo, LEFT, 0));
         }
-    }    
+    }   
     for(int i=0; i<12; i++)
     {
         buttons[i] = empty_button[i];
@@ -164,6 +163,67 @@ void input_window::setLayout()
     addToLayout(buttons[10], new ConsecutiveAlignment(buttons[9],RIGHT,0));
     addToLayout(buttons[11], new ConsecutiveAlignment(buttons[10],RIGHT,0));
 }
+void input_window::fieldCheckResult(json &j)
+{
+    for (int i=0; i<nfields; i++) {
+        if (inputs[i]->label != j["Label"]) continue;
+        inputs[i]->techrange_invalid = !j["TechnicalRange"];
+        inputs[i]->techresol_invalid = !j["TechnicalResolution"];
+        inputs[i]->operatrange_invalid = !j["OperationalRange"];
+        if (!inputs[i]->techrange_invalid && !inputs[i]->techresol_invalid && !inputs[i]->operatrange_invalid)
+        {
+            inputs[i]->setAccepted(true);
+            if (i+1<nfields) cursor++;
+            else cursor = 0;
+            updatePage(cursor/4+1);
+            bool allaccepted = true;
+            for (int j=0; j<nfields; j++) {
+                if (!inputs[j]->isAccepted())
+                    allaccepted = false;
+            }
+            if (allaccepted)
+            {
+                button_yes.setBackgroundColor(Grey);
+                button_yes.setEnabled(true);
+                button_yes.delayType = false;
+            }
+        }
+        else
+        {
+            inputs[i]->keybd_data = "";
+            inputs[i]->updateText();
+            for (int j=0; j<nfields; j++)
+            {
+                if (i!=j) inputs[j]->data_comp->setEnabled(false);
+                else if (!inputs[i]->techrange_invalid && !inputs[i]->techresol_invalid) inputs[j]->data_comp->delayType = true;
+                else inputs[j]->data_comp->setEnabled(false);
+            }
+        }
+    }   
+}
+void input_window::crossResult(json &j)
+{
+    bool tech = false;
+    if (tech)
+    {
+        button_yes.setEnabled(false);
+        button_yes.setBackgroundColor(DarkGrey);
+    }
+    else
+    {
+        button_yes.delayType = true;
+    }
+}
+void input_window::inputChanged(input_data *input)
+{
+    for (int i=0; i<nfields; i++)
+    {
+        inputs[i]->data_comp->delayType = false;
+        inputs[i]->data_comp->setEnabled(true);
+    }
+    button_yes.setEnabled(false);
+    button_yes.setBackgroundColor(DarkGrey);
+}
 void input_window::sendInformation()
 {
     json j = R"({"DriverSelection":"ValidateDataEntry"})"_json;
@@ -172,13 +232,15 @@ void input_window::sendInformation()
     {
         j["DataInputResult"][i.second->label] = i.second->data_accepted;
     }
+    j["SkipOperationalCheck"] = button_yes.delayType;
     write_command("json", j.dump());
 }
-void input_window::build_from(json &j)
+void input_window::buildFrom(json &j)
 {
     for (int i=0; i<nfields; i++) {
         json &input = j["Inputs"][i];
-        inputs[i] = new input_data(input["Label"]);
+        inputs[i] = new input_data(input["Label"], input["Label"] != "");
+        inputs[i]->window = this;
         inputs[i]->keys = getKeyboard(input["Keyboard"], inputs[i]);
         if (input.contains("AcceptedValue"))
         {

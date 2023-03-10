@@ -27,7 +27,7 @@ void TextButton::paint()
     if (enabled_text == nullptr)
     {
         enabled_text = getText(caption, 0, 0, size, fgColor);
-        disabled_text = getText(caption, 0, 0, size, DarkGrey);
+        disabled_text = getText(caption, 0, 0, size, disabledColor);
     }
     Button::paint();
     if(enabled)

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-08 10:44+0100\n"
-"PO-Revision-Date: 2023-03-08 13:07+0100\n"
+"POT-Creation-Date: 2023-03-10 10:15+0100\n"
+"PO-Revision-Date: 2023-03-10 10:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: es\n"
@@ -18,7 +18,32 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.2.2\n"
 
-#: window/data_entry.cpp:24 window/keyboard.cpp:187
+#: language/language.cpp:26 window/menu_main.cpp:31 window/menu_radio.cpp:29
+#: window/nav_buttons.cpp:32
+msgid "Main"
+msgstr "Princ"
+
+#: language/language.cpp:27 window/nav_buttons.cpp:38
+msgid ""
+"Over-\n"
+"ride"
+msgstr "Rebase"
+
+#: language/language.cpp:28 window/nav_buttons.cpp:44
+msgid ""
+"Data\n"
+"view"
+msgstr ""
+"Ver\n"
+"datos"
+
+#: language/language.cpp:29 window/nav_buttons.cpp:50
+msgid "Spec"
+msgstr ""
+
+#: window/data_entry.cpp:24 window/data_validation.cpp:11
+#: window/data_validation.h:28 window/data_validation.h:34
+#: window/data_validation.h:88 window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
 msgstr "Sí"
@@ -27,24 +52,19 @@ msgstr "Sí"
 msgid " entry complete?"
 msgstr " entrada completa?"
 
+#: window/data_validation.h:34 window/keyboard.cpp:185 window/keyboard.cpp:189
+msgid "No"
+msgstr "No"
+
 #: window/data_view.h:39
 msgid "Data view"
 msgstr "Ver datos"
 
-#: window/driver_id.cpp:27 window/menu_main.cpp:36
-msgid "Driver ID"
-msgstr "ID maquinista"
-
-#: window/driver_id.cpp:27
+#: window/driver_id.cpp:26
 msgid "TRN"
 msgstr "NTREN"
 
-#: window/fixed_train_data.cpp:28 window/menu_main.cpp:37
-#: window/train_data.cpp:25
-msgid "Train Data"
-msgstr "Datos tren"
-
-#: window/fixed_train_data.cpp:28
+#: window/fixed_train_data.cpp:27
 msgid ""
 "Enter\n"
 "data"
@@ -52,51 +72,47 @@ msgstr ""
 "Int.\n"
 "datos"
 
-#: window/keyboard.cpp:30 window/keyboard.cpp:73
+#: window/keyboard.cpp:29 window/keyboard.cpp:72
 msgid "DEL"
 msgstr ""
 
-#: window/keyboard.cpp:186
-msgid "No"
-msgstr "No"
-
-#: window/level_window.cpp:22 window/menu_main.cpp:38
-msgid "Level"
-msgstr "Nivel"
-
-#: window/level_window.cpp:48
-msgid "Level validation"
-msgstr "Validar nivel"
-
-#: window/menu_main.cpp:33 window/menu_radio.cpp:29 window/nav_buttons.cpp:32
-msgid "Main"
-msgstr "Princ"
-
-#: window/menu_main.cpp:35
+#: window/menu_main.cpp:33
 msgid "Start"
 msgstr "Inicio"
 
-#: window/menu_main.cpp:39 window/running_number.cpp:23
+#: window/menu_main.cpp:34
+msgid "Driver ID"
+msgstr "ID maquinista"
+
+#: window/menu_main.cpp:35
+msgid "Train Data"
+msgstr "Datos tren"
+
+#: window/menu_main.cpp:36
+msgid "Level"
+msgstr "Nivel"
+
+#: window/menu_main.cpp:37
 msgid "Train running number"
 msgstr "Número de tren"
 
-#: window/menu_main.cpp:40
+#: window/menu_main.cpp:38
 msgid "Exit Shunting"
 msgstr "Fin Maniobras"
 
-#: window/menu_main.cpp:40
+#: window/menu_main.cpp:38
 msgid "Shunting"
 msgstr "Maniobras"
 
-#: window/menu_main.cpp:41
+#: window/menu_main.cpp:39
 msgid "Non-Leading"
 msgstr "Doble Tracción"
 
-#: window/menu_main.cpp:42
+#: window/menu_main.cpp:40
 msgid "Maintain shunting"
 msgstr "Mantener maniobra"
 
-#: window/menu_main.cpp:43
+#: window/menu_main.cpp:41
 msgid "Radio data"
 msgstr "Datos radio"
 
@@ -136,7 +152,7 @@ msgstr "Versión del sistema"
 msgid "Set VBC"
 msgstr "Añadir VBC"
 
-#: window/menu_settings.cpp:28 window/set_vbc.cpp:31
+#: window/menu_settings.cpp:28 window/set_vbc.cpp:27
 msgid "Remove VBC"
 msgstr "Eliminar VBC"
 
@@ -156,53 +172,11 @@ msgstr "Vel/Distancia SR"
 msgid "Train integrity"
 msgstr "Integridad del tren"
 
-#: window/nav_buttons.cpp:38
-msgid ""
-"Over-\n"
-"ride"
-msgstr "Rebase"
-
-#: window/nav_buttons.cpp:44
-msgid ""
-"Data\n"
-"view"
-msgstr ""
-"Ver\n"
-"datos"
-
-#: window/nav_buttons.cpp:50
-msgid "Spec"
-msgstr ""
-
-#: window/rbc_data.cpp:21
-msgid "RBC data"
-msgstr "Datos RBC"
-
-#: window/rbc_data.cpp:23
-msgid "RBC ID"
-msgstr "ID RBC"
-
-#: window/rbc_data.cpp:25
-msgid "RBC phone number"
-msgstr "Número RBC"
-
-#: window/set_vbc.cpp:23 window/set_vbc.cpp:33
+#: window/set_vbc.cpp:23 window/set_vbc.cpp:29
 msgid "VBC code"
 msgstr "Código VBC"
 
-#: window/sr_data.cpp:22
-msgid "SR speed/distance"
-msgstr "Distancia y velocidad SR"
-
-#: window/sr_data.cpp:24
-msgid "SR speed (km/h)"
-msgstr "Velocidad SR (km/h)"
-
-#: window/sr_data.cpp:25
-msgid "SR distance (m)"
-msgstr "Distancia SR (m)"
-
-#: window/train_data.cpp:25
+#: window/train_data.cpp:24
 msgid ""
 "Select\n"
 "type"
@@ -210,30 +184,50 @@ msgstr ""
 "Sel.\n"
 "tipo"
 
-#: window/train_data.cpp:27
+#: window/train_data.cpp:26
 msgid "Length (m)"
 msgstr "Longitud (m)"
 
-#: window/train_data.cpp:28
+#: window/train_data.cpp:27
 msgid "Brake percentage"
 msgstr "Porcentaje de freno"
 
-#: window/train_data.cpp:29
+#: window/train_data.cpp:28
 msgid "Max speed (km/h)"
 msgstr "Vel. máxima (km/h)"
 
-#: window/train_data.cpp:30
+#: window/train_data.cpp:29
 msgid "Loading gauge"
 msgstr "Gálibo"
 
-#: window/train_data.cpp:31
+#: window/train_data.cpp:30
 msgid "Train category"
 msgstr "Tipo de tren"
 
-#: window/train_data.cpp:32
+#: window/train_data.cpp:31
 msgid "Axle load category"
 msgstr "Carga por ejes"
 
-#: window/train_data.cpp:52
-msgid "Validate train data"
-msgstr "Validar datos tren"
+#~ msgid "Level validation"
+#~ msgstr "Validar nivel"
+
+#~ msgid "RBC data"
+#~ msgstr "Datos RBC"
+
+#~ msgid "RBC ID"
+#~ msgstr "ID RBC"
+
+#~ msgid "RBC phone number"
+#~ msgstr "Número RBC"
+
+#~ msgid "SR speed/distance"
+#~ msgstr "Distancia y velocidad SR"
+
+#~ msgid "SR speed (km/h)"
+#~ msgstr "Velocidad SR (km/h)"
+
+#~ msgid "SR distance (m)"
+#~ msgstr "Distancia SR (m)"
+
+#~ msgid "Validate train data"
+#~ msgstr "Validar datos tren"

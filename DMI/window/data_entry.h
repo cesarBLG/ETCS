@@ -32,11 +32,14 @@ class input_window : public subwindow
     map<int, input_data*> inputs;
     Button* buttons[12];
     virtual void setLayout() override;
-    virtual void sendInformation();
+    void sendInformation();
     void create();
     public:
     input_window(string name, int nfields, bool fullscreen);
-    void build_from(json &j);
+    void buildFrom(json &j);
+    void fieldCheckResult(json &j);
+    void crossResult(json &j);
+    void inputChanged(input_data *input);
     virtual ~input_window();
 };
 #endif

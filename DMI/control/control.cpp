@@ -21,21 +21,15 @@
 #include "../monitor.h"
 #include "../window/window.h"
 #include "../window/data_view.h"
-#include "../window/level_window.h"
 #include "../window/train_data.h"
 #include "../window/fixed_train_data.h"
-#include "../window/rbc_data.h"
 #include "../window/driver_id.h"
-#include "../window/running_number.h"
-#include "../window/sr_data.h"
 #include "../window/menu_main.h"
 #include "../window/menu_radio.h"
 #include "../window/menu_override.h"
 #include "../window/menu_spec.h"
 #include "../window/menu_settings.h"
-#include "../window/set_vbc.h"
 #include "../window/track_ahead_free.h"
-#include "../window/language_window.h"
 #include <thread>
 #include <functional>
 #include <mutex>
@@ -113,78 +107,31 @@ void setWindow(json &j)
         } else if (name == "driver_window") {
             driver_window *d;
             if (same) d = (driver_window*)active;
-            else d = new driver_window(j["driver_id"].get<std::string>(), j["show_trn"].get<bool>());
+            else
+            {
+                json& def = j["WindowDefinition"];
+                d = new driver_window(def["WindowTitle"].get<std::string>(), j["show_trn"].get<bool>());
+                ((input_window*)d)->buildFrom(def);
+            }
             w = d;
-        } else if (name == "trn_window") {
-            trn_window *d;
-            if (same) d = (trn_window*)active;
-            else d = new trn_window(j["trn"].get<int>());
-            w = d;
-        } else if (name == "level_window") {
-            level_window *l;
-            if (same) l = (level_window*)active;
-            else l = new level_window(j["level"].get<std::string>(), j["Levels"].get<std::vector<std::string>>());
-            w = l;
-        } else if (name == "level_validation_window") {
-            level_validation_window *l;
-            if (same) l = (level_validation_window*)active;
-            else l = new level_validation_window(j["level"].get<std::string>());
-            w = l;
         } else if (name == "train_data_window") {
             train_data_window *t;
             if (same) t = (train_data_window*)active;
-            else t = new train_data_window();
+            else
+            {
+                json& def = j["WindowDefinition"];
+                t = new train_data_window(def["WindowTitle"].get<std::string>());
+                ((input_window*)t)->buildFrom(def);
+            }
             w = t;
         } else if (name == "fixed_train_data_window") {
             fixed_train_data_window *t;
             if (same) t = (fixed_train_data_window*)active;
-            else t = new fixed_train_data_window(j["train_data"].get<std::string>());
-            w = t;
-        } else if (name == "fixed_train_data_validation_window") {
-            fixed_train_data_validation_window *t;
-            if (same) t = (fixed_train_data_validation_window*)active;
-            else t = new fixed_train_data_validation_window(j["train_data"].get<std::string>());
-            w = t;
-        } else if (name == "rbc_data_window") {
-            rbc_data_window *t;
-            if (same) t = (rbc_data_window*)active;
-            else t = new rbc_data_window(j["RBC id"].get<std::uint32_t>(), j["RBC phone number"].get<std::uint64_t>());
-            w = t;
-        } else if (name == "set_vbc_window") {
-            set_vbc_window *t;
-            if (same) t = (set_vbc_window*)active;
-            else t = new set_vbc_window();
-            w = t;
-        } else if (name == "remove_vbc_window") {
-            remove_vbc_window *t;
-            if (same) t = (remove_vbc_window*)active;
-            else t = new remove_vbc_window();
-            w = t;
-        } else if (name == "sr_data_window") {
-            sr_data_window *t;
-            if (same) t = (sr_data_window*)active;
-            else t = new sr_data_window();
-            w = t;
-        } else if (name == "language_window") {
-            language_window *l;
-            if (same) l = (language_window*)active;
-            else l = new language_window(j["lang"].get<std::string>(), j["Languages"].get<std::vector<std::string>>());
-            w = l;
-        } else if (name == "data_view_window") {
-            data_view_window *t;
-            if (same)
-            {
-                t = (data_view_window*)active;
-            }
             else
             {
-                std::vector<std::pair<std::string,std::string>> data;
-                json &fields = j["Fields"];
-                for (auto it = fields.begin(); it!=fields.end(); ++it)
-                {
-                    data.push_back({it.key(), it.value().get<std::string>()});
-                }
-                t = new data_view_window(data);
+                json& def = j["WindowDefinition"];
+                t = new fixed_train_data_window(def["WindowTitle"].get<std::string>());
+                ((input_window*)t)->buildFrom(def);
             }
             w = t;
         } else {
@@ -195,10 +142,32 @@ void setWindow(json &j)
                 std::string type = def["WindowType"].get<std::string>();
                 if (type == "DataEntry")
                 {
-                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size(), false);
-                    ((input_window*)w)->build_from(def);
+                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size(), def["Inputs"].size() > 1);
+                    ((input_window*)w)->buildFrom(def);
                 }
-                
+                else if (type == "DataValidation")
+                {
+                    std::vector<input_data*> data;
+                    auto res = def["DataInputResult"];
+                    for (auto it = res.begin(); it != res.end(); ++it)
+                    {
+                        input_data *i = new input_data(it.key());
+                        i->data = it.value().get<std::string>();
+                        i->setAccepted(true);
+                        data.push_back(i);
+                    }
+                    w = new validation_window(def["WindowTitle"].get<std::string>(), data);
+                }
+                else if (type == "DataView")
+                {
+                    std::vector<std::pair<std::string,std::string>> data;
+                    json &fields = def["Fields"];
+                    for (json j : fields)
+                    {
+                        data.push_back({j["Label"], j["Value"]});
+                    }
+                    w = new data_view_window(data);
+                }
                 /*else if (type == "Menu") w = new menu(j["WindowDefinitionW"]);*/
             }
         }

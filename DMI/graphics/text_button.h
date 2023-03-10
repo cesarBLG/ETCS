@@ -25,6 +25,7 @@ class TextButton : public Button
     text_graphic *disabled_text=nullptr;
     int size;
     public:
+    Color disabledColor = DarkGrey;
     void paint() override;
     void rename(std::string name)
     {

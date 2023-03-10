@@ -29,11 +29,6 @@ class validation_input : public input_data
         accepted = true;
         keys = getYesNoKeyboard(this);
     }
-    void validate() override
-    {
-        if (data != gettext("Yes") && data!= gettext("No")) return;
-        valid = true;
-    }
 };
 class validation_window : public subwindow
 {
@@ -80,7 +75,6 @@ class validation_window : public subwindow
         confirmation->data_comp->setPressedAction([this]
         {
             confirmation->setAccepted(true);
-            confirmation->validate();
             sendInformation();
         });
         setLayout();

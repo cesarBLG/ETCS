@@ -20,13 +20,11 @@
 #include "window.h"
 #include "algorithm"
 #include "../monitor.h"
-#include "running_number.h"
 #include "menu_settings.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
-driver_window::driver_window(std::string id, bool show_trn) : input_window(gettext("Driver ID"), 1, false), TRN(gettext("TRN"),82,50), settings("symbols/Setting/SE_04.bmp",82,50)
+driver_window::driver_window(std::string title, bool show_trn) : input_window(title, 1, false), TRN(gettext("TRN"),82,50), settings("symbols/Setting/SE_04.bmp",82,50)
 {
-    inputs[0] = new driverid_input();
     TRN.setPressedAction([this] 
     {
         write_command("TrainRunningNumber","");
@@ -35,26 +33,10 @@ driver_window::driver_window(std::string id, bool show_trn) : input_window(gette
     {
         write_command("navButton","settings");
     });
-    create();
-    inputs[0]->data = id;
-    inputs[0]->setAccepted(true);
 }
 void driver_window::setLayout()
 {
     input_window::setLayout();
     addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
     addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
-}
-void driver_window::sendInformation()
-{
-    write_command("setDriverID",inputs[0]->getData());
-}
-void driverid_input::validate()
-{
-    if(data.empty()) return;
-    valid = true;
-}
-driverid_input::driverid_input()
-{
-    keys = getAlphaNumericKeyboard(this);
 }
