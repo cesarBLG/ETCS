@@ -239,6 +239,9 @@ void parseData(string str)
     }
     if (command != "json") return;
     json j = json::parse(value);
+    setWindow(j);
+    if (!j.contains("Status")) return;
+    j = j["Status"];
     /*fill_non_existent(j, "TargetSpeedMpS", 1000);
     fill_non_existent(j, "ReleaseSpeedMpS", 0);
     fill_non_existent(j, "ModeAcknowledgement", nullptr);
@@ -285,7 +288,6 @@ void parseData(string str)
     EB = SB = j["BrakeCommanded"].get<bool>();
     extern bool display_taf;
     display_taf = j["DisplayTAF"].get<bool>();
-    setWindow(j["ActiveWindow"]);
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
     {
         speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();
@@ -301,7 +303,6 @@ void parseData(string str)
         std::set<int> syms = j["ActiveTrackConditions"].get<std::set<int>>();
         updateTc(syms);
     }
-    /*if(command == "setVset") Vset = stof(value);*/
 }
 extern bool running;
 int read(int channel)

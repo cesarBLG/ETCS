@@ -143,6 +143,10 @@ void parse_command(string str, bool lock=true)
                 json &res = j["DataInputResult"];
                 std::string window = j["WindowTitle"];
                 validate_data_entry(window, res);
+            } else if (selection == "ValidateEntryField") {
+                std::string window = j["WindowTitle"];
+                json &res = j["ValidateEntryField"];
+                validate_entry_field(window, res);
             } else if (selection == "CloseWindow") {
                 close_window();
             } else if (selection == "TrackAheadFree") {
@@ -239,7 +243,6 @@ void dmi_comm()
         j["ReleaseSpeedMpS"] = V_release;
         j["CurrentMonitoringStatus"] = (int)monitoring;
         j["CurrentSupervisionStatus"] = (int)supervision;
-        j["ActiveWindow"] = active_window_dmi;
         j["CurrentMode"] = (int)mode;
         j["CurrentLevel"] = (int)level;
         if (level == Level::NTC)
@@ -374,7 +377,10 @@ void dmi_comm()
             j["SpeedTargets"] = "[]"_json;
             j["ActiveTrackConditions"] = "[]"_json;
         }
-        send_command("json", j.dump());
+        json j2;
+        j2["Status"] = j;
+        j2["ActiveWindow"] = active_window_dmi;
+        send_command("json", j2.dump());
         /*
         send_command("setVset", to_string(V_set*3.6));
         send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");

@@ -762,7 +762,7 @@ void validate_data_entry(std::string name, json &result)
         }
     } else if (name == gettext("Driver ID")) {
         driver_id = result[""];
-        if (driver_id == "")
+        if (driver_id.length() < 0 || driver_id.length() > 16)
             return;
         driver_id_valid = true;
         if (active_dialog == dialog_sequence::StartUp)
@@ -828,6 +828,61 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "S1";
         }
     }
+}
+void validate_entry_field(std::string window, json &result)
+{
+    bool operat = true;
+    bool techres = true;
+    bool techrang = true;
+    std::string label = result["Label"];
+    std::string data = result["Value"];
+    if (window == gettext("Train data"))
+    {
+        if (label == gettext("Length (m)"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val >= 0 && val < 4096;
+        }
+        else if (label == gettext("Brake percentage"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val >= 10 && val <= 250;
+        }
+        else if (label == gettext("Max speed (km/h)"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 600;
+            techres = val % 5 == 0;
+        }
+    }
+    else if (window == gettext("RBC data"))
+    {
+        if (label == gettext("RBC ID"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val >= 0 && val <= 16777214;
+        }
+    }
+    else if (window == gettext("SR speed/distance"))
+    {
+        if (label == gettext("SR distance (m)"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 10000;
+        }
+        else if (label == gettext("SR speed (km/h)"))
+        {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 600;
+            techres = val % 5 == 0;
+        }
+    }
+    result["OperationalRange"] = operat || result["SkipOperationalCheck"];
+    result["TechnicalResolution"] = techres;
+    result["TechnicalRange"] = techrang;
+    json j;
+    j["ValidateEntryField"] = result;
+    send_command("json", j.dump());
 }
 void update_dialog_step(std::string step, std::string step2)
 {

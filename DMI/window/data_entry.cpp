@@ -74,16 +74,12 @@ void input_window::create()
                 if (i == cursor)
                 {
                     if (inputs[cursor]->techcross_invalid || inputs[cursor]->techrange_invalid || inputs[cursor]->data == "") return;
-                    /*json j;
-                    j["Label"] = inputs[i]->label;
-                    j["Value"] = inputs[i]->data;
-                    j["SkipOperationalCheck"] = inputs[i]->operatrange_invalid;*/
-                    json j;
-                    j["Label"] = inputs[i]->label;
-                    j["OperationalRange"] = true;
-                    j["TechnicalResolution"] = true;
-                    j["TechnicalRange"] = true;
-                    fieldCheckResult(j);
+                    json j = R"({"DriverSelection":"ValidateEntryField"})"_json;
+                    j["ValidateEntryField"]["Label"] = inputs[i]->label;
+                    j["ValidateEntryField"]["Value"] = inputs[i]->data;
+                    j["ValidateEntryField"]["SkipOperationalCheck"] = inputs[i]->operatrange_invalid;
+                    j["WindowTitle"] = title;
+                    write_command("json", j.dump());
                 }
                 else
                 {

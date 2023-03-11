@@ -56,8 +56,17 @@ void startWindows()
     taf_window.active = false;
     active_name = "default";
 }
-void setWindow(json &j)
+void setWindow(json &data)
 {
+    if (data.contains("ValidateEntryField"))
+    {
+        if (active != nullptr)
+        {
+            ((input_window*)active)->fieldCheckResult(data["ValidateEntryField"]);
+        }
+    }
+    if (!data.contains("ActiveWindow")) return;
+    json j = data["ActiveWindow"];
     subwindow *w = nullptr;
     std::string name = j["active"].get<std::string>();
     if (name == "default") {

@@ -28,4 +28,5 @@ json fixed_train_data_validation_window(std::string data);*/
 void update_dmi_windows();
 void close_window();
 void validate_data_entry(std::string name, json &result);
+void validate_entry_field(std::string window, json &result);
 void update_dialog_step(std::string step, std::string step2);
