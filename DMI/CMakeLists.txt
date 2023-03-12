@@ -11,6 +11,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             window/train_data.cpp  STM/stm_objects.cpp ../EVC/Packets/STM/message.cpp
             planning/planning.cpp control/control.cpp state/gps_pos.cpp 
             graphics/sdl/gfx_primitives.cpp language/language.cpp
+            ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
 )
 
 if(WIN32)
@@ -41,7 +42,15 @@ target_include_directories(dmi PRIVATE ../include)
 
 if(WIN32)
     target_link_libraries(dmi PRIVATE imagehlp wsock32)
+endif()
+if(ANDROID)
+    target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
+endif()
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(dmi PRIVATE Threads::Threads)
 
+if(ETCS_VENDORED)
     add_custom_command(TARGET dmi POST_BUILD 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:SDL2>              
@@ -51,9 +60,3 @@ if(WIN32)
         $<TARGET_FILE:SDL2_ttf>              
         $<TARGET_FILE_DIR:dmi>)
 endif()
-if(ANDROID)
-    target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
-endif()
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-target_link_libraries(dmi PRIVATE Threads::Threads)

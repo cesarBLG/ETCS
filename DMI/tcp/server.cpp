@@ -224,12 +224,7 @@ void parseData(std::string str)
     else if (command == "playSinfo") playSinfo();
     else if (command == "stmData")
     {
-        std::vector<unsigned char> message((value.size()+7)>>3);
-        for (int i=0; i<value.size(); i++) {
-            if (value[i]=='1')
-                message[i>>3] |= 1<<(7-(i&7));
-        }
-        bit_manipulator r(std::move(message));
+        bit_manipulator r(value);
         stm_message msg(r);
         parse_stm_message(msg);
     }
