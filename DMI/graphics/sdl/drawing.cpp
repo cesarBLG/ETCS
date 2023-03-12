@@ -30,6 +30,7 @@
 #include "../flash.h"
 #include "../../sound/sound.h"
 #include "../../messages/messages.h"
+#include "../../tcp/server.h"
 using namespace std;
 extern mutex draw_mtx;
 SDL_Window *sdlwin;
@@ -118,11 +119,9 @@ void loop_video()
 			}
         }
         if (!running) break;
-        {
-
-        }
         void update_stm_windows();
         unique_lock<mutex> lck(draw_mtx);
+        updateDrawCommands();
         update_stm_windows();
         lck.unlock();
         display();
@@ -206,8 +205,8 @@ float getAntiScale(float val)
 }
 void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
 {
-    int w;
-    int h;
+    int w=0;
+    int h=0;
     TTF_SizeUTF8(font, str, &w, &h);
     *width = w/scale;
     *height = h/scale;
@@ -218,12 +217,13 @@ TTF_Font *openFont(std::string text, float size)
     auto it = fonts.find({text,size});
     if (it == fonts.end())
     {
+        std::string path = text;
 #ifdef __ANDROID__
         extern std::string filesDir;
-        text = filesDir+"/"+text;
+        path = filesDir+"/"+text;
 #endif
-        TTF_Font *f = TTF_OpenFont(text.c_str(), getScale(size)*1.4);
-        if(f == nullptr) printf("Error loading font %s. SDL Error: %s\n", text.c_str(), SDL_GetError());
+        TTF_Font *f = TTF_OpenFont(path.c_str(), getScale(size)*1.4);
+        if(f == nullptr) printf("Error loading font %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
         it = fonts.insert({{text,size}, f}).first;
     }
     return it->second;

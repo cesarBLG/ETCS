@@ -232,7 +232,7 @@ void displayCSG()
 static int initSpeed = 0;
 void displayLines()
 {
-    bool inited = initSpeed != maxSpeed;
+    bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
     if (!inited) csg.clear();
     setColor(White);

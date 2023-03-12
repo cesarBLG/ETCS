@@ -36,7 +36,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(evc PRIVATE Threads::Threads)
 
-if(ETCS_VENDORED)
+if(WIN32)
     add_custom_command(TARGET evc POST_BUILD 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:orts>              

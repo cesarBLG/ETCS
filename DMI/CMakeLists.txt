@@ -50,7 +50,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(dmi PRIVATE Threads::Threads)
 
-if(ETCS_VENDORED)
+if(WIN32)
     add_custom_command(TARGET dmi POST_BUILD 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:SDL2>              

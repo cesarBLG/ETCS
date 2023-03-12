@@ -48,6 +48,7 @@ int active_channel;
 #define PORT 5010
 static char data[BUFF_SIZE];
 std::string buffer;
+std::mutex server_mtx;
 static SDL_Event ev;
 #include <iostream>
 template<class T>
@@ -189,8 +190,6 @@ void from_json(const json&j, planning_element &e)
 }
 void parseData(std::string str)
 {
-    extern std::mutex draw_mtx;
-    std::unique_lock<std::mutex> lck(draw_mtx);
     int index = str.find_first_of('(');
     std::string command = str.substr(0, index);
     std::string value = str.substr(index+1, str.find_last_of(')')-index-1);
@@ -306,16 +305,21 @@ int read(int channel)
     if(result>0)
     {
         ::data[result] = 0;
+        std::unique_lock<std::mutex> lck(server_mtx);
         buffer += ::data;
-        int end;
-        while ((end=buffer.find_first_of(';'))!=std::string::npos) {
-            int start = buffer.find_first_not_of("\n\r ;");
-            std::string command = buffer.substr(start, end-start);
-            parseData(command);
-            buffer = buffer.substr(end+1);
-        }
     }
     return result;
+}
+void updateDrawCommands()
+{
+    std::unique_lock<std::mutex> lck(server_mtx);
+    int end;
+    while ((end=buffer.find_first_of(';'))!=std::string::npos) {
+        int start = buffer.find_first_not_of("\n\r ;");
+        std::string command = buffer.substr(start, end-start);
+        parseData(command);
+        buffer = buffer.substr(end+1);
+    }
 }
 void write_command(std::string command, std::string value)
 {

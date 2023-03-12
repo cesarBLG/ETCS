@@ -22,7 +22,7 @@
 #include "../graphics/button.h"
 #include "../graphics/display.h"
 #include "../tcp/server.h"
-input_window::input_window(std::string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(get_text("Yes"),330,40), 
+input_window::input_window(std::string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(get_text("Yes"),330,40),
     nfields(nfields)
 {
     for(int i=0; i<12; i++)

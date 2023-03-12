@@ -5,7 +5,7 @@
 #include "../Packets/STM/30.h"
 #include <iostream>
 moFileLib::moFileReader reader;
-std::string language;
+std::string language = "en";
 std::string get_text(std::string id)
 {
     if (language == "en") return id;
@@ -13,9 +13,14 @@ std::string get_text(std::string id)
 }
 void set_language(std::string lang)
 {
+    std::string file = "../locales/evc/"+lang+".mo";
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    file = filesDir+"/locales/evc/"+lang+".mo";
+#endif
     if (lang == "en") {
         language = "en";
-    } else if (reader.ReadFile(("../locales/evc/"+lang+".mo").c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
+    } else if (reader.ReadFile(file.c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
         std::cout<<reader.GetErrorDescription()<<std::endl;
         language = "en";
     } else {
