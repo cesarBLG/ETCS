@@ -20,8 +20,8 @@
 #include "data_entry.h"
 #include "../graphics/flash.h"
 #include "keyboard.h"
-input_data::input_data(string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
-data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
+input_data::input_data(std::string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
+data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
 {
     holdcursor = {0};
     if(label!="")
@@ -75,7 +75,7 @@ data_set([this](string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 10
         }
     }
 }
-void input_data::setData(string s)
+void input_data::setData(std::string s)
 {
     if (window != nullptr) window->inputChanged(this);
     techcross_invalid = techrange_invalid = techresol_invalid = operatcross_invalid = operatrange_invalid = false;

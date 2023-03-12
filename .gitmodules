@@ -1,0 +1,9 @@
+[submodule "libs/SDL_ttf"]
+	path = libs/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf
+[submodule "libs/SDL"]
+	path = libs/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "libs/liborts"]
+	path = libs/liborts
+	url = https://github.com/cesarBLG/liborts

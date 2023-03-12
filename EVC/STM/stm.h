@@ -67,6 +67,7 @@ struct stm_object
     void report_trip();
     void trigger_condition(std::string change);
     void request_state(stm_state req);
+    void send_message(stm_message *msg);
 };
 void stm_level_change(level_information newlevel, bool driver);
 void stm_level_transition_received(level_transition_information info);

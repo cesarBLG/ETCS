@@ -19,7 +19,6 @@
 #include "../graphics/button.h"
 #include "../sound/sound.h"
 #include <chrono>
-using namespace std;
 bool isInside(Component *comp, float x, float y)
 {
     return (comp->x-comp->touch_left)<x && (comp->x + comp->sx + comp->touch_right)>x
@@ -30,7 +29,7 @@ void window::event(int evNo, float x, float y)
     int64_t CurrentTime = (std::chrono::duration_cast<std::chrono::milliseconds>
         (std::chrono::system_clock::now().time_since_epoch())).count();
     bool pressed = evNo == 1;
-    vector<LayoutElement>& el = getLayoutElements();
+    std::vector<LayoutElement>& el = getLayoutElements();
     Component *validButtonPressed = nullptr;
 	if (pressedButton != nullptr)
 	{

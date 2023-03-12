@@ -38,7 +38,7 @@ void arrowUp();
 void arrowDown();
 IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, 50, arrowUp, "symbols/Navigation/NA_15.bmp");
 IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, 50, arrowDown, "symbols/Navigation/NA_16.bmp");
-deque <Message> messageList;
+std::deque<Message> messageList;
 int line;
 int current=0;
 void addMsg(Message m)
@@ -108,7 +108,7 @@ void updateMessages()
         textArea.setAck([msg]() {
             msg->ack = false;
             setAck(AckType::Message, msg->Id, false);
-            write_command("json", R"({"DriverSelection":"MessageAcknowledge","MessageId":)"+to_string(msg->Id)+"}");
+            write_command("json", R"({"DriverSelection":"MessageAcknowledge","MessageId":)"+std::to_string(msg->Id)+"}");
             updateMessages();
         });
     }
@@ -118,8 +118,8 @@ void updateMessages()
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
-        string date = to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + to_string(m.minute);
-        string &text = m.text;
+        std::string date = std::to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + std::to_string(m.minute);
+        std::string &text = m.text;
         int last = text.size();
         if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
         if(line<5+current && line>=current)

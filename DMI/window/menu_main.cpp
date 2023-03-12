@@ -28,17 +28,17 @@
 #include "../tcp/server.h"
 
 #include <chrono>
-menu_main::menu_main() : menu(gettext("Main"))
+menu_main::menu_main() : menu(get_text("Main"))
 {
-    buttons[0] = new TextButton(gettext("Start"), 153, 50);
-    buttons[1] = new TextButton(gettext("Driver ID"), 153, 50);
-    buttons[2] = new TextButton(gettext("Train Data"), 153, 50);
-    buttons[4] = new TextButton(gettext("Level"), 153, 50);
-    buttons[5] = new TextButton(gettext("Train running number"), 153, 50);
-    buttons[6] = new TextButton(mode == Mode::SH ? gettext("Exit Shunting") : gettext("Shunting"), 153, 50);
-    buttons[7] = new TextButton(gettext("Non-Leading"), 153, 50);
-    buttons[8] = new TextButton(gettext("Maintain shunting"), 153, 50);
-    buttons[9] = new TextButton(gettext("Radio data"), 153, 50);
+    buttons[0] = new TextButton(get_text("Start"), 153, 50);
+    buttons[1] = new TextButton(get_text("Driver ID"), 153, 50);
+    buttons[2] = new TextButton(get_text("Train Data"), 153, 50);
+    buttons[4] = new TextButton(get_text("Level"), 153, 50);
+    buttons[5] = new TextButton(get_text("Train running number"), 153, 50);
+    buttons[6] = new TextButton(mode == Mode::SH ? get_text("Exit Shunting") : get_text("Shunting"), 153, 50);
+    buttons[7] = new TextButton(get_text("Non-Leading"), 153, 50);
+    buttons[8] = new TextButton(get_text("Maintain shunting"), 153, 50);
+    buttons[9] = new TextButton(get_text("Radio data"), 153, 50);
     buttons[6]->delayType = true;
     buttons[0]->setPressedAction([this]
     {

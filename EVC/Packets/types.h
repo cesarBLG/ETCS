@@ -40,10 +40,12 @@ struct bit_manipulator
     {
         write_mode = false;
     }
-    bit_manipulator(unsigned char *data, int count) : position(0) {
+    bit_manipulator(unsigned char *data, int count) : position(0)
+    {
         write_mode = false;
         bits.insert(bits.end(), data, data+count);
     }
+    bit_manipulator(std::string base64);
     inline bool operator[](int pos)
     {
         return bits[pos>>3] & (1<<(7-(pos&7)));

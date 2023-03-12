@@ -37,7 +37,7 @@
 subwindow *active = nullptr;
 std::string active_name;
 window *default_window;
-mutex draw_mtx;
+std::mutex draw_mtx;
 #include <iostream>
 void startWindows()
 {

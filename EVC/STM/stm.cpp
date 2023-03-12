@@ -11,6 +11,7 @@
 #include "../Packets/STM/175.h"
 #include "../Packets/STM/181.h"
 #include "../Packets/STM/184.h"
+#include "../language/language.h"
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
@@ -186,16 +187,11 @@ void update_ntc_transitions()
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
-                    
-                    auto *msg = new stm_message();
-                    msg->NID_STM.rawdata = kvp.first;
+                    stm_message msg;
                     auto *order = new STMStateOrder();
                     order->NID_STMSTATEORDER.rawdata = (int)t.to;
-                    msg->packets.push_back(std::shared_ptr<ETCS_packet>(order));
-                    bit_manipulator w;
-                    msg->write_to(w);
-                    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
-                    
+                    msg.packets.push_back(std::shared_ptr<ETCS_packet>(order));
+                    stm->send_message(&msg);
                     if (t.to == stm_state::FA) {
                         stm->state = stm_state::FA;
                         send_failed_msg(stm);
@@ -344,9 +340,16 @@ void stm_object::report_received(stm_state newstate)
         last_order = {};
 
 }
+void stm_object::send_message(stm_message *msg)
+{
+    msg->NID_STM.rawdata = nid_stm;
+    bit_manipulator w;
+    msg->write_to(w);
+    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+}
 void send_failed_msg(stm_object *stm)
 {
-    text_message msg(get_ntc_name(stm->nid_stm) + gettext(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
+    text_message msg(get_ntc_name(stm->nid_stm) + get_text(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
     add_message(msg);
 }
 bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);
@@ -419,7 +422,7 @@ void update_stm_control()
         if (mode == Mode::SN || (mode == Mode::NL && get_milliseconds()-last_mode_change > 5000)) {
             if (!ntc_unavailable_msg) {
                 ntc_unavailable_msg = true;
-                text_message msg(get_ntc_name(nid_ntc) + gettext(" not available"), true, false, 2, [stm](text_message &msg){
+                text_message msg(get_ntc_name(nid_ntc) + get_text(" not available"), true, false, 2, [stm](text_message &msg){
                     if (stm != get_stm(nid_ntc) || stm->available() || stm->isolated || (mode != Mode::SN && mode != Mode::NL)) {
                         ntc_unavailable_msg = false;
                         return true;
@@ -436,7 +439,7 @@ void update_stm_control()
         if (stm2->state == stm_state::DA || level == Level::N0 || level == Level::N1 || level == Level::N2 || level == Level::N3 || stm != stm2 || mode != Mode::SN || stm->isolated)
             stm2->control_request_EB = false;
         if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
-            stm_control_EB = true;
+            stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && !STM_max_speed) {
@@ -451,10 +454,9 @@ void stm_send_train_data()
         auto *stm = kvp.second;
         if (stm->state == stm_state::CO || stm->state == stm_state::DE || stm->state == stm_state::CS || stm->state == stm_state::HS || stm->state == stm_state::DA) {
             stm->data_entry = stm_object::data_entry_state::Start;
-            auto *msg = new stm_message();
-            msg->NID_STM.rawdata = kvp.first;
+            stm_message msg;
             auto *flag = new STMDataEntryFlag();
-            msg->packets.push_back(std::shared_ptr<ETCS_packet>(flag));
+            msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
             flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Start;
             auto *td = new STMTrainData();
             td->NC_CDTRAIN.set_value(cant_deficiency);
@@ -465,10 +467,8 @@ void stm_send_train_data()
             td->L_TRAIN.set_value(L_TRAIN);
             td->V_MAXTRAIN.set_value(V_train);
             td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
-            msg->packets.push_back(std::shared_ptr<ETCS_packet>(td));
-            bit_manipulator w;
-            msg->write_to(w);
-            s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+            msg.packets.push_back(std::shared_ptr<ETCS_packet>(td));
+            stm->send_message(&msg);
             stm->data_entry_timer = get_milliseconds();
         }
     }
@@ -517,14 +517,11 @@ void handle_stm_message(const stm_message &msg)
             {
                 stm->data_entry = stm_object::data_entry_state::Inactive;
                 stm->data_entry_timer = get_milliseconds();
-                auto *msg = new stm_message();
-                msg->NID_STM.rawdata = nid_stm;
+                stm_message msg;
                 auto *flag = new STMDataEntryFlag();
-                msg->packets.push_back(std::shared_ptr<ETCS_packet>(flag));
+                msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
                 flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-                bit_manipulator w;
-                msg->write_to(w);
-                s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+                stm->send_message(&msg);
                 break;
             }
             case 181:

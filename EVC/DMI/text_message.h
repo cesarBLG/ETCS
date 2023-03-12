@@ -21,7 +21,6 @@
 #include "dmi.h"
 #include "../Packets/72.h"
 #include "../Position/distance.h"
-#include "../language/language.h"
 #include <ctime>
 #include <list>
 enum struct text_message_type

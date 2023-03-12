@@ -1,5 +1,5 @@
 #pragma once
-#include "../Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 enum struct dialog_sequence
 {

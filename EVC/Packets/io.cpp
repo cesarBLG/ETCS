@@ -2,19 +2,13 @@
 #include "types.h"
 static unsigned char base_64_dec[256];
 const unsigned char base64_table[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-/*std::vector<bool> base64_decode(std::string str, bool remove_padding=true)
+
+bit_manipulator::bit_manipulator(std::string base64) : position(0)
 {
-    std::vector<bool> bits;
-    for (int i=0; i<str.size(); i++) {
-        if (str[i] == '=') break;
-        unsigned char c = base_64_dec[str[i]];
-        for (int j=5; j>=0; j--) {
-            bits.push_back(((c>>j) & 1));
-        }
-    }
-    if (remove_padding) bits.erase(bits.end()-bits.size()%8, bits.end());
-    return bits;
-}*/
+    write_mode = false;
+    bits.reserve(base64.size()*3/4);
+    
+}
 std::string bit_manipulator::to_base64()
 {
     std::vector<unsigned char> encoded_data;

@@ -19,6 +19,7 @@
 #include "../MA/movement_authority.h"
 #include "mode_transition.h"
 #include "../STM/stm.h"
+#include "../language/language.h"
 #include <string>
 bool trip_acknowledged = false;
 bool trip_exit_acknowledged = false;
@@ -30,41 +31,41 @@ void train_trip(int reason)
         case 16:
         case 18:
         case 43:
-            str = gettext("Unauthorized passing of EoA/LoA");
+            str = get_text("Unauthorized passing of EoA/LoA");
             break;
         case 17:
         case 66:
-            str = gettext("Balise read error");
+            str = get_text("Balise read error");
             break;
         case 39:
         case 67:
-            str = gettext("No MA received at level transition");
+            str = get_text("No MA received at level transition");
             break;
         case 41:
-            str = gettext("Communication error");
+            str = get_text("Communication error");
             break;
         case 35:
-            str = gettext("SH refused");
+            str = get_text("SH refused");
             break;
         case 65:
-            str = gettext("Trackside not compatible");
+            str = get_text("Trackside not compatible");
             break;
         case 42:
-            str = gettext("SR distance exceeded");
+            str = get_text("SR distance exceeded");
             break;
         case 49:
         case 52:
-            str = gettext("SH stop order");
+            str = get_text("SH stop order");
             break;
         case 36:
         case 54:
-            str = gettext("SR stop order");
+            str = get_text("SR stop order");
             break;
         case 20:
-            str = gettext("Emergency stop");
+            str = get_text("Emergency stop");
             break;
         case 69:
-            str = gettext("No track description");
+            str = get_text("No track description");
             break;
         case 38: {
             std::string name = "NTC";
@@ -75,7 +76,7 @@ void train_trip(int reason)
                         name = it->second;
                 }
             }
-            str = name+gettext(" brake demand");
+            str = name+get_text(" brake demand");
             break;
         }
         default:

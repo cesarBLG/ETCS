@@ -18,7 +18,7 @@
 #define _DATA_ENTRY_H
 #include "subwindow.h"
 #include "input_data.h"
-#include "../../EVC/Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include <map>
 using json = nlohmann::json;
 class input_window : public subwindow
@@ -29,13 +29,13 @@ class input_window : public subwindow
     int nfields;
     protected:
     Component confirmation_label;
-    map<int, input_data*> inputs;
+    std::map<int, input_data*> inputs;
     Button* buttons[12];
     virtual void setLayout() override;
     void sendInformation();
     void create();
     public:
-    input_window(string name, int nfields, bool fullscreen);
+    input_window(std::string name, int nfields, bool fullscreen);
     void buildFrom(json &j);
     void fieldCheckResult(json &j);
     void crossResult(json &j);

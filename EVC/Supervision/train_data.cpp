@@ -17,7 +17,7 @@
  */
 #include "train_data.h"
 #include "conversion_model.h"
-#include "../Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "../Supervision/speed_profile.h"
 #include <fstream>
 #include <list>

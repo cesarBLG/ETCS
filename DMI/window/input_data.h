@@ -24,8 +24,7 @@
 #include "../graphics/button.h"
 #include "../graphics/text_button.h"
 #include "../graphics/icon_button.h"
-#include "../../EVC/Parser/nlohmann/json.hpp"
-using namespace std;
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 class input_window;
 class input_data
@@ -43,11 +42,11 @@ class input_data
     bool operatrange_invalid=false;
     bool operatcross_invalid=false;
     bool show_echo;
-    string label;
-    string data;
-    string data_accepted;
-    string prev_data;
-    string keybd_data;
+    std::string label;
+    std::string data;
+    std::string data_accepted;
+    std::string prev_data;
+    std::string keybd_data;
     text_graphic *data_tex;
     Component* label_comp = nullptr;
     Button* data_comp = nullptr;
@@ -59,17 +58,17 @@ class input_data
     void setAccepted(bool val);
     bool isAccepted() {return accepted;}
     IconButton more;
-    vector<Button*> keys;
+    std::vector<Button*> keys;
     int keypage=0;
-    input_data(string label_text="", bool echo=true);
-    function<string()> data_get;
-    function<void(string)> data_set;
-    void setData(string s);
-    string getData()
+    input_data(std::string label_text="", bool echo=true);
+    std::function<std::string()> data_get;
+    std::function<void(std::string)> data_set;
+    void setData(std::string s);
+    std::string getData()
     {
         return data;
     }
-    string getFormattedData(std::string data)
+    std::string getFormattedData(std::string data)
     {
         if (!character_separation) return data;
         std::string format = "";

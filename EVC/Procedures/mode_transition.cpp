@@ -27,6 +27,7 @@
 #include "../Packets/radio.h"
 #include "../Euroradio/session.h"
 #include "../LX/level_crossing.h"
+#include "../language/language.h"
 #include <map>
 cond mode_conditions[75];
 static std::vector<mode_transition> ordered_transitions[20];
@@ -276,14 +277,14 @@ void update_mode_status()
             SH_speed = {};
         
         if (mode == Mode::FS) {
-            add_message(text_message(gettext("Entering FS"), true, false, false, [](text_message &t){
+            add_message(text_message(get_text("Entering FS"), true, false, false, [](text_message &t){
                 distance back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
                 return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
             }));
         }
         if (mode == Mode::OS) {
             OS_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVONSIGHT, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
-            add_message(text_message(gettext("Entering OS"), true, false, false, [](text_message &t){
+            add_message(text_message(get_text("Entering OS"), true, false, false, [](text_message &t){
                 distance back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
                 return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
             }));

@@ -9,7 +9,7 @@ Packets/logging.cpp Packets/io.cpp STM/stm.cpp Packets/STM/message.cpp
 Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp 
 Procedures/stored_information.cpp TrackConditions/track_conditions.cpp Time/clock.cpp Position/geographical.cpp 
 DMI/text_messages.cpp DMI/windows.cpp DMI/track_ahead_free.cpp TrainSubsystems/power.cpp TrainSubsystems/brake.cpp
-language/language.cpp language/moFileReader.cpp
+language/language.cpp
 NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 )
 
@@ -23,9 +23,7 @@ else()
     add_executable(evc ${SOURCES})
 endif()
 target_compile_definitions(evc PUBLIC _GLIBCXX_DEBUG)
-if (ETCS_VENDORED)
-    target_include_directories(evc PRIVATE ../libs)
-endif()
+target_include_directories(evc PRIVATE ../include)
 target_link_libraries(evc PRIVATE orts)
 
 if(WIN32)

@@ -23,6 +23,10 @@ struct M_DATAENTRYFLAG_t : ETCS_variable
     static const uint32_t Start=1;
     M_DATAENTRYFLAG_t() : ETCS_variable(1) {}
 };
+struct NID_DRV_LANGUAGE_t : ETCS_variable
+{
+    NID_DRV_LANGUAGE_t() : ETCS_variable(16) {}
+};
 struct M_IND_ATTRIB_t : ETCS_variable
 {
     M_IND_ATTRIB_t() : ETCS_variable(10) {}

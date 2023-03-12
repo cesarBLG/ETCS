@@ -47,13 +47,13 @@ int active_channel;
 #define BUFF_SIZE 1024
 #define PORT 5010
 static char data[BUFF_SIZE];
-string buffer;
+std::string buffer;
 static SDL_Event ev;
 #include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {
-    if (!j.contains("str" || j.is_null())) j[str] = def;
+    if (!j.contains("str") || j.is_null()) j[str] = def;
 }
 void fill_non_existent(json &j, std::string str, nullptr_t null)
 {
@@ -187,13 +187,13 @@ void from_json(const json&j, planning_element &e)
     }
     e.condition = tex;
 }
-void parseData(string str)
+void parseData(std::string str)
 {
-    extern mutex draw_mtx;
-    unique_lock<mutex> lck(draw_mtx);
+    extern std::mutex draw_mtx;
+    std::unique_lock<std::mutex> lck(draw_mtx);
     int index = str.find_first_of('(');
-    string command = str.substr(0, index);
-    string value = str.substr(index+1, str.find_last_of(')')-index-1);
+    std::string command = str.substr(0, index);
+    std::string value = str.substr(index+1, str.find_last_of(')')-index-1);
     if (command == "setMessage")
     {
         int valsep = value.find(',');
@@ -202,14 +202,14 @@ void parseData(string str)
         valsep = value.find(',');
         int size = stoi(value.substr(0,valsep));
         value = value.substr(valsep+1);
-        string text = value.substr(0, size);
+        std::string text = value.substr(0, size);
 
         value = value.substr(size+1);
         valsep = value.find(',');
-        vector<string> val;
-        while(valsep!=string::npos)
+        std::vector<std::string> val;
+        while(valsep!=std::string::npos)
         {
-            string param = value.substr(0,valsep);
+            std::string param = value.substr(0,valsep);
             value = value.substr(valsep+1);
             valsep = value.find(',');
             val.push_back(param);
@@ -313,20 +313,20 @@ int read(int channel)
         ::data[result] = 0;
         buffer += ::data;
         int end;
-        while ((end=buffer.find_first_of(';'))!=string::npos) {
+        while ((end=buffer.find_first_of(';'))!=std::string::npos) {
             int start = buffer.find_first_not_of("\n\r ;");
-            string command = buffer.substr(start, end-start);
+            std::string command = buffer.substr(start, end-start);
             parseData(command);
             buffer = buffer.substr(end+1);
         }
     }
     return result;
 }
-void write_command(string command, string value)
+void write_command(std::string command, std::string value)
 {
     if (active_channel < 0)
         return;
-    string tosend = command+"("+value+");\n";
+    std::string tosend = command+"("+value+");\n";
     send(clients[active_channel], tosend.c_str(), tosend.size(), 0);
 }
 void listenChannels()

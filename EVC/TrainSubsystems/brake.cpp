@@ -23,6 +23,7 @@
 #include "../Procedures/stored_information.h"
 #include "../Euroradio/session.h"
 #include "../STM/stm.h"
+#include "../language/language.h"
 extern bool SB;
 extern bool EB;
 bool SB_commanded;
@@ -36,7 +37,7 @@ void trigger_brake_reason(int reason)
         if (cond.reason == reason) return;
     }
     if (reason == 0) {
-        text_message msg(gettext("Balise read error"), true, false, 2, [](text_message &msg){return false;});
+        text_message msg(get_text("Balise read error"), true, false, 2, [](text_message &msg){return false;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
             if (V_est == 0) {
@@ -55,7 +56,7 @@ void trigger_brake_reason(int reason)
         extern bool rollaway_applied;
         extern bool rmp_applied;
         extern bool pt_applied;
-        text_message msg(gettext("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied;});
+        text_message msg(get_text("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
             if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied) {
@@ -69,7 +70,7 @@ void trigger_brake_reason(int reason)
             return false;
         }});
     } else if (reason == 2) {
-        text_message msg(gettext("Communication error"), true, false, 2, [](text_message &msg){return false;});
+        text_message msg(get_text("Communication error"), true, false, 2, [](text_message &msg){return false;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
             if (V_est == 0) {

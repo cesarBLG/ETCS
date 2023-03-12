@@ -230,13 +230,6 @@ void SetParameters()
         parse_command(val, false);
     };
 
-    p = new Parameter("stm::override");
-    p->GetValue = []() {
-        extern bool overrideProcedure;
-        return overrideProcedure ? "1" : "0";
-    };
-    manager.AddParameter(p);
-
     p = new Parameter("stm::command");
     p->SetValue = [](std::string val) {
         std::vector<unsigned char> message((val.size()+7)>>3);

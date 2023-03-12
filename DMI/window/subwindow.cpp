@@ -17,7 +17,7 @@
  */
 #include "subwindow.h"
 #include "../tcp/server.h"
-subwindow::subwindow(string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", 82, 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
+subwindow::subwindow(std::string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", 82, 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
     next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), title_bar(full ? 334 : 306,24), page_count(npages)
 {
     if (full) title_bar.setBackgroundColor(Black);
@@ -41,7 +41,7 @@ subwindow::subwindow(string title, bool full, int npages) : window(), fullscreen
 void subwindow::updateTitle()
 {
     std::string t = title;
-    if (page_count > 1) t += " ("+to_string(current_page)+"/"+to_string(page_count)+")";
+    if (page_count > 1) t += " ("+std::to_string(current_page)+"/"+std::to_string(page_count)+")";
     title_bar.clear();
     title_bar.addText(t,4,0,12,White, fullscreen ? RIGHT : LEFT);
 }

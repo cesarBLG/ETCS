@@ -10,7 +10,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             window/input_data.cpp window/fixed_train_data.cpp window/keyboard.cpp 
             window/train_data.cpp  STM/stm_objects.cpp ../EVC/Packets/STM/message.cpp
             planning/planning.cpp control/control.cpp state/gps_pos.cpp 
-            graphics/sdl/gfx_primitives.cpp language/language.cpp language/moFileReader.cpp
+            graphics/sdl/gfx_primitives.cpp language/language.cpp
 )
 
 if(WIN32)
@@ -36,6 +36,8 @@ endif()
 
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
 target_link_libraries(dmi PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf)
+
+target_include_directories(dmi PRIVATE ../include)
 
 if(WIN32)
     target_link_libraries(dmi PRIVATE imagehlp wsock32)

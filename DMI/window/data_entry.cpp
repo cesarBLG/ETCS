@@ -22,7 +22,7 @@
 #include "../graphics/button.h"
 #include "../graphics/display.h"
 #include "../tcp/server.h"
-input_window::input_window(string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(gettext("Yes"),330,40), 
+input_window::input_window(std::string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(330, 40), button_yes(get_text("Yes"),330,40), 
     nfields(nfields)
 {
     for(int i=0; i<12; i++)
@@ -51,7 +51,7 @@ input_window::input_window(string title, int nfields, bool full) : subwindow(tit
         button_yes.showBorder = false;
         button_yes.touch_up = 50;
     }
-    confirmation_label.addText(title + gettext(" entry complete?"), 0, 0, 12, White);
+    confirmation_label.addText(title + get_text(" entry complete?"), 0, 0, 12, White);
 }
 void input_window::create()
 {
@@ -77,9 +77,17 @@ void input_window::create()
                     json j = R"({"DriverSelection":"ValidateEntryField"})"_json;
                     j["ValidateEntryField"]["Label"] = inputs[i]->label;
                     j["ValidateEntryField"]["Value"] = inputs[i]->data;
-                    j["ValidateEntryField"]["SkipOperationalCheck"] = inputs[i]->operatrange_invalid;
+                    j["ValidateEntryField"]["SkipOperationalCheck"] = inputs[i]->data_comp->delayType;
                     j["WindowTitle"] = title;
                     write_command("json", j.dump());
+                    for (int j=0; j<nfields; j++)
+                    {
+                        inputs[j]->data_comp->setEnabled(false);
+                    }
+                    next_button.setEnabled(false);
+                    prev_button.setEnabled(false);
+                    button_yes.setEnabled(false);
+                    button_yes.setBackgroundColor(DarkGrey);
                 }
                 else
                 {
@@ -174,6 +182,8 @@ void input_window::fieldCheckResult(json &j)
             updatePage(cursor/4+1);
             bool allaccepted = true;
             for (int j=0; j<nfields; j++) {
+                inputs[j]->data_comp->setEnabled(true);
+                inputs[j]->data_comp->delayType = false;
                 if (!inputs[j]->isAccepted())
                     allaccepted = false;
             }
@@ -188,11 +198,10 @@ void input_window::fieldCheckResult(json &j)
         {
             inputs[i]->keybd_data = "";
             inputs[i]->updateText();
-            for (int j=0; j<nfields; j++)
+            if (!inputs[i]->techrange_invalid && !inputs[i]->techresol_invalid)
             {
-                if (i!=j) inputs[j]->data_comp->setEnabled(false);
-                else if (!inputs[i]->techrange_invalid && !inputs[i]->techresol_invalid) inputs[j]->data_comp->delayType = true;
-                else inputs[j]->data_comp->setEnabled(false);
+                inputs[i]->data_comp->delayType = true;
+                inputs[i]->data_comp->setEnabled(true);
             }
         }
     }   
@@ -217,6 +226,8 @@ void input_window::inputChanged(input_data *input)
         inputs[i]->data_comp->delayType = false;
         inputs[i]->data_comp->setEnabled(true);
     }
+    next_button.enabled = current_page < page_count;
+    prev_button.enabled = current_page > 1;
     button_yes.setEnabled(false);
     button_yes.setBackgroundColor(DarkGrey);
 }

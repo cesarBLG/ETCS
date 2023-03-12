@@ -18,7 +18,7 @@
 #ifndef _CONTROL_H
 #define _CONTROL_H
 #include <string>
-#include "../../EVC/Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 /*enum som_step
 {
