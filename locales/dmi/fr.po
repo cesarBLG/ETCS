@@ -31,7 +31,7 @@ msgstr "Spécial"
 #: window/data_validation.h:88 window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr "Ouais"
+msgstr "Oui"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
