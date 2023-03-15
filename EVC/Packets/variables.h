@@ -1247,6 +1247,10 @@ struct NID_VBCMK_t : ETCS_variable
 {
     NID_VBCMK_t() : ETCS_variable(6) {}
 };
+struct NID_XUSER_t : ETCS_variable
+{
+    NID_XUSER_t() : ETCS_variable(9) {}
+};
 struct N_AXLE_t : ETCS_variable
 {
     static const uint32_t Unknown=1023;
@@ -1810,4 +1814,18 @@ struct V_TSR_t : V_t
 struct X_TEXT_t : ETCS_variable
 {
     X_TEXT_t() : ETCS_variable(8) {}
+    static std::string getUTF8(const std::vector<X_TEXT_t> &chars)
+    {
+        std::string text;
+        for (int i=0; i<chars.size(); i++) {
+            unsigned char c = chars[i];
+            if (chars[i] < 0x80) {
+                text += c;
+            } else {
+                text += 0xc2+(c>0xbf);
+                text += (c&0x3f)+0x80;
+            }
+        }
+        return text;
+    }
 };

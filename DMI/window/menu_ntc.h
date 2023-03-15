@@ -16,21 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "train_data.h"
-#include "fixed_train_data.h"
-#include "keyboard.h"
-#include "../tcp/server.h"
-#include "../monitor.h"
-#include <fstream>
-using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window(std::string title) : input_window(title, 1, true), SelectType(get_text("Enter\ndata"),60,50)
+#ifndef _MENU_NTC_H
+#define _MENU_NTC_H
+#include "menu.h"
+class menu_ntc : public menu
 {
-    SelectType.setPressedAction([this]() {
-        write_command("EnterData", "");
-    });
-}
-void fixed_train_data_window::setLayout()
-{
-    input_window::setLayout();
-    addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
-}
+    std::vector<std::string> stms;
+    public:
+    menu_ntc(std::vector<std::string> stms);
+    void setEnabled(json &enabled);
+};
+#endif

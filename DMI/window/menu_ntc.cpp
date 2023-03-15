@@ -16,21 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "train_data.h"
-#include "fixed_train_data.h"
-#include "keyboard.h"
+#include "menu_ntc.h"
 #include "../tcp/server.h"
-#include "../monitor.h"
-#include <fstream>
-using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window(std::string title) : input_window(title, 1, true), SelectType(get_text("Enter\ndata"),60,50)
+menu_ntc::menu_ntc(std::vector<std::string> stms) : menu(get_text("NTC data entry")), stms(stms)
 {
-    SelectType.setPressedAction([this]() {
-        write_command("EnterData", "");
+    for (int i=0; i<stms.size(); i++)
+    {
+        buttons[i] = new TextButton(stms[i], 153, 50);
+        buttons[i]->setPressedAction([stms,i]
+        { 
+            write_command(stms[i],"");
+        });
+    }
+    buttons[9] = new TextButton(get_text("End of data entry"), 153, 50);
+    buttons[9]->setPressedAction([this]
+    { 
+        write_command("EndDataEntry","");
     });
+    setLayout();
 }
-void fixed_train_data_window::setLayout()
+void menu_ntc::setEnabled(json &enabled)
 {
-    input_window::setLayout();
-    addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
+    for (int i=0; i<stms.size(); i++)
+    {
+        if (enabled.contains(stms[i]) && enabled[stms[i]]) buttons[i]->setEnabled(true);
+        else buttons[i]->setEnabled(false);
+    }
+    buttons[9]->setEnabled(enabled["EndDataEntry"]);
 }

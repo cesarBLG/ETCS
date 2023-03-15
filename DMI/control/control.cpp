@@ -29,6 +29,7 @@
 #include "../window/menu_override.h"
 #include "../window/menu_spec.h"
 #include "../window/menu_settings.h"
+#include "../window/menu_ntc.h"
 #include "../window/track_ahead_free.h"
 #include <thread>
 #include <functional>
@@ -113,6 +114,14 @@ void setWindow(json &data)
             json &enabled = j["enabled"];
             m->setEnabled(enabled["Language"].get<bool>(), enabled["Volume"].get<bool>(), enabled["Brightness"].get<bool>(), enabled["SystemVersion"].get<bool>(), enabled["SetVBC"].get<bool>(), enabled["RemoveVBC"].get<bool>());
             w = m;
+        } else if (name == "menu_ntc") {
+            menu_ntc *m;
+            if (same) m = (menu_ntc*)active;
+            else m = new menu_ntc(j["STMs"]);
+            bool hour = j.contains("hour_glass") && j["hour_glass"].get<bool>();
+            m->setHourGlass(hour);
+            m->setEnabled(j["enabled"]);
+            w = m;
         } else if (name == "driver_window") {
             driver_window *d;
             if (same) d = (driver_window*)active;
@@ -151,7 +160,7 @@ void setWindow(json &data)
                 std::string type = def["WindowType"].get<std::string>();
                 if (type == "DataEntry")
                 {
-                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size(), def["Inputs"].size() > 1);
+                    w = new input_window(def["WindowTitle"].get<std::string>(), def["Inputs"].size(), def["Inputs"][0]["Label"] != "");
                     ((input_window*)w)->buildFrom(def);
                 }
                 else if (type == "DataValidation")

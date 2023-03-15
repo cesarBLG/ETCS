@@ -244,16 +244,24 @@ void input_window::sendInformation()
 }
 void input_window::buildFrom(json &j)
 {
+    bool allaccepted = true;
     for (int i=0; i<nfields; i++) {
         json &input = j["Inputs"][i];
         inputs[i] = new input_data(input["Label"], input["Label"] != "");
         inputs[i]->window = this;
         inputs[i]->keys = getKeyboard(input["Keyboard"], inputs[i]);
-        if (input.contains("AcceptedValue"))
+        if (input.contains("Value"))
         {
-            inputs[i]->data = input["AcceptedValue"].get<std::string>();
-            inputs[i]->setAccepted(true);
+            inputs[i]->prev_data = inputs[i]->data = input["Value"].get<std::string>();
+            //inputs[i]->setAccepted(true);
         }
+        if (!inputs[i]->isAccepted()) allaccepted = false;
+    }
+    if (allaccepted)
+    {
+        button_yes.setBackgroundColor(Grey);
+        button_yes.setEnabled(true);
+        button_yes.delayType = false;
     }
     create();
 }

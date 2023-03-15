@@ -68,16 +68,7 @@ void update_messages()
 }
 void add_message(PlainTextMessage m, distance ref)
 {
-    std::string text;
-    for (int i=0; i<m.X_TEXT.size(); i++) {
-        unsigned char c = m.X_TEXT[i];
-        if (m.X_TEXT[i] < 0x80) {
-            text += c;
-        } else {
-            text += 0xc2+(c>0xbf);
-            text += (c&0x3f)+0x80;
-        }
-    }
+    std::string text = X_TEXT_t::getUTF8(m.X_TEXT);
     std::function<bool(text_message&)> start = [m, ref](text_message &t) {
         bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
         std::vector<bool> conds;
