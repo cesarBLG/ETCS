@@ -15,12 +15,14 @@ msgstr "Menu"
 #: language/language.cpp:27 window/nav_buttons.cpp:38
 msgid "Over-\n"
 "ride"
-msgstr "Overlopen"
+msgstr "Over-\n"
+"lopen"
 
 #: language/language.cpp:28 window/nav_buttons.cpp:44
 msgid "Data\n"
 "view"
-msgstr "Gegevens"
+msgstr "Gege-\n"
+"vens"
 
 #: language/language.cpp:29 window/nav_buttons.cpp:50
 msgid "Spec"
@@ -77,7 +79,7 @@ msgstr "Niveau"
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr "trein nummer"
+msgstr "Trein nummer"
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
@@ -85,23 +87,23 @@ msgstr "Einde manoeuvres"
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "manoeuvres"
+msgstr "Manoeuvres"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "dubbele tractie"
+msgstr "Dubbele tractie"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "manoeuvre vasthouden"
+msgstr "Manoeuvre vasthouden"
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "radiogegevens"
+msgstr "Radiogegevens"
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr "overlopen"
+msgstr "Overlopen"
 
 #: window/menu_override.cpp:24
 msgid "EoA"
@@ -109,15 +111,15 @@ msgstr "EoA"
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr "Neem contact op met laatste RBC"
+msgstr "Laatste RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "gebruik kort nummer"
+msgstr "Gebruik kort nummer"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr "Voer RBC-gegevens in"
+msgstr "Voer RBC-gegevens"
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
@@ -129,7 +131,7 @@ msgstr "Instellingen"
 
 #: window/menu_settings.cpp:26
 msgid "System version"
-msgstr "systeem versie"
+msgstr "Systeem versie"
 
 #: window/menu_settings.cpp:27 window/set_vbc.cpp:21
 msgid "Set VBC"
@@ -153,7 +155,7 @@ msgstr "SR Snelheid/Afstand"
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
-msgstr "train integriteit"
+msgstr "Train integriteit"
 
 #: window/set_vbc.cpp:23 window/set_vbc.cpp:29
 msgid "VBC code"
@@ -171,11 +173,11 @@ msgstr "Lengte (m)"
 
 #: window/train_data.cpp:27
 msgid "Brake percentage"
-msgstr "rem percentage"
+msgstr "Rem percentage"
 
 #: window/train_data.cpp:28
 msgid "Max speed (km/h)"
-msgstr "snelheid maximaal (km/u)"
+msgstr "Snelheid maximaal (km/u)"
 
 #: window/train_data.cpp:29
 msgid "Loading gauge"
@@ -187,5 +189,5 @@ msgstr "Soort trein"
 
 #: window/train_data.cpp:31
 msgid "Axle load category"
-msgstr "as belasting"
+msgstr "As belasting"
 

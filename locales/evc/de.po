@@ -14,21 +14,21 @@ msgstr "Fahrer-ID"
 #: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
 #: DMI/windows.cpp:593
 msgid "Level 0"
-msgstr "Stufe 0"
+msgstr "Eben 0"
 
 #: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
 #: DMI/windows.cpp:595
 msgid "Level 1"
-msgstr "Level 1"
+msgstr "Eben 1"
 
 #: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
 #: DMI/windows.cpp:597
 msgid "Level 2"
-msgstr "Level 2"
+msgstr "Eben 2"
 
 #: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
 msgid "Level 3"
-msgstr "Stufe 3"
+msgstr "Eben 3"
 
 #: DMI/windows.cpp:135 DMI/windows.cpp:589
 msgid "Level"
@@ -272,7 +272,7 @@ msgstr "Keine Streckenbeschreibung"
 
 #: Procedures/train_trip.cpp:78
 msgid " brake demand"
-msgstr " Bremsanforderung"
+msgstr " bremsanforderung"
 
 #: STM/stm.cpp:349
 msgid " failed"
@@ -280,7 +280,7 @@ msgstr " fehlgeschlagen"
 
 #: STM/stm.cpp:422
 msgid " not available"
-msgstr " Nicht verfügbar"
+msgstr " nicht verfügbar"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"

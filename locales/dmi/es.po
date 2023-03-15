@@ -35,7 +35,7 @@ msgstr "Sí"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " entrada completa?"
+msgstr " ¿Entrada completa?"
 
 #: window/data_validation.h:34 window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
@@ -89,7 +89,7 @@ msgstr "Maniobras"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Doble Tracción"
+msgstr "Doble tracción"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"

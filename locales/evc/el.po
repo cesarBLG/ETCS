@@ -5,170 +5,170 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: ETCS EVC\n"
-"Language: pt\n"
+"Language: el\n"
 
 #: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
 msgid "Driver ID"
-msgstr "Identificação do motorista"
+msgstr "Ταυτότητα οδηγού"
 
 #: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
 #: DMI/windows.cpp:593
 msgid "Level 0"
-msgstr "Nível 0"
+msgstr "επίπεδο 0"
 
 #: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
 #: DMI/windows.cpp:595
 msgid "Level 1"
-msgstr "Nível 1"
+msgstr "Επίπεδο 1"
 
 #: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
 #: DMI/windows.cpp:597
 msgid "Level 2"
-msgstr "Nível 2"
+msgstr "Επίπεδο 2"
 
 #: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
 msgid "Level 3"
-msgstr "Nível 3"
+msgstr "Επίπεδο 3"
 
 #: DMI/windows.cpp:135 DMI/windows.cpp:589
 msgid "Level"
-msgstr "Nível"
+msgstr "Επίπεδο"
 
 #: DMI/windows.cpp:141 DMI/windows.cpp:204 DMI/windows.cpp:616
 msgid "Train running number"
-msgstr "Número de corrida do trem"
+msgstr "αριθμός τρένου"
 
 #: DMI/windows.cpp:148 DMI/windows.cpp:212 DMI/windows.cpp:743
 msgid "RBC ID"
-msgstr "ID RBC"
+msgstr "Αναγνωριστικό RBC"
 
 #: DMI/windows.cpp:149 DMI/windows.cpp:213 DMI/windows.cpp:744
 msgid "RBC phone number"
-msgstr "Número de telefone RBC"
+msgstr "Τηλέφωνο RBC"
 
 #: DMI/windows.cpp:151 DMI/windows.cpp:742
 msgid "RBC data"
-msgstr "Dados RBC"
+msgstr "Δεδομένα RBC"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:630
 msgid "Train data"
-msgstr "Dados de trem"
+msgstr "Δεδομένα τρένου"
 
 #: DMI/windows.cpp:178 DMI/windows.cpp:759
 msgid "SR speed (km/h)"
-msgstr "Velocidade SR (km/h)"
+msgstr "Ταχύτητα SR (km/h)"
 
 #: DMI/windows.cpp:179 DMI/windows.cpp:760
 msgid "SR distance (m)"
-msgstr "Distância SR (m)"
+msgstr "Απόσταση σε SR (m)"
 
 #: DMI/windows.cpp:181 DMI/windows.cpp:757
 msgid "SR speed/distance"
-msgstr "Velocidade/distância SR"
+msgstr "SR απόσταση/ταχύτητα"
 
 #: DMI/windows.cpp:187 DMI/windows.cpp:753
 msgid "Language"
-msgstr "Linguagem"
+msgstr "Γλώσσα"
 
 #: DMI/windows.cpp:206 DMI/windows.cpp:648
 msgid "Length (m)"
-msgstr "Comprimento (m)"
+msgstr "Μήκος (m)"
 
 #: DMI/windows.cpp:207
 msgid "Brake percentaje"
-msgstr "Porcentagem de freio"
+msgstr "ποσοστό φρένων"
 
 #: DMI/windows.cpp:208
 msgid "Maximum speed (km/h)"
-msgstr "Velocidade máxima (km/h)"
+msgstr "Μέγιστη ταχύτητα (km/h)"
 
 #: DMI/windows.cpp:209
 msgid "Airtight"
-msgstr "Hermético"
+msgstr "Πίεση"
 
 #: DMI/windows.cpp:209
 msgid "Yes"
-msgstr "Sim"
+msgstr "ναι"
 
 #: DMI/windows.cpp:209
 msgid "No"
-msgstr "Não"
+msgstr "Οχι"
 
 #: DMI/windows.cpp:223
 msgid "Data view"
-msgstr "Exibição de dados"
+msgstr "Δείτε στοιχεία"
 
 #: DMI/windows.cpp:298
 msgid "Train is rejected"
-msgstr "O trem é rejeitado"
+msgstr "απορριφθέν τρένο"
 
 #: DMI/windows.cpp:457
 msgid "Shunting request failed"
-msgstr "A solicitação de desvio falhou"
+msgstr "αδύνατος ελιγμός"
 
 #: DMI/windows.cpp:635 DMI/windows.cpp:642
 msgid "Validate train data"
-msgstr "Validar dados do trem"
+msgstr "Επικύρωση δεδομένων αμαξοστοιχίας"
 
 #: DMI/windows.cpp:637 DMI/windows.cpp:714
 msgid "Train type"
-msgstr "Tipo de trem"
+msgstr "Είδος τρένου"
 
 #: DMI/windows.cpp:649
 msgid "Max speed (km/h)"
-msgstr "Velocidade máxima (km/h)"
+msgstr "Ταχύτητα μέγιστο (km/h)"
 
 #: DMI/windows.cpp:650
 msgid "Brake percentage"
-msgstr "Porcentagem de freio"
+msgstr "ποσοστό φρένων"
 
 #: DMI/windows.cpp:651
 msgid "Train category"
-msgstr "Categoria de trem"
+msgstr "τύπου τρένου"
 
 #: DMI/windows.cpp:654
 msgid "PASS 1"
-msgstr "PASSE 1"
+msgstr "ΤΑΞΙΔΙ Ν"
 
 #: DMI/windows.cpp:657
 msgid "PASS 2"
-msgstr "PASSE 2"
+msgstr "ΒΗΜΑ 2"
 
 #: DMI/windows.cpp:660
 msgid "PASS 3"
-msgstr "PASSE 3"
+msgstr "ΤΑΞΙΔΙΑ"
 
 #: DMI/windows.cpp:663
 msgid "TILT 1"
-msgstr "INCLINAÇÃO 1"
+msgstr "ΚΛΙΣΗ 1"
 
 #: DMI/windows.cpp:666
 msgid "TILT 2"
-msgstr "INCLINAÇÃO 2"
+msgstr "ΤΑΞΙΔΙ Β"
 
 #: DMI/windows.cpp:669
 msgid "TILT 3"
-msgstr "INCLINAÇÃO 3"
+msgstr "ΚΛΙΣΗ 3"
 
 #: DMI/windows.cpp:672
 msgid "TILT 4"
-msgstr "INCLINAÇÃO 4"
+msgstr "ΤΑΞΙΔΙ Γ"
 
 #: DMI/windows.cpp:675
 msgid "TILT 5"
-msgstr "INCLINAÇÃO 5"
+msgstr "ΚΛΙΣΗ 5"
 
 #: DMI/windows.cpp:678
 msgid "TILT 6"
-msgstr "INCLINAÇÃO 6"
+msgstr "ΤΑΞΙΔΙ Δ"
 
 #: DMI/windows.cpp:681
 msgid "TILT 7"
-msgstr "INCLINAÇÃO 7"
+msgstr "ΚΛΙΣΗ 7"
 
 #: DMI/windows.cpp:684
 msgid "FP 1"
-msgstr "PF 1"
+msgstr "MERC P/V N"
 
 #: DMI/windows.cpp:687
 msgid "FP 2"
@@ -184,7 +184,7 @@ msgstr "PF 4"
 
 #: DMI/windows.cpp:696
 msgid "FG 1"
-msgstr "FG 1"
+msgstr "MERC F/G N"
 
 #: DMI/windows.cpp:699
 msgid "FG 2"
@@ -200,89 +200,89 @@ msgstr "FG 4"
 
 #: DMI/windows.cpp:766
 msgid "Set VBC"
-msgstr "Definir VBC"
+msgstr "Προσθήκη VBC"
 
 #: DMI/windows.cpp:771 DMI/windows.cpp:784
 msgid "Validate set VBC"
-msgstr "Validar conjunto VBC"
+msgstr "Επικύρωση προστέθηκε VBC"
 
 #: DMI/windows.cpp:775
 msgid "Remove VBC"
-msgstr "Remover VBC"
+msgstr "Αφαιρέστε το VBC"
 
 #: DMI/windows.cpp:780 DMI/windows.cpp:792
 msgid "Validate remove VBC"
-msgstr "Validar remover VBC"
+msgstr "Επικύρωση αφαίρεσης VBC"
 
 #: DMI/windows.cpp:788 DMI/windows.cpp:796
 msgid "VBC code"
-msgstr "Código VBC"
+msgstr "Κωδικός VBC"
 
 #: DMI/windows.cpp:902 Procedures/train_trip.cpp:47
 msgid "SH refused"
-msgstr "SH recusou"
+msgstr "Ο ελιγμός απορρίφθηκε"
 
 #: Procedures/mode_transition.cpp:279
 msgid "Entering FS"
-msgstr "Entrando em FS"
+msgstr "Είσοδος στο FS"
 
 #: Procedures/mode_transition.cpp:286
 msgid "Entering OS"
-msgstr "Entrando no sistema operacional"
+msgstr "εισαγωγή στο ΛΣ"
 
 #: Procedures/train_trip.cpp:33
 msgid "Unauthorized passing of EoA/LoA"
-msgstr "Passagem não autorizada de EoA/LoA"
+msgstr "Υπέρβαση EoA ή LoA"
 
 #: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
-msgstr "Erro de leitura do Balise"
+msgstr "Αποτυχία ανάγνωσης φάρου"
 
 #: Procedures/train_trip.cpp:41
 msgid "No MA received at level transition"
-msgstr "Nenhum MA recebido na transição de nível"
+msgstr "Όχι MA σε μετάβαση σε επίπεδο"
 
 #: Procedures/train_trip.cpp:44 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
-msgstr "Erro de comunicação"
+msgstr "σφάλμα επικοινωνίας"
 
 #: Procedures/train_trip.cpp:50
 msgid "Trackside not compatible"
-msgstr "Via não compatível"
+msgstr "η διαδρομή δεν υποστηρίζεται"
 
 #: Procedures/train_trip.cpp:53
 msgid "SR distance exceeded"
-msgstr "Distância SR excedida"
+msgstr "Υπέρβαση απόστασης SR"
 
 #: Procedures/train_trip.cpp:57
 msgid "SH stop order"
-msgstr "Ordem de parada SH"
+msgstr "Διακοπή παραγγελίας στο SH"
 
 #: Procedures/train_trip.cpp:61
 msgid "SR stop order"
-msgstr "Ordem de parada SR"
+msgstr "Εντολή διακοπής SR"
 
 #: Procedures/train_trip.cpp:64
 msgid "Emergency stop"
-msgstr "Parada de emergência"
+msgstr "Στάση έκτακτης ανάγκης"
 
 #: Procedures/train_trip.cpp:67
 msgid "No track description"
-msgstr "Sem descrição da faixa"
+msgstr "δεν υπάρχουν δεδομένα κομματιού"
 
 #: Procedures/train_trip.cpp:78
 msgid " brake demand"
-msgstr " demanda de freio"
+msgstr " ζήτηση φρένων"
 
 #: STM/stm.cpp:349
 msgid " failed"
-msgstr " fracassado"
+msgstr " απέτυχε"
 
 #: STM/stm.cpp:422
 msgid " not available"
-msgstr " não disponível"
+msgstr " μη διαθέσιμος"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
-msgstr "Movimento descontrolado"
+msgstr "Γλιστρώ"
 

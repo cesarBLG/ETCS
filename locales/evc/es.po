@@ -1,24 +1,11 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-10 10:17+0100\n"
-"PO-Revision-Date: 2023-03-10 10:27+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.2.2\n"
-"X-Poedit-Basepath: ../../EVC\n"
-"X-Poedit-SearchPath-0: .\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: ETCS EVC\n"
+"Language: es\n"
 
 #: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
 msgid "Driver ID"
@@ -145,7 +132,7 @@ msgstr "VIAJ N"
 
 #: DMI/windows.cpp:657
 msgid "PASS 2"
-msgstr ""
+msgstr "PASO 2"
 
 #: DMI/windows.cpp:660
 msgid "PASS 3"
@@ -153,7 +140,7 @@ msgstr "VIAJ A"
 
 #: DMI/windows.cpp:663
 msgid "TILT 1"
-msgstr ""
+msgstr "INCLINACIÓN 1"
 
 #: DMI/windows.cpp:666
 msgid "TILT 2"
@@ -161,7 +148,7 @@ msgstr "VIAJ B"
 
 #: DMI/windows.cpp:669
 msgid "TILT 3"
-msgstr ""
+msgstr "INCLINACIÓN 3"
 
 #: DMI/windows.cpp:672
 msgid "TILT 4"
@@ -169,7 +156,7 @@ msgstr "VIAJ C"
 
 #: DMI/windows.cpp:675
 msgid "TILT 5"
-msgstr ""
+msgstr "INCLINACIÓN 5"
 
 #: DMI/windows.cpp:678
 msgid "TILT 6"
@@ -177,7 +164,7 @@ msgstr "VIAJ D"
 
 #: DMI/windows.cpp:681
 msgid "TILT 7"
-msgstr ""
+msgstr "INCLINACIÓN 7"
 
 #: DMI/windows.cpp:684
 msgid "FP 1"
@@ -185,15 +172,15 @@ msgstr "MERC P/V N"
 
 #: DMI/windows.cpp:687
 msgid "FP 2"
-msgstr ""
+msgstr "FP 2"
 
 #: DMI/windows.cpp:690
 msgid "FP 3"
-msgstr ""
+msgstr "FP 3"
 
 #: DMI/windows.cpp:693
 msgid "FP 4"
-msgstr ""
+msgstr "FP 4"
 
 #: DMI/windows.cpp:696
 msgid "FG 1"
@@ -201,15 +188,15 @@ msgstr "MERC F/G N"
 
 #: DMI/windows.cpp:699
 msgid "FG 2"
-msgstr ""
+msgstr "FG 2"
 
 #: DMI/windows.cpp:702
 msgid "FG 3"
-msgstr ""
+msgstr "FG 3"
 
 #: DMI/windows.cpp:705
 msgid "FG 4"
-msgstr ""
+msgstr "FG 4"
 
 #: DMI/windows.cpp:766
 msgid "Set VBC"
@@ -299,5 +286,3 @@ msgstr " no disponible"
 msgid "Runaway movement"
 msgstr "Deslizamiento"
 
-#~ msgid "Train Data"
-#~ msgstr "Datos tren"

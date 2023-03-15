@@ -5,28 +5,26 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: ETCS DMI\n"
-"Language: de\n"
+"Language: sv\n"
 
 #: language/language.cpp:26 window/menu_main.cpp:31 window/menu_radio.cpp:29
 #: window/nav_buttons.cpp:32
 msgid "Main"
-msgstr "Speise-\n"
-"karte"
+msgstr "Meny"
 
 #: language/language.cpp:27 window/nav_buttons.cpp:38
 msgid "Over-\n"
 "ride"
-msgstr "Über-\n"
-"laufen"
+msgstr "överskridande"
 
 #: language/language.cpp:28 window/nav_buttons.cpp:44
 msgid "Data\n"
 "view"
-msgstr "Daten"
+msgstr "Data"
 
 #: language/language.cpp:29 window/nav_buttons.cpp:50
 msgid "Spec"
-msgstr "Speziell"
+msgstr "Särskild"
 
 #: window/data_entry.cpp:24 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:34
@@ -37,29 +35,29 @@ msgstr "Ja"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " vollständiger eintrag?"
+msgstr " fullständigt inträde?"
 
 #: window/data_validation.h:34 window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
-msgstr "NEIN"
+msgstr "Nej"
 
 #: window/data_view.h:39
 msgid "Data view"
-msgstr "Siehe Daten"
+msgstr "Se data"
 
 #: window/driver_id.cpp:26
 msgid "TRN"
-msgstr "NTRAIN"
+msgstr "NTRÅG"
 
 #: window/fixed_train_data.cpp:27
 msgid "Enter\n"
 "data"
 msgstr "Int.\n"
-"Daten"
+"data"
 
 #: window/keyboard.cpp:29 window/keyboard.cpp:72
 msgid "DEL"
-msgstr "DES"
+msgstr "AV"
 
 #: window/menu_main.cpp:33
 msgid "Start"
@@ -67,43 +65,43 @@ msgstr "Start"
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr "Fahrer-ID"
+msgstr "Förar-ID"
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr "Zugdaten"
+msgstr "Tågdata"
 
 #: window/menu_main.cpp:36
 msgid "Level"
-msgstr "Eben"
+msgstr "Nivå"
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr "Zugnummer"
+msgstr "tågnummer"
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr "Manöver beenden"
+msgstr "Avsluta manövrar"
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "Manöver"
+msgstr "manövrar"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Doppeltraktion"
+msgstr "dubbel dragkraft"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "Haltemanöver"
+msgstr "hålla manöver"
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "Funkdaten"
+msgstr "radiodata"
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr "Überlaufen"
+msgstr "överskridande"
 
 #: window/menu_override.cpp:24
 msgid "EoA"
@@ -111,85 +109,83 @@ msgstr "EoA"
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr "Letzten RBC"
+msgstr "Kontakta senaste RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "Kurznummer \n"
-"verwenden"
+msgstr "använd kort nummer"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr "RBC-Daten"
+msgstr "Ange RBC-data"
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
-msgstr "Funknetzwerk-ID"
+msgstr "Radionätverks-ID"
 
 #: window/menu_settings.cpp:21
 msgid "Settings"
-msgstr "Einstellungen"
+msgstr "inställningar"
 
 #: window/menu_settings.cpp:26
 msgid "System version"
-msgstr "Systemversion"
+msgstr "systemversion"
 
 #: window/menu_settings.cpp:27 window/set_vbc.cpp:21
 msgid "Set VBC"
-msgstr "VBC hinzufügen"
+msgstr "Lägg till VBC"
 
 #: window/menu_settings.cpp:28 window/set_vbc.cpp:27
 msgid "Remove VBC"
-msgstr "VBC entfernen"
+msgstr "Ta bort VBC"
 
 #: window/menu_spec.cpp:21
 msgid "Special"
-msgstr "Speziell"
+msgstr "Särskild"
 
 #: window/menu_spec.cpp:23
 msgid "Adhesion"
-msgstr "Adhärenz"
+msgstr "Efterlevnad"
 
 #: window/menu_spec.cpp:24
 msgid "SR Speed/Distance"
-msgstr "SR Geschwindigkeit/Distanz"
+msgstr "SR Hastighet/Avstånd"
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
-msgstr "Integrität trainieren"
+msgstr "träna integritet"
 
 #: window/set_vbc.cpp:23 window/set_vbc.cpp:29
 msgid "VBC code"
-msgstr "VBC-Code"
+msgstr "VBC-kod"
 
 #: window/train_data.cpp:24
 msgid "Select\n"
 "type"
 msgstr "Sel.\n"
-"Kerl"
+"kille"
 
 #: window/train_data.cpp:26
 msgid "Length (m)"
-msgstr "Länge (m)"
+msgstr "Längd (m)"
 
 #: window/train_data.cpp:27
 msgid "Brake percentage"
-msgstr "Bremsprozentsatz"
+msgstr "bromsprocent"
 
 #: window/train_data.cpp:28
 msgid "Max speed (km/h)"
-msgstr "Geschwindigkeit\n"
-"maximal (km/h)"
+msgstr "fart max (km/h)"
 
 #: window/train_data.cpp:29
 msgid "Loading gauge"
-msgstr "Messgerät"
+msgstr "Mätare"
 
 #: window/train_data.cpp:30
 msgid "Train category"
-msgstr "Eine Art Zug"
+msgstr "Typ tåg"
 
 #: window/train_data.cpp:31
 msgid "Axle load category"
-msgstr "Achslast"
+msgstr "axeltryck"
 

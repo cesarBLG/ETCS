@@ -10,12 +10,14 @@ msgstr ""
 #: language/language.cpp:26 window/menu_main.cpp:31 window/menu_radio.cpp:29
 #: window/nav_buttons.cpp:32
 msgid "Main"
-msgstr "Cardápio"
+msgstr "Cardá-\n"
+"pio"
 
 #: language/language.cpp:27 window/nav_buttons.cpp:38
 msgid "Over-\n"
 "ride"
-msgstr "Superação"
+msgstr "Supera-\n"
+"ção"
 
 #: language/language.cpp:28 window/nav_buttons.cpp:44
 msgid "Data\n"
@@ -69,7 +71,7 @@ msgstr "Identificação do motorista"
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr "dados de trem"
+msgstr "Dados de trem"
 
 #: window/menu_main.cpp:36
 msgid "Level"
@@ -77,31 +79,31 @@ msgstr "Nível"
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr "número do trem"
+msgstr "Número do trem"
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr "manobras finais"
+msgstr "Manobras finais"
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "manobras"
+msgstr "Manobras"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "tração dupla"
+msgstr "Tração dupla"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "manobra de espera"
+msgstr "Manobra de espera"
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "dados de rádio"
+msgstr "Dados de rádio"
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr "superação"
+msgstr "Superação"
 
 #: window/menu_override.cpp:24
 msgid "EoA"
@@ -113,7 +115,7 @@ msgstr "Contato último RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "usar número curto"
+msgstr "Usar número curto"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
@@ -129,7 +131,7 @@ msgstr "Configurações"
 
 #: window/menu_settings.cpp:26
 msgid "System version"
-msgstr "versão do sistema"
+msgstr "Versão do sistema"
 
 #: window/menu_settings.cpp:27 window/set_vbc.cpp:21
 msgid "Set VBC"
@@ -153,11 +155,11 @@ msgstr "SR Velocidade/Distância"
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
-msgstr "treinar integridade"
+msgstr "Treinar integridade"
 
 #: window/set_vbc.cpp:23 window/set_vbc.cpp:29
 msgid "VBC code"
-msgstr "código VBC"
+msgstr "Código VBC"
 
 #: window/train_data.cpp:24
 msgid "Select\n"
@@ -171,11 +173,11 @@ msgstr "Comprimento (m)"
 
 #: window/train_data.cpp:27
 msgid "Brake percentage"
-msgstr "porcentagem de freio"
+msgstr "Porcentagem de freio"
 
 #: window/train_data.cpp:28
 msgid "Max speed (km/h)"
-msgstr "velocidade máximo (km/h)"
+msgstr "Velocidade máximo (km/h)"
 
 #: window/train_data.cpp:29
 msgid "Loading gauge"
@@ -183,9 +185,9 @@ msgstr "Medidor"
 
 #: window/train_data.cpp:30
 msgid "Train category"
-msgstr "tipo de trem"
+msgstr "Tipo de trem"
 
 #: window/train_data.cpp:31
 msgid "Axle load category"
-msgstr "carga do eixo"
+msgstr "Carga do eixo"
 

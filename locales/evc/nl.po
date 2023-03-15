@@ -24,7 +24,7 @@ msgstr "Niveau 1"
 #: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
 #: DMI/windows.cpp:597
 msgid "Level 2"
-msgstr "Level 2"
+msgstr "Niveau 2"
 
 #: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
 msgid "Level 3"
