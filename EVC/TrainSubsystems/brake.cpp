@@ -91,6 +91,21 @@ void trigger_brake_reason(int reason)
             }
             return false;
         }});
+    } else if (reason == 3) {
+        text_message msg(get_text("Train data changed"), true, false, 2, [](text_message &msg){return false;});
+        text_message *m = &add_message(msg);
+        brake_conditions.push_back({reason, m, [](brake_command_information &i) {
+            if (V_est == 0) {
+                int64_t time = get_milliseconds();
+                i.msg->end_condition = [time](text_message &m) {
+                    return time+30000<get_milliseconds();
+                };
+                train_shorten('j');
+                send_command("playSinfo","");
+                return true;
+            }
+            return false;
+        }});
     }
 }
 static bool prevEB;

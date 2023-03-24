@@ -29,6 +29,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient, double default_
 {
     acceleration A_gradient;
     A_gradient.dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
+    A_gradient.speed_step.insert(0);
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
         A_gradient.dist_step.insert(it->first-L_TRAIN);

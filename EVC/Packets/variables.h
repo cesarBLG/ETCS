@@ -60,6 +60,11 @@ struct bg_id
     {
         return NID_C != o.NID_C || NID_BG != o.NID_BG;
     }
+    bool operator<(const bg_id &o) const
+    {
+        if (NID_C == o.NID_C) return NID_BG < o.NID_BG;
+        return NID_C < o.NID_C;
+    }
 };
 struct Q_SCALE_t : ETCS_variable
 {
@@ -219,6 +224,15 @@ struct D_OL_t : D_t
 struct D_POSOFF_t : D_t
 {
 };
+struct D_PBD_t : D_t
+{
+};
+struct D_PBDSR_t : D_t
+{
+};
+struct D_RBCTR_t : D_t
+{
+};
 struct D_REF_t : ETCS_variable
 {
     D_REF_t() : ETCS_variable(16){}
@@ -248,6 +262,9 @@ struct D_STATIC_t : D_t
 struct D_STARTOL_t : D_t
 {
 };
+struct D_SUITABILITY_t : D_t
+{
+};
 struct D_TAFDISPLAY_t : D_t
 {
 };
@@ -271,10 +288,19 @@ struct D_VALIDNV_t : D_t
 {
     static const uint32_t Now=32767;
 };
-struct G_A_t : ETCS_variable
+struct G_t : ETCS_variable
+{
+    G_t() : ETCS_variable(8) {}
+};
+struct G_A_t : G_t
 {
     static const uint32_t EndOfGradient=255;
-    G_A_t() : ETCS_variable(8) {}
+};
+struct G_TSR_t : G_t
+{
+};
+struct G_PBDSR_t : G_t
+{
 };
 struct L_NVKRINT_t : ETCS_variable
 {
@@ -330,13 +356,16 @@ struct L_MAMODE_t : D_t
 {
     static const uint32_t Infinity=32767;
 };
+struct L_MESSAGE_t : ETCS_variable
+{
+    L_MESSAGE_t() : ETCS_variable(10) {}
+};
 struct L_PACKET_t : ETCS_variable
 {
     L_PACKET_t() : ETCS_variable(13) {}
 };
-struct L_MESSAGE_t : ETCS_variable
+struct L_PBDSR_t : D_t
 {
-    L_MESSAGE_t() : ETCS_variable(10) {}
 };
 struct L_SECTION_t : D_t
 {
@@ -1165,6 +1194,19 @@ struct NID_PRVLRBG_t : ETCS_variable
     }
     NID_PRVLRBG_t &operator=(uint32_t data) {rawdata=data; return *this;}
 };
+
+struct NID_LTRBG_t : ETCS_variable
+{
+    NID_LTRBG_t() : ETCS_variable(24) {}
+    bg_id get_value()
+    {
+        return {(int)(rawdata>>14), (int)(rawdata&16383)};
+    }
+    void set_value(bg_id id)
+    {
+        rawdata = (id.NID_C<<14) | id.NID_BG;
+    }
+};
 struct NID_LX_t : ETCS_variable
 {
     NID_LX_t() : ETCS_variable(8) {}
@@ -1172,6 +1214,22 @@ struct NID_LX_t : ETCS_variable
 struct NID_MESSAGE_t : ETCS_variable
 {
     NID_MESSAGE_t() : ETCS_variable(8) {}
+};
+struct NID_MN_t : ETCS_variable
+{
+    NID_MN_t() : ETCS_variable(24) {}
+    uint32_t get_value()
+    {
+        uint32_t value=0;
+        for (int i=5; i>=0; i--)
+        {
+            int c = (rawdata>>(4*i))&15;
+            if (c == 15)
+                continue;
+            value = 10*value + c;
+        }
+        return value;
+    }
 };
 struct NID_NTC_t : ETCS_variable
 {
@@ -1418,6 +1476,12 @@ struct Q_LINKREACTION_t : ETCS_variable
         invalid.insert(3);
     }
 };
+struct Q_LSSMA_t : ETCS_variable
+{
+    static const uint32_t ToggleOff=0;
+    static const uint32_t ToggleOn=1;
+    Q_LSSMA_t() : ETCS_variable(1) {}
+};
 struct Q_LXSTATUS_t : ETCS_variable
 {
     static const uint32_t Protected=0;
@@ -1529,6 +1593,12 @@ struct Q_OVERLAP_t : ETCS_variable
     static const uint32_t ExistsOverlap=1;
     Q_OVERLAP_t() : ETCS_variable(1) {}
 };
+struct Q_PBDSR_t : ETCS_variable
+{
+    static const uint32_t EBIntervention=0;
+    static const uint32_t SBIntervention=1;
+    Q_PBDSR_t() : ETCS_variable(1) {}
+};
 struct Q_PLATFORM_t : ETCS_variable
 {
     static const uint32_t LeftSide=0;
@@ -1572,6 +1642,16 @@ struct Q_STOPLX_t : ETCS_variable
     static const uint32_t NoStopRequired=0;
     static const uint32_t StopRequired=1;
     Q_STOPLX_t() : ETCS_variable(1) {}
+};
+struct Q_SUITABILITY_t : ETCS_variable
+{
+    static const uint32_t LoadingGauge=0;
+    static const uint32_t MaxAxleLoad=1;
+    static const uint32_t TractionSystem=2;
+    Q_SUITABILITY_t() : ETCS_variable(2)
+    {
+        invalid.insert(3);
+    }
 };
 struct Q_RBC_t : ETCS_variable
 {
@@ -1658,6 +1738,10 @@ struct T_EMA_t : T_t
 struct T_ENDTIMER_t : T_t
 {
     static const uint32_t Infinity=1023;
+};
+struct T_LSSMA_t : ETCS_variable
+{
+    T_LSSMA_t() : ETCS_variable(8) {}
 };
 struct T_MAR_t : ETCS_variable
 {

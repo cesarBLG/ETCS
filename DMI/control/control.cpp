@@ -184,7 +184,7 @@ void setWindow(json &data)
                     {
                         data.push_back({j["Label"], j["Value"]});
                     }
-                    w = new data_view_window(data);
+                    w = new data_view_window(def["WindowTitle"], data);
                 }
                 /*else if (type == "Menu") w = new menu(j["WindowDefinitionW"]);*/
             }

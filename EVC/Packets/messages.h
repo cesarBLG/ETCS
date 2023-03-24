@@ -62,7 +62,7 @@ struct eurobalise_telegram : public ETCS_message
             b.peek(&NID_PACKET);
             if (NID_PACKET==255)
                 break;
-            packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(b)));
+            packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(b, M_VERSION)));
         }
         readerror = b.error;
         valid = !b.sparefound;

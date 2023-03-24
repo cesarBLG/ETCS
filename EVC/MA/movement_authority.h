@@ -91,6 +91,10 @@ class movement_authority
     distance start;
     int64_t time_stamp;
 public:
+    optional<distance> EoA_ma;
+    optional<distance> SvL_ma;
+    optional<std::pair<distance,double>> LoA_ma;
+    float V_releaseSvL_ma;
     movement_authority(distance start, Level1_MA ma, int64_t first_balise_passed_time);
     movement_authority(distance start, Level2_3_MA ma, int64_t first_balise_passed_time);
     distance get_end()
@@ -114,23 +118,22 @@ public:
     {
         return v_main;
     }
+    void calculate_distances();
     void update_timers();
     void shorten(distance eoa, distance svl);
     void reposition(distance current, double new_length);
     bool timers_to_expire(int64_t threshold);
     friend void MA_infill(movement_authority ma);
-    friend void replace_MA(movement_authority ma);
+    friend void replace_MA(movement_authority ma, bool coop);
     friend void set_data();
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
-extern optional<distance> EoA_ma;
-extern optional<distance> SvL_ma;
 extern optional<distance> d_perturbation_eoa;
 extern optional<distance> d_perturbation_svl;
 void calculate_SvL();
 void calculate_perturbation_location();
-void replace_MA(movement_authority ma);
+void replace_MA(movement_authority ma, bool cooperative_shortening=false);
 void delete_MA();
 void delete_MA(distance eoa, distance svl);
 void set_signalling_restriction(movement_authority ma, bool infill);

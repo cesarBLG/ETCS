@@ -34,9 +34,12 @@ struct etcs_information
     communication_session *fromRBC;
     int dir;
     bg_id nid_bg;
+    int version;
+    bool reevaluated = false;
     optional<std::shared_ptr<euroradio_message>> message;
     std::list<std::shared_ptr<ETCS_packet>> linked_packets;
     etcs_information() : index_mode(-1), index_level(-1){}
     etcs_information(int index) : index_mode(index), index_level(index){}
     etcs_information(int index_level, int index_mode, std::function<void()> fun = nullptr) : index_level(index_level), index_mode(index_mode), handle_fun(fun) {}
 };
+void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);

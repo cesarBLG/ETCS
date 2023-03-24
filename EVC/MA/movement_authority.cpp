@@ -21,12 +21,9 @@
 #include "../LX/level_crossing.h"
 #include "../Procedures/stored_information.h"
 #include "../Supervision/emergency_stop.h"
-optional<distance> EoA_ma;
-optional<distance> SvL_ma;
+#include "../TrackConditions/route_suitability.h"
 optional<distance> d_perturbation_eoa;
 optional<distance> d_perturbation_svl;
-optional<std::pair<distance,double>> LoA_ma;
-float V_releaseSvL_ma;
 movement_authority::movement_authority(distance start, Level1_MA ma, int64_t time) : start(start), time_stamp(time)
 {
     v_main = ma.V_MAIN.get_value();
@@ -120,6 +117,27 @@ movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t t
     }
 }
 void set_data();
+void movement_authority::calculate_distances()
+{
+	distance end = MA->get_end();
+	if (MA->v_ema == 0) {
+		LoA_ma = {};
+		EoA_ma = distance(end);
+		if (MA->ol) {
+			SvL_ma = distance(end + MA->ol->distance);
+			V_releaseSvL_ma = MA->ol->vrelease;
+		} else if (MA->dp) {
+			SvL_ma = distance(end + MA->dp->distance);
+			V_releaseSvL_ma = MA->dp->vrelease;
+		} else {
+			SvL_ma = distance(end);
+			V_releaseSvL_ma = 0;
+		}
+	} else {
+		EoA_ma = SvL_ma = {};
+		LoA_ma = {end, MA->v_ema};
+	}
+}
 void movement_authority::update_timers()
 {
 	if (endtimer) {
@@ -187,10 +205,10 @@ void calculate_SvL()
         return;
     }
 
-    LoA = LoA_ma;
-    EoA = EoA_ma;
-    SvL = SvL_ma;
-    V_releaseSvL = V_releaseSvL_ma;
+    LoA = MA->LoA_ma;
+    EoA = MA->EoA_ma;
+    SvL = MA->SvL_ma;
+    V_releaseSvL = MA->V_releaseSvL_ma;
 
     for (auto it = mode_profiles.begin(); it != mode_profiles.end(); ++it) {
         if (it->start_SvL && mode != it->mode && ((LoA && LoA->first > it->start) || (SvL && *SvL > it->start)) && it->start > d_maxsafefront(it->start)) {
@@ -217,6 +235,14 @@ void calculate_SvL()
         }
     }
 
+    for (auto it = route_suitability.begin(); it != route_suitability.end(); ++it) {
+        if ((LoA && LoA->first > it->second) || (SvL && *SvL > it->second)) {
+            EoA = SvL = it->second;
+            LoA = {};
+            V_releaseSvL = 0;
+        }
+    }
+
     if (EoA && SvL) V_release = calculate_V_release();
     else V_release = 0;
     recalculate_MRSP();
@@ -226,8 +252,8 @@ void calculate_perturbation_location()
     d_perturbation_eoa = {};
     d_perturbation_svl = {};
     const std::map<distance, double> &mrsp = get_MRSP();
-    if (EoA_ma) {
-        target eoa(*EoA_ma, 0, target_class::EoA);
+    if (MA && MA->EoA_ma) {
+        target eoa(*MA->EoA_ma, 0, target_class::EoA);
         for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_eoa; ++it) {
             auto next = it;
             ++next;
@@ -246,8 +272,8 @@ void calculate_perturbation_location()
             }
         }
     }
-    if (SvL_ma || LoA_ma) {
-        target svl(LoA_ma ? LoA_ma->first : *SvL_ma, LoA_ma ? LoA_ma->second : 0, LoA_ma ? target_class::LoA : target_class::SvL);
+    if (MA && (MA->SvL_ma || MA->LoA_ma)) {
+        target svl(MA->LoA_ma ? MA->LoA_ma->first : *MA->SvL_ma, MA->LoA_ma ? MA->LoA_ma->second : 0, MA->LoA_ma ? target_class::LoA : target_class::SvL);
         for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
             auto next = it;
             ++next;
@@ -269,28 +295,10 @@ optional<movement_authority> MA;
 std::set<speed_restriction> signal_speeds;
 void set_data()
 {
-	distance end = MA->get_end();
-	if (MA->v_ema == 0) {
-		LoA_ma = {};
-		EoA_ma = distance(end);
-		if (MA->ol) {
-			SvL_ma = distance(end + MA->ol->distance);
-			V_releaseSvL_ma = MA->ol->vrelease;
-		} else if (MA->dp) {
-			SvL_ma = distance(end + MA->dp->distance);
-			V_releaseSvL_ma = MA->dp->vrelease;
-		} else {
-			SvL_ma = distance(end);
-			V_releaseSvL_ma = 0;
-		}
-	} else {
-		EoA_ma = SvL_ma = {};
-		LoA_ma = {end, MA->v_ema};
-	}
-
+    MA->calculate_distances();
     calculate_SvL();
 }
-void replace_MA(movement_authority ma)
+void replace_MA(movement_authority ma, bool coop)
 {
     if (MA && MA->endtimer && MA->endtimer->started && ma.endtimer && ma.endtimer->startloc < d_maxsafefront(ma.endtimer->startloc)) {
         ma.endtimer->started = true;
@@ -306,11 +314,15 @@ void replace_MA(movement_authority ma)
         ma.ol->ovtimer->started = true;
         ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
     }
-    auto prevSvL = SvL_ma;
-    auto prevLoA = LoA_ma;
+    optional<distance> prevSvL;
+    optional<std::pair<distance,double>> prevLoA;
+    if (MA) {
+        prevSvL = MA->SvL_ma;
+        prevLoA = MA->LoA_ma;
+    }
     MA = ma;
     set_data();
-    if ((prevSvL && SvL_ma && *prevSvL>*SvL_ma) || (SvL_ma && prevLoA)) {
+    if (((prevSvL && MA->SvL_ma && *prevSvL>*MA->SvL_ma) || (MA->SvL_ma && prevLoA)) && !coop) {
         svl_shorten('b');
     }
 }
@@ -337,8 +349,8 @@ void MA_infill(movement_authority ma)
         ma.ol->ovtimer->start_time = get_milliseconds() - ma.ol->ovtimer->time;
     }
 
-    auto prevSvL = SvL_ma;
-    auto prevLoA = LoA_ma;
+    auto prevSvL = MA->SvL_ma;
+    auto prevLoA = MA->LoA_ma;
     distance cumdist = MA->start;
     std::vector<ma_section> s;
     for (int i=0; i<MA->sections.size(); i++) {
@@ -359,17 +371,13 @@ void MA_infill(movement_authority ma)
     MA->ol = ma.ol;
     MA->time_stamp = ma.time_stamp;
     set_data();
-    if ((prevSvL && SvL_ma && *prevSvL>*SvL_ma) || (SvL_ma && prevLoA)) {
+    if ((prevSvL && MA->SvL_ma && *prevSvL>*MA->SvL_ma) || (MA->SvL_ma && prevLoA)) {
         svl_shorten('b');
     }
 }
 void delete_MA()
 {
     MA = {};
-    SvL_ma = {};
-    EoA_ma = {};
-    LoA_ma = {};
-    V_releaseSvL_ma = 0;
     calculate_SvL();
 }
 void delete_MA(distance eoa, distance svl)

@@ -54,7 +54,7 @@ float speedToAngle(float speed)
 void drawNeedle()
 {
     Color needleColor = Grey;
-    if(mode == Mode::SB)
+    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT)
     {
         needleColor = Grey;
     }
@@ -67,9 +67,9 @@ void drawNeedle()
         needleColor = Red;
     }
     else
-    {        
+    {
         if(monitoring == RSM && Vest<=Vrelease && Vrelease!=0) needleColor = Yellow;
-        if(Vtarget<=Vest && Vest<=Vperm && Vtarget<Vperm && Vtarget>=0)
+        if(Vtarget<=Vest && Vest<=Vperm && Vtarget<Vperm && Vtarget>=0 && mode != Mode::LS)
         {
             if(monitoring==TSM) needleColor = Yellow;
             if(monitoring==CSM) needleColor = White;
@@ -309,13 +309,23 @@ void displayGauge()
 }
 bool ttiShown = false;
 const float TdispTTI = 14;
+int lssma;
+void setLSSMA(int nlssma)
+{
+    if (nlssma != lssma)
+    {
+        lssma = nlssma;
+        a1.clear();
+        if (lssma >= 0)
+        {
+            a1.addImage("symbols/Limited Supervision/MO_21.bmp");
+            a1.addText(std::to_string(lssma), 0, 0, 12, White);
+        }
+    }
+}
 void displaya1()
 {
-    if(mode == Mode::LS)
-    {
-        //a1.drawImage("symbols/Limited Supervision/MO_21.bmp");
-        //a1.addText("120", 12, 0, 0, White);
-    }
+    if(mode == Mode::LS) return;
     if((mode == Mode::FS || ((mode == Mode::OS || mode == Mode::SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
     {
         if(!ttiShown) playSinfo();

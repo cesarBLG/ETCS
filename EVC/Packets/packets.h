@@ -49,7 +49,7 @@ struct ETCS_packet
         L_PACKET.rawdata = w.position-start;
         w.replace(&L_PACKET, start+8);
     }
-    static ETCS_packet *construct(bit_manipulator &r);
+    static ETCS_packet *construct(bit_manipulator &r, int m_version);
 };
 struct ETCS_nondirectional_packet : ETCS_packet
 {
@@ -67,10 +67,12 @@ struct ETCS_directional_packet : ETCS_packet
     }
     virtual void copy(bit_manipulator &w) override
     {
-        std::cout<<"TODO: copy() not implemented for packet "<<NID_PACKET.rawdata<<std::endl;
+        int pos = w.position;
         NID_PACKET.copy(w);
         Q_DIR.copy(w);
         L_PACKET.copy(w);
+        if (!w.write_mode)
+            w.position = pos+L_PACKET;
     }
     void write_to(bit_manipulator &w) override
     {

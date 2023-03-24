@@ -5,12 +5,12 @@
 #include "../Packets/radio.h"
 void svl_shorten(char condition)
 {
-    distance d = *SvL_ma;
+    if (!MA || !MA->SvL_ma) return;
+    distance d = *MA->SvL_ma;
     // MA already shortened
     delete_linking(d);
     delete_gradient(d);
-    if (condition != 'a' && condition != 'b' && condition != 'f')
-    if (level == Level::N2 || level == Level::N3)
+    if (condition != 'a' && condition != 'b' && condition != 'f' && (level == Level::N2 || level == Level::N3))
         ma_rq_reasons[3] = true;
 }
 void train_shorten(char condition)

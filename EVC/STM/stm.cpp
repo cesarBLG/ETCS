@@ -510,8 +510,28 @@ void stm_object::send_specific_data(json &result)
     data_entry_timer = get_milliseconds();
     stm_message msg;
     auto *res = new STMSpecificDataEntryValues();
+    std::map<int, std::string> vals;
+    for (auto it = result.begin(); it!=result.end(); ++it) {
+        for (auto &field : specific_data) {
+            if (field.caption == it.key())
+                vals[field.id] = it.value();
+        }
+    }
+    res->N_ITER.rawdata = vals.size();
+    for (auto &kvp : vals) {
+        STMDataFieldResult dfr;
+        dfr.NID_DATA.rawdata = kvp.first;
+        dfr.L_VALUE.rawdata = kvp.second.size();
+        for (int i=0; i<kvp.second.size(); i++) {
+            X_VALUE_t val;
+            val.rawdata = kvp.second[i];
+            dfr.X_VALUE.push_back(val);
+        }
+        res->results.push_back(dfr);
+    }
     msg.packets.push_back(std::shared_ptr<ETCS_packet>(res));
     send_message(&msg);
+    specific_data.clear();
 }
 void setup_stm_control()
 {

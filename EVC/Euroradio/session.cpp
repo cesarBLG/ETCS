@@ -1,9 +1,15 @@
 #include "session.h"
 #include "../Packets/messages.h"
 #include "../Packets/logging.h"
+#include "../Packets/TrainToTrack/5.h"
 #include "../Supervision/train_data.h"
 #include "../Procedures/start.h"
+#include "../Procedures/level_transition.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "../TrackConditions/track_condition.h"
+#include "../language/language.h"
+#include "../Version/version.h"
+#include "../Version/translate.h"
 #include <thread>
 #include <map>
 #ifndef _WIN32
@@ -14,6 +20,10 @@
 communication_session *supervising_rbc = nullptr;
 communication_session *accepting_rbc = nullptr;
 communication_session *handing_over_rbc = nullptr;
+bool handover_report_accepting = false;
+bool handover_report_min = false;
+bool handover_report_max = false;
+distance rbc_transition_position;
 safe_radio_status radio_status_driver;
 std::map<contact_info, communication_session*> active_sessions;
 #include <iostream>
@@ -24,6 +34,7 @@ void communication_session::open(int ntries)
         return;
     train_data_ack_pending = train_data_valid;
     train_data_ack_sent = false;
+    train_running_number_sent = false;
     closing = false;
     initsent = false;
     status = session_status::Establishing;
@@ -101,6 +112,8 @@ void communication_session::update()
     } else if (status == session_status::Established) {
         if (radio_status == safe_radio_status::Failed && !terminal->setting_up) {
             connection_timer = true;
+            if (train_data_ack_pending && train_data_ack_sent)
+                train_data_ack_sent = false;
             if (get_milliseconds()-last_active > T_keep_session * 1000) {
                 auto ack = pending_ack;
                 finalize();
@@ -110,8 +123,9 @@ void communication_session::update()
                 terminal->setup(this);
             }
         }
-        if (train_data_valid && train_data_ack_pending && !train_data_ack_sent) {
+        if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {
             train_data_ack_sent = true;
+            train_running_number_sent = true;
             auto *tdm = new validated_train_data_message();
             fill_message(tdm);
             auto *td = new TrainDataPacket();
@@ -125,8 +139,32 @@ void communication_session::update()
             td->N_AXLE.rawdata = axle_number;
             td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
             tdm->TrainData = std::shared_ptr<TrainDataPacket>(td);
+            if (VERSION_X(version) != 1) {
+                auto *trn = new TrainRunningNumber();
+                trn->NID_OPERATIONAL.rawdata = 0;
+                int tmp = train_running_number;
+                for (int i=0; i<8; i++) {
+                    trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
+                    tmp /= 10;
+                }
+                tdm->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+            }
             send(std::shared_ptr<validated_train_data_message>(tdm));
         }
+    }
+    if (!train_running_number_sent && train_running_number_valid) {
+        train_running_number_sent = true;
+        auto *rep = new position_report();
+        fill_message(rep);
+        auto *trn = new TrainRunningNumber();
+        trn->NID_OPERATIONAL.rawdata = 0;
+        int tmp = train_running_number;
+        for (int i=0; i<8; i++) {
+            trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
+            tmp /= 10;
+        }
+        rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+        send(std::shared_ptr<euroradio_message_traintotrack>(rep));
     }
     if (terminal != nullptr) {
         std::unique_lock<std::mutex> lck(terminal->mtx);
@@ -150,7 +188,33 @@ void communication_session::update()
             if (msg->NID_MESSAGE == 32) {
                 status = session_status::Established;
                 position_report_reasons[7] = true;
-                // TODO: send version
+                auto rbc_ver = (RBC_version*)msg.get();
+                version = rbc_ver->M_VERSION;
+                if (is_version_supported(version)) {
+                    auto established = std::shared_ptr<communication_session_established>(new communication_session_established());
+                    auto &ver = established->SupportedVersions;
+                    for (auto it = supported_versions.begin(); it != supported_versions.end(); ++it) {
+                        M_VERSION_t M_VERSION;
+                        M_VERSION.rawdata = *it;
+                        if (it == supported_versions.begin())
+                            ver->M_VERSION = M_VERSION;
+                        else
+                            ver->M_VERSIONs.push_back(M_VERSION);
+                    }
+                    ver->N_ITER.rawdata = supported_versions.size() - 1;
+                    fill_message(established.get());
+                    send(established);
+                } else {
+                    auto nover = std::shared_ptr<no_compatible_session_supported>(new no_compatible_session_supported());
+                    fill_message(nover.get());
+                    send(nover);
+                    close();
+                    int64_t time = get_milliseconds();
+                    text_message msg(get_text("Trackside not compatible"), true, false, 2, [time](text_message &msg) {
+                        return time+30000<get_milliseconds();
+                    });
+                    add_message(msg);
+                }
             } else if (msg->NID_MESSAGE == 39) {
                 finalize();
                 break;
@@ -178,6 +242,18 @@ void communication_session::update()
                 msg.times_sent++;
                 msg.last_sent = get_milliseconds();
                 fill_message(msg.message.get());
+                if (VERSION_X(version) == 1) {
+                    if (msg.message->PositionReport1BG) {
+                        auto &mode = msg.message->PositionReport1BG->get()->M_MODE;
+                        if (mode == 15)
+                            mode.rawdata = 3;
+                    }
+                    if (msg.message->PositionReport2BG) {
+                        auto &mode = msg.message->PositionReport2BG->get()->M_MODE;
+                        if (mode == 15)
+                            mode.rawdata = 3;
+                    }
+                }
                 log_message(msg.message, d_estfront, get_milliseconds());
                 if (terminal != nullptr) {
                     {
@@ -193,6 +269,7 @@ void communication_session::update()
 
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg, bool lock)
 {
+    msg = translate_message(msg, version);
     log_message(msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
         return;
@@ -244,6 +321,36 @@ void update_euroradio()
             ++it;
         }
     }
+    if (accepting_rbc && accepting_rbc->status == session_status::Inactive) {
+        accepting_rbc = handing_over_rbc = nullptr;
+        transition_buffer.clear();
+    }
+    if (handing_over_rbc && handing_over_rbc->status == session_status::Inactive)
+        handing_over_rbc = nullptr;
+    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position) {
+        if (!handover_report_accepting && accepting_rbc->status == session_status::Established) {
+            handover_report_accepting = true;
+            handover_report_max = true;
+            position_report_reasons[10] = true;
+            supervising_rbc = accepting_rbc;
+            accepting_rbc = nullptr;
+            rbc_contact = supervising_rbc->contact;
+            inhibit_revocable_tsr = false;
+            for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
+                for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
+                    try_handle_information(*it2, *it);
+                }
+            }
+            transition_buffer.clear();
+        } else if (!handover_report_max) {
+            handover_report_max = true;
+            position_report_reasons[10] = true;
+        }
+    }
+    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position && !handover_report_min) {
+        position_report_reasons[4] = true;
+        handover_report_min = true;
+    }
     if (supervising_rbc) {
         bool c1 = supervising_rbc->status == session_status::Inactive && supervising_rbc->radio_status == safe_radio_status::Failed && som_active;
         bool c2 = supervising_rbc->connection_timer && get_milliseconds()-supervising_rbc->last_active>T_connection_status*1000;
@@ -266,6 +373,13 @@ void update_euroradio()
         radio_status_driver = safe_radio_status::Disconnected;
     }
     bool radio_hole = false;
+    for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
+        auto *tc = it->get();
+        if (tc->condition == TrackConditions::RadioHole) {
+            if (tc->start < d_maxsafefront(tc->start) && tc->end > d_minsafefront(tc->start) - L_TRAIN)
+                radio_hole = true;
+        }
+    }
     if (radio_hole || ((level == Level::N2 || level == Level::N3) && (!supervising_rbc || supervising_rbc->status != session_status::Established))) {
         first_supervised_timestamp = -1;
     }
@@ -301,6 +415,8 @@ void update_euroradio()
         radio_reaction_applied = false;
         radio_reaction_reconnected = false;
     }
+    if (supervising_rbc && supervising_rbc->status == session_status::Established && (level == Level::N2 || level == Level::N3))
+        operate_version(supervising_rbc->version, true);
 }
 optional<contact_info> rbc_contact;
 bool rbc_contact_valid;
@@ -311,6 +427,11 @@ void load_contact_info()
 }
 void set_supervising_rbc(contact_info info)
 {
+    if (accepting_rbc != nullptr) {
+        transition_buffer = {};
+    }
+    handing_over_rbc = accepting_rbc = nullptr;
+    handover_report_accepting = handover_report_max = handover_report_min = false;
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
         info.phone_number = 5015 | ((uint64_t)ntohl(inet_addr("127.0.0.1")))<<16;
     }
@@ -329,6 +450,21 @@ void set_supervising_rbc(contact_info info)
         supervising_rbc = new communication_session(info, true);
         active_sessions[info] = supervising_rbc;
     }
+}
+void rbc_handover(distance d, contact_info newrbc)
+{
+    rbc_transition_position = d;
+    handover_report_accepting = handover_report_max = handover_report_min = false;
+    if (supervising_rbc && supervising_rbc->contact == newrbc)
+        return;
+    if (accepting_rbc && accepting_rbc->contact != newrbc)
+        accepting_rbc->close();
+    if (handing_over_rbc && handing_over_rbc != supervising_rbc)
+        handing_over_rbc->close();
+    handing_over_rbc = supervising_rbc;
+    accepting_rbc = new communication_session(newrbc, true);
+    active_sessions[newrbc] = accepting_rbc;
+    accepting_rbc->open(0);
 }
 void terminate_session(contact_info info)
 {

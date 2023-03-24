@@ -9,6 +9,7 @@
 #include "../Procedures/level_transition.h"
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
+#include "../Version/version.h"
 #include <fstream>
 dialog_sequence active_dialog;
 std::string active_dialog_step;
@@ -266,6 +267,16 @@ json data_view_window()
     j["WindowDefinition"] = def;
     return j;
 }
+json system_version_window()
+{
+    json j = R"({"active":"system_version_window"})"_json;
+    json def;
+    def["WindowType"] = "DataView";
+    def["WindowTitle"] = get_text("Data view");
+    def["Fields"] = {build_field(get_text("Operated system version"), std::to_string(VERSION_X(operated_version))+"."+std::to_string(VERSION_Y(operated_version)))};
+    j["WindowDefinition"] = def;
+    return j;
+}
 static dialog_sequence prev_dialog;
 static std::string prev_step;
 void update_dmi_windows()
@@ -429,6 +440,11 @@ void update_dmi_windows()
             if (!supervising_rbc || supervising_rbc->status == session_status::Inactive || !supervising_rbc->train_data_ack_pending)
                 active_dialog_step = "S1";
         } else if (active_dialog_step == "D1") {
+            if (supervising_rbc) {
+                supervising_rbc->train_data_ack_pending = true;
+                supervising_rbc->train_data_ack_sent = false;
+                supervising_rbc->train_running_number_sent = false;
+            }
             if (level == Level::N2 || level == Level::N3)
                 active_dialog_step = "D2";
             else
@@ -586,7 +602,8 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S4") {
             
         } else if (active_dialog_step == "S5") {
-            
+            if (changed)
+                active_window_dmi = system_version_window();
         } else if (active_dialog_step == "S6-1") {
             if (changed)
                 active_window_dmi = set_vbc_window();
@@ -734,16 +751,21 @@ void validate_data_entry(std::string name, json &result)
         }
     } else if (name == get_text("Train running number")) {
         train_running_number_valid = false;
-        train_running_number = stoi(result[""].get<std::string>());
+        std::string res = result[""].get<std::string>();
+        if (res.size() > 8)
+            return;
+        train_running_number = stoi(res);
         if (train_running_number > 0) {
             train_running_number_valid = true;
         } else {
             return;
         }
         if (active_dialog == dialog_sequence::Main) {
-            if (active_dialog_step == "S6")
+            if (active_dialog_step == "S6") {
                 active_dialog_step = "S1";
-            else
+                if (supervising_rbc)
+                    supervising_rbc->train_running_number_sent = false;
+            } else
                 active_dialog_step = "D1";
         } else if (active_dialog == dialog_sequence::StartUp) {
                 active_dialog_step = "S1";
@@ -842,11 +864,9 @@ void validate_data_entry(std::string name, json &result)
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
             }
+            target::recalculate_all_decelerations();
+            recalculate_MRSP();
             if (train_data_valid) {
-                if (supervising_rbc) {
-                    supervising_rbc->train_data_ack_pending = true;
-                    supervising_rbc->train_data_ack_sent = false;
-                }
                 active_dialog = dialog_sequence::NTCData;
                 active_dialog_step = "D1";
                 stm_send_train_data();
@@ -977,45 +997,31 @@ void validate_entry_field(std::string window, json &result)
     bool techrang = true;
     std::string label = result["Label"];
     std::string data = result["Value"];
-    if (window == get_text("Train data"))
-    {
-        if (label == get_text("Length (m)"))
-        {
+    if (window == get_text("Train data")) {
+        if (label == get_text("Length (m)")) {
             int val = atoi(data.c_str());
             techrang = val >= 0 && val < 4096;
             operat = val < 1500;
-        }
-        else if (label == get_text("Brake percentage"))
-        {
+        } else if (label == get_text("Brake percentage")) {
             int val = atoi(data.c_str());
             techrang = val >= 10 && val <= 250;
             operat = val >= 30;
-        }
-        else if (label == get_text("Max speed (km/h)"))
-        {
+        } else if (label == get_text("Max speed (km/h)")) {
             int val = atoi(data.c_str());
             techrang = val > 0 && val <= 600;
             techres = val % 5 == 0;
             operat = val <= 200;
         }
-    }
-    else if (window == get_text("RBC data"))
-    {
-        if (label == get_text("RBC ID"))
-        {
+    } else if (window == get_text("RBC data")) {
+        if (label == get_text("RBC ID")) {
             int val = atoi(data.c_str());
             techrang = val >= 0 && val <= 16777214;
         }
-    }
-    else if (window == get_text("SR speed/distance"))
-    {
-        if (label == get_text("SR distance (m)"))
-        {
+    } else if (window == get_text("SR speed/distance")) {
+        if (label == get_text("SR distance (m)")) {
             int val = atoi(data.c_str());
             techrang = val > 0 && val <= 10000;
-        }
-        else if (label == get_text("SR speed (km/h)"))
-        {
+        } else if (label == get_text("SR speed (km/h)")) {
             int val = atoi(data.c_str());
             techrang = val > 0 && val <= 600;
             techres = val % 5 == 0;
@@ -1163,9 +1169,9 @@ void update_dialog_step(std::string step, std::string step2)
         /*else if (step == "Volume")
             active_dialog_step = "S3";
         else if (step == "Brightness")
-            active_dialog_step = "S4";
+            active_dialog_step = "S4";*/
         else if (step == "SystemVersion")
-            active_dialog_step = "S5";*/
+            active_dialog_step = "S5";
         else if (step == "SetVBC")
             active_dialog_step = "S6-1";
         else if (step == "RemoveVBC")

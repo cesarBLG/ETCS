@@ -40,6 +40,7 @@
 #include "../control/control.h"
 #include "../STM/stm_objects.h"
 #include "../language/language.h"
+#include "../speed/gauge.h"
 #include <mutex>
 int server;
 int clients[3];
@@ -282,6 +283,8 @@ void parseData(std::string str)
     EB = SB = j["BrakeCommanded"].get<bool>();
     extern bool display_taf;
     display_taf = j["DisplayTAF"].get<bool>();
+    if (j.contains("LSSMA")) setLSSMA((int)(j["LSSMA"].get<double>()*3.6 + 0.01));
+    else setLSSMA(-1);
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
     {
         speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();

@@ -18,6 +18,7 @@
 #pragma once
 #include <set>
 #include <map>
+#include <list>
 #include <vector>
 #include "../optional.h"
 #include "../Position/distance.h"
@@ -79,6 +80,7 @@ void update_SSP(std::vector<SSP_element> nSSP);
 std::set<speed_restriction> &get_SSP();
 void update_gradient(std::map<distance, double> grad);
 const std::map<distance, double> &get_gradient();
+extern int default_gradient_tsr;
 struct TSR
 {
     int id;
@@ -87,7 +89,8 @@ struct TSR
 };
 void insert_TSR(TSR rest);
 void revoke_TSR(int id_tsr);
-extern bool inhibit_revokable_tsr;
+extern bool inhibit_revocable_tsr;
+extern std::list<TSR> TSRs;
 extern optional<speed_restriction> SR_speed;
 extern optional<speed_restriction> SH_speed;
 extern optional<speed_restriction> UN_speed;

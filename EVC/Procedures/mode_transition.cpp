@@ -20,10 +20,12 @@
 #include "override.h"
 #include "start.h"
 #include "../Supervision/emergency_stop.h"
+#include "../Supervision/track_pbd.h"
 #include "../Position/linking.h"
 #include "../DMI/text_message.h"
 #include "level_transition.h"
 #include "../TrackConditions/track_condition.h"
+#include "../TrackConditions/route_suitability.h"
 #include "../Packets/radio.h"
 #include "../Euroradio/session.h"
 #include "../LX/level_crossing.h"
@@ -38,6 +40,8 @@ bool mode_acknowledged=false;
 Mode mode_to_ack;
 bool desk_open=true;
 bool sleep_signal=false;
+optional<std::set<bg_id>> sh_balises;
+optional<std::set<bg_id>> sr_balises;
 void set_mode_deleted_data();
 void initialize_mode_transitions()
 {
@@ -179,6 +183,14 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::UN, Mode::SN, {56}, 7});
     transitions.push_back({Mode::TR, Mode::SN, {63}, 4});
 
+    transitions.push_back({Mode::SB, Mode::LS, {70}, 7});
+    transitions.push_back({Mode::FS, Mode::LS, {70, 72}, 6});
+    transitions.push_back({Mode::SR, Mode::LS, {72}, 6});
+    transitions.push_back({Mode::OS, Mode::LS, {70, 74}, 6});
+    transitions.push_back({Mode::UN, Mode::LS, {71}, 7});
+    transitions.push_back({Mode::PT, Mode::LS, {70}, 5});
+    transitions.push_back({Mode::SN, Mode::LS, {71}, 7});
+
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);
     }
@@ -305,6 +317,10 @@ void update_mode_status()
             end_mission = true;
         if (end_mission) {
             ongoing_mission = false;
+            if (handing_over_rbc)
+                handing_over_rbc->close();
+            if (accepting_rbc)
+                accepting_rbc->close();
             if (supervising_rbc)
                 supervising_rbc->close();
         }
@@ -396,7 +412,14 @@ void set_mode_deleted_data()
     information_list[7].delete_info = []() {STM_max_speed = {};};
     information_list[8].delete_info = []() {STM_system_speed = {};};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
+    information_list[11].delete_info = []() {sh_balises = {};};
+    information_list[12].delete_info = []() {ma_params = {30000, (int64_t)(T_CYCRQSTD*1000), 30000};};
+    information_list[13].delete_info = []() {pos_report_params = {};};
+    information_list[14].delete_info = []() {sr_balises = {};};
+    information_list[16].delete_info = []() {inhibit_revocable_tsr = false;};
+    information_list[17].delete_info = []() {default_gradient_tsr = 0;};
     information_list[18].delete_info = []() {signal_speeds.clear();};
+    information_list[19].delete_info = []() {route_suitability.clear();};
     information_list[22].delete_info = []() {
         for (auto &m : messages) {
             if (m.type == text_message_type::PlainText)
@@ -446,7 +469,9 @@ void set_mode_deleted_data()
     information_list[38].invalidate_info = []() {driver_id_valid = false;};
     information_list[41].invalidate_info = []() {train_running_number_valid = false;};
     information_list[41].delete_info = []() {train_running_number = 0;};
+    information_list[45].delete_info = []() {PBDs.clear();};
     information_list[46].delete_info = []() {level_crossings.clear();};
+    information_list[52].delete_info = []() {display_lssma_time = {};};
 }
 void trigger_condition(int num)
 {

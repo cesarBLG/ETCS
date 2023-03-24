@@ -267,6 +267,7 @@ void dmi_comm()
         else j["GeographicalPositionKM"]=nullptr;
         j["TextMessages"] = messages;
         j["DisplayTAF"] = start_display_taf && !stop_display_taf;
+        if (display_lssma) j["LSSMA"] = lssma;
         if (mode == Mode::FS || mode == Mode::OS)
         {
             std::vector<speed_element> speeds;

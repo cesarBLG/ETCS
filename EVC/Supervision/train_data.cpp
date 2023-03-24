@@ -19,6 +19,7 @@
 #include "conversion_model.h"
 #include <nlohmann/json.hpp>
 #include "../Supervision/speed_profile.h"
+#include "../TrainSubsystems/brake.h"
 #include <fstream>
 #include <list>
 using json = nlohmann::json;
@@ -52,6 +53,9 @@ std::string special_train_data;
 std::list<traction_type> traction_systems;
 void set_train_data(std::string spec)
 {
+    if (special_train_data != spec) {
+        //trigger_brake_reason(3);
+    }
     train_data_valid = false;
     special_train_data = spec;
     conversion_model_used = false;
