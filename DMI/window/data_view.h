@@ -48,8 +48,11 @@ class data_view_window : public subwindow
             c2->addText(data[i].second, 4, 0, 12, White, LEFT);
             components.push_back(c1);
             components.push_back(c2);
-            for (int j=0; j<rows*2; j++) components.push_back(nullptr);
+            for (int j=0; j<(rows-2)*2; j++) components.push_back(nullptr);
         }
+        page_count = (components.size()/2-1)/10 + 1;
+        next_button.enabled = page_count > 1;
+        updateTitle();
         setLayout();
     }
     ~data_view_window()

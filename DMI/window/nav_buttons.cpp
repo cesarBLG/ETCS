@@ -18,14 +18,11 @@
  */
 #include "nav_buttons.h"
 #include "../graphics/button.h"
+#include "../graphics/text_button.h"
+#include "../graphics/icon_button.h"
 #include "window.h"
 #include <algorithm>
 #include "../graphics/display.h"
-#include "menu_main.h"
-#include "menu_override.h"
-#include "menu_settings.h"
-#include "menu_spec.h"
-#include "data_view.h"
 #include "../state/time_hour.h"
 #include "../state/gps_pos.h"
 #include "../tcp/server.h"
