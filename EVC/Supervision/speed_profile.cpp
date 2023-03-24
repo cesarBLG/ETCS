@@ -17,6 +17,7 @@
  */
 #include "speed_profile.h"
 #include "targets.h"
+#include "track_pbd.h"
 #include "train_data.h"
 #include "../MA/movement_authority.h"
 #include "fixed_values.h"
@@ -24,7 +25,6 @@
 #include "../LX/level_crossing.h"
 #include <vector>
 #include <map>
-#include <list>
 #include <cmath>
 std::map<distance,double> MRSP;
 std::set<speed_restriction> SSP;
@@ -39,6 +39,7 @@ optional<speed_restriction> override_speed;
 optional<speed_restriction> STM_system_speed;
 optional<speed_restriction> STM_max_speed;
 std::map<distance, double> gradient;
+int default_gradient_tsr;
 void delete_back_info()
 {
     const distance mindist = d_minsafefront(odometer_orientation, 0)-L_TRAIN-D_keep_information; //For unlinked balise groups, change this, losing efficiency
@@ -55,8 +56,11 @@ void delete_back_info()
         if (it != gradient.begin())
             gradient.erase(gradient.begin(), --it);
     }
-    TSRs.remove_if([mindist](TSR t) {
+    TSRs.remove_if([mindist](const TSR &t) {
         return t.restriction.get_end()<mindist;
+    });
+    PBDs.remove_if([mindist](const PBD_target &t) {
+        return t.end < mindist;
     });
 }
 void delete_SSP(distance d)
@@ -109,6 +113,11 @@ void recalculate_MRSP()
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         for (auto it=level_crossings.begin(); it!=level_crossings.end(); ++it) {
             if (!it->lx_protected && it->svl_replaced) restrictions.insert(speed_restriction(it->V_LX, *it->svl_replaced, it->start+it->length, false));
+        }
+    }
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
+        for (auto &pbd : PBDs) {
+            restrictions.insert(pbd.restriction);
         }
     }
     if (train_speed && 
@@ -202,7 +211,7 @@ void set_train_max_speed(double vel)
     train_speed = speed_restriction(V_train, ::distance(std::numeric_limits<double>::lowest(), 0, 0), ::distance(std::numeric_limits<double>::max(), 0, 0), false);
     recalculate_MRSP();
 }
-bool inhibit_revokable_tsr;
+bool inhibit_revocable_tsr;
 void insert_TSR(TSR rest)
 {
     revoke_TSR(rest.id);

@@ -19,9 +19,9 @@
 #include "menu_override.h"
 #include "../monitor.h"
 #include "../tcp/server.h"
-menu_override::menu_override() : menu(gettext("Override"))
+menu_override::menu_override() : menu(get_text("Override"))
 {
-    buttons[0] = new TextButton(gettext("EoA"), 153, 50);
+    buttons[0] = new TextButton(get_text("EoA"), 153, 50);
     buttons[0]->setPressedAction([this]
     {
         write_command("Override","");

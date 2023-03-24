@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <ctime>
+#include <math.h>
 using namespace std;
 sdlsounddata sinfo;
 sdlsounddata swarn;

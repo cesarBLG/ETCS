@@ -8,7 +8,7 @@
 #include "../../EVC/Packets/STM/43.h"
 #include "../../EVC/Packets/STM/message.h"
 #include "../sound/sound.h"
-#include "../../EVC/Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #include "../../EVC/STM/stm_state.h"
 using json = nlohmann::json;
 struct stm_monitoring_data

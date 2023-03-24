@@ -240,8 +240,8 @@ text_graphic* Component::getText(string text, float x, float y, float size, Colo
     t->aspect = aspect;
     int v = text.find('\n');
     t->tex = getTextGraphic(text, size, col, aspect);
-    float sx = t->tex == nullptr ? 0 : t->tex->width;
-    float sy = t->tex == nullptr ? 0 : t->tex->height;
+    float sx = t->tex == nullptr ? 0 : getAntiScale(t->tex->width);
+    float sy = t->tex == nullptr ? 0 : getAntiScale(t->tex->height);
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
@@ -250,8 +250,8 @@ text_graphic* Component::getText(string text, float x, float y, float size, Colo
     else x = x + this->sx / 2;
     t->x = x;
     t->y = y;
-    t->width = getAntiScale(sx);
-    t->height = getAntiScale(sy);
+    t->width = sx;
+    t->height = sy;
     return t;
 }
 std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, Color col, int aspect)
@@ -259,7 +259,7 @@ std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, 
     if (text == "") return nullptr;
     TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
     if (font == nullptr) return nullptr;
-    if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
+    //if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
     SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};
     SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
     auto *tex = new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf));

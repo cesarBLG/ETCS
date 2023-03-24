@@ -20,11 +20,10 @@
 #include "fixed_train_data.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
-#include "../../EVC/Parser/nlohmann/json.hpp"
 #include "../monitor.h"
 #include <fstream>
 using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window(std::string title) : input_window(title, 1, false), SelectType(gettext("Enter\ndata"),60,50)
+fixed_train_data_window::fixed_train_data_window(std::string title) : input_window(title, 1, true), SelectType(get_text("Enter\ndata"),60,50)
 {
     SelectType.setPressedAction([this]() {
         write_command("EnterData", "");

@@ -37,6 +37,7 @@ struct TrainDataPacket : ETCS_packet
         N_AXLE.copy(w);
         N_ITERtraction.copy(w);
         M_VOLTAGEs.resize(N_ITERtraction);
+        NID_CTRACTIONs.resize(N_ITERtraction);
         for (int i=0; i<N_ITERtraction; i++) {
             M_VOLTAGEs[i].copy(w);
             if (M_VOLTAGEs[i] != 0) {

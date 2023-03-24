@@ -32,6 +32,7 @@ class communication_session
     contact_info contact;
     bool train_data_ack_pending;
     bool train_data_ack_sent;
+    bool train_running_number_sent;
     bool closing;
     session_status status = session_status::Inactive;
     safe_radio_status radio_status = safe_radio_status::Disconnected;
@@ -39,7 +40,8 @@ class communication_session
     bool connection_timer;
     int64_t last_valid_timestamp = std::numeric_limits<int64_t>::lowest();
     std::list<msg_expecting_ack> pending_ack;
-    communication_session(contact_info contact, bool isRBC) : isRBC(isRBC), contact(contact) {}
+    int version;
+    communication_session(contact_info contact, bool isRBC) : isRBC(isRBC), contact(contact), version(-1) {}
     void open(int ntries);
     void finalize();
     void close();
@@ -62,3 +64,4 @@ extern bool radio_reaction_applied;
 void update_euroradio();
 void set_supervising_rbc(contact_info info);
 void terminate_session(contact_info info);
+void rbc_handover(distance d, contact_info newrbc);

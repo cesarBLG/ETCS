@@ -43,6 +43,7 @@ protected:
 public:
     target_class type;
     bool is_EBD_based;
+    bool is_TSR = false;
     double default_gradient=0;
     target();
     target(distance dist, double speed, target_class type);
@@ -98,30 +99,7 @@ public:
             return false;
         return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
     }
-    static std::set<target*> targets; 
-    static void recalculate_all_decelerations()
-    {
-        for (target *t : targets) {
-            t->calculate_decelerations();
-        }
-    }
-};
-class PBD_target : public target
-{
-    bool emergency;
-    public:
-    PBD_target(distance d_PBD, bool emergency, double grad) : target(d_PBD, 0, target_class::PBD)
-    {
-        default_gradient = grad;
-        is_EBD_based = emergency;
-        use_brake_combination = false;
-        calculate_decelerations();
-    }
-    void calculate_decelerations() override
-    {
-        std::map<distance,double> gradient = std::map<distance,double>();
-        target::calculate_decelerations(gradient);
-    }
+    static void recalculate_all_decelerations();
 };
 extern optional<distance> EoA;
 extern optional<distance> SvL;

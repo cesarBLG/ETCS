@@ -21,10 +21,13 @@
 #include <memory>
 #include <list>
 #include "variables.h"
+#include "V1/variables.h"
 #include "types.h"
 #include "packets.h"
 #include "TrainToTrack/0.h"
 #include "TrainToTrack/1.h"
+#include "TrainToTrack/2.h"
+#include "TrainToTrack/V1/3.h"
 #include "TrainToTrack/11.h"
 #include "15.h"
 #include "../optional.h"
@@ -39,7 +42,14 @@ struct position_report_parameters
     std::list<distance> location_rear; 
     bool LRBG;
 };
+struct ma_request_parameters
+{
+    int64_t T_MAR;
+    int64_t T_CYCRQSTD;
+    int64_t T_TIMEOUTRQST;
+};
 extern optional<position_report_parameters> pos_report_params;
+extern ma_request_parameters ma_params;
 struct euroradio_message : public ETCS_message
 {
     NID_MESSAGE_t NID_MESSAGE;
@@ -49,6 +59,7 @@ struct euroradio_message : public ETCS_message
     NID_LRBG_t NID_LRBG;
     std::vector<std::shared_ptr<ETCS_packet>> packets;
     std::vector<std::shared_ptr<ETCS_packet>> optional_packets;
+    int version = 33;
     euroradio_message() {}
     virtual void copy(bit_manipulator &r)
     {
@@ -68,7 +79,7 @@ struct euroradio_message : public ETCS_message
         w.replace(&L_MESSAGE, 8);
         w.log_entries[1].second = std::to_string(L_MESSAGE.rawdata);
     }
-    static std::shared_ptr<euroradio_message> build(bit_manipulator &r);
+    static std::shared_ptr<euroradio_message> build(bit_manipulator &r, int m_version);
 };
 struct euroradio_message_traintotrack : public ETCS_message
 {
@@ -149,6 +160,24 @@ struct MA_message : euroradio_message
         MA->copy(w);
     }
 };
+struct MA_shortening_message : euroradio_message
+{
+    std::shared_ptr<Level2_3_MA> MA;
+    MA_shortening_message()
+    {
+        MA = std::shared_ptr<Level2_3_MA>(new Level2_3_MA());
+        packets.push_back(MA);
+    }
+    virtual void copy(bit_manipulator &w) override
+    {
+        NID_MESSAGE.copy(w);
+        L_MESSAGE.copy(w);
+        T_TRAIN.copy(w);
+        M_ACK.copy(w);
+        NID_LRBG.copy(w);
+        MA->copy(w);
+    }
+};
 struct TR_exit_recognition : euroradio_message
 {
 };
@@ -172,6 +201,10 @@ struct conditional_emergency_stop : euroradio_message
     D_REF_t D_REF;
     Q_DIR_t Q_DIR;
     D_EMERGENCYSTOP_t D_EMERGENCYSTOP;
+    conditional_emergency_stop(int version)
+    {
+        this->version = version;
+    }
     void copy(bit_manipulator &r) override
     {
         NID_MESSAGE.copy(r);
@@ -181,7 +214,8 @@ struct conditional_emergency_stop : euroradio_message
         NID_LRBG.copy(r);
         NID_EM.copy(r);
         Q_SCALE.copy(r);
-        D_REF.copy(r);
+        if ((version>>4) != 1)
+            D_REF.copy(r);
         Q_DIR.copy(r);
         D_EMERGENCYSTOP.copy(r);
     }
@@ -320,6 +354,10 @@ struct taf_request_message : euroradio_message
     Q_DIR_t Q_DIR;
     D_TAFDISPLAY_t D_TAFDISPLAY;
     L_TAFDISPLAY_t L_TAFDISPLAY;
+    taf_request_message(int version)
+    {
+        this->version = version;
+    }
     void copy(bit_manipulator &r) override
     {
         NID_MESSAGE.copy(r);
@@ -328,7 +366,8 @@ struct taf_request_message : euroradio_message
         M_ACK.copy(r);
         NID_LRBG.copy(r);
         Q_SCALE.copy(r);
-        D_REF.copy(r);
+        if ((version>>4) != 1)
+            D_REF.copy(r);
         Q_DIR.copy(r);
         D_TAFDISPLAY.copy(r);
         L_TAFDISPLAY.copy(r);
@@ -366,6 +405,26 @@ struct MA_request : euroradio_message_traintotrack
         copy_position_report(r);
     }
 };
+namespace V1
+{
+struct MA_request : euroradio_message_traintotrack
+{
+    Q_TRACKDEL_t Q_TRACKDEL;
+    MA_request() 
+    {
+        NID_MESSAGE.rawdata = 132;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        Q_TRACKDEL.copy(r);
+        copy_position_report(r);
+    }
+};
+}
 struct position_report : euroradio_message_traintotrack
 {
     position_report()
@@ -378,6 +437,40 @@ struct position_report : euroradio_message_traintotrack
         L_MESSAGE.copy(r);
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
+        copy_position_report(r);
+    }
+};
+struct ma_shorten_granted : euroradio_message_traintotrack
+{
+    T_TRAIN_t T_TRAINreq;
+    ma_shorten_granted()
+    {
+        NID_MESSAGE.rawdata = 137;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        T_TRAINreq.copy(r);
+        copy_position_report(r);
+    }
+};
+struct ma_shorten_rejected : euroradio_message_traintotrack
+{
+    T_TRAIN_t T_TRAINreq;
+    ma_shorten_rejected()
+    {
+        NID_MESSAGE.rawdata = 138;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        T_TRAINreq.copy(r);
         copy_position_report(r);
     }
 };
@@ -417,6 +510,13 @@ struct validated_train_data_message : euroradio_message_traintotrack
         TrainData->copy(r);
     }
 };
+struct no_compatible_session_supported : euroradio_message_traintotrack
+{
+    no_compatible_session_supported()
+    {
+        NID_MESSAGE.rawdata = 154;
+    }
+};
 struct init_communication_session : euroradio_message_traintotrack
 {
     init_communication_session()
@@ -431,6 +531,29 @@ struct terminate_communication_session : euroradio_message_traintotrack
         NID_MESSAGE.rawdata = 156;
     }
 };
+struct communication_session_established : euroradio_message_traintotrack
+{
+    std::shared_ptr<OnboardSupportedSystemVersion> SupportedVersions;
+    communication_session_established()
+    {
+        NID_MESSAGE.rawdata = 159;
+        SupportedVersions = std::shared_ptr<OnboardSupportedSystemVersion>(new OnboardSupportedSystemVersion());
+        packets.push_back(SupportedVersions);
+    }
+};
+namespace V1
+{
+struct communication_session_established : euroradio_message_traintotrack
+{
+    std::shared_ptr<OnboardTelephoneNumbers> PhoneNumbers;
+    communication_session_established()
+    {
+        NID_MESSAGE.rawdata = 159;
+        PhoneNumbers = std::shared_ptr<OnboardTelephoneNumbers>(new OnboardTelephoneNumbers());
+        packets.push_back(PhoneNumbers);
+    }
+};  
+}
 struct emergency_acknowledgement_message : euroradio_message_traintotrack
 {
     NID_EM_t NID_EM;
@@ -478,6 +601,23 @@ struct taf_granted : euroradio_message_traintotrack
         L_MESSAGE.copy(r);
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
+        copy_position_report(r);
+    }
+};
+struct text_message_ack_message : euroradio_message_traintotrack
+{
+    NID_TEXTMESSAGE_t NID_TEXTMESSAGE;
+    text_message_ack_message()
+    {
+        NID_MESSAGE.rawdata = 158;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        NID_TEXTMESSAGE.copy(r);
         copy_position_report(r);
     }
 };

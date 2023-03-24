@@ -230,21 +230,9 @@ void SetParameters()
         parse_command(val, false);
     };
 
-    p = new Parameter("stm::override");
-    p->GetValue = []() {
-        extern bool overrideProcedure;
-        return overrideProcedure ? "1" : "0";
-    };
-    manager.AddParameter(p);
-
     p = new Parameter("stm::command");
     p->SetValue = [](std::string val) {
-        std::vector<unsigned char> message((val.size()+7)>>3);
-        for (int i=0; i<val.size(); i++) {
-            if (val[i]=='1')
-                message[i>>3] |= 1<<(7-(i&7));
-        }
-        bit_manipulator r(std::move(message));
+        bit_manipulator r(val);
         stm_message msg(r);
         handle_stm_message(msg);
         /*for (auto &var : r.log_entries)
@@ -290,8 +278,6 @@ void start_or_iface()
     CreateProcess("server.exe", NULL, NULL, NULL, FALSE, DETACHED_PROCESS, NULL, NULL, &si, &pi);
     Sleep(1000);
 #endif
-    void init_io();
-    init_io();
     poller = new threadwait();
     s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(speed)");

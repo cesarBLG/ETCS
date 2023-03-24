@@ -36,7 +36,7 @@ class data_view_window : public subwindow
         subwindow::setLayout();
     }
     public:
-    data_view_window(std::vector<std::pair<std::string, std::string>> data) : subwindow(gettext("Data view"), false, (data.size()-1)/10 + 1), data(data)
+    data_view_window(std::string title, std::vector<std::pair<std::string, std::string>> data) : subwindow(title, false, (data.size()-1)/10 + 1), data(data)
     {
         for (int i=0; i<data.size(); i++)
         {

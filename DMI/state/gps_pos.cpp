@@ -42,9 +42,9 @@ void display_gps()
                 gps_pos.addImage("symbols/Driver Request/DR_03.bmp");
                 gps_pos.setBackgroundColor(DarkBlue);
             } else {
-                string tm = to_string(m/100)+to_string((m/10)%10)+to_string(m%10);
+                std::string tm = std::to_string(m/100)+std::to_string((m/10)%10)+std::to_string(m%10);
                 gps_pos.setBackgroundColor(Grey);
-                gps_pos.addText(to_string(km), 62, 0, 12, Black, RIGHT);
+                gps_pos.addText(std::to_string(km), 62, 0, 12, Black, RIGHT);
                 gps_pos.addText(tm, 62, 0, 10, Black, LEFT);
             }
         }

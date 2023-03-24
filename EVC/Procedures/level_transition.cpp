@@ -22,6 +22,7 @@
 #include "../TrainSubsystems/brake.h"
 #include "../TrainSubsystems/cold_movement.h"
 #include "../STM/stm.h"
+#include "../DMI/track_ahead_free.h"
 optional<level_transition_information> ongoing_transition;
 optional<level_transition_information> sh_transition;
 std::vector<level_information> priority_levels;
@@ -65,6 +66,14 @@ void driver_set_level(level_information li)
     } else {
         nid_ntc = -1;
     }
+    if (level == Level::N0 || level == Level::NTC || level == Level::N1) {
+        inhibit_revocable_tsr = false;
+    }
+    if (level == Level::N1) {
+        pos_report_params = {};
+        ma_params = {30000, (int64_t)(T_CYCRQSTD*1000), 30000};
+        taf_request = {};
+    }
     save_level();
 }
 void perform_transition()
@@ -92,6 +101,7 @@ void perform_transition()
         nid_ntc = -1;
     for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
         for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
+            it2->get()->reevaluated = true;
             try_handle_information(*it2, *it);
         }
     }
@@ -101,6 +111,14 @@ void perform_transition()
         level_timer = get_milliseconds();
     }
     position_report_reasons[6] = true;
+    if (level == Level::N0 || level == Level::NTC || level == Level::N1) {
+        inhibit_revocable_tsr = false;
+    }
+    if (level == Level::N1) {
+        pos_report_params = {};
+        ma_params = {30000, (int64_t)(T_CYCRQSTD*1000), 30000};
+        taf_request = {};
+    }
     save_level();
 }
 void update_level_status()

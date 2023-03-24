@@ -20,11 +20,11 @@
 #include "button.h"
 class TextButton : public Button
 {
-    std::string caption;
     text_graphic *enabled_text=nullptr;
     text_graphic *disabled_text=nullptr;
     int size;
     public:
+    std::string caption;
     Color disabledColor = DarkGrey;
     void paint() override;
     void rename(std::string name)

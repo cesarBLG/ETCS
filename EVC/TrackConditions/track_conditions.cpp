@@ -200,7 +200,9 @@ void update_track_conditions()
             }
         } else if (c->condition == TrackConditions::SoundHorn) {
             distance pointC = c->start - V_est * T_horn;
+            distance &pointE = c->end;
             c->announce_distance = pointC-d_estfront;
+            c->order = d_estfront > pointC && d_estfront < pointE;
         } else if (c->condition == TrackConditions::AirTightness) {
             distance pointC = c->start - V_est * 10;
             distance max = d_maxsafefront(c->start);
@@ -248,6 +250,40 @@ void update_track_conditions()
             distance &pointF = c->start;
             if (min < pointF) {
                 
+            }
+        } else if (c->condition == TrackConditions::RadioHole) {
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start) - L_TRAIN;
+            c->announce_distance = pointD-max;
+            c->order = max > pointD && min < pointE;
+        } else if (c->condition == TrackConditions::SwitchOffEddyCurrentEmergencyBrake ||
+            c->condition == TrackConditions::SwitchOffEddyCurrentServiceBrake ||
+            c->condition == TrackConditions::SwitchOffMagneticShoe ||
+            c->condition == TrackConditions::SwitchOffRegenerativeBrake) {
+            distance pointC = c->start - V_est * 20;
+            distance max = d_maxsafefront(c->start);
+            distance min = d_minsafefront(c->start) - L_TRAIN;
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            if (pointC-max < 0) {
+                track_condition_profile_external info = {{},{}};
+                if (pointD-max > -L_TRAIN)
+                    info.start = pointD-max;
+                if (pointE-min > -L_TRAIN)
+                    info.end = pointE-min;
+            }
+            c->announce_distance = pointC-max;
+            if (min > c->end) {
+                c->announce = false;
+                c->order = false;
+            } else if (max>c->start) {
+                c->announce = false;
+                c->order = true;
+            } else if (max > pointC) {
+                c->announce = true;
+                c->order = false;
             }
         }
         ++it;
@@ -361,6 +397,7 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
             case M_TRACKCOND_t::SoundHorn:
                 tc->condition = TrackConditions::SoundHorn;
                 tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::SoundHorn, true);
+                tc->active_symbol = 35;
                 break;
             case M_TRACKCOND_t::PowerlessLowerPantograph:
                 tc->condition = TrackConditions::PowerLessSectionLowerPantograph;
@@ -381,22 +418,31 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
             case M_TRACKCOND_t::RadioHole:
                 tc->condition = TrackConditions::RadioHole;
                 tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RadioHole, false);
+                tc->active_symbol = 12;
                 break;
             case M_TRACKCOND_t::SwitchOffRegenerative:
                 tc->condition = TrackConditions::SwitchOffRegenerativeBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, false);
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, true);
+                tc->announcement_symbol = 18;
+                tc->active_symbol = 17;
                 break;
             case M_TRACKCOND_t::SwitchOffShoe:
                 tc->condition = TrackConditions::SwitchOffMagneticShoe;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, false);
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, true);
+                tc->announcement_symbol = 14;
+                tc->active_symbol = 13;
                 break;
             case M_TRACKCOND_t::SwitchOffEddyService:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentServiceBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, false);
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, true);
+                tc->announcement_symbol = 16;
+                tc->active_symbol = 15;
                 break;
             case M_TRACKCOND_t::SwitchOffEddyEmergency:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentEmergencyBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, false);
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, true);
+                tc->announcement_symbol = 16;
+                tc->active_symbol = 15;
                 break;
         }
         bool exists = false;

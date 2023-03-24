@@ -25,7 +25,7 @@ class validation_input : public input_data
     public:
     validation_input()
     {
-        data = gettext("Yes");
+        data = get_text("Yes");
         accepted = true;
         keys = getYesNoKeyboard(this);
     }
@@ -61,10 +61,10 @@ class validation_window : public subwindow
         }
     }
     public:
-    validation_window(string title, vector<input_data*> data) : subwindow(title, true), validation_data(data)
+    validation_window(std::string title, std::vector<input_data*> data) : subwindow(title, true), validation_data(data)
     {
         confirmation = new validation_input();
-        vector<Button*> keys = getYesNoKeyboard(confirmation);
+        std::vector<Button*> keys = getYesNoKeyboard(confirmation);
         for(int i=0; i<12; i++)
         {
             emptybuttons[i] = new Button(102,50);
@@ -79,7 +79,7 @@ class validation_window : public subwindow
         });
         setLayout();
         confirmation->setSelected(true);
-        confirmation->setData(gettext("Yes"));
+        confirmation->setData(get_text("Yes"));
         confirmation->setAccepted(true);
         for (int i=0; i<data.size(); i++)
         {

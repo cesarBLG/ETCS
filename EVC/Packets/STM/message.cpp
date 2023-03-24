@@ -11,7 +11,9 @@
 #include "46.h"
 #include "128.h"
 #include "175.h"
+#include "179.h"
 #include "181.h"
+#include "183.h"
 #include "184.h"
 ETCS_packet *construct_stm_packet(bit_manipulator &r)
 {
@@ -32,7 +34,9 @@ ETCS_packet *construct_stm_packet(bit_manipulator &r)
         case 46: p = new STMSoundCommand(); break;
         case 128: p = new STMBrakeCommand(); break;
         case 175: p = new STMTrainData(); break;
+        case 179: p = new STMSpecificDataEntryRequest(); break;
         case 181: p = new STMSpecificDataNeed(); break;
+        case 183: p = new STMSpecificDataView(); break;
         case 184: p = new STMDataEntryFlag(); break;
         default: p = new ETCS_packet();
     }

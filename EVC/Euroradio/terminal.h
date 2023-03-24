@@ -23,6 +23,10 @@ struct contact_info
     {
         return country == o.country && id == o.id && phone_number == o.phone_number;
     }
+    bool operator!=(const contact_info &o) const
+    {
+        return !(*this == o);
+    }
 };
 enum struct safe_radio_status
 {

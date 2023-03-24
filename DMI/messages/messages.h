@@ -18,7 +18,6 @@
 #pragma once
 #include <string>
 #include "../graphics/color.h"
-using namespace std;
 /*enum DriverMessage
 {
     BaliseReadError,
@@ -59,11 +58,11 @@ struct Message
     int reason;
     bool firstGroup;
     bool shown;
-    string text;
+    std::string text;
     Color fgColor;
     Color bgColor;
     Message() = default;
-    Message(unsigned int id, string text, int hour, int minute, 
+    Message(unsigned int id, std::string text, int hour, int minute, 
             bool firstGroup = false, bool ack = false, int reason = 0, Color fgColor = White, Color bgColor = DarkBlue) : 
             Id(id), hour(hour), minute(minute), firstGroup(firstGroup), ack(ack), reason(reason),
             shown(false), text(text), fgColor(fgColor), bgColor(bgColor)

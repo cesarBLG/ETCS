@@ -1,4 +1,5 @@
 #include "windows.h"
+#include "../language/language.h"
 #include "../Supervision/emergency_stop.h"
 #include "../Supervision/supervision.h"
 #include "../Euroradio/session.h"
@@ -8,6 +9,7 @@
 #include "../Procedures/level_transition.h"
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
+#include "../Version/version.h"
 #include <fstream>
 dialog_sequence active_dialog;
 std::string active_dialog_step;
@@ -22,7 +24,7 @@ bool flexible_data_entry = false;
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
     json j;
-    if (value != "") j["AcceptedValue"] = value;
+    if (value != "") j["Value"] = value;
     json key;
     key["Type"] = "Dedicated";
     key["Keys"] = values;
@@ -33,7 +35,7 @@ json build_input_field(std::string label, std::string value, std::vector<std::st
 json build_numeric_field(std::string label, std::string value)
 {
     json j;
-    if (value != "") j["AcceptedValue"] = value;
+    if (value != "") j["Value"] = value;
     json key;
     key["Type"] = "Numeric";
     j["Keyboard"] = key;
@@ -43,7 +45,7 @@ json build_numeric_field(std::string label, std::string value)
 json build_alphanumeric_field(std::string label, std::string value)
 {
     json j;
-    if (value != "") j["AcceptedValue"] = value;
+    if (value != "") j["Value"] = value;
     json key;
     key["Type"] = "Alphanumeric";
     j["Keyboard"] = key;
@@ -62,7 +64,7 @@ json driver_id_window(bool trn)
 {
     json j = R"({"active":"driver_window"})"_json;
     j["show_trn"] = trn;
-    j["WindowDefinition"] = build_input_window(gettext("Driver ID"), {build_alphanumeric_field("", driver_id)});
+    j["WindowDefinition"] = build_input_window(get_text("Driver ID"), {build_alphanumeric_field("", driver_id)});
     return j;
 }
 json level_window()
@@ -71,24 +73,19 @@ json level_window()
     std::string lv = "";
     switch(level) {
         case Level::N0:
-            lv = gettext("Level 0");
+            lv = get_text("Level 0");
             break;
         case Level::N1:
-            lv = gettext("Level 1");
+            lv = get_text("Level 1");
             break;
         case Level::N2:
-            lv = gettext("Level 2");
+            lv = get_text("Level 2");
             break;
         case Level::N3:
-            lv = gettext("Level 3");
+            lv = get_text("Level 3");
             break;
         case Level::NTC: {
-            auto it = ntc_names.find(nid_ntc);
-            if (it != ntc_names.end()) {
-                lv = it->second;
-            } else {
-                lv = "NTC "+std::to_string(nid_ntc);
-            }
+            lv = get_ntc_name(nid_ntc);
             break;
         }
     }
@@ -97,58 +94,48 @@ json level_window()
         for (auto lti : priority_levels) {
             switch(lti.level) {
                 case Level::N0:
-                    levels.push_back(gettext("Level 0"));
+                    levels.push_back(get_text("Level 0"));
                     break;
                 case Level::N1:
-                    levels.push_back(gettext("Level 1"));
+                    levels.push_back(get_text("Level 1"));
                     break;
                 case Level::N2:
-                    levels.push_back(gettext("Level 2"));
+                    levels.push_back(get_text("Level 2"));
                     break;
                 case Level::N3:
-                    levels.push_back(gettext("Level 3"));
+                    levels.push_back(get_text("Level 3"));
                     break;
                 case Level::NTC: {
                     if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end()) {
-                        auto it = ntc_names.find(lti.nid_ntc);
-                        if (it != ntc_names.end()) {
-                            levels.push_back(it->second);
-                        } else {
-                            levels.push_back("NTC "+std::to_string(lti.nid_ntc));
-                        }
+                        levels.push_back(get_ntc_name(lti.nid_ntc));
                     }
                     break;
                 }
             }
         }
     } else {
-        levels = {gettext("Level 0"), gettext("Level 1"), gettext("Level 2")};
+        levels = {get_text("Level 0"), get_text("Level 1"), get_text("Level 2")};
         for (auto &kvp : installed_stms) {
-            auto it = ntc_names.find(kvp.first);
-            if (it != ntc_names.end()) {
-                levels.push_back(it->second);
-            } else {
-                levels.push_back("NTC "+std::to_string(kvp.first));
-            }
+            levels.push_back(get_ntc_name(kvp.first));
         }
     }
-    j["WindowDefinition"] = build_input_window(gettext("Level"), {build_input_field("", lv, levels)});
+    j["WindowDefinition"] = build_input_window(get_text("Level"), {build_input_field("", lv, levels)});
     return j;
 }
 json trn_window()
 {
     json j = R"({"active":"trn_window"})"_json;
-    j["WindowDefinition"] = build_input_window(gettext("Train running number"), {build_numeric_field("", train_running_number_valid ? std::to_string(train_running_number) : "")});
+    j["WindowDefinition"] = build_input_window(get_text("Train running number"), {build_numeric_field("", train_running_number_valid ? std::to_string(train_running_number) : "")});
     return j;
 }
 json rbc_data_window()
 {
     json j = R"({"active":"rbc_data_window"})"_json;
     std::vector<json> inputs = {
-        build_numeric_field(gettext("RBC ID"), rbc_contact ? std::to_string(rbc_contact->country<<14 | rbc_contact->id) : ""),
-        build_numeric_field(gettext("RBC phone number"), rbc_contact ? std::to_string(rbc_contact->phone_number) : "")
+        build_numeric_field(get_text("RBC ID"), rbc_contact ? std::to_string(rbc_contact->country<<14 | rbc_contact->id) : ""),
+        build_numeric_field(get_text("RBC phone number"), rbc_contact ? std::to_string(rbc_contact->phone_number) : "")
     };
-    j["WindowDefinition"] = build_input_window(gettext("RBC data"), inputs);
+    j["WindowDefinition"] = build_input_window(get_text("RBC data"), inputs);
     return j;
 }
 json fixed_train_data_window()
@@ -168,49 +155,78 @@ json fixed_train_data_window()
     for (auto it = j2.begin(); it!=j2.end(); ++it) {
         types.push_back(it.key());
     }
-    j["WindowDefinition"] = build_input_window(gettext("Train data"), {build_input_field("", special_train_data, types)});
+    j["WindowDefinition"] = build_input_window(get_text("Train data"), {build_input_field(get_text("Train type"), special_train_data, types)});
     return j;
 }
 json train_data_window()
 {
     json j = R"({"active":"train_data_window"})"_json;
     std::vector<json> inputs;
-    inputs.push_back(build_numeric_field(gettext("Length (m)"), L_TRAIN > 0 ? std::to_string((int)L_TRAIN) : ""));
-    inputs.push_back(build_numeric_field(gettext("Brake percentage"), brake_percentage > 0 ? std::to_string(brake_percentage) : ""));
-    inputs.push_back(build_numeric_field(gettext("Max speed (km/h)"), V_train > 0 ? std::to_string((int)(V_train*3.6)) : ""));
-    inputs.push_back(build_input_field(gettext("Loading gauge"), "", {"G1", "GA", "GB", "GC", gettext("Out of GC")}));
-    inputs.push_back(build_input_field(gettext("Train category"), "", {gettext("PASS 1"),gettext("PASS 2"),gettext("PASS 3"),
-        gettext("TILT 1"),gettext("TILT 2"),gettext("TILT 3"),gettext("TILT 4"),gettext("TILT 5"),gettext("TILT 6"),gettext("TILT 7"),
-        gettext("FP 1"),gettext("FP2"),gettext("FP 3"),gettext("FP 4"),gettext("FG 1"),gettext("FG 2"),gettext("FG 3"),gettext("FG 4")}));
-    inputs.push_back(build_input_field(gettext("Axle load category"), "", {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
-    j["WindowDefinition"] = build_input_window(gettext("Train data"), inputs);
+    inputs.push_back(build_numeric_field(get_text("Length (m)"), L_TRAIN > 0 ? std::to_string((int)L_TRAIN) : ""));
+    inputs.push_back(build_numeric_field(get_text("Brake percentage"), brake_percentage > 0 ? std::to_string(brake_percentage) : ""));
+    inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), V_train > 0 ? std::to_string((int)(V_train*3.6)) : ""));
+    inputs.push_back(build_input_field(get_text("Loading gauge"), "", {"G1", "GA", "GB", "GC", get_text("Out of GC")}));
+    inputs.push_back(build_input_field(get_text("Train category"), "", {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
+        get_text("TILT 1"),get_text("TILT 2"),get_text("TILT 3"),get_text("TILT 4"),get_text("TILT 5"),get_text("TILT 6"),get_text("TILT 7"),
+        get_text("FP 1"),get_text("FP2"),get_text("FP 3"),get_text("FP 4"),get_text("FG 1"),get_text("FG 2"),get_text("FG 3"),get_text("FG 4")}));
+    inputs.push_back(build_input_field(get_text("Axle load category"), "", {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
+    j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
     return j;
+}
+json ntc_menu(bool hourglass)
+{
+    json j = R"({"active":"menu_ntc"})"_json;
+    j["hour_glass"] = hourglass;
+    for (auto &kvp : installed_stms) {
+        j["STMs"].push_back(get_ntc_name(kvp.first));
+    }
+    return j;
+}
+json ntc_data_window()
+{
+    for (auto &kvp : installed_stms) {
+        auto *stm = kvp.second;
+        if (stm->data_entry == stm_object::data_entry_state::Driver) {
+            json j = R"({"active":"ntc_data_window"})"_json;
+            std::vector<json> inputs;
+            for (auto &field : stm->specific_data) {
+                if (field.keys.empty())
+                    inputs.push_back(build_alphanumeric_field(field.caption, field.value));
+                else
+                    inputs.push_back(build_input_field(field.caption, field.value, field.keys));
+            }
+            j["WindowDefinition"] = build_input_window(get_ntc_name(kvp.first)+" data", inputs);
+            return j;
+        }
+    }
 }
 json sr_data_window()
 {
     json j = R"({"active":"sr_data_window"})"_json;
     std::vector<json> inputs = {
-        build_numeric_field(gettext("SR speed (km/h)"), ""),
-        build_numeric_field(gettext("SR distance (m)"), "")
+        build_numeric_field(get_text("SR speed (km/h)"), ""),
+        build_numeric_field(get_text("SR distance (m)"), "")
     };
-    j["WindowDefinition"] = build_input_window(gettext("SR speed/distance"), inputs);
+    j["WindowDefinition"] = build_input_window(get_text("SR speed/distance"), inputs);
     return j;
 }
 json language_window()
 {
     json j = R"({"active":"language_window"})"_json;
-    j["WindowDefinition"] = build_input_window(gettext("Language"), {build_input_field("", language, {"en","es","fr","de","pt","it","nl"})});
+    j["WindowDefinition"] = build_input_window(get_text("Language"), {build_input_field("", language, {"en","es","fr","de","pt","it","nl"})});
     return j;
 }
 json set_vbc_window()
 {
     json j = R"({"active":"set_vbc_window"})"_json;
-    j["WindowDefinition"] = build_input_window(gettext("Set VBC"), {build_numeric_field("VBC code", "")});
+    j["WindowDefinition"] = build_input_window(get_text("Set VBC"), {build_numeric_field("VBC code", "")});
+    return j;
 }
 json remove_vbc_window()
 {
     json j = R"({"active":"remove_vbc_window"})"_json;
-    j["WindowDefinition"] = build_input_window(gettext("Remove VBC"), {build_numeric_field("VBC code", "")});
+    j["WindowDefinition"] = build_input_window(get_text("Remove VBC"), {build_numeric_field("VBC code", "")});
+    return j;
 }
 json build_field(std::string label, std::string value)
 {
@@ -224,19 +240,19 @@ json data_view_window()
     json j = R"({"active":"data_view_window"})"_json;
     std::vector<json> fields;
     {
-        fields.push_back(build_field(gettext("Driver ID"), driver_id));
+        fields.push_back(build_field(get_text("Driver ID"), driver_id));
         fields.push_back(build_field("", ""));
-        fields.push_back(build_field(gettext("Train running number"), std::to_string(train_running_number)));
+        fields.push_back(build_field(get_text("Train running number"), std::to_string(train_running_number)));
         fields.push_back(build_field("", ""));
-        if (special_train_data != "") fields.push_back(build_field(gettext("Train type"), special_train_data));
-        fields.push_back(build_field(gettext("Length (m)"), std::to_string((int)L_TRAIN)));
-        fields.push_back(build_field(gettext("Brake percentaje"), std::to_string(brake_percentage)));
-        fields.push_back(build_field(gettext("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
-        fields.push_back(build_field(gettext("Airtight"), Q_airtight ? gettext("Yes") : gettext("No")));
+        if (special_train_data != "") fields.push_back(build_field(get_text("Train type"), special_train_data));
+        fields.push_back(build_field(get_text("Length (m)"), std::to_string((int)L_TRAIN)));
+        fields.push_back(build_field(get_text("Brake percentaje"), std::to_string(brake_percentage)));
+        fields.push_back(build_field(get_text("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
+        fields.push_back(build_field(get_text("Airtight"), Q_airtight ? get_text("Yes") : get_text("No")));
         fields.push_back(build_field("", ""));
         if (rbc_contact) {
-            fields.push_back(build_field(gettext("RBC ID"), std::to_string(rbc_contact->id)));
-            fields.push_back(build_field(gettext("RBC phone number"), std::to_string(rbc_contact->phone_number)));
+            fields.push_back(build_field(get_text("RBC ID"), std::to_string(rbc_contact->id)));
+            fields.push_back(build_field(get_text("RBC phone number"), std::to_string(rbc_contact->phone_number)));
             fields.push_back(build_field("", ""));
         }
         int i = 1;
@@ -246,8 +262,18 @@ json data_view_window()
     }
     json def;
     def["WindowType"] = "DataView";
-    def["WindowTitle"] = gettext("Data view");
+    def["WindowTitle"] = get_text("Data view");
     def["Fields"] = fields;
+    j["WindowDefinition"] = def;
+    return j;
+}
+json system_version_window()
+{
+    json j = R"({"active":"system_version_window"})"_json;
+    json def;
+    def["WindowType"] = "DataView";
+    def["WindowTitle"] = get_text("Data view");
+    def["Fields"] = {build_field(get_text("Operated system version"), std::to_string(VERSION_X(operated_version))+"."+std::to_string(VERSION_Y(operated_version)))};
     j["WindowDefinition"] = def;
     return j;
 }
@@ -321,7 +347,7 @@ void update_dmi_windows()
         } else if (active_dialog_step == "A32") {
             active_dialog_step = "S10";
         } else if (active_dialog_step == "A40") {
-            add_message(text_message(gettext("Train is rejected"), true, false, 0, [](text_message &t){return any_button_pressed;})); // TODO
+            add_message(text_message(get_text("Train is rejected"), true, false, 0, [](text_message &t){return any_button_pressed;})); // TODO
             active_dialog_step = "S10";
         } else if (active_dialog_step == "D2") {
             if (level_valid)
@@ -414,6 +440,11 @@ void update_dmi_windows()
             if (!supervising_rbc || supervising_rbc->status == session_status::Inactive || !supervising_rbc->train_data_ack_pending)
                 active_dialog_step = "S1";
         } else if (active_dialog_step == "D1") {
+            if (supervising_rbc) {
+                supervising_rbc->train_data_ack_pending = true;
+                supervising_rbc->train_data_ack_sent = false;
+                supervising_rbc->train_running_number_sent = false;
+            }
             if (level == Level::N2 || level == Level::N3)
                 active_dialog_step = "D2";
             else
@@ -463,6 +494,68 @@ void update_dmi_windows()
                 active_dialog = dialog_sequence::None;
         }
         active_window_dmi["enabled"]["Exit"] = active_dialog_step != "S5-2-1" && active_dialog_step != "S5-2-3" && active_dialog_step != "S7" && active_dialog_step != "S8" && active_dialog_step != "S9";
+    } else if (active_dialog == dialog_sequence::NTCData) {
+        if (active_dialog_step == "S1") {
+            if (changed)
+                active_window_dmi = ntc_menu(true);
+            bool waiting;
+            for (auto &kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->data_entry == stm_object::data_entry_state::Start) {
+                    waiting = true;
+                    break;
+                }
+            }
+            if (!waiting)
+             active_dialog_step = "S2";
+        } else if (active_dialog_step == "S2") {
+            if (changed)
+                active_window_dmi = ntc_menu(false);
+            bool remaining = false;
+            for (auto kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->data_entry != stm_object::data_entry_state::Inactive) {
+                    remaining = true;
+                    break;
+                }
+            }
+            if (!remaining) {
+                active_dialog = dialog_sequence::Main;
+                active_dialog_step = "D6";
+            }
+        } else if (active_dialog_step == "D1") {
+            bool needsdata = false;
+            for (auto &kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->specific_data_need > 0) {
+                    needsdata = true;
+                    break;
+                }
+            }
+            if (needsdata) {
+                active_dialog_step = "S1";
+            } else {
+                active_dialog = dialog_sequence::Main;
+                active_dialog_step = "D6";
+            }
+        } else if (active_dialog_step == "S3-1") {
+            if (changed)
+                active_window_dmi = ntc_data_window();
+        } else if (active_dialog_step == "S4") {
+            if (changed)
+                active_window_dmi = ntc_menu(true);
+            bool wait = false;
+            for (auto kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->data_entry == stm_object::data_entry_state::DataSent) {
+                    wait = true;
+                    break;
+                }
+            }
+            if (!wait)
+                active_dialog_step = "S2";
+        }
+        active_window_dmi["enabled"]["Exit"] = active_dialog_step != "S1" && active_dialog_step != "S4";
     } else if (active_dialog == dialog_sequence::Override) {
         if (active_dialog_step == "S1")
             if (changed)
@@ -480,7 +573,7 @@ void update_dmi_windows()
             if (!supervising_rbc || supervising_rbc->status != session_status::Established) {
                 active_dialog = dialog_sequence::Main;
                 active_dialog_step = "S1";
-                add_message(text_message(gettext("Shunting request failed"), true, false, 0, [](text_message &t){return any_button_pressed;}));
+                add_message(text_message(get_text("Shunting request failed"), true, false, 0, [](text_message &t){return any_button_pressed;}));
             }
         }
     } else if (active_dialog == dialog_sequence::DataView) {
@@ -509,7 +602,8 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S4") {
             
         } else if (active_dialog_step == "S5") {
-            
+            if (changed)
+                active_window_dmi = system_version_window();
         } else if (active_dialog_step == "S6-1") {
             if (changed)
                 active_window_dmi = set_vbc_window();
@@ -581,6 +675,12 @@ void update_dmi_windows()
         active_window_dmi["enabled"]["SystemVersion"] = c;
         active_window_dmi["enabled"]["SetVBC"] = V_est == 0 && mode == Mode::SB;
         active_window_dmi["enabled"]["RemoveVBC"] = V_est == 0 && mode == Mode::SB && !vbcs.empty();
+    } else if (active == "menu_ntc") {
+        for (auto &kvp : installed_stms) {
+            auto *stm = kvp.second;
+            active_window_dmi["enabled"][get_ntc_name(kvp.first)] = stm->data_entry == stm_object::data_entry_state::Active;
+        }
+        active_window_dmi["enabled"]["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
     }
 }
 void close_window()
@@ -592,7 +692,17 @@ void close_window()
         active_dialog_step = "S1";   
     } else if (active == "fixed_train_data_window" || active == "level_window" || active == "fixed_train_data_validation_window" || active == "train_data_window" || active == "train_data_validation_window")
         active_dialog_step = "S1";
-    else if (active == "menu_radio")
+    else if (active == "menu_ntc") {
+        active_dialog = dialog_sequence::Main;
+        active_dialog_step = "S1";
+    } else if (active == "ntc_data_window" || active == "ntc_data_validation_window") {
+        active_dialog_step = "S2";
+        for (auto &kvp : installed_stms) {
+            auto *stm = kvp.second;
+            if (stm->data_entry == stm_object::data_entry_state::Driver)
+                stm->data_entry = stm_object::data_entry_state::Active;
+        }
+    } else if (active == "menu_radio")
         active_dialog_step = "S1";
     else if (active == "rbc_data_window")
         active_dialog_step = "S5-1";
@@ -611,17 +721,17 @@ void close_window()
 }
 void validate_data_entry(std::string name, json &result)
 {
-    if (name == gettext("Level")) {
+    if (name == get_text("Level")) {
         std::string sel = result[""];
         Level lv = Level::Unknown;
         int nid_ntc = -1;
-        if (sel == gettext("Level 0"))
+        if (sel == get_text("Level 0"))
             lv = Level::N0;
-        else if (sel == gettext("Level 1"))
+        else if (sel == get_text("Level 1"))
             lv = Level::N1;
-        else if (sel == gettext("Level 2"))
+        else if (sel == get_text("Level 2"))
             lv = Level::N2;
-        else if (sel == gettext("Level 3"))
+        else if (sel == get_text("Level 3"))
             lv = Level::N3;
         else for (auto &kvp : ntc_names) {
             if (kvp.second == sel) {
@@ -639,98 +749,111 @@ void validate_data_entry(std::string name, json &result)
                 active_dialog_step = "S1";
             }
         }
-    } else if (name == gettext("Train running number")) {
+    } else if (name == get_text("Train running number")) {
         train_running_number_valid = false;
-        train_running_number = stoi(result[""].get<std::string>());
+        std::string res = result[""].get<std::string>();
+        if (res.size() > 8)
+            return;
+        train_running_number = stoi(res);
         if (train_running_number > 0) {
             train_running_number_valid = true;
         } else {
             return;
         }
         if (active_dialog == dialog_sequence::Main) {
-            if (active_dialog_step == "S6")
+            if (active_dialog_step == "S6") {
                 active_dialog_step = "S1";
-            else
+                if (supervising_rbc)
+                    supervising_rbc->train_running_number_sent = false;
+            } else
                 active_dialog_step = "D1";
         } else if (active_dialog == dialog_sequence::StartUp) {
                 active_dialog_step = "S1";
         }
-    } else if (name == gettext("Train data")) {
+    } else if (name == get_text("Train data")) {
         active_dialog_step = "S3-2";
         json j = R"({"active":"train_data_validation_window"})"_json;
         json def;
         def["WindowType"] = "DataValidation";
-        def["WindowTitle"] = gettext("Validate train data");
-        if (result.contains(""))
-            def["DataInputResult"][gettext("Train type")] = result[""];
-        else
-            def["DataInputResult"] = result;
+        def["WindowTitle"] = get_text("Validate train data");
+        def["DataInputResult"] = result;
         j["WindowDefinition"] = def;
         active_window_dmi = j;
-    } else if (name == gettext("Validate train data")) {
+    } else if (name == get_text("Validate train data")) {
         if (!result["Validated"]) {
-            active_dialog_step = "S3-1";
+            prev_step = active_dialog_step = "S3-1";
+            if (flexible_data_entry)
+                active_window_dmi = train_data_window();
+            else
+                active_window_dmi = fixed_train_data_window();
+            for (auto it = result.begin(); it != result.end(); ++it) {
+                for (json &j : active_window_dmi["WindowDefinition"]["Inputs"]) {
+                    if (j["Label"] == it.key())
+                        j["Value"] = it.value();
+                }
+            }
+            return;
         } else {
             if (flexible_data_entry) {
                 train_data_valid = false;
-                L_TRAIN = stoi(result[gettext("Length (m)")].get<std::string>());
-                set_train_max_speed(stoi(result[gettext("Max speed (km/h)")].get<std::string>())/3.6);
-                brake_percentage = stoi(result[gettext("Brake percentage")].get<std::string>());
-                std::string str = result[gettext("Train category")].get<std::string>();
+                L_TRAIN = stoi(result[get_text("Length (m)")].get<std::string>());
+                set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
+                brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
+                std::string str = result[get_text("Train category")].get<std::string>();
                 int cant;
                 int cat;
-                if (str == gettext("PASS 1")) {
+                if (str == get_text("PASS 1")) {
                     cant = 80;
                     cat = 2;
-                } else if (str == gettext("PASS 2")) {
+                } else if (str == get_text("PASS 2")) {
                     cant = 130;
                     cat = 2;
-                } else if (str == gettext("PASS 3")) {
+                } else if (str == get_text("PASS 3")) {
                     cant = 150;
                     cat = 2;
-                } else if (str == gettext("TILT 1")) {
+                } else if (str == get_text("TILT 1")) {
                     cant = 165;
                     cat = 2;
-                } else if (str == gettext("TILT 2")) {
+                } else if (str == get_text("TILT 2")) {
                     cant = 180;
                     cat = 2;
-                } else if (str == gettext("TILT 3")) {
+                } else if (str == get_text("TILT 3")) {
                     cant = 210;
                     cat = 2;
-                } else if (str == gettext("TILT 4")) {
+                } else if (str == get_text("TILT 4")) {
                     cant = 225;
                     cat = 2;
-                } else if (str == gettext("TILT 5")) {
+                } else if (str == get_text("TILT 5")) {
                     cant = 245;
                     cat = 2;
-                } else if (str == gettext("TILT 6")) {
+                } else if (str == get_text("TILT 6")) {
                     cant = 275;
                     cat = 2;
-                } else if (str == gettext("TILT 7")) {
+                } else if (str == get_text("TILT 7")) {
                     cant = 300;
                     cat = 2;
-                } else if (str == gettext("FP 1")) {
+                } else if (str == get_text("FP 1")) {
                     cant = 80;
                     cat = 0;
-                } else if (str == gettext("FP 2")) {
+                } else if (str == get_text("FP 2")) {
                     cant = 100;
                     cat = 0;
-                } else if (str == gettext("FP 3")) {
+                } else if (str == get_text("FP 3")) {
                     cant = 130;
                     cat = 0;
-                } else if (str == gettext("FP 4")) {
+                } else if (str == get_text("FP 4")) {
                     cant = 150;
                     cat = 0;
-                } else if (str == gettext("FG 1")) {
+                } else if (str == get_text("FG 1")) {
                     cant = 80;
                     cat = 1;
-                } else if (str == gettext("FG 2")) {
+                } else if (str == get_text("FG 2")) {
                     cant = 100;
                     cat = 1;
-                } else if (str == gettext("FG 3")) {
+                } else if (str == get_text("FG 3")) {
                     cant = 130;
                     cat = 1;
-                } else if (str == gettext("FG 4")) {
+                } else if (str == get_text("FG 4")) {
                     cant = 150;
                     cat = 1;
                 }
@@ -739,39 +862,30 @@ void validate_data_entry(std::string name, json &result)
                 set_conversion_model();
                 train_data_valid = conversion_model_used;
             } else {
-                set_train_data(result[gettext("Train type")].get<std::string>());
+                set_train_data(result[get_text("Train type")].get<std::string>());
             }
+            target::recalculate_all_decelerations();
+            recalculate_MRSP();
             if (train_data_valid) {
-                if (supervising_rbc) {
-                    supervising_rbc->train_data_ack_pending = true;
-                    supervising_rbc->train_data_ack_sent = false;
-                }
-                active_dialog_step = "D6";
-                for (auto &kvp : installed_stms) {
-                    auto *stm = kvp.second;
-                    if (stm->specific_data > 0) {
-                        active_dialog = dialog_sequence::NTCData;
-                        active_dialog_step = "S1";
-                        break;
-                    }
-                }
+                active_dialog = dialog_sequence::NTCData;
+                active_dialog_step = "D1";
                 stm_send_train_data();
             } else {
                 active_dialog_step = "S1";
             }
         }
-    } else if (name == gettext("Driver ID")) {
+    } else if (name == get_text("Driver ID")) {
         driver_id = result[""];
-        if (driver_id == "")
+        if (driver_id.length() < 0 || driver_id.length() > 16)
             return;
         driver_id_valid = true;
         if (active_dialog == dialog_sequence::StartUp)
             active_dialog_step = "D2";
         else if (active_dialog == dialog_sequence::Main)
             active_dialog_step = "S1";
-    } else if (name == gettext("RBC data")) {
-        uint32_t id = atoll(result[gettext("RBC ID")].get<std::string>().c_str());
-        uint64_t number = atoll(result[gettext("RBC phone number")].get<std::string>().c_str());
+    } else if (name == get_text("RBC data")) {
+        uint32_t id = atoll(result[get_text("RBC ID")].get<std::string>().c_str());
+        uint64_t number = atoll(result[get_text("RBC phone number")].get<std::string>().c_str());
         set_supervising_rbc(contact_info({id>>14,id&((1<<14) - 1),number}));
         if (som_active && som_status == S3 ) {
             som_status = A31;
@@ -780,54 +894,145 @@ void validate_data_entry(std::string name, json &result)
                 supervising_rbc->open(N_tries_radio);
             active_dialog_step = "S8";
         }
-    } else if (name == gettext("Language")) {
+    } else if (name == get_text("Language")) {
         set_language(result[""]);
         if (active_dialog == dialog_sequence::Settings)
             active_dialog_step = "S1";
-    } else if (name == gettext("SR speed/distance")) {
+    } else if (name == get_text("SR speed/distance")) {
         if (mode == Mode::SR) {
-            double v = stod(result[gettext("SR speed (km/h)")].get<std::string>())/3.6;
-            double d = stod(result[gettext("SR distance (m)")].get<std::string>());
+            double v = stod(result[get_text("SR speed (km/h)")].get<std::string>())/3.6;
+            double d = stod(result[get_text("SR distance (m)")].get<std::string>());
             SR_dist = d_estfront_dir[odometer_orientation == -1]+d;
             SR_speed = speed_restriction(v, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
             recalculate_MRSP();
         }
         active_dialog_step = "S1";
-    } else if (name == gettext("Set VBC")) {
+    } else if (name == get_text("Set VBC")) {
         active_dialog_step = "S6-2";
         json j = R"({"active":"set_vbc_validation_window"})"_json;
         json def;
         def["WindowType"] = "DataValidation";
-        def["WindowTitle"] = gettext("Validate set VBC");
+        def["WindowTitle"] = get_text("Validate set VBC");
         def["DataInputResult"] = result;
         j["WindowDefinition"] = def;
         active_window_dmi = j;
-    } else if (name == gettext("Remove VBC")) {
+    } else if (name == get_text("Remove VBC")) {
         active_dialog_step = "S7-2";
         json j = R"({"active":"remove_vbc_validation_window"})"_json;
         json def;
         def["WindowType"] = "DataValidation";
-        def["WindowTitle"] = gettext("Validate remove VBC");
+        def["WindowTitle"] = get_text("Validate remove VBC");
         def["DataInputResult"] = result;
         j["WindowDefinition"] = def;
         active_window_dmi = j;
-    } else if (name == gettext("Validate set VBC")) {
+    } else if (name == get_text("Validate set VBC")) {
         if (!result["Validated"]) {
-            active_dialog_step = "S6-1";
+            prev_step = active_dialog_step = "S6-1";
+            active_window_dmi = set_vbc_window();
+            for (auto it = result.begin(); it != result.end(); ++it) {
+                for (json &j : active_window_dmi["WindowDefinition"]["Inputs"]) {
+                    if (j["Label"] == it.key())
+                        j["Value"] = it.value();
+                }
+            }
+            return;
         } else {
-            uint32_t num = stoi(result[gettext("VBC code")].get<std::string>());
+            uint32_t num = stoi(result[get_text("VBC code")].get<std::string>());
             set_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
         }
-    } else if (name == gettext("Validate remove VBC")) {
+    } else if (name == get_text("Validate remove VBC")) {
         if (!result["Validated"]) {
-            active_dialog_step = "S7-1";
+            prev_step = active_dialog_step = "S7-1";
+            active_window_dmi = remove_vbc_window();
+            for (auto it = result.begin(); it != result.end(); ++it) {
+                for (json &j : active_window_dmi["WindowDefinition"]["Inputs"]) {
+                    if (j["Label"] == it.key())
+                        j["Value"] = it.value();
+                }
+            }
+            return;
         } else {
-            uint32_t num = stoi(result[gettext("VBC code")].get<std::string>());
+            uint32_t num = stoi(result[get_text("VBC code")].get<std::string>());
             remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
         }
+    } else {
+        for (auto &kvp : installed_stms) {
+            auto *stm = kvp.second;
+            if (stm->data_entry == stm_object::data_entry_state::Driver) {
+                if ((name == get_ntc_name(kvp.first)+" data")) {
+                    active_dialog_step = "S3-2";
+                    json j = R"({"active":"ntc_data_validation_window"})"_json;
+                    json def;
+                    def["WindowType"] = "DataValidation";
+                    def["WindowTitle"] = "Validate "+get_ntc_name(kvp.first)+" data";
+                    def["DataInputResult"] = result;
+                    j["WindowDefinition"] = def;
+                    active_window_dmi = j;
+                } else if ((name == "Validate "+get_ntc_name(kvp.first)+" data")) {
+                    if (!result["Validated"]) {
+                        prev_step = active_dialog_step = "S3-1";
+                        active_window_dmi = ntc_data_window();
+                        for (auto it = result.begin(); it != result.end(); ++it) {
+                            for (json &j : active_window_dmi["WindowDefinition"]["Inputs"]) {
+                                if (j["Label"] == it.key())
+                                    j["Value"] = it.value();
+                            }
+                        }
+                        return;
+                    } else {
+                        stm->send_specific_data(result);
+                        active_dialog_step = "S4";
+                    }
+                }
+            }
+        }
     }
+}
+void validate_entry_field(std::string window, json &result)
+{
+    bool operat = true;
+    bool techres = true;
+    bool techrang = true;
+    std::string label = result["Label"];
+    std::string data = result["Value"];
+    if (window == get_text("Train data")) {
+        if (label == get_text("Length (m)")) {
+            int val = atoi(data.c_str());
+            techrang = val >= 0 && val < 4096;
+            operat = val < 1500;
+        } else if (label == get_text("Brake percentage")) {
+            int val = atoi(data.c_str());
+            techrang = val >= 10 && val <= 250;
+            operat = val >= 30;
+        } else if (label == get_text("Max speed (km/h)")) {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 600;
+            techres = val % 5 == 0;
+            operat = val <= 200;
+        }
+    } else if (window == get_text("RBC data")) {
+        if (label == get_text("RBC ID")) {
+            int val = atoi(data.c_str());
+            techrang = val >= 0 && val <= 16777214;
+        }
+    } else if (window == get_text("SR speed/distance")) {
+        if (label == get_text("SR distance (m)")) {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 10000;
+        } else if (label == get_text("SR speed (km/h)")) {
+            int val = atoi(data.c_str());
+            techrang = val > 0 && val <= 600;
+            techres = val % 5 == 0;
+        }
+    }
+    result["OperationalRange"] = operat || result["SkipOperationalCheck"];
+    result["TechnicalResolution"] = techres;
+    result["TechnicalRange"] = techrang;
+    json j;
+    j["ValidateEntryField"] = result;
+    send_command("json", j.dump());
 }
 void update_dialog_step(std::string step, std::string step2)
 {
@@ -922,6 +1127,19 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "EnterRBCdata") {
             active_dialog_step = "S5-3";
         }
+    } else if (active_dialog == dialog_sequence::NTCData) {
+        if (step == "EndDataEntry") {
+            active_dialog = dialog_sequence::Main;
+            active_dialog_step = "D6";
+        } else {
+            for (auto &kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (step == get_ntc_name(kvp.first) && stm->data_entry == stm_object::data_entry_state::Active) {
+                    stm->data_entry = stm_object::data_entry_state::Driver;
+                    active_dialog_step = "S3-1";
+                }
+            }
+        }
     } else if (active_dialog == dialog_sequence::Override) {
         if (step == "Override") {
             start_override();
@@ -929,7 +1147,7 @@ void update_dialog_step(std::string step, std::string step2)
         }
     } else if (active_dialog == dialog_sequence::Shunting) {
         if (step == "SH refused") {
-            add_message(text_message(gettext("SH refused"), true, false, 0, [](text_message &t){return any_button_pressed;}));
+            add_message(text_message(get_text("SH refused"), true, false, 0, [](text_message &t){return any_button_pressed;}));
             active_dialog = dialog_sequence::Main;
             active_dialog_step = "S1";
         } else if (step == "SH authorised") {
@@ -951,9 +1169,9 @@ void update_dialog_step(std::string step, std::string step2)
         /*else if (step == "Volume")
             active_dialog_step = "S3";
         else if (step == "Brightness")
-            active_dialog_step = "S4";
+            active_dialog_step = "S4";*/
         else if (step == "SystemVersion")
-            active_dialog_step = "S5";*/
+            active_dialog_step = "S5";
         else if (step == "SetVBC")
             active_dialog_step = "S6-1";
         else if (step == "RemoveVBC")

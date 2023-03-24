@@ -22,7 +22,7 @@ menu::menu(std::string title) : subwindow(title)
 {
     for(int i=0; i<10; i++)
     {
-        empty_button[i] = new Button(102,50);
+        empty_button[i] = new Button(153,50);
         empty_button[i]->showBorder = false;
         buttons[i] = empty_button[i];
     }

@@ -24,7 +24,7 @@
 class subwindow : public window
 {
     protected:
-    string title;
+    std::string title;
     Component title_bar;
     int current_page=1;
     int page_count;
@@ -33,7 +33,7 @@ class subwindow : public window
     public:
     IconButton exit_button;
     bool fullscreen;
-    subwindow(string title, bool full = false, int npages=1);
+    subwindow(std::string title, bool full = false, int npages=1);
     virtual void setLayout();
     void updatePage(int newpage);
     void updateTitle();

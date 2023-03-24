@@ -23,10 +23,13 @@
 #include "national_values.h"
 #include "fixed_values.h"
 #include "train_data.h"
+#include "../TrackConditions/track_condition.h"
+#include "../MA/movement_authority.h"
+#include "track_pbd.h"
 #include <set>
-std::set<target*> target::targets;
+std::list<PBD_target> PBDs;
 target::target() : is_valid(false), type(target_class::MRSP) {};
-target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type) 
+target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type)
 {
     is_EBD_based = type != target_class::EoA;
     calculate_decelerations();
@@ -190,8 +193,16 @@ void set_supervised_targets()
         auto minMRSP = MRSP.begin();
         auto prev = minMRSP;
         for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
-            if (it->second < prev->second && d_maxsafefront(it->first)<it->first)
-                supervised_targets.push_back(target(it->first, it->second, target_class::MRSP));
+            if (it->second < prev->second && d_maxsafefront(it->first)<it->first) {
+                target t(it->first, it->second, target_class::MRSP);
+                for (auto &tsr : TSRs) {
+                    if (it->first == tsr.restriction.get_start() && it->second == tsr.restriction.get_speed()) {
+                        t.is_TSR = true;
+                        break;
+                    }
+                }
+                supervised_targets.push_back(t);
+            }
             prev = it;
         }
     }
@@ -291,4 +302,82 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
             }
         }
     }
+}
+void target::recalculate_all_decelerations()
+{
+    std::set<target*> targets;
+    for (auto &t : supervised_targets) {
+        targets.insert(&t);
+    }
+    extern std::map<track_condition*, std::vector<target>> track_condition_targets; 
+    for (auto &kvp : track_condition_targets) {
+        for (auto &t : kvp.second)
+            targets.insert(&t);
+    }
+    for (target *t : targets) {
+        if (!t->is_valid)
+            continue;
+        if (t->is_TSR)
+            t->default_gradient = default_gradient_tsr;
+        t->calculate_decelerations();
+    }
+    calculate_perturbation_location();
+}
+void PBD_target::calculate_restriction()
+{
+    calculate_times();
+    float V_PBD = 0;
+    distance doffset = start + L_antenna_front;
+    for (double v_pbd = 0; v_pbd<500/3.6; v_pbd+=0.8/3.6) {
+        if (is_EBD_based) {
+            float V_delta0PBD = Q_NVINHSMICPERM ? 0 : 0;
+            float Dbec = (v_pbd + dV_ebi(v_pbd) + V_delta0PBD)*(T_traction + T_berem);
+            distance d1 = doffset + Dbec;
+            if (d1 <= d_target && abs(v_pbd+dV_ebi(v_pbd)-(speed_curve(A_safe, d_target, 0, d1)-V_delta0PBD))<=1/3.6) {
+                V_PBD = v_pbd;
+                break;
+            }
+        } else {
+            float V_delta0PBD = Q_NVINHSMICPERM ? 0 : 0;
+            float Dbec = (v_pbd + dV_sbi(v_pbd) + V_delta0PBD)*(T_traction + T_berem);
+            distance d1 = doffset + Dbec + (v_pbd + dV_sbi(v_pbd))*T_bs2;
+            if (d1 <= d_target && abs(v_pbd+dV_sbi(v_pbd)-(speed_curve(A_safe, d_target, 0, d1)-V_delta0PBD))<=1/3.6) {
+                V_PBD = v_pbd;
+                break;
+            }
+        }
+    }
+    if (!is_EBD_based) {
+        float V_PBD_SB = 0;
+        for (double v_pbd = 0; v_pbd<500/3.6; v_pbd+=0.8/3.6) {
+            distance d1 = doffset + (v_pbd + dV_sbi(v_pbd))*T_bs1;
+            if (d1 <= d_target && abs(v_pbd+dV_sbi(v_pbd)-(speed_curve(A_expected, d_target, 0, d1)))<=1/3.6) {
+                V_PBD_SB = v_pbd;
+                break;
+            }
+        }
+        if (V_PBD > V_PBD_SB)
+            V_PBD = V_PBD_SB;
+    }
+    restriction = speed_restriction(((int)(V_PBD*3.6/5))*5/3.6, start, end, false);
+}
+optional<distance> reset_pbd;
+void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
+{
+    if (pbd.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+        reset_pbd = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
+        return;
+    }
+    reset_pbd = {};
+    distance start = ref+pbd.element.D_PBDSR.get_value(pbd.Q_SCALE);
+    PBDs.remove_if([start](const PBD_target &t) {return t.start < start;});
+    std::vector<PBD_element> elements;
+    elements.push_back(pbd.element);
+    elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());
+    for (auto &e : elements) {
+        ref += e.D_PBDSR.get_value(pbd.Q_SCALE);
+        double grad = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_PBDSR;
+        PBDs.push_back(PBD_target(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == Q_PBDSR_t::EBIntervention, grad));
+    }
+    recalculate_MRSP();
 }

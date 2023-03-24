@@ -19,4 +19,5 @@
 #define _GAUGE_H
 void displayGauge();
 void displayVrelease();
+void setLSSMA(int nlssma);
 #endif

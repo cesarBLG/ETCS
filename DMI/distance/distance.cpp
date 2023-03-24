@@ -31,21 +31,32 @@ extern bool showSpeeds;
 static float prev_dist = 0;
 void displayDistanceText()
 {
-    if (mode == Mode::SN) {
-        if (active_ntc_window == nullptr || !(active_ntc_window->monitoring_data.Dtarget_display & 1)) {
+    if (mode == Mode::SN)
+    {
+        if (active_ntc_window == nullptr || !(active_ntc_window->monitoring_data.Dtarget_display & 1))
+        {
             a2.clear();
+            prev_dist = -1;
             return;
         }
-    } else if((monitoring == CSM && Vtarget>=Vperm) || (!showSpeeds && (mode == Mode::OS || mode == Mode::SR))) {
+    }
+    else if (mode != Mode::FS && mode != Mode::OS && mode != Mode::SR && mode != Mode::RV)
+    {
         a2.clear();
+        prev_dist = -1;
+        return;
+    }
+    else if((monitoring == CSM && Vtarget>=Vperm) || (!showSpeeds && (mode == Mode::OS || mode == Mode::SR)))
+    {
+        a2.clear();
+        prev_dist = -1;
         return;
     }
     float dist = Dtarg;
     if(dist!=prev_dist)
     {
         a2.clear();
-        string str = to_string(((((int)(dist))/10))*10);
-        a2.addText(str, 10, 0, 10, Grey, RIGHT);
+        a2.addText(to_string(((((int)(dist))/10))*10), 10, 0, 10, Grey, RIGHT);
         prev_dist = dist;
     }
 }
@@ -57,6 +68,7 @@ void displayDistance()
         if (active_ntc_window == nullptr || active_ntc_window->monitoring_data.Dtarget_display < 2)
             return;
     }
+    else if (mode != Mode::FS && mode != Mode::OS && mode != Mode::SR && mode != Mode::RV) return;
     else if(monitoring == CSM && Vtarget>=Vperm) return;
     else if(!showSpeeds && (mode == Mode::OS || mode == Mode::SR)) return;
     for(int i=0; i<11; i++)

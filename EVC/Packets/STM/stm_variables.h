@@ -5,6 +5,10 @@ struct L_CAPTION_t : ETCS_variable
 {
     L_CAPTION_t() : ETCS_variable(6) {}
 };
+struct L_VALUE_t : ETCS_variable
+{
+    L_VALUE_t() : ETCS_variable(5) {}
+};
 struct L_MESSAGE_stm_t : ETCS_variable
 {
     L_MESSAGE_stm_t() : ETCS_variable(8) {}
@@ -22,6 +26,10 @@ struct M_DATAENTRYFLAG_t : ETCS_variable
     static const uint32_t Stop=0;
     static const uint32_t Start=1;
     M_DATAENTRYFLAG_t() : ETCS_variable(1) {}
+};
+struct NID_DRV_LANGUAGE_t : ETCS_variable
+{
+    NID_DRV_LANGUAGE_t() : ETCS_variable(16) {}
 };
 struct M_IND_ATTRIB_t : ETCS_variable
 {
@@ -42,6 +50,10 @@ struct NID_ICON_t : ETCS_variable
 struct NID_BUTTON_t : ETCS_variable
 {
     NID_BUTTON_t() : ETCS_variable(8) {}
+};
+struct NID_DATA_t : ETCS_variable
+{
+    NID_DATA_t() : ETCS_variable(8) {}
 };
 struct NID_INDICATOR_t : ETCS_variable
 {
@@ -220,6 +232,18 @@ struct Q_DISPLAY_TD_t : ETCS_variable
     static const uint32_t GaugeAndDigit = 3;
     Q_DISPLAY_TD_t() : ETCS_variable(2) {}
 };
+struct Q_FOLLOWING_t : ETCS_variable
+{
+    static const uint32_t NoFollowing = 0;
+    static const uint32_t FollowingRequest = 1;
+    Q_FOLLOWING_t() : ETCS_variable(1) {}
+};
+struct Q_OVR_STATUS_t : ETCS_variable
+{
+    static const uint32_t OverrideNotActive = 0;
+    static const uint32_t OverrideActive = 1;
+    Q_OVR_STATUS_t() : ETCS_variable(1) {}
+};
 struct Q_SOUND_t : ETCS_variable
 {
     static const uint32_t Stop = 0;
@@ -243,4 +267,36 @@ struct M_COLOUR_IS_t : M_COLOUR_t {};
 struct X_CAPTION_t : ETCS_variable
 {
     X_CAPTION_t() : ETCS_variable(8) {}
+    static std::string getUTF8(const std::vector<X_CAPTION_t> &chars)
+    {
+        std::string text;
+        for (int i=0; i<chars.size(); i++) {
+            unsigned char c = chars[i];
+            if (chars[i] < 0x80) {
+                text += c;
+            } else {
+                text += 0xc2+(c>0xbf);
+                text += (c&0x3f)+0x80;
+            }
+        }
+        return text;
+    }
+};
+struct X_VALUE_t : ETCS_variable
+{
+    X_VALUE_t() : ETCS_variable(8) {}
+    static std::string getUTF8(const std::vector<X_VALUE_t> &chars)
+    {
+        std::string text;
+        for (int i=0; i<chars.size(); i++) {
+            unsigned char c = chars[i];
+            if (chars[i] < 0x80) {
+                text += c;
+            } else {
+                text += 0xc2+(c>0xbf);
+                text += (c&0x3f)+0x80;
+            }
+        }
+        return text;
+    }
 };

@@ -6,6 +6,7 @@
 #include "../Supervision/supervision.h"
 #include "../optional.h"
 #include "../Packets/STM/message.h"
+#include "../Packets/STM/179.h"
 #include "stm_state.h"
 struct stm_commands
 {
@@ -26,6 +27,23 @@ struct stm_forwarded_info
     int direction;
     int active_cab;
 };
+struct stm_specific_data
+{
+    int id;
+    std::string caption;
+    std::string value;
+    std::vector<std::string> keys;
+    stm_specific_data() = default;
+    stm_specific_data(const STMSpecificDataField &field)
+    {
+        id = field.NID_DATA;
+        caption = X_CAPTION_t::getUTF8(field.X_CAPTION);
+        value = X_VALUE_t::getUTF8(field.value.X_VALUE);
+        for (auto &v : field.values) {
+            keys.push_back(X_VALUE_t::getUTF8(v.X_VALUE));
+        }
+    }
+};
 struct stm_object
 {
     int nid_stm;
@@ -34,12 +52,13 @@ struct stm_object
     optional<stm_state> last_order;
     int64_t last_order_time;
     int64_t last_national_trip;
-    int specific_data;
+    int specific_data_need;
     int64_t data_entry_timer;
     enum struct data_entry_state
     {
         Inactive,
         Start,
+        Active,
         Driver,
         DataSent,
     } data_entry;
@@ -47,6 +66,7 @@ struct stm_object
     bool isolated;
     bool control_request_EB;
     std::map<std::string, cond> conditions;
+    std::vector<stm_specific_data> specific_data;
     stm_object();
     bool active()
     {
@@ -67,6 +87,8 @@ struct stm_object
     void report_trip();
     void trigger_condition(std::string change);
     void request_state(stm_state req);
+    void send_message(stm_message *msg);
+    void send_specific_data(json &result);
 };
 void stm_level_change(level_information newlevel, bool driver);
 void stm_level_transition_received(level_transition_information info);

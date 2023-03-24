@@ -40,6 +40,7 @@
 #include "../control/control.h"
 #include "../STM/stm_objects.h"
 #include "../language/language.h"
+#include "../speed/gauge.h"
 #include <mutex>
 int server;
 int clients[3];
@@ -47,13 +48,14 @@ int active_channel;
 #define BUFF_SIZE 1024
 #define PORT 5010
 static char data[BUFF_SIZE];
-string buffer;
+std::string buffer;
+std::mutex server_mtx;
 static SDL_Event ev;
 #include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {
-    if (!j.contains("str" || j.is_null())) j[str] = def;
+    if (!j.contains("str") || j.is_null()) j[str] = def;
 }
 void fill_non_existent(json &j, std::string str, nullptr_t null)
 {
@@ -187,13 +189,11 @@ void from_json(const json&j, planning_element &e)
     }
     e.condition = tex;
 }
-void parseData(string str)
+void parseData(std::string str)
 {
-    extern mutex draw_mtx;
-    unique_lock<mutex> lck(draw_mtx);
     int index = str.find_first_of('(');
-    string command = str.substr(0, index);
-    string value = str.substr(index+1, str.find_last_of(')')-index-1);
+    std::string command = str.substr(0, index);
+    std::string value = str.substr(index+1, str.find_last_of(')')-index-1);
     if (command == "setMessage")
     {
         int valsep = value.find(',');
@@ -202,14 +202,14 @@ void parseData(string str)
         valsep = value.find(',');
         int size = stoi(value.substr(0,valsep));
         value = value.substr(valsep+1);
-        string text = value.substr(0, size);
+        std::string text = value.substr(0, size);
 
         value = value.substr(size+1);
         valsep = value.find(',');
-        vector<string> val;
-        while(valsep!=string::npos)
+        std::vector<std::string> val;
+        while(valsep!=std::string::npos)
         {
-            string param = value.substr(0,valsep);
+            std::string param = value.substr(0,valsep);
             value = value.substr(valsep+1);
             valsep = value.find(',');
             val.push_back(param);
@@ -224,12 +224,7 @@ void parseData(string str)
     else if (command == "playSinfo") playSinfo();
     else if (command == "stmData")
     {
-        std::vector<unsigned char> message((value.size()+7)>>3);
-        for (int i=0; i<value.size(); i++) {
-            if (value[i]=='1')
-                message[i>>3] |= 1<<(7-(i&7));
-        }
-        bit_manipulator r(std::move(message));
+        bit_manipulator r(value);
         stm_message msg(r);
         parse_stm_message(msg);
     }
@@ -239,6 +234,9 @@ void parseData(string str)
     }
     if (command != "json") return;
     json j = json::parse(value);
+    setWindow(j);
+    if (!j.contains("Status")) return;
+    j = j["Status"];
     /*fill_non_existent(j, "TargetSpeedMpS", 1000);
     fill_non_existent(j, "ReleaseSpeedMpS", 0);
     fill_non_existent(j, "ModeAcknowledgement", nullptr);
@@ -285,7 +283,8 @@ void parseData(string str)
     EB = SB = j["BrakeCommanded"].get<bool>();
     extern bool display_taf;
     display_taf = j["DisplayTAF"].get<bool>();
-    setWindow(j["ActiveWindow"]);
+    if (j.contains("LSSMA")) setLSSMA((int)(j["LSSMA"].get<double>()*3.6 + 0.01));
+    else setLSSMA(-1);
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
     {
         speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();
@@ -301,7 +300,6 @@ void parseData(string str)
         std::set<int> syms = j["ActiveTrackConditions"].get<std::set<int>>();
         updateTc(syms);
     }
-    /*if(command == "setVset") Vset = stof(value);*/
 }
 extern bool running;
 int read(int channel)
@@ -310,22 +308,27 @@ int read(int channel)
     if(result>0)
     {
         ::data[result] = 0;
+        std::unique_lock<std::mutex> lck(server_mtx);
         buffer += ::data;
-        int end;
-        while ((end=buffer.find_first_of(';'))!=string::npos) {
-            int start = buffer.find_first_not_of("\n\r ;");
-            string command = buffer.substr(start, end-start);
-            parseData(command);
-            buffer = buffer.substr(end+1);
-        }
     }
     return result;
 }
-void write_command(string command, string value)
+void updateDrawCommands()
+{
+    std::unique_lock<std::mutex> lck(server_mtx);
+    int end;
+    while ((end=buffer.find_first_of(';'))!=std::string::npos) {
+        int start = buffer.find_first_not_of("\n\r ;");
+        std::string command = buffer.substr(start, end-start);
+        parseData(command);
+        buffer = buffer.substr(end+1);
+    }
+}
+void write_command(std::string command, std::string value)
 {
     if (active_channel < 0)
         return;
-    string tosend = command+"("+value+");\n";
+    std::string tosend = command+"("+value+");\n";
     send(clients[active_channel], tosend.c_str(), tosend.size(), 0);
 }
 void listenChannels()

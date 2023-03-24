@@ -3,6 +3,10 @@
 #include "stm_variables.h"
 struct ETCSStatusData : ETCS_packet
 {
+    ETCSStatusData()
+    {
+        NID_PACKET.rawdata = 5;
+    }
     M_LEVEL_t M_LEVEL;
     NID_NTC_t NID_NTC;
     M_MODE_t M_MODESTM;

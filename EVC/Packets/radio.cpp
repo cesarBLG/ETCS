@@ -20,15 +20,11 @@
 #include "../Euroradio/session.h"
 #include "../MA/movement_authority.h"
 #include "../Supervision/supervision.h"
+#include "../Version/version.h"
 void ma_request(bool driver, bool perturb, bool timer, bool trackdel, bool taf);
 void fill_pos_report(euroradio_message_traintotrack *m);
 ETCS_packet *get_position_report();
-#include <orts/client.h>
-#include <orts/common.h>
-#include <sstream>
-extern ORserver::POSIXclient *s_client;
-std::vector<bool> base64_decode(std::string str, bool remove_padding);
-std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
+std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r, int m_version)
 {
     int size = r.bits.size();
     NID_MESSAGE_t nid;
@@ -39,21 +35,31 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
         case 3: msg = new MA_message(); break;
         case 6: msg = new TR_exit_recognition(); break;
         case 8: msg = new train_data_acknowledgement(); break;
-        case 15: msg = new conditional_emergency_stop(); break;
+        case 9: msg = new MA_shortening_message(); break;
+        case 15: msg = new conditional_emergency_stop(m_version); break;
         case 16: msg = new unconditional_emergency_stop(); break;
         case 18: msg = new emergency_stop_revocation(); break;
         case 24: msg = new euroradio_message(); break;
         case 27: msg = new SH_refused(); break;
         case 28: msg = new SH_authorised(); break;
         case 32: msg = new RBC_version(); break;
-        case 34: msg = new taf_request_message(); break;
         case 33: msg = new MA_shifted_message(); break;
+        case 34: msg = new taf_request_message(m_version); break;
         case 39: msg = new ack_session_termination(); break;
         case 40: msg = new train_rejected(); break;
         case 41: msg = new train_accepted(); break;
         case 43: msg = new som_position_confirmed(); break;
         case 45: msg = new coordinate_system_assignment(); break;
-        default: r.sparefound = true; msg = new euroradio_message(); break;
+        default:
+            bool highery = false;
+            for (int v : supported_versions) {
+                if (VERSION_X(m_version)==VERSION_X(v) && VERSION_Y(m_version)>VERSION_Y(v))
+                    highery = true;
+            }
+            if (!highery)
+                r.sparefound = true;
+            msg = new euroradio_message();
+            break;
     }
     msg->copy(r);
     while (!r.error && r.position<=(r.bits.size()*8-8))
@@ -62,7 +68,7 @@ std::shared_ptr<euroradio_message> euroradio_message::build(bit_manipulator &r)
         r.peek(&NID_PACKET);
         if (NID_PACKET==255)
             break;
-        msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r)));
+        msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r, m_version)));
     }
     msg->packets.insert(msg->packets.end(), msg->optional_packets.begin(), msg->optional_packets.end());
     if (msg->L_MESSAGE != size) r.error=true;
@@ -81,7 +87,16 @@ std::shared_ptr<euroradio_message_traintotrack> euroradio_message_traintotrack::
         case 130: msg = new SH_request(); break;
         case 132: msg = new MA_request(); break;
         case 136: msg = new position_report(); break;
+        case 137: msg = new ma_shorten_granted(); break;
+        case 138: msg = new ma_shorten_rejected(); break;
+        case 146: msg = new acknowledgement_message(); break;
+        case 147: msg = new emergency_acknowledgement_message(); break;
+        case 149: msg = new taf_granted(); break;
+        case 154: msg = new no_compatible_session_supported(); break;
+        case 155: msg = new init_communication_session(); break;
+        case 156: msg = new terminate_communication_session(); break;
         case 157: msg = new SoM_position_report(); break;
+        case 159: msg = new communication_session_established(); break;
         default: r.sparefound = true; msg = new euroradio_message_traintotrack(); break;
     }
     msg->copy(r);
@@ -91,7 +106,7 @@ std::shared_ptr<euroradio_message_traintotrack> euroradio_message_traintotrack::
         r.peek(&NID_PACKET);
         if (NID_PACKET==255)
             break;
-        msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r)));
+        msg->optional_packets.push_back(std::shared_ptr<ETCS_packet>(ETCS_packet::construct(r, 33)));
     }
     msg->packets.insert(msg->packets.end(), msg->optional_packets.begin(), msg->optional_packets.end());
     if (msg->L_MESSAGE != size) r.error=true;
@@ -125,12 +140,6 @@ std::shared_ptr<euroradio_message_traintotrack> euroradio_message_traintotrack::
     bit_manipulator r(base64_decode(str.str(), true));
     //auto msg = euroradio_message_traintotrack::build(r);
 }*/
-struct ma_request_parameters
-{
-    int64_t T_MAR;
-    int64_t T_CYCRQSTD;
-    int64_t T_TIMEOUTRQST;
-};
 optional<position_report_parameters> pos_report_params;
 ma_request_parameters ma_params = {30000, (int64_t)(T_CYCRQSTD*1000), 30000};
 int64_t ma_asked;
@@ -204,11 +213,10 @@ void update_radio()
 int position_report_reasons[12];
 void send_position_report(bool som)
 {
-    if (!supervising_rbc)
-        return;
     if (som) {
+        if (!supervising_rbc)
+            return;
         auto *rep = new SoM_position_report();
-        rep->NID_MESSAGE.rawdata = 157;
         if (lrbgs.empty())
             rep->Q_STATUS.rawdata = Q_STATUS_t::Unknown;
         else
@@ -216,19 +224,28 @@ void send_position_report(bool som)
         fill_message(rep);
         supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(rep));
     } else {
-        auto *rep = new position_report();
-        rep->NID_MESSAGE.rawdata = 136;
-        fill_message(rep);
-        auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
-        supervising_rbc->send(msg);
-        std::set<int> acks;
-        // TODO: 4 only for Handing Over RBC
-        if ((position_report_reasons[1] && mode == Mode::SH) || position_report_reasons[4] || position_report_reasons[5] || position_report_reasons[6] == 2)
-            acks.insert(-1);
-        else if (position_report_reasons[1] && mode == Mode::PT)
-            acks.insert(6);
-        if (!acks.empty())
-            supervising_rbc->pending_ack.push_back({acks, msg, 1,get_milliseconds()});
+        std::set<communication_session*> rbcs;
+        if (supervising_rbc != nullptr)
+            rbcs.insert(supervising_rbc);
+        if (accepting_rbc != nullptr)
+            rbcs.insert(accepting_rbc);
+        if (handing_over_rbc != nullptr)
+            rbcs.insert(handing_over_rbc);
+        if (rbcs.empty())
+            return;
+        for (auto *session : rbcs) {
+            auto *rep = new position_report();
+            fill_message(rep);
+            auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
+            session->send(msg);
+            std::set<int> acks;
+            if ((position_report_reasons[4] && session == handing_over_rbc) || (position_report_reasons[1] && mode == Mode::SH) || position_report_reasons[5] || position_report_reasons[6] == 2)
+                acks.insert(-1);
+            else if (position_report_reasons[1] && mode == Mode::PT)
+                acks.insert(6);
+            if (!acks.empty() && session->status == session_status::Established)
+                session->pending_ack.push_back({acks, msg, 1, get_milliseconds()});
+        }
         t_last_pos_rep = get_milliseconds();
         d_last_pos_rep = d_estfront;
     }

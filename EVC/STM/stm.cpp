@@ -4,13 +4,18 @@
 #include "../Packets/messages.h"
 #include "../Packets/etcs_information.h"
 #include "../Supervision/train_data.h"
+#include "../Packets/STM/7.h"
 #include "../Packets/STM/13.h"
 #include "../Packets/STM/14.h"
 #include "../Packets/STM/15.h"
 #include "../Packets/STM/128.h"
 #include "../Packets/STM/175.h"
+#include "../Packets/STM/179.h"
+#include "../Packets/STM/180.h"
 #include "../Packets/STM/181.h"
 #include "../Packets/STM/184.h"
+#include "../language/language.h"
+#include "../DMI/windows.h"
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
@@ -59,7 +64,7 @@ void stm_object::request_state(stm_state req)
         trigger_condition("A4a");
     else if (req == stm_state::FA && state != stm_state::FA)
         send_failed_msg(this);
-    if (req == stm_state::CO && specific_data < 0)
+    if (req == stm_state::CO && specific_data_need < 0)
         trigger_condition("L16");
     auto &available = ordered_transitions[(int)state];
     bool allowed = req == state;
@@ -79,7 +84,7 @@ stm_object::stm_object()
     last_national_trip = 0;
     national_trip = isolated = false;
     data_entry = data_entry_state::Inactive;
-    specific_data = -1;
+    specific_data_need = -1;
     conditions["A1"] = [this] {return state == stm_state::PO;};
     conditions["E4a"] = [] {return mode == Mode::SB;};
     conditions["G4a"] = [this] {
@@ -137,7 +142,6 @@ stm_object::stm_object()
     conditions["C16"] = [this] {return last_order && *last_order != stm_state::DA && *last_order != stm_state::CCS && get_milliseconds() - last_order_time > 10000;};
     conditions["D16"] = [this] {return last_order && *last_order == stm_state::DA && get_milliseconds() - last_order_time > 5000;};
     conditions["E16"] = [this] {return last_order && *last_order == stm_state::CCS && !national_trip && get_milliseconds() - last_order_time > 5000;};
-    conditions["O16"] = [this] {return (data_entry == data_entry_state::Start || data_entry == data_entry_state::DataSent) && get_milliseconds() - data_entry_timer > 10000;};
 }
 void fill_stm_transitions()
 {
@@ -186,16 +190,11 @@ void update_ntc_transitions()
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
-                    
-                    auto *msg = new stm_message();
-                    msg->NID_STM.rawdata = kvp.first;
+                    stm_message msg;
                     auto *order = new STMStateOrder();
                     order->NID_STMSTATEORDER.rawdata = (int)t.to;
-                    msg->packets.push_back(std::shared_ptr<ETCS_packet>(order));
-                    bit_manipulator w;
-                    msg->write_to(w);
-                    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
-                    
+                    msg.packets.push_back(std::shared_ptr<ETCS_packet>(order));
+                    stm->send_message(&msg);
                     if (t.to == stm_state::FA) {
                         stm->state = stm_state::FA;
                         send_failed_msg(stm);
@@ -344,9 +343,16 @@ void stm_object::report_received(stm_state newstate)
         last_order = {};
 
 }
+void stm_object::send_message(stm_message *msg)
+{
+    msg->NID_STM.rawdata = nid_stm;
+    bit_manipulator w;
+    msg->write_to(w);
+    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+}
 void send_failed_msg(stm_object *stm)
 {
-    text_message msg(get_ntc_name(stm->nid_stm) + gettext(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
+    text_message msg(get_ntc_name(stm->nid_stm) + get_text(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
     add_message(msg);
 }
 bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);
@@ -398,6 +404,7 @@ std::string get_ntc_name(int nid_ntc)
     return "NTC "+std::to_string(nid_ntc);
 }
 static Mode prev_mode;
+static bool prev_override;
 void update_stm_control()
 {
     if (level != Level::NTC)
@@ -405,10 +412,34 @@ void update_stm_control()
     if (mode != prev_mode && (mode == Mode::NP/* || mode == Mode::SB*/))
         ntc_to_stm.clear();
     prev_mode = mode;
+    if (prev_override != overrideProcedure) {
+        for (auto kvp : installed_stms) {
+            auto *stm = kvp.second;
+            stm_message msg;
+            auto *ov = new STMOverrideStatus();
+            ov->Q_OVR_STATUS.rawdata = overrideProcedure;
+			msg.packets.push_back(std::shared_ptr<ETCS_packet>(ov));
+			stm->send_message(&msg);
+        }
+    }
+    prev_override = overrideProcedure;
 
     for (auto kvp : installed_stms) {
-        kvp.second->national_trip = get_milliseconds() - kvp.second->last_national_trip < 10000;
-    }
+        auto *stm = kvp.second;
+        stm->national_trip = get_milliseconds() - kvp.second->last_national_trip < 10000;
+		bool entry_timer = (stm->data_entry == stm_object::data_entry_state::Start || stm->data_entry == stm_object::data_entry_state::DataSent)
+            && get_milliseconds() - stm->data_entry_timer > 10000;
+		if (entry_timer || (stm->data_entry != stm_object::data_entry_state::Inactive && active_dialog != dialog_sequence::NTCData)) {
+			if (entry_timer)
+				stm->trigger_condition("O16");
+			stm->data_entry = stm_object::data_entry_state::Inactive;
+			stm_message msg;
+			auto *flag = new STMDataEntryFlag();
+			msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
+			flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
+			stm->send_message(&msg);
+		}
+	}
 
     update_ntc_transitions();
 
@@ -419,7 +450,7 @@ void update_stm_control()
         if (mode == Mode::SN || (mode == Mode::NL && get_milliseconds()-last_mode_change > 5000)) {
             if (!ntc_unavailable_msg) {
                 ntc_unavailable_msg = true;
-                text_message msg(get_ntc_name(nid_ntc) + gettext(" not available"), true, false, 2, [stm](text_message &msg){
+                text_message msg(get_ntc_name(nid_ntc) + get_text(" not available"), true, false, 2, [stm](text_message &msg){
                     if (stm != get_stm(nid_ntc) || stm->available() || stm->isolated || (mode != Mode::SN && mode != Mode::NL)) {
                         ntc_unavailable_msg = false;
                         return true;
@@ -436,7 +467,7 @@ void update_stm_control()
         if (stm2->state == stm_state::DA || level == Level::N0 || level == Level::N1 || level == Level::N2 || level == Level::N3 || stm != stm2 || mode != Mode::SN || stm->isolated)
             stm2->control_request_EB = false;
         if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
-            stm_control_EB = true;
+            stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && !STM_max_speed) {
@@ -450,12 +481,15 @@ void stm_send_train_data()
     for (auto &kvp : installed_stms) {
         auto *stm = kvp.second;
         if (stm->state == stm_state::CO || stm->state == stm_state::DE || stm->state == stm_state::CS || stm->state == stm_state::HS || stm->state == stm_state::DA) {
-            stm->data_entry = stm_object::data_entry_state::Start;
-            auto *msg = new stm_message();
-            msg->NID_STM.rawdata = kvp.first;
-            auto *flag = new STMDataEntryFlag();
-            msg->packets.push_back(std::shared_ptr<ETCS_packet>(flag));
-            flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Start;
+            stm_message msg;
+            if (stm->specific_data_need > 0) {
+                stm->specific_data.clear();
+                stm->data_entry = stm_object::data_entry_state::Start;
+                stm->data_entry_timer = get_milliseconds();
+                auto *flag = new STMDataEntryFlag();
+                flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Start;
+                msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
+            }
             auto *td = new STMTrainData();
             td->NC_CDTRAIN.set_value(cant_deficiency);
             td->NC_TRAIN.rawdata = 0;
@@ -465,13 +499,39 @@ void stm_send_train_data()
             td->L_TRAIN.set_value(L_TRAIN);
             td->V_MAXTRAIN.set_value(V_train);
             td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
-            msg->packets.push_back(std::shared_ptr<ETCS_packet>(td));
-            bit_manipulator w;
-            msg->write_to(w);
-            s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
-            stm->data_entry_timer = get_milliseconds();
+            msg.packets.push_back(std::shared_ptr<ETCS_packet>(td));
+            stm->send_message(&msg);
         }
     }
+}
+void stm_object::send_specific_data(json &result)
+{
+    data_entry = stm_object::data_entry_state::DataSent;
+    data_entry_timer = get_milliseconds();
+    stm_message msg;
+    auto *res = new STMSpecificDataEntryValues();
+    std::map<int, std::string> vals;
+    for (auto it = result.begin(); it!=result.end(); ++it) {
+        for (auto &field : specific_data) {
+            if (field.caption == it.key())
+                vals[field.id] = it.value();
+        }
+    }
+    res->N_ITER.rawdata = vals.size();
+    for (auto &kvp : vals) {
+        STMDataFieldResult dfr;
+        dfr.NID_DATA.rawdata = kvp.first;
+        dfr.L_VALUE.rawdata = kvp.second.size();
+        for (int i=0; i<kvp.second.size(); i++) {
+            X_VALUE_t val;
+            val.rawdata = kvp.second[i];
+            dfr.X_VALUE.push_back(val);
+        }
+        res->results.push_back(dfr);
+    }
+    msg.packets.push_back(std::shared_ptr<ETCS_packet>(res));
+    send_message(&msg);
+    specific_data.clear();
 }
 void setup_stm_control()
 {
@@ -515,20 +575,26 @@ void handle_stm_message(const stm_message &msg)
             }
             case 179:
             {
-                stm->data_entry = stm_object::data_entry_state::Inactive;
-                stm->data_entry_timer = get_milliseconds();
-                auto *msg = new stm_message();
-                msg->NID_STM.rawdata = nid_stm;
-                auto *flag = new STMDataEntryFlag();
-                msg->packets.push_back(std::shared_ptr<ETCS_packet>(flag));
-                flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-                bit_manipulator w;
-                msg->write_to(w);
-                s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+                auto &specific = *((STMSpecificDataEntryRequest*)pack.get());
+                if (specific.N_ITER.rawdata != 0) {
+                    for (auto &field : specific.fields) {
+                        stm->specific_data.push_back(stm_specific_data(field));
+                    }
+                    if (specific.Q_FOLLOWING == Q_FOLLOWING_t::NoFollowing)
+                        stm->data_entry = stm_object::data_entry_state::Active;
+                    stm->data_entry_timer = get_milliseconds();
+                } else {
+                    stm->data_entry = stm_object::data_entry_state::Inactive;
+                    stm_message msg;
+                    auto *flag = new STMDataEntryFlag();
+                    msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
+                    flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
+                    stm->send_message(&msg);
+                }
                 break;
             }
             case 181:
-                stm->specific_data = ((STMSpecificDataNeed*)pack.get())->Q_DATAENTRY.rawdata == Q_DATAENTRY_t::SpecificDataNeeded;
+                stm->specific_data_need = ((STMSpecificDataNeed*)pack.get())->Q_DATAENTRY.rawdata == Q_DATAENTRY_t::SpecificDataNeeded;
                 break;
         }
     }

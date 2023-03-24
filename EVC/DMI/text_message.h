@@ -20,8 +20,9 @@
 #include <functional>
 #include "dmi.h"
 #include "../Packets/72.h"
+#include "../Packets/76.h"
 #include "../Position/distance.h"
-#include "../language/language.h"
+#include "../Euroradio/session.h"
 #include <ctime>
 #include <list>
 enum struct text_message_type
@@ -45,6 +46,7 @@ struct text_message
     int trackid;
     int64_t first_displayed;
     distance first_distance;
+    optional<contact_info> report_rbc;
     std::function<bool(text_message&)> start_condition;
     std::function<bool(text_message&)> end_condition;
     text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition);
@@ -52,5 +54,6 @@ struct text_message
 extern std::list<text_message> messages;
 text_message &add_message(text_message t);
 void add_message(PlainTextMessage m, distance ref);
+void add_message(FixedTextMessage m, distance ref);
 void update_messages();
 void message_acked(int id);

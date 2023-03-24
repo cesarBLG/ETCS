@@ -26,12 +26,12 @@
 #include "../tcp/server.h"
 
 #include <chrono>
-menu_radio::menu_radio() : menu(gettext("Main"))
+menu_radio::menu_radio() : menu(get_text("Main"))
 {
-    buttons[0] = new TextButton(gettext("Contact last RBC"), 153, 50);
-    buttons[1] = new TextButton(gettext("Use short number"), 153, 50);
-    buttons[2] = new TextButton(gettext("Enter RBC data"), 153, 50);
-    buttons[3] = new TextButton(gettext("Radio Network ID"), 153, 50);
+    buttons[0] = new TextButton(get_text("Contact last RBC"), 153, 50);
+    buttons[1] = new TextButton(get_text("Use short number"), 153, 50);
+    buttons[2] = new TextButton(get_text("Enter RBC data"), 153, 50);
+    buttons[3] = new TextButton(get_text("Radio Network ID"), 153, 50);
     buttons[0]->setPressedAction([this]
     {
         write_command("ContactLastRBC","");

@@ -18,14 +18,14 @@
  */
 #include "menu_settings.h"
 #include "../tcp/server.h"
-menu_settings::menu_settings() : menu(gettext("Settings"))
+menu_settings::menu_settings() : menu(get_text("Settings"))
 {
     buttons[0] = new IconButton("symbols/Setting/SE_03.bmp", 153, 50);
     buttons[1] = new IconButton("symbols/Setting/SE_02.bmp", 153, 50);
     buttons[2] = new IconButton("symbols/Setting/SE_01.bmp", 153, 50);
-    buttons[3] = new TextButton(gettext("System version"), 153, 50);
-    buttons[4] = new TextButton(gettext("Set VBC"), 153, 50);
-    buttons[5] = new TextButton(gettext("Remove VBC"), 153, 50);
+    buttons[3] = new TextButton(get_text("System version"), 153, 50);
+    buttons[4] = new TextButton(get_text("Set VBC"), 153, 50);
+    buttons[5] = new TextButton(get_text("Remove VBC"), 153, 50);
     buttons[0]->setPressedAction([this]
     {
         write_command("Language","");

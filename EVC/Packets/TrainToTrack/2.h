@@ -6,6 +6,10 @@
 
 struct OnboardSupportedSystemVersion : ETCS_packet
 {
+    OnboardSupportedSystemVersion()
+    {
+        NID_PACKET.rawdata = 2;
+    }
     M_VERSION_t M_VERSION;
     N_ITER_t N_ITER;
     std::vector<M_VERSION_t> M_VERSIONs;

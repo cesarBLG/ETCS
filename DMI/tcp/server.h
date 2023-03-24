@@ -22,4 +22,5 @@ void startSocket();
 void loopSocket();
 void closeSocket();
 void write_command(std::string command, std::string value);
+void updateDrawCommands();
 #endif

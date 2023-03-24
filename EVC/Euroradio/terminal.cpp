@@ -1,5 +1,6 @@
 #include "terminal.h"
 #include "session.h"
+#include "../Version/translate.h"
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/socket.h>
@@ -46,6 +47,7 @@ bool mobile_terminal::setup(communication_session *session)
                 while (!pending_write.empty()) {
                     auto msg = pending_write.front();
                     pending_write.pop_front();
+                    msg = translate_message(msg, 0);
                     lck.unlock();
                     bit_manipulator w;
                     msg->write_to(w);
@@ -84,7 +86,7 @@ bool mobile_terminal::setup(communication_session *session)
             if (res != size-3)
                 break;
             bit_manipulator r(pack, size);
-            std::shared_ptr<euroradio_message> msg = euroradio_message::build(r);
+            std::shared_ptr<euroradio_message> msg = euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version);
             std::unique_lock<std::mutex> lck(mtx);
             pending_read.push_back(msg);
         }

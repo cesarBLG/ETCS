@@ -18,7 +18,7 @@
 #pragma once
 #include <map>
 #include "acceleration.h"
-#include "../Parser/nlohmann/json.hpp"
+#include <nlohmann/json.hpp>
 #define REGENERATIVE_AVAILABLE 0
 #define EDDY_AVAILABLE 1
 #define EP_AVAILABLE 2
