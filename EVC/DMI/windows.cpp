@@ -213,7 +213,7 @@ json sr_data_window()
 json language_window()
 {
     json j = R"({"active":"language_window"})"_json;
-    j["WindowDefinition"] = build_input_window(get_text("Language"), {build_input_field("", language, {"en","es","fr","de","pt","it","nl"})});
+    j["WindowDefinition"] = build_input_window(get_text("Language"), {build_input_field("", language, {"en","es","fr","de","pt","it","nl","sv","el","hu","pl"})});
     return j;
 }
 json set_vbc_window()
