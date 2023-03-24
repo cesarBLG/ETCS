@@ -20,7 +20,7 @@
 subwindow::subwindow(std::string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", 82, 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
     next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), title_bar(full ? 334 : 306,24), page_count(npages)
 {
-    if (full) title_bar.setBackgroundColor(Black);
+    title_bar.setBackgroundColor(Black);
     exit_button.setPressedAction([this]
     {
         write_command("json",R"({"DriverSelection":"CloseWindow"})");

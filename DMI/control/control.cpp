@@ -180,7 +180,7 @@ void setWindow(json &data)
                 {
                     std::vector<std::pair<std::string,std::string>> data;
                     json &fields = def["Fields"];
-                    for (json j : fields)
+                    for (json &j : fields)
                     {
                         data.push_back({j["Label"], j["Value"]});
                     }

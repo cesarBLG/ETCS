@@ -401,7 +401,7 @@ void movement_authority::shorten(distance eoa, distance svl)
     if (get_end() < eoa)
         eoa = get_end();
     ol = {};
-    dp = {(int)(svl-eoa), 0};
+    dp = {svl-eoa, 0};
     v_main = 0;
     distance cum = start;
     for (int i=0; i<sections.size(); i++) {

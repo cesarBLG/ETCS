@@ -11,6 +11,11 @@ std::string get_text(std::string id)
     if (language == "en") return id;
     return reader.Lookup(id.c_str());
 }
+std::string get_text_context(std::string context, std::string id)
+{
+    if (language == "en") return id;
+    return reader.LookupWithContext(context.c_str(), id.c_str());
+}
 void set_language(std::string lang)
 {
     std::string file = "../locales/evc/"+lang+".mo";

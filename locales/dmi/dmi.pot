@@ -3,77 +3,67 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-24 18:53+0100\n"
-"PO-Revision-Date: 2023-03-24 18:53+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: es\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.2.2\n"
+"X-Poedit-Basepath: ../../DMI\n"
+"X-Poedit-KeywordsList: get_text;get_text_context:1c,2\n"
+"X-Poedit-SearchPath-0: .\n"
 
 #: language/language.cpp:36 window/nav_buttons.cpp:29
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Menú"
+msgstr ""
 
 #: language/language.cpp:37 window/nav_buttons.cpp:35
-#, fuzzy
-#| msgid ""
-#| "Over-\n"
-#| "ride"
 msgctxt "Navigation bar"
 msgid ""
 "Over-\n"
 "ride"
-msgstr "Rebase"
+msgstr ""
 
 #: language/language.cpp:38 window/nav_buttons.cpp:41
-#, fuzzy
-#| msgid ""
-#| "Data\n"
-#| "view"
 msgctxt "Navigation bar"
 msgid ""
 "Data\n"
 "view"
-msgstr "Datos"
+msgstr ""
 
 #: language/language.cpp:39 window/nav_buttons.cpp:47
-#, fuzzy
-#| msgid "Spec"
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Especial"
+msgstr ""
 
 #: window/data_entry.cpp:25 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:82
 #: window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr "Sí"
+msgstr ""
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " entrada completa?"
+msgstr ""
 
 #: window/driver_id.cpp:26
 msgid "TRN"
-msgstr "NTREN"
+msgstr ""
 
 #: window/fixed_train_data.cpp:26
 msgid ""
 "Enter\n"
 "data"
 msgstr ""
-"Int.\n"
-"datos"
 
 #: window/keyboard.cpp:29 window/keyboard.cpp:72
 msgid "DEL"
@@ -81,51 +71,51 @@ msgstr ""
 
 #: window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #: window/menu_main.cpp:31 window/menu_radio.cpp:29
 msgid "Main"
-msgstr "Principal"
+msgstr ""
 
 #: window/menu_main.cpp:33
 msgid "Start"
-msgstr "Inicio"
+msgstr ""
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr "ID maquinista"
+msgstr ""
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr "Datos tren"
+msgstr ""
 
 #: window/menu_main.cpp:36
 msgid "Level"
-msgstr "Nivel"
+msgstr ""
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr "Número de tren"
+msgstr ""
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr "Fin Maniobras"
+msgstr ""
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "Maniobras"
+msgstr ""
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Doble Tracción"
+msgstr ""
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "Mantener maniobra"
+msgstr ""
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "Datos radio"
+msgstr ""
 
 #: window/menu_ntc.cpp:21
 msgid "NTC data entry"
@@ -137,79 +127,62 @@ msgstr ""
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr "Rebase"
+msgstr ""
 
 #: window/menu_override.cpp:24
 msgid "EoA"
-msgstr "EoA"
+msgstr ""
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr "Contactar último RBC"
+msgstr ""
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "Usar número corto"
+msgstr ""
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr "Introducir datos RBC"
+msgstr ""
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
-msgstr "ID red radio"
+msgstr ""
 
 #: window/menu_settings.cpp:21
 msgid "Settings"
-msgstr "Ajustes"
+msgstr ""
 
 #: window/menu_settings.cpp:26
 msgid "System version"
-msgstr "Versión del sistema"
+msgstr ""
 
 #: window/menu_settings.cpp:27
 msgid "Set VBC"
 msgstr ""
-"Establecimiento\n"
-"VBC"
 
 #: window/menu_settings.cpp:28
 msgid "Remove VBC"
-msgstr "Suprimir VBC"
+msgstr ""
 
 #: window/menu_spec.cpp:21
 msgid "Special"
-msgstr "Especial"
+msgstr ""
 
 #: window/menu_spec.cpp:23
 msgid "Adhesion"
-msgstr "Adherencia"
+msgstr ""
 
 #: window/menu_spec.cpp:24
 msgid "SR Speed/Distance"
-msgstr "Vel/Distancia SR"
+msgstr ""
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
-msgstr "Integridad del tren"
+msgstr ""
 
 #: window/train_data.cpp:24
 msgid ""
 "Select\n"
 "type"
 msgstr ""
-"Sel.\n"
-"tipo"
-
-#~ msgid ""
-#~ "Over-\n"
-#~ "ride"
-#~ msgstr "Rebase"
-
-#~ msgid ""
-#~ "Data\n"
-#~ "view"
-#~ msgstr "Datos"
-
-#~ msgid "Spec"
-#~ msgstr "Especial"

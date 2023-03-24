@@ -235,6 +235,14 @@ json build_field(std::string label, std::string value)
     j["Value"] = value;
     return j;
 }
+json build_data_view_window(std::string name, std::vector<json> fields)
+{
+    json def;
+    def["WindowType"] = "DataView";
+    def["WindowTitle"] = name;
+    def["Fields"] = fields;
+    return def;
+}
 json data_view_window()
 {
     json j = R"({"active":"data_view_window"})"_json;
@@ -260,21 +268,13 @@ json data_view_window()
             fields.push_back(build_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK)));
         }
     }
-    json def;
-    def["WindowType"] = "DataView";
-    def["WindowTitle"] = get_text("Data view");
-    def["Fields"] = fields;
-    j["WindowDefinition"] = def;
+    j["WindowDefinition"] = build_data_view_window(get_text("Data view"), fields);
     return j;
 }
 json system_version_window()
 {
     json j = R"({"active":"system_version_window"})"_json;
-    json def;
-    def["WindowType"] = "DataView";
-    def["WindowTitle"] = get_text("Data view");
-    def["Fields"] = {build_field(get_text("Operated system version"), std::to_string(VERSION_X(operated_version))+"."+std::to_string(VERSION_Y(operated_version)))};
-    j["WindowDefinition"] = def;
+    j["WindowDefinition"] = build_data_view_window(get_text("System version"), {build_field(get_text("Operated system version"), std::to_string(VERSION_X(operated_version))+"."+std::to_string(VERSION_Y(operated_version)))});
     return j;
 }
 static dialog_sequence prev_dialog;

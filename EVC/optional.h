@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#if __cplusplus >= 201703L
+//#if __cplusplus >= 201703L
 #include <optional>
 using std::optional;
-#else
+/*#else
 #include <initializer_list>
 template<class T>
 class optional
@@ -103,4 +103,4 @@ class optional
         return value;
     }
 };
-#endif
+#endif*/

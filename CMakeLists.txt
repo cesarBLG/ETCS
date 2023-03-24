@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.14)
 project (ETCS)
+set(CMAKE_CXX_STANDARD 17)
 if (WIN32)
     option(ETCS_VENDORED "Use vendored libraries" ON)
 elseif(ANDROID)

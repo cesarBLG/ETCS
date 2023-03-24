@@ -94,7 +94,7 @@ void ma_information::handle()
             for (int i=0; i<balises.N_ITER; i++) {
                 if (balises.elements[i].Q_NEWCOUNTRY)
                     NID_C = balises.elements[i].NID_C;
-                sh_balises->insert({NID_C, balises.elements[i].NID_BG});
+                sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
             set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
@@ -127,7 +127,7 @@ void ma_information_lv2::handle()
             for (int i=0; i<balises.N_ITER; i++) {
                 if (balises.elements[i].Q_NEWCOUNTRY)
                     NID_C = balises.elements[i].NID_C;
-                sh_balises->insert({NID_C, balises.elements[i].NID_BG});
+                sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
             set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
@@ -242,7 +242,7 @@ void SR_authorisation_info::handle()
             for (int i=0; i<balises.N_ITER; i++) {
                 if (balises.elements[i].Q_NEWCOUNTRY)
                     NID_C = balises.elements[i].NID_C;
-                sr_balises->insert({NID_C, balises.elements[i].NID_BG});
+                sr_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         }
     }
@@ -383,7 +383,7 @@ void ma_shortening_information::handle()
                 for (int i=0; i<balises.N_ITER; i++) {
                     if (balises.elements[i].Q_NEWCOUNTRY)
                         NID_C = balises.elements[i].NID_C;
-                    sh_balises->insert({NID_C, balises.elements[i].NID_BG});
+                    sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
                 }
             } else if (it->get()->NID_PACKET == 80) {
                 set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
@@ -417,7 +417,7 @@ void SH_authorisation_info::handle()
             for (int i=0; i<balises.N_ITER; i++) {
                 if (balises.elements[i].Q_NEWCOUNTRY)
                     NID_C = balises.elements[i].NID_C;
-                sh_balises->insert({NID_C, balises.elements[i].NID_BG});
+                sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         }
     }
@@ -443,7 +443,7 @@ void taf_level23_information::handle()
     if (supervising_rbc && supervising_rbc->status == session_status::Established) {
         auto &taf = *(TrackAheadFreeTransition*)linked_packets.front().get();
         auto *lti = new Level23TransitionInformation();
-        lti->NID_LTRBG.set_value(bg_id({taf.Q_NEWCOUNTRY ? taf.NID_C : nid_bg.NID_C, taf.NID_BG}));
+        lti->NID_LTRBG.set_value(bg_id({taf.Q_NEWCOUNTRY ? (int)taf.NID_C : (int)nid_bg.NID_C, (int)taf.NID_BG}));
         auto pack = std::shared_ptr<ETCS_packet>(lti);
         auto *req = new MA_request();
         fill_message(req);
@@ -478,7 +478,7 @@ void generic_ls_marker_information::handle()
 void lssma_display_on_information::handle()
 {
     auto *disp = (LSSMAToggleOrder*)linked_packets.front().get();
-    display_lssma_time = disp->T_LSSMA.rawdata + reevaluated ? get_milliseconds() : timestamp;
+    display_lssma_time = disp->T_LSSMA.rawdata + (reevaluated ? get_milliseconds() : timestamp);
 }
 void lssma_display_off_information::handle()
 {
