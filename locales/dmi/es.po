@@ -1,56 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-24 18:53+0100\n"
-"PO-Revision-Date: 2023-03-24 18:53+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: ETCS DMI\n"
+"Language: es\n"
 
-#: language/language.cpp:36 window/nav_buttons.cpp:29
-msgctxt "Navigation bar"
+#: window/menu_main.cpp:31 window/menu_radio.cpp:29
 msgid "Main"
-msgstr "Menú"
-
-#: language/language.cpp:37 window/nav_buttons.cpp:35
-#, fuzzy
-#| msgid ""
-#| "Over-\n"
-#| "ride"
-msgctxt "Navigation bar"
-msgid ""
-"Over-\n"
-"ride"
-msgstr "Rebase"
-
-#: language/language.cpp:38 window/nav_buttons.cpp:41
-#, fuzzy
-#| msgid ""
-#| "Data\n"
-#| "view"
-msgctxt "Navigation bar"
-msgid ""
-"Data\n"
-"view"
-msgstr "Datos"
-
-#: language/language.cpp:39 window/nav_buttons.cpp:47
-#, fuzzy
-#| msgid "Spec"
-msgctxt "Navigation bar"
-msgid "Spec"
-msgstr "Especial"
+msgstr "Principal"
 
 #: window/data_entry.cpp:25 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:82
@@ -61,31 +20,25 @@ msgstr "Sí"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " entrada completa?"
+msgstr " ¿Entrada completa?"
+
+#: window/keyboard.cpp:185 window/keyboard.cpp:189
+msgid "No"
+msgstr "No"
 
 #: window/driver_id.cpp:26
 msgid "TRN"
 msgstr "NTREN"
 
 #: window/fixed_train_data.cpp:26
-msgid ""
-"Enter\n"
+msgid "Enter\n"
 "data"
-msgstr ""
-"Int.\n"
+msgstr "Int.\n"
 "datos"
 
 #: window/keyboard.cpp:29 window/keyboard.cpp:72
 msgid "DEL"
-msgstr ""
-
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
-msgid "No"
-msgstr "No"
-
-#: window/menu_main.cpp:31 window/menu_radio.cpp:29
-msgid "Main"
-msgstr "Principal"
+msgstr "DEL"
 
 #: window/menu_main.cpp:33
 msgid "Start"
@@ -93,11 +46,11 @@ msgstr "Inicio"
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr "ID maquinista"
+msgstr "Datos Maquinista"
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr "Datos tren"
+msgstr "Datos Tren"
 
 #: window/menu_main.cpp:36
 msgid "Level"
@@ -126,14 +79,6 @@ msgstr "Mantener maniobra"
 #: window/menu_main.cpp:41
 msgid "Radio data"
 msgstr "Datos radio"
-
-#: window/menu_ntc.cpp:21
-msgid "NTC data entry"
-msgstr ""
-
-#: window/menu_ntc.cpp:31
-msgid "End of data entry"
-msgstr ""
 
 #: window/menu_override.cpp:22
 msgid "Override"
@@ -169,8 +114,7 @@ msgstr "Versión del sistema"
 
 #: window/menu_settings.cpp:27
 msgid "Set VBC"
-msgstr ""
-"Establecimiento\n"
+msgstr "Establecimiento\n"
 "VBC"
 
 #: window/menu_settings.cpp:28
@@ -194,22 +138,41 @@ msgid "Train integrity"
 msgstr "Integridad del tren"
 
 #: window/train_data.cpp:24
-msgid ""
-"Select\n"
+msgid "Select\n"
 "type"
-msgstr ""
-"Sel.\n"
+msgstr "Sel.\n"
 "tipo"
 
-#~ msgid ""
-#~ "Over-\n"
-#~ "ride"
-#~ msgstr "Rebase"
+#: language/language.cpp:36 window/nav_buttons.cpp:29
+msgctxt "Navigation bar"
+msgid "Main"
+msgstr "Menú"
 
-#~ msgid ""
-#~ "Data\n"
-#~ "view"
-#~ msgstr "Datos"
+#: language/language.cpp:37 window/nav_buttons.cpp:35
+#, fuzzy
+msgctxt "Navigation bar"
+msgid "Over-\n"
+"ride"
+msgstr "Rebase"
 
-#~ msgid "Spec"
-#~ msgstr "Especial"
+#: language/language.cpp:38 window/nav_buttons.cpp:41
+#, fuzzy
+msgctxt "Navigation bar"
+msgid "Data\n"
+"view"
+msgstr "Datos"
+
+#: language/language.cpp:39 window/nav_buttons.cpp:47
+#, fuzzy
+msgctxt "Navigation bar"
+msgid "Spec"
+msgstr "Especial"
+
+#: window/menu_ntc.cpp:21
+msgid "NTC data entry"
+msgstr "Entrada de datos NTC"
+
+#: window/menu_ntc.cpp:31
+msgid "End of data entry"
+msgstr "Fin de la entrada de datos"
+

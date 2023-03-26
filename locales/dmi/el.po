@@ -7,49 +7,30 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: el\n"
 
-#: language/language.cpp:26 window/menu_main.cpp:31 window/menu_radio.cpp:29
-#: window/nav_buttons.cpp:32
+#: window/menu_main.cpp:31 window/menu_radio.cpp:29
 msgid "Main"
-msgstr "Μενού"
+msgstr "Κύριο μενού"
 
-#: language/language.cpp:27 window/nav_buttons.cpp:38
-msgid "Over-\n"
-"ride"
-msgstr "υπερβαίνω"
-
-#: language/language.cpp:28 window/nav_buttons.cpp:44
-msgid "Data\n"
-"view"
-msgstr "Δεδομένα"
-
-#: language/language.cpp:29 window/nav_buttons.cpp:50
-msgid "Spec"
-msgstr "Ειδικός"
-
-#: window/data_entry.cpp:24 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:34
-#: window/data_validation.h:88 window/keyboard.cpp:186 window/keyboard.cpp:193
+#: window/data_entry.cpp:25 window/data_validation.cpp:11
+#: window/data_validation.h:28 window/data_validation.h:82
+#: window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr "ναι"
+msgstr "Vαι"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
 msgstr " πλήρης είσοδος;"
 
-#: window/data_validation.h:34 window/keyboard.cpp:185 window/keyboard.cpp:189
+#: window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
 msgstr "Οχι"
-
-#: window/data_view.h:39
-msgid "Data view"
-msgstr "Δείτε στοιχεία"
 
 #: window/driver_id.cpp:26
 msgid "TRN"
 msgstr "NTRAIN"
 
-#: window/fixed_train_data.cpp:27
+#: window/fixed_train_data.cpp:26
 msgid "Enter\n"
 "data"
 msgstr "Int.\n"
@@ -131,11 +112,11 @@ msgstr "Ρυθμίσεις"
 msgid "System version"
 msgstr "έκδοση συστήματος"
 
-#: window/menu_settings.cpp:27 window/set_vbc.cpp:21
+#: window/menu_settings.cpp:27
 msgid "Set VBC"
 msgstr "Προσθήκη VBC"
 
-#: window/menu_settings.cpp:28 window/set_vbc.cpp:27
+#: window/menu_settings.cpp:28
 msgid "Remove VBC"
 msgstr "Αφαιρέστε το VBC"
 
@@ -155,37 +136,41 @@ msgstr "SR Ταχύτητα/Απόσταση"
 msgid "Train integrity"
 msgstr "ακεραιότητα του τρένου"
 
-#: window/set_vbc.cpp:23 window/set_vbc.cpp:29
-msgid "VBC code"
-msgstr "Κωδικός VBC"
-
 #: window/train_data.cpp:24
 msgid "Select\n"
 "type"
 msgstr "Sel.\n"
 "ο τύπος"
 
-#: window/train_data.cpp:26
-msgid "Length (m)"
-msgstr "Μήκος (m)"
+#: language/language.cpp:36 window/nav_buttons.cpp:29
+msgctxt "Navigation bar"
+msgid "Main"
+msgstr "Μενού"
 
-#: window/train_data.cpp:27
-msgid "Brake percentage"
-msgstr "ποσοστό φρένων"
+#: language/language.cpp:37 window/nav_buttons.cpp:35
+msgctxt "Navigation bar"
+msgid "Over-\n"
+"ride"
+msgstr "κατα-\n"
+"πατώ"
 
-#: window/train_data.cpp:28
-msgid "Max speed (km/h)"
-msgstr "Ταχύτητα μέγιστο (km/h)"
+#: language/language.cpp:38 window/nav_buttons.cpp:41
+msgctxt "Navigation bar"
+msgid "Data\n"
+"view"
+msgstr "Δεδο-\n"
+"μένα"
 
-#: window/train_data.cpp:29
-msgid "Loading gauge"
-msgstr "Μετρητής"
+#: language/language.cpp:39 window/nav_buttons.cpp:47
+msgctxt "Navigation bar"
+msgid "Spec"
+msgstr "Ειδικός"
 
-#: window/train_data.cpp:30
-msgid "Train category"
-msgstr "Είδος τρένου"
+#: window/menu_ntc.cpp:21
+msgid "NTC data entry"
+msgstr "Εισαγωγή δεδομένων NTC"
 
-#: window/train_data.cpp:31
-msgid "Axle load category"
-msgstr "φορτίο άξονα"
+#: window/menu_ntc.cpp:31
+msgid "End of data entry"
+msgstr "Τέλος εισαγωγής δεδομένων"
 
