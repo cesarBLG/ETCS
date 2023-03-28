@@ -174,5 +174,5 @@ msgstr "Entrada de datos NTC"
 
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
-msgstr "Fin de la entrada de datos"
+msgstr "Fin entrada datos"
 
