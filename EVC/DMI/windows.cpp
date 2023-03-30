@@ -21,6 +21,7 @@ bool pending_train_data_send = false;
 bool any_button_pressed_async = false;
 bool any_button_pressed = false;
 bool flexible_data_entry = false;
+int data_entry_type = 0;
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
     json j;
@@ -145,9 +146,9 @@ json fixed_train_data_window()
 
 #ifdef __ANDROID__
     extern std::string filesDir;
-    std::ifstream file(filesDir+"/traindata.txt");
+    std::ifstream file(filesDir+"/"+traindata_file);
 #else
-    std::ifstream file("traindata.txt");
+    std::ifstream file(traindata_file);
 #endif
     json j2;
     file >> j2;
@@ -156,6 +157,7 @@ json fixed_train_data_window()
         types.push_back(it.key());
     }
     j["WindowDefinition"] = build_input_window(get_text("Train data"), {build_input_field(get_text("Train type"), special_train_data, types)});
+    j["Switchable"] = data_entry_type == 2;
     return j;
 }
 json train_data_window()
@@ -171,6 +173,7 @@ json train_data_window()
         get_text("FP 1"),get_text("FP2"),get_text("FP 3"),get_text("FP 4"),get_text("FG 1"),get_text("FG 2"),get_text("FG 3"),get_text("FG 4")}));
     inputs.push_back(build_input_field(get_text("Axle load category"), "", {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
     j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
+    j["Switchable"] = data_entry_type == 2;
     return j;
 }
 json ntc_menu(bool hourglass)
@@ -195,10 +198,16 @@ json ntc_data_window()
                 else
                     inputs.push_back(build_input_field(field.caption, field.value, field.keys));
             }
-            j["WindowDefinition"] = build_input_window(get_ntc_name(kvp.first)+" data", inputs);
+            j["WindowDefinition"] = build_input_window(get_ntc_name(kvp.first)+get_text(" data"), inputs);
             return j;
         }
     }
+}
+json adhesion_window()
+{
+    json j = R"({"active":"adhesion_window"})"_json;
+    j["WindowDefinition"] = build_input_window(get_text("Adhesion"), {build_input_field("", "", {get_text("Non slippery rail"), get_text("Slippery rail")})});
+    return j;
 }
 json sr_data_window()
 {
@@ -219,13 +228,13 @@ json language_window()
 json set_vbc_window()
 {
     json j = R"({"active":"set_vbc_window"})"_json;
-    j["WindowDefinition"] = build_input_window(get_text("Set VBC"), {build_numeric_field("VBC code", "")});
+    j["WindowDefinition"] = build_input_window(get_text("Set VBC"), {build_numeric_field(get_text("VBC code"), "")});
     return j;
 }
 json remove_vbc_window()
 {
     json j = R"({"active":"remove_vbc_window"})"_json;
-    j["WindowDefinition"] = build_input_window(get_text("Remove VBC"), {build_numeric_field("VBC code", "")});
+    j["WindowDefinition"] = build_input_window(get_text("Remove VBC"), {build_numeric_field(get_text("VBC code"), "")});
     return j;
 }
 json build_field(std::string label, std::string value)
@@ -395,6 +404,10 @@ void update_dmi_windows()
                 active_window_dmi = driver_id_window(false);
         } else if (active_dialog_step == "S3-1") {
             if (changed) {
+                if (data_entry_type == 0)
+                    flexible_data_entry = true;
+                else if (data_entry_type == 1)
+                    flexible_data_entry = false;
                 if (flexible_data_entry)
                     active_window_dmi = train_data_window();
                 else
@@ -527,7 +540,7 @@ void update_dmi_windows()
             bool needsdata = false;
             for (auto &kvp : installed_stms) {
                 auto *stm = kvp.second;
-                if (stm->specific_data_need > 0) {
+                if (stm->specific_data_need > 0 && (stm->state == stm_state::CO || stm->state == stm_state::DE || stm->state == stm_state::CS || stm->state == stm_state::HS || stm->state == stm_state::DA)) {
                     needsdata = true;
                     break;
                 }
@@ -585,7 +598,7 @@ void update_dmi_windows()
                 active_window_dmi = R"({"active":"menu_spec"})"_json;
         } else if (active_dialog_step == "S2") {
             if (changed)
-                active_window_dmi = R"({"active":"adhesion_window"})"_json;
+                active_window_dmi = adhesion_window();
         } else if (active_dialog_step == "S3") {
             if (changed)
                 active_window_dmi = sr_data_window();
@@ -907,6 +920,9 @@ void validate_data_entry(std::string name, json &result)
             recalculate_MRSP();
         }
         active_dialog_step = "S1";
+    } else if (name == get_text("Adhesion")) {
+        slippery_rail_driver = result[""] == get_text("Slippery rail");
+        active_dialog_step = "S1";
     } else if (name == get_text("Set VBC")) {
         active_dialog_step = "S6-2";
         json j = R"({"active":"set_vbc_validation_window"})"_json;
@@ -937,6 +953,7 @@ void validate_data_entry(std::string name, json &result)
             }
             return;
         } else {
+            std::string t = get_text("VBC code");
             uint32_t num = stoi(result[get_text("VBC code")].get<std::string>());
             set_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
@@ -961,16 +978,16 @@ void validate_data_entry(std::string name, json &result)
         for (auto &kvp : installed_stms) {
             auto *stm = kvp.second;
             if (stm->data_entry == stm_object::data_entry_state::Driver) {
-                if ((name == get_ntc_name(kvp.first)+" data")) {
+                if ((name == get_ntc_name(kvp.first)+get_text(" data"))) {
                     active_dialog_step = "S3-2";
                     json j = R"({"active":"ntc_data_validation_window"})"_json;
                     json def;
                     def["WindowType"] = "DataValidation";
-                    def["WindowTitle"] = "Validate "+get_ntc_name(kvp.first)+" data";
+                    def["WindowTitle"] = get_text("Validate ")+get_ntc_name(kvp.first)+get_text(" data");
                     def["DataInputResult"] = result;
                     j["WindowDefinition"] = def;
                     active_window_dmi = j;
-                } else if ((name == "Validate "+get_ntc_name(kvp.first)+" data")) {
+                } else if ((name == get_text("Validate ")+get_ntc_name(kvp.first)+get_text(" data"))) {
                     if (!result["Validated"]) {
                         prev_step = active_dialog_step = "S3-1";
                         active_window_dmi = ntc_data_window();
@@ -1084,11 +1101,15 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "TrainData") {
             active_dialog_step = "S3-1";
         } else if (step == "SelectType") {
-            flexible_data_entry = false;
-            active_window_dmi = fixed_train_data_window();
+            if (data_entry_type == 2) {
+                flexible_data_entry = false;
+                active_window_dmi = fixed_train_data_window();
+            }
         } else if (step == "EnterData") {
-            flexible_data_entry = true;
-            active_window_dmi = train_data_window();
+            if (data_entry_type == 2) {
+                flexible_data_entry = true;
+                active_window_dmi = train_data_window();
+            }
         } else if (step == "Shunting") {
             if (V_est == 0 && mode == Mode::SH) {
                 trigger_condition(19);
@@ -1157,7 +1178,7 @@ void update_dialog_step(std::string step, std::string step2)
         }
     } else if (active_dialog == dialog_sequence::Special) {
         if (step == "Adhesion") {
-            //active_dialog_step = "S2";
+            active_dialog_step = "S2";
         } else if (step == "SRspeed") {
             active_dialog_step = "S3";
         } else if (step == "TrainIntegrity") {

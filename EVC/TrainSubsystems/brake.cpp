@@ -18,6 +18,7 @@
 #include <functional>
 #include <list>
 #include <algorithm>
+#include "train_interface.h"
 #include "../Time/clock.h"
 #include "brake.h"
 #include "../Procedures/stored_information.h"
@@ -26,8 +27,6 @@
 #include "../language/language.h"
 extern bool SB;
 extern bool EB;
-bool SB_commanded;
-bool EB_commanded;
 bool brake_acknowledgeable;
 bool brake_acknowledged;
 std::list<brake_command_information> brake_conditions;
@@ -112,26 +111,32 @@ static bool prevEB;
 static bool prevSB;
 void handle_brake_command()
 {
+    if (mode == Mode::IS)
+    {
+        EB_command = SB_command = false;
+        brake_conditions.clear();
+        return;
+    }
     for (auto it = brake_conditions.begin(); it!=brake_conditions.end();) {
         if (it->revoke(*it))
             it = brake_conditions.erase(it);
         else
             ++it;
     }
-    SB_commanded = !brake_conditions.empty();
-    SB_commanded |= SB;
-    EB_commanded = EB;
-    EB_commanded |= stm_control_EB;
+    SB_command = !brake_conditions.empty();
+    SB_command |= SB;
+    EB_command = EB;
+    EB_command |= stm_control_EB;
     if (mode == Mode::SN) {
         for (auto kvp : installed_stms) {
             auto *stm = kvp.second;
             if (stm->active()) {
-                SB_commanded |= stm->commands.SB;
-                EB_commanded |= stm->commands.EB;
+                SB_command |= stm->commands.SB;
+                EB_command |= stm->commands.EB;
             }
         }
     }
-    if ((prevEB || prevSB) && !EB_commanded && !SB_commanded) send_command("playSinfo","");
-    prevEB = EB_commanded;
-    prevSB = SB_commanded;
+    if ((prevEB || prevSB) && !EB_command && !SB_command) send_command("playSinfo","");
+    prevEB = EB_command;
+    prevSB = SB_command;
 }

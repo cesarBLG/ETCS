@@ -10,6 +10,8 @@
 #include "43.h"
 #include "46.h"
 #include "128.h"
+#include "129.h"
+#include "130.h"
 #include "175.h"
 #include "179.h"
 #include "181.h"
@@ -33,6 +35,8 @@ ETCS_packet *construct_stm_packet(bit_manipulator &r)
         case 43: p = new STMSupervisionInformation(); break;
         case 46: p = new STMSoundCommand(); break;
         case 128: p = new STMBrakeCommand(); break;
+        case 129: p = new STMSpecificBrakeCommand(); break;
+        case 130: p = new STMTrainCommand(); break;
         case 175: p = new STMTrainData(); break;
         case 179: p = new STMSpecificDataEntryRequest(); break;
         case 181: p = new STMSpecificDataNeed(); break;

@@ -239,7 +239,7 @@ text_graphic* Component::getText(string text, float x, float y, float size, Colo
     t->alignment = align;
     t->aspect = aspect;
     int v = text.find('\n');
-    t->tex = getTextGraphic(text, size, col, aspect);
+    t->tex = getTextGraphic(text, size, col, aspect, align);
     float sx = t->tex == nullptr ? 0 : getAntiScale(t->tex->width);
     float sy = t->tex == nullptr ? 0 : getAntiScale(t->tex->height);
     if (align & UP) y = y + sy / 2;
@@ -254,10 +254,11 @@ text_graphic* Component::getText(string text, float x, float y, float size, Colo
     t->height = sy;
     return t;
 }
-std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, Color col, int aspect)
+std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
     if (text == "") return nullptr;
     TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
+    TTF_SetFontWrappedAlign(font, align == CENTER ? TTF_WRAPPED_ALIGN_CENTER : (align == RIGHT ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
     if (font == nullptr) return nullptr;
     //if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
     SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};

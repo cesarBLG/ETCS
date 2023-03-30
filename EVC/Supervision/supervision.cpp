@@ -27,6 +27,7 @@
 #include "supervision.h"
 #include "../antenna.h"
 #include "../TrainSubsystems/brake.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "../TrainSubsystems/power.h"
 #include <iostream>
 #include <cmath>
@@ -391,7 +392,9 @@ void update_supervision()
                 }
             }
         }
-        if (indication_target != nullptr && A_NVMAXREDADH1 == -1) {
+        bool slip = slippery_rail_driver;
+        double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP == 3 ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;      
+        if (indication_target != nullptr && A_MAXREDADH == -1) {
             V_target = indication_target->get_target_speed();
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {
                 D_target = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
@@ -400,7 +403,7 @@ void update_supervision()
                 D_target = std::max(indication_target->d_P-d_maxsafefront(indication_target->get_target_position()), 0.0);
             }
         }
-        if (indication_target != nullptr && A_NVMAXREDADH1 == -2 && V_est != 0) {
+        if (indication_target != nullptr && A_MAXREDADH == -2 && V_est != 0) {
             TTI = indication_distance / V_est;
         } else {
             TTI = 20;

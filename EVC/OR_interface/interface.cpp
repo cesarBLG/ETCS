@@ -27,7 +27,9 @@
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
 #include "../TrainSubsystems/power.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "../STM/stm.h"
+#include "../Config/config.h"
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -44,8 +46,8 @@ extern std::condition_variable evc_cv;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
-extern bool EB_commanded;
-extern bool SB_commanded;
+extern bool EB_command;
+extern bool SB_command;
 extern bool desk_open;
 extern bool sleep_signal;
 double or_dist;
@@ -92,8 +94,14 @@ void SetParameters()
 
     p = new Parameter("master_key");
     p->SetValue = [](string val) {
-        desk_open = val == "1";
-        sleep_signal = !desk_open;
+        cab_active[0] = cab_active[1] = false;
+        if (val == "1") {
+            if (current_odometer_orientation == 1)
+                cab_active[0] = true;
+            else
+                cab_active[1] = true;
+        }
+        sl_signal = !cab_active[0] && !cab_active[1];
     };
     manager.AddParameter(p);
 
@@ -125,13 +133,13 @@ void SetParameters()
 
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {
-        return EB_commanded ? "true" : "false";
+        return EB_command ? "true" : "false";
     };
     manager.AddParameter(p);
 
     p = new Parameter("etcs::fullbrake");
     p->GetValue = []() {
-        return SB_commanded ? "true" : "false";
+        return SB_command ? "true" : "false";
     };
     manager.AddParameter(p);
 
@@ -242,6 +250,26 @@ void SetParameters()
         send_command("stmData", val);
     };
     manager.AddParameter(p);
+
+    p = new Parameter("stm::lzb::isolated");
+    p->SetValue = [](std::string val) {
+        auto it = installed_stms.find(10);
+        if (it != installed_stms.end())
+            it->second->isolated = val == "1";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::isolated");
+    p->SetValue = [](std::string val) {
+        isolated = val == "1";
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("serie");
+    p->SetValue = [](std::string val) {
+        load_config(val);
+    };
+    manager.AddParameter(p);
 }
 void register_parameter(string parameter)
 {
@@ -290,6 +318,9 @@ void start_or_iface()
     s_client->WriteLine("register(controller::direction)");
     s_client->WriteLine("register(train_orientation)");
     s_client->WriteLine("register(stm::command)");
+    s_client->WriteLine("register(stm::+::isolated)");
+    s_client->WriteLine("register(etcs::isolated)");
+    s_client->WriteLine("register(serie)");
     SetParameters();
     thread t(polling);
     t.detach();

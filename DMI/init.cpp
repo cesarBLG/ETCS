@@ -182,9 +182,6 @@ int main(int argc, char** argv)
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
-    extern int etcsDialMaxSpeed;
-    std::ifstream file("speed.txt");
-    file>>etcsDialMaxSpeed;
     startSocket();
     init_video();
     void startWindows();

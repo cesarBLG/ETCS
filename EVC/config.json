@@ -1,0 +1,82 @@
+ {
+    "465": {
+        "TrainData": "TrainData/traindata_465.json",
+        "SpeedDial": 150,
+        "STMLayout": "stm_siemens.json"
+    },
+	"450": {
+        "TrainData": "TrainData/traindata_450.json",
+        "SpeedDial": 160,
+        "STMLayout": "stm_siemens.json"
+    },
+	"447": {
+        "TrainData": "TrainData/traindata_447.json",
+        "SpeedDial": 140,
+        "STMLayout": "stm_siemens.json"
+    },
+	"446": {
+        "TrainData": "TrainData/traindata_446.json",
+        "SpeedDial": 120,
+        "STMLayout": "stm_siemens.json"
+    },
+	"449": {
+        "TrainData": "TrainData/traindata_449.json",
+        "SpeedDial": 180,
+        "STMLayout": "stm_siemens.json"
+    },
+	"490": {
+        "TrainData": "TrainData/traindata_490.json",
+        "SpeedDial": 180,
+        "STMLayout": "stm_siemens.json"
+    },
+	"104": {
+        "TrainData": "TrainData/traindata_104.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"114": {
+        "TrainData": "TrainData/traindata_114.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"130": {
+        "TrainData": "TrainData/traindata_130.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_bombardier.json"
+    },
+	"112": {
+        "TrainData": "TrainData/traindata_112.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"102": {
+        "TrainData": "TrainData/traindata_102.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"103": {
+        "TrainData": "TrainData/traindata_103.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"108": {
+        "TrainData": "TrainData/traindata_108.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"109": {
+        "TrainData": "TrainData/traindata_109.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+	"454": {
+        "TrainData": "TrainData/traindata_454.json",
+        "SpeedDial": 180,
+        "STMLayout": "stm_siemens.json"
+    },
+	"100": {
+        "TrainData": "TrainData/traindata_100.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    }
+ }

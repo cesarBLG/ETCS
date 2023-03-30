@@ -41,6 +41,7 @@
 #include "../STM/stm_objects.h"
 #include "../language/language.h"
 #include "../speed/gauge.h"
+#include "../Config/config.h"
 #include <mutex>
 int server;
 int clients[3];
@@ -231,6 +232,10 @@ void parseData(std::string str)
     else if (command == "language")
     {
         set_language(value);
+    }
+    else if (command == "setSerie")
+    {
+        load_config(value);
     }
     if (command != "json") return;
     json j = json::parse(value);

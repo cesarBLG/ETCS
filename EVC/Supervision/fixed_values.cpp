@@ -38,8 +38,8 @@ const double T_driver = 4;
 const double T_horn = 4;
 const double T_delete_condition = 5;
 
-const double M_rotating_max = 0.15;
-const double M_rotating_min = 0.02;
+const int M_rotating_max = 15;
+const int M_rotating_min = 2;
 
 const double T_CYCRQSTD = 60;
 const double T_ACK = 5;

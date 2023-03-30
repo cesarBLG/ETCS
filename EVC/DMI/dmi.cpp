@@ -103,8 +103,8 @@ extern double V_sbi;
 extern double D_target;
 extern double TTI;
 extern double TTP;
-extern bool EB_commanded;
-extern bool SB_commanded;
+extern bool EB_command;
+extern bool SB_command;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
 #ifdef WIN32
@@ -261,7 +261,7 @@ void dmi_comm()
         }
         j["OverrideActive"] = overrideProcedure;
         j["RadioStatus"] = (int)radio_status_driver;
-        j["BrakeCommanded"] = EB_commanded || SB_commanded;
+        j["BrakeCommanded"] = EB_command || SB_command;
         j["BrakeAcknowledge"] = brake_acknowledgeable;
         if (valid_geo_reference) j["GeographicalPositionKM"] = valid_geo_reference->get_position(d_estfront);
         else j["GeographicalPositionKM"]=nullptr;

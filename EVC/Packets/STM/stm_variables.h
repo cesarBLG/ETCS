@@ -109,6 +109,70 @@ struct M_BISB_CMD_t : ETCS_variable
     static const uint32_t NoChange=3;
     M_BISB_CMD_t() : ETCS_variable(2) {}
 };
+struct M_TIPANTO_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t PantoLift=1;
+    static const uint32_t PantoLower=2;
+    static const uint32_t NoChange=3;
+    M_TIPANTO_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIFLAP_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t FlatOpen=1;
+    static const uint32_t FlatClose=2;
+    static const uint32_t NoChange=3;
+    M_TIFLAP_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIMS_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t MainSwitchClose=1;
+    static const uint32_t MainSwitchOpen=2;
+    static const uint32_t NoChange=3;
+    M_TIMS_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TITR_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t TCO=1;
+    static const uint32_t NoTCO=2;
+    static const uint32_t NoChange=3;
+    M_TITR_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIRB_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t AllowRegenerative=1;
+    static const uint32_t SupressRegenerative=2;
+    static const uint32_t NoChange=3;
+    M_TIRB_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIMSH_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t AllowMagnetic=1;
+    static const uint32_t SupressMagnetic=2;
+    static const uint32_t NoChange=3;
+    M_TIMSH_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIEDCBEB_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t AllowEddyEB=1;
+    static const uint32_t SupressEddyEB=2;
+    static const uint32_t NoChange=3;
+    M_TIEDCBEB_CMD_t() : ETCS_variable(2) {}
+};
+struct M_TIEDCBSB_CMD_t : ETCS_variable
+{
+    static const uint32_t Reserved=0;
+    static const uint32_t AllowEddySB=1;
+    static const uint32_t SupressEddySB=2;
+    static const uint32_t NoChange=3;
+    M_TIEDCBSB_CMD_t() : ETCS_variable(2) {}
+};
 struct M_COLOUR_t : ETCS_variable
 {
     M_COLOUR_t() : ETCS_variable(3)

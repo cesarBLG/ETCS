@@ -7,18 +7,18 @@
 #include "../Position/linking.h"
 #include "../Packets/radio.h"
 #include "stored_information.h"
+#include "../TrainSubsystems/train_interface.h"
 som_step som_status = S0;
 som_step prev_status = S0;
 bool som_active;
 bool ongoing_mission;
-extern bool desk_open;
 bool status_changed;
 void update_SoM()
 {
     som_step save_status = som_status;
-    if (som_active && !desk_open)
+    if (som_active && !cab_active[0] && !cab_active[1])
         desk_closed_som();
-    if (mode != Mode::SB || !desk_open) {
+    if (mode != Mode::SB || !cab_active[0] && !cab_active[1]) {
         som_active = false;
         som_status = S0;
     } else {
@@ -27,7 +27,7 @@ void update_SoM()
     switch (som_status) {
         case S0:
             if (som_active) {
-                if (mode == Mode::SB && desk_open && (!supervising_rbc || (supervising_rbc->status != session_status::Establishing && supervising_rbc->status != session_status::Established)))
+                if (mode == Mode::SB && (cab_active[0]^cab_active[1]) && (!supervising_rbc || (supervising_rbc->status != session_status::Establishing && supervising_rbc->status != session_status::Established)))
                     som_status = S1;
                 active_dialog = dialog_sequence::StartUp;
                 active_dialog_step = "S0";

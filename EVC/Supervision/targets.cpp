@@ -23,9 +23,10 @@
 #include "national_values.h"
 #include "fixed_values.h"
 #include "train_data.h"
+#include "track_pbd.h"
 #include "../TrackConditions/track_condition.h"
 #include "../MA/movement_authority.h"
-#include "track_pbd.h"
+#include "../TrainSubsystems/train_interface.h"
 #include <set>
 std::list<PBD_target> PBDs;
 target::target() : is_valid(false), type(target_class::MRSP) {};
@@ -245,7 +246,7 @@ void target::calculate_decelerations()
 }
 void target::calculate_decelerations(const std::map<distance,double> &gradient)
 {
-    std::map<distance,bool> redadh = std::map<distance,bool>();
+    std::map<distance,bool> redadh;
     redadh[distance(std::numeric_limits<double>::lowest(), 0, 0)] = false;
     acceleration A_gradient = get_A_gradient(gradient, default_gradient);
     acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
@@ -277,9 +278,8 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
         A_safe.dist_step.insert(it->first);
     for (auto &d : A_safe.dist_step) {
         for (auto &V : A_safe.speed_step) {
-            bool slip = (--redadh.upper_bound(d))->second/* || driver_slippery_rail*/;
-            int brake = 1;
-            double A_MAXREDADH = (brake == 3 ? A_NVMAXREDADH3 : (brake == 2 ? A_NVMAXREDADH2 : A_NVMAXREDADH1));
+            bool slip = (--redadh.upper_bound(d))->second || slippery_rail_driver;
+            double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP == 3 ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;
             if (!slip || A_MAXREDADH < 0)
                 A_MAXREDADH = std::numeric_limits<double>::max();
             A_safe.accelerations[d][V] =  std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d);

@@ -12,6 +12,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             planning/planning.cpp control/control.cpp state/gps_pos.cpp 
             graphics/sdl/gfx_primitives.cpp language/language.cpp
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
+            Config/config.cpp
 )
 
 if(WIN32)

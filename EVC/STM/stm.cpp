@@ -9,6 +9,8 @@
 #include "../Packets/STM/14.h"
 #include "../Packets/STM/15.h"
 #include "../Packets/STM/128.h"
+#include "../Packets/STM/129.h"
+#include "../Packets/STM/130.h"
 #include "../Packets/STM/175.h"
 #include "../Packets/STM/179.h"
 #include "../Packets/STM/180.h"
@@ -16,6 +18,7 @@
 #include "../Packets/STM/184.h"
 #include "../language/language.h"
 #include "../DMI/windows.h"
+#include "../TrainSubsystems/train_interface.h"
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
@@ -99,7 +102,7 @@ stm_object::stm_object()
         }
         return false;
     };
-    conditions["H4a"] = []{return mode == Mode::SB && !desk_open;};
+    conditions["H4a"] = []{return mode == Mode::SB && !cab_active[0] && !cab_active[1];};
     conditions["I4a"] = []{return mode == Mode::SH;};
     conditions["L4a"] = []{return mode == Mode::TR;};
     conditions["A6"] = [this]{
@@ -116,7 +119,7 @@ stm_object::stm_object()
         return false;
     };
     conditions["B6"] = [this]{
-        if (mode == Mode::SB && desk_open && state == stm_state::CS && level == Level::NTC && level_valid) {
+        if (mode == Mode::SB && (cab_active[0]^cab_active[1]) && state == stm_state::CS && level == Level::NTC && level_valid) {
             for (auto kvp : installed_stms) {
                 auto *stm = kvp.second;
                 if (stm != this && stm->state == stm_state::HS)
@@ -139,6 +142,7 @@ stm_object::stm_object()
         }
         return false;
     };
+    conditions["A15"] = [this] {return isolated;};
     conditions["C16"] = [this] {return last_order && *last_order != stm_state::DA && *last_order != stm_state::CCS && get_milliseconds() - last_order_time > 10000;};
     conditions["D16"] = [this] {return last_order && *last_order == stm_state::DA && get_milliseconds() - last_order_time > 5000;};
     conditions["E16"] = [this] {return last_order && *last_order == stm_state::CCS && !national_trip && get_milliseconds() - last_order_time > 5000;};
@@ -338,6 +342,9 @@ void stm_object::report_received(stm_state newstate)
         STM_max_speed = {};
         recalculate_MRSP();
     }
+    if (state != newstate && newstate != stm_state::DA) {
+        commands = stm_commands();
+    }
     state = newstate;
     if (last_order && (*last_order == state || (*last_order == stm_state::CCS && state == stm_state::CS)))
         last_order = {};
@@ -536,7 +543,45 @@ void stm_object::send_specific_data(json &result)
 void setup_stm_control()
 {
     ntc_names[0] = "ASFA";
-    ntc_names[10] = "LZB";
+    ntc_names[1] = "ATB";
+    ntc_names[2] = "ASFA AVE";
+    ntc_names[3] = "LZB (C)";
+    ntc_names[5] = "TBL 1";
+    ntc_names[6] = "PZB 90";
+    ntc_names[7] = "TBL 2/3";
+    ntc_names[8] = "KVB";
+    ntc_names[9] = "LZB";
+    ntc_names[10] = "LZB (E)";
+    ntc_names[11] = "SCMT";
+    ntc_names[12] = "MEMOR II+";
+    ntc_names[14] = "TVM";
+    ntc_names[15] = "BACC";
+    ntc_names[16] = "RSDD";
+    ntc_names[17] = "EVM";
+    ntc_names[18] = "Crocodile";
+    ntc_names[19] = "EBICAB 900";
+    ntc_names[20] = "TPWS/AWS";
+    ntc_names[21] = "TPWS/AWS (SA)";
+    ntc_names[22] = "ATC2";
+    ntc_names[23] = "EBICAB 900";
+    ntc_names[24] = "EBICAB 900 (PL)";
+    ntc_names[25] = "KNR ATS";
+    ntc_names[26] = "SHP";
+    ntc_names[27] = "INDUSI I 60";
+    ntc_names[28] = "TBL1+";
+    ntc_names[29] = "NExTEO";
+    ntc_names[30] = "ZUB 123";
+    ntc_names[32] = "RPS";
+    ntc_names[33] = "LS";
+    ntc_names[34] = "EBICAB 700 (P)";
+    ntc_names[35] = "SELCAB";
+    ntc_names[36] = "INDUSI I 60";
+    ntc_names[37] = "TBL";
+    ntc_names[39] = "ALSN";
+    ntc_names[40] = "EBICAB";
+    ntc_names[45] = "CTCS-2";
+    ntc_names[46] = "EBICAB 700";
+    ntc_names[50] = "TGMT";
     fill_stm_transitions();
 }
 void handle_stm_message(const stm_message &msg)
@@ -571,6 +616,48 @@ void handle_stm_message(const stm_message &msg)
                     stm->commands.SB = emerg.M_BISB_CMD != M_BISB_CMD_t::ReleaseSB;
                     stm->commands.EB_on_SB_failure = emerg.M_BISB_CMD == M_BISB_CMD_t::ApplySBorEB;
                 }
+                break;
+            }
+            case 129:
+            {
+                auto &ti = *((STMSpecificBrakeCommand*)pack.get());
+                if (ti.M_TIRB_CMD == M_TIRB_CMD_t::AllowRegenerative)
+                    stm->commands.regenerative_brake_inhibition = false;
+                else if (ti.M_TIRB_CMD == M_TIRB_CMD_t::SupressRegenerative)
+                    stm->commands.regenerative_brake_inhibition = true;
+                if (ti.M_TIMSH_CMD == M_TIMSH_CMD_t::AllowMagnetic)
+                    stm->commands.magnetic_shoe_inhibition = false;
+                else if (ti.M_TIMSH_CMD == M_TIMSH_CMD_t::SupressMagnetic)
+                    stm->commands.magnetic_shoe_inhibition = true;
+                if (ti.M_TIEDCBEB_CMD == M_TIEDCBEB_CMD_t::AllowEddyEB)
+                    stm->commands.eddy_emergency_brake_inhibition = false;
+                else if (ti.M_TIEDCBEB_CMD == M_TIEDCBEB_CMD_t::SupressEddyEB)
+                    stm->commands.eddy_emergency_brake_inhibition = true;
+                if (ti.M_TIEDCBSB_CMD == M_TIEDCBSB_CMD_t::AllowEddySB)
+                    stm->commands.eddy_service_brake_inhibition = false;
+                else if (ti.M_TIEDCBSB_CMD == M_TIEDCBSB_CMD_t::SupressEddySB)
+                    stm->commands.eddy_service_brake_inhibition = true;
+                break;
+            }
+            case 130:
+            {
+                auto &ti = *((STMTrainCommand*)pack.get());
+                if (ti.M_TIPANTO_CMD == M_TIPANTO_CMD_t::PantoLift)
+                    stm->commands.lower_pantograph = false;
+                else if (ti.M_TIPANTO_CMD == M_TIPANTO_CMD_t::PantoLower)
+                    stm->commands.lower_pantograph = true;
+                if (ti.M_TIFLAP_CMD == M_TIFLAP_CMD_t::FlatClose)
+                    stm->commands.close_air_intake = true;
+                else if (ti.M_TIFLAP_CMD == M_TIFLAP_CMD_t::FlatOpen)
+                    stm->commands.close_air_intake = true;
+                if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
+                    stm->commands.open_circuit_breaker = true;
+                else if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
+                    stm->commands.open_circuit_breaker = false;
+                if (ti.M_TITR_CMD == M_TITR_CMD_t::TCO)
+                    stm->commands.TCO = true;
+                else if (ti.M_TITR_CMD == M_TITR_CMD_t::NoTCO)
+                    stm->commands.TCO = false;
                 break;
             }
             case 179:

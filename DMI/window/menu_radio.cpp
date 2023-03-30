@@ -26,7 +26,7 @@
 #include "../tcp/server.h"
 
 #include <chrono>
-menu_radio::menu_radio() : menu(get_text("Main"))
+menu_radio::menu_radio() : menu(get_text("RBC data"))
 {
     buttons[0] = new TextButton(get_text("Contact last RBC"), 153, 50);
     buttons[1] = new TextButton(get_text("Use short number"), 153, 50);

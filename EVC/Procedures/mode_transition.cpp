@@ -30,6 +30,7 @@
 #include "../Euroradio/session.h"
 #include "../LX/level_crossing.h"
 #include "../language/language.h"
+#include "../TrainSubsystems/train_interface.h"
 #include <map>
 cond mode_conditions[75];
 static std::vector<mode_transition> ordered_transitions[20];
@@ -38,31 +39,29 @@ int64_t last_mode_change;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
 Mode mode_to_ack;
-bool desk_open=true;
-bool sleep_signal=false;
 optional<std::set<bg_id>> sh_balises;
 optional<std::set<bg_id>> sr_balises;
 void set_mode_deleted_data();
 void initialize_mode_transitions()
 {
     cond *c = mode_conditions;
-    c[1] = [](){return false;};
-    c[2] = [](){return desk_open;};
-    c[3] = [](){return !sleep_signal && V_est == 0;};
+    c[1] = [](){return isolated;};
+    c[2] = [](){return cab_active[0] ^ cab_active[1];};
+    c[3] = [](){return !sl_signal && V_est == 0;};
     c[4] = [](){return true;};
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
     c[10] = [](){return train_data_valid && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
     c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(*EoA)-L_antenna_front);};
-    c[14] = [](){return !desk_open && V_est == 0 && sleep_signal;};
+    c[14] = [](){return !cab_active[0] && !cab_active[1] && V_est == 0 && sl_signal;};
     c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(*EoA);};
     c[21] = [](){return level == Level::N0;};
     c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
-    c[27] = [](){return !desk_open;};
-    c[28] = [](){return !desk_open;};
+    c[27] = [](){return !cab_active[0] && !cab_active[1];};
+    c[28] = [](){return !cab_active[0] && !cab_active[1];};
     c[29] = [](){return false;};
-    c[30] = [](){return !desk_open;};
+    c[30] = [](){return !cab_active[0] && !cab_active[1] && !ps_signal;};
     c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
     c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
     c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
@@ -191,6 +190,23 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::PT, Mode::LS, {70}, 5});
     transitions.push_back({Mode::SN, Mode::LS, {71}, 7});
 
+    transitions.push_back({Mode::NP, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SB, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::PS, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SH, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::FS, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::LS, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SR, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::OS, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SL, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::NL, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::UN, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::TR, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::PT, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SF, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::SN, Mode::IS, {1}, 1});
+    transitions.push_back({Mode::RV, Mode::IS, {1}, 1});
+
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);
     }
@@ -227,8 +243,8 @@ std::map<Mode, std::vector<deleted_information>> deleted_informations;
 bool prev_desk_open;
 void update_mode_status()
 {
-    if (!prev_desk_open && desk_open) {
-        odometer_orientation = current_odometer_orientation;
+    if (!prev_desk_open && (cab_active[0] ^ cab_active[1])) {
+        odometer_orientation = cab_active[0] ? 1 : -1;
         for (auto &lrbg : lrbgs) {
             if (lrbg.dir != -1 && lrbg.position.get_orientation() != odometer_orientation)
                 lrbg.dir = 1-lrbg.dir;
@@ -237,7 +253,7 @@ void update_mode_status()
         void reset_eurobalise_data();
         reset_eurobalise_data();
     }
-    prev_desk_open = desk_open;
+    prev_desk_open = cab_active[0] ^ cab_active[1];
     update_mode_profile();
     std::vector<mode_transition> &available=ordered_transitions[(int)mode];
     int priority = 10;
@@ -420,6 +436,7 @@ void set_mode_deleted_data()
     information_list[17].delete_info = []() {default_gradient_tsr = 0;};
     information_list[18].delete_info = []() {signal_speeds.clear();};
     information_list[19].delete_info = []() {route_suitability.clear();};
+    information_list[21].delete_info = []() {slippery_rail_driver=false;};
     information_list[22].delete_info = []() {
         for (auto &m : messages) {
             if (m.type == text_message_type::PlainText)
