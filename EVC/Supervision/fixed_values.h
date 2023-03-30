@@ -37,8 +37,8 @@ extern const double T_driver;
 extern const double T_horn;
 extern const double T_delete_condition;
 
-extern const double M_rotating_max;
-extern const double M_rotating_min;
+extern const int M_rotating_max;
+extern const int M_rotating_min;
 
 extern const double T_CYCRQSTD;
 extern const double T_ACK;

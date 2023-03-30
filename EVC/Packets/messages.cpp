@@ -38,6 +38,7 @@
 #include "../Procedures/train_trip.h"
 #include "../Position/geographical.h"
 #include "../TrainSubsystems/brake.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "../DMI/track_ahead_free.h"
 #include "../DMI/windows.h"
 #include "../Version/version.h"
@@ -1198,8 +1199,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_p
             if (level == Level::N1 || !trip_exit_acknowledged/*|| info->timestamp < trip_exit_timestamp*/) return false;
         }
         if (s.exceptions.find(2) != s.exceptions.end()) {
-            extern bool desk_open;
-            if (!desk_open) return false;
+            if (!cab_active[0] && !cab_active[1]) return false;
         }
         if (s.exceptions.find(4) != s.exceptions.end()) {
             if (!train_data_valid) return false;

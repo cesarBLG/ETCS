@@ -40,4 +40,5 @@ extern int cant_deficiency;
 extern std::set<int> other_train_categories;
 extern std::string special_train_data;
 extern bool train_data_valid;
+extern std::string traindata_file;
 void set_train_data(std::string spec);

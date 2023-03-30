@@ -44,3 +44,4 @@ extern bool conversion_model_used;
 double Kdry_rst(double V, double EBCL, distance d);
 double Kwet_rst(double V, distance d);
 extern std::map<distance,std::pair<int,int>> active_combination;
+extern bool slippery_rail_driver;

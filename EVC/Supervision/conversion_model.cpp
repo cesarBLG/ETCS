@@ -42,7 +42,7 @@ acceleration get_A_gradient(std::map<distance, double> gradient, double default_
             }
             double grad = 50000;
             for (auto it=--gradient.upper_bound(d-L_TRAIN); it!=gradient.upper_bound(d); ++it) {
-                grad = std::min(grad, it->second);
+                grad = std::min(grad, it->second*1000);
             }
             const double g = 9.81;
             if (M_rotating_nom > 0)
@@ -60,6 +60,7 @@ double T_brake_service_cmt;
 acceleration A_brake_emergency;
 acceleration A_brake_service;
 std::map<distance,std::pair<int,int>> active_combination;
+bool slippery_rail_driver;
 std::map<int,std::map<double, double>> A_brake_emergency_combination;
 std::map<int,std::map<double, double>> A_brake_service_combination;
 std::map<int,std::map<double,std::map<double, double>>> A_brake_normal_service_combination;

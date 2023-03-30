@@ -23,7 +23,7 @@
 #include "menu_settings.h"
 #include "keyboard.h"
 #include "../tcp/server.h"
-driver_window::driver_window(std::string title, bool show_trn) : input_window(title, 1, false), TRN(get_text("TRN"),82,50), settings("symbols/Setting/SE_04.bmp",82,50)
+driver_window::driver_window(std::string title, bool show_trn) : input_window(title, 1, false), TRN(get_text("TRN"),82,50,nullptr,10), settings("symbols/Setting/SE_04.bmp",82,50), show_trn(show_trn)
 {
     TRN.setPressedAction([this] 
     {
@@ -37,6 +37,6 @@ driver_window::driver_window(std::string title, bool show_trn) : input_window(ti
 void driver_window::setLayout()
 {
     input_window::setLayout();
-    addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
+    if (show_trn) addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
     addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
 }

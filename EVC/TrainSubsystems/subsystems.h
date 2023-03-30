@@ -16,10 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-void update_power_status();
+#include "train_interface.h"
 void handle_brake_command();
 void update_train_subsystems()
 {
-    update_power_status();
+    update_train_interface();
     handle_brake_command();
 }

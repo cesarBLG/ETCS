@@ -51,6 +51,7 @@ brake_position_types brake_position = PassengerP;
 bool train_data_valid = false;
 std::string special_train_data;
 std::list<traction_type> traction_systems;
+std::string traindata_file = "traindata.txt";
 void set_train_data(std::string spec)
 {
     if (special_train_data != spec) {
@@ -62,9 +63,9 @@ void set_train_data(std::string spec)
     if (!special_train_data.empty()) {
 #ifdef __ANDROID__
         extern std::string filesDir;
-        std::ifstream file(filesDir+"/traindata.txt");
+        std::ifstream file(filesDir+"/"+traindata_file);
 #else
-        std::ifstream file("traindata.txt");
+        std::ifstream file(traindata_file);
 #endif
         json j;
         file >> j;

@@ -15,6 +15,7 @@ std::map<int, std::vector<int>> ind_pos;
 ntc_window *active_ntc_window;
 std::map<int,ntc_window*> ntc_windows;
 std::map<std::string, std::vector<int>> areas;
+std::string stm_layout_file = "stm_windows.json";
 void setup_areas()
 {
     areas["A1"] = {0, 15, 54, 54};
@@ -58,9 +59,9 @@ ntc_window::ntc_window(int nid_stm) : window(construct_main), nid_stm(nid_stm)
 {
     #ifdef __ANDROID__
     extern std::string filesDir;
-    std::ifstream file(filesDir+"/stm_windows.json");
+    std::ifstream file(filesDir+"/"+stm_layout_file);
 #else
-    std::ifstream file("stm_windows.json");
+    std::ifstream file(stm_layout_file);
 #endif
     json j;
     file >> j;

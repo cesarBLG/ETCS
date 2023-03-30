@@ -138,7 +138,7 @@ void setWindow(json &data)
             else
             {
                 json& def = j["WindowDefinition"];
-                t = new train_data_window(def["WindowTitle"].get<std::string>());
+                t = new train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>());
                 ((input_window*)t)->buildFrom(def);
             }
             w = t;
@@ -148,7 +148,7 @@ void setWindow(json &data)
             else
             {
                 json& def = j["WindowDefinition"];
-                t = new fixed_train_data_window(def["WindowTitle"].get<std::string>());
+                t = new fixed_train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>());
                 ((input_window*)t)->buildFrom(def);
             }
             w = t;

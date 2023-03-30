@@ -22,9 +22,10 @@
 #include "data_validation.h"
 class fixed_train_data_window : public input_window
 {
+    bool switchable;
     public:
     TextButton SelectType;
-    fixed_train_data_window(std::string title);
+    fixed_train_data_window(std::string title, bool switchable);
     void setLayout() override;
 };
 #endif

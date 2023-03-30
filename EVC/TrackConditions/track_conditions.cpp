@@ -20,6 +20,7 @@
 #include "../Supervision/fixed_values.h"
 #include "../Time/clock.h"
 #include "../TrainSubsystems/power.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "../Supervision/conversion_model.h"
 std::list<std::shared_ptr<track_condition>> track_conditions;
 optional<distance> restore_initial_states_various;
@@ -273,6 +274,22 @@ void update_track_conditions()
                     info.start = pointD-max;
                 if (pointE-min > -L_TRAIN)
                     info.end = pointE-min;
+                track_condition_profile_external *info2 = nullptr;
+                switch (c->condition) {
+                    case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
+                        info2 = &eddy_eb_inhibition;
+                        break;
+                    case TrackConditions::SwitchOffEddyCurrentServiceBrake:
+                        info2 = &eddy_sb_inhibition;
+                        break;
+                    case TrackConditions::SwitchOffMagneticShoe:
+                        info2 = &magnetic_inhibition;
+                        break;
+                    case TrackConditions::SwitchOffRegenerativeBrake:
+                        info2 = &regenerative_inhibition;
+                        break;
+                }
+                if (info2 != nullptr && !info2->start && !info2->end) *info2 = info;
             }
             c->announce_distance = pointC-max;
             if (min > c->end) {

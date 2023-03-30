@@ -10,17 +10,17 @@
 #include "stm_state.h"
 struct stm_commands
 {
-    bool TCO;
-    bool SB;
-    bool EB_on_SB_failure;
-    bool EB;
-    bool open_circuit_breaker;
-    bool lower_pantograph;
-    bool close_air_intake;
-    bool regenerative_brake_inhibition;
-    bool magnetic_shoe_inhibition;
-    bool eddy_emergency_brake_inhibition;
-    bool eddy_service_brake_inhibition;
+    bool TCO=false;
+    bool SB=false;
+    bool EB_on_SB_failure=false;
+    bool EB=false;
+    bool open_circuit_breaker=false;
+    bool lower_pantograph=false;
+    bool close_air_intake=false;
+    bool regenerative_brake_inhibition=false;
+    bool magnetic_shoe_inhibition=false;
+    bool eddy_emergency_brake_inhibition=false;
+    bool eddy_service_brake_inhibition=false;
 };
 struct stm_forwarded_info
 {
