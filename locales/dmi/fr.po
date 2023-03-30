@@ -90,19 +90,23 @@ msgstr "EoA"
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr "Contacter le dernier RBC"
+msgstr "Contacter le dernier\n"
+"RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "Utiliser un numéro court"
+msgstr "Utiliser un numéro\n"
+"court"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr "Saisir les données RBC"
+msgstr "Saisir les données\n"
+"RBC"
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
-msgstr "Identifiant du réseau radio"
+msgstr "Identifiant du réseau\n"
+"radio"
 
 #: window/menu_settings.cpp:21
 msgid "Settings"
