@@ -49,7 +49,7 @@ msgstr "Teléfono RBC"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
-msgstr "Datos RBC"
+msgstr "Conexión RBC"
 
 #: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
 #: DMI/windows.cpp:1017
@@ -115,7 +115,7 @@ msgstr "Validar datos del tren"
 
 #: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
-msgstr "Tipo de tren"
+msgstr "Datos de Tren"
 
 #: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 msgid "Max speed (km/h)"

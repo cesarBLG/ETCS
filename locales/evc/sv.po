@@ -7,282 +7,365 @@ msgstr ""
 "Project-Id-Version: ETCS EVC\n"
 "Language: sv\n"
 
-#: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
+#: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
+#, fuzzy
 msgid "Driver ID"
 msgstr "Förar-ID"
 
-#: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
-#: DMI/windows.cpp:593
+#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
+#: DMI/windows.cpp:741
 msgid "Level 0"
 msgstr "Nivå 0"
 
-#: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
-#: DMI/windows.cpp:595
+#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
+#: DMI/windows.cpp:743
 msgid "Level 1"
 msgstr "Nivå 1"
 
-#: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
-#: DMI/windows.cpp:597
+#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
+#: DMI/windows.cpp:745
 msgid "Level 2"
 msgstr "Nivå 2"
 
-#: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
+#: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
 msgid "Level 3"
 msgstr "Nivå 3"
 
-#: DMI/windows.cpp:135 DMI/windows.cpp:589
+#: DMI/windows.cpp:123 DMI/windows.cpp:737
 msgid "Level"
 msgstr "Nivå"
 
-#: DMI/windows.cpp:141 DMI/windows.cpp:204 DMI/windows.cpp:616
+#: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
 msgstr "Tågnummer"
 
-#: DMI/windows.cpp:148 DMI/windows.cpp:212 DMI/windows.cpp:743
+#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
+#: DMI/windows.cpp:1033
 msgid "RBC ID"
 msgstr "RBC ID"
 
-#: DMI/windows.cpp:149 DMI/windows.cpp:213 DMI/windows.cpp:744
+#: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
 msgstr "RBC telefon"
 
-#: DMI/windows.cpp:151 DMI/windows.cpp:742
+#: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
 msgstr "RBC-data"
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:630
+#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
+#: DMI/windows.cpp:1017
+#, fuzzy
 msgid "Train data"
 msgstr "Tågdata"
 
-#: DMI/windows.cpp:178 DMI/windows.cpp:759
+#: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
+#, fuzzy
 msgid "SR speed (km/h)"
 msgstr "SR hastighet (km/h)"
 
-#: DMI/windows.cpp:179 DMI/windows.cpp:760
+#: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
+#, fuzzy
 msgid "SR distance (m)"
 msgstr "Avstånd i SR (m)"
 
-#: DMI/windows.cpp:181 DMI/windows.cpp:757
+#: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
+#, fuzzy
 msgid "SR speed/distance"
 msgstr "SR dist/fart"
 
-#: DMI/windows.cpp:187 DMI/windows.cpp:753
+#: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
 msgstr "Språk"
 
-#: DMI/windows.cpp:206 DMI/windows.cpp:648
+#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
+#: DMI/windows.cpp:1018
+#, fuzzy
 msgid "Length (m)"
 msgstr "Längd (m)"
 
-#: DMI/windows.cpp:207
+#: DMI/windows.cpp:266
 msgid "Brake percentaje"
 msgstr "bromsprocent"
 
-#: DMI/windows.cpp:208
+#: DMI/windows.cpp:267
+#, fuzzy
 msgid "Maximum speed (km/h)"
 msgstr "Maxhastighet (km/h)"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "Airtight"
 msgstr "Trycksättning"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "Yes"
 msgstr "Ja"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "No"
 msgstr "Nej"
 
-#: DMI/windows.cpp:223
+#: DMI/windows.cpp:280
 msgid "Data view"
 msgstr "Se data"
 
-#: DMI/windows.cpp:298
+#: DMI/windows.cpp:359
 msgid "Train is rejected"
 msgstr "avvisat tåg"
 
-#: DMI/windows.cpp:457
+#: DMI/windows.cpp:589
 msgid "Shunting request failed"
 msgstr "omöjlig manöver"
 
-#: DMI/windows.cpp:635 DMI/windows.cpp:642
+#: DMI/windows.cpp:791 DMI/windows.cpp:795
+#, fuzzy
 msgid "Validate train data"
 msgstr "Validera tågdata"
 
-#: DMI/windows.cpp:637 DMI/windows.cpp:714
+#: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
 msgstr "Typ tåg"
 
-#: DMI/windows.cpp:649
+#: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
+#, fuzzy
 msgid "Max speed (km/h)"
 msgstr "fart max (km/h)"
 
-#: DMI/windows.cpp:650
+#: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
 msgstr "bromsprocent"
 
-#: DMI/windows.cpp:651
+#: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
 msgstr "tågtyp"
 
-#: DMI/windows.cpp:654
+#: DMI/windows.cpp:171 DMI/windows.cpp:818
 msgid "PASS 1"
 msgstr "RESA N"
 
-#: DMI/windows.cpp:657
+#: DMI/windows.cpp:171 DMI/windows.cpp:821
 msgid "PASS 2"
 msgstr "STEG 2"
 
-#: DMI/windows.cpp:660
+#: DMI/windows.cpp:171 DMI/windows.cpp:824
 msgid "PASS 3"
 msgstr "RESOR"
 
-#: DMI/windows.cpp:663
+#: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
 msgstr "LUTA 1"
 
-#: DMI/windows.cpp:666
+#: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
 msgstr "RESA B"
 
-#: DMI/windows.cpp:669
+#: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
 msgstr "LUTA 3"
 
-#: DMI/windows.cpp:672
+#: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
 msgstr "RESA C"
 
-#: DMI/windows.cpp:675
+#: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
 msgstr "LUTA 5"
 
-#: DMI/windows.cpp:678
+#: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
 msgstr "RESA D"
 
-#: DMI/windows.cpp:681
+#: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
 msgstr "LUTA 7"
 
-#: DMI/windows.cpp:684
+#: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
 msgstr "MERC P/V N"
 
-#: DMI/windows.cpp:687
+#: DMI/windows.cpp:851
 msgid "FP 2"
 msgstr "PF 2"
 
-#: DMI/windows.cpp:690
+#: DMI/windows.cpp:173 DMI/windows.cpp:854
 msgid "FP 3"
 msgstr "PF 3"
 
-#: DMI/windows.cpp:693
+#: DMI/windows.cpp:173 DMI/windows.cpp:857
 msgid "FP 4"
 msgstr "PF 4"
 
-#: DMI/windows.cpp:696
+#: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
 msgstr "MERC F/G N"
 
-#: DMI/windows.cpp:699
+#: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
 msgstr "FG 2"
 
-#: DMI/windows.cpp:702
+#: DMI/windows.cpp:173 DMI/windows.cpp:866
 msgid "FG 3"
 msgstr "FG 3"
 
-#: DMI/windows.cpp:705
+#: DMI/windows.cpp:173 DMI/windows.cpp:869
 msgid "FG 4"
 msgstr "FG 4"
 
-#: DMI/windows.cpp:766
+#: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
 msgstr "Lägg till VBC"
 
-#: DMI/windows.cpp:771 DMI/windows.cpp:784
+#: DMI/windows.cpp:931 DMI/windows.cpp:944
 msgid "Validate set VBC"
 msgstr "Validera VBC har lagts till"
 
-#: DMI/windows.cpp:775
+#: DMI/windows.cpp:237 DMI/windows.cpp:935
 msgid "Remove VBC"
 msgstr "Ta bort VBC"
 
-#: DMI/windows.cpp:780 DMI/windows.cpp:792
+#: DMI/windows.cpp:940 DMI/windows.cpp:961
 msgid "Validate remove VBC"
 msgstr "Validera borttagning av VBC"
 
-#: DMI/windows.cpp:788 DMI/windows.cpp:796
+#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
+#: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
 msgstr "VBC-kod"
 
-#: DMI/windows.cpp:902 Procedures/train_trip.cpp:47
+#: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
 msgid "SH refused"
 msgstr "Manöver avvisad"
 
-#: Procedures/mode_transition.cpp:279
+#: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
 msgstr "Inträde i FS"
 
-#: Procedures/mode_transition.cpp:286
+#: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
 msgstr "in i OS"
 
-#: Procedures/train_trip.cpp:33
+#: Procedures/train_trip.cpp:34
+#, fuzzy
 msgid "Unauthorized passing of EoA/LoA"
 msgstr "EoA eller LoA överskrids"
 
-#: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:39
+#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
 msgstr "Beacon läsning misslyckande"
 
-#: Procedures/train_trip.cpp:41
+#: Procedures/train_trip.cpp:42
 msgid "No MA received at level transition"
 msgstr "Ingen MA vid nivåövergång"
 
-#: Procedures/train_trip.cpp:44 TrainSubsystems/brake.cpp:72
+#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
 msgstr "kommunikationsfel"
 
-#: Procedures/train_trip.cpp:50
+#: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
 msgid "Trackside not compatible"
 msgstr "sökväg stöds inte"
 
-#: Procedures/train_trip.cpp:53
+#: Procedures/train_trip.cpp:54
 msgid "SR distance exceeded"
 msgstr "SR-avståndet har överskridits"
 
-#: Procedures/train_trip.cpp:57
+#: Procedures/train_trip.cpp:58
 msgid "SH stop order"
 msgstr "Stopporder i SH"
 
-#: Procedures/train_trip.cpp:61
+#: Procedures/train_trip.cpp:62
 msgid "SR stop order"
 msgstr "SR stoppkommando"
 
-#: Procedures/train_trip.cpp:64
+#: Procedures/train_trip.cpp:65
 msgid "Emergency stop"
 msgstr "Nödstopp"
 
-#: Procedures/train_trip.cpp:67
+#: Procedures/train_trip.cpp:68
 msgid "No track description"
 msgstr "inga spårdata"
 
-#: Procedures/train_trip.cpp:78
+#: Procedures/train_trip.cpp:79
 msgid " brake demand"
 msgstr " bromsbehov"
 
-#: STM/stm.cpp:349
+#: STM/stm.cpp:362
 msgid " failed"
 msgstr " misslyckades"
 
-#: STM/stm.cpp:422
+#: STM/stm.cpp:460
 msgid " not available"
 msgstr " inte tillgänglig"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
 msgstr "Glida"
+
+#: DMI/text_messages.cpp:126
+msgid "Level crossing not protected"
+msgstr "Plankorsning ej skyddad"
+
+#: DMI/text_messages.cpp:127
+msgid "Acknowledgement"
+msgstr "Bekräftelse"
+
+#: DMI/windows.cpp:170
+msgid "Loading gauge"
+msgstr "Laddningsmätare"
+
+#: DMI/windows.cpp:170
+msgid "Out of GC"
+msgstr "Ute från GC"
+
+#: DMI/windows.cpp:173
+msgid "FP2"
+msgstr "FP2"
+
+#: DMI/windows.cpp:174
+msgid "Axle load category"
+msgstr "Axellastkategori"
+
+#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
+#: DMI/windows.cpp:990
+msgid " data"
+msgstr " data"
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:923
+msgid "Adhesion"
+msgstr "Adhesion"
+
+#: DMI/windows.cpp:209
+msgid "Non slippery rail"
+msgstr "Halkfri skena"
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:924
+msgid "Slippery rail"
+msgstr "Halt skena"
+
+#: DMI/windows.cpp:286
+msgid "System version"
+msgstr "Systemversion"
+
+#: DMI/windows.cpp:286
+msgid "Operated system version"
+msgstr "Operativt systemversion"
+
+#: DMI/windows.cpp:986 DMI/windows.cpp:990
+msgid "Validate "
+msgstr "Bekräfta "
+
+#: TrackConditions/route_suitability.cpp:53
+msgid "Route suitability - loading gauge"
+msgstr "Ruttlämplighet - lastmätare"
+
+#: TrackConditions/route_suitability.cpp:56
+msgid "Route suitability - axle load category"
+msgstr "Ruttlämplighet - axellastkategori"
+
+#: TrackConditions/route_suitability.cpp:59
+msgid "Route suitability - traction system"
+msgstr "Ruttlämplighet - dragsystem"
+
+#: TrainSubsystems/brake.cpp:94
+msgid "Train data changed"
+msgstr "Tågdata har ändrats"
 
