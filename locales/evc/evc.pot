@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-24 18:55+0100\n"
+"POT-Creation-Date: 2023-03-30 20:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,245 +28,267 @@ msgstr ""
 msgid "Acknowledgement"
 msgstr ""
 
-#: DMI/windows.cpp:67 DMI/windows.cpp:251 DMI/windows.cpp:877
+#: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
 msgid "Driver ID"
 msgstr ""
 
-#: DMI/windows.cpp:76 DMI/windows.cpp:97 DMI/windows.cpp:117
-#: DMI/windows.cpp:728
+#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
+#: DMI/windows.cpp:741
 msgid "Level 0"
 msgstr ""
 
-#: DMI/windows.cpp:79 DMI/windows.cpp:100 DMI/windows.cpp:117
-#: DMI/windows.cpp:730
+#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
+#: DMI/windows.cpp:743
 msgid "Level 1"
 msgstr ""
 
-#: DMI/windows.cpp:82 DMI/windows.cpp:103 DMI/windows.cpp:117
-#: DMI/windows.cpp:732
+#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
+#: DMI/windows.cpp:745
 msgid "Level 2"
 msgstr ""
 
-#: DMI/windows.cpp:85 DMI/windows.cpp:106 DMI/windows.cpp:734
+#: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
 msgid "Level 3"
 msgstr ""
 
-#: DMI/windows.cpp:122 DMI/windows.cpp:724
+#: DMI/windows.cpp:123 DMI/windows.cpp:737
 msgid "Level"
 msgstr ""
 
-#: DMI/windows.cpp:128 DMI/windows.cpp:253 DMI/windows.cpp:752
+#: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
 msgstr ""
 
-#: DMI/windows.cpp:135 DMI/windows.cpp:262 DMI/windows.cpp:887
-#: DMI/windows.cpp:1016
+#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
+#: DMI/windows.cpp:1033
 msgid "RBC ID"
 msgstr ""
 
-#: DMI/windows.cpp:136 DMI/windows.cpp:263 DMI/windows.cpp:888
+#: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
 msgstr ""
 
-#: DMI/windows.cpp:138 DMI/windows.cpp:886 DMI/windows.cpp:1015
+#: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
 msgstr ""
 
-#: DMI/windows.cpp:158 DMI/windows.cpp:173 DMI/windows.cpp:773
-#: DMI/windows.cpp:1000
+#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
+#: DMI/windows.cpp:1017
 msgid "Train data"
 msgstr ""
 
-#: DMI/windows.cpp:158 DMI/windows.cpp:255 DMI/windows.cpp:865
+#: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
 msgstr ""
 
-#: DMI/windows.cpp:165 DMI/windows.cpp:256 DMI/windows.cpp:799
-#: DMI/windows.cpp:1001
+#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
+#: DMI/windows.cpp:1018
 msgid "Length (m)"
 msgstr ""
 
-#: DMI/windows.cpp:166 DMI/windows.cpp:801 DMI/windows.cpp:1005
+#: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
 msgstr ""
 
-#: DMI/windows.cpp:167 DMI/windows.cpp:800 DMI/windows.cpp:1009
+#: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 msgid "Max speed (km/h)"
 msgstr ""
 
-#: DMI/windows.cpp:168
+#: DMI/windows.cpp:170
 msgid "Loading gauge"
 msgstr ""
 
-#: DMI/windows.cpp:168
+#: DMI/windows.cpp:170
 msgid "Out of GC"
 msgstr ""
 
-#: DMI/windows.cpp:169 DMI/windows.cpp:802
+#: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
 msgstr ""
 
-#: DMI/windows.cpp:169 DMI/windows.cpp:805
+#: DMI/windows.cpp:171 DMI/windows.cpp:818
 msgid "PASS 1"
 msgstr ""
 
-#: DMI/windows.cpp:169 DMI/windows.cpp:808
+#: DMI/windows.cpp:171 DMI/windows.cpp:821
 msgid "PASS 2"
 msgstr ""
 
-#: DMI/windows.cpp:169 DMI/windows.cpp:811
+#: DMI/windows.cpp:171 DMI/windows.cpp:824
 msgid "PASS 3"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:814
+#: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:817
+#: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:820
+#: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:823
+#: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:826
+#: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:829
+#: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
 msgstr ""
 
-#: DMI/windows.cpp:170 DMI/windows.cpp:832
+#: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:835
+#: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
 msgstr ""
 
-#: DMI/windows.cpp:171
+#: DMI/windows.cpp:173
 msgid "FP2"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:841
+#: DMI/windows.cpp:173 DMI/windows.cpp:854
 msgid "FP 3"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:844
+#: DMI/windows.cpp:173 DMI/windows.cpp:857
 msgid "FP 4"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:847
+#: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:850
+#: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:853
+#: DMI/windows.cpp:173 DMI/windows.cpp:866
 msgid "FG 3"
 msgstr ""
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:856
+#: DMI/windows.cpp:173 DMI/windows.cpp:869
 msgid "FG 4"
 msgstr ""
 
-#: DMI/windows.cpp:172
+#: DMI/windows.cpp:174
 msgid "Axle load category"
 msgstr ""
 
-#: DMI/windows.cpp:207 DMI/windows.cpp:903 DMI/windows.cpp:1024
+#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
+#: DMI/windows.cpp:990
+msgid " data"
+msgstr ""
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:923
+msgid "Adhesion"
+msgstr ""
+
+#: DMI/windows.cpp:209
+msgid "Non slippery rail"
+msgstr ""
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:924
+msgid "Slippery rail"
+msgstr ""
+
+#: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
 msgid "SR speed (km/h)"
 msgstr ""
 
-#: DMI/windows.cpp:208 DMI/windows.cpp:904 DMI/windows.cpp:1021
+#: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
 msgid "SR distance (m)"
 msgstr ""
 
-#: DMI/windows.cpp:210 DMI/windows.cpp:901 DMI/windows.cpp:1020
+#: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
 msgid "SR speed/distance"
 msgstr ""
 
-#: DMI/windows.cpp:216 DMI/windows.cpp:897
+#: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
 msgstr ""
 
-#: DMI/windows.cpp:222 DMI/windows.cpp:910
+#: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
 msgstr ""
 
-#: DMI/windows.cpp:228 DMI/windows.cpp:919
-msgid "Remove VBC"
-msgstr ""
-
-#: DMI/windows.cpp:257
-msgid "Brake percentaje"
-msgstr ""
-
-#: DMI/windows.cpp:258
-msgid "Maximum speed (km/h)"
-msgstr ""
-
-#: DMI/windows.cpp:259
-msgid "Airtight"
-msgstr ""
-
-#: DMI/windows.cpp:259
-msgid "Yes"
-msgstr ""
-
-#: DMI/windows.cpp:259
-msgid "No"
-msgstr ""
-
-#: DMI/windows.cpp:271
-msgid "Data view"
-msgstr ""
-
-#: DMI/windows.cpp:277
-msgid "System version"
-msgstr ""
-
-#: DMI/windows.cpp:277
-msgid "Operated system version"
-msgstr ""
-
-#: DMI/windows.cpp:350
-msgid "Train is rejected"
-msgstr ""
-
-#: DMI/windows.cpp:576
-msgid "Shunting request failed"
-msgstr ""
-
-#: DMI/windows.cpp:778 DMI/windows.cpp:782
-msgid "Validate train data"
-msgstr ""
-
-#: DMI/windows.cpp:838
-msgid "FP 2"
-msgstr ""
-
-#: DMI/windows.cpp:915 DMI/windows.cpp:928
-msgid "Validate set VBC"
-msgstr ""
-
-#: DMI/windows.cpp:924 DMI/windows.cpp:944
-msgid "Validate remove VBC"
-msgstr ""
-
-#: DMI/windows.cpp:940 DMI/windows.cpp:956
+#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
+#: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
 msgstr ""
 
-#: DMI/windows.cpp:1150 Procedures/train_trip.cpp:48
+#: DMI/windows.cpp:237 DMI/windows.cpp:935
+msgid "Remove VBC"
+msgstr ""
+
+#: DMI/windows.cpp:266
+msgid "Brake percentaje"
+msgstr ""
+
+#: DMI/windows.cpp:267
+msgid "Maximum speed (km/h)"
+msgstr ""
+
+#: DMI/windows.cpp:268
+msgid "Airtight"
+msgstr ""
+
+#: DMI/windows.cpp:268
+msgid "Yes"
+msgstr ""
+
+#: DMI/windows.cpp:268
+msgid "No"
+msgstr ""
+
+#: DMI/windows.cpp:280
+msgid "Data view"
+msgstr ""
+
+#: DMI/windows.cpp:286
+msgid "System version"
+msgstr ""
+
+#: DMI/windows.cpp:286
+msgid "Operated system version"
+msgstr ""
+
+#: DMI/windows.cpp:359
+msgid "Train is rejected"
+msgstr ""
+
+#: DMI/windows.cpp:589
+msgid "Shunting request failed"
+msgstr ""
+
+#: DMI/windows.cpp:791 DMI/windows.cpp:795
+msgid "Validate train data"
+msgstr ""
+
+#: DMI/windows.cpp:851
+msgid "FP 2"
+msgstr ""
+
+#: DMI/windows.cpp:931 DMI/windows.cpp:944
+msgid "Validate set VBC"
+msgstr ""
+
+#: DMI/windows.cpp:940 DMI/windows.cpp:961
+msgid "Validate remove VBC"
+msgstr ""
+
+#: DMI/windows.cpp:986 DMI/windows.cpp:990
+msgid "Validate "
+msgstr ""
+
+#: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
 msgid "SH refused"
 msgstr ""
 
@@ -274,11 +296,11 @@ msgstr ""
 msgid "Trackside not compatible"
 msgstr ""
 
-#: Procedures/mode_transition.cpp:292
+#: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
 msgstr ""
 
-#: Procedures/mode_transition.cpp:299
+#: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
 msgstr ""
 
@@ -286,7 +308,7 @@ msgstr ""
 msgid "Unauthorized passing of EoA/LoA"
 msgstr ""
 
-#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:40
+#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
 msgstr ""
 
@@ -294,7 +316,7 @@ msgstr ""
 msgid "No MA received at level transition"
 msgstr ""
 
-#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:73
+#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
 msgstr ""
 
@@ -322,11 +344,11 @@ msgstr ""
 msgid " brake demand"
 msgstr ""
 
-#: STM/stm.cpp:355
+#: STM/stm.cpp:362
 msgid " failed"
 msgstr ""
 
-#: STM/stm.cpp:453
+#: STM/stm.cpp:460
 msgid " not available"
 msgstr ""
 
@@ -342,10 +364,10 @@ msgstr ""
 msgid "Route suitability - traction system"
 msgstr ""
 
-#: TrainSubsystems/brake.cpp:59
+#: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
 msgstr ""
 
-#: TrainSubsystems/brake.cpp:95
+#: TrainSubsystems/brake.cpp:94
 msgid "Train data changed"
 msgstr ""
