@@ -7,282 +7,356 @@ msgstr ""
 "Project-Id-Version: ETCS EVC\n"
 "Language: es\n"
 
-#: DMI/windows.cpp:65 DMI/windows.cpp:202 DMI/windows.cpp:735
+#: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
 msgid "Driver ID"
-msgstr "ID maquinista"
+msgstr "Identificador Maquinista"
 
-#: DMI/windows.cpp:74 DMI/windows.cpp:100 DMI/windows.cpp:125
-#: DMI/windows.cpp:593
+#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
+#: DMI/windows.cpp:741
 msgid "Level 0"
 msgstr "Nivel 0"
 
-#: DMI/windows.cpp:77 DMI/windows.cpp:103 DMI/windows.cpp:125
-#: DMI/windows.cpp:595
+#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
+#: DMI/windows.cpp:743
 msgid "Level 1"
 msgstr "Nivel 1"
 
-#: DMI/windows.cpp:80 DMI/windows.cpp:106 DMI/windows.cpp:125
-#: DMI/windows.cpp:597
+#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
+#: DMI/windows.cpp:745
 msgid "Level 2"
 msgstr "Nivel 2"
 
-#: DMI/windows.cpp:83 DMI/windows.cpp:109 DMI/windows.cpp:599
+#: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
 msgid "Level 3"
 msgstr "Nivel 3"
 
-#: DMI/windows.cpp:135 DMI/windows.cpp:589
+#: DMI/windows.cpp:123 DMI/windows.cpp:737
 msgid "Level"
 msgstr "Nivel"
 
-#: DMI/windows.cpp:141 DMI/windows.cpp:204 DMI/windows.cpp:616
+#: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
 msgstr "Número de tren"
 
-#: DMI/windows.cpp:148 DMI/windows.cpp:212 DMI/windows.cpp:743
+#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
+#: DMI/windows.cpp:1033
 msgid "RBC ID"
 msgstr "ID RBC"
 
-#: DMI/windows.cpp:149 DMI/windows.cpp:213 DMI/windows.cpp:744
+#: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
 msgstr "Teléfono RBC"
 
-#: DMI/windows.cpp:151 DMI/windows.cpp:742
+#: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
-msgstr "Datos RBC"
+msgstr "Conexión RBC"
 
-#: DMI/windows.cpp:171 DMI/windows.cpp:630
+#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
+#: DMI/windows.cpp:1017
 msgid "Train data"
-msgstr "Datos tren"
+msgstr "Datos del tren"
 
-#: DMI/windows.cpp:178 DMI/windows.cpp:759
+#: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
 msgid "SR speed (km/h)"
-msgstr "Velocidad SR (km/h)"
+msgstr "Max. velocidad SR [km/h]"
 
-#: DMI/windows.cpp:179 DMI/windows.cpp:760
+#: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
 msgid "SR distance (m)"
-msgstr "Distancia en SR (m)"
+msgstr "Max. distancia SR [m]"
 
-#: DMI/windows.cpp:181 DMI/windows.cpp:757
+#: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
 msgid "SR speed/distance"
-msgstr "SR dist/vel"
+msgstr "Datos SR Velocidad / Distancia"
 
-#: DMI/windows.cpp:187 DMI/windows.cpp:753
+#: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
 msgstr "Idioma"
 
-#: DMI/windows.cpp:206 DMI/windows.cpp:648
+#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
+#: DMI/windows.cpp:1018
 msgid "Length (m)"
-msgstr "Longitud (m)"
+msgstr "Longitud [m]"
 
-#: DMI/windows.cpp:207
+#: DMI/windows.cpp:266
 msgid "Brake percentaje"
 msgstr "Porcentaje freno"
 
-#: DMI/windows.cpp:208
+#: DMI/windows.cpp:267
 msgid "Maximum speed (km/h)"
-msgstr "Velocidad máxima (km/h)"
+msgstr "Max. velocidad [km/h]"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "Airtight"
 msgstr "Presurización"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "Yes"
 msgstr "Sí"
 
-#: DMI/windows.cpp:209
+#: DMI/windows.cpp:268
 msgid "No"
 msgstr "No"
 
-#: DMI/windows.cpp:223
+#: DMI/windows.cpp:280
 msgid "Data view"
 msgstr "Ver datos"
 
-#: DMI/windows.cpp:298
+#: DMI/windows.cpp:359
 msgid "Train is rejected"
 msgstr "Tren rechazado"
 
-#: DMI/windows.cpp:457
+#: DMI/windows.cpp:589
 msgid "Shunting request failed"
 msgstr "Maniobra imposible"
 
-#: DMI/windows.cpp:635 DMI/windows.cpp:642
+#: DMI/windows.cpp:791 DMI/windows.cpp:795
 msgid "Validate train data"
-msgstr "Validar datos tren"
+msgstr "Validar datos del tren"
 
-#: DMI/windows.cpp:637 DMI/windows.cpp:714
+#: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
-msgstr "Tipo de tren"
+msgstr "Datos de Tren"
 
-#: DMI/windows.cpp:649
+#: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 msgid "Max speed (km/h)"
-msgstr "Vel. máxima (km/h)"
+msgstr "Max. velocidad [km/h]"
 
-#: DMI/windows.cpp:650
+#: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
 msgstr "Porcentaje de freno"
 
-#: DMI/windows.cpp:651
+#: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
 msgstr "Tipo tren"
 
-#: DMI/windows.cpp:654
+#: DMI/windows.cpp:171 DMI/windows.cpp:818
 msgid "PASS 1"
 msgstr "VIAJ N"
 
-#: DMI/windows.cpp:657
+#: DMI/windows.cpp:171 DMI/windows.cpp:821
 msgid "PASS 2"
 msgstr "PASO 2"
 
-#: DMI/windows.cpp:660
+#: DMI/windows.cpp:171 DMI/windows.cpp:824
 msgid "PASS 3"
 msgstr "VIAJ A"
 
-#: DMI/windows.cpp:663
+#: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
 msgstr "INCLINACIÓN 1"
 
-#: DMI/windows.cpp:666
+#: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
 msgstr "VIAJ B"
 
-#: DMI/windows.cpp:669
+#: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
 msgstr "INCLINACIÓN 3"
 
-#: DMI/windows.cpp:672
+#: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
 msgstr "VIAJ C"
 
-#: DMI/windows.cpp:675
+#: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
 msgstr "INCLINACIÓN 5"
 
-#: DMI/windows.cpp:678
+#: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
 msgstr "VIAJ D"
 
-#: DMI/windows.cpp:681
+#: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
 msgstr "INCLINACIÓN 7"
 
-#: DMI/windows.cpp:684
+#: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
 msgstr "MERC P/V N"
 
-#: DMI/windows.cpp:687
+#: DMI/windows.cpp:851
 msgid "FP 2"
 msgstr "FP 2"
 
-#: DMI/windows.cpp:690
+#: DMI/windows.cpp:173 DMI/windows.cpp:854
 msgid "FP 3"
 msgstr "FP 3"
 
-#: DMI/windows.cpp:693
+#: DMI/windows.cpp:173 DMI/windows.cpp:857
 msgid "FP 4"
 msgstr "FP 4"
 
-#: DMI/windows.cpp:696
+#: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
 msgstr "MERC F/G N"
 
-#: DMI/windows.cpp:699
+#: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
 msgstr "FG 2"
 
-#: DMI/windows.cpp:702
+#: DMI/windows.cpp:173 DMI/windows.cpp:866
 msgid "FG 3"
 msgstr "FG 3"
 
-#: DMI/windows.cpp:705
+#: DMI/windows.cpp:173 DMI/windows.cpp:869
 msgid "FG 4"
 msgstr "FG 4"
 
-#: DMI/windows.cpp:766
+#: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
 msgstr "Añadir VBC"
 
-#: DMI/windows.cpp:771 DMI/windows.cpp:784
+#: DMI/windows.cpp:931 DMI/windows.cpp:944
 msgid "Validate set VBC"
 msgstr "Validar VBC añadido"
 
-#: DMI/windows.cpp:775
+#: DMI/windows.cpp:237 DMI/windows.cpp:935
 msgid "Remove VBC"
 msgstr "Eliminar VBC"
 
-#: DMI/windows.cpp:780 DMI/windows.cpp:792
+#: DMI/windows.cpp:940 DMI/windows.cpp:961
 msgid "Validate remove VBC"
 msgstr "Validar eliminación VBC"
 
-#: DMI/windows.cpp:788 DMI/windows.cpp:796
+#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
+#: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
 msgstr "Código VBC"
 
-#: DMI/windows.cpp:902 Procedures/train_trip.cpp:47
+#: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
 msgid "SH refused"
 msgstr "Maniobra rechazada"
 
-#: Procedures/mode_transition.cpp:279
+#: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
 msgstr "Entrada en FS"
 
-#: Procedures/mode_transition.cpp:286
+#: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
 msgstr "Entrada en OS"
 
-#: Procedures/train_trip.cpp:33
+#: Procedures/train_trip.cpp:34
 msgid "Unauthorized passing of EoA/LoA"
-msgstr "EoA o LoA rebasado"
+msgstr "EOA o LOA rebasado"
 
-#: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:39
+#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
 msgstr "Fallo lectura baliza"
 
-#: Procedures/train_trip.cpp:41
+#: Procedures/train_trip.cpp:42
 msgid "No MA received at level transition"
 msgstr "Sin MA en la transición de nivel"
 
-#: Procedures/train_trip.cpp:44 TrainSubsystems/brake.cpp:72
+#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
 msgstr "Error de comunicaciones"
 
-#: Procedures/train_trip.cpp:50
+#: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
 msgid "Trackside not compatible"
 msgstr "Vía no compatible"
 
-#: Procedures/train_trip.cpp:53
+#: Procedures/train_trip.cpp:54
 msgid "SR distance exceeded"
 msgstr "Distancia en SR rebasada"
 
-#: Procedures/train_trip.cpp:57
+#: Procedures/train_trip.cpp:58
 msgid "SH stop order"
 msgstr "Orden de parada en SH"
 
-#: Procedures/train_trip.cpp:61
+#: Procedures/train_trip.cpp:62
 msgid "SR stop order"
 msgstr "Orden de parada en SR"
 
-#: Procedures/train_trip.cpp:64
+#: Procedures/train_trip.cpp:65
 msgid "Emergency stop"
 msgstr "Parada de emergencia"
 
-#: Procedures/train_trip.cpp:67
+#: Procedures/train_trip.cpp:68
 msgid "No track description"
 msgstr "Sin datos de vía"
 
-#: Procedures/train_trip.cpp:78
+#: Procedures/train_trip.cpp:79
 msgid " brake demand"
 msgstr " demanda de freno"
 
-#: STM/stm.cpp:349
+#: STM/stm.cpp:362
 msgid " failed"
 msgstr " falló"
 
-#: STM/stm.cpp:422
+#: STM/stm.cpp:460
 msgid " not available"
 msgstr " no disponible"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
 msgstr "Deslizamiento"
+
+#: DMI/text_messages.cpp:126
+msgid "Level crossing not protected"
+msgstr "Paso a nivel no protegido"
+
+#: DMI/text_messages.cpp:127
+msgid "Acknowledgement"
+msgstr "Reconocimiento"
+
+#: DMI/windows.cpp:170
+msgid "Loading gauge"
+msgstr "Indicador de carga"
+
+#: DMI/windows.cpp:170
+msgid "Out of GC"
+msgstr "Fuera de GC"
+
+#: DMI/windows.cpp:173
+msgid "FP2"
+msgstr "FP2"
+
+#: DMI/windows.cpp:174
+msgid "Axle load category"
+msgstr "Categoría de carga por eje"
+
+#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
+#: DMI/windows.cpp:990
+msgid " data"
+msgstr " datos"
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:923
+msgid "Adhesion"
+msgstr "Adhesión"
+
+#: DMI/windows.cpp:209
+msgid "Non slippery rail"
+msgstr "Via no deslizante"
+
+#: DMI/windows.cpp:209 DMI/windows.cpp:924
+msgid "Slippery rail"
+msgstr "Via deslizante"
+
+#: DMI/windows.cpp:286
+msgid "System version"
+msgstr "Versión del Sistema"
+
+#: DMI/windows.cpp:286
+msgid "Operated system version"
+msgstr "Versión del sistema\n"
+"operativo"
+
+#: DMI/windows.cpp:986 DMI/windows.cpp:990
+msgid "Validate "
+msgstr "Validar "
+
+#: TrackConditions/route_suitability.cpp:53
+msgid "Route suitability - loading gauge"
+msgstr "Incompatibilidad de ruta - gálibo de carga"
+
+#: TrackConditions/route_suitability.cpp:56
+msgid "Route suitability - axle load category"
+msgstr "Incompatibilidad de ruta - categoría de carga por eje"
+
+#: TrackConditions/route_suitability.cpp:59
+msgid "Route suitability - traction system"
+msgstr "Incompatibilidad de ruta - sistema de tracción"
+
+#: TrainSubsystems/brake.cpp:94
+msgid "Train data changed"
+msgstr "Los datos del tren cambiaron"
 

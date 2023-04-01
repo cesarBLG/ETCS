@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-03-24 18:53+0100\n"
+"POT-Creation-Date: 2023-04-01 16:28+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,7 +65,7 @@ msgid ""
 "data"
 msgstr ""
 
-#: window/keyboard.cpp:29 window/keyboard.cpp:72
+#: window/keyboard.cpp:29
 msgid "DEL"
 msgstr ""
 
@@ -73,7 +73,7 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: window/menu_main.cpp:31 window/menu_radio.cpp:29
+#: window/menu_main.cpp:31
 msgid "Main"
 msgstr ""
 
@@ -131,6 +131,10 @@ msgstr ""
 
 #: window/menu_override.cpp:24
 msgid "EoA"
+msgstr ""
+
+#: window/menu_radio.cpp:29
+msgid "RBC data"
 msgstr ""
 
 #: window/menu_radio.cpp:31
