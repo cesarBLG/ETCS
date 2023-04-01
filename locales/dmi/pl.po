@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: pl\n"
 
-#: window/menu_main.cpp:31 window/menu_radio.cpp:29
+#: window/menu_main.cpp:31
 msgid "Main"
 msgstr "Główny"
 
@@ -36,7 +36,7 @@ msgid "Enter\n"
 msgstr "Int.\n"
 "dane"
 
-#: window/keyboard.cpp:29 window/keyboard.cpp:72
+#: window/keyboard.cpp:29
 msgid "DEL"
 msgstr "Z"
 
@@ -70,7 +70,8 @@ msgstr "Manewry"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Podwójna Przyczepność"
+msgstr "Podwójna\n"
+"Przyczepność"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
@@ -163,7 +164,8 @@ msgstr "Dane"
 #: language/language.cpp:39 window/nav_buttons.cpp:47
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Specjalny"
+msgstr "Spec-\n"
+"jalny"
 
 #: window/menu_ntc.cpp:21
 msgid "NTC data entry"
@@ -172,4 +174,8 @@ msgstr "Wprowadzanie danych NTC"
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
 msgstr "Koniec wprowadzania danych"
+
+#: window/menu_radio.cpp:29
+msgid "RBC data"
+msgstr "Dane RBC"
 

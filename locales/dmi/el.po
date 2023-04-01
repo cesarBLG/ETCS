@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: el\n"
 
-#: window/menu_main.cpp:31 window/menu_radio.cpp:29
+#: window/menu_main.cpp:31
 msgid "Main"
 msgstr "Κύριο μενού"
 
@@ -36,7 +36,7 @@ msgid "Enter\n"
 msgstr "Int.\n"
 "δεδομένα"
 
-#: window/keyboard.cpp:29 window/keyboard.cpp:72
+#: window/keyboard.cpp:29
 msgid "DEL"
 msgstr "ΑΠΟ"
 
@@ -173,4 +173,8 @@ msgstr "Εισαγωγή δεδομένων NTC"
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
 msgstr "Τέλος εισαγωγής δεδομένων"
+
+#: window/menu_radio.cpp:29
+msgid "RBC data"
+msgstr "Δεδομένα RBC"
 

@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: de\n"
 
-#: window/menu_main.cpp:31 window/menu_radio.cpp:29
+#: window/menu_main.cpp:31
 msgid "Main"
 msgstr "Rektor"
 
@@ -36,7 +36,7 @@ msgid "Enter\n"
 msgstr "Int.\n"
 "Daten"
 
-#: window/keyboard.cpp:29 window/keyboard.cpp:72
+#: window/keyboard.cpp:29
 msgid "DEL"
 msgstr "DES"
 
@@ -174,4 +174,8 @@ msgstr "NTC-Dateneingabe"
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
 msgstr "Ende der Dateneingabe"
+
+#: window/menu_radio.cpp:29
+msgid "RBC data"
+msgstr "RBC-Daten"
 
