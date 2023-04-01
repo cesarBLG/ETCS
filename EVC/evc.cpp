@@ -44,6 +44,7 @@
 #include "TrainSubsystems/subsystems.h"
 #include "LX/level_crossing.h"
 #include "STM/stm.h"
+#include "language/language.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -217,6 +218,7 @@ void start()
     start_dmi();
     start_or_iface();
     start_logging();
+    load_language();
     setup_national_values();
     load_vbcs();
     initialize_mode_transitions();

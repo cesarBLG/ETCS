@@ -37,6 +37,9 @@ driver_window::driver_window(std::string title, bool show_trn) : input_window(ti
 void driver_window::setLayout()
 {
     input_window::setLayout();
-    if (show_trn) addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
-    addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
+    if (show_trn)
+    {
+        addToLayout(&TRN, new RelativeAlignment(nullptr, 334+142,400+15,0));
+        addToLayout(&settings, new ConsecutiveAlignment(&TRN, RIGHT,0));
+    }
 }

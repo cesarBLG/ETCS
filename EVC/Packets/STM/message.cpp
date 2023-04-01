@@ -1,4 +1,5 @@
 #include "message.h"
+#include "1.h"
 #include "6.h"
 #include "13.h"
 #include "15.h"
@@ -24,6 +25,7 @@ ETCS_packet *construct_stm_packet(bit_manipulator &r)
     r.peek(&NID_PACKET);
     ETCS_packet *p;
     switch ((unsigned char)NID_PACKET) {
+        case 1: p = new STMVersion(); break;
         case 6: p = new STMOverrideActivation(); break;
         case 13: p = new STMStateRequest(); break;
         case 15: p = new STMStateReport(); break;

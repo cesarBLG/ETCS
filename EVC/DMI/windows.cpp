@@ -1155,7 +1155,7 @@ void update_dialog_step(std::string step, std::string step2)
         } else {
             for (auto &kvp : installed_stms) {
                 auto *stm = kvp.second;
-                if (step == get_ntc_name(kvp.first) && stm->data_entry == stm_object::data_entry_state::Active) {
+                if (step2 == get_ntc_name(kvp.first) && stm->data_entry == stm_object::data_entry_state::Active) {
                     stm->data_entry = stm_object::data_entry_state::Driver;
                     active_dialog_step = "S3-1";
                 }

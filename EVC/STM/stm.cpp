@@ -4,10 +4,13 @@
 #include "../Packets/messages.h"
 #include "../Packets/etcs_information.h"
 #include "../Supervision/train_data.h"
+#include "../Packets/STM/1.h"
+#include "../Packets/STM/5.h"
 #include "../Packets/STM/7.h"
 #include "../Packets/STM/13.h"
 #include "../Packets/STM/14.h"
 #include "../Packets/STM/15.h"
+#include "../Packets/STM/30.h"
 #include "../Packets/STM/128.h"
 #include "../Packets/STM/129.h"
 #include "../Packets/STM/130.h"
@@ -80,7 +83,8 @@ void stm_object::request_state(stm_state req)
 }
 stm_object::stm_object()
 {
-    commands = stm_commands();
+    tiu_function = stm_tiu_function();
+    biu_function = stm_biu_function();
     state = stm_state::NP;
     last_order = {};
     last_order_time = 0;
@@ -293,6 +297,16 @@ void stm_level_change(level_information newlevel, bool driver)
     }
     if (newlevel.level != Level::NTC || nid_ntc != newlevel.nid_ntc)
         ntc_to_stm.erase(nid_ntc);
+
+    stm_message msg;
+    auto *stat = new ETCSStatusData();
+    stat->M_LEVEL.set_value(level);
+    stat->NID_NTC.rawdata = nid_ntc;
+    stat->M_MODESTM.set_value(mode);
+    msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
+    for (auto kvp : installed_stms) {
+        kvp.second->send_message(&msg);
+    }
 }
 void stm_level_transition_received(level_transition_information info)
 {
@@ -343,7 +357,8 @@ void stm_object::report_received(stm_state newstate)
         recalculate_MRSP();
     }
     if (state != newstate && newstate != stm_state::DA) {
-        commands = stm_commands();
+        tiu_function = stm_tiu_function();
+        biu_function = stm_biu_function();
     }
     state = newstate;
     if (last_order && (*last_order == state || (*last_order == stm_state::CCS && state == stm_state::CS)))
@@ -416,8 +431,19 @@ void update_stm_control()
 {
     if (level != Level::NTC)
         nid_ntc = -1;
-    if (mode != prev_mode && (mode == Mode::NP/* || mode == Mode::SB*/))
-        ntc_to_stm.clear();
+    if (mode != prev_mode) {
+        if(mode == Mode::NP/* || mode == Mode::SB*/)
+            ntc_to_stm.clear();
+        stm_message msg;
+        auto *stat = new ETCSStatusData();
+        stat->M_LEVEL.set_value(level);
+        stat->NID_NTC.rawdata = nid_ntc;
+        stat->M_MODESTM.set_value(mode);
+        msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
+        for (auto kvp : installed_stms) {
+            kvp.second->send_message(&msg);
+        }
+    }
     prev_mode = mode;
     if (prev_override != overrideProcedure) {
         for (auto kvp : installed_stms) {
@@ -594,6 +620,23 @@ void handle_stm_message(const stm_message &msg)
     stm_object *stm = installed_stms[nid_stm];
     for (auto &pack : msg.packets) {
         switch((unsigned char)pack->NID_PACKET.rawdata) {
+            case 1:
+            {
+                auto &ver = *((STMVersion*)pack.get());
+                if (ver.N_VERMAJOR != 4) break;
+                stm_message msg;
+                msg.packets.push_back(pack);
+                auto *lang = new STMLanguage();
+                lang->NID_DRV_LANGUAGE.rawdata = ((language[0]&0xFF)<<8)|(language[1]&0xFF);
+                msg.packets.push_back(std::shared_ptr<ETCS_packet>(lang));
+                auto *stat = new ETCSStatusData();
+                stat->M_LEVEL.set_value(level);
+                stat->NID_NTC.rawdata = nid_ntc;
+                stat->M_MODESTM.set_value(mode);
+                msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
+                stm->send_message(&msg);
+                break;
+            }
             case 6:
                 stm->report_override();
                 break;
@@ -609,55 +652,58 @@ void handle_stm_message(const stm_message &msg)
             case 128:
             {
                 auto &emerg = *((STMBrakeCommand*)pack.get());
+                auto &biu = stm->biu_function;
                 if (emerg.M_BIEB_CMD != M_BIEB_CMD_t::NoChange) {
-                    stm->commands.EB = emerg.M_BIEB_CMD != M_BIEB_CMD_t::ReleaseEB;
+                    biu.EB = emerg.M_BIEB_CMD != M_BIEB_CMD_t::ReleaseEB;
                 }
                 if (emerg.M_BISB_CMD != M_BISB_CMD_t::NoChange) {
-                    stm->commands.SB = emerg.M_BISB_CMD != M_BISB_CMD_t::ReleaseSB;
-                    stm->commands.EB_on_SB_failure = emerg.M_BISB_CMD == M_BISB_CMD_t::ApplySBorEB;
+                    biu.SB = emerg.M_BISB_CMD != M_BISB_CMD_t::ReleaseSB;
+                    biu.EB_on_SB_failure = emerg.M_BISB_CMD == M_BISB_CMD_t::ApplySBorEB;
                 }
                 break;
             }
             case 129:
             {
                 auto &ti = *((STMSpecificBrakeCommand*)pack.get());
+                auto &tiu = stm->tiu_function;
                 if (ti.M_TIRB_CMD == M_TIRB_CMD_t::AllowRegenerative)
-                    stm->commands.regenerative_brake_inhibition = false;
+                    tiu.regenerative_brake_inhibition = false;
                 else if (ti.M_TIRB_CMD == M_TIRB_CMD_t::SupressRegenerative)
-                    stm->commands.regenerative_brake_inhibition = true;
+                    tiu.regenerative_brake_inhibition = true;
                 if (ti.M_TIMSH_CMD == M_TIMSH_CMD_t::AllowMagnetic)
-                    stm->commands.magnetic_shoe_inhibition = false;
+                    tiu.magnetic_shoe_inhibition = false;
                 else if (ti.M_TIMSH_CMD == M_TIMSH_CMD_t::SupressMagnetic)
-                    stm->commands.magnetic_shoe_inhibition = true;
+                    tiu.magnetic_shoe_inhibition = true;
                 if (ti.M_TIEDCBEB_CMD == M_TIEDCBEB_CMD_t::AllowEddyEB)
-                    stm->commands.eddy_emergency_brake_inhibition = false;
+                    tiu.eddy_emergency_brake_inhibition = false;
                 else if (ti.M_TIEDCBEB_CMD == M_TIEDCBEB_CMD_t::SupressEddyEB)
-                    stm->commands.eddy_emergency_brake_inhibition = true;
+                    tiu.eddy_emergency_brake_inhibition = true;
                 if (ti.M_TIEDCBSB_CMD == M_TIEDCBSB_CMD_t::AllowEddySB)
-                    stm->commands.eddy_service_brake_inhibition = false;
+                    tiu.eddy_service_brake_inhibition = false;
                 else if (ti.M_TIEDCBSB_CMD == M_TIEDCBSB_CMD_t::SupressEddySB)
-                    stm->commands.eddy_service_brake_inhibition = true;
+                    tiu.eddy_service_brake_inhibition = true;
                 break;
             }
             case 130:
             {
                 auto &ti = *((STMTrainCommand*)pack.get());
+                auto &tiu = stm->tiu_function;
                 if (ti.M_TIPANTO_CMD == M_TIPANTO_CMD_t::PantoLift)
-                    stm->commands.lower_pantograph = false;
+                    tiu.lower_pantograph = false;
                 else if (ti.M_TIPANTO_CMD == M_TIPANTO_CMD_t::PantoLower)
-                    stm->commands.lower_pantograph = true;
+                    tiu.lower_pantograph = true;
                 if (ti.M_TIFLAP_CMD == M_TIFLAP_CMD_t::FlatClose)
-                    stm->commands.close_air_intake = true;
+                    tiu.close_air_intake = true;
                 else if (ti.M_TIFLAP_CMD == M_TIFLAP_CMD_t::FlatOpen)
-                    stm->commands.close_air_intake = true;
+                    tiu.close_air_intake = true;
                 if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
-                    stm->commands.open_circuit_breaker = true;
+                    tiu.open_circuit_breaker = true;
                 else if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
-                    stm->commands.open_circuit_breaker = false;
+                    tiu.open_circuit_breaker = false;
                 if (ti.M_TITR_CMD == M_TITR_CMD_t::TCO)
-                    stm->commands.TCO = true;
+                    tiu.TCO = true;
                 else if (ti.M_TITR_CMD == M_TITR_CMD_t::NoTCO)
-                    stm->commands.TCO = false;
+                    tiu.TCO = false;
                 break;
             }
             case 179:

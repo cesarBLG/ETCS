@@ -4,6 +4,7 @@
 #include "../STM/stm.h"
 #include "../Packets/STM/30.h"
 #include <iostream>
+#include <fstream>
 moFileLib::moFileReader reader;
 std::string language = "en";
 std::string get_text(std::string id)
@@ -39,4 +40,13 @@ void set_language(std::string lang)
         it.second->send_message(&msg);
     }
     send_command("language", lang);
+    std::fstream f("language.txt", std::ios_base::out);
+    f<<lang;
+}
+void load_language()
+{
+    std::fstream f("language.txt");
+    std::string lang;
+    f>>lang;
+    set_language(lang);
 }

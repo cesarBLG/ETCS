@@ -35,14 +35,14 @@ void update_train_interface()
         for (auto kvp : installed_stms) {
             auto *stm = kvp.second;
             if (stm->active()) {
-                traction_cutoff_status &= !stm->commands.TCO;
-                neutral_section_stm = stm->commands.open_circuit_breaker;
-                lower_pantograph_stm = stm->commands.lower_pantograph;
-                air_tightness_stm = stm->commands.close_air_intake;
-                regenerative_inhibition_stm = stm->commands.regenerative_brake_inhibition;
-                magnetic_inhibition_stm = stm->commands.magnetic_shoe_inhibition;
-                eddy_eb_inhibition_stm = stm->commands.eddy_emergency_brake_inhibition;
-                eddy_sb_inhibition_stm = stm->commands.eddy_service_brake_inhibition;
+                traction_cutoff_status &= !stm->tiu_function.TCO;
+                neutral_section_stm = stm->tiu_function.open_circuit_breaker;
+                lower_pantograph_stm = stm->tiu_function.lower_pantograph;
+                air_tightness_stm = stm->tiu_function.close_air_intake;
+                regenerative_inhibition_stm = stm->tiu_function.regenerative_brake_inhibition;
+                magnetic_inhibition_stm = stm->tiu_function.magnetic_shoe_inhibition;
+                eddy_eb_inhibition_stm = stm->tiu_function.eddy_emergency_brake_inhibition;
+                eddy_sb_inhibition_stm = stm->tiu_function.eddy_service_brake_inhibition;
             }
         }
     }

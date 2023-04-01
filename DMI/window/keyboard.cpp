@@ -69,7 +69,7 @@ std::vector<Button*> getAlphaNumericKeyboard(input_data *input)
     keys[7]->addText("tuv",4,0,10);
     keys[8]->addText("9",-15,0,16);
     keys[8]->addText("wxyz",10,0,10);
-    keys.push_back(new TextButton(get_text("DEL"), 102, 50, nullptr));
+    keys.push_back(new IconButton("symbols/Navigation/NA_21.bmp", 102, 50, nullptr));
     keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50, nullptr));
     for(int i=0; i<12; i++)

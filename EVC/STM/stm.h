@@ -8,12 +8,15 @@
 #include "../Packets/STM/message.h"
 #include "../Packets/STM/179.h"
 #include "stm_state.h"
-struct stm_commands
+struct stm_connection
+{
+    int nid_stm;
+    int version_X;
+    int version_Y;
+};
+struct stm_tiu_function
 {
     bool TCO=false;
-    bool SB=false;
-    bool EB_on_SB_failure=false;
-    bool EB=false;
     bool open_circuit_breaker=false;
     bool lower_pantograph=false;
     bool close_air_intake=false;
@@ -21,11 +24,14 @@ struct stm_commands
     bool magnetic_shoe_inhibition=false;
     bool eddy_emergency_brake_inhibition=false;
     bool eddy_service_brake_inhibition=false;
-};
-struct stm_forwarded_info
-{
     int direction;
     int active_cab;
+};
+struct stm_biu_function
+{
+    bool SB=false;
+    bool EB_on_SB_failure=false;
+    bool EB=false;
 };
 struct stm_specific_data
 {
@@ -47,7 +53,8 @@ struct stm_specific_data
 struct stm_object
 {
     int nid_stm;
-    stm_commands commands;
+    stm_tiu_function tiu_function;
+    stm_biu_function biu_function;
     stm_state state;
     optional<stm_state> last_order;
     int64_t last_order_time;
@@ -67,6 +74,9 @@ struct stm_object
     bool control_request_EB;
     std::map<std::string, cond> conditions;
     std::vector<stm_specific_data> specific_data;
+    stm_connection *control_connection;
+    stm_connection *tiu_connection;
+    stm_connection *biu_connection;
     stm_object();
     bool active()
     {
@@ -87,8 +97,8 @@ struct stm_object
     void report_trip();
     void trigger_condition(std::string change);
     void request_state(stm_state req);
-    void send_message(stm_message *msg);
     void send_specific_data(json &result);
+    void send_message(stm_message *msg);
 };
 void stm_level_change(level_information newlevel, bool driver);
 void stm_level_transition_received(level_transition_information info);

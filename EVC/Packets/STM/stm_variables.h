@@ -217,6 +217,14 @@ struct M_FREQ_t : ETCS_variable
         return rawdata * 32;
     }
 };
+struct N_VERMAJOR_t : ETCS_variable
+{
+    N_VERMAJOR_t() : ETCS_variable(8) {}
+};
+struct N_VERMINOR_t : ETCS_variable
+{
+    N_VERMINOR_t() : ETCS_variable(8) {}
+};
 struct T_SOUND_t : ETCS_variable
 {
     T_SOUND_t() : ETCS_variable(8) {}

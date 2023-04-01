@@ -131,8 +131,8 @@ void handle_brake_command()
         for (auto kvp : installed_stms) {
             auto *stm = kvp.second;
             if (stm->active()) {
-                SB_command |= stm->commands.SB;
-                EB_command |= stm->commands.EB;
+                SB_command |= stm->biu_function.SB;
+                EB_command |= stm->biu_function.EB;
             }
         }
     }
