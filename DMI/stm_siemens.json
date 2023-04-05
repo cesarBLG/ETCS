@@ -115,6 +115,11 @@
                     "text": false
                 },
                 {
+                    "id": 5,
+                    "file": "LZB/EL.bmp",
+                    "text": false
+                },
+                {
                     "id": 6,
                     "file": "LZB/V.bmp",
                     "text": false
