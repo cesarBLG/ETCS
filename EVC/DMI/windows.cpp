@@ -701,7 +701,7 @@ void close_window()
     std::string active = active_window_dmi["active"];
     if (active == "menu_main" || active == "menu_override" || active == "data_view_window" || active == "menu_spec")
         active_dialog = dialog_sequence::None;
-    else if (active == "trn_window") {
+    else if (active == "trn_window" || active == "driver_window") {
         active_dialog_step = "S1";   
     } else if (active == "fixed_train_data_window" || active == "level_window" || active == "fixed_train_data_validation_window" || active == "train_data_window" || active == "train_data_validation_window")
         active_dialog_step = "S1";

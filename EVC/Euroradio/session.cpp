@@ -151,20 +151,20 @@ void communication_session::update()
             }
             send(std::shared_ptr<validated_train_data_message>(tdm));
         }
-    }
-    if (!train_running_number_sent && train_running_number_valid) {
-        train_running_number_sent = true;
-        auto *rep = new position_report();
-        fill_message(rep);
-        auto *trn = new TrainRunningNumber();
-        trn->NID_OPERATIONAL.rawdata = 0;
-        int tmp = train_running_number;
-        for (int i=0; i<8; i++) {
-            trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
-            tmp /= 10;
+        if (!train_running_number_sent && train_running_number_valid) {
+            train_running_number_sent = true;
+            auto *rep = new position_report();
+            fill_message(rep);
+            auto *trn = new TrainRunningNumber();
+            trn->NID_OPERATIONAL.rawdata = 0;
+            int tmp = train_running_number;
+            for (int i=0; i<8; i++) {
+                trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
+                tmp /= 10;
+            }
+            rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+            send(std::shared_ptr<euroradio_message_traintotrack>(rep));
         }
-        rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
-        send(std::shared_ptr<euroradio_message_traintotrack>(rep));
     }
     if (terminal != nullptr) {
         std::unique_lock<std::mutex> lck(terminal->mtx);

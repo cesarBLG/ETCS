@@ -42,7 +42,7 @@ target_link_libraries(dmi PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf)
 target_include_directories(dmi PRIVATE ../include)
 
 if(WIN32)
-    target_link_libraries(dmi PRIVATE imagehlp wsock32)
+    target_link_libraries(dmi PRIVATE imagehlp wsock32 psapi)
 endif()
 if(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)

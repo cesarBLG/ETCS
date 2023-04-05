@@ -466,14 +466,20 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
             track_condition *tc2 = it->get();
             if (tc2->condition == tc->condition) {
-                if (tc->start <= tc2->start && tc->end >= tc2->start)
+                if (tc->start >= tc2->start && tc->start <= tc2->end) {
                     exists = true;
-                if (tc->start >= tc2->start && tc->start <= tc2->end)
-                    exists = true;
-                if (tc->start <= tc2->start && tc->end >= tc2->start)
+                    track_condition_targets.erase(tc2);
+                }
+                if (tc->start <= tc2->start && tc->end >= tc2->start) {
                     tc2->start = tc->start;
-                if (tc->end >= tc2->end && tc->start <= tc2->end)
+                    exists = true;
+                    track_condition_targets.erase(tc2);
+                }
+                if (tc->end >= tc2->end && tc->start <= tc2->end) {
                     tc2->end = tc->end;
+                    exists = true;
+                    track_condition_targets.erase(tc2);
+                }
             } 
         }
         if (!exists) {

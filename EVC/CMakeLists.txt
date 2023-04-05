@@ -28,7 +28,7 @@ target_include_directories(evc PRIVATE ../include)
 target_link_libraries(evc PRIVATE orts)
 
 if(WIN32)
-    target_link_libraries(evc PRIVATE imagehlp wsock32)
+    target_link_libraries(evc PRIVATE imagehlp wsock32 psapi)
 endif()
 if(ANDROID)
     target_link_libraries(evc PRIVATE log)
