@@ -1,5 +1,6 @@
 #include "config.h"
 #include "../DMI/dmi.h"
+#include "../Procedures/level_transition.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 using json = nlohmann::json;
@@ -23,6 +24,9 @@ void load_config(std::string serie)
             traindata_file = cfg["TrainData"];
             data_entry_type = 1;
         }
+    }
+    if (serie == "130" || serie == "730") {
+        ntc_available_no_stm.insert(0);
     }
     send_command("setSerie", serie);
 }

@@ -217,7 +217,7 @@ void update_ntc_transitions()
 }
 void assign_stm(int nid_ntc, bool driver)
 {
-    if (ntc_to_stm.find(nid_ntc) == ntc_to_stm.end()) {
+    if (ntc_to_stm.find(nid_ntc) == ntc_to_stm.end() || installed_stms.find(ntc_to_stm[nid_ntc]) == installed_stms.end() || !installed_stms[ntc_to_stm[nid_ntc]]->available()) {
         int nid_stm = -1;
         if (driver) {
             auto it = ntc_to_stm_lookup_table.find(nid_ntc);
@@ -337,6 +337,7 @@ void stm_object::report_override()
 }
 void stm_object::report_received(stm_state newstate)
 {
+    bool ordered = last_order && (*last_order == newstate || (*last_order == stm_state::CCS && newstate == stm_state::CS));
     if (state != newstate) {
         auto &available = ordered_transitions[(int)state];
         bool allowed = false;
@@ -344,14 +345,13 @@ void stm_object::report_received(stm_state newstate)
             if (t.to == newstate)
                 allowed = true;
         }
-        if (!allowed)
-            trigger_condition("B16");
         if (newstate == stm_state::NP)
             trigger_condition("A15");
         else if (newstate == stm_state::FA)
             trigger_condition("A17");
+        else if (!allowed || !ordered)
+            trigger_condition("B16");
     }
-
     if (state != newstate && newstate == stm_state::DA) {
         STM_max_speed = {};
         recalculate_MRSP();
@@ -361,9 +361,8 @@ void stm_object::report_received(stm_state newstate)
         biu_function = stm_biu_function();
     }
     state = newstate;
-    if (last_order && (*last_order == state || (*last_order == stm_state::CCS && state == stm_state::CS)))
+    if (ordered)
         last_order = {};
-
 }
 void stm_object::send_message(stm_message *msg)
 {
