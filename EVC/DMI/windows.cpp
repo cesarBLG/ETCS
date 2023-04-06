@@ -107,7 +107,7 @@ json level_window()
                     levels.push_back(get_text("Level 3"));
                     break;
                 case Level::NTC: {
-                    if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end()) {
+                    if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end() || ntc_available_no_stm.find(lti.nid_ntc) != ntc_available_no_stm.end()) {
                         levels.push_back(get_ntc_name(lti.nid_ntc));
                     }
                     break;
@@ -118,6 +118,9 @@ json level_window()
         levels = {get_text("Level 0"), get_text("Level 1"), get_text("Level 2")};
         for (auto &kvp : installed_stms) {
             levels.push_back(get_ntc_name(kvp.first));
+        }
+        for (int ntc : ntc_available_no_stm) {
+            levels.push_back(get_ntc_name(ntc));
         }
     }
     j["WindowDefinition"] = build_input_window(get_text("Level"), {build_input_field("", lv, levels)});

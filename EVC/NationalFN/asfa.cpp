@@ -96,7 +96,7 @@ void update_asfa()
         active = true;
         msg = true;
     }
-    if (!connected && (level == Level::N0 || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10)))) {
+    if (!connected && ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10)))) {
         CON = false;
         AKT = true;
         if (!brake_commanded) {
@@ -110,13 +110,13 @@ void update_asfa()
     } else {
         brake_commanded = false;
     }
-    if (ongoing_transition && (ongoing_transition->leveldata.level == Level::N0 || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
+    if (ongoing_transition && ((ongoing_transition->leveldata.level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();
             msg = true;
         }
-    } else if (level == Level::N0 || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10))) {
+    } else if ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();

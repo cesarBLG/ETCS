@@ -39,6 +39,7 @@ int ntc_to_ack;
 bool level_timer_started = false;
 int64_t level_timer;
 std::map<int, std::string> ntc_names;
+std::set<int> ntc_available_no_stm;
 #include <fstream>
 void load_level()
 {
@@ -230,7 +231,7 @@ void level_transition_information::set_leveldata(std::vector<target_level_inform
         if (p.level == Level::NTC) {
             assign_stm(p.nid_ntc, false);
             auto *stm = get_stm(p.nid_ntc);
-            if (stm != nullptr && stm->available()) {
+            if ((stm != nullptr && stm->available()) || (stm == nullptr && ntc_available_no_stm.find(p.nid_ntc) != ntc_available_no_stm.end())) {
                 leveldata = p;
                 return;
             }

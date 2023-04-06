@@ -83,7 +83,8 @@ void trigger_reaction(int reaction)
 {
     switch (reaction) {
         case 1:
-            trigger_brake_reason(0);
+            if (mode != Mode::SL && mode != Mode::PT && mode != Mode::NL && mode != Mode::RV && mode != Mode::PS)
+                trigger_brake_reason(0);
             break;
         case 2:
             //No reaction
