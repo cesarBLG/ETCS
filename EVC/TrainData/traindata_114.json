@@ -4,7 +4,7 @@
         "speed": 250,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
-        "airtight": 0,
+        "airtight": 1,
         "traction_systems": [
             {"name": "AC25kV", "nid_ctraction": 0}
         ],
@@ -75,7 +75,7 @@
         "speed": 250,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
-        "airtight": 0,
+        "airtight": 1,
         "traction_systems": [
             {"name": "AC25kV", "nid_ctraction": 0}
         ],
