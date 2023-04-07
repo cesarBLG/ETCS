@@ -1,5 +1,6 @@
 /*
  * European Train Control System
+ * Copyright (C) 2019  Iván Izquierdo
  * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
@@ -14,32 +15,15 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */#ifndef _DATA_ENTRY_H
-#define _DATA_ENTRY_H
-#include "subwindow.h"
-#include "input_data.h"
-#include <nlohmann/json.hpp>
-#include <map>
-using json = nlohmann::json;
-class input_window : public subwindow
+ */
+#ifndef _VOLUME_H
+#define _VOLUME_H
+#include "data_entry.h"
+class volume_window : public input_window
 {
-    TextButton button_yes;
-    Button* empty_button[12];
-    int cursor=0;
-    int nfields;
-    protected:
-    Component confirmation_label;
-    std::map<int, input_data*> inputs;
-    Button* buttons[12];
-    virtual void setLayout() override;
-    virtual void sendInformation();
-    void create();
     public:
-    input_window(std::string name, int nfields, bool fullscreen);
-    void buildFrom(json &j);
-    void fieldCheckResult(json &j);
-    void crossResult(json &j);
-    void inputChanged(input_data *input);
-    virtual ~input_window();
+    volume_window();
+    void setLayout() override;
+    void sendInformation() override;
 };
 #endif

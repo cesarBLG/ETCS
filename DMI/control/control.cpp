@@ -24,6 +24,7 @@
 #include "../window/train_data.h"
 #include "../window/fixed_train_data.h"
 #include "../window/driver_id.h"
+#include "../window/volume.h"
 #include "../window/menu_main.h"
 #include "../window/menu_radio.h"
 #include "../window/menu_override.h"
@@ -152,6 +153,13 @@ void setWindow(json &data)
                 ((input_window*)t)->buildFrom(def);
             }
             w = t;
+        } else if (name == "volume_window") {
+            volume_window *v;
+            if (same) v = (volume_window*)active;
+            else v = new volume_window();
+            w = v;
+        } else if (name == "brightness_window") {
+            w = active; //TODO
         } else {
             if (same) w = active;
             else
