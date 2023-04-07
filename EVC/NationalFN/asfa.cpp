@@ -96,7 +96,7 @@ void update_asfa()
         active = true;
         msg = true;
     }
-    if (!connected && ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10)))) {
+    if (!connected && ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && nid_ntc == 0))) {
         CON = false;
         AKT = true;
         if (!brake_commanded) {
@@ -121,8 +121,7 @@ void update_asfa()
             CON = true;
             akt_delay = get_milliseconds();
             msg = true;
-        }
-        else if (AKT && get_milliseconds()-akt_delay > 500)
+        } else if (AKT && get_milliseconds()-akt_delay > 500)
             AKT = false;
     } else {
         if (CON) {

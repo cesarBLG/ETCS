@@ -349,7 +349,7 @@ void stm_object::report_received(stm_state newstate)
             trigger_condition("A15");
         else if (newstate == stm_state::FA)
             trigger_condition("A17");
-        else if (!allowed || !ordered)
+        else if (!allowed || (!ordered && newstate != stm_state::PO))
             trigger_condition("B16");
     }
     if (state != newstate && newstate == stm_state::DA) {

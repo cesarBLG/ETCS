@@ -614,9 +614,11 @@ void update_dmi_windows()
             if (changed)
                 active_window_dmi = language_window();
         } else if (active_dialog_step == "S3") {
-            
+            if (changed)
+                active_window_dmi = R"({"active":"volume_window"})"_json;
         } else if (active_dialog_step == "S4") {
-            
+            if (changed)
+                active_window_dmi = R"({"active":"brightness_window"})"_json;
         } else if (active_dialog_step == "S5") {
             if (changed)
                 active_window_dmi = system_version_window();
@@ -977,6 +979,10 @@ void validate_data_entry(std::string name, json &result)
             remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
             active_dialog_step = "S1";
         }
+    } else if (name == get_text("Brightness")) {
+        active_dialog_step = "S1";
+    } else if (name == get_text("Volume")) {
+        active_dialog_step = "S1";
     } else {
         for (auto &kvp : installed_stms) {
             auto *stm = kvp.second;
@@ -1190,10 +1196,10 @@ void update_dialog_step(std::string step, std::string step2)
     } else if (active_dialog == dialog_sequence::Settings) {
         if (step == "Language")
             active_dialog_step = "S2";
-        /*else if (step == "Volume")
+        else if (step == "Volume")
             active_dialog_step = "S3";
         else if (step == "Brightness")
-            active_dialog_step = "S4";*/
+            active_dialog_step = "S4";
         else if (step == "SystemVersion")
             active_dialog_step = "S5";
         else if (step == "SetVBC")

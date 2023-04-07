@@ -6,7 +6,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             window/window_main.cpp state/time_hour.cpp window/subwindow.cpp window/data_entry.cpp window/data_validation.cpp 
             window/nav_buttons.cpp window/menu.cpp window/menu_main.cpp window/menu_override.cpp window/menu_radio.cpp 
             window/menu_spec.cpp window/menu_settings.cpp window/menu_ntc.cpp window/track_ahead_free.cpp 
-            window/driver_id.cpp
+            window/driver_id.cpp window/volume.cpp
             window/input_data.cpp window/fixed_train_data.cpp window/keyboard.cpp 
             window/train_data.cpp  STM/stm_objects.cpp ../EVC/Packets/STM/message.cpp
             planning/planning.cpp control/control.cpp state/gps_pos.cpp 
@@ -43,9 +43,10 @@ target_include_directories(dmi PRIVATE ../include)
 
 if(WIN32)
     target_link_libraries(dmi PRIVATE imagehlp wsock32 psapi)
-endif()
-if(ANDROID)
+elseif(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
+else ()
+    target_link_libraries(dmi PRIVATE asound)
 endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
