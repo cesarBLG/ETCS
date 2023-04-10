@@ -1,5 +1,5 @@
 {
-	"730" : {
+	"730 Simple" : {
         "length": 189,
         "speed": 250,
         "cant_deficiency": 206,
@@ -69,7 +69,7 @@
             
         }
     },
-    "730_doble" : {
+    "730 Doble" : {
         "length": 375,
         "speed": 250,
         "cant_deficiency": 206,
@@ -139,7 +139,7 @@
             
         }
     },
-    "130" : {
+    "130 Simple" : {
         "length": 189,
         "speed": 250,
         "cant_deficiency": 206,
@@ -211,7 +211,7 @@
             
         }
     },
-    "130_doble" : {
+    "130 Doble" : {
         "length": 375,
         "speed": 250,
         "cant_deficiency": 206,

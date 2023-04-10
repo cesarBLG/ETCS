@@ -1,5 +1,5 @@
 {
-	"454" : {
+	"1UT" : {
         "length": 150,
         "speed": 160,
         "cant_deficiency": 165,
@@ -68,7 +68,7 @@
             
         }
     },
-	"454_doble" : {
+	"2UT" : {
         "length": 298,
         "speed": 160,
         "cant_deficiency": 165,
