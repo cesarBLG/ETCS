@@ -153,21 +153,18 @@ msgid "Main"
 msgstr "Menú"
 
 #: language/language.cpp:37 window/nav_buttons.cpp:35
-#, fuzzy
 msgctxt "Navigation bar"
 msgid "Over-\n"
 "ride"
 msgstr "Rebase"
 
 #: language/language.cpp:38 window/nav_buttons.cpp:41
-#, fuzzy
 msgctxt "Navigation bar"
 msgid "Data\n"
 "view"
 msgstr "Datos"
 
 #: language/language.cpp:39 window/nav_buttons.cpp:47
-#, fuzzy
 msgctxt "Navigation bar"
 msgid "Spec"
 msgstr "Especial"
