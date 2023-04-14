@@ -279,7 +279,7 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
     for (auto &d : A_safe.dist_step) {
         for (auto &V : A_safe.speed_step) {
             bool slip = (--redadh.upper_bound(d))->second || slippery_rail_driver;
-            double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP == 3 ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;
+            double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;
             if (!slip || A_MAXREDADH < 0)
                 A_MAXREDADH = std::numeric_limits<double>::max();
             A_safe.accelerations[d][V] =  std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d);

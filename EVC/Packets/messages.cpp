@@ -257,7 +257,7 @@ void update_track_comm()
         check_linking();
         if (reading) {
             double elapsed = d_estfront_dir[odometer_orientation == -1]-L_antenna_front-last_passed_distance;
-            if (prevpig==-1) {
+            /*if (prevpig==-1) {
                 if (elapsed > 12*8)
                     balise_group_passed();
             } else {
@@ -269,16 +269,18 @@ void update_track_comm()
                     balise_group_passed();
                 else if (dir == -1 && elapsed > std::max(v1, v2)*12)
                     balise_group_passed();
-            }
+            }*/
+            if (elapsed > 12)
+                balise_group_passed();
         }
     } else {
         eurobalise_telegram t = pending_telegrams.front().first;
         distance passed_dist = pending_telegrams.front().second.first-L_antenna_front;
         log_message(std::shared_ptr<ETCS_message>(new eurobalise_telegram(t)), pending_telegrams.front().second.first, pending_telegrams.front().second.second);
         pending_telegrams.pop_front();
-        extern optional<distance> rmp_position;
-        bool rev = mode == Mode::PT || mode == Mode::RV;
-        if (rmp_position && ((rev && *rmp_position < d_estfront) || (!rev && *rmp_position > d_estfront))) {
+        extern optional<float> rmp_position;
+        int rev = ((mode == Mode::PT || mode == Mode::RV) ? -1 : 1)*odometer_orientation;
+        if (rmp_position && (*rmp_position - odometer_value)*rev > 0.1) {
             update_track_comm();
             return;
         }
@@ -342,18 +344,19 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     int m_version=-1;
     int dir=-1;
     int prevno=-1;
+    int n_total=-1;
     std::vector<eurobalise_telegram> read_telegrams;
     for (int i=0; i<telegrams.size(); i++) {
         eurobalise_telegram t = telegrams[i];
-        if (!t.readerror || m_version == -1)
-            m_version = t.M_VERSION;
         if (!t.readerror) {
+            m_version = t.M_VERSION;
             nid_bg = t.NID_BG;
             nid_c = t.NID_C;
             if (prevno == -1)
                 prevno = t.N_PIG;
             else
-                dir = t.N_PIG<prevno; 
+                dir = t.N_PIG<prevno;
+            n_total = t.N_TOTAL;
             read_telegrams.push_back(t);
         }
     }
@@ -408,48 +411,38 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
             return;
     }
 
-    std::set<int> missed;
-    for (int i=0; i<read_telegrams.size(); i++) {
-        eurobalise_telegram t = read_telegrams[i];
-        if (i==0 && t.N_PIG != 0) {
-            for (int j=0; j<t.N_PIG; j++)
-                missed.insert(j);
-        }
-        if ((i>1 && telegrams[i-1].N_PIG+1<t.N_PIG)) {
-            for (int j=telegrams[i-1].N_PIG; j<t.N_PIG; j++)
-                missed.insert(j);
-        }
-        if (i+1==read_telegrams.size() && t.N_PIG!=t.N_TOTAL) {
-            for (int j=t.N_PIG+1; j<=t.N_TOTAL; j++)
-                missed.insert(j);
-        }
-    }
-    for (int pig : missed) {
-        bool reject=true;
-        for (int i=0; i<read_telegrams.size(); i++) {
-            eurobalise_telegram t = read_telegrams[i];
-            if ((t.M_DUP == M_DUP_t::DuplicateOfNext && t.N_PIG+1==pig) || (t.M_DUP == M_DUP_t::DuplicateOfPrev && t.N_PIG==pig+1)) {
-                if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
+    if (n_total == -1) {
+        accepted1 = false;
+    } else {
+        for (int pig=0; pig<=n_total; pig++) {
+            bool reject=true;
+            for (int i=0; i<read_telegrams.size() && reject; i++) {
+                eurobalise_telegram t = read_telegrams[i];
+                if (t.N_PIG == pig) {
                     reject = false;
-                } else {
-                    if (dir!=-1) {
+                } else if ((t.M_DUP == M_DUP_t::DuplicateOfNext && t.N_PIG+1==pig) || (t.M_DUP == M_DUP_t::DuplicateOfPrev && t.N_PIG==pig+1)) {
+                    if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
                         reject = false;
                     } else {
-                        bool directional = false;
-                        for (int j=0; j<t.packets.size(); j++) {
-                            ETCS_packet *p = t.packets[i].get();
-                            if (p->directional && ((ETCS_directional_packet*)p)->Q_DIR != Q_DIR_t::Both)
-                                directional = true;
-                        }
-                        if (!directional)
+                        if (dir!=-1) {
                             reject = false;
+                        } else {
+                            bool directional = false;
+                            for (int j=0; j<t.packets.size(); j++) {
+                                ETCS_packet *p = t.packets[i].get();
+                                if (p->directional && ((ETCS_directional_packet*)p)->Q_DIR != Q_DIR_t::Both)
+                                    directional = true;
+                            }
+                            if (!directional)
+                                reject = false;
+                        }
                     }
+                    break;
                 }
-                break;
             }
+            if (reject)
+                accepted1 = false;
         }
-        if (reject)
-            accepted1 = false;
     }
 
     std::vector<eurobalise_telegram> message;

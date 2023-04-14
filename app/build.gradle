@@ -1,0 +1,78 @@
+def buildAsLibrary = project.hasProperty('BUILD_AS_LIBRARY');
+def buildAsApplication = !buildAsLibrary
+if (buildAsApplication) {
+    apply plugin: 'com.android.application'
+}
+else {
+    apply plugin: 'com.android.library'
+}
+
+android {
+    compileSdkVersion 31
+    defaultConfig {
+        if (buildAsApplication) {
+            applicationId "com.etcs.dmi"
+        }
+        minSdkVersion 16
+        targetSdkVersion 31
+        versionCode 6
+        versionName "0.6"
+        externalNativeBuild {
+            //ndkBuild {
+            //    arguments "APP_PLATFORM=android-16"
+            //    abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            //    targets "dmi", "evc"
+            //}
+             cmake {
+                 version "3.14+"
+                 arguments "-DANDROID_APP_PLATFORM=android-16", "-DANDROID_STL=c++_static"
+                 // abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+                 abiFilters 'arm64-v8a'
+             }
+        }
+    }
+    ndkVersion "21.1.6352462"
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lint {
+        abortOnError false
+    }
+    namespace 'com.etcs.dmi'
+    if (!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
+        sourceSets{
+            main {
+                jniLibs.srcDir 'libs'
+            }
+        }
+        externalNativeBuild {
+            //ndkBuild {
+            //    path 'jni/Android.mk'
+            //}
+             cmake {
+                 path '../CMakeLists.txt'
+             }
+        }
+       
+    }
+
+    if (buildAsLibrary) {
+        libraryVariants.all { variant ->
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith(".aar")) {
+                    def fileName = "com.etcs.dmi.aar";
+                    output.outputFile = new File(outputFile.parent, fileName);
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.core:core:1.0.0'
+}

@@ -29,7 +29,7 @@ int get_volume()
     return 50;
 }
 #elif defined(_WIN32)
-#include "Windows.h"
+#include <Windows.h>
 void set_volume(int percent)
 {
     /*
@@ -37,7 +37,6 @@ void set_volume(int percent)
 }
 int get_volume()
 {
-    /*
     DWORD volume;
     // Get the volume for the default playback device
     if (waveOutGetVolume(NULL, &volume) != MMSYSERR_NOERROR) {
@@ -48,8 +47,6 @@ int get_volume()
     WORD leftVolume = LOWORD(volume);
     WORD rightVolume = HIWORD(volume);
     return (leftVolume+rightVolume)/2*100/65536;
-    */
-    return 50;
 }
 #elif defined(__unix__)
 #include <cstdlib>

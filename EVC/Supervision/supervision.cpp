@@ -216,11 +216,11 @@ void update_monitor_transitions(bool suptargchang, const std::list<target> &supe
 }
 #include <chrono>
 #include <iostream>
-optional<distance> standstill_position;
+optional<float> standstill_position;
 bool standstill_applied;
-optional<distance> rollaway_position;
+optional<float> rollaway_position;
 bool rollaway_applied;
-optional<distance> rmp_position;
+optional<float> rmp_position;
 bool rmp_applied;
 optional<distance> pt_position;
 bool pt_applied;
@@ -234,13 +234,13 @@ void update_supervision()
     }
     if (mode == Mode::SB) {
         if (!standstill_position)
-            standstill_position = d_estfront;
-        if (std::abs(d_estfront - *standstill_position) > D_NVROLL && !standstill_applied) {
+            standstill_position = odometer_value;
+        if (std::abs(odometer_value - *standstill_position) > D_NVROLL && !standstill_applied) {
             trigger_brake_reason(1);
             standstill_applied = true;
         }
         if (brake_acknowledged) {
-            standstill_position = d_estfront;
+            standstill_position = odometer_value;
             standstill_applied = false;
         }
     } else {
@@ -248,16 +248,16 @@ void update_supervision()
         standstill_applied = false;
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::SR || mode == Mode::LS || mode == Mode::PT || mode == Mode::RV || mode == Mode::SH || mode == Mode::UN) {
-        if (!rollaway_position || (reverser_direction == 1 && d_estfront > *rollaway_position) || (reverser_direction == -1 && d_estfront < *rollaway_position))
-            rollaway_position = d_estfront_dir[odometer_orientation == -1];
+        if (!rollaway_position || (reverser_direction*odometer_orientation == 1 && odometer_value > *rollaway_position) || (reverser_direction * odometer_orientation == -1 && odometer_value < *rollaway_position))
+            rollaway_position = odometer_value;
         if (!rollaway_applied) {
-            if ((reverser_direction != 1 && d_estfront - *rollaway_position > D_NVROLL) || (reverser_direction != -1 && *rollaway_position - d_estfront > D_NVROLL)) {
+            if ((reverser_direction * odometer_orientation != 1 && odometer_value - *rollaway_position > D_NVROLL) || (reverser_direction * odometer_orientation != -1 && *rollaway_position - odometer_value > D_NVROLL)) {
                 rollaway_applied = true;
                 trigger_brake_reason(1);
             }
         }
         if (brake_acknowledged) {
-            rollaway_position = d_estfront_dir[odometer_orientation == -1];
+            rollaway_position = odometer_value;
             rollaway_applied = false;
         }
     } else {
@@ -266,18 +266,16 @@ void update_supervision()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::SR || mode == Mode::LS || mode == Mode::PT || mode == Mode::RV) {
         int dir = odometer_orientation * ((mode == Mode::PT || mode == Mode::RV) ? -1 : 1);
-        if (rmp_position && rmp_position->get_orientation() != dir)
-            rmp_position = {};
-        if (!rmp_position || d_estfront > *rmp_position)
-            rmp_position = d_estfront_dir[dir == -1];
+        if (!rmp_position || (odometer_value - *rmp_position)*dir > 0)
+            rmp_position = odometer_value;
         if (!rmp_applied) {
-            if (*rmp_position - d_estfront > D_NVROLL) {
+            if ((*rmp_position - odometer_value)*dir > D_NVROLL) {
                 rmp_applied = true;
                 trigger_brake_reason(1);
             }
         }
         if (brake_acknowledged) {
-            rmp_position = d_estfront_dir[dir == -1];
+            rmp_position = odometer_value;
             rmp_applied = false;
         }
     } else {
@@ -393,7 +391,7 @@ void update_supervision()
             }
         }
         bool slip = slippery_rail_driver;
-        double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP == 3 ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;      
+        double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;      
         if (indication_target != nullptr && A_MAXREDADH == -1) {
             V_target = indication_target->get_target_speed();
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {
