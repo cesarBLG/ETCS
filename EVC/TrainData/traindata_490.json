@@ -1,5 +1,5 @@
 {
-	"490" : {
+	"1UT" : {
         "length": 80,
         "speed": 160,
         "cant_deficiency": 165,
@@ -68,7 +68,7 @@
             
         }
     },
-	"490_doble" : {
+	"2UT" : {
         "length": 160,
         "speed": 160,
         "cant_deficiency": 165,

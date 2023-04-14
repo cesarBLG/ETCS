@@ -1,5 +1,5 @@
 {
-	 "108" : {
+	 "Simple" : {
         "length": 200,
         "speed": 320,
         "cant_deficiency": 206,
@@ -75,7 +75,7 @@
             
         }
     },
-    "108_doble" : {
+    "Doble" : {
         "length": 400,
         "speed": 320,
         "cant_deficiency": 206,

@@ -143,7 +143,7 @@ msgstr "VIAJ A"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
-msgstr "INCLINACIÓN 1"
+msgstr "PEND 1"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
@@ -151,7 +151,7 @@ msgstr "VIAJ B"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
-msgstr "INCLINACIÓN 3"
+msgstr "PEND 3"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
@@ -159,7 +159,7 @@ msgstr "VIAJ C"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
-msgstr "INCLINACIÓN 5"
+msgstr "PEND 5"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
@@ -167,11 +167,11 @@ msgstr "VIAJ D"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
-msgstr "INCLINACIÓN 7"
+msgstr "PEND 7"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
-msgstr "MERC P/V N"
+msgstr "MERC P/V"
 
 #: DMI/windows.cpp:851
 msgid "FP 2"
@@ -187,7 +187,7 @@ msgstr "FP 4"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
-msgstr "MERC F/G N"
+msgstr "MERC F/G"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
