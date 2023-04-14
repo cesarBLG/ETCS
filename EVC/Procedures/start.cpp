@@ -18,7 +18,7 @@ void update_SoM()
     som_step save_status = som_status;
     if (som_active && !cab_active[0] && !cab_active[1])
         desk_closed_som();
-    if (mode != Mode::SB || !cab_active[0] && !cab_active[1]) {
+    if (mode != Mode::SB || (!cab_active[0] && !cab_active[1])) {
         som_active = false;
         som_status = S0;
     } else {

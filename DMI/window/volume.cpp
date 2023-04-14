@@ -29,15 +29,13 @@ int get_volume()
     return 50;
 }
 #elif defined(_WIN32)
-#include <Windows.h>
+//#include <Windows.h>
 void set_volume(int percent)
 {
-    /*
-    */
 }
 int get_volume()
 {
-    DWORD volume;
+    /*DWORD volume;
     // Get the volume for the default playback device
     if (waveOutGetVolume(NULL, &volume) != MMSYSERR_NOERROR) {
         std::cerr << "Error getting system volume." << std::endl;
@@ -46,7 +44,8 @@ int get_volume()
     // Extract the left and right channel volumes
     WORD leftVolume = LOWORD(volume);
     WORD rightVolume = HIWORD(volume);
-    return (leftVolume+rightVolume)/2*100/65536;
+    return (leftVolume+rightVolume)/2*100/65536;*/
+    return 50;
 }
 #elif defined(__unix__)
 #include <cstdlib>
