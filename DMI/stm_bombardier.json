@@ -16,6 +16,12 @@
                     "valign": "center"
                 },
                 {
+                    "id": 5,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
                     "id": 6,
                     "font_size": 20,
                     "halign": "center",
@@ -56,8 +62,160 @@
                     "font_size": 20,
                     "halign": "center",
                     "valign": "center"
+                },
+			],
+			"nid_stm": 0,
+            "indicators": [
+                {
+                    "id": 15,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 16,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 17,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 18,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 19,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 20,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 21,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 22,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 23,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 24,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+				                {
+                    "id": 25,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 26,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 27,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 28,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 29,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 30,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 31,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 32,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+				                {
+                    "id": 34,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+				                {
+                    "id": 35,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 36,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 37,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 38,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 39,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 40,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
                 }
-                
             ],
             "positions": [
                 {
@@ -152,6 +310,136 @@
                 {
                     "id": 14,
                     "file": "LZB/80.bmp",
+                    "text": false
+                },
+				            {
+                    "id": 15,
+                    "file": "EBICAB_ASFA/frenar_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 16,
+                    "file": "EBICAB_ASFA/frenar_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 17,
+                    "file": "EBICAB_ASFA/rec_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 18,
+                    "file": "EBICAB_ASFA/rec_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 19,
+                    "file": "EBICAB_ASFA/verde_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 20,
+                    "file": "EBICAB_ASFA/verde_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 21,
+                    "file": "EBICAB_ASFA/alarma_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 22,
+                    "file": "EBICAB_ASFA/alarma_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 23,
+                    "file": "EBICAB_ASFA/rojo_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 24,
+                    "file": "EBICAB_ASFA/rojo_on.bmp",
+                    "text": false
+                },
+				                {
+                    "id": 25,
+                    "file": "EBICAB_ASFA/rearme_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 26,
+                    "file": "EBICAB_ASFA/rearme_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 27,
+                    "file": "EBICAB_ASFA/v_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 28,
+                    "file": "EBICAB_ASFA/v_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 29,
+                    "file": "EBICAB_ASFA/rebase_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 30,
+                    "file": "EBICAB_ASFA/rebase_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 31,
+                    "file": "EBICAB_ASFA/i_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 32,
+                    "file": "EBICAB_ASFA/i_on.bmp",
+                    "text": false
+                },
+				                {
+                    "id": 33,
+                    "file": "EBICAB_ASFA/eficacia_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 34,
+                    "file": "EBICAB_ASFA/eficacia_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 35,
+                    "file": "EBICAB_ASFA/fin_off.bmp",
+                    "text": false
+                },
+                {
+                    "id": 36,
+                    "file": "EBICAB_ASFA/fin_on.bmp",
+                    "text": false
+                },
+                {
+                    "id": 37,
+                    "file": "EBICAB_ASFA/ATP_icono.bmp",
+                    "text": false
+                },
+                {
+                    "id": 38,
+                    "file": "EBICAB_ASFA/ave.bmp",
+                    "text": false
+                },
+				                {
+                    "id": 39,
+                    "file": "EBICAB_ASFA/conv.bmp",
+                    "text": false
+                },
+                {
+                    "id": 40,
+                    "file": "EBICAB_ASFA/CM.bmp",
                     "text": false
                 }
             ],
