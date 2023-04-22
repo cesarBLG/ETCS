@@ -22,6 +22,7 @@
 #include "../control/control.h"
 class window
 {
+    protected:
     Layout *l;
     std::function<void(window*)> constructfun;
     public:
