@@ -19,35 +19,7 @@
 #include "volume.h"
 #include "../tcp/server.h"
 #include <iostream>
-#ifdef __ANDROID__
-void set_volume(int percent)
-{
-
-}
-int get_volume()
-{
-    return 50;
-}
-#elif defined(_WIN32)
-//#include <Windows.h>
-void set_volume(int percent)
-{
-}
-int get_volume()
-{
-    /*DWORD volume;
-    // Get the volume for the default playback device
-    if (waveOutGetVolume(NULL, &volume) != MMSYSERR_NOERROR) {
-        std::cerr << "Error getting system volume." << std::endl;
-        return 1;
-    }
-    // Extract the left and right channel volumes
-    WORD leftVolume = LOWORD(volume);
-    WORD rightVolume = HIWORD(volume);
-    return (leftVolume+rightVolume)/2*100/65536;*/
-    return 50;
-}
-#elif defined(__unix__)
+#ifdef DMI_VOLUME_ALSA
 #include <cstdlib>
 #include <alsa/asoundlib.h>
 void set_volume(int percent)
@@ -101,6 +73,15 @@ int get_volume()
     // Compute the average volume
     int averageVolume = (int)((currentVolume - minVolume) * 100.0 / (maxVolume - minVolume) + 0.5);
     return (averageVolume/10)*10;
+}
+#else
+void set_volume(int percent)
+{
+
+}
+int get_volume()
+{
+    return 50;
 }
 #endif
 volume_window::volume_window() : input_window("Volume", 1, false)
