@@ -1,3 +1,11 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2023  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 #include "stm_objects.h"
 #include "../monitor.h"
 #include "../graphics/display.h"
@@ -55,7 +63,7 @@ void setup_areas()
     areas["G12"] = {397, 415, 120, 50};
     areas["G13"] = {517, 415, 63, 50};
 }
-ntc_window::ntc_window(int nid_stm) : window(construct_main), nid_stm(nid_stm)
+ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
     #ifdef __ANDROID__
     extern std::string filesDir;
@@ -73,10 +81,11 @@ ntc_window::ntc_window(int nid_stm) : window(construct_main), nid_stm(nid_stm)
             break;
         }
     }
+    constructfun = [this](window *w) {construct_main(w, customized != nullptr);};
 }
 void ntc_window::display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton)
 {
-    auto it = indicators.find(id);
+    auto it = indicators.find((isButton ? 256 : 0) + id);
     if (it != indicators.end()) {
         remove(it->second);
         delete it->second;
@@ -88,9 +97,18 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
     std::vector<int> pos;
     if (customized != nullptr)
     {
-        if (customized->positions.find(position) == customized->positions.end())
-            return;
-        pos = customized->positions[position];
+        if (isButton)
+        {
+            if (customized->button_positions.find(position) == customized->button_positions.end())
+                return;
+            pos = customized->button_positions[position];
+        }
+        else
+        {
+            if (customized->positions.find(position) == customized->positions.end())
+                return;
+            pos = customized->positions[position];
+        }
     }
     else
     {
@@ -115,7 +133,9 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
             return;
         pos = areas[area];
     }
-    Component *c = new Component(pos[2],pos[3]);
+    Component *c;
+    if (isButton) c = new Button(pos[2], pos[3]);
+    else c = new Component(pos[2],pos[3]);
     Color bg = get_color((properties>>3)&7, true);
     Color fg = get_color(properties&7, false);
     c->setBackgroundColor(bg);
@@ -126,20 +146,21 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
         bool text_also = true;
         if (icon > 0 && customized->icons.find(icon) != customized->icons.end())
         {
-            text_also = customized->icons[icon].text_also;
-            c->addImage("symbols/STM/"+customized->icons[icon].file);
+            auto &ic = customized->icons[icon];
+            text_also = ic.text_also;
+            c->addImage("symbols/STM/"+ic.file);
         }
         if (text_also && text.size() > 0)
         {
-            if (customized != nullptr && customized->indicators.find(id) != customized->indicators.end())
+            customized_dmi::indicator ind;
+            ind.font_size = 12;
+            ind.align = CENTER;
+            if (customized != nullptr)
             {
-                auto &ind = customized->indicators[id];
-                c->addText(text, 0, 0, ind.font_size, fg, ind.align);
+                if (!isButton && customized->indicators.find(id) != customized->indicators.end()) ind = customized->indicators[id];
+                else if (isButton && customized->buttons.find(id) != customized->buttons.end()) ind = customized->buttons[id];
             }
-            else
-            {
-                c->addText(text, 0, 0, 12, fg);
-            }
+            c->addText(text, 0, 0, ind.font_size, fg, ind.align);
         }
     }
     else
@@ -261,7 +282,7 @@ void parse_stm_message(const stm_message &message)
                         text += (c&0x3f)+0x80;
                     }
                 }
-                window->display_indicator(icon.NID_ICON, icon.NID_INDPOS, icon.NID_ICON, text, icon.M_IND_ATTRIB, false);
+                window->display_indicator(icon.NID_INDICATOR, icon.NID_INDPOS, icon.NID_ICON, text, icon.M_IND_ATTRIB, false);
             }
             /*for (auto &var : r.log_entries)
             {
@@ -360,15 +381,15 @@ void update_stm_windows()
     for (auto it = ntc_windows.begin(); it != ntc_windows.end(); )
     {
         if (/*get_milliseconds() - it->second->last_time > 2000 ||*/
-            (it->second->state != stm_state::DA && default_window == it->second) ||
+            (it->second->state != stm_state::DA && prev_default_window == it->second) ||
             (it->second->state != stm_state::DA && it->second->state != stm_state::HS))
         {
-            if (it->second == default_window)
+            if (it->second == prev_default_window)
             {
-                active_windows.erase(default_window);
                 prev_default_window = nullptr;
                 active_ntc_window = nullptr;
             }
+            active_windows.erase(it->second);
             delete it->second;
             it = ntc_windows.erase(it);
             continue;
@@ -393,7 +414,58 @@ void update_stm_windows()
                 }
             }
         }
-        if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr && active_ntc_window->customized->etcs_dial_range > 0)
+        default_window->clearLayout();
+        default_window->construct();
+        if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr)
+        {
+            //extern TextButton main_button;
+            //extern TextButton override_button;
+            //extern TextButton dataview_button;
+            //extern TextButton special_button;
+            //extern TextButton settings_button;
+            extern Component a4;
+            extern Component modeRegion;
+            extern Component levelRegion;
+            extern Component c1;
+            extern Component c7;
+            extern Component c9;
+            extern Component e1;
+            for (auto &kvp : active_ntc_window->customized->moved_areas)
+            {
+                Component *moved = nullptr;
+                if (kvp.first == "A4") moved = &a4;
+                //else if (kvp.first == "F1") moved = &main_button;
+                //else if (kvp.first == "F2") moved = &override_button;
+                //else if (kvp.first == "F3") moved = &dataview_button;
+                //else if (kvp.first == "F4") moved = &special_button;
+                //else if (kvp.first == "F5") moved = &settings_button;
+                else if (kvp.first == "B7") moved = &modeRegion;
+                else if (kvp.first == "C8") moved = &levelRegion;
+                else if (kvp.first == "C1") moved = &c1;
+                else if (kvp.first == "C7") moved = &c7;
+                else if (kvp.first == "C9") moved = &c9;
+                else if (kvp.first == "E1") moved = &e1;
+                if (moved != nullptr)
+                {
+                    active_ntc_window->remove(moved);
+                    active_ntc_window->addToLayout(moved, new RelativeAlignment(0, kvp.second.x, kvp.second.y));
+                }
+            }
+        }
+        if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr && !active_ntc_window->customized->etcs_supervision)
+        {
+            extern Component csg;
+            extern Component a2;
+            extern Component a23;
+            extern Component distanceBar;
+            extern Component releaseRegion;
+            active_ntc_window->remove(&csg);
+            active_ntc_window->remove(&a2);
+            active_ntc_window->remove(&a23);
+            active_ntc_window->remove(&distanceBar);
+            active_ntc_window->remove(&releaseRegion);
+        }
+        else if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr && active_ntc_window->customized->etcs_dial_range > 0)
             maxSpeed = active_ntc_window->customized->etcs_dial_range;
         else
             maxSpeed = etcsDialMaxSpeed;

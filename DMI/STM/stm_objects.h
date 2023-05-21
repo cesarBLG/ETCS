@@ -1,3 +1,11 @@
+/*
+ * European Train Control System
+ * Copyright (C) 2019-2023  César Benito <cesarbema2009@hotmail.com>
+ * 
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
 #pragma once
 #include <list>
 #include "../graphics/color.h"
@@ -38,7 +46,7 @@ struct stm_monitoring_data
         Dtarget_display = info.Q_DISPLAY_TD.rawdata;
     }
 };
-void construct_main(window *w);
+void construct_main(window *w, bool customized);
 struct customized_dmi
 {
     int nid_stm;
@@ -46,9 +54,26 @@ struct customized_dmi
     {
         int font_size;
         int align;
+        indicator() = default;
+        indicator(const json &j)
+        {
+            font_size = j["font_size"].get<int>();
+            std::string h = j["halign"].get<std::string>();
+            align = h == "center" ? CENTER : (h == "left" ? LEFT : RIGHT);
+            std::string v = j["valign"].get<std::string>();
+            align |= h == "center" ? CENTER : (h == "up" ? UP : DOWN);
+        }
+    };
+    struct moved_area
+    {
+        int x;
+        int y;
+        std::string soft_key;
     };
     std::map<int, indicator> indicators;
+    std::map<int, indicator> buttons;
     std::map<int, std::vector<int>> positions;
+    std::map<int, std::vector<int>> button_positions;
     struct icon
     {
         std::string file;
@@ -61,22 +86,25 @@ struct customized_dmi
     double fast_flash_freq;
     int flash_style;
     std::map<int, sdlsounddata*> sounds;
+    std::map<std::string,moved_area> moved_areas;
     customized_dmi(json &j)
     {
         nid_stm = j["nid_stm"].get<int>();
         for (auto &inds : j["indicators"])
         {
-            indicator ind;
-            ind.font_size = inds["font_size"].get<int>();
-            std::string h = inds["halign"].get<std::string>();
-            ind.align = h == "center" ? CENTER : (h == "left" ? LEFT : RIGHT);
-            std::string v = inds["valign"].get<std::string>();
-            ind.align |= h == "center" ? CENTER : (h == "up" ? UP : DOWN);
-            indicators[inds["id"].get<int>()] = ind;
+            indicators[inds["id"].get<int>()] = indicator(inds);
+        }
+        for (auto &inds : j["buttons"])
+        {
+            buttons[inds["id"].get<int>()] = indicator(inds);
         }
         for (auto &pos : j["positions"])
         {
             positions[pos["id"].get<int>()] = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
+        }
+        for (auto &pos : j["button_positions"])
+        {
+            button_positions[pos["id"].get<int>()] = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
         }
         for (auto &ics : j["icons"])
         {
@@ -94,6 +122,16 @@ struct customized_dmi
         {
             sounds[snds["id"].get<int>()] = loadSound(snds["file"].get<std::string>());
         }
+        if (j.contains("moved_areas"))
+        {
+            for (auto &area : j["moved_areas"])
+            {
+                moved_area a;
+                a.x = area["x"];
+                a.y = area["y"];
+                moved_areas[area["area"]] = a;
+            }
+        }
     }
     ~customized_dmi()
     {
@@ -108,7 +146,7 @@ class ntc_window : public window
 {
     int nid_stm;
     std::map<int, Component*> indicators;
-    //std::map<int, image_graphic*> icons;
+    std::map<int, std::shared_ptr<sdl_texture>> icons;
     public:
     stm_state state;
     int64_t last_time;

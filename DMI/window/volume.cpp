@@ -1,53 +1,15 @@
 /*
  * European Train Control System
- * Copyright (C) 2019  Iván Izquierdo
- * Copyright (C) 2019-2020  César Benito <cesarbema2009@hotmail.com>
+ * Copyright (C) 2019-2023  César Benito <cesarbema2009@hotmail.com>
  * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "volume.h"
 #include "../tcp/server.h"
 #include <iostream>
-#ifdef __ANDROID__
-void set_volume(int percent)
-{
-
-}
-int get_volume()
-{
-    return 50;
-}
-#elif defined(_WIN32)
-//#include <Windows.h>
-void set_volume(int percent)
-{
-}
-int get_volume()
-{
-    /*DWORD volume;
-    // Get the volume for the default playback device
-    if (waveOutGetVolume(NULL, &volume) != MMSYSERR_NOERROR) {
-        std::cerr << "Error getting system volume." << std::endl;
-        return 1;
-    }
-    // Extract the left and right channel volumes
-    WORD leftVolume = LOWORD(volume);
-    WORD rightVolume = HIWORD(volume);
-    return (leftVolume+rightVolume)/2*100/65536;*/
-    return 50;
-}
-#elif defined(__unix__)
+#ifdef DMI_VOLUME_ALSA
 #include <cstdlib>
 #include <alsa/asoundlib.h>
 void set_volume(int percent)
@@ -101,6 +63,15 @@ int get_volume()
     // Compute the average volume
     int averageVolume = (int)((currentVolume - minVolume) * 100.0 / (maxVolume - minVolume) + 0.5);
     return (averageVolume/10)*10;
+}
+#else
+void set_volume(int percent)
+{
+
+}
+int get_volume()
+{
+    return 50;
 }
 #endif
 volume_window::volume_window() : input_window("Volume", 1, false)
