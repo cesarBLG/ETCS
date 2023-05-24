@@ -8,6 +8,7 @@
  */
 #include "../graphics/display.h"
 #include "../graphics/button.h"
+#include "../graphics/icon_button.h"
 #include "../graphics/text_button.h"
 #include "../STM/stm_objects.h"
 void construct_main(window *w, bool custom)
@@ -29,8 +30,8 @@ void construct_main(window *w, bool custom)
     extern Component c6;
     extern Component c7;
     extern Component textArea;
-    extern Button upArrow;
-    extern Button downArrow;
+    extern IconButton upArrow;
+    extern IconButton downArrow;
 
     extern Component e1;
     extern Component e2;

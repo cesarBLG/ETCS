@@ -153,6 +153,8 @@ void dmi_recv()
     string s;
     for (;;) {
         int count = recv(fd, buff, sizeof(buff)-1,0);
+        if (count < 1)
+            exit(1);
         buff[count] = 0;
         s+=buff;
         int end;
@@ -219,6 +221,8 @@ void dmi_comm()
     //std::cin>>ip;
     addr.sin_addr.s_addr = inet_addr(ip.c_str());
     int res = connect(fd, (struct sockaddr *)&addr, sizeof(addr));
+    if (res < 0)
+        exit(1);
     thread reading(dmi_recv);
     reading.detach();
     for (;;) {
@@ -378,7 +382,8 @@ void dmi_comm()
         send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
         auto m = mode;
         */
-        write(fd, lines.c_str(), lines.size());
+        if (write(fd, lines.c_str(), lines.size()) < 0)
+            exit(1);
         lines = "";
         lck.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
