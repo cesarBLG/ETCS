@@ -20,6 +20,7 @@ struct ComponentAlignment
     AlignType alignType;
     Component *relative;
     int layer;
+    virtual ~ComponentAlignment() = default;
     ComponentAlignment(AlignType at, Component *c, int layer = -1) : alignType(at), relative(c), layer(layer)
     {
     }
