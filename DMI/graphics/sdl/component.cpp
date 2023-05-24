@@ -178,15 +178,12 @@ void Component::draw(graphic *graph)
 }
 void Component::drawPolygon(float* x, float* y, int n)
 {
-    short* scalex = new short[n];
-    short* scaley = new short[n];
-    getXpoints(x, scalex, n);
-    getYpoints(y, scaley, n);
-    aapolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
-    filledPolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
-
-    delete scalex;
-    delete scaley;
+    std::vector<short> scalex(n);
+    std::vector<short> scaley(n);
+    getXpoints(x, scalex.data(), n);
+    getYpoints(y, scaley.data(), n);
+    aapolygonRGBA(sdlren, scalex.data(), scaley.data(), n, renderColor.R, renderColor.G, renderColor.B, 255);
+    filledPolygonRGBA(sdlren, scalex.data(), scaley.data(), n, renderColor.R, renderColor.G, renderColor.B, 255);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
@@ -222,9 +219,13 @@ void Component::addText(string text, float x, float y, float size, Color col, in
     if(text=="") return;
     add(getText(text, x, y, size, col, align, aspect));
 }
-text_graphic* Component::getText(string text, float x, float y, float size, Color col, int align, int aspect)
+text_graphic* Component::getText(const string &text, float x, float y, float size, Color col, int align, int aspect)
 {
-    text_graphic *t = new text_graphic();
+    return getTextUnique(text, x, y, size, col, align, aspect).release();
+}
+std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float x, float y, float size, Color col, int align, int aspect)
+{
+    std::unique_ptr<text_graphic> t = std::make_unique<text_graphic>();
     t->text = text;
     t->offx = x;
     t->offy = y;

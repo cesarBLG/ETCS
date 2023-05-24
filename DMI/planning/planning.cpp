@@ -103,13 +103,13 @@ void displayGradient()
         planning_gradient.drawLine(0, maxp-1, 17, maxp-1, Black);
         if(size>44)
         {
-            planning_gradient.draw(planning_gradient.getText(std::to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White));
-            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val>=0 ? Black : White));
-            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val>=0 ? Black : White));
+            planning_gradient.draw(planning_gradient.getTextUnique(std::to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White).get());
+            planning_gradient.draw(planning_gradient.getTextUnique(e.val<0 ? "-" : "+", 0, minp-planning_gradient.sy/2+7, 10, e.val>=0 ? Black : White).get());
+            planning_gradient.draw(planning_gradient.getTextUnique(e.val<0 ? "-" : "+", 0, maxp-planning_gradient.sy/2-8, 10, e.val>=0 ? Black : White).get());
         }
         else if(size>14)
         {
-            planning_gradient.draw(planning_gradient.getText(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White));
+            planning_gradient.draw(planning_gradient.getTextUnique(e.val<0 ? "-" : "+", 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White).get());
         }
     }
 }
@@ -203,12 +203,12 @@ void displaySpeed()
         if(im || prev.speed>cur.speed || cur.speed == 0)
         {
             planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7, 20, 20);
-            planning_speed.draw(planning_speed.getText(std::to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT));
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
         }
         else if (prev.speed != cur.speed)
         {
             planning_speed.drawTexture(pl21, 14, a-7, 20, 20);
-            planning_speed.draw(planning_speed.getText(std::to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT));
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
         }
         if (cur.speed == 0) return;
     }
