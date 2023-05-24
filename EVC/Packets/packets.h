@@ -22,6 +22,7 @@ struct ETCS_packet
     NID_PACKET_t NID_PACKET;
     L_PACKET_t L_PACKET;
     ETCS_packet() {}
+    virtual ~ETCS_packet() = default;
     ETCS_packet(bit_manipulator &r)
     {
         r.read(&NID_PACKET);

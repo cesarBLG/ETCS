@@ -93,7 +93,8 @@ class Component
     void drawTexture(std::shared_ptr<sdl_texture> tex, float cx, float cy, float sx, float sy);
     void add(graphic* g) { graphics.push_back(g); }
     void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-    text_graphic *getText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
+    std::unique_ptr<text_graphic> getTextUnique(const std::string &text, float x = 0, float y = 0, float size = 12, Color col = White, int align = CENTER, int aspect = 0);
     static std::shared_ptr<sdl_texture> getTextGraphic(std::string text, float size, Color col, int aspect, int align=CENTER);
     void addImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
     image_graphic *getImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);

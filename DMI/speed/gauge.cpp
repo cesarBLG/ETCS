@@ -265,6 +265,7 @@ void displayLines()
             t->width = width;
             t->height = height;
             t->tex = std::shared_ptr<sdl_texture>(new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf)));
+            SDL_FreeSurface(surf);
             csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);
