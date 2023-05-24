@@ -20,6 +20,7 @@
 #include "../TrainSubsystems/power.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../STM/stm.h"
+#include "../../DMI/time_etcs.h"
 #include "../Config/config.h"
 #include <iostream>
 #include <sstream>
@@ -42,6 +43,7 @@ extern bool SB_command;
 extern bool desk_open;
 extern bool sleep_signal;
 double or_dist;
+int TimeOffset::offset;
 POSIXclient *s_client;
 ParameterManager manager;
 mutex iface_mtx;
@@ -74,6 +76,13 @@ void SetParameters()
         }
         if (prev != 0 && V_est == 0)
             position_report_reasons[0] = true;
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("time_offset");
+    p->SetValue = [](string val) {
+        TimeOffset::offset = atoi(val.c_str());
+        send_command("timeOffset", val);
     };
     manager.AddParameter(p);
 
@@ -299,6 +308,7 @@ void start_or_iface()
 #endif
     poller = new threadwait();
     s_client = TCPclient::connect_to_server(poller);
+    s_client->WriteLine("register(time_offset)");
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(acceleration)");

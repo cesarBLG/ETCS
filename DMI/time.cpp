@@ -8,12 +8,21 @@
  */
 #include <ctime>
 #include "time.h"
+#include "time_etcs.h"
 using namespace std;
+
+int TimeOffset::offset;
+
 tm getTime()
 {
-    time_t t = time(nullptr);
-    return *localtime(&t);
+    time_t now = time(nullptr);
+    struct tm timeWithOffset = *localtime(&now);
+    timeWithOffset.tm_sec += TimeOffset::offset;
+    mktime(&timeWithOffset);
+
+    return timeWithOffset;
 }
+
 int getHour()
 {
     return getTime().tm_hour;

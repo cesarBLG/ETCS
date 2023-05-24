@@ -12,4 +12,11 @@
 int getHour();
 int getMinute();
 int getSecond();
+
+class TimeOffset
+{
+	public:
+		static int offset;
+};
+
 #endif

@@ -10,13 +10,16 @@
 #include "../Time/clock.h"
 #include "../Supervision/supervision.h"
 #include "../language/language.h"
-#include "../Version/version.h"
+#include "../Version/version.h",
+#include "../../DMI/time_etcs.h"
 unsigned char idcount=0;
 text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
     : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)
 {
     std::time_t t = std::time(0);
     std::tm* now = std::localtime(&t);
+    now->tm_sec += TimeOffset::offset;
+    mktime(now);
     hour = now->tm_hour;
     minute = now->tm_min;
     start_condition = [](text_message &t){return true;};
