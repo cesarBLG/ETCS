@@ -13,6 +13,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             graphics/sdl/gfx_primitives.cpp language/language.cpp
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
+			Settings/settings.cpp
 )
 
 if(WIN32)
