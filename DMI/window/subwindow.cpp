@@ -46,7 +46,7 @@ void subwindow::updatePage(int num)
 }
 void subwindow::setLayout()
 {
-    extern Button downArrow;
+    extern IconButton downArrow;
     if(fullscreen) addToLayout(&title_bar, new RelativeAlignment(nullptr,0,15,0));
     else addToLayout(&title_bar, new RelativeAlignment(nullptr,334,15,0));
     addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));

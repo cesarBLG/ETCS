@@ -23,7 +23,7 @@ if (ANDROID)
 else()
     add_executable(evc ${SOURCES})
 endif()
-target_compile_definitions(evc PUBLIC _GLIBCXX_DEBUG)
+target_compile_definitions(evc PUBLIC _GLIBCXX_DEBUG NOMINMAX)
 target_include_directories(evc PRIVATE ../include)
 target_link_libraries(evc PRIVATE orts)
 

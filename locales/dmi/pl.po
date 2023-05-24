@@ -9,18 +9,18 @@ msgstr ""
 
 #: window/menu_main.cpp:31
 msgid "Main"
-msgstr "Główny"
+msgstr "Menu"
 
 #: window/data_entry.cpp:25 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:82
 #: window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr "Tak"
+msgstr "TAK"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " pełny wpis?"
+msgstr " - wyprowadzone poprawnie?"
 
 #: window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
@@ -33,7 +33,7 @@ msgstr "POCIĄG"
 #: window/fixed_train_data.cpp:26
 msgid "Enter\n"
 "data"
-msgstr "Int.\n"
+msgstr "Wpisz\n"
 "dane"
 
 #: window/keyboard.cpp:29
@@ -42,11 +42,11 @@ msgstr "Z"
 
 #: window/menu_main.cpp:33
 msgid "Start"
-msgstr "Początek"
+msgstr "START"
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr "Dane kierowcy"
+msgstr "ID Maszynisty"
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
@@ -62,28 +62,28 @@ msgstr "Numer pociągu"
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr "Koniec manewrów"
+msgstr "Koniec jazdy man."
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "Manewry"
+msgstr "Jazda manewrowa"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Podwójna\n"
-"Przyczepność"
+msgstr "Nie prowadzi poc."
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "Wstrzymać manewr"
+msgstr "Manewrowanie\n"
+"prowadzone"
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "Dane radiowe"
+msgstr "Dane RBC"
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr "Najechać"
+msgstr "Pomiń"
 
 #: window/menu_override.cpp:24
 msgid "EoA"
@@ -91,19 +91,19 @@ msgstr "EoA"
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr "Skontaktuj się z ostatnim RBC"
+msgstr "Ost. RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr "użyj krótkiego numeru"
+msgstr "Krótki nr telefonu"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr "Wprowadź dane RBC"
+msgstr "Wprow. dane RBC"
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
-msgstr "Identyfikator sieci radiowej"
+msgstr "ID sieci GSMR"
 
 #: window/menu_settings.cpp:21
 msgid "Settings"
@@ -123,7 +123,7 @@ msgstr "Usuń VBC"
 
 #: window/menu_spec.cpp:21
 msgid "Special"
-msgstr "Specjalny"
+msgstr "Specjalne"
 
 #: window/menu_spec.cpp:23
 msgid "Adhesion"
@@ -140,20 +140,19 @@ msgstr "Integralność pociągu"
 #: window/train_data.cpp:24
 msgid "Select\n"
 "type"
-msgstr "Sel.\n"
-"facet"
+msgstr "Wybierz\n"
+"zestaw"
 
 #: language/language.cpp:36 window/nav_buttons.cpp:29
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Główny"
+msgstr "Menu"
 
 #: language/language.cpp:37 window/nav_buttons.cpp:35
 msgctxt "Navigation bar"
 msgid "Over-\n"
 "ride"
-msgstr "Nadpi-\n"
-"sanie"
+msgstr "Pomiń"
 
 #: language/language.cpp:38 window/nav_buttons.cpp:41
 msgctxt "Navigation bar"
@@ -164,8 +163,7 @@ msgstr "Dane"
 #: language/language.cpp:39 window/nav_buttons.cpp:47
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Spec-\n"
-"jalny"
+msgstr "Spec."
 
 #: window/menu_ntc.cpp:21
 msgid "NTC data entry"
