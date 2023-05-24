@@ -38,4 +38,5 @@ const Color Blue = {0, 0, 234};
 const Color Green = {0, 234, 0};
 const Color LightRed = {255, 96, 96};
 const Color LightGreen = {96, 255, 96};
+const Color Magenta = {255, 0, 255};
 #endif

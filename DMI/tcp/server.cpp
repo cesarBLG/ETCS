@@ -228,6 +228,10 @@ void parseData(std::string str)
     {
         load_config(value);
     }
+    else if (command == "setVset")
+    {
+        Vset = stof(value);
+    }
     else if (command == "timeOffset")
     {
         TimeOffset::offset = atoi(value.c_str());

@@ -123,8 +123,13 @@ void drawSetSpeed()
 {
     if (Vset == 0) return;
     float an = speedToAngle(Vset);
+
     setColor(White);
-    csg.drawCircle(5, 111*cos(an) + cx, 111*sin(an) + cy);
+    csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
+
+    setColor(Magenta);
+    csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
+
 }
 bool showSpeeds = false;
 void displayCSG()
