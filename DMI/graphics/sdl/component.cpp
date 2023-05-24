@@ -222,9 +222,13 @@ void Component::addText(string text, float x, float y, float size, Color col, in
     if(text=="") return;
     add(getText(text, x, y, size, col, align, aspect));
 }
-text_graphic* Component::getText(string text, float x, float y, float size, Color col, int align, int aspect)
+text_graphic* Component::getText(const string &text, float x, float y, float size, Color col, int align, int aspect)
 {
-    text_graphic *t = new text_graphic();
+    return getTextUnique(text, x, y, size, col, align, aspect).release();
+}
+std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float x, float y, float size, Color col, int align, int aspect)
+{
+    std::unique_ptr<text_graphic> t = std::make_unique<text_graphic>();
     t->text = text;
     t->offx = x;
     t->offy = y;
