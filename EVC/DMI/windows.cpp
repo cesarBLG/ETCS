@@ -123,7 +123,12 @@ json level_window()
             }
         }
     } else {
-        levels = {get_text("Level 0"), get_text("Level 1"), get_text("Level 2")};
+        for (int i = 0; i < 3; i++)
+        {
+            if (unsupported_levels.count(i))
+                continue;
+            levels.push_back(get_text("Level " + std::to_string(i)));
+        }
         for (auto &kvp : installed_stms) {
             levels.push_back(get_ntc_name(kvp.first));
         }

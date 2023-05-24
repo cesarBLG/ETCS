@@ -54,3 +54,4 @@ extern Level level_to_ack;
 extern int ntc_to_ack;
 extern std::map<int, std::string> ntc_names;
 extern std::set<int> ntc_available_no_stm;
+extern std::set<int> unsupported_levels;

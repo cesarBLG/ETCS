@@ -32,9 +32,16 @@ void load_config(std::string serie)
             traindata_file = cfg["TrainData"];
             data_entry_type = 1;
         }
-    }
-    if (serie == "130" || serie == "730") {
-        ntc_available_no_stm.insert(0);
+        if (cfg.contains("UnsupportedLevels")) {
+            unsupported_levels = cfg["UnsupportedLevels"].get<std::set<int>>();
+        }
+        if (cfg.contains("AvailableNTC")) {
+            std::set<int> ntcs = cfg["AvailableNTC"].get<std::set<int>>();
+            for (int ntc : ntcs)
+            {
+                ntc_available_no_stm.insert(ntc);
+            }
+        }
     }
     send_command("setSerie", serie);
 }
