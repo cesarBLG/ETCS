@@ -1,7 +1,7 @@
 /*
  * European Train Control System
  * Copyright (C) 2019-2023  César Benito <cesarbema2009@hotmail.com>
- * 
+ *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -63,7 +63,7 @@ void start_dmi()
     dmi_pid = fork();
     if(dmi_pid == 0)
     {
-        chdir("../DMI");
+        chdir("../DMI") ;
         /*int fd = open("dmi.log.o", O_RDWR);
         dup2(fd, 2);*/
         execl("dmi", "dmi", nullptr);
@@ -76,8 +76,19 @@ void start_dmi()
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
-    TCHAR cmd[] = TEXT("../DMI/dmi.exe");
-    CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../DMI", &si, &pi);
+    TCHAR cmd[] = TEXT("../DMI/Debug/dmi.exe");
+
+#if SIMRAIL
+    #if _DEBUG
+    if (!CreateProcess(nullptr, "../DMI/Debug/dmi.exe", nullptr, nullptr, false, 0, nullptr, "../DMI", &si, &pi))
+    #else
+    if (!CreateProcess(nullptr, "dmi.exe", nullptr, nullptr, false, 0, nullptr, "./", &si, &pi))
+    #endif
+#else
+    if (!CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../../ETCS/DMI", &si, &pi))
+#endif
+        exit(1);
+
     Sleep(1000);
     WSADATA wsa;
     WSAStartup(MAKEWORD(2,2), &wsa);

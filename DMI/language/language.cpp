@@ -24,7 +24,16 @@ std::string get_text_context(std::string context, std::string id)
 }
 void set_language(std::string lang)
 {
-    std::string file = "../locales/dmi/"+lang+".mo";
+#if SIMRAIL
+#if _DEBUG
+    std::string file = "../locales/dmi/" + lang + ".mo";
+#else
+    std::string file = "locales/dmi/" + lang + ".mo";
+#endif
+#else
+    std::string file = "../locales/dmi/" + lang + ".mo";
+#endif
+
 #ifdef __ANDROID__
     extern std::string filesDir;
     file = filesDir+"/locales/dmi/"+lang+".mo";

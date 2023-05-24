@@ -26,8 +26,13 @@ using namespace std;
 extern mutex draw_mtx;
 SDL_Window *sdlwin;
 SDL_Renderer *sdlren;
+#if SIMRAIL
+std::string fontPath = "fonts/verdana.ttf";
+std::string fontPathb = "fonts/verdanab.ttf";
+#else
 std::string fontPath = "fonts/swiss.ttf";
 std::string fontPathb = "fonts/swissb.ttf";
+#endif
 #define PI 3.14159265358979323846264338327950288419716939937510
 float scale = 1;
 float offset[2] = {0, 0};
@@ -213,7 +218,12 @@ TTF_Font *openFont(std::string text, float size)
         extern std::string filesDir;
         path = filesDir+"/"+text;
 #endif
-        TTF_Font *f = TTF_OpenFont(path.c_str(), getScale(size)*1.4);
+
+#if SIMRAIL
+        TTF_Font* f = TTF_OpenFont(path.c_str(), getScale(size) * 1.25);
+#else
+        TTF_Font* f = TTF_OpenFont(path.c_str(), getScale(size) * 1.4);
+#endif
         if(f == nullptr) printf("Error loading font %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
         it = fonts.insert({{text,size}, f}).first;
     }
