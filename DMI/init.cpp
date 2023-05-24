@@ -11,6 +11,7 @@
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
+#include "Settings/settings.h"
 bool running = true;
 void quit()
 {
@@ -170,6 +171,7 @@ int main(int argc, char** argv)
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
+    Settings::Init();
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
