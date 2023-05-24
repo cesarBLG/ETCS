@@ -123,7 +123,7 @@ void Component::drawArc(float ang0, float ang1, float r, float cx, float cy)
 }
 void Component::drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy)
 {
-    int n = 51;
+    const int n = 51;
     float x[2 * n];
     float y[2 * n];
     for(int i = 0; i < n; i++)
@@ -176,14 +176,17 @@ void Component::draw(graphic *graph)
             break;
     }
 }
-void Component::drawPolygon(float *x, float *y, int n)
+void Component::drawPolygon(float* x, float* y, int n)
 {
-    short scalex[n];
-    short scaley[n];
+    short* scalex = new short[n];
+    short* scaley = new short[n];
     getXpoints(x, scalex, n);
     getYpoints(y, scaley, n);
     aapolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
     filledPolygonRGBA(sdlren, scalex, scaley, n, renderColor.R, renderColor.G, renderColor.B, 255);
+
+    delete scalex;
+    delete scaley;
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {

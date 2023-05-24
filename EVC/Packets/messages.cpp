@@ -860,7 +860,7 @@ struct accepted_condition
 std::map<level_filter_data, accepted_condition> level_filter_index;
 bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message) 
 {
-    accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC}];
+    accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC != nullptr}];
     if (!s.reject) {
         if (s.exceptions.find(3) != s.exceptions.end()) {
             if (supervising_rbc && supervising_rbc->train_data_ack_pending)

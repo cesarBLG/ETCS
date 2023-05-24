@@ -86,14 +86,15 @@ bool mobile_terminal::setup(communication_session *session)
             if (recv(fd, (char*)head, 3, 0) < 0)
                 break;
             int size = (head[1]<<2)|(head[2]>>6);
-            unsigned char pack[size];
+            std::vector<unsigned char> pack;
+            pack.resize(size, 0);
             pack[0] = head[0];
             pack[1] = head[1];
             pack[2] = head[2];
-            int res = recv(fd, (char*)pack+3, size-3, 0);
+            int res = recv(fd, (char*)pack.data() + 3, size - 3, 0);
             if (res != size-3)
                 break;
-            bit_manipulator r(pack, size);
+            bit_manipulator r(std::move(pack));
             std::shared_ptr<euroradio_message> msg = euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version);
             std::unique_lock<std::mutex> lck(mtx);
             pending_read.push_back(msg);
