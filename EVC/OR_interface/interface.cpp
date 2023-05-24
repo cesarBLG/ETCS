@@ -266,7 +266,7 @@ void register_parameter(string parameter)
 {
     s_client->WriteLine("register("+parameter+")");
 }
-#include <unistd.h>
+
 void polling()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));

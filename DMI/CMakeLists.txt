@@ -31,7 +31,7 @@ if (ANDROID)
 else()
     add_executable(dmi ${SOURCES})
 endif()
-target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG)
+target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG NOMINMAX)
 
 if(TARGET SDL2::SDL2main)
     target_link_libraries(dmi PRIVATE SDL2::SDL2main)

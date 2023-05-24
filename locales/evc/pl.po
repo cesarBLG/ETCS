@@ -10,12 +10,12 @@ msgstr ""
 #: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
 #, fuzzy
 msgid "Driver ID"
-msgstr "Identyfikator kierowcy"
+msgstr "ID Maszynisty"
 
 #: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
 #: DMI/windows.cpp:741
 msgid "Level 0"
-msgstr "poziom 0"
+msgstr "Poziom 0"
 
 #: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
 #: DMI/windows.cpp:743
@@ -37,20 +37,20 @@ msgstr "Poziom"
 
 #: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
-msgstr "numer pociągu"
+msgstr "Numer pociągu"
 
 #: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
 #: DMI/windows.cpp:1033
 msgid "RBC ID"
-msgstr "Identyfikator RBC"
+msgstr "ID RBC"
 
 #: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
-msgstr "Telefon RCK"
+msgstr "Numer telefonu RBC"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
-msgstr "dane RBC"
+msgstr "Dane RBC"
 
 #: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
 #: DMI/windows.cpp:1017
@@ -66,12 +66,12 @@ msgstr "Prędkość SR (km/h)"
 #: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
 #, fuzzy
 msgid "SR distance (m)"
-msgstr "Odległość w SR (m)"
+msgstr "Odległość SR (m)"
 
 #: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
 #, fuzzy
 msgid "SR speed/distance"
-msgstr "Odległość/prędkość SR"
+msgstr "Ustawienia trybu SR"
 
 #: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
@@ -85,12 +85,12 @@ msgstr "Długość (m)"
 
 #: DMI/windows.cpp:266
 msgid "Brake percentaje"
-msgstr "procent hamowania"
+msgstr "Proc. masy ham."
 
 #: DMI/windows.cpp:267
 #, fuzzy
 msgid "Maximum speed (km/h)"
-msgstr "Maksymalna prędkość (km/h)"
+msgstr "Prędkość max. (km/h)"
 
 #: DMI/windows.cpp:268
 msgid "Airtight"
@@ -98,7 +98,7 @@ msgstr "Zwiększanie ciśnienia"
 
 #: DMI/windows.cpp:268
 msgid "Yes"
-msgstr "Tak"
+msgstr "TAK"
 
 #: DMI/windows.cpp:268
 msgid "No"
@@ -106,15 +106,15 @@ msgstr "NIE"
 
 #: DMI/windows.cpp:280
 msgid "Data view"
-msgstr "Zobacz dane"
+msgstr "Dane"
 
 #: DMI/windows.cpp:359
 msgid "Train is rejected"
-msgstr "odrzucony pociąg"
+msgstr "Pociąg odrzucony"
 
 #: DMI/windows.cpp:589
 msgid "Shunting request failed"
-msgstr "niemożliwy manewr"
+msgstr "Manewrowanie odrzucone"
 
 #: DMI/windows.cpp:791 DMI/windows.cpp:795
 #, fuzzy
@@ -128,87 +128,15 @@ msgstr "Rodzaj pociągu"
 #: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 #, fuzzy
 msgid "Max speed (km/h)"
-msgstr "prędkość maksymalna (km/godz.)"
+msgstr "Prędkość max. (km/h)"
 
 #: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
-msgstr "procent hamowania"
+msgstr "Proc. masy ham."
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
-msgstr "typ pociągu"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:818
-msgid "PASS 1"
-msgstr "PODRÓŻ N"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:821
-msgid "PASS 2"
-msgstr "KROK 2"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:824
-msgid "PASS 3"
-msgstr "PODRÓŻE"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:827
-msgid "TILT 1"
-msgstr "PRZECHYLENIE 1"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:830
-msgid "TILT 2"
-msgstr "PODRÓŻ B"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:833
-msgid "TILT 3"
-msgstr "PRZECHYLENIE 3"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:836
-msgid "TILT 4"
-msgstr "PODRÓŻ C"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:839
-msgid "TILT 5"
-msgstr "PRZECHYLENIE 5"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:842
-msgid "TILT 6"
-msgstr "PODRÓŻE"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:845
-msgid "TILT 7"
-msgstr "PRZECHYLENIE 7"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:848
-msgid "FP 1"
-msgstr "Numer P/V MERC"
-
-#: DMI/windows.cpp:851
-msgid "FP 2"
-msgstr "PF 2"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:854
-msgid "FP 3"
-msgstr "PF 3"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:857
-msgid "FP 4"
-msgstr "PF 4"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:860
-msgid "FG 1"
-msgstr "MERC F/G N"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:863
-msgid "FG 2"
-msgstr "FG 2"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:866
-msgid "FG 3"
-msgstr "FG 3"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:869
-msgid "FG 4"
-msgstr "FG 4"
+msgstr "Kategoria"
 
 #: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
@@ -237,11 +165,11 @@ msgstr "Manewr odrzucony"
 
 #: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
-msgstr "Wpis w FS"
+msgstr "Wejście w tryb PEŁEN NADZÓR"
 
 #: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
-msgstr "wprowadzić do systemu operacyjnego"
+msgstr "Wejście w tryb NA WIDOCZNOŚĆ"
 
 #: Procedures/train_trip.cpp:34
 #, fuzzy
@@ -250,19 +178,19 @@ msgstr "Przekroczono EoA lub LoA"
 
 #: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
-msgstr "Błąd odczytu latarni"
+msgstr "Błąd odczytu balisy"
 
 #: Procedures/train_trip.cpp:42
 msgid "No MA received at level transition"
-msgstr "Brak MA przy zmianie poziomu"
+msgstr "Nie otrzymano MA przy zmianie poziomu"
 
 #: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
-msgstr "błąd komunikacji"
+msgstr "Błąd komunikacji"
 
 #: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
 msgid "Trackside not compatible"
-msgstr "ścieżka nie jest obsługiwana"
+msgstr "Błąd wyposażenia szlaku"
 
 #: Procedures/train_trip.cpp:54
 msgid "SR distance exceeded"
@@ -270,19 +198,19 @@ msgstr "Przekroczono odległość SR"
 
 #: Procedures/train_trip.cpp:58
 msgid "SH stop order"
-msgstr "Zatrzymaj zlecenie w SH"
+msgstr "Odebrano polecenie zatrzymania"
 
 #: Procedures/train_trip.cpp:62
 msgid "SR stop order"
-msgstr "Zlecenie zatrzymania SR"
+msgstr "Odebrano polecenie zatrzymania"
 
 #: Procedures/train_trip.cpp:65
 msgid "Emergency stop"
-msgstr "Awaryjny postój"
+msgstr "Hamowanie awaryjne"
 
 #: Procedures/train_trip.cpp:68
 msgid "No track description"
-msgstr "brak danych o utworze"
+msgstr "Błąd wyposażenia szlaku"
 
 #: Procedures/train_trip.cpp:79
 msgid " brake demand"
@@ -290,15 +218,15 @@ msgstr " zapotrzebowanie na hamulec"
 
 #: STM/stm.cpp:362
 msgid " failed"
-msgstr " przegrany"
+msgstr " uszkodzony"
 
 #: STM/stm.cpp:460
 msgid " not available"
-msgstr " niedostępne"
+msgstr " niedostępny"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
-msgstr "Poślizg"
+msgstr "Zbiegnięcie taboru"
 
 #: DMI/text_messages.cpp:126
 msgid "Level crossing not protected"
@@ -310,19 +238,15 @@ msgstr "Potwierdzenie"
 
 #: DMI/windows.cpp:170
 msgid "Loading gauge"
-msgstr "Miernik obciążenia"
+msgstr "Skrajnia"
 
 #: DMI/windows.cpp:170
 msgid "Out of GC"
 msgstr "Poza GC"
 
-#: DMI/windows.cpp:173
-msgid "FP2"
-msgstr "FP2"
-
 #: DMI/windows.cpp:174
 msgid "Axle load category"
-msgstr "Kategoria nacisku na oś"
+msgstr "Nacisk na oś"
 
 #: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
 #: DMI/windows.cpp:990
