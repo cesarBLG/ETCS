@@ -387,7 +387,7 @@ void dmi_comm()
         json j2;
         j2["Status"] = j;
         j2["ActiveWindow"] = active_window_dmi;
-        send_command("json", j.dump());
+        send_command("json", j2.dump());
         send_command("setVset", to_string(V_set * 3.6));
         /*
         send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
