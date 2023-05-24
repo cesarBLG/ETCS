@@ -22,10 +22,13 @@
 #include "../../sound/sound.h"
 #include "../../messages/messages.h"
 #include "../../tcp/server.h"
+#include "../../Settings/settings.h"
 using namespace std;
 extern mutex draw_mtx;
-SDL_Window *sdlwin;
-SDL_Renderer *sdlren;
+SDL_Window* sdlwin;
+SDL_Renderer* sdlren;
+SDL_Texture* sdltex;
+bool sdlrot;
 std::string fontPath = "fonts/swiss.ttf";
 std::string fontPathb = "fonts/swissb.ttf";
 #define PI 3.14159265358979323846264338327950288419716939937510
@@ -43,7 +46,16 @@ void init_video()
         running = false;
         return;
     }
-    startDisplay(false);
+
+    startDisplay(
+        Settings::Get("fullScreen") == "true",
+        atoi(Settings::Get("display").c_str()),
+        atoi(Settings::Get("width").c_str()),
+        atoi(Settings::Get("height").c_str()),
+        Settings::Get("borderless") == "true",
+        Settings::Get("rotateScreen") == "true"
+    );
+
     int timer = SDL_AddTimer(250, flash, nullptr);
     if(timer == 0)
     {
@@ -70,28 +82,28 @@ void loop_video()
 				float scrx;
 				float scry;
 				bool pressed;
-				if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
-				{
-					SDL_TouchFingerEvent tfe = ev.tfinger;
-					if (ev.type == SDL_FINGERMOTION) pressed = tfe.pressure>0;
-					else pressed = ev.type == SDL_FINGERDOWN;
-					scrx = tfe.x;
-					scry = tfe.y;
-				}
-				else if (ev.type == SDL_MOUSEMOTION)
-				{
-					SDL_MouseMotionEvent mme = ev.motion;
-					pressed = mme.state == SDL_PRESSED;
-					scrx = mme.x;
-					scry = mme.y;
-				}
-				else
-				{
-					SDL_MouseButtonEvent mbe = ev.button;
-					pressed = mbe.state == SDL_PRESSED;
-					scrx = mbe.x;
-					scry = mbe.y;
-				}
+                if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
+                {
+                    SDL_TouchFingerEvent tfe = ev.tfinger;
+                    if (ev.type == SDL_FINGERMOTION) pressed = tfe.pressure > 0;
+                    else pressed = ev.type == SDL_FINGERDOWN;
+                    scrx = sdlrot ? 640 - tfe.x : tfe.x;
+                    scry = sdlrot ? 480 - tfe.y : tfe.y;
+                }
+                else if (ev.type == SDL_MOUSEMOTION)
+                {
+                    SDL_MouseMotionEvent mme = ev.motion;
+                    pressed = mme.state == SDL_PRESSED;
+                    scrx = sdlrot ? 640 - mme.x : mme.x;
+                    scry = sdlrot ? 480 - mme.y : mme.y;
+                }
+                else
+                {
+                    SDL_MouseButtonEvent mbe = ev.button;
+                    pressed = mbe.state == SDL_PRESSED;
+                    scrx = sdlrot ? 640 - mbe.x : mbe.x;
+                    scry = sdlrot ? 480 - mbe.y : mbe.y;
+                }
 				extern float scale;
 				extern float offset[2];
 				float x = (scrx - offset[0]) / scale;
@@ -130,39 +142,55 @@ void loop_video()
     }
     quitDisplay();
 }
-void startDisplay(bool fullscreen)
+void startDisplay(bool fullscreen, int display = 0, int width = 640, int height = 480, bool borderless = false, bool rotate = false)
 {
     TTF_Init();
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-    sdlwin = SDL_CreateWindow("Driver Machine Interface", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
+    sdlwin = SDL_CreateWindow("Driver Machine Interface", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);
     if(sdlwin == nullptr)
     {
         printf("Failed to create window. SDL Error: %s", SDL_GetError());
         running = false;
         return;
     }
-    if(fullscreen) SDL_SetWindowFullscreen(sdlwin, SDL_WINDOW_FULLSCREEN_DESKTOP); 
-    sdlren = SDL_CreateRenderer(sdlwin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if(sdlren == nullptr)
+    if (fullscreen)
+        SDL_SetWindowFullscreen(sdlwin, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+    sdlren = SDL_CreateRenderer(sdlwin, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+    if (sdlren == nullptr)
     {
         printf("Failed to create renderer. SDL Error: %s", SDL_GetError());
         running = false;
         return;
     }
-    int w,h;
-    SDL_GetWindowSize(sdlwin, &w, &h);
-    float scrsize[] = {(float)w,(float)h};
-    float extra = 640/2*(scrsize[0]/(scrsize[1]*4/3)-1);
+
+    sdltex = SDL_CreateTexture(sdlren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
+    sdlrot = rotate;
+
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+    SDL_RenderSetLogicalSize(sdlren, 640, 480);
+
+    int w = 640, h = 480;
+    //SDL_GetWindowSize(sdlwin, &w, &h);
+    float scrsize[] = { (float)w,(float)h };
+    float extra = 640 / 2 * (scrsize[0] / (scrsize[1] * 4 / 3) - 1);
     offset[0] = extra;
-    scale = scrsize[1]/480.0;
-    //SDL_SetWindowBordered(sdlwin, SDL_FALSE);
+    scale = scrsize[1] / 480.0;
+
+    if (borderless)
+        SDL_SetWindowBordered(sdlwin, SDL_FALSE);
+
 }
 void display()
 {
+    SDL_SetRenderTarget(sdlren, sdltex);
     clear();
     displayETCS();
+    SDL_SetRenderTarget(sdlren, nullptr);
+    SDL_RenderCopyEx(sdlren, sdltex, nullptr, nullptr, sdlrot ? 180.0f : 0.0f, nullptr, SDL_FLIP_NONE);
     SDL_RenderPresent(sdlren);
 }
+
 void quitDisplay()
 {
     SDL_DestroyRenderer(sdlren);
