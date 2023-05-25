@@ -76,7 +76,6 @@ void start_dmi()
     PROCESS_INFORMATION pi;
     ZeroMemory(&si, sizeof(si));
     ZeroMemory(&pi, sizeof(pi));
-    TCHAR cmd[] = TEXT("../DMI/Debug/dmi.exe");
 
 #if SIMRAIL
     #if _DEBUG
@@ -85,10 +84,14 @@ void start_dmi()
     if (!CreateProcess(nullptr, "dmi.exe", nullptr, nullptr, false, 0, nullptr, "./", &si, &pi))
     #endif
 #else
-    if (!CreateProcess(nullptr, cmd, nullptr, nullptr, false, 0, nullptr, "../../ETCS/DMI", &si, &pi))
+    if (!CreateProcess(nullptr, "../DMI/Debug/dmi.exe", nullptr, nullptr, false, 0, nullptr, "../../ETCS/DMI", &si, &pi))
 #endif
+    {
+        std::string message = "DMI.EXE CreateProcess failed. " + std::system_category().message(GetLastError());
+        perror(message.c_str());
         exit(1);
-
+    }
+        
     Sleep(1000);
     WSADATA wsa;
     WSAStartup(MAKEWORD(2,2), &wsa);

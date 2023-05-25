@@ -270,6 +270,8 @@ void SetParameters()
         load_config(val);
     };
     manager.AddParameter(p);
+
+    load_config("TraxxDC3_PL");
 }
 void register_parameter(string parameter)
 {
@@ -303,7 +305,22 @@ void start_or_iface()
     ZeroMemory( &si, sizeof(si) );
     si.cb = sizeof(si);
     ZeroMemory( &pi, sizeof(pi) );
-    CreateProcess("server.exe", NULL, NULL, NULL, FALSE, DETACHED_PROCESS, NULL, NULL, &si, &pi);
+    std::cout << "Starting TCP server..." << std::endl;
+    
+#if SIMRAIL
+#if _DEBUG
+    if (!CreateProcess(nullptr, "../EVC/Debug/server.exe", nullptr, nullptr, false, 0, nullptr, "../EVC", &si, &pi))
+#else
+    if (!CreateProcess(nullptr, "server.exe", nullptr, nullptr, false, 0, nullptr, "./", &si, &pi))
+#endif
+#else
+    if (!CreateProcess(nullptr, "../EVC/Debug/server.exe", nullptr, nullptr, false, 0, nullptr, "../../ETCS/EVC", &si, &pi))
+#endif
+    {
+        std::string message = "SERVER.EXE CreateProcess failed. " + std::system_category().message(GetLastError());
+        perror(message.c_str());
+        exit(1);
+    }
     Sleep(1000);
 #endif
     poller = new threadwait();
