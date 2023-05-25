@@ -318,7 +318,7 @@ void start_or_iface()
 #endif
     {
         std::string message = "SERVER.EXE CreateProcess failed. " + std::system_category().message(GetLastError());
-        perror(message.c_str());
+        std::cout << message << std::endl;
         exit(1);
     }
     Sleep(1000);

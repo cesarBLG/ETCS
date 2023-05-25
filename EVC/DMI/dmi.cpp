@@ -88,7 +88,7 @@ void start_dmi()
 #endif
     {
         std::string message = "DMI.EXE CreateProcess failed. " + std::system_category().message(GetLastError());
-        perror(message.c_str());
+        std::cout << message << std::endl;
         exit(1);
     }
         
