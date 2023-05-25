@@ -312,8 +312,18 @@ std::shared_ptr<sdl_texture> Component::getImageGraphic(string path)
 void Component::setBorder(Color c)
 {
     setColor(c);
-    SDL_Rect r = {getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0)};
+#if SIMRAIL
+    SDL_Rect r;
+
+    r = { getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0) };
     SDL_RenderDrawRect(sdlren, &r);
+
+    r = { getX(1), getY(1), getX(sx) - getX(2), getY(sy) - getY(2) };
+    SDL_RenderDrawRect(sdlren, &r);
+#else
+    SDL_Rect r = { getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0) };
+    SDL_RenderDrawRect(sdlren, &r);
+#endif
 }
 void Component::addBorder(Color c)
 {
