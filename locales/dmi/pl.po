@@ -20,7 +20,7 @@ msgstr "TAK"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " - wyprowadzone poprawnie?"
+msgstr " - wprowadzone poprawnie?"
 
 #: window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
