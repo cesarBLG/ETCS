@@ -32,16 +32,31 @@ Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
+
+#if SIMRAIL
 float speedToAngle(float speed)
 {
-    if(speed>maxSpeed) return ang1;
-    if(maxSpeed == 400)
+    if (speed > maxSpeed) return ang1;
+    int halfEtcsDialMaxSpeed = etcsDialMaxSpeed / 2;
     {
-        if(speed>200) return amed + (speed-200)/(maxSpeed-200)*(ang1-amed);
-        return ang0 + speed/200*(amed-ang0);
+        if (speed > halfEtcsDialMaxSpeed) return amed + (speed - halfEtcsDialMaxSpeed) / (maxSpeed - halfEtcsDialMaxSpeed) * (ang1 - amed);
+        return ang0 + speed / halfEtcsDialMaxSpeed * (amed - ang0);
     }
-    return ang0 + speed/maxSpeed*(ang1-ang0);
+    return ang0 + speed / maxSpeed * (ang1 - ang0);
 }
+#else
+float speedToAngle(float speed)
+{
+    if (speed > maxSpeed) return ang1;
+    if (maxSpeed == 400)
+    {
+        if (speed > 200) return amed + (speed - 200) / (maxSpeed - 200) * (ang1 - amed);
+        return ang0 + speed / 200 * (amed - ang0);
+    }
+    return ang0 + speed / maxSpeed * (ang1 - ang0);
+}
+#endif
+
 void drawNeedle()
 {
     Color needleColor = Grey;
@@ -232,12 +247,20 @@ void displayLines()
     initSpeed = maxSpeed;
     if (!inited) csg.clear();
     setColor(White);
+#if SIMRAIL
+    int step = 5;
+#else
     int step = maxSpeed == 150 ? 5 : 10;
+#endif
     for(int i = 0; i<=maxSpeed; i+=step)
     {
         float size;
         float an = speedToAngle(i);
+#if SIMRAIL
+        int longinterval = maxSpeed == 400 ? 50 : (i > maxSpeed / 2 ? 40 : 20);
+#else
         int longinterval = maxSpeed == 400 ? 50 : (maxSpeed == 150 ? 25 : 20);
+#endif
         size = i%longinterval!=0 ? -110 : -100;
         if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
@@ -256,7 +279,11 @@ void displayLines()
             float maxan = atanf(hy/hx);
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
+#if SIMRAIL
+            float val = size + adjust + 10;
+#else
             float val = size + adjust;
+#endif
             SDL_Surface *surf = TTF_RenderText_Blended(font, str, white);
             //TTF_CloseFont(font);
             texture *t = new texture();
