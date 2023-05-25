@@ -19,7 +19,17 @@ void load_config(std::string serie)
     extern std::string filesDir;
     std::ifstream file(filesDir+"/config.json");
 #else
+    
+#if SIMRAIL
+    #if _DEBUG
     std::ifstream file("../EVC/config.json");
+    #else
+    std::ifstream file("config.json");
+    #endif
+#else
+    std::ifstream file("../EVC/config.json");
+#endif
+
 #endif
     etcsDialMaxSpeed = 400;
     stm_layout_file = "stm_windows.json";
