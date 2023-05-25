@@ -27,6 +27,7 @@ const float amed = -42*PI/180.0;
 const float ang1 = 54*PI/180.0;
 const float cx = 140;
 const float cy = 150;
+TTF_Font* font;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
@@ -243,10 +244,16 @@ void displayCSG()
 static int initSpeed = 0;
 void displayLines()
 {
+    if (font == nullptr)
+        font = openFont(fontPath, 16);
+
+    SDL_Color sdlWhite = { (Uint8)White.R, (Uint8)White.G, (Uint8)White.B };
+
     bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
     if (!inited) csg.clear();
     setColor(White);
+
 #if SIMRAIL
     int step = 5;
 #else
@@ -268,9 +275,7 @@ void displayLines()
             const char *str = s.c_str();
             float hx = 0;
             float hy = 12/2.0;
-            TTF_Font *font = openFont(fontPath, 16);
-            if (font == nullptr) return;
-            SDL_Color white = {(Uint8)White.R, (Uint8)White.G, (Uint8)White.B};
+            
             float width;
             float height;
             getFontSize(font, str, &width, &height);
@@ -284,7 +289,7 @@ void displayLines()
 #else
             float val = size + adjust;
 #endif
-            SDL_Surface *surf = TTF_RenderText_Blended(font, str, white);
+            SDL_Surface *surf = TTF_RenderText_Blended(font, str, sdlWhite);
             //TTF_CloseFont(font);
             texture *t = new texture();
             t->x = cx-val*cosf(an);
