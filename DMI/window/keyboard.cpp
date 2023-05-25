@@ -16,7 +16,7 @@ std::vector<Button*> getNumericKeyboard(input_data *input)
     {
         keys.push_back(new TextButton(std::to_string(i+1), 102, 50, nullptr, 16));
     }
-    keys.push_back(new TextButton(get_text("DEL"), 102, 50, nullptr));
+    keys.push_back(new IconButton("symbols/Navigation/NA_21.bmp", 102, 50, nullptr));
     keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
     keys.push_back(new TextButton(".", 102, 50));
     for(int i=0; i<12; i++)
