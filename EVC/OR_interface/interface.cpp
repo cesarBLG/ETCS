@@ -271,7 +271,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    load_config("TraxxDC3_PL");
+    p = new Parameter("ackButton");
+    p->SetValue = [](std::string val) {
+        std::cout << "Yellow ack button: " << val << " ms" << std::endl;
+        send_command("ackButton", val);
+    };
+    manager.AddParameter(p);
 }
 void register_parameter(string parameter)
 {
@@ -326,6 +331,7 @@ void start_or_iface()
     poller = new threadwait();
     s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(time_offset)");
+    s_client->WriteLine("register(ackButton)");
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(acceleration)");

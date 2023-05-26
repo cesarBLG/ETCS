@@ -19,6 +19,8 @@
 #include "../circle.h"
 #include "../button.h"
 using namespace std;
+
+std::set<Component*> Component::_instances;
 Component Z(640, 15, nullptr);
 Component Y(640, 15, nullptr);
 Component::Component(float sx, float sy, function<void()> display)
@@ -26,9 +28,11 @@ Component::Component(float sx, float sy, function<void()> display)
     this->sx = sx;
     this->sy = sy;
     this->display = display;
+    _instances.insert(this);
 }
 Component::~Component()
 {
+    _instances.erase(this);
     clear();
 }
 void Component::clear()
@@ -47,6 +51,25 @@ void Component::setAck(function<void()> ackAction)
 {
     pressedAction = ackAction;
     ack = ackAction != nullptr;
+}
+void Component::externalAckButton(int time)
+{
+    for (auto instance : _instances)
+    {
+        if (instance->ack)
+        {
+            if (instance->delayType && time > 2000)
+            {
+                instance->setPressed();
+                return;
+            }
+            else if (!instance->delayType)
+            {
+                instance->setPressed();
+                return;
+            }
+        }
+    }
 }
 void Component::setPressed()
 {
