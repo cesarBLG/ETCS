@@ -254,8 +254,8 @@ acceleration conversion_acceleration(double lambda_0)
     double V_lim = 16.85*std::pow(lambda_0,0.428);
     std::map<double,double> AD;
     AD[0] = 0.0075*lambda_0+0.076;
-    double coef[5][4] = { {0.0663,4.72e-3,6.1e-5,6.3e-7},
-                        {0.13,5.14e-3,-4.53e-6,2.73e-7},
+    double coef[5][4] = { {0.0663,4.72e-3,6.1e-5,-6.3e-7},
+                        {0.13,5.14e-3,-4.54e-6,2.73e-7},
                         {0.0479,5.81e-3,-6.76e-6,5.58e-8}, 
                         {0.048, 5.52e-3, -3.85e-6, 3e-8}, 
                         {0.0559, 5.06e-3, 1.66e-6, 3.23e-9}};
