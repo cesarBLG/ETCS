@@ -23,14 +23,10 @@
 #include "../window/menu_settings.h"
 #include "../window/menu_ntc.h"
 #include "../window/track_ahead_free.h"
-#include <thread>
 #include <functional>
-#include <mutex>
-#include <condition_variable>
 subwindow *active = nullptr;
 std::string active_name;
 window *default_window;
-std::mutex draw_mtx;
 #include <iostream>
 void startWindows()
 {
