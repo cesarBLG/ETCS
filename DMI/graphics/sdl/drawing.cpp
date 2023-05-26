@@ -97,7 +97,6 @@ void loop_video()
 				float x = (scrx - offset[0]) / scale;
 				float y = scry / scale;
 				vector<window *> windows;
-				unique_lock<mutex> lck(draw_mtx);
 				for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
 				{
 					windows.push_back(*it);
@@ -111,10 +110,8 @@ void loop_video()
         }
         if (!running) break;
         void update_stm_windows();
-        unique_lock<mutex> lck(draw_mtx);
         updateDrawCommands();
         update_stm_windows();
-        lck.unlock();
         display();
 
         std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
@@ -163,9 +160,7 @@ void startDisplay(bool fullscreen)
 void display()
 {
     clear();
-    unique_lock<mutex> lck(draw_mtx);
     displayETCS();
-    lck.unlock();
     SDL_RenderPresent(sdlren);
 }
 void quitDisplay()
