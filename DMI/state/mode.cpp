@@ -62,6 +62,9 @@ void displayMode()
         case Mode::LS:
             num = 21;
             break;
+        case Mode::IS:
+            num = 23;
+            break;
     }
     if(num<10) path+="0";
     path+=to_string(num);

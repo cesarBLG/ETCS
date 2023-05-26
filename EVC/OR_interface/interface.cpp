@@ -277,6 +277,18 @@ void SetParameters()
         send_command("ackButton", val);
     };
     manager.AddParameter(p);
+
+    p = new Parameter("isolation");
+    p->SetValue = [](std::string val) {
+        bool enable = atoi(val.c_str()) > 0;
+
+        level = Level::Unknown;
+        mode = enable ? Mode::IS : Mode::SB;
+        V_train = enable ? 160 : 0;
+        V_perm = enable ? 160 : 0;
+    };
+    manager.AddParameter(p);
+
 }
 void register_parameter(string parameter)
 {
@@ -332,6 +344,7 @@ void start_or_iface()
     s_client = TCPclient::connect_to_server(poller);
     s_client->WriteLine("register(time_offset)");
     s_client->WriteLine("register(ackButton)");
+    s_client->WriteLine("register(isolation)");
     s_client->WriteLine("register(speed)");
     s_client->WriteLine("register(distance)");
     s_client->WriteLine("register(acceleration)");

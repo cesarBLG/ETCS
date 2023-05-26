@@ -20,7 +20,7 @@ extern Mode mode;
 #include <iostream>
 void displayETCS()
 {
-    if (mode == Mode::SL || mode == Mode::NP || mode == Mode::IS || mode == Mode::PS)
+    if (mode == Mode::SL || mode == Mode::NP || mode == Mode::PS)
     {
         return;
     }
