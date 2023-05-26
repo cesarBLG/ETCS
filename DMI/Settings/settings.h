@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-static class Settings
+class Settings
 {
 	public:
 		static void Init();
