@@ -97,8 +97,13 @@ void Component::paint()
         }
         if(display != nullptr) display();
     }
-    if (show && flash_style != 0 && !(flash_style & 4)) setBorder(Yellow);
-    else if (ack && (flash_state & 2)) setBorder(Yellow);
+    if ((show && flash_style != 0 && !(flash_style & 4)) || (ack && (flash_state & 2)))
+    {
+        drawRectangle(0, 0, 2, sy, Yellow);
+        drawRectangle(sx - 2, 0, 2, sy, Yellow);
+        drawRectangle(0, 0, sx, 2, Yellow);
+        drawRectangle(0, sy - 2, sx, 2, Yellow);
+    }
     else if(dispBorder)
     {
         drawLine(0, 0, 0, sy - 1, Black);
