@@ -16,6 +16,12 @@
                     "valign": "center"
                 },
                 {
+                    "id": 5,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
                     "id": 6,
                     "font_size": 20,
                     "halign": "center",
