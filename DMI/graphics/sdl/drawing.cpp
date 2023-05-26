@@ -28,6 +28,7 @@ extern mutex draw_mtx;
 SDL_Window* sdlwin;
 SDL_Renderer* sdlren;
 SDL_Texture* sdltex;
+bool renderToTexture;
 bool sdlrot;
 std::string fontPath = "fonts/swiss.ttf";
 std::string fontPathb = "fonts/swissb.ttf";
@@ -163,19 +164,25 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
         running = false;
         return;
     }
-
-    sdltex = SDL_CreateTexture(sdlren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
     sdlrot = rotate;
 
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-    SDL_RenderSetLogicalSize(sdlren, 640, 480);
+    if (width < 640 || height < 480) renderToTexture = true;
 
-    int w = 640, h = 480;
-    //SDL_GetWindowSize(sdlwin, &w, &h);
-    float scrsize[] = { (float)w,(float)h };
-    float extra = 640 / 2 * (scrsize[0] / (scrsize[1] * 4 / 3) - 1);
-    offset[0] = extra;
-    scale = scrsize[1] / 480.0;
+    if (renderToTexture)
+    {
+        sdltex = SDL_CreateTexture(sdlren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
+        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        SDL_RenderSetLogicalSize(sdlren, 640, 480);
+    }
+    else
+    {
+        int w = 640, h = 480;
+        SDL_GetWindowSize(sdlwin, &w, &h);
+        float scrsize[] = { (float)w,(float)h };
+        float extra = 640 / 2 * (scrsize[0] / (scrsize[1] * 4 / 3) - 1);
+        offset[0] = extra;
+        scale = scrsize[1] / 480.0;
+    }
 
     if (borderless)
         SDL_SetWindowBordered(sdlwin, SDL_FALSE);
@@ -183,11 +190,14 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
 }
 void display()
 {
-    SDL_SetRenderTarget(sdlren, sdltex);
+    if (renderToTexture) SDL_SetRenderTarget(sdlren, sdltex);
     clear();
     displayETCS();
-    SDL_SetRenderTarget(sdlren, nullptr);
-    SDL_RenderCopyEx(sdlren, sdltex, nullptr, nullptr, sdlrot ? 180.0f : 0.0f, nullptr, SDL_FLIP_NONE);
+    if (renderToTexture)
+    {
+        SDL_SetRenderTarget(sdlren, nullptr);
+        SDL_RenderCopyEx(sdlren, sdltex, nullptr, nullptr, sdlrot ? 180.0f : 0.0f, nullptr, SDL_FLIP_NONE);
+    }
     SDL_RenderPresent(sdlren);
 }
 
