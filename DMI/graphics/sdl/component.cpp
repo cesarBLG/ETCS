@@ -120,8 +120,13 @@ void Component::paint()
         }
         if(display != nullptr) display();
     }
-    if (show && flash_style != 0 && !(flash_style & 4)) setBorder(Yellow);
-    else if (ack && (flash_state & 2)) setBorder(Yellow);
+    if ((show && flash_style != 0 && !(flash_style & 4)) || (ack && (flash_state & 2)))
+    {
+        drawRectangle(0, 0, 2, sy, Yellow);
+        drawRectangle(sx - 2, 0, 2, sy, Yellow);
+        drawRectangle(0, 0, sx, 2, Yellow);
+        drawRectangle(0, sy - 2, sx, 2, Yellow);
+    }
     else if(dispBorder)
     {
         drawLine(0, 0, 0, sy - 1, Black);
@@ -335,18 +340,8 @@ std::shared_ptr<sdl_texture> Component::getImageGraphic(string path)
 void Component::setBorder(Color c)
 {
     setColor(c);
-#if SIMRAIL
-    SDL_Rect r;
-
-    r = { getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0) };
-    SDL_RenderDrawRect(sdlren, &r);
-
-    r = { getX(1), getY(1), getX(sx) - getX(2), getY(sy) - getY(2) };
-    SDL_RenderDrawRect(sdlren, &r);
-#else
     SDL_Rect r = { getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0) };
     SDL_RenderDrawRect(sdlren, &r);
-#endif
 }
 void Component::addBorder(Color c)
 {
