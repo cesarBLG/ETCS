@@ -40,7 +40,12 @@ void zoominp()
 }
 void zoomoutp()
 {
+#if SIMRAIL
+    // SimRail track scanner has max distance of 16km
+    if(planning_scale<=8)
+#else
     if(planning_scale<=16)
+#endif
     {
         planning_scale*=2;
         speedLines();
@@ -220,7 +225,7 @@ void speedLines()
     {
         if(i==0||i>4)
         {
-            planning_distance.addText(std::to_string(divs[i]*planning_scale), 208, posy[i]-150, 10, White, RIGHT);
+            planning_distance.addText(std::to_string(divs[i]*planning_scale), 208, posy[i]-150, 9, White, RIGHT);
         }
     }
 }
