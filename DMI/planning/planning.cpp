@@ -53,9 +53,8 @@ void displayPlanning()
 {
     for(int i=0; i<9; i++)
     {
-        setColor(DarkGrey);
         if(i==0||i==5||i==8) planning_distance.drawRectangle(40, posy[i], 200, 2, MediumGrey);
-        else planning_distance.drawLine(40, posy[i], 240-1, posy[i]);
+        else planning_distance.drawRectangle(40, posy[i], 200, 1, DarkGrey);
     }
 }
 std::map<int,std::shared_ptr<sdl_texture>> object_textures;
@@ -98,9 +97,9 @@ void displayGradient()
         if(max>divs[8]*planning_scale) minp = 0;
         float size = maxp-minp;
         planning_gradient.drawRectangle(0, minp, 18, size, e.val>=0 ? Grey : DarkGrey);
-        planning_gradient.drawLine(0, minp, 17, minp, e.val>=0 ? White : Grey);
-        planning_gradient.drawLine(0, minp, 0, maxp-1, e.val>=0 ? White : Grey);
-        planning_gradient.drawLine(0, maxp-1, 17, maxp-1, Black);
+        planning_gradient.drawRectangle(0, minp, 18, 1, e.val>=0 ? White : Grey);
+        planning_gradient.drawRectangle(0, minp, 1, maxp-minp-1, e.val>=0 ? White : Grey);
+        planning_gradient.drawRectangle(0, maxp-1, 18, 1, Black);
         if(size>44)
         {
             planning_gradient.draw(planning_gradient.getTextUnique(std::to_string(abs(e.val)).c_str(), 0, (minp+maxp-1)/2-planning_gradient.sy/2, 10, e.val>=0 ? Black : White).get());

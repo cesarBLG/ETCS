@@ -106,10 +106,10 @@ void Component::paint()
     }
     else if(dispBorder)
     {
-        drawLine(0, 0, 0, sy - 1, Black);
-        drawLine(sx - 1, 0, sx - 1, sy - 1, Shadow);
-        drawLine(0, 0, sx - 1, 0, Black);
-        drawLine(0, sy - 1, sx - 1, sy - 1, Shadow);
+        drawRectangle(0, 0, 1, sy - 1, Black);
+        drawRectangle(sx - 1, 0, 1, sy - 1, Shadow);
+        drawRectangle(0, 0, sx - 1, 1, Black);
+        drawRectangle(0, sy - 1, sx - 1, 1, Shadow);
     }
 }
 void Component::drawArc(float ang0, float ang1, float r, float cx, float cy)

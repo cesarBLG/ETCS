@@ -12,17 +12,17 @@ void Button::paint()
     Component::paint();
     if(showBorder)
     {
-        drawLine(0, 0, 0, sy - 1, Black);
-        drawLine(sx - 1, 0, sx - 1, sy - 1, Shadow);
-        drawLine(0, 0, sx - 1, 0, Black);
-        drawLine(0, sy - 1, sx - 1, sy - 1, Shadow);
+        drawRectangle(0, 0, 1, sy - 1, Black);
+        drawRectangle(sx - 1, 0, 1, sy - 1, Shadow);
+        drawRectangle(0, 0, sx - 1, 1, Black);
+        drawRectangle(0, sy - 1, sx - 1, 1, Shadow);
 
         if (!pressed)
         {
-            drawLine(1, 1, 1, sy-2, Shadow);
-            drawLine(sx-2, 1, sx-2, sy-2, Black);
-            drawLine(1, 1, sx-2, 1, Shadow);
-            drawLine(1, sy-2, sx-2, sy-2, Black);
+            drawRectangle(1, 1, 1, sy - 2, Shadow);
+            drawRectangle(sx - 2, 1, 1, sy - 2, Black);
+            drawRectangle(1, 1, sx - 2, 1, Shadow);
+            drawRectangle(1, sy - 2, sx - 2, 1, Black);
         }
     }
 }
