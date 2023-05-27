@@ -3,6 +3,7 @@
 *.dll
 *.res
 .vscode/
+.vs/
 .kdev4
 ETCS.kdev4
 .directory
