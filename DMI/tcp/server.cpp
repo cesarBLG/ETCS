@@ -228,6 +228,10 @@ void parseData(std::string str)
     {
         load_config(value);
     }
+    else if (command == "ackButton")
+    {
+        externalAck(value!="false");
+    }
     if (command != "json") return;
     json j = json::parse(value);
     setWindow(j);

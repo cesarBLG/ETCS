@@ -20,4 +20,5 @@ extern AckType AllowedAck;
 extern Component *componentAck;
 void setAck(AckType type, int id, bool ack);
 void updateAcks();
+void externalAck(bool pressed);
 #endif

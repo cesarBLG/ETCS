@@ -11,6 +11,7 @@
 #include "../tcp/server.h"
 #include "../sound/sound.h"
 #include "../messages/messages.h"
+#include "../graphics/display.h"
 #include "acks.h"
 #include <list>
 using namespace std;
@@ -194,5 +195,14 @@ void setAck(AckType type, int id, bool ack)
             }
             else ++it;
         }
+    }
+}
+void externalAck(bool pressed)
+{
+    if (componentAck == nullptr) return;
+    for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
+    {
+        if ((*it)->active) (*it)->event(pressed, 0, 0);
+        else (*it)->event(0, -100, -100);
     }
 }

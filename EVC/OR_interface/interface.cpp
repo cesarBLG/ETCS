@@ -256,6 +256,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new Parameter("etcs::ackbutton");
+    p->SetValue = [](std::string val) {
+        send_command("ackButton", val == "1" ? "true" : "false");
+    };
+    manager.AddParameter(p);
+
     p = new Parameter("serie");
     p->SetValue = [](std::string val) {
         load_config(val);
@@ -311,6 +317,7 @@ void start_or_iface()
     s_client->WriteLine("register(stm::command)");
     s_client->WriteLine("register(stm::+::isolated)");
     s_client->WriteLine("register(etcs::isolated)");
+    s_client->WriteLine("register(etcs::ackbutton)");
     s_client->WriteLine("register(serie)");
     SetParameters();
     thread t(polling);
