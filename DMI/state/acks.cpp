@@ -22,10 +22,13 @@ Component c4(37, 50, nullptr);
 Component c1(58, 50, dispAcks);
 Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
+extern Component c9;
+extern Component textArea;
 bool prevAck = false;
 int prevlevel = 0;
 bool level_announce = false;
 AckType AllowedAck = AckType::None;
+Component *componentAck;
 list<pair<AckType, int>> pendingAcks;
 void dispAcks()
 {
@@ -121,18 +124,22 @@ void updateAcks()
         switch (type)
         {
             case AckType::Message:
+                componentAck = &textArea;
                 break;
             case AckType::Mode:
                 playSinfo();
                 modeAck = true;
+                componentAck = &c1;
                 break;
             case AckType::Level:
                 playSinfo();
                 levelAck = 2;
+                componentAck = &c1;
                 break;
             case AckType::Brake:
                 playSinfo();
                 brakeAck = true;
+                componentAck = &c9;
                 break;
         }
         AllowedAck = type;
@@ -147,7 +154,7 @@ void updateAcks()
         }
     }
     else if (levelAck == 1) levelAck = 0;
-
+    if (AllowedAck == AckType::None) componentAck = nullptr;
 }
 void setAck(AckType type, int id, bool ack)
 {
