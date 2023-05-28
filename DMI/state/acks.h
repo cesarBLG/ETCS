@@ -17,6 +17,7 @@ enum struct AckType
     Message
 };
 extern AckType AllowedAck;
+extern Component *componentAck;
 void setAck(AckType type, int id, bool ack);
 void updateAcks();
 #endif

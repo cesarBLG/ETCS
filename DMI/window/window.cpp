@@ -9,9 +9,11 @@
 #include "window.h"
 #include "../graphics/button.h"
 #include "../sound/sound.h"
+#include "../state/acks.h"
 #include <chrono>
 bool isInside(Component *comp, float x, float y)
 {
+	if (comp == componentAck) return true;
     return (comp->x-comp->touch_left)<x && (comp->x + comp->sx + comp->touch_right)>x
         && (comp->y-comp->touch_up)<y && (comp->y + comp->sy+comp->touch_down)>y;
 }
