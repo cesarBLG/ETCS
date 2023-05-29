@@ -265,6 +265,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new Parameter("etcs::failed");
+    p->SetValue = [](std::string val) {
+        failed = val == "1";
+    };
+    manager.AddParameter(p);
+
     p = new Parameter("serie");
     p->SetValue = [](std::string val) {
         load_config(val);
@@ -344,6 +350,7 @@ void start_or_iface()
     s_client->WriteLine("register(stm::command)");
     s_client->WriteLine("register(stm::+::isolated)");
     s_client->WriteLine("register(etcs::isolated)");
+    s_client->WriteLine("register(etcs::failed)");
     s_client->WriteLine("register(serie)");
     SetParameters();
     thread t(polling);
