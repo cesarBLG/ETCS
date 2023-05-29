@@ -217,7 +217,7 @@ optional<distance> pt_position;
 bool pt_applied;
 void update_supervision()
 {
-    if (mode == Mode::TR) {
+    if (mode == Mode::TR || mode == Mode::SF) {
         EB = true;
         V_perm = V_target = V_release = V_sbi = 0;
         supervision = IntS;
