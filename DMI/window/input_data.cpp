@@ -50,7 +50,7 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
             time(&now);
             if (keybd_data.empty()) curx = data_tex->offx;
             else if (difftime(now, holdcursor)<2) curx-=9;
-            data_comp->drawLine(curx, cury, curx+9, cury, Black);
+            data_comp->drawRectangle(curx, cury, 9, 1, Black);
         }
     });
     if(label!="")

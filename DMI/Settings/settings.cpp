@@ -11,7 +11,12 @@ void Settings::Init()
 {
     std::string line;
     std::ifstream file;
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    file.open(filesDir+"/settings.ini");
+#else
     file.open("settings.ini");
+#endif
 
     if (!file.is_open()) {
         perror("Settings file error...");
