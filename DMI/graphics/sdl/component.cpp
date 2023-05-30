@@ -8,7 +8,6 @@
  */
 #include "../component.h"
 #include "../display.h"
-#include "gfx_primitives.h"
 #include <algorithm>
 #include <cmath>
 #include "../flash.h"
@@ -94,8 +93,7 @@ void Component::setLocation(float x, float y)
 }
 void Component::drawLine(float x1, float y1, float x2, float y2)
 {
-    int res = SDL_RenderDrawLine(sdlren, getX(x1), getY(y1), getX(x2), getY(y2));
-    if(res < 0) printf("Failed to draw line. SDL Error: %s\n", SDL_GetError());
+    rend_backend->draw_line(getX(x1), getY(y1), getX(x2), getY(y2));
 }
 void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 {
@@ -210,13 +208,11 @@ void Component::drawPolygon(float* x, float* y, int n)
     std::vector<short> scaley(n);
     getXpoints(x, scalex.data(), n);
     getYpoints(y, scaley.data(), n);
-    aapolygonRGBA(sdlren, scalex.data(), scaley.data(), n, renderColor.R, renderColor.G, renderColor.B, 255);
-    filledPolygonRGBA(sdlren, scalex.data(), scaley.data(), n, renderColor.R, renderColor.G, renderColor.B, 255);
+    rend_backend->draw_polygon_filled(scalex.data(), scaley.data(), n);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
-    aacircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
-    filledCircleRGBA(sdlren, getX(cx), getY(cy), getScale(radius), renderColor.R, renderColor.G, renderColor.B, 255);
+    rend_backend->draw_circle_filled(getX(cx), getY(cy), getScale(radius));
 }
 void Component::addRectangle(float x, float y, float w, float h, Color c, int align)
 {
@@ -227,9 +223,7 @@ void Component::drawRectangle(float x, float y, float w, float h, Color c, int a
     setColor(c);
     if(!(align & LEFT)) x = sx / 2 + x - w / 2;
     if(!(align & UP)) y = sy / 2 + y - h / 2;
-    SDL_Rect r = {getX(x), getY(y), getScale(w), getScale(h)};
-    int res = SDL_RenderFillRect(sdlren, &r);
-    if(res < 0) printf("Failed to draw rectangle. SDL Error: %s\n", SDL_GetError());
+    rend_backend->draw_rect_filled(getX(x), getY(y), getScale(w), getScale(h));
 }
 void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang)
 {
@@ -237,10 +231,9 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(std::shared_ptr<sdl_texture> tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<Renderer::Image> tex, float cx, float cy, float sx, float sy)
 {
-    SDL_Rect rect = SDL_Rect({getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy)});
-    SDL_RenderCopy(sdlren, tex->tex, nullptr, &rect);
+    rend_backend->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy));
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
@@ -263,8 +256,8 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->aspect = aspect;
     int v = text.find('\n');
     t->tex = getTextGraphic(text, size, col, aspect, align);
-    float sx = t->tex == nullptr ? 0 : getAntiScale(t->tex->width);
-    float sy = t->tex == nullptr ? 0 : getAntiScale(t->tex->height);
+    float sx = t->tex == nullptr ? 0 : getAntiScale(t->tex->width());
+    float sy = t->tex == nullptr ? 0 : getAntiScale(t->tex->height());
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
@@ -277,20 +270,9 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->height = sy;
     return t;
 }
-std::shared_ptr<sdl_texture> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
+std::shared_ptr<Renderer::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
-    if (text == "") return nullptr;
-    TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
-    TTF_SetFontWrappedAlign(font, align == CENTER ? TTF_WRAPPED_ALIGN_CENTER : (align == RIGHT ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
-    if (font == nullptr) return nullptr;
-    //if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
-    SDL_Color color = {(Uint8)col.R, (Uint8)col.G, (Uint8)col.B};
-    SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
-    auto *tex = new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf));
-    tex->width = surf->w;
-    tex->height = surf->h;
-    SDL_FreeSurface(surf);
-    return std::shared_ptr<sdl_texture>(tex);
+    return rend_backend->make_wrapped_text_image(text, size, aspect, align, Renderer::Color{col.R, col.G, col.B});
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
 {
@@ -310,38 +292,21 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     }
     else
     {
-        ig->width = ig->tex->width;
-        ig->height = ig->tex->height;
+        ig->width = ig->tex->width();
+        ig->height = ig->tex->height();
         ig->x = this->sx/2;
         ig->y = this->sy/2;
     }
     return ig;
 }
-std::shared_ptr<sdl_texture> Component::getImageGraphic(string path)
+std::shared_ptr<Renderer::Image> Component::getImageGraphic(string path)
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    path = filesDir+"/"+path;
-#endif
-    SDL_Surface *surf = SDL_LoadBMP(path.c_str());
-    if(surf == nullptr)
-    {
-        printf("Error loading BMP %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
-        return nullptr;
-    }
-    SDL_Texture *t = SDL_CreateTextureFromSurface(sdlren, surf);
-    if (t == nullptr) return nullptr;
-    sdl_texture *tex = new sdl_texture(t);
-    tex->width = surf->w;
-    tex->height = surf->h;
-    SDL_FreeSurface(surf);
-    return std::shared_ptr<sdl_texture>(tex);
+    return rend_backend->load_image(path);
 }
 void Component::setBorder(Color c)
 {
     setColor(c);
-    SDL_Rect r = { getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0) };
-    SDL_RenderDrawRect(sdlren, &r);
+    rend_backend->draw_rect(getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0));
 }
 void Component::addBorder(Color c)
 {

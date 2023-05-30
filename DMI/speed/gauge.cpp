@@ -247,8 +247,6 @@ void displayLines()
     if (font == nullptr)
         font = openFont(fontPath, 16);
 
-    SDL_Color sdlWhite = { (Uint8)White.R, (Uint8)White.G, (Uint8)White.B };
-
     bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
     if (!inited) csg.clear();
@@ -289,15 +287,12 @@ void displayLines()
 #else
             float val = size + adjust;
 #endif
-            SDL_Surface *surf = TTF_RenderText_Blended(font, str, sdlWhite);
-            //TTF_CloseFont(font);
             texture *t = new texture();
             t->x = cx-val*cosf(an);
             t->y = cy-val*sinf(an);
             t->width = width;
             t->height = height;
-            t->tex = std::shared_ptr<sdl_texture>(new sdl_texture(SDL_CreateTextureFromSurface(sdlren, surf)));
-            SDL_FreeSurface(surf);
+            t->tex = rend_backend->make_text_image(str, 16, 0, Renderer::Color{ White.R, White.G, White.B });
             csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);

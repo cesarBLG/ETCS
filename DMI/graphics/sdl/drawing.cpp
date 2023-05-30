@@ -23,8 +23,9 @@
 #include "../../messages/messages.h"
 #include "../../tcp/server.h"
 #include "../../Settings/settings.h"
+#include "../../renderer/sdl_renderer.h"
 using namespace std;
-extern mutex draw_mtx;
+
 SDL_Window* sdlwin;
 SDL_Renderer* sdlren;
 SDL_Texture* sdltex;
@@ -42,7 +43,6 @@ float scale = 1;
 float offset[2] = {0, 0};
 extern bool running;
 void quit();
-mutex ev_mtx;
 void init_video()
 {
     int res = SDL_Init(SDL_INIT_EVERYTHING);
@@ -171,6 +171,7 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
         return;
     }
     sdlrot = rotate;
+    rend_backend = std::make_unique<SdlRenderer>(sdlren);
 
     if (width < 640 || height < 480) renderToTexture = true;
 
@@ -218,12 +219,9 @@ void clear()
     setColor(DarkBlue);
     SDL_RenderClear(sdlren);
 }
-Color renderColor;
 void setColor(Color color)
 {
-    renderColor = color;
-    int res = SDL_SetRenderDrawColor(sdlren, color.R,color.G,color.B,255);
-    if(res<0) printf("Failed to set render color. SDL Error: %s\n", SDL_GetError());
+    rend_backend->set_color(Renderer::Color{color.R, color.G, color.B});
 }
 int getScale(float val)
 {
