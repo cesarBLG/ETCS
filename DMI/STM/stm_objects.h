@@ -175,6 +175,7 @@ class ntc_window : public window
             case 7:
                 return LightGreen;
         }
+        return White;
     }
     public:
     ntc_window(int nid_stm);

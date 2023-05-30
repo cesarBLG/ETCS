@@ -193,4 +193,5 @@ std::vector<Button*> getKeyboard(const json &j, input_data *input)
     else if (type == "Numeric") return getNumericKeyboard(input);
     else if (type == "YesNo") return getYesNoKeyboard(input);
     else if (type == "Dedicated") return getSingleChoiceKeyboard(j["Keys"].get<std::vector<std::string>>(), input);
+    return std::vector<Button*>();
 }
