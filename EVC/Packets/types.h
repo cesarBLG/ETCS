@@ -45,7 +45,11 @@ struct bit_manipulator
     void log(ETCS_variable_custom<T> *var)
     {
         std::string name = typeid(*var).name();
+#ifdef _MSC_VER
+        name = name.substr(6);
+#else
         name = name.substr(name.find_first_not_of("0123456789"));
+#endif
         name = name.substr(0, name.size()-2);
         log_entries.push_back({name, std::to_string(var->rawdata)});
     }
