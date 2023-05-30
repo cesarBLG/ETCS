@@ -400,7 +400,7 @@ void update_supervision()
     } else if (monitoring == TSM) {
         std::list<const target*> MRDTtarg;
         for (const target &t : supervised_targets) {
-            if ((t.type == target_class::EoA ? d_estfront : d_maxsafefront(t.d_I)) > t.d_I && V_est>=t.get_target_speed())
+            if ((t.type == target_class::EoA ? d_estfront : d_maxsafefront(t.d_I)) >= t.d_I && V_est>=t.get_target_speed())
                 MRDTtarg.push_back(&t);
         }
         if (!MRDTtarg.empty())
