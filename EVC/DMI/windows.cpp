@@ -218,6 +218,7 @@ json ntc_data_window()
             return j;
         }
     }
+    return json();
 }
 json adhesion_window()
 {
