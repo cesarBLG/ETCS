@@ -534,14 +534,18 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
 }
 bool info_compare(const std::shared_ptr<etcs_information> &i1, const std::shared_ptr<etcs_information> &i2)
 {
-    if (!i1->infill && i2->infill)
-        return true;
-    if ((i1->index_level == 8 || i1->index_level == 9) && (i2->index_level != 8 && i2->index_level != 9))
-        return true;
-    if (i1->index_level == 1 && i2->index_level != 1)
-        return true;
-    if (i2->index_level == 3 && i1->index_level != 3)
-        return true;
+    // Non infill information processed first
+    if (i1->infill != i2->infill)
+        return i1->infill;
+    // Evaluate level transitions first to fill transition buffer
+    if ((i1->index_level == 8 || i1->index_level == 9) != (i2->index_level == 8 || i2->index_level == 9))
+        return i1->index_level == 8 || i1->index_level == 9;
+    // Linking
+    if ((i1->index_level == 1) != (i2->index_level == 1))
+        return i1->index_level == 1;
+    // Process MA after route info has been accepted
+    if ((i2->index_level == 3) != (i1->index_level == 3))
+        return i2->index_level == 3;
     return false;
 }
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg, int m_version)
