@@ -97,7 +97,7 @@ acceleration get_A_brake_service(bool use_active_combination)
     acceleration ac;
     for (auto it = active_combination.begin(); it!=active_combination.end(); ++it)
         ac.dist_step.insert(it->first);
-    for (int i=0; i<16; i++) {
+    for (int i=0; i<8; i++) {
         for (auto it = A_brake_service_combination[i].begin(); it!=A_brake_service_combination[i].end(); ++it)
             ac.speed_step.insert(it->first);
     }
