@@ -42,8 +42,15 @@ menu_radio::menu_radio() : menu(get_text("RBC data"))
 }
 void menu_radio::setEnabled(bool contactlast, bool shortno, bool enterdata, bool radionetwork)
 {
+#if SIMRAIL
+    buttons[0]->setEnabled(contactlast);
+    buttons[1]->setEnabled(false);
+    buttons[2]->setEnabled(enterdata);
+    buttons[3]->setEnabled(false);
+#else
     buttons[0]->setEnabled(contactlast);
     buttons[1]->setEnabled(shortno);
     buttons[2]->setEnabled(enterdata);
     buttons[3]->setEnabled(radionetwork);
+#endif
 }

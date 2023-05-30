@@ -35,10 +35,21 @@ bool mobile_terminal::setup(communication_session *session)
             setting_up = false;
             return;
         }
+
+        if (active_session == nullptr)
+            return;
+
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(active_session->contact.phone_number&0xffff);
-        addr.sin_addr.s_addr = htonl(active_session->contact.phone_number>>16);
+#if SIMRAIL
+        addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+        addr.sin_port = htons(active_session->contact.phone_number & 0xffff);
+#else
+        addr.sin_port = htons(active_session->contact.phone_number & 0xffff);
+        addr.sin_addr.s_addr = htonl(active_session->contact.phone_number >> 16);
+#endif
+        std::cout << "Connecting to RBC " << inet_ntoa(addr.sin_addr) << ":" << ntohs(addr.sin_port) << "..." << std::endl;
+
         if (connect(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
             status = safe_radio_status::Failed;
             perror("connect");
