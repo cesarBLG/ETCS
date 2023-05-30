@@ -136,7 +136,7 @@ void from_json(const json&j, planning_element &e)
             tex = yellow ? 20 : 18;
             break;
         case TrackConditionType::SoundHorn:
-            tex = 35;
+            tex = 24;
             break;
         case TrackConditionType::TractionSystemChange:{
             TractionSystem traction = (TractionSystem)j["TractionSystem"].get<int>();
