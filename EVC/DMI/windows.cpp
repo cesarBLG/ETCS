@@ -829,6 +829,9 @@ void validate_data_entry(std::string name, json &result)
             if (flexible_data_entry) {
                 train_data_valid = false;
                 L_TRAIN = stoi(result[get_text("Length (m)")].get<std::string>());
+                loading_gauge = result[get_text("Loading gauge")].get<std::string>();
+                axle_load_category = result[get_text("Axle load category")].get<std::string>();
+                train_category = result[get_text("Train category")].get<std::string>();
                 set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
                 brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
                 std::string str = result[get_text("Train category")].get<std::string>();
