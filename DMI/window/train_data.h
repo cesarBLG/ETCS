@@ -15,7 +15,7 @@ class train_data_window : public input_window
     bool switchable;
     public:
     TextButton SelectType;
-    train_data_window(std::string title, bool switchable);
+    train_data_window(std::string title, bool switchable, int nfields);
     void setLayout() override;
 };
 #endif
