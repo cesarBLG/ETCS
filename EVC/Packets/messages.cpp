@@ -896,7 +896,7 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
         if (s.exceptions.find(10) != s.exceptions.end()) {
             auto &msg = *((coordinate_system_assignment*)info->message->get());
             bg_id prvlrbg = {-1,-1};
-            bg_id memorized_lrbg;
+            bg_id memorized_lrbg = prvlrbg;
             for (auto &lrbg : lrbgs) {
                 if (lrbg.nid_lrbg == msg.NID_LRBG.get_value() && prvlrbg.NID_BG >= 0) {
                     if (memorized_lrbg.NID_BG >= 0 && memorized_lrbg != prvlrbg)
@@ -1103,7 +1103,7 @@ void set_mode_filter()
         {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
         {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
         {"NR","R","R","A","A","A","A","A","A","A","A","A","R","NR","NR","A","A"},
-        {"NR","A2","R","R","R","R","A","R","R","A","A","R","A1","NR","N","R","A","R"},
+        {"NR","A2","R","R","R","R","A","R","R","A","A","R","A1","NR","NR","A","R"},
         {"NR","R","R","R","A","A","R","R","R","R","R","R","R","NR","NR","R","R"},
         {"NR","A2,4","R","R","A","A","A","A","R","A","A","A","A1","NR","NR","A","R"},
         {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},
