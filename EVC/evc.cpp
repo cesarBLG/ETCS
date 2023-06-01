@@ -36,6 +36,7 @@
 #include "LX/level_crossing.h"
 #include "STM/stm.h"
 #include "language/language.h"
+#include "Euroradio/terminal.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -247,5 +248,8 @@ void loop()
         int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
         /*if (d>500) std::cout<<d<<std::endl;*/
         evc_cv.wait_for(lck, std::chrono::milliseconds(80));
+    }
+    for (auto &terminal : mobile_terminals) {
+        terminal.release();
     }
 }
