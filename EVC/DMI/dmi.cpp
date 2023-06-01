@@ -54,6 +54,7 @@ using std::to_string;
 using namespace ORserver;
 extern mutex loop_mtx;
 int dmi_pid;
+extern bool run;
 void dmi_comm();
 void start_dmi()
 {
@@ -151,10 +152,10 @@ void dmi_recv()
 {
     char buff[500];
     string s;
-    for (;;) {
+    while (run) {
         int count = recv(fd, buff, sizeof(buff)-1,0);
         if (count < 1)
-            exit(1);
+            break;
         buff[count] = 0;
         s+=buff;
         int end;
@@ -165,7 +166,7 @@ void dmi_recv()
             s = s.substr(end+1);
         }
     }
-
+    run = false;
 }
 string lines = "";
 extern POSIXclient *s_client;
@@ -221,11 +222,13 @@ void dmi_comm()
     //std::cin>>ip;
     addr.sin_addr.s_addr = inet_addr(ip.c_str());
     int res = connect(fd, (struct sockaddr *)&addr, sizeof(addr));
-    if (res < 0)
-        exit(1);
+    if (res < 0) {
+        run = false;
+        return;
+    }
     thread reading(dmi_recv);
     reading.detach();
-    for (;;) {
+    while (run) {
         unique_lock<mutex> lck(loop_mtx);
         sendtoor = get_milliseconds() - lastor > 250;
         if (sendtoor) lastor = get_milliseconds();
@@ -383,9 +386,10 @@ void dmi_comm()
         auto m = mode;
         */
         if (write(fd, lines.c_str(), lines.size()) < 0)
-            exit(1);
+            break;
         lines = "";
         lck.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+    run = false;
 }
