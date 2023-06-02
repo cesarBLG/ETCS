@@ -18,7 +18,6 @@
 #include "../language/language.h"
 #include "../Version/version.h"
 #include "../Version/translate.h"
-#include <fstream>
 #include <thread>
 #include <map>
 #ifndef _WIN32
@@ -432,20 +431,20 @@ bool rbc_contact_valid;
 void load_contact_info()
 {
     //TODO: Radio Network
-    std::ifstream file("rbc.dat");
-    unsigned int nid_c, nid_rbc;
-    uint64_t phone_number = 0;
-    file>>nid_c;
-    file>>nid_rbc;
-    file>>phone_number;
-    if (phone_number != 0) rbc_contact = {nid_c, nid_rbc, phone_number};
+    json j = load_cold_data("RBCData");
+    if (j.is_null()) return;
+    uint64_t phone_number = j["PhoneNumber"];
+    if (phone_number != 0) rbc_contact = {j["NID_C"].get<unsigned int>(), j["NID_RBC"].get<unsigned int>(), phone_number};
     rbc_contact_valid = cold_movement_status == NoColdMovement;
 }
 void set_rbc_contact(contact_info contact)
 {
     rbc_contact = contact;
-    std::ofstream file("rbc.dat");
-    file<<contact.country<<" "<<contact.id<<" "<<contact.phone_number<<"\n";
+    json j;
+    j["NID_C"] = rbc_contact->country;
+    j["NID_RBC"] = rbc_contact->id;
+    j["PhoneNumber"] = rbc_contact->phone_number;
+    save_cold_data("RBCData", j);
 }
 void set_supervising_rbc(contact_info info)
 {

@@ -9,7 +9,7 @@ Packets/logging.cpp Packets/io/io.cpp Packets/io/base64.cpp STM/stm.cpp Packets/
 Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp 
 Procedures/stored_information.cpp TrackConditions/track_conditions.cpp  TrackConditions/route_suitability.cpp
 Time/clock.cpp Position/geographical.cpp DMI/text_messages.cpp DMI/windows.cpp DMI/track_ahead_free.cpp
-TrainSubsystems/power.cpp TrainSubsystems/brake.cpp TrainSubsystems/train_interface.cpp
+TrainSubsystems/power.cpp TrainSubsystems/brake.cpp TrainSubsystems/train_interface.cpp TrainSubsystems/cold_movement.cpp
 language/language.cpp Version/version.cpp Version/translate.cpp Config/config.cpp
 NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 )
