@@ -213,6 +213,7 @@ void start()
     load_language();
     setup_national_values();
     load_vbcs();
+    load_contact_info();
     initialize_mode_transitions();
     setup_stm_control();
     set_message_filters();
