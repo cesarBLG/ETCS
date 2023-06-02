@@ -18,6 +18,7 @@
 #include "../language/language.h"
 #include "../Version/version.h"
 #include "../Version/translate.h"
+#include <fstream>
 #include <thread>
 #include <map>
 #ifndef _WIN32
@@ -342,7 +343,7 @@ void update_euroradio()
             position_report_reasons[10] = true;
             supervising_rbc = accepting_rbc;
             accepting_rbc = nullptr;
-            rbc_contact = supervising_rbc->contact;
+            set_rbc_contact(supervising_rbc->contact);
             inhibit_revocable_tsr = false;
             for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
                 for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
@@ -431,7 +432,20 @@ bool rbc_contact_valid;
 void load_contact_info()
 {
     //TODO: Radio Network
+    std::ifstream file("rbc.dat");
+    unsigned int nid_c, nid_rbc;
+    uint64_t phone_number = 0;
+    file>>nid_c;
+    file>>nid_rbc;
+    file>>phone_number;
+    if (phone_number != 0) rbc_contact = {nid_c, nid_rbc, phone_number};
     rbc_contact_valid = cold_movement_status == NoColdMovement;
+}
+void set_rbc_contact(contact_info contact)
+{
+    rbc_contact = contact;
+    std::ofstream file("rbc.dat");
+    file<<contact.country<<" "<<contact.id<<" "<<contact.phone_number<<"\n";
 }
 void set_supervising_rbc(contact_info info)
 {
@@ -451,7 +465,7 @@ void set_supervising_rbc(contact_info info)
     }
     if (supervising_rbc && supervising_rbc->contact == info)
         return;
-    rbc_contact = info;
+    set_rbc_contact(info);
     if (active_sessions.find(info) != active_sessions.end()) {
         supervising_rbc = active_sessions[info];
     } else {
