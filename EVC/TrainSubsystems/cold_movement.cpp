@@ -17,7 +17,12 @@ int cold_movement_status;
 static std::string filename;
 void initialize_cold_movement()
 {
+#ifdef __ANDROID__
+    extern std::string filesDir;
+    filename = filesDir+"/"+"cold_data.json";
+#else
     filename = "cold_data.json";
+#endif
     cold_movement_status = ColdMovementUnknown;
     load_language();
     setup_national_values();
