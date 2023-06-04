@@ -5,6 +5,10 @@
 struct ErrorReporting : ETCS_packet
 {
     M_ERROR_t M_ERROR;
+    ErrorReporting()
+    {
+        NID_PACKET.rawdata = 4;
+    }
     void copy(bit_manipulator &w) override
     {
         NID_PACKET.copy(w);
