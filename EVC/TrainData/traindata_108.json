@@ -1,12 +1,14 @@
 {
 	 "Simple" : {
         "length": 200,
-        "speed": 320,
+        "speed": 300,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
+            {"name": "DC1.5kV", "nid_ctraction": 0},
             {"name": "DC3kV", "nid_ctraction": 0},
+            {"name": "AC15kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
@@ -77,12 +79,14 @@
     },
     "Doble" : {
         "length": 400,
-        "speed": 320,
+        "speed": 300,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
+            {"name": "DC1.5kV", "nid_ctraction": 0},
             {"name": "DC3kV", "nid_ctraction": 0},
+            {"name": "AC15kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
