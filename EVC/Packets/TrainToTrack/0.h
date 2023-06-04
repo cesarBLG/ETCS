@@ -20,6 +20,10 @@ struct PositionReport : ETCS_packet
     M_MODE_t M_MODE;
     M_LEVEL_t M_LEVEL;
     NID_NTC_t NID_NTC;
+    PositionReport()
+    {
+        NID_PACKET.rawdata = 1;
+    }
     void copy(bit_manipulator &w) override
     {
         NID_PACKET.copy(w);
