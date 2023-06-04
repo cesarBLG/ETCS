@@ -243,7 +243,9 @@ void communication_session::update()
                 if (msg.message->NID_MESSAGE == 155 || msg.message->NID_MESSAGE == 156) {
                     finalize();
                 } else {
+#if !SIMRAIL
                     close();
+#endif
                 }
                 break;
             } else {
@@ -496,7 +498,11 @@ void terminate_session(contact_info info)
             return;
     }
     for (auto &it : active_sessions) {
+#if SIMRAIL
+        if ((it.first.country == info.country && it.first.id == info.id) || active_sessions.size() == 1) {
+#else
         if (it.first.country == info.country && it.first.id == info.id) {
+#endif
             it.second->close();
             if (it.second == supervising_rbc)
                 supervising_rbc = nullptr;

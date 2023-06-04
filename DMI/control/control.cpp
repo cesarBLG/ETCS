@@ -126,7 +126,8 @@ void setWindow(json &data)
             else
             {
                 json& def = j["WindowDefinition"];
-                t = new train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>());
+                int nfields = def["Inputs"].size();
+                t = new train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>(), nfields);
                 ((input_window*)t)->buildFrom(def);
             }
             w = t;

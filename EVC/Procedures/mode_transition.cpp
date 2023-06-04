@@ -88,6 +88,11 @@ void initialize_mode_transitions()
     c[72] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    
+    // Out of SRS conditions
+    c[75] = [](){return !isolated;};
+    c[76] = [](){return failed; };
+    c[77] = [](){return !failed;};
 
     std::vector<mode_transition> transitions;
     transitions.push_back({Mode::SB, Mode::SR, {8,37}, 7});
@@ -197,6 +202,26 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::SF, Mode::IS, {1}, 1});
     transitions.push_back({Mode::SN, Mode::IS, {1}, 1});
     transitions.push_back({Mode::RV, Mode::IS, {1}, 1});
+
+    // Out of SRS conditions
+    transitions.push_back({ Mode::IS, Mode::SB, {75}, 1 });
+    transitions.push_back({ Mode::NP, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SB, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::PS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SH, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::FS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::LS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SR, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::OS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SL, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::NL, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::UN, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::TR, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::PT, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SF, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SN, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::RV, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SF, Mode::SB, {77}, 1 });
 
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);

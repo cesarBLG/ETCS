@@ -146,7 +146,7 @@ class ntc_window : public window
 {
     int nid_stm;
     std::map<int, Component*> indicators;
-    std::map<int, std::shared_ptr<sdl_texture>> icons;
+    std::map<int, std::shared_ptr<Renderer::Image>> icons;
     public:
     stm_state state;
     int64_t last_time;
@@ -175,6 +175,7 @@ class ntc_window : public window
             case 7:
                 return LightGreen;
         }
+        return White;
     }
     public:
     ntc_window(int nid_stm);

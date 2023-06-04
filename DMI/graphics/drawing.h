@@ -21,7 +21,6 @@ extern std::string fontPath;
 extern std::string fontPathb;
 extern SDL_Window *sdlwin;
 extern SDL_Renderer *sdlren;
-extern Color renderColor;
 int getScale(float val);
 float getAntiScale(float val);
 void startDisplay(bool fullscreen, int display, int width, int height, bool borderless, bool rotate);

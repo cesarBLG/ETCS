@@ -8,21 +8,20 @@ msgstr ""
 "Language: pl\n"
 
 #: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
-#, fuzzy
 msgid "Driver ID"
 msgstr "ID Maszynisty"
 
-#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
+#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118 
 #: DMI/windows.cpp:741
 msgid "Level 0"
 msgstr "Poziom 0"
 
-#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
+#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118 
 #: DMI/windows.cpp:743
 msgid "Level 1"
 msgstr "Poziom 1"
 
-#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
+#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118 
 #: DMI/windows.cpp:745
 msgid "Level 2"
 msgstr "Poziom 2"
@@ -39,47 +38,42 @@ msgstr "Poziom"
 msgid "Train running number"
 msgstr "Numer pociągu"
 
-#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
+#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900 
 #: DMI/windows.cpp:1033
 msgid "RBC ID"
 msgstr "ID RBC"
 
 #: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
-msgstr "Numer telefonu RBC"
+msgstr "Numer tel. RBC"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
 msgstr "Dane RBC"
 
-#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
+#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786 
 #: DMI/windows.cpp:1017
-#, fuzzy
 msgid "Train data"
 msgstr "Dane pociągu"
 
 #: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
-#, fuzzy
 msgid "SR speed (km/h)"
 msgstr "Prędkość SR (km/h)"
 
 #: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
-#, fuzzy
 msgid "SR distance (m)"
 msgstr "Odległość SR (m)"
 
 #: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
-#, fuzzy
-msgid "SR speed/distance"
+msgid "SR Speed/Distance"
 msgstr "Ustawienia trybu SR"
 
 #: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
 msgstr "Język"
 
-#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
+#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812 
 #: DMI/windows.cpp:1018
-#, fuzzy
 msgid "Length (m)"
 msgstr "Długość (m)"
 
@@ -88,7 +82,6 @@ msgid "Brake percentaje"
 msgstr "Proc. masy ham."
 
 #: DMI/windows.cpp:267
-#, fuzzy
 msgid "Maximum speed (km/h)"
 msgstr "Prędkość max. (km/h)"
 
@@ -117,7 +110,6 @@ msgid "Shunting request failed"
 msgstr "Manewrowanie odrzucone"
 
 #: DMI/windows.cpp:791 DMI/windows.cpp:795
-#, fuzzy
 msgid "Validate train data"
 msgstr "Sprawdź dane pociągu"
 
@@ -126,7 +118,6 @@ msgid "Train type"
 msgstr "Rodzaj pociągu"
 
 #: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
-#, fuzzy
 msgid "Max speed (km/h)"
 msgstr "Prędkość max. (km/h)"
 
@@ -154,7 +145,7 @@ msgstr "Usuń VBC"
 msgid "Validate remove VBC"
 msgstr "Potwierdź usunięcie VBC"
 
-#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
+#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956 
 #: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
 msgstr "kod VBC"
@@ -172,7 +163,6 @@ msgid "Entering OS"
 msgstr "Wejście w tryb NA WIDOCZNOŚĆ"
 
 #: Procedures/train_trip.cpp:34
-#, fuzzy
 msgid "Unauthorized passing of EoA/LoA"
 msgstr "Przekroczono EoA lub LoA"
 
@@ -248,7 +238,7 @@ msgstr "Poza GC"
 msgid "Axle load category"
 msgstr "Nacisk na oś"
 
-#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
+#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986 
 #: DMI/windows.cpp:990
 msgid " data"
 msgstr " dane"
@@ -292,4 +282,3 @@ msgstr "Przydatność trasy – system trakcji"
 #: TrainSubsystems/brake.cpp:94
 msgid "Train data changed"
 msgstr "Zmieniono dane pociągu"
-

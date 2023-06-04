@@ -10,9 +10,9 @@
 #define _COLOR_H
 struct Color
 {
-    int R;
-    int G;
-    int B;
+    unsigned char R;
+    unsigned char G;
+    unsigned char B;
     bool operator==(Color b)
     {
         return R == b.R && G==b.G && B==b.B;

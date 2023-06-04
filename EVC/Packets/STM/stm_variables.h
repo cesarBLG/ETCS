@@ -205,6 +205,7 @@ struct M_COLOUR_t : ETCS_variable
             case 6:
                 return Red;
         }
+        return White;
     }
 };
 struct M_XATTRIBUTE_t : ETCS_variable

@@ -11,9 +11,9 @@ msgstr ""
 msgid "Main"
 msgstr "Menu"
 
-#: window/data_entry.cpp:25 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:82
-#: window/keyboard.cpp:186 window/keyboard.cpp:193
+#: window/data_entry.cpp:25 window/data_validation.cpp:11 
+#: window/data_validation.h:28 window/data_validation.h:82 
+#: window/keyboard.cpp:186 window/keyboard.cpp:193 
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
 msgstr "TAK"
@@ -131,7 +131,7 @@ msgstr "Przyczepność"
 
 #: window/menu_spec.cpp:24
 msgid "SR Speed/Distance"
-msgstr "Prędkość/odległość SR"
+msgstr "Ustawienia trybu SR"
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
@@ -150,13 +150,15 @@ msgstr "Menu"
 
 #: language/language.cpp:37 window/nav_buttons.cpp:35
 msgctxt "Navigation bar"
-msgid "Over-\n"
+msgid ""
+"Over-\n"
 "ride"
 msgstr "Pomiń"
 
 #: language/language.cpp:38 window/nav_buttons.cpp:41
 msgctxt "Navigation bar"
-msgid "Data\n"
+msgid ""
+"Data\n"
 "view"
 msgstr "Dane"
 
@@ -176,4 +178,3 @@ msgstr "Koniec wprowadzania danych"
 #: window/menu_radio.cpp:29
 msgid "RBC data"
 msgstr "Dane RBC"
-

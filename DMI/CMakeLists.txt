@@ -14,6 +14,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/sdl/drawing.cpp graphics/sdl
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
 			Settings/settings.cpp
+            renderer/sdl_renderer.cpp
 )
 
 if(WIN32)
@@ -36,6 +37,11 @@ target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG NOMINMAX)
 
 if(TARGET SDL2::SDL2main)
     target_link_libraries(dmi PRIVATE SDL2::SDL2main)
+endif()
+
+if(SIMRAIL)
+	include_directories(${cppzmq_INCLUDE_DIR})
+	target_link_libraries(dmi PRIVATE ${cppzmq_LIBRARY})
 endif()
 
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
