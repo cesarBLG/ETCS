@@ -531,6 +531,14 @@ struct communication_session_established : euroradio_message_traintotrack
         SupportedVersions = std::shared_ptr<OnboardSupportedSystemVersion>(new OnboardSupportedSystemVersion());
         packets.push_back(SupportedVersions);
     }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        SupportedVersions->copy(r);
+    }
 };
 namespace V1
 {
@@ -542,6 +550,14 @@ struct communication_session_established : euroradio_message_traintotrack
         NID_MESSAGE.rawdata = 159;
         PhoneNumbers = std::shared_ptr<OnboardTelephoneNumbers>(new OnboardTelephoneNumbers());
         packets.push_back(PhoneNumbers);
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        PhoneNumbers->copy(r);
     }
 };  
 }
