@@ -8,13 +8,11 @@
  */
 #include "config.h"
 #include "../DMI/dmi.h"
-#include "../DMI/windows.h"
 #include "../Procedures/level_transition.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 using json = nlohmann::json;
 extern std::string traindata_file;
-extern std::map<std::string, std::string> predefined_train_data;
 extern int data_entry_type;
 void load_config(std::string serie)
 {
@@ -43,9 +41,6 @@ void load_config(std::string serie)
             {
                 ntc_available_no_stm.insert(ntc);
             }
-        }
-        if (cfg.contains("PredefinedTrainData")) {
-            predefined_train_data = cfg["PredefinedTrainData"].get<std::map<std::string, std::string>>();
         }
     }
     send_command("setSerie", serie);
