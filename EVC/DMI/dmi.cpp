@@ -106,12 +106,11 @@ int write(int fd, const char *buff, size_t size)
 }
 #endif
 static int fd;
-void parse_command(string str, bool lock=true)
+void parse_command(string str)
 {
     int index = str.find_first_of('(');
     string command = str.substr(0, index);
     string value = str.substr(index+1, str.find_last_of(')')-index-1);
-    if (lock) unique_lock<mutex> lck(loop_mtx);
     if (command == "json")
     {
         json j = json::parse(value);
@@ -162,6 +161,7 @@ void dmi_recv()
         while ((end=s.find_first_of(';'))!=string::npos) {
             int start = s.find_first_not_of("\n\r ;");
             string command = s.substr(start, end-start);
+            unique_lock<mutex> lck(loop_mtx);
             parse_command(command);
             s = s.substr(end+1);
         }

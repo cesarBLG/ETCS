@@ -48,7 +48,7 @@ ParameterManager manager;
 mutex iface_mtx;
 static threadwait *poller;
 //std::list<euroradio_message_traintotrack> pendingmessages;
-void parse_command(string str, bool lock);
+void parse_command(string str);
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -227,7 +227,7 @@ void SetParameters()
 
     p = new Parameter("etcs::dmi::feedback");
     p->SetValue = [](string val) {
-        parse_command(val, false);
+        parse_command(val);
     };
 
     p = new Parameter("stm::command");
