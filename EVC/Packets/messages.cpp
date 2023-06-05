@@ -662,17 +662,17 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
-            ref += emerg->D_REF.get_value(emerg->Q_SCALE);
+            ref += emerg->D_REF.get_value(emerg->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
         case 33: {
             auto *ma = (MA_shifted_message*)message.get();
-            ref += ma->D_REF.get_value(ma->Q_SCALE);
+            ref += ma->D_REF.get_value(ma->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
         case 34: {
             auto *taf = (taf_request_message*)message.get();
-            ref += taf->D_REF.get_value(taf->Q_SCALE);
+            ref += taf->D_REF.get_value(taf->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
         default:
