@@ -879,6 +879,14 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                     return false;
                 if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
                     return false;   
+            } else if (info->linked_packets.begin()->get()->NID_PACKET == 15) {
+                Level2_3_MA ma = *((Level2_3_MA*)info->linked_packets.begin()->get());
+                movement_authority MA = movement_authority(info->ref, ma, info->timestamp);
+                distance end = MA.get_abs_end();
+                if (get_SSP().empty() || (--get_SSP().end())->get_end()<end || get_SSP().begin()->get_start() > d_estfront)
+                    return false;
+                if (get_gradient().empty() || (--get_gradient().end())->first<end || get_gradient().begin()->first > d_estfront)
+                    return false;   
             }
         }
         if (s.exceptions.find(5) != s.exceptions.end()) {
@@ -896,7 +904,7 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
         if (s.exceptions.find(10) != s.exceptions.end()) {
             auto &msg = *((coordinate_system_assignment*)info->message->get());
             bg_id prvlrbg = {-1,-1};
-            bg_id memorized_lrbg;
+            bg_id memorized_lrbg = prvlrbg;
             for (auto &lrbg : lrbgs) {
                 if (lrbg.nid_lrbg == msg.NID_LRBG.get_value() && prvlrbg.NID_BG >= 0) {
                     if (memorized_lrbg.NID_BG >= 0 && memorized_lrbg != prvlrbg)
@@ -1103,7 +1111,7 @@ void set_mode_filter()
         {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
         {"NR","R","R","R","A","A","A","A", "R", "R", "R", "R", "R","NR","NR","R","R"},
         {"NR","R","R","A","A","A","A","A","A","A","A","A","R","NR","NR","A","A"},
-        {"NR","A2","R","R","R","R","A","R","R","A","A","R","A1","NR","N","R","A","R"},
+        {"NR","A2","R","R","R","R","A","R","R","A","A","R","A1","NR","NR","A","R"},
         {"NR","R","R","R","A","A","R","R","R","R","R","R","R","NR","NR","R","R"},
         {"NR","A2,4","R","R","A","A","A","A","R","A","A","A","A1","NR","NR","A","R"},
         {"NR","A2,4","R","R","A","A","A","A","R","R","A","R","A1","NR","NR","A","R"},

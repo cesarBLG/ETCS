@@ -35,6 +35,7 @@ using std::thread;
 using std::mutex;
 extern mutex loop_mtx;
 extern std::condition_variable evc_cv;
+extern bool run;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
@@ -292,7 +293,7 @@ void register_parameter(string parameter)
 void polling()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    while(s_client->connected) {
+    while(s_client->connected && run) {
         int nfds = poller->poll(300);
         s_client->handle();
         string s = s_client->ReadLine();
