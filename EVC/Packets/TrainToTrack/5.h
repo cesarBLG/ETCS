@@ -5,6 +5,10 @@
 struct TrainRunningNumber : ETCS_packet
 {
     NID_OPERATIONAL_t NID_OPERATIONAL;
+    TrainRunningNumber()
+    {
+        NID_PACKET.rawdata = 5;
+    }
     void copy(bit_manipulator &w) override
     {
         NID_PACKET.copy(w);

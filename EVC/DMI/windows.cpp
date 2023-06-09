@@ -528,7 +528,7 @@ void update_dmi_windows()
         if (active_dialog_step == "S1") {
             if (changed)
                 active_window_dmi = ntc_menu(true);
-            bool waiting;
+            bool waiting=false;
             for (auto &kvp : installed_stms) {
                 auto *stm = kvp.second;
                 if (stm->data_entry == stm_object::data_entry_state::Start) {
