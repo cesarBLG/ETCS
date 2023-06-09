@@ -312,10 +312,17 @@ ETCS_packet *get_position_report()
         r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
         if (lrbgs.size() > 1) {
             lrbg_info &prevLRBG = *(----lrbgs.end());
-            r->Q_DIRLRBG.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_orientation < 0);
-            r->Q_DLRBG.set_value(dist < 0);
-            r->Q_DIRTRAIN.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_direction < 0);
-            r->NID_PRVLRBG.set_value(prevLRBG.nid_lrbg);
+            if (prevLRBG.position.get_orientation() != lrbgs.back().position.get_orientation()) {
+                r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
+                r->Q_DLRBG = Q_DLRBG_t::Unknown;
+                r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
+                r->NID_PRVLRBG = NID_PRVLRBG_t::Unknown;
+            } else {
+                r->Q_DIRLRBG.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_orientation < 0);
+                r->Q_DLRBG.set_value(dist < 0);
+                r->Q_DIRTRAIN.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_direction < 0);
+                r->NID_PRVLRBG.set_value(prevLRBG.nid_lrbg);
+            }
         } else {
             r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
             r->Q_DLRBG = Q_DLRBG_t::Unknown;

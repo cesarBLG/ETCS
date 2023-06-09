@@ -417,7 +417,7 @@ void SH_authorisation_info::handle()
 {
     update_dialog_step("SH authorised", "");
     sh_balises = {};
-    for (auto it = ++linked_packets.begin(); it != linked_packets.end(); ++it) {
+    for (auto it = linked_packets.begin(); it != linked_packets.end(); ++it) {
         if (it->get()->NID_PACKET == 49) {
             auto &balises = *((ListSRBalises*)it->get());
             sh_balises = std::set<bg_id>();

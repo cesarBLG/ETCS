@@ -7,27 +7,35 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "vbc.h"
+#include "../TrainSubsystems/cold_movement.h"
 std::set<virtual_balise_cover> vbcs;
-#include <fstream>
+void from_json(const json&j, virtual_balise_cover &vbc)
+{
+    vbc.NID_C = j["NID_C"].get<int>();
+    vbc.NID_VBCMK = j["NID_VBCMK"].get<int>();
+    vbc.validity = j["Validity"].get<int64_t>();
+}
+void to_json(json&j, const virtual_balise_cover &vbc)
+{
+    j["NID_C"] = vbc.NID_C;
+    j["NID_VBCMK"] = vbc.NID_VBCMK;
+    j["Validity"] = vbc.validity;
+}
 void write_vbcs()
 {
-    std::ofstream file("vbcs.dat");
-    for (auto vbc : vbcs) {
-        file<<vbc.NID_C<<" "<<vbc.NID_VBCMK<<" "<<vbc.validity<<"\n";
+    std::vector<json> vbcj;
+    for (auto &vbc : vbcs) {
+        vbcj.push_back(vbc);
     }
+    json j = vbcj;
+    save_cold_data("VBC", j);
 }
 void load_vbcs()
 {
-    std::ifstream file("vbcs.dat");
-    while (!file.eof()) {
-        int nid_c, nid_vbcmk;
-        int64_t validity;
-        file>>nid_c;
-        file>>nid_vbcmk;
-        file>>validity;
-        if (file.fail()) break;
-        if (validity > get_milliseconds())
-            vbcs.insert({nid_c, nid_vbcmk, validity});
+    json vbcj = load_cold_data("VBC");
+    if (vbcj.is_null()) return;
+    for (auto &vbc : vbcj) {
+        vbcs.insert(vbc);
     }
 }
 void set_vbc(virtual_balise_cover vbc)

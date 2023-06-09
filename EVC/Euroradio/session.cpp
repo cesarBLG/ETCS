@@ -344,7 +344,7 @@ void update_euroradio()
             position_report_reasons[10] = true;
             supervising_rbc = accepting_rbc;
             accepting_rbc = nullptr;
-            rbc_contact = supervising_rbc->contact;
+            set_rbc_contact(supervising_rbc->contact);
             inhibit_revocable_tsr = false;
             for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
                 for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
@@ -433,7 +433,20 @@ bool rbc_contact_valid;
 void load_contact_info()
 {
     //TODO: Radio Network
+    json j = load_cold_data("RBCData");
+    if (j.is_null()) return;
+    uint64_t phone_number = j["PhoneNumber"];
+    if (phone_number != 0) rbc_contact = {j["NID_C"].get<unsigned int>(), j["NID_RBC"].get<unsigned int>(), phone_number};
     rbc_contact_valid = cold_movement_status == NoColdMovement;
+}
+void set_rbc_contact(contact_info contact)
+{
+    rbc_contact = contact;
+    json j;
+    j["NID_C"] = rbc_contact->country;
+    j["NID_RBC"] = rbc_contact->id;
+    j["PhoneNumber"] = rbc_contact->phone_number;
+    save_cold_data("RBCData", j);
 }
 void set_supervising_rbc(contact_info info)
 {
@@ -453,7 +466,7 @@ void set_supervising_rbc(contact_info info)
     }
     if (supervising_rbc && supervising_rbc->contact == info)
         return;
-    rbc_contact = info;
+    set_rbc_contact(info);
     if (active_sessions.find(info) != active_sessions.end()) {
         supervising_rbc = active_sessions[info];
     } else {

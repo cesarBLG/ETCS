@@ -41,3 +41,4 @@ distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bo
 void update_linking(distance start, Linking link, bool infill, bg_id this_bg);
 void delete_linking();
 void delete_linking(distance from);
+void load_train_position();

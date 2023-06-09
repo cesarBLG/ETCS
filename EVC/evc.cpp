@@ -19,11 +19,9 @@
 #include <chrono>
 #include "Packets/messages.h"
 #include "Packets/logging.h"
-#include "Packets/vbc.h"
 #include "Supervision/speed_profile.h"
 #include "Supervision/targets.h"
 #include "Supervision/supervision.h"
-#include "Supervision/national_values.h"
 #include "Position/distance.h"
 #include "Position/geographical.h"
 #include "Supervision/conversion_model.h"
@@ -35,7 +33,7 @@
 #include "TrainSubsystems/subsystems.h"
 #include "LX/level_crossing.h"
 #include "STM/stm.h"
-#include "language/language.h"
+#include "Euroradio/terminal.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -202,16 +200,12 @@ extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 }
 #endif
 bool started=false;
-int cold_movement_status;
 void start()
 {
-    cold_movement_status = ColdMovementUnknown;
     start_dmi();
     start_or_iface();
     start_logging();
-    load_language();
-    setup_national_values();
-    load_vbcs();
+    initialize_cold_movement();
     initialize_mode_transitions();
     setup_stm_control();
     set_message_filters();
@@ -247,5 +241,8 @@ void loop()
         int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
         /*if (d>500) std::cout<<d<<std::endl;*/
         evc_cv.wait_for(lck, std::chrono::milliseconds(80));
+    }
+    for (auto &terminal : mobile_terminals) {
+        terminal.release();
     }
 }

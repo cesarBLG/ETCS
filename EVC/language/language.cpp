@@ -12,7 +12,7 @@
 #include "../STM/stm.h"
 #include "../Packets/STM/30.h"
 #include <iostream>
-#include <fstream>
+#include "../TrainSubsystems/cold_movement.h"
 moFileLib::moFileReader reader;
 std::string language = "en";
 std::string get_text(std::string id)
@@ -41,7 +41,7 @@ void set_language(std::string lang)
     extern std::string filesDir;
     file = filesDir+"/locales/evc/"+lang+".mo";
 #endif
-    if (lang == "en") {
+    if (lang == "en" || lang == "") {
         language = "en";
     } else if (reader.ReadFile(file.c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
         std::cout<<reader.GetErrorDescription()<<std::endl;
@@ -57,13 +57,11 @@ void set_language(std::string lang)
         it.second->send_message(&msg);
     }
     send_command("language", lang);
-    std::fstream f("language.txt", std::ios_base::out);
-    f<<lang;
+    json j = json::parse("\""+lang+"\"");
+    save_cold_data("Language", j);
 }
 void load_language()
 {
-    std::fstream f("language.txt");
-    std::string lang;
-    f>>lang;
-    set_language(lang);
+    json j = load_cold_data("Language");
+    set_language(j.is_null() ? "" : j);
 }

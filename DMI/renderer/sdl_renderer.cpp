@@ -96,7 +96,6 @@ std::unique_ptr<Renderer::Font> SdlRenderer::load_font(float size, bool bold) {
 		std::string path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
 		TTF_Font* font = TTF_OpenFont(path.c_str(), getScale(size) * 1.4);
 #endif
-		printf("loading font %s %f\n", path.c_str(), size);
 		if (font == nullptr)
 			return nullptr;
 		wrapper = std::make_shared<SdlFontWrapper>(font);
@@ -184,7 +183,6 @@ SdlRenderer::SdlFontWrapper::SdlFontWrapper(TTF_Font *f) : font(f) {
 }
 
 SdlRenderer::SdlFontWrapper::~SdlFontWrapper() {
-	printf("killing font\n");
 	TTF_CloseFont(font);
 }
 

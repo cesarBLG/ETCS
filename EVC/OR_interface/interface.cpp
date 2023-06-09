@@ -35,6 +35,7 @@ using std::thread;
 using std::mutex;
 extern mutex loop_mtx;
 extern std::condition_variable evc_cv;
+extern bool run;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
@@ -49,7 +50,7 @@ ParameterManager manager;
 mutex iface_mtx;
 static threadwait *poller;
 //std::list<euroradio_message_traintotrack> pendingmessages;
-void parse_command(string str, bool lock);
+void parse_command(string str);
 void SetParameters()
 {
     std::unique_lock<mutex> lck(iface_mtx);
@@ -235,7 +236,7 @@ void SetParameters()
 
     p = new Parameter("etcs::dmi::feedback");
     p->SetValue = [](string val) {
-        parse_command(val, false);
+        parse_command(val);
     };
 
     p = new Parameter("stm::command");
@@ -292,7 +293,7 @@ void register_parameter(string parameter)
 void polling()
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    while(s_client->connected) {
+    while(s_client->connected && run) {
         int nfds = poller->poll(300);
         s_client->handle();
         string s = s_client->ReadLine();

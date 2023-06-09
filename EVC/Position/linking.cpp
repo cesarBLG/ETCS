@@ -17,7 +17,6 @@ std::list<lrbg_info> lrbgs;
 bool position_valid=false;
 void load_train_position()
 {
-    //TODO: load lrbgs
     position_valid = cold_movement_status == NoColdMovement;
 }
 void save_train_position()

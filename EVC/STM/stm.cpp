@@ -320,7 +320,7 @@ void stm_level_transition_received(level_transition_information info)
 {
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC) {
         auto *stm1 = get_stm(ongoing_transition->leveldata.nid_ntc);
-        if (stm1->state == stm_state::HS) {
+        if (stm1 != nullptr && stm1->state == stm_state::HS) {
             if (info.leveldata.level == Level::NTC) {
                 auto stm2 = get_stm(info.leveldata.nid_ntc);
                 if (stm1 != stm2) {

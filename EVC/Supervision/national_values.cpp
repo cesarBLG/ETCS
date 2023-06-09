@@ -9,9 +9,9 @@
 #include "national_values.h"
 #include "../optional.h"
 #include "../Packets/logging.h"
+#include "../TrainSubsystems/cold_movement.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
-#include <fstream>
 bool Q_NVDRIVER_ADHES;
 
 double V_NVSHUNT;
@@ -196,16 +196,10 @@ void load_national_values(NationalValues nv)
         M_NVKTINT = nv.M_NVKTINT.get_value();
     }
     nv_changed();
-
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ofstream file(filesDir+"/nationalvalues.bin", std::ios::binary);
-#else
-    std::ofstream file("nationalvalues.bin", std::ios::binary);
-#endif
     bit_manipulator w;
     nv.copy(w);
-    file.write((const char*)&w.bits[0], w.bits.size());
+    json j = w.to_base64();
+    save_cold_data("NationalValues", j);
 }
 struct StoredNationalValueSet
 {
@@ -224,19 +218,13 @@ void national_values_received(NationalValues nv, distance reference)
 }
 void setup_national_values()
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ifstream file(filesDir+"/nationalvalues.bin", std::ios::binary);
-#else
-    std::ifstream file("nationalvalues.bin", std::ios::binary);
-#endif
-    std::vector<unsigned char> message;
-    while (!file.eof() && !file.fail()) {
-        char c;
-        file.read(&c, 1);
-        message.push_back(c);
+    json j = load_cold_data("NationalValues");
+    if (j.is_null())
+    {
+        reset_national_values();
+        return;
     }
-    bit_manipulator r(std::move(message));
+    bit_manipulator r(j.get<std::string>());
     NationalValues nv = NationalValues();
     nv.copy(r);
     std::cout<<"Loading national values\n";
@@ -260,12 +248,8 @@ void update_national_values()
 }
 void reset_national_values()
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    remove((filesDir+"/nationalvalues.bin").c_str());
-#else
-    remove("nationalvalues.bin");
-#endif
+    json j;
+    save_cold_data("NationalValues", j);
     set_default_nv();
     nv_changed();
 }
