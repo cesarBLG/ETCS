@@ -42,7 +42,6 @@ int active_channel;
 static char data[BUFF_SIZE];
 std::string buffer;
 std::mutex server_mtx;
-static SDL_Event ev;
 #include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)

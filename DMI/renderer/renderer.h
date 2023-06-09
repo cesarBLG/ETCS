@@ -8,21 +8,25 @@
 
 #include <string>
 #include <memory>
+#include "../graphics/color.h"
 
 class Renderer
 {
 public:
-	struct Color
-	{
-		unsigned char R, G, B;
-	};
-
 	class Image
 	{
 	public:
 		virtual ~Image() = default;
 		virtual int width() const = 0;
 		virtual int height() const = 0;
+	};
+
+	class Font
+	{
+	public:
+		virtual ~Font() = default;
+		virtual float ascent() const = 0;
+		virtual std::pair<float, float> calc_size(const std::string &str) const = 0;
 	};
 
 	virtual ~Renderer() = default;
@@ -33,9 +37,11 @@ public:
 	virtual void draw_image(const Image &img, int x, int y, int w, int h) = 0;
 	virtual void draw_circle_filled(int x, int y, int rad) = 0;
 	virtual void draw_polygon_filled(const short int *vx, const short int *vy, size_t n) = 0;
+	virtual void clear() = 0;
 	virtual std::unique_ptr<Image> load_image(const std::string &path) = 0;
-	virtual std::unique_ptr<Image> make_text_image(const std::string &text, float size, int aspect, Color c) = 0;
-	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, float size, int aspect, int align, Color c) = 0;
+	virtual std::unique_ptr<Font> load_font(float size, bool bold) = 0;
+	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) = 0;
+	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) = 0;
 };
 
 extern std::unique_ptr<Renderer> rend_backend;

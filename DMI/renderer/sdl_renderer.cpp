@@ -8,6 +8,7 @@
 #include "../graphics/drawing.h"
 #include "../graphics/sdl/gfx_primitives.h"
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 std::unique_ptr<Renderer> rend_backend;
 
@@ -59,6 +60,10 @@ void SdlRenderer::draw_polygon_filled(const int16_t *vx, const int16_t *vy, size
 	aapolygonRGBA(sdlrend, vx, vy, n, c.R, c.G, c.B, 255);
 }
 
+void SdlRenderer::clear() {
+	SDL_RenderClear(sdlrend);
+}
+
 std::unique_ptr<Renderer::Image> SdlRenderer::load_image(const std::string &p) {
 	std::string path = load_path + p;
 	SDL_Surface *surf = SDL_LoadBMP(path.c_str());
@@ -77,15 +82,38 @@ std::unique_ptr<Renderer::Image> SdlRenderer::load_image(const std::string &p) {
 	return img;
 }
 
-std::unique_ptr<Renderer::Image> SdlRenderer::make_text_image(const std::string &text, float size, int aspect, Color c) {
+std::unique_ptr<Renderer::Font> SdlRenderer::load_font(float size, bool bold) {
+	auto it = loaded_fonts.find({size, bold});
+	std::shared_ptr<SdlFontWrapper> wrapper;
+	if (it != loaded_fonts.end())
+		wrapper = it->second;
+
+	if (!wrapper) {
+#if SIMRAIL
+		std::string path = load_path + (!bold ? "fonts/verdana.ttf" : "fonts/verdanab.ttf");
+		TTF_Font* font = TTF_OpenFont(path.c_str(), getScale(size) * 1.25);
+#else
+		std::string path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
+		TTF_Font* font = TTF_OpenFont(path.c_str(), getScale(size) * 1.4);
+#endif
+		printf("loading font %s %f\n", path.c_str(), size);
+		if (font == nullptr)
+			return nullptr;
+		wrapper = std::make_shared<SdlFontWrapper>(font);
+		loaded_fonts.insert_or_assign({size, bold}, wrapper);
+	}
+
+	return std::make_unique<SdlFont>(wrapper);
+}
+
+std::unique_ptr<Renderer::Image> SdlRenderer::make_text_image(const std::string &text, const Font &base, Color c) {
 	if (text.empty())
 		return nullptr;
 
-	TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
-	if (font == nullptr) return nullptr;
+	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended(font, text.c_str(), color);
+	SDL_Surface *surf = TTF_RenderUTF8_Blended(font.get(), text.c_str(), color);
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -103,19 +131,17 @@ std::unique_ptr<Renderer::Image> SdlRenderer::make_text_image(const std::string 
 	return img;
 }
 
-std::unique_ptr<Renderer::Image> SdlRenderer::make_wrapped_text_image(const std::string &text, float size, int aspect, int align, Color c) {
+std::unique_ptr<Renderer::Image> SdlRenderer::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
 	if (text.empty())
 		return nullptr;
 
-	TTF_Font *font = openFont(aspect&1 ? fontPathb : fontPath, size);
-	if (font == nullptr)
-		return nullptr;
+	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
-	TTF_SetFontWrappedAlign(font, align == CENTER ? TTF_WRAPPED_ALIGN_CENTER : (align == RIGHT ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
+	TTF_SetFontWrappedAlign(font.get(), align == CENTER ? TTF_WRAPPED_ALIGN_CENTER : (align == RIGHT ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
 
 	//if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font, text.c_str(), color, 0);
+	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), text.c_str(), color, 0);
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -134,6 +160,7 @@ std::unique_ptr<Renderer::Image> SdlRenderer::make_wrapped_text_image(const std:
 }
 
 SdlRenderer::SdlImage::SdlImage(SDL_Texture *tex, int w, int h) : tex(tex), w(w), h(h) {
+
 }
 
 SdlRenderer::SdlImage::~SdlImage() {
@@ -150,4 +177,35 @@ int SdlRenderer::SdlImage::width() const {
 
 int SdlRenderer::SdlImage::height() const {
 	return h;
+}
+
+SdlRenderer::SdlFontWrapper::SdlFontWrapper(TTF_Font *f) : font(f) {
+
+}
+
+SdlRenderer::SdlFontWrapper::~SdlFontWrapper() {
+	printf("killing font\n");
+	TTF_CloseFont(font);
+}
+
+TTF_Font* SdlRenderer::SdlFontWrapper::get() const {
+	return font;
+}
+
+SdlRenderer::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper) : font(wrapper) {
+
+}
+
+float SdlRenderer::SdlFont::ascent() const {
+	return TTF_FontAscent(font->get());
+}
+
+std::pair<float, float> SdlRenderer::SdlFont::calc_size(const std::string &str) const {
+	int w, h;
+    TTF_SizeUTF8(font->get(), str.c_str(), &w, &h);
+    return std::make_pair(getAntiScale(w), getAntiScale(h));
+}
+
+TTF_Font* SdlRenderer::SdlFont::get() const {
+	return font->get();
 }

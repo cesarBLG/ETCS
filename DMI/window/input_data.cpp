@@ -28,7 +28,6 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
     data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
     data_comp->add(data_tex);
     data_comp->showBorder = false;
-    font = openFont(fontPath, 12);
     data_comp->setDisplayFunction([this]
     {
         data_comp->setBorder(MediumGrey);
@@ -39,11 +38,10 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
             std::string text = getFormattedData(data);
             if (text.find('\n') != std::string::npos)
             {
-                if (font == nullptr) return;
-                float x;
-                float y;
-                getFontSize(font, text.substr(text.find('\n')+1).c_str(), &x, &y);
-                curx = data_tex->offx + x;
+                auto font = rend_backend->load_font(12, false);
+                if (font == nullptr)
+                    return;
+                curx = data_tex->offx + font->calc_size(text.substr(text.find('\n')+1)).first;
                 cury = 42;
             }
             time_t now;

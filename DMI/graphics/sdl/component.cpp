@@ -97,7 +97,7 @@ void Component::drawLine(float x1, float y1, float x2, float y2)
 }
 void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 {
-    setColor(c);
+    rend_backend->set_color(c);
     drawLine(x1, y1, x2, y2);
 }
 void Component::paint()
@@ -220,7 +220,7 @@ void Component::addRectangle(float x, float y, float w, float h, Color c, int al
 }
 void Component::drawRectangle(float x, float y, float w, float h, Color c, int align)
 {
-    setColor(c);
+    rend_backend->set_color(c);
     if(!(align & LEFT)) x = sx / 2 + x - w / 2;
     if(!(align & UP)) y = sy / 2 + y - h / 2;
     rend_backend->draw_rect_filled(getX(x), getY(y), getScale(w), getScale(h));
@@ -272,7 +272,8 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
 }
 std::shared_ptr<Renderer::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
-    return rend_backend->make_wrapped_text_image(text, size, aspect, align, Renderer::Color{col.R, col.G, col.B});
+    auto font = rend_backend->load_font(size, (aspect & 1) != 0);
+    return rend_backend->make_wrapped_text_image(text, *font, align, col);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
 {
@@ -305,7 +306,7 @@ std::shared_ptr<Renderer::Image> Component::getImageGraphic(string path)
 }
 void Component::setBorder(Color c)
 {
-    setColor(c);
+    rend_backend->set_color(c);
     rend_backend->draw_rect(getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0));
 }
 void Component::addBorder(Color c)

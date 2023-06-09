@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <deque>
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <thread>
 #include <mutex>
 #include "../drawing.h"
@@ -26,18 +27,11 @@
 #include "../../renderer/sdl_renderer.h"
 using namespace std;
 
-SDL_Window* sdlwin;
-SDL_Renderer* sdlren;
+static SDL_Window *sdlwin;
+static SDL_Renderer *sdlren;
 SDL_Texture* sdltex;
 bool renderToTexture;
 bool sdlrot;
-#if SIMRAIL
-std::string fontPath = "fonts/verdana.ttf";
-std::string fontPathb = "fonts/verdanab.ttf";
-#else
-std::string fontPath = "fonts/swiss.ttf";
-std::string fontPathb = "fonts/swissb.ttf";
-#endif
 #define PI 3.14159265358979323846264338327950288419716939937510
 float scale = 1;
 float offset[2] = {0, 0};
@@ -198,7 +192,8 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
 void display()
 {
     if (renderToTexture) SDL_SetRenderTarget(sdlren, sdltex);
-    clear();
+    rend_backend->set_color(DarkBlue);
+    rend_backend->clear();
     displayETCS();
     if (renderToTexture)
     {
@@ -214,15 +209,6 @@ void quitDisplay()
     SDL_DestroyWindow(sdlwin);
     SDL_Quit();
 }
-void clear()
-{
-    setColor(DarkBlue);
-    SDL_RenderClear(sdlren);
-}
-void setColor(Color color)
-{
-    rend_backend->set_color(Renderer::Color{color.R, color.G, color.B});
-}
 int getScale(float val)
 {
     return round(val*scale);
@@ -230,34 +216,4 @@ int getScale(float val)
 float getAntiScale(float val)
 {
     return val/scale;
-}
-void getFontSize(TTF_Font *font, const char *str, float *width, float *height)
-{
-    int w=0;
-    int h=0;
-    TTF_SizeUTF8(font, str, &w, &h);
-    *width = w/scale;
-    *height = h/scale;
-}
-std::map<std::pair<std::string, float>, TTF_Font*> fonts;
-TTF_Font *openFont(std::string text, float size)
-{
-    auto it = fonts.find({text,size});
-    if (it == fonts.end())
-    {
-        std::string path = text;
-#ifdef __ANDROID__
-        extern std::string filesDir;
-        path = filesDir+"/"+text;
-#endif
-
-#if SIMRAIL
-        TTF_Font* f = TTF_OpenFont(path.c_str(), getScale(size) * 1.25);
-#else
-        TTF_Font* f = TTF_OpenFont(path.c_str(), getScale(size) * 1.4);
-#endif
-        if(f == nullptr) printf("Error loading font %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
-        it = fonts.insert({{text,size}, f}).first;
-    }
-    return it->second;
 }

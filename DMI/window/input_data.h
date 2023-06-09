@@ -19,7 +19,6 @@ using json = nlohmann::json;
 class input_window;
 class input_data
 {
-    TTF_Font *font;
     protected:
     bool selected = false;
     bool accepted = false;
