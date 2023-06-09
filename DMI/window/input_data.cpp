@@ -25,7 +25,7 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
         }
     }
     else data_comp = new Button(204+102,50);
-    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data), 10, 0, 12, selected ? Black : (accepted ? White : DarkGrey), LEFT);
     data_comp->add(data_tex);
     data_comp->showBorder = false;
     font = openFont(fontPath, 12);
@@ -101,7 +101,7 @@ void input_data::updateText()
 {
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
     data_comp->clear();
-    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : DarkGrey), LEFT);
     data_comp->add(data_tex);
     if(label!="" && show_echo)
     {
@@ -115,7 +115,7 @@ void input_data::updateText()
         else if (operatcross_invalid)
             data_echo->addText("????", 4, 0, 12, Yellow, LEFT);
         else
-            data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : Grey, LEFT);
+            data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : DarkGrey, LEFT);
     }
 }
 input_data::~input_data()
