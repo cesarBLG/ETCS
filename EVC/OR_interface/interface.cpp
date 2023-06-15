@@ -132,6 +132,18 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new Parameter("etcs::level");
+    p->GetValue = []() {
+        return std::to_string((int)level);
+    };
+    manager.AddParameter(p);
+
+    p = new Parameter("etcs::mode");
+    p->GetValue = []() {
+        return std::to_string((int)mode);
+    };
+    manager.AddParameter(p);
+
     p = new Parameter("etcs::emergency");
     p->GetValue = []() {
         return EB_command ? "true" : "false";
