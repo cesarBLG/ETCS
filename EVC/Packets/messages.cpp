@@ -641,7 +641,6 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         transition_buffer.clear();
     else
         transition_buffer.push_back({});
-    
     message = translate_message(message, session->version);
     std::list<std::shared_ptr<etcs_information>> ordered_info;
     bg_id lrbg = message->NID_LRBG.get_value();
