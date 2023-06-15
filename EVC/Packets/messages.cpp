@@ -684,8 +684,9 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             case 15:{
                 auto *emerg = (conditional_emergency_stop*)message.get();
                 if (!((emerg->Q_DIR == Q_DIR_t::Nominal && dir == 1) && (emerg->Q_DIR == Q_DIR_t::Reverse && dir == 0))) {
-                    info = new etcs_information(41, 43, [emerg,ref]() {
-                        int result = handle_conditional_emergency_stop(emerg->NID_EM, ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE));
+                    distance minsafe = d_minsafefront(ref);
+                    info = new etcs_information(41, 43, [emerg,ref,minsafe]() {
+                        int result = handle_conditional_emergency_stop(emerg->NID_EM, ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE), minsafe);
                         emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
                         ack->NID_EM = emerg->NID_EM;
                         ack->Q_EMERGENCYSTOP.rawdata = result;

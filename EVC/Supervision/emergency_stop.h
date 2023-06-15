@@ -12,5 +12,5 @@
 #include <map>
 extern std::map<int, optional<distance>> emergency_stops;
 void handle_unconditional_emergency_stop(int id);
-int handle_conditional_emergency_stop(int id, distance location);
+int handle_conditional_emergency_stop(int id, distance location, distance minsafe);
 void revoke_emergency_stop(int id);
