@@ -24,7 +24,7 @@ std::string active_dialog_step;
 json default_window = R"({"active":"default"})"_json;
 json active_window_dmi = default_window;
 const json main_window_radio_wait = R"({"active":"menu_main","hour_glass":true,"enabled":{"Start":false,"Driver ID":false,"Train Data":false,"Level":false,"Train Running Number":false,"Maintain Shunting":false,"Shunting":false,"Non Leading":false,"Radio Data":false,"Exit":false}})"_json;
-const json radio_window_radio_wait = R"({"active":"menu_radio","hour_glass":true,"enabled":{"Exit":false}})"_json;
+const json radio_window_radio_wait = R"({"active":"menu_radio","hour_glass":true,"enabled":{"Exit":false,"Contact last RBC":false,"Use short number":false,"Enter RBC data":false,"Radio Network ID":false}})"_json;
 bool pending_train_data_send = false;
 bool any_button_pressed_async = false;
 bool any_button_pressed = false;
@@ -152,7 +152,15 @@ json rbc_data_window()
         build_numeric_field(get_text("RBC ID"), rbc_contact ? std::to_string(rbc_contact->country<<14 | rbc_contact->id) : ""),
         build_numeric_field(get_text("RBC phone number"), rbc_contact ? std::to_string(rbc_contact->phone_number) : "")
     };
+    inputs[0]["Echo"] = false;
+    inputs[1]["Echo"] = false;
     j["WindowDefinition"] = build_input_window(get_text("RBC data"), inputs);
+    return j;
+}
+json radio_network_window()
+{
+    json j = R"({"active":"radio_network_window"})"_json;
+    j["WindowDefinition"] = build_input_window(get_text("Radio network ID"), {build_input_field("", RadioNetworkId, *AllowedRadioNetworks)});
     return j;
 }
 json fixed_train_data_window()
@@ -280,11 +288,13 @@ json data_view_window()
         fields.push_back(build_field(get_text("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
         fields.push_back(build_field(get_text("Airtight"), Q_airtight ? get_text("Yes") : get_text("No")));
         fields.push_back(build_field("", ""));
+        fields.push_back(build_field(get_text("Radio network ID"), RadioNetworkId));
         if (rbc_contact) {
             fields.push_back(build_field(get_text("RBC ID"), std::to_string(rbc_contact->id)));
             fields.push_back(build_field(get_text("RBC phone number"), std::to_string(rbc_contact->phone_number)));
-            fields.push_back(build_field("", ""));
+            
         }
+        fields.push_back(build_field("", ""));
         int i = 1;
         for (auto &vbc : vbcs) {
             fields.push_back(build_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK)));
@@ -347,10 +357,32 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S3-2-1") {
             if (changed)
                 active_window_dmi = radio_window_radio_wait;
+            if (AllowedRadioNetworks) {
+                if (AllowedRadioNetworks->empty()) {
+                    som_status = A29;
+                    active_dialog_step = "A29";
+                } else {
+                    active_dialog_step = "S3-2-2";
+                }
+            }
         } else if (active_dialog_step == "S3-2-2") {
+            if (changed)
+                active_window_dmi = radio_network_window();
         } else if (active_dialog_step == "S3-2-3") {
             if (changed)
                 active_window_dmi = radio_window_radio_wait;
+            bool registered = false;
+            bool timeout = true;
+            for (mobile_terminal &t : mobile_terminals) {
+                if (t.registered) {
+                    registered = true;
+                    break;
+                }
+                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                    timeout = false;
+            }
+            if (registered || timeout)
+                active_dialog_step = "S3-1";
         } else if (active_dialog_step == "S3-3") {
             if (changed)
                 active_window_dmi = rbc_data_window();
@@ -359,7 +391,13 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S4") {
             if (changed)
                 active_window_dmi = main_window_radio_wait;
+            if (som_status == A29)
+                active_dialog_step = "A29";
+            else if (som_status == A31)
+                active_dialog_step = "A31";
         } else if (active_dialog_step == "A29") {
+            add_message(text_message(get_text("Radio network registration failed"), true, false, 0, [](text_message &t){return any_button_pressed;}));
+            RadioNetworkId = "";
             active_dialog_step = "S10";
         } else if (active_dialog_step == "A31") {
             if (changed)
@@ -440,10 +478,35 @@ void update_dmi_windows()
         } else if (active_dialog_step == "S5-2-1") {
             if (changed)
                 active_window_dmi = radio_window_radio_wait;
+            if (AllowedRadioNetworks) {
+                if (AllowedRadioNetworks->empty()) {
+                    active_dialog_step = "A5";
+                } else {
+                    active_dialog_step = "S5-2-2";
+                }
+            }
         } else if (active_dialog_step == "S5-2-2") {
+            if (changed)
+                active_window_dmi = radio_network_window();
         } else if (active_dialog_step == "S5-2-3") {
             if (changed)
                 active_window_dmi = radio_window_radio_wait;
+            bool registered = false;
+            bool timeout = true;
+            for (mobile_terminal &t : mobile_terminals) {
+                if (t.registered) {
+                    registered = true;
+                    break;
+                }
+                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                    timeout = false;
+            }
+            if (registered || timeout)
+                active_dialog_step = "S5-1";
+        } else if (active_dialog_step == "A5") {
+            add_message(text_message(get_text("Radio network registration failed"), true, false, 0, [](text_message &t){return any_button_pressed;}));
+            RadioNetworkId = "";
+            active_dialog_step = "S1";
         } else if (active_dialog_step == "S5-3") {
             if (changed)
                 active_window_dmi = rbc_data_window();
@@ -501,7 +564,14 @@ void update_dmi_windows()
                 active_dialog_step = "S1";
             }
         } else if (active_dialog_step == "D5") {
-            if (rbc_contact && rbc_contact_valid) {
+            bool registered = false;
+            for (mobile_terminal &t : mobile_terminals) {
+                if (t.registered) {
+                    registered = true;
+                    break;
+                }
+            }
+            if (rbc_contact && rbc_contact_valid && registered) {
                 set_supervising_rbc(*rbc_contact);
                 supervising_rbc->open(N_tries_radio);
                 active_dialog_step = "S8";
@@ -732,9 +802,12 @@ void close_window()
         }
     } else if (active == "menu_radio")
         active_dialog_step = "S1";
-    else if (active == "rbc_data_window")
-        active_dialog_step = "S5-1";
-    else if (active == "menu_settings") {
+    else if (active == "rbc_data_window" || active == "radio_network_window") {
+        if (active_dialog == dialog_sequence::StartUp)
+            active_dialog_step = "S3-1";
+        else
+            active_dialog_step = "S5-1";
+    } else if (active == "menu_settings") {
         if (som_active && som_status == S1) {
             active_dialog = dialog_sequence::StartUp;
             active_dialog_step = "S1";
@@ -925,6 +998,25 @@ void validate_data_entry(std::string name, json &result)
                 supervising_rbc->open(N_tries_radio);
             active_dialog_step = "S8";
         }
+    } else if (name == get_text("Radio network ID")) {
+        std::string id = result[""];
+        if (id != "") {
+            RadioNetworkId = id;
+            for (mobile_terminal &t : mobile_terminals) {
+                if (RadioNetworkId != "" && (!t.registered || t.radio_network_id != RadioNetworkId) && (t.released == 0 && t.active_session == nullptr)) {
+                    if (!t.last_register_order) {
+                        t.last_register_order = get_milliseconds();
+                        t.radio_network_id = RadioNetworkId;
+                        t.registered = false;
+                    }
+                }
+            }
+            if (active_dialog == dialog_sequence::StartUp) {
+                rbc_contact_valid = false;
+                active_dialog_step = "S3-2-3";
+            } else
+                active_dialog_step = "S5-2-3";
+        }
     } else if (name == get_text("Language")) {
         set_language(result[""]);
         if (active_dialog == dialog_sequence::Settings)
@@ -1103,6 +1195,13 @@ void update_dialog_step(std::string step, std::string step2)
             som_status = A31;
         } else if (step == "EnterRBCdata") {
             active_dialog_step = "S3-3";
+        } else if (step == "RadioNetworkID") {
+            for (auto &kvp : active_sessions) {
+                if (kvp.second->status != session_status::Inactive)
+                    kvp.second->close();
+            }
+            retrieve_radio_networks();
+            active_dialog_step = "S3-2-1";
         }
     } else if (active_dialog == dialog_sequence::Main) {
         if (step == "Start") {
@@ -1169,6 +1268,9 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog_step = "S8";
         } else if (step == "EnterRBCdata") {
             active_dialog_step = "S5-3";
+        } else if (step == "RadioNetworkID") {
+            retrieve_radio_networks();
+            active_dialog_step = "S5-2-1";
         }
     } else if (active_dialog == dialog_sequence::NTCData) {
         if (step == "EndDataEntry") {

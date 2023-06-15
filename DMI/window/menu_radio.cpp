@@ -21,6 +21,7 @@ menu_radio::menu_radio() : menu(get_text("RBC data"))
     buttons[1] = new TextButton(get_text("Use short number"), 153, 50);
     buttons[2] = new TextButton(get_text("Enter RBC data"), 153, 50);
     buttons[3] = new TextButton(get_text("Radio Network ID"), 153, 50);
+    buttons[3]->delayType = true;
     buttons[0]->setPressedAction([this]
     {
         write_command("ContactLastRBC","");

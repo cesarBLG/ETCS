@@ -8,6 +8,7 @@
  */
 #pragma once
 #include <deque>
+#include <vector>
 #include "../Packets/radio.h"
 #include "platform.h"
 class communication_session;
@@ -56,6 +57,7 @@ public:
 
     safe_radio_status status = safe_radio_status::Disconnected;
     std::string radio_network_id;
+    optional<int64_t> last_register_order;
     bool registered;
     bool setup(communication_session *session);
     void release();
@@ -64,3 +66,6 @@ public:
     PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
 };
 extern mobile_terminal mobile_terminals[2];
+extern optional<std::vector<std::string>> AllowedRadioNetworks;
+extern std::string RadioNetworkId;
+void retrieve_radio_networks();

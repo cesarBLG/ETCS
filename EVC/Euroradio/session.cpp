@@ -296,16 +296,18 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
         terminal->send(msg);
     }
 }
-std::string RadioNetworkId = "GSMR-A";
 int64_t first_supervised_timestamp;
 bool radio_reaction_applied = false;
 bool radio_reaction_reconnected = false;
 void update_euroradio()
 {
     for (mobile_terminal &t : mobile_terminals) {
-        if ((!t.registered || t.radio_network_id != RadioNetworkId) && (t.released == 0 && t.active_session == nullptr)) {
-            t.registered = true;
+        t.update();
+        if (t.radio_network_id != RadioNetworkId && (t.released == 0 && t.active_session == nullptr)) {
             t.radio_network_id = RadioNetworkId;
+            t.registered = false;
+            if (RadioNetworkId != "" && !t.last_register_order)
+                t.last_register_order = get_milliseconds();
         }
     }
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {

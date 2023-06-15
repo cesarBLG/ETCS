@@ -238,7 +238,7 @@ void input_window::buildFrom(json &j)
     bool allaccepted = true;
     for (int i=0; i<nfields; i++) {
         json &input = j["Inputs"][i];
-        inputs[i] = new input_data(input["Label"], input["Label"] != "");
+        inputs[i] = new input_data(input["Label"], input.contains("Echo") ? input["Echo"].get<bool>() : input["Label"] != "");
         inputs[i]->window = this;
         inputs[i]->keys = getKeyboard(input["Keyboard"], inputs[i]);
         if (input.contains("Value"))

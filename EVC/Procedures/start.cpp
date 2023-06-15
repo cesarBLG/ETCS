@@ -82,15 +82,18 @@ void update_SoM()
             break;
         case S4: {
             bool registered = false;
+            bool timeout = true;
             for (mobile_terminal &t : mobile_terminals) {
                 if (t.registered) {
                     registered = true;
                     break;
                 }
+                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                    timeout = false;
             }
             if (registered)
                 som_status = A31;
-            else if (true/*TODO: timer elapses*/)
+            else if (timeout)
                 som_status = A29;
             break; }
         case A29:

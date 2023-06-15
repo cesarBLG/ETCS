@@ -13,6 +13,9 @@
 
 mobile_terminal mobile_terminals[2];
 
+optional<std::vector<std::string>> AllowedRadioNetworks;
+std::string RadioNetworkId = "GSMR-A";
+
 void mobile_terminal::data_receive(BasePlatform::BusSocket::ReceiveResult &&result) {
     rx_promise = socket->receive().then(std::bind(&mobile_terminal::data_receive, this, std::placeholders::_1));
 
@@ -82,4 +85,17 @@ void mobile_terminal::release()
     active_session = nullptr;
     status = safe_radio_status::Disconnected;
     released = 0;
+}
+void mobile_terminal::update()
+{
+    if (!registered && radio_network_id != "" && last_register_order && get_milliseconds() - *last_register_order > 4000)
+        registered = true;
+    if (registered && radio_network_id == "")
+        registered = false;
+    if (registered && last_register_order)
+        last_register_order = {};
+}
+void retrieve_radio_networks()
+{
+    AllowedRadioNetworks = {"GSMR-A", "GSMR-B"};
 }
