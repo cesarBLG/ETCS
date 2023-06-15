@@ -535,8 +535,8 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
 bool info_compare(const std::shared_ptr<etcs_information> &i1, const std::shared_ptr<etcs_information> &i2)
 {
     // Non infill information processed first
-    if (i1->infill != i2->infill)
-        return i1->infill;
+    if (i1->infill.has_value() != i2->infill.has_value())
+        return !i1->infill;
     // Evaluate level transitions first to fill transition buffer
     if ((i1->index_level == 8 || i1->index_level == 9) != (i2->index_level == 8 || i2->index_level == 9))
         return i1->index_level == 8 || i1->index_level == 9;
@@ -571,7 +571,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
     for (int i=0; i<message.size(); i++) {
         eurobalise_telegram t = message[i];
         distance ref = dist;
-        bool infill=false;
+        optional<bg_id> infill;
         for (int j=0; j<t.packets.size(); j++) {
             ETCS_packet *p = t.packets[j].get();
             if (p->directional) {
@@ -589,20 +589,8 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
                     try_handle_information(*it, ordered_info);
                 }
                 ordered_info.clear();
-
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
-                bool found = false;
-                for (auto it = link_expected; it!=linking.end(); ++it) {
-                    link_data &l = *it;
-                    if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, (int)ilr.NID_BG})) {
-                        found = true;
-                        infill = true;
-                        ref = l.dist;
-                        break;
-                    }
-                }
-                if (!found)
-                    return;
+                infill = bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, (int)ilr.NID_BG});
             } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
                 for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
                     if (it->get()->index_level == 3 || it->get()->index_level == 39) {
@@ -769,14 +757,14 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             info->dir = dir;
             info->fromRBC = session->isRBC ? session : nullptr;
             info->nid_bg = lrbg;
-            info->infill = false;
+            info->infill = {};
             info->timestamp = message->T_TRAIN.get_value();
             info->message = message;
             info->version = session->version;
             ordered_info.push_back(std::shared_ptr<etcs_information>(info));
         }
     }
-    bool infill=false;
+    optional<bg_id> infill;
     for (int j=0; j<message->packets.size(); j++) {
         ETCS_packet *p = message->packets[j].get();
         if (p->directional) {
@@ -786,18 +774,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         }
         if (p->NID_PACKET == 136) {
             InfillLocationReference ilr = *((InfillLocationReference*)p);
-            bool found = false;
-            for (auto it = link_expected; it!=linking.end(); ++it) {
-                link_data &l = *it;
-                if (l.nid_bg == bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? lrbg.NID_C : ilr.NID_C, (int)ilr.NID_BG})) {
-                    found = true;
-                    infill = true;
-                    ref = l.dist;
-                    break;
-                }
-            }
-            if (!found)
-                break;
+            infill = bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? lrbg.NID_C : ilr.NID_C, (int)ilr.NID_BG});
         } else if (p->NID_PACKET == 80) {
             for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
                 if (it->get()->index_level == 3 || it->get()->index_level == 39) {
@@ -868,6 +845,11 @@ std::map<level_filter_data, accepted_condition> level_filter_index;
 bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message) 
 {
     accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC != nullptr}];
+    if (!s.reject && info->infill)
+    {
+        accepted_condition s2 = level_filter_index[{32, level, info->fromRBC != nullptr}];
+        if (s2.reject) s = s2;
+    }
     if (!s.reject) {
         if (s.exceptions.find(3) != s.exceptions.end()) {
             if (supervising_rbc && supervising_rbc->train_data_ack_pending)
@@ -1256,6 +1238,20 @@ bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_p
 }
 void try_handle_information(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message)
 {
+    if (info->infill)
+    {
+        bool found = false;
+        for (auto it = link_expected; it!=linking.end(); ++it) {
+            link_data &l = *it;
+            if (l.nid_bg == *info->infill) {
+                found = true;
+                info->ref = l.dist;
+                break;
+            }
+        }
+        if (!found)
+            return;
+    }
     if (!level_filter(info, message)) return;
     if (!second_filter(info, message)) return;
     if (!mode_filter(info, message)) return;

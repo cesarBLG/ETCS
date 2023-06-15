@@ -69,7 +69,7 @@ void national_values_information::handle()
 void linking_information::handle()
 {
     Linking l = *(Linking*)linked_packets.front().get();
-    update_linking(ref, l, infill, nid_bg);
+    update_linking(ref, l, infill.has_value(), nid_bg);
 }
 void signalling_information::handle()
 {
@@ -81,7 +81,7 @@ void signalling_information::handle()
         }
     } else {
         movement_authority newMA = movement_authority(ref, ma, timestamp);
-        set_signalling_restriction(newMA, infill);
+        set_signalling_restriction(newMA, infill.has_value());
     }
 }
 void ma_information::handle()
@@ -105,11 +105,11 @@ void ma_information::handle()
                 sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
-            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
+            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
             mp = true;
         }
     }
-    if (!mp) reset_mode_profile(ref, infill);
+    if (!mp) reset_mode_profile(ref, infill.has_value());
 }
 void ma_information_lv2::handle()
 {
@@ -138,14 +138,14 @@ void ma_information_lv2::handle()
                 sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
-            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
+            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
             mp = true;
         } else if (it->get()->NID_PACKET == 181) {
             glsmk = true;
         }
     }
     if (!glsmk) ls_function_marker = false;
-    if (!mp) reset_mode_profile(ref, infill);
+    if (!mp) reset_mode_profile(ref, infill.has_value());
 }
 void repositioning_information::handle()
 {
@@ -394,11 +394,11 @@ void ma_shortening_information::handle()
                     sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
                 }
             } else if (it->get()->NID_PACKET == 80) {
-                set_mode_profile(*(ModeProfile*)(it->get()), ref, infill);
+                set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
                 mp = true;
             }
         }
-        if (!mp) reset_mode_profile(ref, infill);
+        if (!mp) reset_mode_profile(ref, infill.has_value());
         svl_shorten('f');
         if (supervising_rbc) {
             auto *msg = new ma_shorten_granted();
