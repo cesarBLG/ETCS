@@ -135,7 +135,7 @@ void update_level_status()
         perform_transition();
     }
     if (!ongoing_transition) return;
-    if (ongoing_transition->start<=d_estfront)
+    if (ongoing_transition->immediate || ongoing_transition->start<=d_estfront)
         perform_transition();
     else if (mode != Mode::SB && 
     (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0) && 
@@ -177,8 +177,6 @@ void level_transition_received(level_transition_information info)
     ongoing_transition = info;
     level_to_ack = ongoing_transition->leveldata.level;
     ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
-    if (ongoing_transition->immediate)
-        perform_transition();
 }
 level_transition_information::level_transition_information(LevelTransitionOrder o, distance ref)
 {
