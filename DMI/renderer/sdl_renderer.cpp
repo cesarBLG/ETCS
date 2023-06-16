@@ -207,3 +207,19 @@ std::pair<float, float> SdlRenderer::SdlFont::calc_size(const std::string &str) 
 TTF_Font* SdlRenderer::SdlFont::get() const {
 	return font->get();
 }
+
+std::unique_ptr<Renderer::Sound> SdlRenderer::load_sound(const std::string &path) {
+	return nullptr;
+}
+
+std::unique_ptr<Renderer::Sound> SdlRenderer::load_sound(const std::vector<std::pair<int, int>> &melody) {
+	return nullptr;
+}
+
+int SdlRenderer::play_sound(const Sound &snd, bool looping) {
+	return 0;
+}
+
+void SdlRenderer::stop_sound(int handle) {
+
+}

@@ -26,6 +26,12 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const override { return std::make_pair(0.0f, 0.0f); }
 	};
 
+	class NullSound : public Sound
+	{
+	public:
+		NullSound() = default;
+	};
+
 	NullRenderer() = default;
 	virtual void set_color(Color c) override {};
 	virtual void draw_line(int x1, int y1, int x2, int y2) override {};
@@ -39,4 +45,9 @@ public:
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) override { return std::make_unique<NullFont>(); };
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override { return std::make_unique<NullImage>(); };
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override { return std::make_unique<NullImage>(); };
+
+	virtual std::unique_ptr<Sound> load_sound(const std::string &path) override { return std::make_unique<NullSound>(); };
+	virtual std::unique_ptr<Sound> load_sound(const std::vector<std::pair<int, int>> &melody) override { return std::make_unique<NullSound>(); };
+	virtual int play_sound(const Sound &snd, bool looping) override { return 1; };
+	virtual void stop_sound(int handle) override {};
 };

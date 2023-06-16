@@ -56,6 +56,23 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const override;
 	};
 
+	class SdlSoundWav : public Sound
+	{
+	private:
+		uint8_t* buffer;
+		uint32_t len;
+	public:
+		SdlSoundWav(uint8_t* b, uint32_t l);
+	};
+
+	class SdlSoundMelody : public Sound
+	{
+	private:
+		std::vector<std::pair<int, int>> melody;
+	public:
+		SdlSoundMelody(const std::vector<std::pair<int, int>> &m);
+	};
+
 	SdlRenderer(SDL_Renderer *r);
 	virtual ~SdlRenderer() override;
 	virtual void set_color(Color c) override;
@@ -70,4 +87,9 @@ public:
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) override;
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
+
+	virtual std::unique_ptr<Sound> load_sound(const std::string &path) override;
+	virtual std::unique_ptr<Sound> load_sound(const std::vector<std::pair<int, int>> &melody) override;
+	virtual int play_sound(const Sound &snd, bool looping) override;
+	virtual void stop_sound(int handle) override;
 };
