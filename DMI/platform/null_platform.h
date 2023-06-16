@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include "renderer.h"
+#include "platform.h"
 
-class NullRenderer : public Renderer {
+class NullPlatform : public Platform {
 public:
 	class NullImage : public Image
 	{
@@ -32,7 +32,7 @@ public:
 		NullSound() = default;
 	};
 
-	NullRenderer() = default;
+	NullPlatform() = default;
 	virtual void set_color(Color c) override {};
 	virtual void draw_line(int x1, int y1, int x2, int y2) override {};
 	virtual void draw_rect(int x, int y, int w, int h) override {};

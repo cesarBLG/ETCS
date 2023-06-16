@@ -7,14 +7,14 @@
 #pragma once
 
 #include <map>
-#include "renderer.h"
+#include "platform.h"
 
 struct SDL_Renderer;
 struct SDL_Texture;
 struct _TTF_Font;
 typedef struct _TTF_Font TTF_Font;
 
-class SdlRenderer : public Renderer {
+class SdlPlatform : public Platform {
 private:
 	class SdlFontWrapper
 	{
@@ -73,8 +73,8 @@ public:
 		SdlSoundMelody(const std::vector<std::pair<int, int>> &m);
 	};
 
-	SdlRenderer(SDL_Renderer *r);
-	virtual ~SdlRenderer() override;
+	SdlPlatform(SDL_Renderer *r);
+	virtual ~SdlPlatform() override;
 	virtual void set_color(Color c) override;
 	virtual void draw_line(int x1, int y1, int x2, int y2) override;
 	virtual void draw_rect(int x, int y, int w, int h) override;

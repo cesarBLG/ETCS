@@ -24,7 +24,7 @@
 #include "../../messages/messages.h"
 #include "../../tcp/server.h"
 #include "../../Settings/settings.h"
-#include "../../renderer/sdl_renderer.h"
+#include "../../platform/sdl_platform.h"
 using namespace std;
 
 static SDL_Window *sdlwin;
@@ -165,7 +165,7 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
         return;
     }
     sdlrot = rotate;
-    rend_backend = std::make_unique<SdlRenderer>(sdlren);
+    platform = std::make_unique<SdlPlatform>(sdlren);
 
     if (width < 640 || height < 480) renderToTexture = true;
 
@@ -192,8 +192,8 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
 void display()
 {
     if (renderToTexture) SDL_SetRenderTarget(sdlren, sdltex);
-    rend_backend->set_color(DarkBlue);
-    rend_backend->clear();
+    platform->set_color(DarkBlue);
+    platform->clear();
     displayETCS();
     if (renderToTexture)
     {

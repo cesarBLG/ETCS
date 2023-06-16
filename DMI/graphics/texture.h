@@ -11,17 +11,17 @@
 #include "graphic.h"
 #include <functional>
 #include <memory>
-#include "../renderer/renderer.h"
+#include "../platform/platform.h"
 
 class texture : public graphic
 {
     public:
-    std::shared_ptr<Renderer::Image> tex;
+    std::shared_ptr<Platform::Image> tex;
     float width;
     float height;
     float x;
     float y;
     texture() : graphic(TEXTURE){};
-    texture(std::shared_ptr<Renderer::Image> tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
+    texture(std::shared_ptr<Platform::Image> tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
 };
 #endif

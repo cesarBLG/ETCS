@@ -11,7 +11,7 @@
 #include <vector>
 #include "../graphics/color.h"
 
-class Renderer
+class Platform
 {
 public:
 	class Image
@@ -36,7 +36,7 @@ public:
 		virtual ~Sound() = default;
 	};
 
-	virtual ~Renderer() = default;
+	virtual ~Platform() = default;
 	virtual void set_color(Color c) = 0;
 	virtual void draw_line(int x1, int y1, int x2, int y2) = 0;
 	virtual void draw_rect(int x, int y, int w, int h) = 0;
@@ -56,4 +56,4 @@ public:
 	virtual void stop_sound(int handle) = 0;
 };
 
-extern std::unique_ptr<Renderer> rend_backend;
+extern std::unique_ptr<Platform> platform;

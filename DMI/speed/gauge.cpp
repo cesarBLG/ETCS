@@ -87,7 +87,7 @@ void drawNeedle()
     }
     Color speedColor = needleColor == Red ? White : Black;
     float an = speedToAngle(Vest);
-    rend_backend->set_color(needleColor);
+    platform->set_color(needleColor);
     csg.drawCircle(25,cx,cy);
     float px[] = {-4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5};
     float py[] = {-15,-15,-82,-90,-105,-105,-90,-82};
@@ -125,7 +125,7 @@ void drawHook(float speed)
 }
 void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 {
-    rend_backend->set_color(color);
+    platform->set_color(color);
     float ang0 = speedToAngle(minspeed);
     float ang1 = speedToAngle(maxspeed);
     csg.drawSolidArc(ang0,ang1,rmin,137,cx,cy);
@@ -139,10 +139,10 @@ void drawSetSpeed()
     if (Vset == 0) return;
     float an = speedToAngle(Vset);
 
-    rend_backend->set_color(White);
+    platform->set_color(White);
     csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
 
-    rend_backend->set_color(Magenta);
+    platform->set_color(Magenta);
     csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
 
 }
@@ -163,15 +163,15 @@ void displayCSG()
         stm_monitoring_data stm = active_ntc_window->monitoring_data;
         if (stm.Vtarget_display & 2 || stm.Vperm_display & 2 || stm.Vsbi_display & 2 || stm.Vrelease_display & 2)
         {
-            rend_backend->set_color(DarkGrey);
+            platform->set_color(DarkGrey);
             csg.drawSolidArc(ang00, ang0, 128, 137, cx, cy);
         }
-        rend_backend->set_color(stm.Vsbi_color);
+        platform->set_color(stm.Vsbi_color);
         if (stm.Vsbi_display) drawGauge(Vperm, Vsbi, stm.Vsbi_color, stm.Vsbi_display == 2 ? 117 : 128);
-        rend_backend->set_color(stm.Vtarget_color);
+        platform->set_color(stm.Vtarget_color);
         if (stm.Vtarget_display & 2) drawGauge(stm.Vperm_display && Vperm < Vtarget ? Vperm : 0, Vtarget, stm.Vtarget_color);
         if (stm.Vtarget_display & 1) drawHook(Vtarget);
-        rend_backend->set_color(stm.Vperm_color);
+        platform->set_color(stm.Vperm_color);
         if (stm.Vperm_display & 2) drawGauge(stm.Vtarget_display && Vperm >= Vtarget ? Vtarget : 0, Vperm, stm.Vperm_color);
         if (stm.Vperm_display & 1) drawHook(Vperm);
         if (stm.Vrelease_display & 2) drawGauge(0,Vrelease,stm.Vrelease_color,133);
@@ -181,22 +181,22 @@ void displayCSG()
     {
         if((mode == Mode::OS || mode == Mode::SR) && showSpeeds)
         {
-            rend_backend->set_color(White);
+            platform->set_color(White);
             drawHook(Vperm);
             if(monitoring != CSM || (Vtarget<Vperm && Vtarget>=0))
             {
-                rend_backend->set_color(MediumGrey);
+                platform->set_color(MediumGrey);
                 drawHook(Vtarget);
             }
         }
         if((mode == Mode::SH && showSpeeds) || mode == Mode::RV)
         {
-            rend_backend->set_color(White);
+            platform->set_color(White);
             drawHook(Vperm);
         }
         return;
     } 
-    rend_backend->set_color(DarkGrey);
+    platform->set_color(DarkGrey);
     csg.drawSolidArc(ang00, ang0, 128, 137, cx, cy);
     if(monitoring == CSM)
     {
@@ -216,7 +216,7 @@ void displayCSG()
     }
     if(monitoring == RSM)
     {
-        rend_backend->set_color(Yellow);
+        platform->set_color(Yellow);
         drawHook(Vperm);
     }
     if(supervision == OvS || supervision == WaS) drawGauge(Vperm,Vsbi,Orange,117);
@@ -227,9 +227,9 @@ void displayCSG()
         {
             drawGauge(0, Vrelease, MediumGrey);
             float ang = speedToAngle(Vperm);
-            rend_backend->set_color(Black);
+            platform->set_color(Black);
             csg.drawSolidArc(ang0,ang,132,133,cx,cy);
-            rend_backend->set_color(Yellow);
+            platform->set_color(Yellow);
             csg.drawSolidArc(ang0,ang,128, 132,cx,cy);
         }
         else
@@ -245,12 +245,12 @@ void displayLines()
 {
     bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
-    std::unique_ptr<Renderer::Font> gaugeFont;
+    std::unique_ptr<Platform::Font> gaugeFont;
     if (!inited) {
         csg.clear();
-        gaugeFont = rend_backend->load_font(16, false);
+        gaugeFont = platform->load_font(16, false);
     }
-    rend_backend->set_color(White);
+    platform->set_color(White);
 
 #if SIMRAIL
     int step = 5;
@@ -289,7 +289,7 @@ void displayLines()
             t->y = cy-val*sinf(an);
             t->width = wh.first;
             t->height = wh.second;
-            t->tex = rend_backend->make_text_image(s, *gaugeFont, White);
+            t->tex = platform->make_text_image(s, *gaugeFont, White);
             csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);

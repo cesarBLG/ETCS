@@ -38,7 +38,7 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
             std::string text = getFormattedData(data);
             if (text.find('\n') != std::string::npos)
             {
-                auto font = rend_backend->load_font(12, false);
+                auto font = platform->load_font(12, false);
                 if (font == nullptr)
                     return;
                 curx = data_tex->offx + font->calc_size(text.substr(text.find('\n')+1)).first;

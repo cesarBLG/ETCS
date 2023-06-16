@@ -93,11 +93,11 @@ void Component::setLocation(float x, float y)
 }
 void Component::drawLine(float x1, float y1, float x2, float y2)
 {
-    rend_backend->draw_line(getX(x1), getY(y1), getX(x2), getY(y2));
+    platform->draw_line(getX(x1), getY(y1), getX(x2), getY(y2));
 }
 void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 {
-    rend_backend->set_color(c);
+    platform->set_color(c);
     drawLine(x1, y1, x2, y2);
 }
 void Component::paint()
@@ -208,11 +208,11 @@ void Component::drawPolygon(float* x, float* y, int n)
     std::vector<short> scaley(n);
     getXpoints(x, scalex.data(), n);
     getYpoints(y, scaley.data(), n);
-    rend_backend->draw_polygon_filled(scalex.data(), scaley.data(), n);
+    platform->draw_polygon_filled(scalex.data(), scaley.data(), n);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
-    rend_backend->draw_circle_filled(getX(cx), getY(cy), getScale(radius));
+    platform->draw_circle_filled(getX(cx), getY(cy), getScale(radius));
 }
 void Component::addRectangle(float x, float y, float w, float h, Color c, int align)
 {
@@ -220,10 +220,10 @@ void Component::addRectangle(float x, float y, float w, float h, Color c, int al
 }
 void Component::drawRectangle(float x, float y, float w, float h, Color c, int align)
 {
-    rend_backend->set_color(c);
+    platform->set_color(c);
     if(!(align & LEFT)) x = sx / 2 + x - w / 2;
     if(!(align & UP)) y = sy / 2 + y - h / 2;
-    rend_backend->draw_rect_filled(getX(x), getY(y), getScale(w), getScale(h));
+    platform->draw_rect_filled(getX(x), getY(y), getScale(w), getScale(h));
 }
 void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang)
 {
@@ -231,9 +231,9 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(std::shared_ptr<Renderer::Image> tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<Platform::Image> tex, float cx, float cy, float sx, float sy)
 {
-    rend_backend->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy));
+    platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy));
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
@@ -270,10 +270,10 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->height = sy;
     return t;
 }
-std::shared_ptr<Renderer::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
+std::shared_ptr<Platform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
-    auto font = rend_backend->load_font(size, (aspect & 1) != 0);
-    return rend_backend->make_wrapped_text_image(text, *font, align, col);
+    auto font = platform->load_font(size, (aspect & 1) != 0);
+    return platform->make_wrapped_text_image(text, *font, align, col);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
 {
@@ -300,14 +300,14 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     }
     return ig;
 }
-std::shared_ptr<Renderer::Image> Component::getImageGraphic(string path)
+std::shared_ptr<Platform::Image> Component::getImageGraphic(string path)
 {
-    return rend_backend->load_image(path);
+    return platform->load_image(path);
 }
 void Component::setBorder(Color c)
 {
-    rend_backend->set_color(c);
-    rend_backend->draw_rect(getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0));
+    platform->set_color(c);
+    platform->draw_rect(getX(0), getY(0), getX(sx) - getX(0), getY(sy) - getY(0));
 }
 void Component::addBorder(Color c)
 {
