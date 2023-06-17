@@ -275,7 +275,7 @@ void displayLines()
 
             std::pair<float, float> wh = gaugeFont->calc_size(s);
             hx = wh.first/2 + 1;
-            hy = gaugeFont->ascent()/getScale(1)/2 - 2;
+            hy = gaugeFont->ascent()/2 - 2;
             float maxan = atanf(hy/hx);
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);

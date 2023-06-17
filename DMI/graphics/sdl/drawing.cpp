@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <deque>
 #include <SDL.h>
-#include <SDL_ttf.h>
 #include <thread>
 #include <mutex>
 #include "../drawing.h"
@@ -29,12 +28,7 @@ using namespace std;
 
 static SDL_Window *sdlwin;
 static SDL_Renderer *sdlren;
-SDL_Texture* sdltex;
-bool renderToTexture;
-bool sdlrot;
-#define PI 3.14159265358979323846264338327950288419716939937510
-float scale = 1;
-float offset[2] = {0, 0};
+float scale, ox, oy;
 extern bool running;
 void quit();
 void init_video()
@@ -79,35 +73,33 @@ void loop_video()
                 break;
             }
             if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION /*|| ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION*/) {
-				float scrx;
-				float scry;
+				float x;
+				float y;
 				bool pressed;
                 if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
                 {
                     SDL_TouchFingerEvent tfe = ev.tfinger;
                     if (ev.type == SDL_FINGERMOTION) pressed = tfe.pressure > 0;
                     else pressed = ev.type == SDL_FINGERDOWN;
-                    scrx = sdlrot ? 640 - tfe.x : tfe.x;
-                    scry = sdlrot ? 480 - tfe.y : tfe.y;
+                    x = tfe.x;
+                    y = tfe.y;
                 }
                 else if (ev.type == SDL_MOUSEMOTION)
                 {
                     SDL_MouseMotionEvent mme = ev.motion;
                     pressed = mme.state == SDL_PRESSED;
-                    scrx = sdlrot ? 640 - mme.x : mme.x;
-                    scry = sdlrot ? 480 - mme.y : mme.y;
+                    x = mme.x;
+                    y = mme.y;
                 }
                 else
                 {
                     SDL_MouseButtonEvent mbe = ev.button;
                     pressed = mbe.state == SDL_PRESSED;
-                    scrx = sdlrot ? 640 - mbe.x : mbe.x;
-                    scry = sdlrot ? 480 - mbe.y : mbe.y;
+                    x = mbe.x;
+                    y = mbe.y;
                 }
-				extern float scale;
-				extern float offset[2];
-				float x = (scrx - offset[0]) / scale;
-				float y = scry / scale;
+				x = (x - ox) / scale;
+				y = (y - oy) / scale;
 				vector<window *> windows;
 				for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
 				{
@@ -144,7 +136,6 @@ void loop_video()
 }
 void startDisplay(bool fullscreen, int display = 0, int width = 640, int height = 480, bool borderless = false, bool rotate = false)
 {
-    TTF_Init();
     SDL_SetHint(SDL_HINT_RENDER_DIRECT3D_THREADSAFE, "1");
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
     sdlwin = SDL_CreateWindow("Driver Machine Interface", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);
@@ -164,42 +155,35 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
         running = false;
         return;
     }
-    sdlrot = rotate;
-    platform = std::make_unique<SdlPlatform>(sdlren);
 
-    if (width < 640 || height < 480) renderToTexture = true;
-
-    if (renderToTexture)
-    {
-        sdltex = SDL_CreateTexture(sdlren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 640, 480);
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-        SDL_RenderSetLogicalSize(sdlren, 640, 480);
+    int wx, wy;
+    SDL_GetWindowSize(sdlwin, &wx, &wy);
+    float sx = wx / 640.0f;
+    float sy = wy / 480.0f;
+    scale = std::min(sx, sy);
+    if (sx > sy) {
+        ox = (wx - wy * (640.0f / 480.0f)) * 0.5f;
+        oy = 0.0f;
+    } else {
+        ox = 0.0f;
+        oy = (wy - wx * (480.0f / 640.0f)) * 0.5f;
     }
-    else
-    {
-        int w = 640, h = 480;
-        SDL_GetWindowSize(sdlwin, &w, &h);
-        float scrsize[] = { (float)w,(float)h };
-        float extra = 640 / 2 * (scrsize[0] / (scrsize[1] * 4 / 3) - 1);
-        offset[0] = extra;
-        scale = scrsize[1] / 480.0;
+    if (rotate) {
+        scale *= -1.0f;
+        ox += wx - ox * 2.0f;
+        oy += wy - oy * 2.0f;
     }
 
     if (borderless)
         SDL_SetWindowBordered(sdlwin, SDL_FALSE);
 
+    platform = std::make_unique<SdlPlatform>(sdlren, scale, ox, oy);
 }
 void display()
 {
-    if (renderToTexture) SDL_SetRenderTarget(sdlren, sdltex);
     platform->set_color(DarkBlue);
     platform->clear();
     displayETCS();
-    if (renderToTexture)
-    {
-        SDL_SetRenderTarget(sdlren, nullptr);
-        SDL_RenderCopyEx(sdlren, sdltex, nullptr, nullptr, sdlrot ? 180.0f : 0.0f, nullptr, SDL_FLIP_NONE);
-    }
     SDL_RenderPresent(sdlren);
 }
 
@@ -208,12 +192,4 @@ void quitDisplay()
     SDL_DestroyRenderer(sdlren);
     SDL_DestroyWindow(sdlwin);
     SDL_Quit();
-}
-int getScale(float val)
-{
-    return round(val*scale);
-}
-float getAntiScale(float val)
-{
-    return val/scale;
 }

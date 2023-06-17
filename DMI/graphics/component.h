@@ -30,27 +30,13 @@ class Component
         static void externalAckButton(int time);
 
     protected:
-        inline int getX(float val)
+        inline float getX(float val)
         {
-            return round(getScale(val+x) + offset[0]);
+            return val + x;
         }
-        inline int getY(float val)
+        inline float getY(float val)
         {   
-            return round(getScale(val+y) + offset[1]);
-        }
-        void getXpoints(float *source, short * dest, int n)
-        {
-            for(int i=0; i<n; i++)
-            {
-                dest[i] = (short)getX(source[i]);
-            }
-        }
-        void getYpoints(float *source, short * dest, int n)
-        {
-            for(int i=0; i<n; i++)
-            {
-                dest[i] = (short)getY(source[i]);
-            }
+            return val + y;
         }
         Color bgColor = DarkBlue;
         Color fgColor = White;

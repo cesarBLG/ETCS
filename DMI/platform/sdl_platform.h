@@ -46,6 +46,7 @@ private:
 	int audio_samplerate;
 	int audio_device;
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
+	float s, ox, oy;
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
@@ -56,21 +57,23 @@ public:
 	{
 	private:
 		SDL_Texture* tex;
-		int w, h;
+		float w, h, scale;
+
 	public:
-		SdlImage(SDL_Texture *tex, int w, int h);
+		SdlImage(SDL_Texture *tex, float w, float h, float s);
 		SDL_Texture* get() const;
 		virtual ~SdlImage() override;
-		virtual int width() const override;
-		virtual int height() const override;
+		virtual float width() const override;
+		virtual float height() const override;
 	};
 
 	class SdlFont : public Font
 	{
 	private:
 		std::shared_ptr<SdlFontWrapper> font;
+		float scale;
 	public:
-		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper);
+		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
 		virtual float ascent() const override;
 		virtual std::pair<float, float> calc_size(const std::string &str) const override;
@@ -95,16 +98,16 @@ public:
 		virtual void detach() override;
 	};
 
-	SdlPlatform(SDL_Renderer *r);
+	SdlPlatform(SDL_Renderer *r, float s, float ox, float oy);
 	virtual ~SdlPlatform() override;
 
 	virtual void set_color(Color c) override;
-	virtual void draw_line(int x1, int y1, int x2, int y2) override;
-	virtual void draw_rect(int x, int y, int w, int h) override;
-	virtual void draw_rect_filled(int x, int y, int w, int h) override;
-	virtual void draw_image(const Image &img, int x, int y, int w, int h) override;
-	virtual void draw_circle_filled(int x, int y, int rad) override;
-	virtual void draw_polygon_filled(const short int *vx, const short int *vy, size_t n) override;
+	virtual void draw_line(float x1, float y1, float x2, float y2) override;
+	virtual void draw_rect(float x, float y, float w, float h) override;
+	virtual void draw_rect_filled(float x, float y, float w, float h) override;
+	virtual void draw_image(const Image &img, float x, float y, float w, float h) override;
+	virtual void draw_circle_filled(float x, float y, float rad) override;
+	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
 	virtual void clear() override;
 	virtual std::unique_ptr<Image> load_image(const std::string &path) override;
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) override;
@@ -114,4 +117,6 @@ public:
 	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override;
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
+
+	virtual int64_t get_time() override;
 };

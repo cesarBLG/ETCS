@@ -10,8 +10,9 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <algorithm>
+#include <ctime>
 
-SdlPlatform::SdlPlatform(SDL_Renderer *r) : sdlrend(r) {
+SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend(r), s(s), ox(ox), oy(oy) {
 #ifdef __ANDROID__
 	extern std::string filesDir;
 	load_path = filesDir + "/";
@@ -27,10 +28,12 @@ SdlPlatform::SdlPlatform(SDL_Renderer *r) : sdlrend(r) {
 	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	audio_samplerate = obtained.freq;
 	SDL_PauseAudioDevice(audio_device, 0);
+	TTF_Init();
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
 }
 
 SdlPlatform::~SdlPlatform() {
-
+	SDL_CloseAudioDevice(audio_device);
 }
 
 void SdlPlatform::set_color(Color c) {
@@ -38,36 +41,48 @@ void SdlPlatform::set_color(Color c) {
 	current_color = c;
 }
 
-void SdlPlatform::draw_line(int x1, int y1, int x2, int y2) {
-	SDL_RenderDrawLine(sdlrend, x1, y1, x2, y2);
+void SdlPlatform::draw_line(float x1, float y1, float x2, float y2) {
+	SDL_RenderDrawLineF(sdlrend, x1 * s + ox, y1 * s + oy, x2 * s + ox, y2 * s + oy);
 }
 
-void SdlPlatform::draw_rect(int x, int y, int w, int h) {
-	SDL_Rect rect = { x, y, w, h };
-	SDL_RenderDrawRect(sdlrend, &rect);
+void SdlPlatform::draw_rect(float x, float y, float w, float h) {
+	SDL_FRect rect { x * s + ox, y * s + oy, w * s, h * s };
+	SDL_RenderDrawRectF(sdlrend, &rect);
 }
 
-void SdlPlatform::draw_rect_filled(int x, int y, int w, int h) {
-	SDL_Rect rect = { x, y, w, h };
-	SDL_RenderFillRect(sdlrend, &rect);
+void SdlPlatform::draw_rect_filled(float x, float y, float w, float h) {
+	SDL_FRect rect { x * s + ox, y * s + oy, w * s, h * s };
+	SDL_RenderFillRectF(sdlrend, &rect);
 }
 
-void SdlPlatform::draw_image(const Image &base, int x, int y, int w, int h) {
+void SdlPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
 	const SdlImage &img = dynamic_cast<const SdlImage&>(base);
-	SDL_Rect rect = SDL_Rect({x, y, w, h});
-	SDL_RenderCopy(sdlrend, img.get(), nullptr, &rect);
+	if (s > 0.0f) {
+		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), w * s, h * s };
+		SDL_RenderCopyF(sdlrend, img.get(), nullptr, &rect);
+	} else {
+		SDL_FRect rect { std::floor((x + w) * s + ox), std::floor((y + h) * s + oy), w * -s, h * -s };
+		SDL_RenderCopyExF(sdlrend, img.get(), nullptr, &rect, 180.0, nullptr, SDL_FLIP_NONE);
+	}
 }
 
-void SdlPlatform::draw_circle_filled(int x, int y, int rad) {
+void SdlPlatform::draw_circle_filled(float x, float y, float rad) {
 	Color c = current_color;
-	filledCircleRGBA(sdlrend, x, y, rad, c.R, c.G, c.B, 255);
-	aacircleRGBA(sdlrend, x, y, rad, c.R, c.G, c.B, 255);
+	filledCircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
+	aacircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
 }
 
-void SdlPlatform::draw_polygon_filled(const int16_t *vx, const int16_t *vy, size_t n) {
+void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
+	std::vector<int16_t> sx, sy;
+	sx.reserve(poly.size());
+	sy.reserve(poly.size());
+	for (const std::pair<float, float> &v : poly) {
+		sx.push_back(v.first * s + ox);
+		sy.push_back(v.second * s + oy);
+	}
 	Color c = current_color;
-	filledPolygonRGBA(sdlrend, vx, vy, n, c.R, c.G, c.B, 255);
-	aapolygonRGBA(sdlrend, vx, vy, n, c.R, c.G, c.B, 255);
+	filledPolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
+	aapolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
 }
 
 void SdlPlatform::clear() {
@@ -87,7 +102,7 @@ std::unique_ptr<Platform::Image> SdlPlatform::load_image(const std::string &p) {
 		SDL_FreeSurface(surf);
 		return nullptr;
 	}
-	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h);
+	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, 1.0f);
 	SDL_FreeSurface(surf);
 	return img;
 }
@@ -98,13 +113,15 @@ std::unique_ptr<Platform::Font> SdlPlatform::load_font(float size, bool bold) {
 	if (it != loaded_fonts.end())
 		wrapper = it->second;
 
+	float scale = std::abs(s);
+
 	if (!wrapper) {
 #if SIMRAIL
 		std::string path = load_path + (!bold ? "fonts/verdana.ttf" : "fonts/verdanab.ttf");
-		TTF_Font* font = TTF_OpenFont(path.c_str(), getScale(size) * 1.25);
+		TTF_Font* font = TTF_OpenFont(path.c_str(), size * 1.25 * scale);
 #else
 		std::string path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
-		TTF_Font* font = TTF_OpenFont(path.c_str(), getScale(size) * 1.4);
+		TTF_Font* font = TTF_OpenFont(path.c_str(), size * 1.4 * scale);
 #endif
 		if (font == nullptr)
 			return nullptr;
@@ -112,7 +129,7 @@ std::unique_ptr<Platform::Font> SdlPlatform::load_font(float size, bool bold) {
 		loaded_fonts.insert_or_assign({size, bold}, wrapper);
 	}
 
-	return std::make_unique<SdlFont>(wrapper);
+	return std::make_unique<SdlFont>(wrapper, scale);
 }
 
 std::unique_ptr<Platform::Image> SdlPlatform::make_text_image(const std::string &text, const Font &base, Color c) {
@@ -135,7 +152,7 @@ std::unique_ptr<Platform::Image> SdlPlatform::make_text_image(const std::string 
 		return nullptr;
 	}
 
-	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h);
+	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, std::abs(s));
 	SDL_FreeSurface(surf);
 	return img;
 }
@@ -163,12 +180,12 @@ std::unique_ptr<Platform::Image> SdlPlatform::make_wrapped_text_image(const std:
 		return nullptr;
 	}
 
-	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h);
+	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, std::abs(s));
 	SDL_FreeSurface(surf);
 	return img;
 }
 
-SdlPlatform::SdlImage::SdlImage(SDL_Texture *tex, int w, int h) : tex(tex), w(w), h(h) {
+SdlPlatform::SdlImage::SdlImage(SDL_Texture *tex, float w, float h, float s) : tex(tex), w(w), h(h), scale(s) {
 
 }
 
@@ -180,12 +197,12 @@ SDL_Texture* SdlPlatform::SdlImage::get() const {
 	return tex;
 }
 
-int SdlPlatform::SdlImage::width() const {
-	return w;
+float SdlPlatform::SdlImage::width() const {
+	return w / scale;
 }
 
-int SdlPlatform::SdlImage::height() const {
-	return h;
+float SdlPlatform::SdlImage::height() const {
+	return h / scale;
 }
 
 SdlPlatform::SdlFontWrapper::SdlFontWrapper(TTF_Font *f) : font(f) {
@@ -196,18 +213,18 @@ SdlPlatform::SdlFontWrapper::~SdlFontWrapper() {
 	TTF_CloseFont(font);
 }
 
-SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper) : font(wrapper) {
+SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float s) : font(wrapper), scale(s) {
 
 }
 
 float SdlPlatform::SdlFont::ascent() const {
-	return TTF_FontAscent(font->font);
+	return TTF_FontAscent(font->font) / scale;
 }
 
 std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string &str) const {
 	int w, h;
 	TTF_SizeUTF8(font->font, str.c_str(), &w, &h);
-	return std::make_pair(getAntiScale(w), getAntiScale(h));
+	return std::make_pair(w / scale, h / scale);
 }
 
 TTF_Font* SdlPlatform::SdlFont::get() const {
@@ -332,4 +349,9 @@ std::unique_ptr<Platform::SoundSource> SdlPlatform::play_sound(const SoundData &
 	SDL_UnlockAudioDevice(audio_device);
 
 	return std::make_unique<SdlSoundSource>(state);
+}
+
+int64_t SdlPlatform::get_time()
+{
+	return std::time(nullptr);
 }

@@ -10,7 +10,6 @@
 #include "sound.h"
 #include <map>
 #include <string>
-#include <ctime>
 
 StmSound::StmSound(std::unique_ptr<Platform::SoundData> &&in) : data(std::move(in)) {
 
@@ -70,8 +69,9 @@ void stopSwarning()
 
 void playSinfo()
 {
-    if (time(nullptr)-last_sinfo<1) return;
-    last_sinfo = time(nullptr);
+    int64_t now = platform->get_time();
+    if (now-last_sinfo<1) return;
+    last_sinfo = now;
     platform->play_sound(*sinfo, false)->detach();
 }
 

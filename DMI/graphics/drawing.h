@@ -15,8 +15,6 @@
 #define LEFT 2
 #define UP 4
 #define DOWN 8
-int getScale(float val);
-float getAntiScale(float val);
 void startDisplay(bool fullscreen, int display, int width, int height, bool borderless, bool rotate);
 void display();
 void quitDisplay();

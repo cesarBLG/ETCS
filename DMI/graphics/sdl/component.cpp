@@ -204,15 +204,15 @@ void Component::draw(graphic *graph)
 }
 void Component::drawPolygon(float* x, float* y, int n)
 {
-    std::vector<short> scalex(n);
-    std::vector<short> scaley(n);
-    getXpoints(x, scalex.data(), n);
-    getYpoints(y, scaley.data(), n);
-    platform->draw_polygon_filled(scalex.data(), scaley.data(), n);
+    std::vector<std::pair<float, float>> poly;
+    poly.reserve(n);
+    for (int i = 0; i < n; i++)
+        poly.push_back(std::make_pair(getX(x[i]), getY(y[i])));
+    platform->draw_polygon_filled(poly);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
-    platform->draw_circle_filled(getX(cx), getY(cy), getScale(radius));
+    platform->draw_circle_filled(getX(cx), getY(cy), radius);
 }
 void Component::addRectangle(float x, float y, float w, float h, Color c, int align)
 {
@@ -223,7 +223,7 @@ void Component::drawRectangle(float x, float y, float w, float h, Color c, int a
     platform->set_color(c);
     if(!(align & LEFT)) x = sx / 2 + x - w / 2;
     if(!(align & UP)) y = sy / 2 + y - h / 2;
-    platform->draw_rect_filled(getX(x), getY(y), getScale(w), getScale(h));
+    platform->draw_rect_filled(getX(x), getY(y), w, h);
 }
 void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang)
 {
@@ -233,7 +233,7 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
 }
 void Component::drawTexture(std::shared_ptr<Platform::Image> tex, float cx, float cy, float sx, float sy)
 {
-    platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), getScale(sx), getScale(sy));
+    platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), sx, sy);
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
@@ -256,8 +256,8 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->aspect = aspect;
     int v = text.find('\n');
     t->tex = getTextGraphic(text, size, col, aspect, align);
-    float sx = t->tex == nullptr ? 0 : getAntiScale(t->tex->width());
-    float sy = t->tex == nullptr ? 0 : getAntiScale(t->tex->height());
+    float sx = t->tex == nullptr ? 0 : t->tex->width();
+    float sy = t->tex == nullptr ? 0 : t->tex->height();
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
