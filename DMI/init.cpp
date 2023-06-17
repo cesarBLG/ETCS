@@ -181,8 +181,6 @@ int main(int argc, char** argv)
     startWindows();
     void initialize_stm_windows();
     initialize_stm_windows();
-    std::thread tcp(loopSocket);
     loop_video();
-    tcp.join();
     return 0;
 }

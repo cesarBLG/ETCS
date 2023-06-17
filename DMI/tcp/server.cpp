@@ -8,13 +8,13 @@
  */
 #include <string>
 #include <cstdio>
-#include <thread>
 #include <chrono>
 #include <set>
 #include <cmath>
 #ifndef _WIN32
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
 #else
 #include <winsock2.h>
 #include <windows.h>
@@ -33,15 +33,12 @@
 #include "../language/language.h"
 #include "../speed/gauge.h"
 #include "../Config/config.h"
-#include <mutex>
 int server;
-int clients[3];
 int active_channel;
 #define BUFF_SIZE 1024
 #define PORT 5010
-static char data[BUFF_SIZE];
+std::string recvbuf;
 std::string buffer;
-std::mutex server_mtx;
 #include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
@@ -307,21 +304,21 @@ void parseData(std::string str)
         updateTc(syms);
     }
 }
-extern bool running;
-int read(int channel)
-{
-    int result = recv(clients[channel], ::data, BUFF_SIZE-1, 0);
-    if(result>0)
-    {
-        ::data[result] = 0;
-        std::unique_lock<std::mutex> lck(server_mtx);
-        buffer += ::data;
-    }
-    return result;
-}
+void listenChannels();
 void updateDrawCommands()
 {
-    std::unique_lock<std::mutex> lck(server_mtx);
+    listenChannels();
+    if (active_channel != -1) {
+        int result;
+        recvbuf.resize(BUFF_SIZE);
+        while ((result = recv(active_channel, recvbuf.data(), BUFF_SIZE, 0)) > 0) {
+            recvbuf.resize(result);
+            buffer += recvbuf;
+        }
+        if (result < 0 && errno != EAGAIN)
+            active_channel = -1;
+    }
+
     int end;
     while ((end=buffer.find_first_of(';'))!=std::string::npos) {
         int start = buffer.find_first_not_of("\n\r ;");
@@ -332,14 +329,15 @@ void updateDrawCommands()
 }
 void write_command(std::string command, std::string value)
 {
-    if (active_channel < 0)
-        return;
-    std::string tosend = command+"("+value+");\n";
-    send(clients[active_channel], tosend.c_str(), tosend.size(), 0);
+    if (active_channel != -1) {
+        std::string tosend = command+"("+value+");\n";
+        if (send(active_channel, tosend.c_str(), tosend.size(), 0) < 0)
+            active_channel = -1;
+    }
 }
 void listenChannels()
 {
-    while(active_channel == -1 && running)
+    if (active_channel == -1)
     {
         struct sockaddr_in addr;
         int c = sizeof(struct sockaddr_in);
@@ -350,16 +348,14 @@ void listenChannels()
         (socklen_t *)
 #endif
         &c);
-        if(cl == -1) {
-            perror("accept");
-            continue;
-        }
-        for (int i=0; i<3; i++) {
-            if (clients[i] < 0) {
-                clients[i] = cl;
-                active_channel = i;
-                break;
-            }
+        if (cl > 0) {
+            unsigned long one = 1;
+#ifdef _WIN32
+            ioctlsocket(cl, FIONBIO, &one);
+#else
+            ioctl(cl, FIONBIO, &one);
+#endif
+            active_channel = cl;
         }
     }
 }
@@ -382,39 +378,13 @@ void startSocket()
         perror("bind");
         return;
     }
-    if (listen(server, 3) == -1) {
+    unsigned long one = 1;
+#ifdef _WIN32
+    ioctlsocket(server, FIONBIO, &one);
+#else
+    ioctl(server, FIONBIO, &one);
+#endif
+    if (listen(server, 3) < 0)
         perror("listen");
-        return;
-    }
     active_channel = -1;
-    for (int i=0; i<3; i++)
-        clients[i] = -1;
-}
-void loopSocket()
-{
-    listenChannels();
-    while(running)
-    {
-        int res = read(active_channel);
-        if (res < 0)
-        {
-#ifdef _WIN32
-            closesocket(clients[active_channel]);
-#else
-            close(clients[active_channel]);
-#endif
-            clients[active_channel] = -1;
-            active_channel = -1;
-            if (running) listenChannels();
-        }
-    }
-    closeSocket();
-}
-void closeSocket()
-{
-#ifdef _WIN32
-    closesocket(server);
-#else
-    close(server);
-#endif
 }
