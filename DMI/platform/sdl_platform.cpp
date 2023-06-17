@@ -13,8 +13,7 @@
 
 SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend(r), s(s), ox(ox), oy(oy) {
 #ifdef __ANDROID__
-	extern std::string filesDir;
-	load_path = filesDir + "/";
+	load_path = std::string(SDL_AndroidGetExternalStoragePath()) + "/";
 #endif
 	SDL_AudioSpec desired = {};
 	SDL_AudioSpec obtained;

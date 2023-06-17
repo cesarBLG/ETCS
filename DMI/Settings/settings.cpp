@@ -26,7 +26,11 @@ void Settings::Init()
     items.clear();
 
     while (std::getline(file, line)) {
-        int pos = line.find('=', 0);
+        while (!line.empty() && line.back() == '\r' || line.back() == '\n')
+            line.pop_back();
+        int pos = line.find('=');
+        if (pos == -1)
+            continue;
         items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos+1)));
     }
 
