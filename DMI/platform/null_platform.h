@@ -54,9 +54,10 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override { return std::make_unique<NullImage>(); };
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override { return std::make_unique<NullImage>(); };
 
+	virtual void set_volume(int vol) override {};
 	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override { return std::make_unique<NullSoundData>(); };
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override { return std::make_unique<NullSoundData>(); };
-	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override { return return std::make_unique<NullSoundSource>(); };
+	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override { return std::make_unique<NullSoundSource>(); };
 
 	virtual int64_t get_timer() override { return 0; }
 	virtual TimeOfDay get_local_time() override { return TimeOfDay{}; }

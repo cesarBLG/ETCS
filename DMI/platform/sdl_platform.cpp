@@ -26,6 +26,7 @@ SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend
 	desired.userdata = this;
 	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	audio_samplerate = obtained.freq;
+	audio_volume = 50;
 	SDL_PauseAudioDevice(audio_device, 0);
 	TTF_Init();
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
@@ -256,7 +257,7 @@ void SdlPlatform::mixer_func(int16_t *buffer, size_t len) {
 
 		size_t i = 0;
 		while (i < len) {
-			buffer[i++] = std::clamp(buffer[i] + state->data->buffer[state->position++], INT16_MIN, INT16_MAX);
+			buffer[i++] = std::clamp(buffer[i] + state->data->buffer[state->position++] * audio_volume / 100, INT16_MIN, INT16_MAX);
 
 			if (state->position == state->data->samples) {
 				if (state->looping)
@@ -282,6 +283,10 @@ SdlPlatform::SdlSoundSource::~SdlSoundSource() {
 
 void SdlPlatform::SdlSoundSource::detach() {
 	state.reset();
+}
+
+void SdlPlatform::set_volume(int vol) {
+	audio_volume = vol;
 }
 
 std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::string &path) {

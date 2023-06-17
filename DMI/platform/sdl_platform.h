@@ -45,6 +45,7 @@ private:
 	Color current_color;
 	int audio_samplerate;
 	int audio_device;
+	int audio_volume;
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
 
@@ -114,6 +115,7 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
 
+	virtual void set_volume(int vol) override;
 	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override;
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;

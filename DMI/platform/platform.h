@@ -65,6 +65,7 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) = 0;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) = 0;
 
+	virtual void set_volume(int vol) = 0;
 	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) = 0;
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) = 0;
