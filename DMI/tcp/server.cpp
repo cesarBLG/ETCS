@@ -315,8 +315,15 @@ void updateDrawCommands()
             recvbuf.resize(result);
             buffer += recvbuf;
         }
-        if (result < 0 && errno != EAGAIN)
-            active_channel = -1;
+        if (result < 0) {
+#ifdef _WIN32
+            if (WSAGetLastError() != WSAEWOULDBLOCK)
+                active_channel = -1;
+#else
+            if (errno != EAGAIN)
+                active_channel = -1;
+#endif
+        }
     }
 
     int end;
