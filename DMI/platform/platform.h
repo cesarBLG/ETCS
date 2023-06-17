@@ -43,6 +43,13 @@ public:
 		virtual void detach() = 0;
 	};
 
+	struct TimeOfDay
+	{
+		int hour;
+		int minute;
+		int second;
+	};
+
 	virtual ~Platform() = default;
 
 	virtual void set_color(Color c) = 0;
@@ -62,7 +69,8 @@ public:
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) = 0;
 
-	virtual int64_t get_time() = 0;
+	virtual int64_t get_timer() = 0;
+	virtual TimeOfDay get_local_time() = 0;
 };
 
 extern std::unique_ptr<Platform> platform;

@@ -10,7 +10,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <algorithm>
-#include <ctime>
 
 SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend(r), s(s), ox(ox), oy(oy) {
 #ifdef __ANDROID__
@@ -351,7 +350,14 @@ std::unique_ptr<Platform::SoundSource> SdlPlatform::play_sound(const SoundData &
 	return std::make_unique<SdlSoundSource>(state);
 }
 
-int64_t SdlPlatform::get_time()
+int64_t SdlPlatform::get_timer()
 {
-	return std::time(nullptr);
+	return SDL_GetTicks64();
+}
+
+Platform::TimeOfDay SdlPlatform::get_local_time()
+{
+	time_t now = time(nullptr);
+	tm *datetime = localtime(&now);
+	return TimeOfDay { datetime->tm_hour, datetime->tm_min, datetime->tm_sec };
 }

@@ -10,7 +10,6 @@
 #define _INPUT_DATA_H
 #include <string>
 #include <vector>
-#include <ctime>
 #include "../graphics/button.h"
 #include "../graphics/text_button.h"
 #include "../graphics/icon_button.h"
@@ -42,7 +41,7 @@ class input_data
     Component* label_echo = nullptr;
     Component* data_echo = nullptr;
     input_window* window = nullptr;
-    time_t holdcursor;
+    int64_t holdcursor;
     void setSelected(bool val);
     void setAccepted(bool val);
     bool isAccepted() {return accepted;}

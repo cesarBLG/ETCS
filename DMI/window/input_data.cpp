@@ -44,10 +44,9 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
                 curx = data_tex->offx + font->calc_size(text.substr(text.find('\n')+1)).first;
                 cury = 42;
             }
-            time_t now;
-            time(&now);
+            int64_t now = platform->get_timer();
             if (keybd_data.empty()) curx = data_tex->offx;
-            else if (difftime(now, holdcursor)<2) curx-=9;
+            else if (now - holdcursor<2000) curx-=9;
             data_comp->drawRectangle(curx, cury, 9, 1, Black);
         }
     });

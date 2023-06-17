@@ -44,7 +44,7 @@ std::unique_ptr<Platform::SoundData> sinfo;
 std::unique_ptr<Platform::SoundData> swarn;
 std::unique_ptr<Platform::SoundData> stoofast;
 std::unique_ptr<Platform::SoundData> click; 
-time_t last_sinfo;
+int64_t last_sinfo;
 std::unique_ptr<Platform::SoundSource> swarn_source;
 
 void loadBeeps()
@@ -69,8 +69,8 @@ void stopSwarning()
 
 void playSinfo()
 {
-    int64_t now = platform->get_time();
-    if (now-last_sinfo<1) return;
+    int64_t now = platform->get_timer();
+    if (now-last_sinfo<1000) return;
     last_sinfo = now;
     platform->play_sound(*sinfo, false)->detach();
 }

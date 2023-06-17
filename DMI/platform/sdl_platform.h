@@ -118,5 +118,6 @@ public:
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
-	virtual int64_t get_time() override;
+	virtual int64_t get_timer() override;
+	virtual TimeOfDay get_local_time() override;
 };

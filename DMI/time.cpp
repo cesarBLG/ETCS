@@ -6,32 +6,37 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <ctime>
 #include "time.h"
 #include "time_etcs.h"
-using namespace std;
+#include "platform/platform.h"
 
 int TimeOffset::offset;
 
-tm getTime()
-{
-    time_t now = time(nullptr);
-    struct tm timeWithOffset = *localtime(&now);
-    timeWithOffset.tm_sec += TimeOffset::offset;
-    mktime(&timeWithOffset);
-
-    return timeWithOffset;
+static Platform::TimeOfDay offset_time() {
+    Platform::TimeOfDay clock = platform->get_local_time();
+    clock.second += TimeOffset::offset;
+    while (clock.second >= 60) {
+        clock.second -= 60;
+        clock.minute++;
+    }
+    while (clock.minute >= 60) {
+        clock.minute -= 60;
+        clock.hour++;
+    }
+    while (clock.hour >= 24)
+        clock.hour -= 24;
+    return clock;
 }
 
 int getHour()
 {
-    return getTime().tm_hour;
+    return offset_time().hour;
 }
 int getMinute()
 {
-    return getTime().tm_min;
+    return offset_time().minute;
 }
 int getSecond()
 {
-    return getTime().tm_sec;
+    return offset_time().second;
 }
