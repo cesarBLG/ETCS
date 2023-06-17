@@ -30,13 +30,21 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const = 0;
 	};
 
-	class Sound
+	class SoundData
 	{
 	public:
-		virtual ~Sound() = default;
+		virtual ~SoundData() = default;
+	};
+
+	class SoundSource
+	{
+	public:
+		virtual ~SoundSource() = default;
+		virtual void detach() = 0;
 	};
 
 	virtual ~Platform() = default;
+
 	virtual void set_color(Color c) = 0;
 	virtual void draw_line(int x1, int y1, int x2, int y2) = 0;
 	virtual void draw_rect(int x, int y, int w, int h) = 0;
@@ -50,10 +58,9 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) = 0;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) = 0;
 
-	virtual std::unique_ptr<Sound> load_sound(const std::string &path) = 0;
-	virtual std::unique_ptr<Sound> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
-	virtual int play_sound(const Sound &snd, bool looping) = 0;
-	virtual void stop_sound(int handle) = 0;
+	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) = 0;
+	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
+	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) = 0;
 };
 
 extern std::unique_ptr<Platform> platform;

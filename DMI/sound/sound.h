@@ -8,24 +8,25 @@
  */
 #ifndef _SOUND_H
 #define _SOUND_H
-#include <string>
+#include "../platform/platform.h"
 #include "../../EVC/Packets/STM/46.h"
-struct sdlsounddata
+class StmSound
 {
-    uint8_t *wavBuffer;
-    uint32_t wavLength;
-    //int64_t duration;
-    int freeAudio;
-    ~sdlsounddata();
+    std::unique_ptr<Platform::SoundData> data;
+    std::unique_ptr<Platform::SoundSource> source;
+
+public:
+    StmSound(std::unique_ptr<Platform::SoundData> &&data);
+    void play(bool loop);
+    void stop();
 };
-sdlsounddata *loadSound(std::string file);
-sdlsounddata* loadSound(STMSoundDefinition &def);
-void play(sdlsounddata *d, bool loop=false);
-void stopSound(sdlsounddata *d);
+std::unique_ptr<StmSound> loadStmSound(const std::string &name);
+std::unique_ptr<StmSound> loadStmSound(const STMSoundDefinition &def);
+
+void loadBeeps();
 void playSinfo();
 void playTooFast();
 void playClick();
 void playSwarning();
 void stopSwarning();
-void start_sound();
 #endif

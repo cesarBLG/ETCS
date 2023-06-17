@@ -7,6 +7,7 @@
 #pragma once
 
 #include <map>
+#include <atomic>
 #include "platform.h"
 
 struct SDL_Renderer;
@@ -16,20 +17,39 @@ typedef struct _TTF_Font TTF_Font;
 
 class SdlPlatform : public Platform {
 private:
-	class SdlFontWrapper
+	struct SdlFontWrapper
 	{
-	private:
 		TTF_Font* font;
-	public:
+
 		SdlFontWrapper(TTF_Font *f);
 		~SdlFontWrapper();
-		TTF_Font* get() const;
+	};
+
+	struct SdlSoundDataWrapper
+	{
+		std::unique_ptr<int16_t[]> buffer;
+		size_t samples;
+
+		SdlSoundDataWrapper(std::unique_ptr<int16_t[]> &&b, size_t s);
+	};
+
+	struct PlaybackState {
+		std::shared_ptr<SdlSoundDataWrapper> data;
+		size_t position;
+		bool looping;
+		std::atomic<bool> stop;
 	};
 
 	SDL_Renderer *sdlrend;
 	std::string load_path;
 	Color current_color;
+	int audio_samplerate;
+	int audio_device;
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
+
+	std::vector<std::shared_ptr<PlaybackState>> playback_list;
+	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
+	void mixer_func(int16_t *buffer, size_t len);
 
 public:
 	class SdlImage : public Image
@@ -56,25 +76,28 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const override;
 	};
 
-	class SdlSoundWav : public Sound
+	class SdlSoundData : public SoundData
 	{
 	private:
-		uint8_t* buffer;
-		uint32_t len;
+		std::shared_ptr<SdlSoundDataWrapper> data;
 	public:
-		SdlSoundWav(uint8_t* b, uint32_t l);
+		SdlSoundData(const std::shared_ptr<SdlSoundDataWrapper> &wrap);
+		const std::shared_ptr<SdlSoundDataWrapper>& get() const;
 	};
 
-	class SdlSoundMelody : public Sound
+	class SdlSoundSource : public SoundSource
 	{
 	private:
-		std::vector<std::pair<int, int>> melody;
+		std::weak_ptr<PlaybackState> state;
 	public:
-		SdlSoundMelody(const std::vector<std::pair<int, int>> &m);
+		SdlSoundSource(const std::shared_ptr<PlaybackState> &s);
+		virtual ~SdlSoundSource() override;
+		virtual void detach() override;
 	};
 
 	SdlPlatform(SDL_Renderer *r);
 	virtual ~SdlPlatform() override;
+
 	virtual void set_color(Color c) override;
 	virtual void draw_line(int x1, int y1, int x2, int y2) override;
 	virtual void draw_rect(int x, int y, int w, int h) override;
@@ -88,8 +111,7 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
 
-	virtual std::unique_ptr<Sound> load_sound(const std::string &path) override;
-	virtual std::unique_ptr<Sound> load_sound(const std::vector<std::pair<int, int>> &melody) override;
-	virtual int play_sound(const Sound &snd, bool looping) override;
-	virtual void stop_sound(int handle) override;
+	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override;
+	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
+	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 };

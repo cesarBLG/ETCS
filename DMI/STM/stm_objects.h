@@ -85,7 +85,7 @@ struct customized_dmi
     double slow_flash_freq;
     double fast_flash_freq;
     int flash_style;
-    std::map<int, sdlsounddata*> sounds;
+    std::map<int, std::unique_ptr<StmSound>> sounds;
     std::map<std::string,moved_area> moved_areas;
     customized_dmi(json &j)
     {
@@ -120,7 +120,7 @@ struct customized_dmi
         flash_style = j["flash_style"].get<std::string>() == "area" ? 1 : 0;
         for (auto &snds : j["sounds"])
         {
-            sounds[snds["id"].get<int>()] = loadSound(snds["file"].get<std::string>());
+            sounds[snds["id"].get<int>()] = loadStmSound(snds["file"].get<std::string>());
         }
         if (j.contains("moved_areas"))
         {
@@ -133,14 +133,6 @@ struct customized_dmi
             }
         }
     }
-    ~customized_dmi()
-    {
-        for (auto &kvp : sounds)
-        {
-            stopSound(kvp.second);
-            delete kvp.second;
-        }
-    }
 };
 class ntc_window : public window
 {
@@ -151,7 +143,7 @@ class ntc_window : public window
     stm_state state;
     int64_t last_time;
     std::map<int, Message> messages;
-    std::list<std::pair<int, sdlsounddata*>> generated_sounds;
+    std::list<std::pair<int, std::unique_ptr<StmSound>>> generated_sounds;
     customized_dmi *customized;
     stm_monitoring_data monitoring_data;
     Color get_color(int col, bool bg)
@@ -190,11 +182,6 @@ class ntc_window : public window
         for (auto &it : messages)
         {
             revokeMessage(it.second.Id);
-        }
-        for (auto &snd : generated_sounds)
-        {
-            stopSound(snd.second);
-            delete snd.second;
         }
         if (customized != nullptr) delete customized;
     }

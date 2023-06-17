@@ -26,13 +26,21 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const override { return std::make_pair(0.0f, 0.0f); }
 	};
 
-	class NullSound : public Sound
+	class NullSoundData : public SoundData
 	{
 	public:
-		NullSound() = default;
+		NullSoundData() = default;
+	};
+
+	class NullSoundSource : public SoundSource
+	{
+	public:
+		NullSoundSource() = default;
+		virtual void detach() override {};
 	};
 
 	NullPlatform() = default;
+
 	virtual void set_color(Color c) override {};
 	virtual void draw_line(int x1, int y1, int x2, int y2) override {};
 	virtual void draw_rect(int x, int y, int w, int h) override {};
@@ -46,8 +54,7 @@ public:
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override { return std::make_unique<NullImage>(); };
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override { return std::make_unique<NullImage>(); };
 
-	virtual std::unique_ptr<Sound> load_sound(const std::string &path) override { return std::make_unique<NullSound>(); };
-	virtual std::unique_ptr<Sound> load_sound(const std::vector<std::pair<int, int>> &melody) override { return std::make_unique<NullSound>(); };
-	virtual int play_sound(const Sound &snd, bool looping) override { return 1; };
-	virtual void stop_sound(int handle) override {};
+	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override { return std::make_unique<NullSoundData>(); };
+	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override { return std::make_unique<NullSoundData>(); };
+	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override { return return std::make_unique<NullSoundSource>(); };
 };

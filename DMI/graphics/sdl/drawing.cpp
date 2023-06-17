@@ -63,7 +63,7 @@ void init_video()
         running = false;
         return;
     }
-    start_sound();
+    loadBeeps();
 }
 void loop_video()
 {

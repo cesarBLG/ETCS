@@ -9,12 +9,24 @@
 #include "../graphics/sdl/gfx_primitives.h"
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <algorithm>
 
 SdlPlatform::SdlPlatform(SDL_Renderer *r) : sdlrend(r) {
 #ifdef __ANDROID__
 	extern std::string filesDir;
 	load_path = filesDir + "/";
 #endif
+	SDL_AudioSpec desired = {};
+	SDL_AudioSpec obtained;
+	desired.freq = 44100;
+	desired.format = AUDIO_S16;
+	desired.channels = 1;
+	desired.samples = 2048;
+	desired.callback = &mixer_func_proxy;
+	desired.userdata = this;
+	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+	audio_samplerate = obtained.freq;
+	SDL_PauseAudioDevice(audio_device, 0);
 }
 
 SdlPlatform::~SdlPlatform() {
@@ -184,40 +196,140 @@ SdlPlatform::SdlFontWrapper::~SdlFontWrapper() {
 	TTF_CloseFont(font);
 }
 
-TTF_Font* SdlPlatform::SdlFontWrapper::get() const {
-	return font;
-}
-
 SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper) : font(wrapper) {
 
 }
 
 float SdlPlatform::SdlFont::ascent() const {
-	return TTF_FontAscent(font->get());
+	return TTF_FontAscent(font->font);
 }
 
 std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string &str) const {
 	int w, h;
-    TTF_SizeUTF8(font->get(), str.c_str(), &w, &h);
-    return std::make_pair(getAntiScale(w), getAntiScale(h));
+	TTF_SizeUTF8(font->font, str.c_str(), &w, &h);
+	return std::make_pair(getAntiScale(w), getAntiScale(h));
 }
 
 TTF_Font* SdlPlatform::SdlFont::get() const {
-	return font->get();
+	return font->font;
 }
 
-std::unique_ptr<Platform::Sound> SdlPlatform::load_sound(const std::string &path) {
-	return nullptr;
+SdlPlatform::SdlSoundDataWrapper::SdlSoundDataWrapper(std::unique_ptr<int16_t[]> &&b, size_t s) : buffer(std::move(b)), samples(s) {
+
 }
 
-std::unique_ptr<Platform::Sound> SdlPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
-	return nullptr;
+SdlPlatform::SdlSoundData::SdlSoundData(const std::shared_ptr<SdlSoundDataWrapper> &wrap) : data(wrap) {
+
 }
 
-int SdlPlatform::play_sound(const Sound &snd, bool looping) {
-	return 0;
+const std::shared_ptr<SdlPlatform::SdlSoundDataWrapper>& SdlPlatform::SdlSoundData::get() const {
+	return data;
 }
 
-void SdlPlatform::stop_sound(int handle) {
+void SdlPlatform::mixer_func_proxy(void *ptr, unsigned char *stream, int len) {
+	((SdlPlatform*)ptr)->mixer_func((int16_t*)stream, len / 2);
+}
 
+void SdlPlatform::mixer_func(int16_t *buffer, size_t len) {
+	memset(buffer, 0, len * 2);
+
+	playback_list.erase(std::remove_if(playback_list.begin(), playback_list.end(), [=](const std::shared_ptr<PlaybackState> &state)
+	{
+		if (state->stop)
+			return true;
+
+		size_t i = 0;
+		while (i < len) {
+			buffer[i++] = std::clamp(buffer[i] + state->data->buffer[state->position++], INT16_MIN, INT16_MAX);
+
+			if (state->position == state->data->samples) {
+				if (state->looping)
+					state->position = 0;
+				else
+					return true;
+			}
+		}
+
+		return false;
+	}), playback_list.end());
+}
+
+SdlPlatform::SdlSoundSource::SdlSoundSource(const std::shared_ptr<PlaybackState> &s) : state(s) {
+
+}
+
+SdlPlatform::SdlSoundSource::~SdlSoundSource() {
+	std::shared_ptr<PlaybackState> locked = state.lock();
+	if (locked)
+		locked->stop = true;
+}
+
+void SdlPlatform::SdlSoundSource::detach() {
+	state.reset();
+}
+
+std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::string &path) {
+	std::string file = load_path + "sound/" + path + ".wav";
+
+	SDL_AudioSpec spec;
+	uint8_t* buffer;
+	uint32_t len;
+	if (!SDL_LoadWAV(file.c_str(), &spec, &buffer, &len))
+		return nullptr;
+
+	SDL_AudioCVT cvt;
+	int ret = SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_S16, 1, audio_samplerate);
+	if (ret < 0)
+		return nullptr;
+
+	std::unique_ptr<int16_t[]> buf = std::make_unique<int16_t[]>(len * cvt.len_mult / 2);
+	memcpy(buf.get(), buffer, len);
+	SDL_FreeWAV(buffer);
+
+	cvt.buf = (Uint8*)buf.get();
+	cvt.len = len;
+
+	if (SDL_ConvertAudio(&cvt))
+		return nullptr;
+
+	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), cvt.len * cvt.len_ratio / 2));
+}
+
+std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
+	std::vector<int16_t> buffer;
+	for (std::pair<int, int> element : melody)
+	{
+		int samples = (float)audio_samplerate / 1000 * element.second;
+		if (element.first > 0) {
+			float x = (float)element.first / audio_samplerate * 2.0f * M_PI;
+			for (int i = 0; i < samples; i++)
+				buffer.push_back(std::cos(x * i) * INT16_MAX);
+		} else {
+			for (int i = 0; i < samples; i++)
+				buffer.push_back(0);
+		}
+	}
+
+	std::unique_ptr<int16_t[]> buf = std::make_unique<int16_t[]>(buffer.size());
+	memcpy(buf.get(), buffer.data(), buffer.size() * 2);
+	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), buffer.size()));
+}
+
+std::unique_ptr<Platform::SoundSource> SdlPlatform::play_sound(const SoundData &base, bool looping) {
+	const SdlSoundData &snd = dynamic_cast<const SdlSoundData&>(base);
+
+	std::shared_ptr<PlaybackState> state = std::make_shared<PlaybackState>();
+	state->data = snd.get();
+	state->position = 0;
+	state->looping = looping;
+	state->stop = false;
+
+	if (state->data->samples == 0)
+		return nullptr;
+
+	SDL_LockAudioDevice(audio_device);
+	playback_list.push_back(state);
+	SDL_UnlockAudioDevice(audio_device);
+
+	return std::make_unique<SdlSoundSource>(state);
 }

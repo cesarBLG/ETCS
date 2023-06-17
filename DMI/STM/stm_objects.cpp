@@ -325,14 +325,12 @@ void parse_stm_message(const stm_message &message)
                 {
                     if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
                     {
-                        stopSound(window->customized->sounds[snd.NID_SOUND]);
+                        window->customized->sounds[snd.NID_SOUND]->stop();
                     }
                     for (auto it = window->generated_sounds.begin(); it != window->generated_sounds.end();)
                     {
                         if (it->first == snd.NID_SOUND)
                         {
-                            stopSound(it->second);
-                            delete it->second;
                             it = window->generated_sounds.erase(it);
                             continue;
                         }
@@ -341,17 +339,16 @@ void parse_stm_message(const stm_message &message)
                 }
                 else
                 {
-                    sdlsounddata *s;
                     if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
                     {
-                        s = window->customized->sounds[snd.NID_SOUND];
+                        window->customized->sounds[snd.NID_SOUND]->play(snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
                     }
                     else
                     {
-                        s = loadSound(snd);
-                        window->generated_sounds.push_front({snd.NID_SOUND, s});
+                        std::unique_ptr<StmSound> s = loadStmSound(snd);
+                        s->play(snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
+                        window->generated_sounds.push_front({snd.NID_SOUND, std::move(s)});
                     }
-                    play(s, snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
                 }
             }
             int count = 0;
@@ -360,8 +357,6 @@ void parse_stm_message(const stm_message &message)
                 count++;
                 if (count > 2)
                 {
-                    stopSound(it->second);
-                    delete it->second;
                     it = window->generated_sounds.erase(it);
                     continue;
                 }
