@@ -31,7 +31,8 @@ SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend
 	SDL_PauseAudioDevice(audio_device, 0);
 	TTF_Init();
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
-	//test();
+	running = true;
+	present_count = 0;
 }
 
 SdlPlatform::~SdlPlatform() {
@@ -72,17 +73,89 @@ void SdlPlatform::debug_print(const std::string &msg) {
 }
 
 PlatformUtil::Promise<void> SdlPlatform::delay(int ms) {
-	auto pair = PlatformUtil::create_promise<void>();
+	auto pair = PlatformUtil::PromiseFactory::create<void>();
 	timer_queue.insert(std::make_pair(get_timer() + ms, std::move(pair.second)));
 	return std::move(pair.first);
 }
 
+PlatformUtil::Promise<void> SdlPlatform::on_quit_request() {
+	return on_close_list.create_and_add();
+}
+
+PlatformUtil::Promise<void> SdlPlatform::on_quit() {
+	return on_quit_list.create_and_add();
+}
+
+PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {
+	return on_input_list.create_and_add();
+}
+
 void SdlPlatform::event_loop() {
-	int64_t now = get_timer();
-	while (!timer_queue.empty() && timer_queue.begin()->first < now) {
-		timer_queue.begin()->second.fulfill();
-		timer_queue.erase(timer_queue.begin());
+	int64_t prev = 0;
+	while (running) {
+		{
+			int64_t now = get_timer();
+			if (now - prev < 10)
+				SDL_Delay(10 - (now - prev));
+			prev = get_timer();
+		}
+
+		{
+			SDL_Event ev;
+			while (SDL_PollEvent(&ev)) {
+				if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE) {
+					on_close_list.fulfill_all();
+				}
+				else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
+					SDL_MouseButtonEvent sdlev = ev.button;
+					if (sdlev.button == SDL_BUTTON_LEFT) {
+						InputEvent ev;
+						ev.action = (sdlev.state == SDL_PRESSED) ? InputEvent::Action::Press : InputEvent::Action::Release;
+						ev.x = (sdlev.x - ox) / s;
+						ev.y = (sdlev.y - oy) / s;
+
+						on_input_list.fulfill_all(ev);
+					}
+				}
+				else if (ev.type == SDL_MOUSEMOTION) {
+					SDL_MouseMotionEvent sdlev = ev.motion;
+					if (sdlev.state & SDL_BUTTON_LMASK) {
+						InputEvent ev;
+						ev.action = InputEvent::Action::Move;
+						ev.x = (sdlev.x - ox) / s;
+						ev.y = (sdlev.y - oy) / s;
+
+						on_input_list.fulfill_all(ev);
+					}
+				}
+			}
+		}
+
+		{
+			int64_t now = get_timer();
+			std::vector<PlatformUtil::Fulfiller<void>> expired;
+			while (!timer_queue.empty() && timer_queue.begin()->first < now) {
+				expired.push_back(std::move(timer_queue.begin()->second));
+				timer_queue.erase(timer_queue.begin());
+			}
+			for (PlatformUtil::Fulfiller<void> &f : expired)
+				f.fulfill();
+		}
+
+		{
+			int present_fulfill = std::min(present_count, on_present_list.pending());
+			for (int i = 0; i < present_fulfill; i++) {
+				on_present_list.fulfill_one();
+				present_count--;
+			}
+		}
 	}
+
+	on_quit_list.fulfill_all();
+}
+
+void SdlPlatform::quit() {
+	running = false;
 }
 
 void SdlPlatform::set_color(Color c) {
@@ -140,9 +213,8 @@ void SdlPlatform::clear() {
 
 PlatformUtil::Promise<void> SdlPlatform::present() {
 	SDL_RenderPresent(sdlrend);
-	auto pair = PlatformUtil::create_promise<void>();
-	pair.second.fulfill();
-	return std::move(pair.first);
+	present_count++;
+	return on_present_list.create_and_add();
 }
 
 std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string &p) {

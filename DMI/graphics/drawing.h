@@ -15,9 +15,6 @@
 #define LEFT 2
 #define UP 4
 #define DOWN 8
-void startDisplay(bool fullscreen, int display, int width, int height, bool borderless, bool rotate);
-void display();
-void quitDisplay();
 void init_video();
-void loop_video();
+void drawing_start();
 #endif

@@ -14,14 +14,6 @@
 
 namespace PlatformUtil
 {
-	class NoCopy
-	{
-	public:
-		NoCopy(const NoCopy&) = delete;
-		NoCopy& operator=(const NoCopy&) = delete;
-		NoCopy() = default;
-	};
-
 	template <typename T>
 	struct CallbackType
 	{
@@ -36,19 +28,12 @@ namespace PlatformUtil
 		typedef std::function<void()> type;
 	};
 
-	template <typename T>
-	struct TypeOrEmpty
+	class NoCopy
 	{
-		TypeOrEmpty() = delete;
-		typedef T type;
-	};
-
-	template <>
-	struct TypeOrEmpty<void>
-	{
-		TypeOrEmpty() = delete;
-		struct Empty {};
-		typedef Empty type;
+	public:
+		NoCopy(const NoCopy&) = delete;
+		NoCopy& operator=(const NoCopy&) = delete;
+		NoCopy() = default;
 	};
 
 	template <typename T>
@@ -64,31 +49,46 @@ namespace PlatformUtil
 		friend class Fulfiller<T>;
 
 		typename CallbackType<T>::type callback;
-		std::optional<typename TypeOrEmpty<T>::type> value;
+		std::optional<T> value;
 
 		void subscribe(const typename CallbackType<T>::type &func) {
 			callback = func;
-			if (value) {
-				if constexpr (std::is_void<T>::value)
-					callback();
-				else
-					callback(std::move(*value));
-			}
+			if (value)
+				callback(std::move(*value));
 		}
 
-		template <typename... Args>
-		void fulfill(Args&&... args) {
-			if constexpr (std::is_void<T>::value)
-				value.emplace();
-			else
-				value = std::forward<T>(args...);
+		void fulfill(T&& val) {
+			value = std::move(val);
+			if (callback)
+				callback(std::move(*value));
+		}
 
-			if (callback) {
-				if constexpr (std::is_void<T>::value)
-					callback(args...);
-				else
-					callback(std::move(*value));
-			}
+		void fulfill(const T& val) {
+			value = val;
+			if (callback)
+				callback(std::move(*value));
+		}
+	};
+
+	template <>
+	class PromiseStorage<void> : private NoCopy
+	{
+		friend class Promise<void>;
+		friend class Fulfiller<void>;
+
+		typename CallbackType<void>::type callback;
+		bool value = false;
+
+		void subscribe(const typename CallbackType<void>::type &func) {
+			callback = func;
+			if (value)
+				callback();
+		}
+
+		void fulfill() {
+			value = true;
+			if (callback)
+				callback();
 		}
 	};
 
@@ -118,16 +118,51 @@ namespace PlatformUtil
 			return !storage->value;
 		}
 
-		template <typename... Args>
-		void fulfill(Args&&... args) {
+		void fulfill(T&& arg) {
 			if (!storage)
 				return;
+			storage->fulfill(std::move(arg));
+			storage = nullptr;
+		}
 
-			if constexpr (std::is_void<T>::value)
-				storage->fulfill(args...);
-			else
-				storage->fulfill(std::forward<T>(args...));
+		void fulfill(const T& arg) {
+			if (!storage)
+				return;
+			storage->fulfill(arg);
+			storage = nullptr;
+		}
+	};
 
+	template <>
+	class Fulfiller<void>
+	{
+		friend class PromiseFactory;
+
+		std::shared_ptr<PromiseStorage<void>> storage;
+		Fulfiller(const std::shared_ptr<PromiseStorage<void>> &ptr) : storage(ptr) {};
+
+	public:
+		Fulfiller() = default;
+		Fulfiller(Fulfiller &&other) {
+			storage = other.storage;
+			other.storage = nullptr;
+		}
+		Fulfiller& operator=(Fulfiller &&other) {
+			storage = other.storage;
+			other.storage = nullptr;
+			return *this;
+		}
+
+		bool is_pending() const {
+			if (!storage)
+				return false;
+			return !storage->value;
+		}
+
+		void fulfill() {
+			if (!storage)
+				return;
+			storage->fulfill();
 			storage = nullptr;
 		}
 	};
@@ -187,7 +222,81 @@ namespace PlatformUtil
 	};
 
 	template <typename T>
-	inline std::pair<Promise<T>, Fulfiller<T>> create_promise() {
-		return PromiseFactory::create<T>();
-	}
+	class FulfillerList
+	{
+		std::vector<Fulfiller<T>> list;
+
+	public:
+		void add(Fulfiller<T> &&f) {
+			list.push_back(std::move(f));
+		}
+
+		void fulfill_one(const T& arg) {
+			if (list.empty())
+				return;
+			std::vector<Fulfiller<T>> tmp = std::move(list);
+			list.clear();
+			tmp.begin()->fulfill(arg);
+			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+		}
+
+		void fulfill_one(T&& arg) {
+			if (list.empty())
+				return;
+			std::vector<Fulfiller<T>> tmp = std::move(list);
+			list.clear();
+			tmp.begin()->fulfill(std::move(arg));
+			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+		}
+
+		void fulfill_all(const T& arg) {
+			std::vector<Fulfiller<T>> tmp = std::move(list);
+			list.clear();
+			for (PlatformUtil::Fulfiller<T> &f : tmp)
+				f.fulfill(arg);
+		}
+
+		Promise<T> create_and_add() {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
+			list.push_back(std::move(pair.second));
+			return std::move(pair.first);
+		}
+	};
+
+	template <>
+	class FulfillerList<void>
+	{
+		std::vector<Fulfiller<void>> list;
+
+	public:
+		void add(Fulfiller<void> &&f) {
+			list.push_back(std::move(f));
+		}
+
+		size_t pending() {
+			return list.size();
+		}
+
+		void fulfill_one() {
+			if (list.empty())
+				return;
+			std::vector<Fulfiller<void>> tmp = std::move(list);
+			list.clear();
+			tmp.begin()->fulfill();
+			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+		}
+
+		void fulfill_all() {
+			std::vector<Fulfiller<void>> tmp = std::move(list);
+			list.clear();
+			for (PlatformUtil::Fulfiller<void> &f : tmp)
+				f.fulfill();
+		}
+
+		Promise<void> create_and_add() {
+			std::pair<Promise<void>, Fulfiller<void>> pair = PromiseFactory::create<void>();
+			list.push_back(std::move(pair.second));
+			return std::move(pair.first);
+		}
+	};
 }

@@ -49,6 +49,7 @@ public:
 	virtual void debug_print(const std::string &msg) override {};
 
 	virtual PlatformUtil::Promise<void> delay(int ms) override { return {}; }
+	virtual PlatformUtil::Promise<void> on_close() override { return {}; }
 
 	virtual void event_loop() override {};
 

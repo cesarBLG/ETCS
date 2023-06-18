@@ -11,12 +11,7 @@
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
-bool running = true;
-void quit()
-{
-    running = false;
-    printf("quit\n");
-}
+#include "platform/platform.h"
 #ifdef __ANDROID__
 #elif defined(_WIN32)
 #include <windows.h>
@@ -118,7 +113,8 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
 #include <time.h>
 void sighandler(int sig)
 {
-    quit();
+    if (platform)
+        platform->quit();
 }
 int addr2line(char const * const program_name, void const * const addr)
 {
@@ -148,7 +144,8 @@ void crash_handler(int sig)
 #include <jni.h>
 extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 {
-    running = false;
+    if (platform)
+        platform->quit();
 }
 #endif
 #include <fstream>
@@ -174,6 +171,7 @@ int main(int argc, char** argv)
     startWindows();
     void initialize_stm_windows();
     initialize_stm_windows();
-    loop_video();
+    drawing_start();
+    platform->event_loop();
     return 0;
 }

@@ -44,12 +44,13 @@ public:
 	virtual void debug_print(const std::string &msg) = 0;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) = 0;
+	virtual PlatformUtil::Promise<void> on_quit_request() = 0;
+	virtual PlatformUtil::Promise<void> on_quit() = 0;
 
 	virtual void event_loop() = 0;
+	virtual void quit() = 0;
 
 	//virtual std::unique_ptr<Socket> open_socket(const std::string &channel) = 0;
-	//virtual PlatformUtil::Promise<void> wait_for_close() = 0;
-	//virtual void quit() = 0;
 };
 
 class UiPlatform : public BasePlatform
@@ -116,7 +117,7 @@ public:
 
 	virtual void set_brightness(int br) = 0;
 
-	//virtual PlatformUtil::Promise<InputEvent> read_input() = 0;
+	virtual PlatformUtil::Promise<InputEvent> on_input_event() = 0;
 };
 
 extern std::unique_ptr<UiPlatform> platform;

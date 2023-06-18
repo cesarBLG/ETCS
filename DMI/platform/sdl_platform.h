@@ -51,6 +51,12 @@ private:
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
 	std::map<int, PlatformUtil::Fulfiller<void>> timer_queue;
+	PlatformUtil::FulfillerList<void> on_close_list;
+	PlatformUtil::FulfillerList<void> on_quit_list;
+	PlatformUtil::FulfillerList<InputEvent> on_input_list;
+	PlatformUtil::FulfillerList<void> on_present_list;
+	size_t present_count;
+	bool running;
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
@@ -113,8 +119,11 @@ public:
 	virtual void debug_print(const std::string &msg) override;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) override;
+	virtual PlatformUtil::Promise<void> on_quit_request() override;
+	virtual PlatformUtil::Promise<void> on_quit() override;
 
 	virtual void event_loop() override;
+	virtual void quit() override;
 
 	virtual void set_color(Color c) override;
 	virtual void draw_line(float x1, float y1, float x2, float y2) override;
@@ -136,4 +145,6 @@ public:
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
 	virtual void set_brightness(int br) override;
+
+	virtual PlatformUtil::Promise<InputEvent> on_input_event() override;
 };

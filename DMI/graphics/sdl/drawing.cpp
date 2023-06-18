@@ -30,8 +30,6 @@ using namespace std;
 static SDL_Window *sdlwin;
 static SDL_Renderer *sdlren;
 float scale, ox, oy;
-extern bool running;
-void quit();
 
 static std::map<std::string, std::string>  ini_items;
 
@@ -58,105 +56,52 @@ static std::string ini_get(const std::string &key)
     return it->second;
 }
 
-void init_video()
+void update_stm_windows();
+
+void present_frame()
 {
-    int res = SDL_Init(SDL_INIT_EVERYTHING);
-    if(res<0)
+    updateDrawCommands();
+    update_stm_windows();
+    platform->set_color(DarkBlue);
+    platform->clear();
+    displayETCS();
+    platform->present().then(present_frame).detach();
+}
+
+void process_input(UiPlatform::InputEvent ev)
+{
+    vector<window *> windows;
+    for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
     {
-        printf("Failed to init SDL. SDL Error: %s", SDL_GetError());
-        running = false;
-        return;
+        windows.push_back(*it);
     }
+    for (int i = 0; i < windows.size(); i++)
+    {
+        if (windows[i]->active) windows[i]->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
+        else windows[i]->event(0, -100, -100);
+    }
+    platform->on_input_event().then(process_input).detach();
+}
 
-    ini_load();
-    startDisplay(
-        ini_get("fullScreen") == "true",
-        std::stoi(ini_get("display")),
-        std::stoi(ini_get("width")),
-        std::stoi(ini_get("height")),
-        ini_get("borderless") == "true",
-        ini_get("rotateScreen") == "true"
-    );
+void drawing_start()
+{
+    platform->on_quit_request().then([](){
+        platform->quit();
+    }).detach();
 
-    loadBeeps();
+    platform->on_quit().then([](){
+        platform = nullptr;
+        SDL_DestroyRenderer(sdlren);
+        SDL_DestroyWindow(sdlwin);
+        SDL_Quit();
+    }).detach();
+
+    platform->on_input_event().then(process_input).detach();
+
     setupFlash();
+    present_frame();
 }
-void loop_video()
-{
-    while(running)
-    {
-        auto prev = std::chrono::system_clock::now();
-        SDL_Event ev;
-        while(SDL_PollEvent(&ev) != 0)
-        {
-			if(ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
-            {
-                quit();
-                break;
-            }
-            if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP || ev.type == SDL_MOUSEMOTION /*|| ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION*/) {
-				float x;
-				float y;
-				bool pressed;
-                if (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION)
-                {
-                    SDL_TouchFingerEvent tfe = ev.tfinger;
-                    if (ev.type == SDL_FINGERMOTION) pressed = tfe.pressure > 0;
-                    else pressed = ev.type == SDL_FINGERDOWN;
-                    x = tfe.x;
-                    y = tfe.y;
-                }
-                else if (ev.type == SDL_MOUSEMOTION)
-                {
-                    SDL_MouseMotionEvent mme = ev.motion;
-                    pressed = mme.state == SDL_PRESSED;
-                    x = mme.x;
-                    y = mme.y;
-                }
-                else
-                {
-                    SDL_MouseButtonEvent mbe = ev.button;
-                    pressed = mbe.state == SDL_PRESSED;
-                    x = mbe.x;
-                    y = mbe.y;
-                }
-				x = (x - ox) / scale;
-				y = (y - oy) / scale;
-				vector<window *> windows;
-				for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
-				{
-					windows.push_back(*it);
-				}
-				for (int i = 0; i < windows.size(); i++)
-				{
-					if (windows[i]->active) windows[i]->event(pressed, x, y);
-                    else windows[i]->event(0, -100, -100);
-				}
-			}
-        }
-        if (!running) break;
-        platform->event_loop();
-        void update_stm_windows();
-        updateDrawCommands();
-        update_stm_windows();
-        display();
 
-        std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
-        int d = std::chrono::duration_cast<std::chrono::duration<int, std::milli>>(diff).count();
-        int time = 50 - d;
-        if (time < 30)
-        {
-            time = 125 - d;
-            if (time < 60)
-            {
-                time = 250 - d;
-                if (time < 100) time = 2*d;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(time));
-    }
-    quitDisplay();
-}
 void startDisplay(bool fullscreen, int display = 0, int width = 640, int height = 480, bool borderless = false, bool rotate = false)
 {
     SDL_SetHint(SDL_HINT_RENDER_DIRECT3D_THREADSAFE, "1");
@@ -165,7 +110,6 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
     if(sdlwin == nullptr)
     {
         printf("Failed to create window. SDL Error: %s", SDL_GetError());
-        running = false;
         return;
     }
     if (fullscreen)
@@ -175,7 +119,6 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
     if (sdlren == nullptr)
     {
         printf("Failed to create renderer. SDL Error: %s", SDL_GetError());
-        running = false;
         return;
     }
 
@@ -203,17 +146,25 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
     platform = std::make_unique<SdlPlatform>(sdlren, scale, ox, oy);
     //platform = std::make_unique<NullPlatform>();
 }
-void display()
-{
-    platform->set_color(DarkBlue);
-    platform->clear();
-    displayETCS();
-    platform->present();
-}
 
-void quitDisplay()
+void init_video()
 {
-    SDL_DestroyRenderer(sdlren);
-    SDL_DestroyWindow(sdlwin);
-    SDL_Quit();
+    int res = SDL_Init(SDL_INIT_EVERYTHING);
+    if(res<0)
+    {
+        printf("Failed to init SDL. SDL Error: %s", SDL_GetError());
+        return;
+    }
+
+    ini_load();
+    startDisplay(
+        ini_get("fullScreen") == "true",
+        std::stoi(ini_get("display")),
+        std::stoi(ini_get("width")),
+        std::stoi(ini_get("height")),
+        ini_get("borderless") == "true",
+        ini_get("rotateScreen") == "true"
+    );
+
+    loadBeeps();
 }
