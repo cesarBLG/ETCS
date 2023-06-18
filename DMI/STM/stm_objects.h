@@ -138,7 +138,7 @@ class ntc_window : public window
 {
     int nid_stm;
     std::map<int, Component*> indicators;
-    std::map<int, std::shared_ptr<Platform::Image>> icons;
+    std::map<int, std::shared_ptr<UiPlatform::Image>> icons;
     public:
     stm_state state;
     int64_t last_time;

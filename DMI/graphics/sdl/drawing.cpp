@@ -15,6 +15,7 @@
 #include <SDL.h>
 #include <thread>
 #include <mutex>
+#include <fstream>
 #include "../drawing.h"
 #include "../display.h"
 #include "../button.h"
@@ -22,8 +23,8 @@
 #include "../../sound/sound.h"
 #include "../../messages/messages.h"
 #include "../../tcp/server.h"
-#include "../../Settings/settings.h"
 #include "../../platform/sdl_platform.h"
+//#include "../../platform/null_platform.h"
 using namespace std;
 
 static SDL_Window *sdlwin;
@@ -31,6 +32,32 @@ static SDL_Renderer *sdlren;
 float scale, ox, oy;
 extern bool running;
 void quit();
+
+static std::map<std::string, std::string>  ini_items;
+
+static void ini_load()
+{
+    std::ifstream file("settings.ini", std::ios::binary);
+    std::string line;
+
+    while (std::getline(file, line)) {
+        while (!line.empty() && line.back() == '\r' || line.back() == '\n')
+            line.pop_back();
+        int pos = line.find('=');
+        if (pos == -1)
+            continue;
+        ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos+1)));
+    }
+}
+
+static std::string ini_get(const std::string &key)
+{
+    auto it = ini_items.find(key);
+    if (it == ini_items.end())
+        return "";
+    return it->second;
+}
+
 void init_video()
 {
     int res = SDL_Init(SDL_INIT_EVERYTHING);
@@ -41,23 +68,18 @@ void init_video()
         return;
     }
 
+    ini_load();
     startDisplay(
-        Settings::Get("fullScreen") == "true",
-        atoi(Settings::Get("display").c_str()),
-        atoi(Settings::Get("width").c_str()),
-        atoi(Settings::Get("height").c_str()),
-        Settings::Get("borderless") == "true",
-        Settings::Get("rotateScreen") == "true"
+        ini_get("fullScreen") == "true",
+        std::stoi(ini_get("display")),
+        std::stoi(ini_get("width")),
+        std::stoi(ini_get("height")),
+        ini_get("borderless") == "true",
+        ini_get("rotateScreen") == "true"
     );
 
-    int timer = SDL_AddTimer(250, flash, nullptr);
-    if(timer == 0)
-    {
-        printf("Failed to create flashing timer. SDL Error: %s", SDL_GetError());
-        running = false;
-        return;
-    }
     loadBeeps();
+    setupFlash();
 }
 void loop_video()
 {
@@ -113,6 +135,7 @@ void loop_video()
 			}
         }
         if (!running) break;
+        platform->event_loop();
         void update_stm_windows();
         updateDrawCommands();
         update_stm_windows();
@@ -178,13 +201,14 @@ void startDisplay(bool fullscreen, int display = 0, int width = 640, int height 
         SDL_SetWindowBordered(sdlwin, SDL_FALSE);
 
     platform = std::make_unique<SdlPlatform>(sdlren, scale, ox, oy);
+    //platform = std::make_unique<NullPlatform>();
 }
 void display()
 {
     platform->set_color(DarkBlue);
     platform->clear();
     displayETCS();
-    SDL_RenderPresent(sdlren);
+    platform->present();
 }
 
 void quitDisplay()

@@ -12,11 +12,11 @@
 #include "../../EVC/Packets/STM/46.h"
 class StmSound
 {
-    std::unique_ptr<Platform::SoundData> data;
-    std::unique_ptr<Platform::SoundSource> source;
+    std::unique_ptr<UiPlatform::SoundData> data;
+    std::unique_ptr<UiPlatform::SoundSource> source;
 
 public:
-    StmSound(std::unique_ptr<Platform::SoundData> &&data);
+    StmSound(std::unique_ptr<UiPlatform::SoundData> &&data);
     void play(bool loop);
     void stop();
 };

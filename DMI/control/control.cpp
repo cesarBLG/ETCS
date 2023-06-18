@@ -27,7 +27,6 @@
 subwindow *active = nullptr;
 std::string active_name;
 window *default_window;
-#include <iostream>
 void startWindows()
 {
     etcs_default_window.construct();

@@ -245,7 +245,7 @@ void displayLines()
 {
     bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
-    std::unique_ptr<Platform::Font> gaugeFont;
+    std::unique_ptr<UiPlatform::Font> gaugeFont;
     if (!inited) {
         csg.clear();
         gaugeFont = platform->load_font(16, false);

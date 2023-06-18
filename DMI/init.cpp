@@ -11,13 +11,10 @@
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
-#include "Settings/settings.h"
 bool running = true;
 void quit()
 {
-    //std::unique_lock<std::mutex> lck(window_mtx);
     running = false;
-    //window_cv.notify_one();
     printf("quit\n");
 }
 #ifdef __ANDROID__
@@ -149,7 +146,6 @@ void crash_handler(int sig)
 #endif
 #ifdef __ANDROID__
 #include <jni.h>
-std::string filesDir;
 extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 {
     running = false;
@@ -159,9 +155,7 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 #include "graphics/text_button.h"
 int main(int argc, char** argv)
 {
-#ifdef __ANDROID__
-    filesDir = SDL_AndroidGetExternalStoragePath();
-#else
+#ifndef __ANDROID__
 #ifdef __unix__
     signal(SIGINT, sighandler);
     signal(SIGSEGV, crash_handler);
@@ -171,7 +165,6 @@ int main(int argc, char** argv)
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
-    Settings::Init();
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);

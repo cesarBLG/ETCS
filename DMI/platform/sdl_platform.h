@@ -8,6 +8,8 @@
 
 #include <map>
 #include <atomic>
+#include <optional>
+#include <functional>
 #include "platform.h"
 
 struct SDL_Renderer;
@@ -15,7 +17,7 @@ struct SDL_Texture;
 struct _TTF_Font;
 typedef struct _TTF_Font TTF_Font;
 
-class SdlPlatform : public Platform {
+class SdlPlatform : public UiPlatform {
 private:
 	struct SdlFontWrapper
 	{
@@ -48,6 +50,7 @@ private:
 	int audio_volume;
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
+	std::map<int, PlatformUtil::Fulfiller<void>> timer_queue;
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
@@ -102,6 +105,17 @@ public:
 	SdlPlatform(SDL_Renderer *r, float s, float ox, float oy);
 	virtual ~SdlPlatform() override;
 
+	virtual int64_t get_timer() override;
+	virtual int64_t get_timestamp() override;
+	virtual DateTime get_local_time() override;
+
+	virtual std::string read_file(const std::string &path) override;
+	virtual void debug_print(const std::string &msg) override;
+
+	virtual PlatformUtil::Promise<void> delay(int ms) override;
+
+	virtual void event_loop() override;
+
 	virtual void set_color(Color c) override;
 	virtual void draw_line(float x1, float y1, float x2, float y2) override;
 	virtual void draw_rect(float x, float y, float w, float h) override;
@@ -110,6 +124,7 @@ public:
 	virtual void draw_circle_filled(float x, float y, float rad) override;
 	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
 	virtual void clear() override;
+	virtual PlatformUtil::Promise<void> present() override;
 	virtual std::unique_ptr<Image> load_image(const std::string &path) override;
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) override;
 	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
@@ -120,6 +135,5 @@ public:
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
-	virtual int64_t get_timer() override;
-	virtual TimeOfDay get_local_time() override;
+	virtual void set_brightness(int br) override;
 };

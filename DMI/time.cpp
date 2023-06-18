@@ -12,8 +12,8 @@
 
 int TimeOffset::offset;
 
-static Platform::TimeOfDay offset_time() {
-    Platform::TimeOfDay clock = platform->get_local_time();
+static BasePlatform::DateTime offset_time() {
+    BasePlatform::DateTime clock = platform->get_local_time();
     clock.second += TimeOffset::offset;
     while (clock.second >= 60) {
         clock.second -= 60;

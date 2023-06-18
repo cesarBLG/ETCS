@@ -7,9 +7,11 @@
 #include "sdl_platform.h"
 #include "../graphics/drawing.h"
 #include "../graphics/sdl/gfx_primitives.h"
+#include <algorithm>
+#include <chrono>
+#include <fstream>
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include <algorithm>
 
 SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend(r), s(s), ox(ox), oy(oy) {
 #ifdef __ANDROID__
@@ -29,10 +31,58 @@ SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend
 	SDL_PauseAudioDevice(audio_device, 0);
 	TTF_Init();
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+	//test();
 }
 
 SdlPlatform::~SdlPlatform() {
 	SDL_CloseAudioDevice(audio_device);
+}
+
+int64_t SdlPlatform::get_timer() {
+	return SDL_GetTicks64();
+}
+
+int64_t SdlPlatform::get_timestamp() {
+	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+SdlPlatform::DateTime SdlPlatform::get_local_time() {
+	time_t now = time(nullptr);
+	tm *datetime = localtime(&now);
+	return DateTime { 
+		datetime->tm_year + 1900, datetime->tm_mon, datetime->tm_mday - 1,
+		datetime->tm_hour, datetime->tm_min, datetime->tm_sec
+	};
+}
+
+std::string SdlPlatform::read_file(const std::string &path) {
+	std::ifstream file(load_path + path, std::ios::binary | std::ios::ate);
+	if (!file.good())
+		return "";
+	size_t size = file.tellg();
+	file.seekg(0);
+	std::string buffer;
+	buffer.resize(size);
+	file.read(buffer.data(), size);
+	return buffer;
+}
+
+void SdlPlatform::debug_print(const std::string &msg) {
+	printf("debug_print: %s\n", msg.c_str());
+}
+
+PlatformUtil::Promise<void> SdlPlatform::delay(int ms) {
+	auto pair = PlatformUtil::create_promise<void>();
+	timer_queue.insert(std::make_pair(get_timer() + ms, std::move(pair.second)));
+	return std::move(pair.first);
+}
+
+void SdlPlatform::event_loop() {
+	int64_t now = get_timer();
+	while (!timer_queue.empty() && timer_queue.begin()->first < now) {
+		timer_queue.begin()->second.fulfill();
+		timer_queue.erase(timer_queue.begin());
+	}
 }
 
 void SdlPlatform::set_color(Color c) {
@@ -88,7 +138,14 @@ void SdlPlatform::clear() {
 	SDL_RenderClear(sdlrend);
 }
 
-std::unique_ptr<Platform::Image> SdlPlatform::load_image(const std::string &p) {
+PlatformUtil::Promise<void> SdlPlatform::present() {
+	SDL_RenderPresent(sdlrend);
+	auto pair = PlatformUtil::create_promise<void>();
+	pair.second.fulfill();
+	return std::move(pair.first);
+}
+
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string &p) {
 	std::string path = load_path + p;
 	SDL_Surface *surf = SDL_LoadBMP(path.c_str());
 	if (surf == nullptr) {
@@ -106,7 +163,7 @@ std::unique_ptr<Platform::Image> SdlPlatform::load_image(const std::string &p) {
 	return img;
 }
 
-std::unique_ptr<Platform::Font> SdlPlatform::load_font(float size, bool bold) {
+std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold) {
 	auto it = loaded_fonts.find({size, bold});
 	std::shared_ptr<SdlFontWrapper> wrapper;
 	if (it != loaded_fonts.end())
@@ -131,7 +188,7 @@ std::unique_ptr<Platform::Font> SdlPlatform::load_font(float size, bool bold) {
 	return std::make_unique<SdlFont>(wrapper, scale);
 }
 
-std::unique_ptr<Platform::Image> SdlPlatform::make_text_image(const std::string &text, const Font &base, Color c) {
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::string &text, const Font &base, Color c) {
 	if (text.empty())
 		return nullptr;
 
@@ -156,7 +213,7 @@ std::unique_ptr<Platform::Image> SdlPlatform::make_text_image(const std::string 
 	return img;
 }
 
-std::unique_ptr<Platform::Image> SdlPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
 	if (text.empty())
 		return nullptr;
 
@@ -288,7 +345,7 @@ void SdlPlatform::set_volume(int vol) {
 	audio_volume = vol;
 }
 
-std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::string &path) {
+std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string &path) {
 	std::string file = load_path + "sound/" + path + ".wav";
 
 	SDL_AudioSpec spec;
@@ -315,7 +372,7 @@ std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::string &
 	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), cvt.len * cvt.len_ratio / 2));
 }
 
-std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
+std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
 	std::vector<int16_t> buffer;
 	for (std::pair<int, int> element : melody)
 	{
@@ -335,7 +392,7 @@ std::unique_ptr<Platform::SoundData> SdlPlatform::load_sound(const std::vector<s
 	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), buffer.size()));
 }
 
-std::unique_ptr<Platform::SoundSource> SdlPlatform::play_sound(const SoundData &base, bool looping) {
+std::unique_ptr<SdlPlatform::SoundSource> SdlPlatform::play_sound(const SoundData &base, bool looping) {
 	const SdlSoundData &snd = dynamic_cast<const SdlSoundData&>(base);
 
 	std::shared_ptr<PlaybackState> state = std::make_shared<PlaybackState>();
@@ -354,14 +411,6 @@ std::unique_ptr<Platform::SoundSource> SdlPlatform::play_sound(const SoundData &
 	return std::make_unique<SdlSoundSource>(state);
 }
 
-int64_t SdlPlatform::get_timer()
-{
-	return SDL_GetTicks64();
-}
+void SdlPlatform::set_brightness(int vol) {
 
-Platform::TimeOfDay SdlPlatform::get_local_time()
-{
-	time_t now = time(nullptr);
-	tm *datetime = localtime(&now);
-	return TimeOfDay { datetime->tm_hour, datetime->tm_min, datetime->tm_sec };
 }

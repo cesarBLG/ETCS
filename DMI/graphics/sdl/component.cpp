@@ -231,7 +231,7 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(std::shared_ptr<Platform::Image> tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy)
 {
     platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), sx, sy);
 }
@@ -270,7 +270,7 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->height = sy;
     return t;
 }
-std::shared_ptr<Platform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
+std::shared_ptr<UiPlatform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
     auto font = platform->load_font(size, (aspect & 1) != 0);
     return platform->make_wrapped_text_image(text, *font, align, col);
@@ -300,7 +300,7 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     }
     return ig;
 }
-std::shared_ptr<Platform::Image> Component::getImageGraphic(string path)
+std::shared_ptr<UiPlatform::Image> Component::getImageGraphic(string path)
 {
     return platform->load_image(path);
 }

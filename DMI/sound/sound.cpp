@@ -11,7 +11,7 @@
 #include <map>
 #include <string>
 
-StmSound::StmSound(std::unique_ptr<Platform::SoundData> &&in) : data(std::move(in)) {
+StmSound::StmSound(std::unique_ptr<UiPlatform::SoundData> &&in) : data(std::move(in)) {
 
 }
 
@@ -40,12 +40,12 @@ std::unique_ptr<StmSound> loadStmSound(const STMSoundDefinition &def)
     return std::make_unique<StmSound>(platform->load_sound(melody));
 }
 
-std::unique_ptr<Platform::SoundData> sinfo;
-std::unique_ptr<Platform::SoundData> swarn;
-std::unique_ptr<Platform::SoundData> stoofast;
-std::unique_ptr<Platform::SoundData> click; 
+std::unique_ptr<UiPlatform::SoundData> sinfo;
+std::unique_ptr<UiPlatform::SoundData> swarn;
+std::unique_ptr<UiPlatform::SoundData> stoofast;
+std::unique_ptr<UiPlatform::SoundData> click;
 int64_t last_sinfo;
-std::unique_ptr<Platform::SoundSource> swarn_source;
+std::unique_ptr<UiPlatform::SoundSource> swarn_source;
 
 void loadBeeps()
 {

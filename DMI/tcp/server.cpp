@@ -39,7 +39,6 @@ int active_channel;
 #define PORT 5010
 std::string recvbuf;
 std::string buffer;
-#include <iostream>
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {

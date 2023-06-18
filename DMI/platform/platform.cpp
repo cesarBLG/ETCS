@@ -6,4 +6,4 @@
 
 #include "platform.h"
 
-std::unique_ptr<Platform> platform;
+std::unique_ptr<UiPlatform> platform;

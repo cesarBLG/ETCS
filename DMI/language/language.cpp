@@ -9,7 +9,6 @@
 #include "language.h"
 #include <moFileReader.hpp>
 #include "../graphics/text_button.h"
-#include <iostream>
 std::string language = "en";
 moFileLib::moFileReader reader;
 std::string get_text(std::string id)
@@ -24,24 +23,10 @@ std::string get_text_context(std::string context, std::string id)
 }
 void set_language(std::string lang)
 {
-#if SIMRAIL
-#if _DEBUG
-    std::string file = "../locales/dmi/" + lang + ".mo";
-#else
-    std::string file = "locales/dmi/" + lang + ".mo";
-#endif
-#else
-    std::string file = "../locales/dmi/" + lang + ".mo";
-#endif
-
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    file = filesDir+"/locales/dmi/"+lang+".mo";
-#endif
     if (lang == "en") {
         language = "en";
-    } else if (reader.ReadFile(file.c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
-        std::cout<<reader.GetErrorDescription()<<std::endl;
+    } else if (reader.ParseData(platform->read_file("locales/dmi/" + lang + ".mo")) != moFileLib::moFileReader::EC_SUCCESS) {
+        platform->debug_print(reader.GetErrorDescription());
         language = "en";
     } else {
         language = lang;
