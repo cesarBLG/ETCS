@@ -20,6 +20,7 @@
 #include <netdb.h>
 #else
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 void SdlPlatform::SdlPlatform::load_config()
@@ -215,6 +216,12 @@ void SdlPlatform::SdlSocket::handle_error() {
 	}
 #endif
 }
+
+#ifdef _WIN32
+#define socklen_t int
+#define ssize_t int
+#define MSG_NOSIGNAL 0
+#endif
 
 void SdlPlatform::SdlSocket::update() {
 	if (!peer_fd) {
@@ -625,7 +632,7 @@ void SdlPlatform::mixer_func(int16_t *buffer, size_t len) {
 
 		size_t i = 0;
 		while (i < len) {
-			buffer[i++] = std::clamp(buffer[i] + state->data->buffer[state->position++] * audio_volume / 100, INT16_MIN, INT16_MAX);
+			buffer[i++] = std::clamp(buffer[i] + state->data->buffer[state->position++] * audio_volume / 100, (int)INT16_MIN, (int)INT16_MAX);
 
 			if (state->position == state->data->samples) {
 				if (state->looping)

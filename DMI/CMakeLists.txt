@@ -56,7 +56,7 @@ endif()
 target_include_directories(dmi PRIVATE ../include)
 
 if(WIN32)
-    target_link_libraries(dmi PRIVATE imagehlp wsock32 psapi)
+    target_link_libraries(dmi PRIVATE imagehlp ws2_32 psapi)
 elseif(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
 endif()
