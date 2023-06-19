@@ -550,13 +550,11 @@ bool info_compare(const std::shared_ptr<etcs_information> &i1, const std::shared
 }
 void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, int dir, int64_t timestamp, bg_id nid_bg, int m_version)
 {
-    if (!ongoing_transition) {
+    if (!ongoing_transition)
         transition_buffer.clear();
-    } else {
-        if (transition_buffer.size() == 3)
-            transition_buffer.pop_front();
+    else
         transition_buffer.push_back({});
-    }
+
     if (NV_NID_Cs.find(nid_bg.NID_C) == NV_NID_Cs.end()) {
         reset_national_values();
         operate_version(m_version, false);
@@ -632,16 +630,18 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
     {
         try_handle_information(*it, ordered_info);
     }
+    if (!transition_buffer.empty() && transition_buffer.back().empty())
+        transition_buffer.pop_back();
+    if (transition_buffer.size() > 3)
+        transition_buffer.pop_front();
 }
 void handle_radio_message(std::shared_ptr<euroradio_message> message, communication_session *session)
 {
-    if (!ongoing_transition) {
+    if (!ongoing_transition)
         transition_buffer.clear();
-    } else {
-        if (transition_buffer.size() == 3)
-            transition_buffer.pop_front();
+    else
         transition_buffer.push_back({});
-    }
+    
     message = translate_message(message, session->version);
     std::list<std::shared_ptr<etcs_information>> ordered_info;
     bg_id lrbg = message->NID_LRBG.get_value();
@@ -840,6 +840,10 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
     {
         try_handle_information(*it, ordered_info);
     }
+    if (!transition_buffer.empty() && transition_buffer.back().empty())
+        transition_buffer.pop_back();
+    if (transition_buffer.size() > 3)
+        transition_buffer.pop_front();
 }
 struct level_filter_data
 {
