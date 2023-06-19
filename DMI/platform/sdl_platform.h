@@ -14,6 +14,7 @@
 
 struct SDL_Renderer;
 struct SDL_Texture;
+struct SDL_Window;
 struct _TTF_Font;
 typedef struct _TTF_Font TTF_Font;
 
@@ -43,6 +44,7 @@ private:
 	};
 
 	SDL_Renderer *sdlrend;
+	SDL_Window *sdlwindow;
 	std::string load_path;
 	Color current_color;
 	int audio_samplerate;
@@ -50,13 +52,23 @@ private:
 	int audio_volume;
 	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
-	std::map<int, PlatformUtil::Fulfiller<void>> timer_queue;
+	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
 	PlatformUtil::FulfillerList<void> on_close_list;
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
 	size_t present_count;
 	bool running;
+	struct SocketConfig {
+		std::string name;
+		std::string hostname;
+		int port;
+		bool server;
+	};
+	std::vector<SocketConfig> socket_config;
+	std::map<std::string, std::string> ini_items;
+	void load_config();
+	std::string get_config(const std::string &key);
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
@@ -108,13 +120,38 @@ public:
 		virtual void detach() override;
 	};
 
-	SdlPlatform(SDL_Renderer *r, float s, float ox, float oy);
+	class SdlSocket : public Socket
+	{
+	private:
+		int listen_fd;
+		int peer_fd;
+		PlatformUtil::FulfillerBufferedQueue<std::string> rx_buffer;
+		std::string tx_buffer;
+		PlatformUtil::Promise<void> refresh_promise;
+
+		std::string hostname;
+		bool server;
+		int port;
+		void mark_nonblocking(int fd);
+		void close_socket(int fd);
+		void handle_error();
+		void update();
+		void connect();
+	public:
+		SdlSocket(const std::string &hostname, bool server, int port);
+		~SdlSocket();
+		virtual void send(const std::string &data) override;
+		virtual PlatformUtil::Promise<std::string> receive() override;
+	};
+
+	SdlPlatform(float virtual_w, float virtual_h);
 	virtual ~SdlPlatform() override;
 
 	virtual int64_t get_timer() override;
 	virtual int64_t get_timestamp() override;
 	virtual DateTime get_local_time() override;
 
+	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) override;
 	virtual std::string read_file(const std::string &path) override;
 	virtual void debug_print(const std::string &msg) override;
 

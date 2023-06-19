@@ -109,11 +109,9 @@ void dispAcks()
     }
     else c1.setAck(nullptr);
 }
-#include <chrono>
 int64_t get_milliseconds()
 {
-    return (std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch())).count();
+    return platform->get_timer();
 }
 int64_t lastAck;
 void updateAcks()

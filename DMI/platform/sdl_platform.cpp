@@ -6,17 +6,106 @@
 
 #include "sdl_platform.h"
 #include "../graphics/drawing.h"
-#include "../graphics/sdl/gfx_primitives.h"
+#include "sdl_gfx/gfx_primitives.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <sstream>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend(r), s(s), ox(ox), oy(oy) {
+#ifndef _WIN32
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+#else
+#include <winsock2.h>
+#endif
+
+void SdlPlatform::SdlPlatform::load_config()
+{
+	std::ifstream file(load_path + "settings.ini", std::ios::binary);
+	std::string line;
+
+	while (std::getline(file, line)) {
+		while (!line.empty() && line.back() == '\r' || line.back() == '\n')
+			line.pop_back();
+		int pos = line.find('=');
+		if (pos == -1)
+			continue;
+		ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos+1)));
+	}
+}
+
+std::string SdlPlatform::SdlPlatform::get_config(const std::string &key)
+{
+	auto it = ini_items.find(key);
+	if (it == ini_items.end())
+		return "";
+	return it->second;
+}
+
+SdlPlatform::SdlPlatform(float virtual_w, float virtual_h) {
+	SDL_Init(SDL_INIT_EVERYTHING);
 #ifdef __ANDROID__
 	load_path = std::string(SDL_AndroidGetExternalStoragePath()) + "/";
 #endif
+
+	load_config();
+	bool fullscreen = get_config("fullScreen") == "true";
+	int display = std::stoi(get_config("display"));
+	int width = std::stoi(get_config("width"));
+	int height = std::stoi(get_config("height"));
+	bool borderless = get_config("borderless") == "true";
+	bool rotate = get_config("rotateScreen") == "true";
+
+	for (const auto &entry : ini_items) {
+		std::istringstream key(entry.first);
+		std::string delim1, delim2;
+		std::getline(key, delim1, ':');
+		std::getline(key, delim2, ':');
+		if (delim1 == "socket") {
+			std::istringstream key(entry.second);
+			std::string delim3, delim4, delim5;
+			std::getline(key, delim3, ':');
+			std::getline(key, delim4, ':');
+			std::getline(key, delim5, ':');
+			socket_config.push_back(SocketConfig{delim2, delim3, std::stoi(delim4), delim5 == "s"});
+		}
+	}
+
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+	sdlwindow = SDL_CreateWindow("SdlPlatform", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);
+
+	if (borderless)
+		SDL_SetWindowBordered(sdlwindow, SDL_FALSE);
+	if (fullscreen)
+		SDL_SetWindowFullscreen(sdlwindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+
+	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+
+	int wx, wy;
+	SDL_GetWindowSize(sdlwindow, &wx, &wy);
+	float sx = wx / virtual_w;
+	float sy = wy / virtual_h;
+	s = std::min(sx, sy);
+	if (sx > sy) {
+		ox = (wx - wy * (virtual_w / virtual_h)) * 0.5f;
+		oy = 0.0f;
+	} else {
+		ox = 0.0f;
+		oy = (wy - wx * (virtual_h / virtual_w)) * 0.5f;
+	}
+	if (rotate) {
+		s *= -1.0f;
+		ox += wx - ox * 2.0f;
+		oy += wy - oy * 2.0f;
+	}
+
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+
+	TTF_Init();
+
 	SDL_AudioSpec desired = {};
 	SDL_AudioSpec obtained;
 	desired.freq = 44100;
@@ -29,14 +118,27 @@ SdlPlatform::SdlPlatform(SDL_Renderer *r, float s, float ox, float oy) : sdlrend
 	audio_samplerate = obtained.freq;
 	audio_volume = 50;
 	SDL_PauseAudioDevice(audio_device, 0);
-	TTF_Init();
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+
+#ifdef _WIN32
+	WSADATA wsa;
+	WSAStartup(MAKEWORD(2,2), &wsa);
+#endif
+
 	running = true;
 	present_count = 0;
 }
 
 SdlPlatform::~SdlPlatform() {
+#ifdef _WIN32
+	WSACleanup();
+#endif
+
 	SDL_CloseAudioDevice(audio_device);
+	loaded_fonts.clear();
+	TTF_Quit();
+	SDL_DestroyRenderer(sdlrend);
+	SDL_DestroyWindow(sdlwindow);
+	SDL_Quit();
 }
 
 int64_t SdlPlatform::get_timer() {
@@ -69,7 +171,7 @@ std::string SdlPlatform::read_file(const std::string &path) {
 }
 
 void SdlPlatform::debug_print(const std::string &msg) {
-	printf("debug_print: %s\n", msg.c_str());
+	printf("%s\n", msg.c_str());
 }
 
 PlatformUtil::Promise<void> SdlPlatform::delay(int ms) {
@@ -84,6 +186,144 @@ PlatformUtil::Promise<void> SdlPlatform::on_quit_request() {
 
 PlatformUtil::Promise<void> SdlPlatform::on_quit() {
 	return on_quit_list.create_and_add();
+}
+
+void SdlPlatform::SdlSocket::mark_nonblocking(int fd) {
+	unsigned long one = 1;
+#ifdef _WIN32
+	ioctlsocket(fd, FIONBIO, &one);
+#else
+	ioctl(fd, FIONBIO, &one);
+#endif
+}
+
+void SdlPlatform::SdlSocket::close_socket(int fd) {
+#ifdef _WIN32
+	closesocket(fd);
+#else
+	close(fd);
+#endif
+}
+
+void SdlPlatform::SdlSocket::handle_error() {
+#ifdef _WIN32
+	if (WSAGetLastError() != WSAEWOULDBLOCK)
+		peer_fd = 0;
+#else
+	if (errno != EAGAIN) {
+		peer_fd = 0;
+	}
+#endif
+}
+
+void SdlPlatform::SdlSocket::update() {
+	if (!peer_fd) {
+		if (server && listen_fd) {
+			sockaddr_storage addr;
+			size_t addr_size = sizeof(addr);
+			int ret = accept(listen_fd, (struct sockaddr*)&addr, (socklen_t*)&addr_size);
+			if (ret > 0) {
+				peer_fd = ret;
+				mark_nonblocking(peer_fd);
+			}
+		} else {
+			connect();
+		}
+	}
+
+	while (peer_fd && !tx_buffer.empty()) {
+		ssize_t ret = ::send(peer_fd, tx_buffer.data(), tx_buffer.size(), MSG_NOSIGNAL);
+		if (ret < 0) {
+			handle_error();
+		} else if (ret > 0) {
+			tx_buffer.erase(0, ret);
+		}
+		if (ret <= 0)
+			break;
+	}
+
+	while (peer_fd && rx_buffer.pending_packets() < 8) {
+		std::string buf;
+		buf.resize(4096);
+		ssize_t ret = recv(peer_fd, buf.data(), buf.size(), 0);
+		if (ret < 0) {
+			handle_error();
+		} else if (ret > 0) {
+			buf.resize(ret);
+			rx_buffer.push_data(std::move(buf));
+		}
+		if (ret <= 0)
+			break;
+	}
+	if ((!tx_buffer.empty() || rx_buffer.pending_fulfillers() > 0) && !refresh_promise.is_pending()) {
+		refresh_promise = std::move(platform->delay(10).then(std::bind(&SdlSocket::update, this)));
+	}
+}
+
+void SdlPlatform::SdlSocket::connect() {
+	if (listen_fd)
+		close_socket(listen_fd);
+	if (peer_fd)
+		close_socket(peer_fd);
+
+	if (!port)
+		return;
+
+	if (server) {
+		addrinfo hints, *res;
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_flags = AI_PASSIVE;
+		getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &res);
+
+		listen_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		mark_nonblocking(listen_fd);
+		bind(listen_fd, res->ai_addr, res->ai_addrlen);
+		listen(listen_fd, 5);
+	} else {
+		addrinfo hints, *res;
+		memset(&hints, 0, sizeof hints);
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &res);
+
+		peer_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		mark_nonblocking(peer_fd);
+		::connect(peer_fd, res->ai_addr, res->ai_addrlen);
+	}
+}
+
+void SdlPlatform::SdlSocket::send(const std::string &data) {
+	tx_buffer += data;
+	update();
+}
+
+PlatformUtil::Promise<std::string> SdlPlatform::SdlSocket::receive() {
+	PlatformUtil::Promise<std::string> promise = rx_buffer.create_and_add();
+	update();
+	return std::move(promise);
+}
+
+SdlPlatform::SdlSocket::SdlSocket(const std::string &hostname, bool server, int port) : hostname(hostname), server(server), port(port) {
+	listen_fd = 0;
+	peer_fd = 0;
+	connect();
+}
+
+SdlPlatform::SdlSocket::~SdlSocket() {
+	if (listen_fd)
+		close_socket(listen_fd);
+	if (peer_fd)
+		close_socket(peer_fd);
+}
+
+std::unique_ptr<SdlPlatform::Socket> SdlPlatform::open_socket(const std::string &channel) {
+	for (const SocketConfig &conf : socket_config)
+		if (conf.name == channel)
+			return std::make_unique<SdlSocket>(conf.hostname, conf.server, conf.port);
+	debug_print("unconfigured socket channel \"" + channel + "\"!");
+	return std::make_unique<SdlSocket>("", false, 0);
 }
 
 PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {

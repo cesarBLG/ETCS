@@ -6,17 +6,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include "../component.h"
-#include "../display.h"
+#include "component.h"
+#include "display.h"
 #include <algorithm>
 #include <cmath>
-#include "../flash.h"
-#include "../../sound/sound.h"
-#include "../texture.h"
-#include "../rectangle.h"
-#include "../line.h"
-#include "../circle.h"
-#include "../button.h"
+#include "flash.h"
+#include "../sound/sound.h"
+#include "texture.h"
+#include "rectangle.h"
+#include "line.h"
+#include "circle.h"
+#include "button.h"
 using namespace std;
 
 std::set<Component*> Component::_instances;

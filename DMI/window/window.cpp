@@ -19,7 +19,7 @@ bool isInside(Component *comp, float x, float y)
 }
 void window::event(int evNo, float x, float y)
 {
-	int64_t CurrentTime = (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())).count();
+	int64_t CurrentTime = platform->get_timer();
     bool pressed = evNo == 1;
     std::vector<LayoutElement>& el = getLayoutElements();
     Component *validButtonPressed = nullptr;

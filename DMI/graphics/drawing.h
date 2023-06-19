@@ -15,6 +15,5 @@
 #define LEFT 2
 #define UP 4
 #define DOWN 8
-void init_video();
 void drawing_start();
 #endif

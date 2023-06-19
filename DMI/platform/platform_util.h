@@ -7,9 +7,6 @@
 #pragma once
 
 #include <functional>
-#include <memory>
-#include <map>
-#include <any>
 #include <optional>
 
 namespace PlatformUtil
@@ -43,93 +40,72 @@ namespace PlatformUtil
 	class PromiseFactory;
 
 	template <typename T>
-	class PromiseStorage : private NoCopy
+	class PromisePart
 	{
+		friend class PromiseFactory;
 		friend class Promise<T>;
 		friend class Fulfiller<T>;
 
-		typename CallbackType<T>::type callback;
-		std::optional<T> value;
-
-		void subscribe(const typename CallbackType<T>::type &func) {
-			callback = func;
-			if (value)
-				callback(std::move(*value));
-		}
-
-		void fulfill(T&& val) {
-			value = std::move(val);
-			if (callback)
-				callback(std::move(*value));
-		}
-
-		void fulfill(const T& val) {
-			value = val;
-			if (callback)
-				callback(std::move(*value));
-		}
-	};
-
-	template <>
-	class PromiseStorage<void> : private NoCopy
-	{
-		friend class Promise<void>;
-		friend class Fulfiller<void>;
-
-		typename CallbackType<void>::type callback;
-		bool value = false;
-
-		void subscribe(const typename CallbackType<void>::type &func) {
-			callback = func;
-			if (value)
-				callback();
-		}
-
-		void fulfill() {
-			value = true;
-			if (callback)
-				callback();
-		}
+		Fulfiller<T>* fulfiller;
 	};
 
 	template <typename T>
 	class Fulfiller
 	{
 		friend class PromiseFactory;
+		friend class Promise<T>;
 
-		std::shared_ptr<PromiseStorage<T>> storage;
-		Fulfiller(const std::shared_ptr<PromiseStorage<T>> &ptr) : storage(ptr) {};
+		PromisePart<T>* promise;
+		std::optional<T> value;
+		typename CallbackType<T>::type callback;
 
 	public:
-		Fulfiller() = default;
+		Fulfiller() {
+			promise = nullptr;
+		}
 		Fulfiller(Fulfiller &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			promise = nullptr;
+			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			if (promise)
+				promise->fulfiller = nullptr;
+
+			promise = other.promise;
+			if (promise)
+				promise->fulfiller = this;
+
+			value = std::move(other.value);
+			callback = std::move(other.callback);
+
+			other.promise = nullptr;
+			other.callback = nullptr;
+
 			return *this;
+		}
+		~Fulfiller() {
+			if (promise)
+				promise->fulfiller = nullptr;
 		}
 
 		bool is_pending() const {
-			if (!storage)
-				return false;
-			return !storage->value;
+			return !value;
 		}
 
 		void fulfill(T&& arg) {
-			if (!storage)
-				return;
-			storage->fulfill(std::move(arg));
-			storage = nullptr;
+			value = std::move(arg);
+			if (callback) {
+				callback(std::move(*value));
+				callback = nullptr;
+			}
 		}
 
 		void fulfill(const T& arg) {
-			if (!storage)
-				return;
-			storage->fulfill(arg);
-			storage = nullptr;
+			value = arg;
+			if (callback) {
+				callback(std::move(*value));
+				callback = nullptr;
+			}
 		}
 	};
 
@@ -137,33 +113,52 @@ namespace PlatformUtil
 	class Fulfiller<void>
 	{
 		friend class PromiseFactory;
+		friend class Promise<void>;
 
-		std::shared_ptr<PromiseStorage<void>> storage;
-		Fulfiller(const std::shared_ptr<PromiseStorage<void>> &ptr) : storage(ptr) {};
+		PromisePart<void>* promise;
+		bool value;
+		typename CallbackType<void>::type callback;
 
 	public:
-		Fulfiller() = default;
+		Fulfiller() {
+			promise = nullptr;
+			value = false;
+		}
 		Fulfiller(Fulfiller &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			promise = nullptr;
+			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			if (promise)
+				promise->fulfiller = nullptr;
+
+			promise = other.promise;
+			if (promise)
+				promise->fulfiller = this;
+
+			value = other.value;
+			callback = std::move(other.callback);
+
+			other.promise = nullptr;
+			other.callback = nullptr;
+
 			return *this;
+		}
+		~Fulfiller() {
+			if (promise)
+				promise->fulfiller = nullptr;
 		}
 
 		bool is_pending() const {
-			if (!storage)
-				return false;
-			return !storage->value;
+			return !value;
 		}
 
 		void fulfill() {
-			if (!storage)
-				return;
-			storage->fulfill();
-			storage = nullptr;
+			value = true;
+			if (callback) {
+				callback();
+				callback = nullptr;
+			}
 		}
 	};
 
@@ -171,40 +166,62 @@ namespace PlatformUtil
 	class Promise
 	{
 		friend class PromiseFactory;
+		friend class Fulfiller<T>;
 
-		std::shared_ptr<PromiseStorage<T>> storage;
-		Promise(const std::shared_ptr<PromiseStorage<T>> &ptr) : storage(ptr) {};
+		PromisePart<T> p;
 
 	public:
-		Promise() = default;
+		Promise() {
+			p.fulfiller = nullptr;
+		}
 		Promise(Promise &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			p.fulfiller = nullptr;
+			*this = std::move(other);
 		}
 		Promise& operator=(Promise &&other) {
-			storage = other.storage;
-			other.storage = nullptr;
+			if (p.fulfiller) {
+				p.fulfiller->promise = nullptr;
+				p.fulfiller->callback = nullptr;
+			}
+
+			p.fulfiller = other.p.fulfiller;
+			if (p.fulfiller)
+				p.fulfiller->promise = &p;
+
+			other.p.fulfiller = nullptr;
+
 			return *this;
+		}
+		~Promise() {
+			if (p.fulfiller) {
+				p.fulfiller->promise = nullptr;
+				p.fulfiller->callback = nullptr;
+			}
 		}
 
 		void detach() {
-			storage = nullptr;
+			if (p.fulfiller)
+				p.fulfiller->promise = nullptr;
+			p.fulfiller = nullptr;
 		}
 
 		bool is_pending() const {
-			if (!storage)
+			if (!p.fulfiller)
 				return false;
-			return !storage->value;
-		}
-
-		~Promise() {
-			if (storage)
-				storage->callback = nullptr;
+			return !p.fulfiller->value;
 		}
 
 		Promise<T>& then(const typename CallbackType<T>::type &func) {
-			if (storage && !storage->callback)
-				storage->subscribe(func);
+			if (!p.fulfiller)
+				return *this;
+			if (p.fulfiller->value) {
+				if constexpr (std::is_void<T>::value)
+					func();
+				else
+					func(std::move(*p.fulfiller->value));
+			} else {
+				p.fulfiller->callback = func;
+			}
 			return *this;
 		}
 	};
@@ -216,8 +233,66 @@ namespace PlatformUtil
 	public:
 		template <typename T>
 		static std::pair<Promise<T>, Fulfiller<T>> create() {
-			std::shared_ptr<PromiseStorage<T>> storage = std::make_shared<PromiseStorage<T>>();
-			return std::make_pair(Promise<T>(storage), Fulfiller<T>(storage));
+			Promise<T> promise;
+			Fulfiller<T> fulfiller;
+			promise.p.fulfiller = &fulfiller;
+			fulfiller.promise = &promise.p;
+			return std::make_pair(std::move(promise), std::move(fulfiller));
+		}
+	};
+
+	template <typename T>
+	class FulfillerBufferedQueue
+	{
+		std::vector<Fulfiller<T>> fulfiller_queue;
+		std::vector<T> data_queue;
+
+	public:
+		size_t pending_packets() {
+			return data_queue.size();
+		}
+
+		size_t pending_fulfillers() {
+			return fulfiller_queue.size();
+		}
+
+		void push_data(const T& packet) {
+			if (!fulfiller_queue.empty()) {
+				auto it = fulfiller_queue.begin();
+				Fulfiller<T> f = std::move(*it);
+				fulfiller_queue.erase(it);
+				f.fulfill(packet);
+			} else {
+				data_queue.push_back(packet);
+			}
+		}
+
+		void push_data(T&& packet) {
+			if (!fulfiller_queue.empty()) {
+				auto it = fulfiller_queue.begin();
+				Fulfiller<T> f = std::move(*it);
+				fulfiller_queue.erase(it);
+				f.fulfill(std::move(packet));
+			} else {
+				data_queue.push_back(std::move(packet));
+			}
+		}
+
+		void add(Fulfiller<T> &&f) {
+			if (!data_queue.empty()) {
+				auto it = data_queue.begin();
+				T packet = std::move(*it);
+				data_queue.erase(it);
+				f.fulfill(std::move(packet));
+			} else {
+				fulfiller_queue.push_back(std::move(f));
+			}
+		}
+
+		Promise<T>  create_and_add() {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
+			add(std::move(pair.second));
+			return std::move(pair.first);
 		}
 	};
 

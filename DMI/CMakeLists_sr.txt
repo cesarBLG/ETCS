@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.4.0)
+set(CMAKE_CXX_STANDARD 17)
+project(DMI)
+
+set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp 
+            graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp 
+            speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp 
+            state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp 
+            messages/messages.cpp graphics/flash.cpp 
+            window/window_main.cpp state/time_hour.cpp window/subwindow.cpp window/data_entry.cpp window/data_validation.cpp 
+            window/nav_buttons.cpp window/menu.cpp window/menu_main.cpp window/menu_override.cpp window/menu_radio.cpp 
+            window/menu_spec.cpp window/menu_settings.cpp window/menu_ntc.cpp window/track_ahead_free.cpp 
+            window/driver_id.cpp window/volume.cpp
+            window/input_data.cpp window/fixed_train_data.cpp window/keyboard.cpp 
+            window/train_data.cpp  STM/stm_objects.cpp ../EVC/Packets/STM/message.cpp
+            planning/planning.cpp control/control.cpp state/gps_pos.cpp 
+            language/language.cpp
+            ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
+            Config/config.cpp
+            platform/platform.cpp
+)
+
+add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
+add_compile_options(-fno-exceptions)
+add_link_options(-mexec-model=reactor)
+add_link_options(-Wl,--export=init)
+add_definitions(-DNO_EXCEPTIONS)
+add_definitions(-DWASM_SRAPI)
+
+target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG NOMINMAX)
+
+target_include_directories(dmi PRIVATE ../include)

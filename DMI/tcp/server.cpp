@@ -7,18 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include <string>
-#include <cstdio>
-#include <chrono>
 #include <set>
-#include <cmath>
-#ifndef _WIN32
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/ioctl.h>
-#else
-#include <winsock2.h>
-#include <windows.h>
-#endif
 #include "server.h"
 #include "../monitor.h"
 #include "../sound/sound.h"
@@ -33,12 +22,7 @@
 #include "../language/language.h"
 #include "../speed/gauge.h"
 #include "../Config/config.h"
-int server;
-int active_channel;
-#define BUFF_SIZE 1024
-#define PORT 5010
-std::string recvbuf;
-std::string buffer;
+
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {
@@ -303,28 +287,14 @@ void parseData(std::string str)
         updateTc(syms);
     }
 }
-void listenChannels();
-void updateDrawCommands()
+std::unique_ptr<BasePlatform::Socket> evc_socket;
+std::string buffer;
+void data_received(const std::string &data)
 {
-    listenChannels();
-    if (active_channel != -1) {
-        int result;
-        recvbuf.resize(BUFF_SIZE);
-        while ((result = recv(active_channel, recvbuf.data(), BUFF_SIZE, 0)) > 0) {
-            recvbuf.resize(result);
-            buffer += recvbuf;
-        }
-        if (result < 0) {
-#ifdef _WIN32
-            if (WSAGetLastError() != WSAEWOULDBLOCK)
-                active_channel = -1;
-#else
-            if (errno != EAGAIN)
-                active_channel = -1;
-#endif
-        }
-    }
-
+    if (buffer.empty())
+        buffer = std::move(data);
+    else
+        buffer += data;
     int end;
     while ((end=buffer.find_first_of(';'))!=std::string::npos) {
         int start = buffer.find_first_not_of("\n\r ;");
@@ -332,65 +302,15 @@ void updateDrawCommands()
         parseData(command);
         buffer = buffer.substr(end+1);
     }
+    evc_socket->receive().then(data_received).detach();
 }
 void write_command(std::string command, std::string value)
 {
-    if (active_channel != -1) {
-        std::string tosend = command+"("+value+");\n";
-        if (send(active_channel, tosend.c_str(), tosend.size(), 0) < 0)
-            active_channel = -1;
-    }
-}
-void listenChannels()
-{
-    if (active_channel == -1)
-    {
-        struct sockaddr_in addr;
-        int c = sizeof(struct sockaddr_in);
-        int cl = accept(server, (struct sockaddr *)&addr, 
-#ifdef _WIN32
-        (int *)
-#else
-        (socklen_t *)
-#endif
-        &c);
-        if (cl > 0) {
-            unsigned long one = 1;
-#ifdef _WIN32
-            ioctlsocket(cl, FIONBIO, &one);
-#else
-            ioctl(cl, FIONBIO, &one);
-#endif
-            active_channel = cl;
-        }
-    }
+    std::string tosend = command+"("+value+");\n";
+    evc_socket->send(tosend);
 }
 void startSocket()
 {
-#ifdef _WIN32
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2,2), &wsa);
-#endif
-    server = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in serv;
-    serv.sin_family = AF_INET;
-    serv.sin_port = htons(PORT);
-    serv.sin_addr.s_addr = INADDR_ANY;
-    if (server == -1) {
-        perror("socket");
-        return;
-    }
-    if (0 != ::bind(server, (struct sockaddr *)&(serv), sizeof(serv))) {
-        perror("bind");
-        return;
-    }
-    unsigned long one = 1;
-#ifdef _WIN32
-    ioctlsocket(server, FIONBIO, &one);
-#else
-    ioctl(server, FIONBIO, &one);
-#endif
-    if (listen(server, 3) < 0)
-        perror("listen");
-    active_channel = -1;
+    evc_socket = platform->open_socket("evc_dmi");
+    evc_socket->receive().then(data_received).detach();
 }

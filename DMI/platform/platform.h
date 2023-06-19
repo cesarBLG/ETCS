@@ -40,6 +40,7 @@ public:
 	virtual int64_t get_timestamp() = 0;
 	virtual DateTime get_local_time() = 0;
 
+	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) = 0;
 	virtual std::string read_file(const std::string &path) = 0;
 	virtual void debug_print(const std::string &msg) = 0;
 
@@ -49,8 +50,6 @@ public:
 
 	virtual void event_loop() = 0;
 	virtual void quit() = 0;
-
-	//virtual std::unique_ptr<Socket> open_socket(const std::string &channel) = 0;
 };
 
 class UiPlatform : public BasePlatform

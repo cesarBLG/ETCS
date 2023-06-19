@@ -39,19 +39,30 @@ public:
 		virtual void detach() override {};
 	};
 
+	class NullSocket : public Socket
+	{
+	public:
+		NullSocket() = default;
+		virtual void send(const std::string &data) override {};
+		virtual PlatformUtil::Promise<std::string> receive() override { return {}; };
+	};
+
 	NullPlatform() = default;
 
 	virtual int64_t get_timer() override { return 0; }
 	virtual int64_t get_timestamp() override { return 0; }
 	virtual DateTime get_local_time() override { return {}; }
 
+	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) override { return std::make_unique<NullSocket>(); };
 	virtual std::string read_file(const std::string &path) override { return ""; };
 	virtual void debug_print(const std::string &msg) override {};
 
 	virtual PlatformUtil::Promise<void> delay(int ms) override { return {}; }
-	virtual PlatformUtil::Promise<void> on_close() override { return {}; }
+	virtual PlatformUtil::Promise<void> on_quit_request() override { return {}; }
+	virtual PlatformUtil::Promise<void> on_quit() override { return {}; }
 
 	virtual void event_loop() override {};
+	virtual void quit() override {};
 
 	virtual void set_color(Color c) override {};
 	virtual void draw_line(float x1, float y1, float x2, float y2) override {};
@@ -73,4 +84,6 @@ public:
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override { return std::make_unique<NullSoundSource>(); };
 
 	virtual void set_brightness(int br) override {};
+
+	virtual PlatformUtil::Promise<InputEvent> on_input_event() override { return {}; };
 };

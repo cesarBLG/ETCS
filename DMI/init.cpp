@@ -6,12 +6,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <thread>
 #include "monitor.h"
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
 #include "platform/platform.h"
+#include "platform/sdl_platform.h"
+#include "platform/null_platform.h"
 #ifdef __ANDROID__
 #elif defined(_WIN32)
 #include <windows.h>
@@ -148,9 +149,15 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
         platform->quit();
 }
 #endif
-#include <fstream>
-#include "graphics/text_button.h"
+
+void startWindows();
+void initialize_stm_windows();
+#include <sstream>
+#ifndef WASM_SRAPI
 int main(int argc, char** argv)
+#else
+extern "C" int init()
+#endif
 {
 #ifndef __ANDROID__
 #ifdef __unix__
@@ -162,16 +169,24 @@ int main(int argc, char** argv)
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
+
+#ifdef WITH_SDL
+    platform = std::make_unique<SdlPlatform>(640.0, 480.0f);
+#else
+    platform = std::make_unique<NullPlatform>();
+#endif
+    platform->on_quit_request().then([](){
+        platform->quit();
+    }).detach();
+
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
     startSocket();
-    init_video();
-    void startWindows();
     startWindows();
-    void initialize_stm_windows();
     initialize_stm_windows();
     drawing_start();
+
     platform->event_loop();
     return 0;
 }

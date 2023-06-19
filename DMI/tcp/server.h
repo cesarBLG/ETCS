@@ -11,5 +11,4 @@
 #include <string>
 void startSocket();
 void write_command(std::string command, std::string value);
-void updateDrawCommands();
 #endif
