@@ -17,15 +17,20 @@ void load_config(std::string serie)
 {
     etcsDialMaxSpeed = 400;
     stm_layout_file = "stm_windows.json";
-    json j(platform->read_file("config.json"));
-    if (j.contains(serie)) {
-        json &cfg = j[serie];
-        if (cfg.contains("SpeedDial")) {
-            etcsDialMaxSpeed = cfg["SpeedDial"];
+    std::string contents = platform->read_file("config.json");
+    if (!contents.empty()) {
+        json j = json::parse(contents);
+        if (j.contains(serie)) {
+            json &cfg = j[serie];
+            if (cfg.contains("SpeedDial")) {
+                etcsDialMaxSpeed = cfg["SpeedDial"];
+            }
+            if (cfg.contains("STMLayout")) {
+                stm_layout_file = cfg["STMLayout"];
+            }
         }
-        if (cfg.contains("STMLayout")) {
-            stm_layout_file = cfg["STMLayout"];
-        }
+    } else {
+        platform->debug_print("failed to load config.json");
     }
     maxSpeed = etcsDialMaxSpeed;
 }

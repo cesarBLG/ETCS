@@ -64,14 +64,19 @@ void setup_areas()
 }
 ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
-    json j(platform->read_file(stm_layout_file));
-    for (json &stm : j["STM"])
-    {
-        if (stm["nid_stm"].get<int>() == nid_stm)
+    std::string contents = platform->read_file(stm_layout_file);
+    if (!contents.empty()) {
+        json j = json::parse(contents);
+        for (json &stm : j["STM"])
         {
-            customized = new customized_dmi(stm);
-            break;
+            if (stm["nid_stm"].get<int>() == nid_stm)
+            {
+                customized = new customized_dmi(stm);
+                break;
+            }
         }
+    } else {
+        platform->debug_print("failed to load stm layout");
     }
     constructfun = [this](window *w) {construct_main(w, customized != nullptr);};
 }
