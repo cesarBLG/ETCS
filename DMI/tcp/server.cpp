@@ -213,10 +213,10 @@ void parseData(std::string str)
     }
     else if (command == "timeOffset")
     {
-        TimeOffset::offset = atoi(value.c_str());
+        TimeOffset::offset = stoi(value);
     }
     else if (command == "ackButton") {
-        Component::externalAckButton(atoi(value.c_str()));
+        Component::externalAckButton(stoi(value));
     }
     if (command != "json") return;
     json j = json::parse(value);

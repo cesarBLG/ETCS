@@ -13,6 +13,7 @@
 #include "platform/platform.h"
 #include "platform/sdl_platform.h"
 #include "platform/null_platform.h"
+#include "platform/simrail_platform.h"
 #ifdef __ANDROID__
 #elif defined(_WIN32)
 #include <windows.h>
@@ -152,7 +153,6 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 
 void startWindows();
 void initialize_stm_windows();
-#include <sstream>
 #ifndef WASM_SRAPI
 int main(int argc, char** argv)
 #else
@@ -173,7 +173,7 @@ extern "C" int init()
 #ifdef WITH_SDL
     platform = std::make_unique<SdlPlatform>(640.0, 480.0f);
 #else
-    platform = std::make_unique<NullPlatform>();
+    platform = std::make_unique<SimrailPlatform>(640.0, 480.0f);
 #endif
     platform->on_quit_request().then([](){
         platform->quit();

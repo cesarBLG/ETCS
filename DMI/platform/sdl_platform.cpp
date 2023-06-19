@@ -5,8 +5,8 @@
  */
 
 #include "sdl_platform.h"
-#include "../graphics/drawing.h"
 #include "sdl_gfx/gfx_primitives.h"
+#include "../graphics/drawing.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>

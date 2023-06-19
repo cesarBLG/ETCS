@@ -17,16 +17,20 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             language/language.cpp
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
-            platform/platform.cpp
+            platform/platform.cpp platform/simrail_platform.cpp
 )
 
 add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
 add_compile_options(-fno-exceptions)
 add_link_options(-mexec-model=reactor)
 add_link_options(-Wl,--export=init)
+add_link_options(-Wl,--export=alloc_mem)
+add_link_options(-Wl,--export=free_mem)
+add_link_options(-Wl,--export=callback_void)
+add_link_options(-Wl,--export=callback_inputevent)
 add_definitions(-DNO_EXCEPTIONS)
 add_definitions(-DWASM_SRAPI)
 
-target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG NOMINMAX)
-
+add_executable(dmi ${SOURCES})
+target_compile_definitions(dmi PUBLIC NOMINMAX)
 target_include_directories(dmi PRIVATE ../include)
