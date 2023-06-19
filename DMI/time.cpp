@@ -8,7 +8,7 @@
  */
 #include "time.h"
 #include "time_etcs.h"
-#include "platform/platform.h"
+#include "platform.h"
 
 int TimeOffset::offset;
 

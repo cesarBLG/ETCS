@@ -10,10 +10,10 @@
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
-#include "platform/platform.h"
-#include "platform/sdl_platform.h"
-#include "platform/null_platform.h"
-#include "platform/simrail_platform.h"
+#include "platform.h"
+#include "sdl_platform.h"
+#include "null_platform.h"
+#include "simrail_platform.h"
 #ifdef __ANDROID__
 #elif defined(_WIN32)
 #include <windows.h>

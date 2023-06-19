@@ -8,7 +8,7 @@
  */
 #ifndef _SOUND_H
 #define _SOUND_H
-#include "../platform/platform.h"
+#include "platform.h"
 #include "../../EVC/Packets/STM/46.h"
 class StmSound
 {

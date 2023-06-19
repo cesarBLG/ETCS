@@ -11,7 +11,7 @@
 #include "graphic.h"
 #include <functional>
 #include <memory>
-#include "../platform/platform.h"
+#include "platform.h"
 
 class texture : public graphic
 {

@@ -6,7 +6,6 @@
 
 #include "sdl_platform.h"
 #include "sdl_gfx/gfx_primitives.h"
-#include "../graphics/drawing.h"
 #include <algorithm>
 #include <chrono>
 #include <fstream>
@@ -538,7 +537,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 
 	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
-	TTF_SetFontWrappedAlign(font.get(), align == CENTER ? TTF_WRAPPED_ALIGN_CENTER : (align == RIGHT ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
+	TTF_SetFontWrappedAlign(font.get(), align == 0 ? TTF_WRAPPED_ALIGN_CENTER : (align == 1 ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
 
 	//if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
 	SDL_Color color = { c.R, c.G, c.B };

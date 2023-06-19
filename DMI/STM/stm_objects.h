@@ -34,15 +34,15 @@ struct stm_monitoring_data
     stm_monitoring_data() = default;
     stm_monitoring_data(const STMSupervisionInformation &info)
     {
-        needle_color = info.M_COLOUR_SP.get_value();
+        needle_color = Color::from_etcs(info.M_COLOUR_SP.get_value());
         Vperm_display = info.Q_DISPLAY_PS.rawdata;
-        Vperm_color = info.M_COLOUR_PS.get_value();
+        Vperm_color = Color::from_etcs(info.M_COLOUR_PS.get_value());
         Vtarget_display = info.Q_DISPLAY_TS.rawdata;
-        Vtarget_color = info.M_COLOUR_TS.get_value();
+        Vtarget_color = Color::from_etcs(info.M_COLOUR_TS.get_value());
         Vrelease_display = info.Q_DISPLAY_RS.rawdata;
-        Vrelease_color = info.M_COLOUR_RS.get_value();
+        Vrelease_color = Color::from_etcs(info.M_COLOUR_RS.get_value());
         Vsbi_display = info.Q_DISPLAY_IS.rawdata;
-        Vsbi_color = info.M_COLOUR_IS.get_value();
+        Vsbi_color = Color::from_etcs(info.M_COLOUR_IS.get_value());
         Dtarget_display = info.Q_DISPLAY_TD.rawdata;
     }
 };

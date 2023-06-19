@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "flash.h"
-#include "../platform/platform.h"
+#include "platform.h"
 
 int flash_state = 0;
 

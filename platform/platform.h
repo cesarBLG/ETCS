@@ -10,7 +10,6 @@
 #include <memory>
 #include <vector>
 #include "platform_util.h"
-#include "../graphics/color.h"
 
 class BasePlatform : private PlatformUtil::NoCopy
 {
@@ -93,6 +92,10 @@ public:
 		};
 		Action action;
 		float x, y;
+	};
+
+	struct Color {
+		unsigned char R, G, B;
 	};
 
 	virtual void set_color(Color c) = 0;

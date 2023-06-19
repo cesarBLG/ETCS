@@ -15,7 +15,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             language/language.cpp
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
-            platform/platform.cpp
+            ../platform/platform.cpp
 )
 
 if(WIN32)
@@ -23,7 +23,7 @@ if(WIN32)
 endif()
 
 if (WITH_SDL)
-    list(APPEND SOURCES platform/sdl_gfx/gfx_primitives.cpp  platform/sdl_platform.cpp)
+    list(APPEND SOURCES ../platform/sdl_gfx/gfx_primitives.cpp  ../platform/sdl_platform.cpp)
     if (NOT ETCS_VENDORED)
         find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)       
         find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
@@ -54,6 +54,7 @@ if(SIMRAIL)
 endif()
 
 target_include_directories(dmi PRIVATE ../include)
+target_include_directories(dmi PRIVATE ../platform)
 
 if(WIN32)
     target_link_libraries(dmi PRIVATE imagehlp ws2_32 psapi)

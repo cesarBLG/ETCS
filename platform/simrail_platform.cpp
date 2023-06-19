@@ -159,7 +159,7 @@ std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_text_image(const s
 	return nullptr;
 }
 
-std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
+std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_wrapped_text_image(const std::string &text, const Font &base, TextAlign align, Color c) {
 	return nullptr;
 }
 

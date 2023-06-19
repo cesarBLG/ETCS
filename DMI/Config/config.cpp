@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "config.h"
-#include "../platform/platform.h"
+#include "platform.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 extern int maxSpeed;
