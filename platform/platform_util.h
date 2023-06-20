@@ -58,13 +58,16 @@ namespace PlatformUtil
 		PromisePart<T>* promise;
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
+		bool allocated;
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
+			allocated = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
+			allocated = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -84,12 +87,18 @@ namespace PlatformUtil
 			return *this;
 		}
 		~Fulfiller() {
-			if (promise)
-				promise->fulfiller = nullptr;
+			if (promise) {
+				if (value)
+					(new Fulfiller<T>(std::move(*this)))->allocated = true;
+				else
+					promise->fulfiller = nullptr;
+			}
 		}
 
 		bool is_pending() const {
-			return !value;
+			if (value)
+				return false;
+			return callback != nullptr || promise != nullptr;
 		}
 
 		void fulfill(T&& arg) {
@@ -118,14 +127,17 @@ namespace PlatformUtil
 		PromisePart<void>* promise;
 		bool value;
 		typename CallbackType<void>::type callback;
+		bool allocated;
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
 			value = false;
+			allocated = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
+			allocated = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -145,12 +157,18 @@ namespace PlatformUtil
 			return *this;
 		}
 		~Fulfiller() {
-			if (promise)
-				promise->fulfiller = nullptr;
+			if (promise) {
+				if (value)
+					(new Fulfiller<void>(std::move(*this)))->allocated = true;
+				else
+					promise->fulfiller = nullptr;
+			}
 		}
 
 		bool is_pending() const {
-			return !value;
+			if (value)
+				return false;
+			return callback != nullptr || promise != nullptr;
 		}
 
 		void fulfill() {
@@ -193,15 +211,17 @@ namespace PlatformUtil
 			return *this;
 		}
 		~Promise() {
-			if (p.fulfiller) {
-				p.fulfiller->promise = nullptr;
+			if (p.fulfiller)
 				p.fulfiller->callback = nullptr;
-			}
+			detach();
 		}
 
 		void detach() {
-			if (p.fulfiller)
+			if (p.fulfiller) {
 				p.fulfiller->promise = nullptr;
+				if (p.fulfiller->allocated)
+					delete p.fulfiller;
+			}
 			p.fulfiller = nullptr;
 		}
 
@@ -302,6 +322,10 @@ namespace PlatformUtil
 		std::vector<Fulfiller<T>> list;
 
 	public:
+		size_t pending() {
+			return list.size();
+		}
+
 		void add(Fulfiller<T> &&f) {
 			list.push_back(std::move(f));
 		}
@@ -344,12 +368,12 @@ namespace PlatformUtil
 		std::vector<Fulfiller<void>> list;
 
 	public:
-		void add(Fulfiller<void> &&f) {
-			list.push_back(std::move(f));
-		}
-
 		size_t pending() {
 			return list.size();
+		}
+
+		void add(Fulfiller<void> &&f) {
+			list.push_back(std::move(f));
 		}
 
 		void fulfill_one() {
