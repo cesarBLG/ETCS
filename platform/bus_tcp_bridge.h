@@ -25,6 +25,7 @@ private:
         std::string tcp_rx_buffer;
 
         std::optional<uint32_t> bus_tid;
+        bool newline_framing;
 
         void tcp_rx(std::string &&data);
         void bus_rx(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
@@ -32,7 +33,7 @@ private:
         bool alive;
 
     public:
-        BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid);
+        BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid, bool nl);
         bool is_alive() const;
     };
 
@@ -42,13 +43,14 @@ private:
     BusSocketImpl& bus_impl;
     uint32_t rx_tid;
     std::optional<uint32_t> tx_tid;
+    bool newline_framing;
 
 	TcpListener listener;
     PlatformUtil::Promise<TcpSocket> accept_promise;
     std::vector<std::unique_ptr<BridgedTcpSocket>> clients;
 
 public:
-    BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b);
+    BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b);
 };
 
 class BusTcpBridgeManager : private PlatformUtil::NoCopy {

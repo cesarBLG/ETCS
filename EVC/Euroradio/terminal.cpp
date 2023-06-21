@@ -15,19 +15,26 @@ mobile_terminal mobile_terminals[2];
 void mobile_terminal::data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data) {
     rx_promise = std::move(socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1)));
 
-    std::string buffer = std::move(data.second);
-    if (buffer.size() < 3)
-        return;
+    if (rx_buffer.empty())
+        rx_buffer = std::move(data.second);
+    else
+        rx_buffer += data.second;
 
-    int size = (buffer[1]<<2)|(buffer[2]>>6);
-    if (buffer.size() < size)
-        return;
+    while (true) {
+        if (rx_buffer.size() < 3)
+            return;
 
-    std::vector<unsigned char> pack;
-    pack.insert(pack.end(), buffer.begin(), buffer.end());
+        int size = (rx_buffer[1]<<2)|(rx_buffer[2]>>6);
+        if (rx_buffer.size() < size)
+            return;
 
-    bit_manipulator r(std::move(pack));
-    rx_list.fulfill_one(euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version));
+        std::vector<unsigned char> pack;
+        pack.insert(pack.end(), rx_buffer.begin(), rx_buffer.begin() + size);
+        rx_buffer.erase(0, size);
+
+        bit_manipulator r(std::move(pack));
+        rx_list.fulfill_one(euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version));
+    }
 }
 
 void mobile_terminal::send(std::shared_ptr<euroradio_message_traintotrack> msg) {
@@ -63,6 +70,7 @@ bool mobile_terminal::setup(communication_session *session)
 void mobile_terminal::release()
 {
     rx_promise = {};
+    rx_buffer.clear();
     socket = nullptr;
 
     active_session = nullptr;

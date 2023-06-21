@@ -43,6 +43,7 @@ enum struct safe_radio_status
 class mobile_terminal
 {
     std::unique_ptr<BasePlatform::BusSocket> socket;
+    std::string rx_buffer;
 
     PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::ClientId, std::string>> rx_promise;
     PlatformUtil::FulfillerList<std::shared_ptr<euroradio_message>> rx_list;

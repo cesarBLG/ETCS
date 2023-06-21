@@ -27,18 +27,26 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
     else
         tcp_rx_buffer += data;
 
-    size_t it;
-    while ((it = tcp_rx_buffer.find_first_of("\r\n")) != -1) {
-        if (it != 0) {
-            if (bus_tid)
-                bus_socket->broadcast(*bus_tid, tcp_rx_buffer.substr(0, it));
-            else
-                bus_socket->broadcast(tcp_rx_buffer.substr(0, it));
+    if (newline_framing) {
+        size_t it;
+        while ((it = tcp_rx_buffer.find_first_of("\r\n")) != -1) {
+            if (it != 0) {
+                if (bus_tid)
+                    bus_socket->broadcast(*bus_tid, tcp_rx_buffer.substr(0, it));
+                else
+                    bus_socket->broadcast(tcp_rx_buffer.substr(0, it));
+            }
+            tcp_rx_buffer.erase(0, it);
+            size_t i = 0;
+            while (i < tcp_rx_buffer.size() && (tcp_rx_buffer[i] == '\r' || tcp_rx_buffer[i] == '\n'))
+                tcp_rx_buffer.erase(0, 1);
         }
-        tcp_rx_buffer.erase(0, it);
-        size_t i = 0;
-        while (i < tcp_rx_buffer.size() && (tcp_rx_buffer[i] == '\r' || tcp_rx_buffer[i] == '\n'))
-            tcp_rx_buffer.erase(0, 1);
+    } else {
+        if (bus_tid)
+            bus_socket->broadcast(*bus_tid, tcp_rx_buffer);
+        else
+            bus_socket->broadcast(tcp_rx_buffer);
+        tcp_rx_buffer.clear();
     }
 }
 
@@ -48,11 +56,14 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::C
         return;
 
     bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
-    tcp_socket.send(data.second + "\r\n");
+    if (newline_framing)
+        tcp_socket.send(data.second + "\r\n");
+    else
+        tcp_socket.send(data.second);
 }
 
-BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid) :
-    bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), alive(true)
+BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid, bool nl) :
+    bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), newline_framing(nl), alive(true)
 {
     tcp_rx_promise = std::move(tcp_socket.receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
     bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
@@ -71,11 +82,11 @@ void BusTcpBridge::on_new_client(TcpSocket &&sock)
         return;
 
     clients.erase(std::remove_if(clients.begin(), clients.end(), [](const auto &c){ return !c->is_alive(); }), clients.end());
-    clients.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), tx_tid));
+    clients.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), tx_tid, newline_framing));
 }
 
-BusTcpBridge::BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b) :
-    bus(bus), listener(hostname, port, fd), rx_tid(rx_tid), tx_tid(tx_tid), bus_impl(b)
+BusTcpBridge::BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b) :
+    bus(bus), listener(hostname, port, fd), rx_tid(rx_tid), tx_tid(tx_tid), newline_framing(nl), bus_impl(b)
 {
     accept_promise = std::move(listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1)));
 }
@@ -99,16 +110,18 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string &load_path, FdPoller 
         std::istringstream key1(entry.first);
         std::istringstream key2(entry.second);
         std::string tcphost, tcpport;
-        std::string busname, rx_tid, tx_tid;
+        std::string busname, rx_tid, tx_tid, nl;
         std::getline(key1, tcphost, ':');
         std::getline(key1, tcpport, ':');
         std::getline(key2, busname, ':');
         std::getline(key2, rx_tid, ':');
         std::getline(key2, tx_tid, ':');
+        std::getline(key2, nl, ':');
         uint32_t rxt = tx_tid.size() >= 4 ? BasePlatform::BusSocket::ClientId::fourcc(rx_tid.data()) : 0;
         std::optional<uint32_t> txt;
         if (tx_tid.size() >= 4)
             txt = BasePlatform::BusSocket::ClientId::fourcc(tx_tid.data());
-        bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, tcphost, std::stoi(tcpport), fd, impl));
+        bool newline_framing = (!nl.empty() && nl[0] == 'n');
+        bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, newline_framing, tcphost, std::stoi(tcpport), fd, impl));
     }
 }
