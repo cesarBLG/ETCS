@@ -188,6 +188,11 @@ namespace PlatformUtil
 
 		PromisePart<T> p;
 
+		void cancel() {
+			if (p.fulfiller)
+				p.fulfiller->callback = nullptr;
+		}
+
 	public:
 		Promise() {
 			p.fulfiller = nullptr;
@@ -197,10 +202,8 @@ namespace PlatformUtil
 			*this = std::move(other);
 		}
 		Promise& operator=(Promise &&other) {
-			if (p.fulfiller) {
-				p.fulfiller->promise = nullptr;
-				p.fulfiller->callback = nullptr;
-			}
+			cancel();
+			detach();
 
 			p.fulfiller = other.p.fulfiller;
 			if (p.fulfiller)
@@ -211,8 +214,7 @@ namespace PlatformUtil
 			return *this;
 		}
 		~Promise() {
-			if (p.fulfiller)
-				p.fulfiller->callback = nullptr;
+			cancel();
 			detach();
 		}
 
