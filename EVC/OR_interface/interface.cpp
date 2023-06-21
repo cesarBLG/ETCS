@@ -308,7 +308,7 @@ std::unique_ptr<BasePlatform::BusSocket> sim_socket;
 void sim_write_line(const std::string &str)
 {
     if (sim_socket)
-        sim_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("SIM_"), str);
+        sim_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("SIM"), str);
 }
 
 void sim_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
@@ -321,12 +321,12 @@ void sim_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string>
 
 void start_or_iface()
 {
-    sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::ClientId::fourcc("EVC_"));
+    sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::ClientId::fourcc("EVC"));
     if (!sim_socket)
         return;
 
     sim_socket->receive().then(sim_data_received).detach();
-    wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::ClientId::fourcc("SIM_"));
+    wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::ClientId::fourcc("SIM"));
 
     sim_write_line("register(time_offset)");
     sim_write_line("register(ackButton)");

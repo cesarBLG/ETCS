@@ -22,8 +22,8 @@ public:
 		struct ClientId {
 			uint32_t tid;
 			uint32_t uid;
-			static constexpr uint32_t fourcc(char const p[5]) {
-			    return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+			static constexpr uint32_t fourcc(std::string_view p) {
+			    return ((p.size() >= 1 ? p[0] : '_') << 24) | ((p.size() >= 2 ? p[1] : '_') << 16) | ((p.size() >= 3 ? p[2] : '_') << 8) | (p.size() >= 4 ? p[3] : '_');
 			}
 		};
 		virtual ~BusSocket() = default;

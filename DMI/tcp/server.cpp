@@ -297,11 +297,11 @@ void write_command(std::string command, std::string value)
 {
     std::string tosend = command+"("+value+")";
     if (evc_socket)
-        evc_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("EVC_"), tosend);
+        evc_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("EVC"), tosend);
 }
 void startSocket()
 {
-    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("DMI_"));
+    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("DMI"));
     if (evc_socket)
         evc_socket->receive().then(data_received).detach();
 }

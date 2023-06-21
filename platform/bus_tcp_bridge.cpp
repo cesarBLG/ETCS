@@ -117,10 +117,10 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string &load_path, FdPoller 
         std::getline(key2, rx_tid, ':');
         std::getline(key2, tx_tid, ':');
         std::getline(key2, nl, ':');
-        uint32_t rxt = tx_tid.size() >= 4 ? BasePlatform::BusSocket::ClientId::fourcc(rx_tid.data()) : 0;
+        uint32_t rxt = BasePlatform::BusSocket::ClientId::fourcc(rx_tid);
         std::optional<uint32_t> txt;
-        if (tx_tid.size() >= 4)
-            txt = BasePlatform::BusSocket::ClientId::fourcc(tx_tid.data());
+        if (tx_tid != "*")
+            txt = BasePlatform::BusSocket::ClientId::fourcc(tx_tid);
         bool newline_framing = (!nl.empty() && nl[0] == 'n');
         bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, newline_framing, tcphost, std::stoi(tcpport), fd, impl));
     }
