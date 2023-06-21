@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <vector>
 #include <typeinfo>
-#include <iostream>
 #include <string>
 #include <cstring>
 template<typename T>

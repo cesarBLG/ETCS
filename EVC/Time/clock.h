@@ -7,5 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #pragma once
-#include <chrono>
+#include "platform.h"
 int64_t get_milliseconds();
+BasePlatform::DateTime offset_time();

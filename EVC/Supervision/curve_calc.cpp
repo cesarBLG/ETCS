@@ -6,8 +6,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <chrono>
-#include <iostream>
 #include <cmath>
 #include "conversion_model.h"
 distance distance_curve(const acceleration &a, const distance &dref, double vref, double vel)

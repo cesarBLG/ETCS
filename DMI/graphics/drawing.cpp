@@ -6,13 +6,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <ctime>
-#include <chrono>
-#include <cstdio>
 #include <vector>
 #include <algorithm>
 #include <deque>
-#include <fstream>
 #include "drawing.h"
 #include "display.h"
 #include "button.h"

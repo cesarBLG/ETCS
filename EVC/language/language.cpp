@@ -11,7 +11,6 @@
 #include "../DMI/dmi.h"
 #include "../STM/stm.h"
 #include "../Packets/STM/30.h"
-#include <iostream>
 #include "../TrainSubsystems/cold_movement.h"
 moFileLib::moFileReader reader;
 std::string language = "en";
@@ -30,7 +29,7 @@ void set_language(std::string lang)
     if (lang == "en" || lang == "") {
         language = "en";
     } else if (reader.ParseData(platform->read_file("locales/evc/" + lang + ".mo")) != moFileLib::moFileReader::EC_SUCCESS) {
-        std::cout<<reader.GetErrorDescription()<<std::endl;
+        platform->debug_print(reader.GetErrorDescription());
         language = "en";
     } else {
         language = lang;

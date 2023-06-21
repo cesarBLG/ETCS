@@ -12,8 +12,6 @@
 #include "DMI/text_message.h"
 #include "DMI/windows.h"
 #include "DMI/track_ahead_free.h"
-#include <iostream>
-#include <chrono>
 #include "Packets/messages.h"
 #include "Packets/logging.h"
 #include "Supervision/speed_profile.h"

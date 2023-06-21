@@ -8,16 +8,12 @@
  */
 
 #include <cstdlib>
-#include <cstdio>
 #include <string>
-#include <sstream>
 #include <list>
 #include <algorithm>
 #include <map>
 #include "../Supervision/supervision.h"
 #include "../Supervision/targets.h"
-#include <iostream>
-#include <chrono>
 #include "../Supervision/train_data.h"
 #include "../Supervision/speed_profile.h"
 #include "../Euroradio/session.h"

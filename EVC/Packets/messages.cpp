@@ -35,7 +35,6 @@
 #include "../Version/version.h"
 #include "../Version/translate.h"
 #include <algorithm>
-#include <iostream>
 static int reading_nid_bg=-1;
 static int reading_nid_c=-1;
 static std::vector<eurobalise_telegram> telegrams;
@@ -133,14 +132,14 @@ void check_linking(bool group_passed)
         if (c1 || c2 || c3) {
             // TODO: If check_linking() were not called in other modes, what would happen to link_expected when entering FS,OS,LS?
             if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
-                std::cout<<"Balise read error: check_linking() c1="<<c1<<" c2="<<c2<<" c3="<<c3<<std::endl;
+                platform->debug_print("Balise read error: check_linking() c1=" + std::to_string(c1) + " c2=" + std::to_string(c2) + " c3=" + std::to_string(c3));
             
                 if (c2 || c3)
                     rams_lost_count++;
                 if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
                     trigger_reaction(1);
                     rams_lost_count = 0;
-                    std::cout<<"RAMS supervision"<<std::endl;
+                    platform->debug_print("RAMS supervision");
                 } else {
                     trigger_reaction(link_expected->reaction);
                 }
@@ -179,7 +178,7 @@ void balise_group_passed()
             link_data &l = *it;
             if (l.nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
                 if (dir != -1 && dir != l.reverse_dir) {
-                    std::cout<<"Balise error: group passed in wrong direction. Expected "<<l.reverse_dir<<", passed "<<dir<<std::endl;
+                    platform->debug_print("Balise error: group passed in wrong direction. Expected " + std::to_string(l.reverse_dir) + ", passed " + std::to_string(dir));
                     trigger_condition(66);
                 }
                 rams_reposition_mitigation = {};
@@ -499,7 +498,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     bool accepted = accepted1 && accepted2;
     if (!accepted) {
         if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
-            std::cout<<"Balise error. Linked BG not accepted. accepted1="<<accepted1<<", accepted2="<<accepted2<<std::endl;
+            platform->debug_print("Balise error. Linked BG not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2));
             trigger_reaction(balise_link.reaction);
         } else {
             if (accepted2) {
@@ -516,7 +515,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
                     }
                 }
             }
-            std::cout<<"Balise error. Telegram not accepted. accepted1="<<accepted1<<", accepted2="<<accepted2<<std::endl;
+            platform->debug_print("Balise error. Telegram not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2));
             trigger_reaction(1);
         }
         return;
@@ -652,7 +651,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         if (info.nid_lrbg == lrbg) {
             valid_lrbg = true;
             ref = info.position;
-            std::cout<<"Ref: "<<ref.get()<<std::endl;
+            platform->debug_print("Ref: " + std::to_string(ref.get()));
             dir = info.dir;
             break;
         }

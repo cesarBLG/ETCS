@@ -8,7 +8,23 @@
  */
 #include "clock.h"
 #include "platform.h"
+#include "../../DMI/time_etcs.h"
 int64_t get_milliseconds()
 {
     return platform->get_timer();
+}
+BasePlatform::DateTime offset_time() {
+    BasePlatform::DateTime clock = platform->get_local_time();
+    clock.second += TimeOffset::offset;
+    while (clock.second >= 60) {
+        clock.second -= 60;
+        clock.minute++;
+    }
+    while (clock.minute >= 60) {
+        clock.minute -= 60;
+        clock.hour++;
+    }
+    while (clock.hour >= 24)
+        clock.hour -= 24;
+    return clock;
 }

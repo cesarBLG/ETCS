@@ -15,7 +15,6 @@
 #include "../control/control.h"
 #include "../tcp/server.h"
 
-#include <chrono>
 menu_radio::menu_radio() : menu(get_text("RBC data"))
 {
     buttons[0] = new TextButton(get_text("Contact last RBC"), 153, 50);
