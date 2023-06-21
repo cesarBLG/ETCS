@@ -4,12 +4,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#include <map>
-#include <atomic>
-#include <optional>
 #include <functional>
 #include <fstream>
 #include <sstream>
+#include <map>
 #include "bus_tcp_bridge.h"
 
 void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)

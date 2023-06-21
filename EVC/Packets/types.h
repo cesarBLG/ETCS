@@ -11,7 +11,6 @@
 #include <vector>
 #include <typeinfo>
 #include <string>
-#include <cstring>
 template<typename T>
 class ETCS_variable_custom;
 struct bit_manipulator

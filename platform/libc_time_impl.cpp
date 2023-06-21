@@ -5,9 +5,6 @@
  */
 
 #include "libc_time_impl.h"
-#include <fstream>
-#include <sstream>
-#include <cstring>
 #include <chrono>
 
 int64_t LibcTimeImpl::get_timer() {

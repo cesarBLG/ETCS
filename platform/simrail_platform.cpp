@@ -5,9 +5,6 @@
  */
 
 #include "simrail_platform.h"
-#include <algorithm>
-#include <chrono>
-#include <fstream>
 
 #define EXPORT_FUNC extern "C" __attribute__((visibility("default")))
 #define IMPORT_FUNC(n) extern "C" __attribute__ ((import_name(n)))

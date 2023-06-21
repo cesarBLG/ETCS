@@ -5,9 +5,6 @@
  */
 
 #include "tcp_socket.h"
-#include <fstream>
-#include <sstream>
-#include <cstring>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -126,8 +123,7 @@ TcpSocket& TcpSocket::operator=(TcpSocket &&other) {
 void TcpSocket::connect(const std::string &hostname, int port) {
 	close_socket(peer_fd);
 
-	addrinfo hints, *res;
-	memset(&hints, 0, sizeof hints);
+	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &res);

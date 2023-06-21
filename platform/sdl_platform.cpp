@@ -7,9 +7,7 @@
 #include "sdl_platform.h"
 #include "sdl_gfx/gfx_primitives.h"
 #include <algorithm>
-#include <chrono>
 #include <fstream>
-#include <sstream>
 #include <SDL.h>
 #include <SDL_ttf.h>
 

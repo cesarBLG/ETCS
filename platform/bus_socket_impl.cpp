@@ -5,9 +5,9 @@
  */
 
 #include "bus_socket_impl.h"
+#include <map>
 #include <fstream>
 #include <sstream>
-#include <cstring>
 
 BusSocketImpl::BusSocketImpl(const std::string &load_path, FdPoller &p) : poller(p) {
 	std::ifstream file(load_path + "tcp_bus_client.conf", std::ios::binary);

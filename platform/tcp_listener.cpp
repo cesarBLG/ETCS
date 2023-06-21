@@ -5,9 +5,6 @@
  */
 
 #include "tcp_listener.h"
-#include <fstream>
-#include <sstream>
-#include <cstring>
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -82,8 +79,7 @@ void TcpListener::fd_ready(int rev) {
 
 TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : poller(p) {
 	listen_fd = -1;
-	addrinfo hints, *res;
-	memset(&hints, 0, sizeof hints);
+	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;

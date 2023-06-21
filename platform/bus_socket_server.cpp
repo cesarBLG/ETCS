@@ -5,8 +5,6 @@
  */
 
 #include <map>
-#include <atomic>
-#include <optional>
 #include <functional>
 #include <fstream>
 #include <sstream>

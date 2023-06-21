@@ -6,10 +6,6 @@
 
 #pragma once
 
-#include <map>
-#include <atomic>
-#include <optional>
-#include <functional>
 #include "platform.h"
 
 class SimrailPlatform final : public UiPlatform {
