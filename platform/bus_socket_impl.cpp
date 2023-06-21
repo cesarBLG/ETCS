@@ -57,14 +57,14 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 	if (data.empty()) {
 		rx_buffer.clear();
 		retry_promise = std::move(platform->delay(100).then([this](){
-			socket = TcpSocket(hostname, port, poller);
-			rx_promise = std::move(socket.receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+			socket = std::make_unique<TcpSocket>(hostname, port, poller);
+			rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
 			client_hello();
 		}));
 		return;
 	}
 
-	rx_promise = std::move(socket.receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+	rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
 
 	if (rx_buffer.empty())
 		rx_buffer = std::move(data);
@@ -109,8 +109,8 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 }
 
 BusSocketImpl::TcpBusSocket::TcpBusSocket(uint32_t tid, const std::string &hostname, int port, FdPoller &poller) :
-	hostname(hostname), port(port), tid(tid), poller(poller), socket(hostname, port, poller) {
-	rx_promise = std::move(socket.receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+	hostname(hostname), port(port), tid(tid), poller(poller), socket(std::make_unique<TcpSocket>(hostname, port, poller)) {
+	rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
 	client_hello();
 }
 
@@ -119,7 +119,7 @@ void BusSocketImpl::TcpBusSocket::client_hello() {
 	buf.resize(2 * 4);
 	pack_uint32(buf.data() + 0 * 4, 11); // hello
 	pack_uint32(buf.data() + 1 * 4, tid);
-	socket.send(std::move(buf));
+	socket->send(std::move(buf));
 }
 
 void BusSocketImpl::TcpBusSocket::broadcast(const std::string &data) {
@@ -129,7 +129,7 @@ void BusSocketImpl::TcpBusSocket::broadcast(const std::string &data) {
 	pack_uint32(buf.data() + 0 * 4, 12); // broadcast all
 	pack_uint32(buf.data() + 1 * 4, data.size());
 	buf.insert(buf.end(), data.begin(), data.end());
-	socket.send(std::move(buf));
+	socket->send(std::move(buf));
 }
 
 void BusSocketImpl::TcpBusSocket::broadcast(uint32_t tid, const std::string &data) {
@@ -140,7 +140,7 @@ void BusSocketImpl::TcpBusSocket::broadcast(uint32_t tid, const std::string &dat
 	pack_uint32(buf.data() + 1 * 4, tid);
 	pack_uint32(buf.data() + 2 * 4, data.size());
 	buf.insert(buf.end(), data.begin(), data.end());
-	socket.send(std::move(buf));
+	socket->send(std::move(buf));
 }
 
 void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data) {
@@ -151,7 +151,7 @@ void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data)
 	pack_uint32(buf.data() + 1 * 4, uid);
 	pack_uint32(buf.data() + 2 * 4, data.size());
 	buf.insert(buf.end(), data.begin(), data.end());
-	socket.send(std::move(buf));
+	socket->send(std::move(buf));
 }
 
 PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> BusSocketImpl::TcpBusSocket::receive() {

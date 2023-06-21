@@ -26,7 +26,7 @@ public:
 
 	class TcpBusSocket : public BasePlatform::BusSocket {
 	private:
-		TcpSocket socket;
+		std::unique_ptr<TcpSocket> socket;
 		std::string rx_buffer;
 		PlatformUtil::Promise<std::string> rx_promise;
 		PlatformUtil::Promise<void> retry_promise;

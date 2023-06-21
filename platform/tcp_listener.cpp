@@ -31,33 +31,32 @@ void TcpListener::mark_nonblocking(int fd) {
 #endif
 }
 
-void TcpListener::close_socket(int &fd) {
-	if (fd == -1)
+void TcpListener::close_socket() {
+	if (listen_fd == -1)
 		return;
-	if (&fd == &listen_fd)
-		promise = {};
+	promise = {};
 #ifdef _WIN32
-	closesocket(fd);
+	closesocket(listen_fd);
 #else
-	close(fd);
+	close(listen_fd);
 #endif
-	fd = -1;
+	listen_fd = -1;
 }
 
-void TcpListener::handle_error(int &fd) {
+void TcpListener::handle_error() {
 #ifdef _WIN32
 	int wsaerr = WSAGetLastError();
 	if (wsaerr != WSAEWOULDBLOCK && wsaerr != WSAEINPROGRESS)
-		close_socket(fd);
+		close_socket();
 #else
 	if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINPROGRESS)
-		close_socket(fd);
+		close_socket();
 #endif
 }
 
 void TcpListener::fd_ready(int rev) {
 	if (rev & (POLLERR | POLLHUP)) {
-		close_socket(listen_fd);
+		close_socket();
 		return;
 	}
 	if (rev & POLLIN) {
@@ -66,11 +65,11 @@ void TcpListener::fd_ready(int rev) {
 
 		int ret = ::accept(listen_fd, (struct sockaddr*)&addr, (socklen_t*)&addr_size);
 		if (ret < 0) {
-			handle_error(listen_fd);
+			handle_error();
 		} else {
 			int peer_fd = ret;
 			mark_nonblocking(peer_fd);
-			list.fulfill_one(TcpSocket(peer_fd, poller));
+			list.fulfill_one(std::make_unique<TcpSocket>(peer_fd, poller));
 		}
 	}
 	if (listen_fd != -1)
@@ -92,13 +91,15 @@ TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : p
 	bind(listen_fd, res->ai_addr, res->ai_addrlen);
 	listen(listen_fd, 10);
 
+	freeaddrinfo(res);
+
 	promise = std::move(poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1)));
 }
 
 TcpListener::~TcpListener() {
-	close_socket(listen_fd);
+	close_socket();
 }
 
-PlatformUtil::Promise<TcpSocket> TcpListener::accept() {
+PlatformUtil::Promise<std::unique_ptr<TcpSocket>> TcpListener::accept() {
 	return list.create_and_add();
 }

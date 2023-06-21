@@ -14,12 +14,12 @@ private:
 	struct ClientData {
 		std::optional<uint32_t> tid;
 		uint32_t uid;
-		TcpSocket socket;
+		std::unique_ptr<TcpSocket> socket;
 		PlatformUtil::Promise<std::string> rx_promise;
 		std::string rx_buffer;
 	};
 	std::vector<ClientData> clients;
-	PlatformUtil::Promise<TcpSocket> accept_promise;
+	PlatformUtil::Promise<std::unique_ptr<TcpSocket>> accept_promise;
 	uint32_t uid;
 
 	void pack_uint32(char* ptr, uint32_t v);
@@ -27,7 +27,7 @@ private:
 
 	void handle_client(ClientData &client);
 	void on_client_data(std::string &&data, uint32_t uid);
-	void on_new_client(TcpSocket &&sock);
+	void on_new_client(std::unique_ptr<TcpSocket> &&sock);
 
 public:
 	BusSocketServer(const std::string &hostname, int port, FdPoller &p);

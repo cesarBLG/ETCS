@@ -43,7 +43,7 @@ void BusSocketServer::handle_client(ClientData &client)
                     pack_uint32(buf.data() + 2 * 4, client.uid);
                     for (ClientData &cl : clients)
                         if (&cl != &client && cl.tid.has_value())
-                            cl.socket.send(buf);
+                            cl.socket->send(buf);
                 }
 
                 for (ClientData &cl : clients) {
@@ -54,7 +54,7 @@ void BusSocketServer::handle_client(ClientData &client)
                     pack_uint32(buf.data() + 0 * 4, 1); // join
                     pack_uint32(buf.data() + 1 * 4, *cl.tid);
                     pack_uint32(buf.data() + 2 * 4, cl.uid);
-                    client.socket.send(buf);
+                    client.socket->send(buf);
                 }
             }
             client.rx_buffer.erase(0, 2 * 4);
@@ -76,7 +76,7 @@ void BusSocketServer::handle_client(ClientData &client)
 
                 for (ClientData &cl : clients)
                     if (&cl != &client && cl.tid.has_value())
-                        cl.socket.send(buf);
+                        cl.socket->send(buf);
             }
             client.rx_buffer.erase(0, 2 * 4 + len);
         } else if (msgtype == 13) { // broadcast tid
@@ -98,7 +98,7 @@ void BusSocketServer::handle_client(ClientData &client)
 
                 for (ClientData &cl : clients)
                     if (&cl != &client && cl.tid == tid && cl.tid.has_value())
-                        cl.socket.send(buf);
+                        cl.socket->send(buf);
             }
             client.rx_buffer.erase(0, 3 * 4 + len);
         } else if (msgtype == 14) { // send to
@@ -120,7 +120,7 @@ void BusSocketServer::handle_client(ClientData &client)
 
                 for (ClientData &cl : clients)
                     if (&cl != &client && cl.uid == uid && cl.tid.has_value())
-                        cl.socket.send(buf);
+                        cl.socket->send(buf);
             }
             client.rx_buffer.erase(0, 3 * 4 + len);
         } else {
@@ -145,12 +145,12 @@ void BusSocketServer::on_client_data(std::string &&data, uint32_t uid)
 
                 for (ClientData &cl : clients)
                     if (&cl != &clients[i] && cl.tid.has_value())
-                        cl.socket.send(buf);
+                        cl.socket->send(buf);
             }
 
             clients.erase(clients.begin() + i);
         } else {
-            clients[i].rx_promise = std::move(clients[i].socket.receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, uid)));
+            clients[i].rx_promise = std::move(clients[i].socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, uid)));
             clients[i].rx_buffer += std::move(data);
             handle_client(clients[i]);
         }
@@ -158,12 +158,12 @@ void BusSocketServer::on_client_data(std::string &&data, uint32_t uid)
     }
 }
 
-void BusSocketServer::on_new_client(TcpSocket &&sock)
+void BusSocketServer::on_new_client(std::unique_ptr<TcpSocket> &&sock)
 {
     accept_promise = std::move(listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1)));
     uint32_t id = ++uid;
     clients.push_back(ClientData{ std::nullopt, id, std::move(sock), {} });
-    clients.back().rx_promise = std::move(clients.back().socket.receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, id)));
+    clients.back().rx_promise = std::move(clients.back().socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, id)));
 }
 
 BusSocketServer::BusSocketServer(const std::string &hostname, int port, FdPoller &p) :

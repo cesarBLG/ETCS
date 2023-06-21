@@ -31,98 +31,79 @@ void TcpSocket::mark_nonblocking(int fd) {
 #endif
 }
 
-void TcpSocket::close_socket(int &fd) {
-	if (fd == -1)
+void TcpSocket::close_socket() {
+	if (peer_fd == -1)
 		return;
-	if (&fd == &peer_fd) {
-		tx_promise = {};
-		rx_promise = {};
-		rx_list.fulfill_one("");
-	}
+	tx_promise = {};
+	rx_promise = {};
 #ifdef _WIN32
-	closesocket(fd);
+	closesocket(peer_fd);
 #else
-	close(fd);
+	close(peer_fd);
 #endif
-	fd = -1;
+	peer_fd = -1;
+	rx_list.fulfill_one("");
 }
 
-void TcpSocket::handle_error(int &fd) {
+bool TcpSocket::handle_error() {
 #ifdef _WIN32
 	int wsaerr = WSAGetLastError();
-	if (wsaerr != WSAEWOULDBLOCK && wsaerr != WSAEINPROGRESS)
-		close_socket(fd);
+	if (wsaerr != WSAEWOULDBLOCK && wsaerr != WSAEINPROGRESS) {
+		close_socket();
+		return true;
+	}
 #else
-	if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINPROGRESS)
-		close_socket(fd);
+	if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINPROGRESS) {
+		close_socket();
+		return true;
+	}
 #endif
+	return false;
 }
 
 void TcpSocket::update() {
 	if (peer_fd != -1 && !tx_promise.is_pending() && !tx_buffer.empty()) {
 		tx_promise = std::move(poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
-			if (rev & (POLLERR | POLLHUP))
-				close_socket(peer_fd);
-			if (peer_fd != -1 && (rev & POLLOUT)) {
+			if (rev & (POLLERR | POLLHUP)) {
+				close_socket();
+			} else if (peer_fd != -1 && (rev & POLLOUT)) {
 				ssize_t ret = ::send(peer_fd, tx_buffer.data(), tx_buffer.size(), MSG_NOSIGNAL);
-				if (ret < 0)
-					handle_error(peer_fd);
-				else
+				if (ret < 0) {
+					if (!handle_error())
+						update();
+				}
+				else {
 					tx_buffer.erase(0, ret);
+					update();
+				}
 			}
-			update();
 		}));
 	}
 
 	if (peer_fd != -1 && !rx_promise.is_pending() && rx_list.pending() > 0) {
 		rx_promise = std::move(poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
-			if (rev & (POLLERR | POLLHUP))
-				close_socket(peer_fd);
-			if (peer_fd != -1 && (rev & POLLIN)) {
+			if (rev & (POLLERR | POLLHUP)) {
+				close_socket();
+			} else if (rev & POLLIN) {
 				std::string buf;
 				buf.resize(4096);
 				ssize_t ret = recv(peer_fd, buf.data(), buf.size(), 0);
 				if (ret < 0) {
-					handle_error(peer_fd);
+					if (!handle_error())
+						update();
 				} else if (ret == 0) {
-					close_socket(peer_fd);
+					close_socket();
 				} else {
 					buf.resize(ret);
 					rx_list.fulfill_one(std::move(buf));
+					update();
 				}
 			}
-			update();
 		}));
 	}
 }
 
-TcpSocket::TcpSocket(TcpSocket &&other) {
-	peer_fd = -1;
-	*this = std::move(other);
-}
-
-TcpSocket& TcpSocket::operator=(TcpSocket &&other) {
-	close_socket(peer_fd);
-	rx_promise = {};
-	tx_promise = {};
-
-	peer_fd = other.peer_fd;
-	other.peer_fd = -1;
-
-	rx_list = std::move(other.rx_list);
-	tx_buffer = std::move(other.tx_buffer);
-	poller = other.poller;
-
-	other.rx_promise = {};
-	other.tx_promise = {};
-	update();
-
-	return *this;
-}
-
 void TcpSocket::connect(const std::string &hostname, int port) {
-	close_socket(peer_fd);
-
 	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -131,6 +112,8 @@ void TcpSocket::connect(const std::string &hostname, int port) {
 	peer_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(peer_fd);
 	::connect(peer_fd, res->ai_addr, res->ai_addrlen);
+
+	freeaddrinfo(res);
 }
 
 void TcpSocket::send(const std::string &data) {
@@ -145,7 +128,6 @@ PlatformUtil::Promise<std::string> TcpSocket::receive() {
 }
 
 TcpSocket::TcpSocket(const std::string &hostname, int port, FdPoller &p) : poller(&p) {
-	peer_fd = -1;
 	connect(hostname, port);
 }
 
@@ -154,5 +136,5 @@ TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p) {
 }
 
 TcpSocket::~TcpSocket() {
-	close_socket(peer_fd);
+	close_socket();
 }

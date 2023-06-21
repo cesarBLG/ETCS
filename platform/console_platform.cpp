@@ -123,8 +123,10 @@ void ConsolePlatform::ConsoleFdPoller::poll(int timeout) {
 	::sys_poll(pfd.data(), pfd.size(), timeout);
 
 	for (int i = 0; i < pfd.size(); i++) {
-		if (pfd[i].revents & POLLNVAL)
-			platform->debug_print("nval!");
+		if (pfd[i].revents & POLLNVAL) {
+			printf("nval fd: %d\n", pfd[i]);
+			//platform->debug_print("nval!");
+		}
 		else if ((pfd[i].events & pfd[i].revents) != 0 || (pfd[i].revents & (POLLERR | POLLHUP)) != 0)
 			tmp[i].second.fulfill(pfd[i].revents);
 		else

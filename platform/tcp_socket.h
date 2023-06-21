@@ -24,15 +24,13 @@ private:
 	FdPoller* poller;
 
 	void mark_nonblocking(int fd);
-	void close_socket(int &fd);
-	void handle_error(int &fd);
+	void close_socket();
+	bool handle_error();
 	void update();
 	void connect(const std::string &hostname, int port);
 public:
 	TcpSocket(const std::string &hostname, int port, FdPoller &p);
 	TcpSocket(int fd, FdPoller &p);
-	TcpSocket(TcpSocket &&other);
-	TcpSocket& operator=(TcpSocket &&other);
 	~TcpSocket();
 	void send(const std::string &data);
 	PlatformUtil::Promise<std::string> receive();

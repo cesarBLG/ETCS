@@ -18,7 +18,7 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
         return;
     }
 
-    tcp_rx_promise = std::move(tcp_socket.receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
+    tcp_rx_promise = std::move(tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
 
     if (tcp_rx_buffer.empty())
         tcp_rx_buffer = std::move(data);
@@ -55,15 +55,15 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::P
 
     bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
     if (newline_framing)
-        tcp_socket.send(data.second + "\r\n");
+        tcp_socket->send(data.second + "\r\n");
     else
-        tcp_socket.send(data.second);
+        tcp_socket->send(data.second);
 }
 
-BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid, bool nl) :
+BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl) :
     bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), newline_framing(nl), alive(true)
 {
-    tcp_rx_promise = std::move(tcp_socket.receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
+    tcp_rx_promise = std::move(tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
     bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
 }
 
@@ -71,7 +71,7 @@ bool BusTcpBridge::BridgedTcpSocket::is_alive() const {
     return alive;
 }
 
-void BusTcpBridge::on_new_client(TcpSocket &&sock)
+void BusTcpBridge::on_new_client(std::unique_ptr<TcpSocket> &&sock)
 {
     accept_promise = std::move(listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1)));
 

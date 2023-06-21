@@ -297,7 +297,6 @@ void sim_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &
 {
     sim_socket->receive().then(sim_data_received).detach();
 
-    platform->debug_print(data.second);
     manager.ParseLine(sim_wrapper.get(), data.second);
     std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }

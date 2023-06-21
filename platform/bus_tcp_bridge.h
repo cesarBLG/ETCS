@@ -16,7 +16,7 @@ private:
         std::unique_ptr<BasePlatform::BusSocket> bus_socket;
         PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> bus_rx_promise;
 
-        TcpSocket tcp_socket;
+        std::unique_ptr<TcpSocket> tcp_socket;
         PlatformUtil::Promise<std::string> tcp_rx_promise;
         std::string tcp_rx_buffer;
 
@@ -29,11 +29,11 @@ private:
         bool alive;
 
     public:
-        BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, TcpSocket &&tcp, std::optional<uint32_t> tid, bool nl);
+        BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl);
         bool is_alive() const;
     };
 
-    void on_new_client(TcpSocket &&sock);
+    void on_new_client(std::unique_ptr<TcpSocket> &&sock);
 
     std::string bus;
     BusSocketImpl& bus_impl;
@@ -42,7 +42,7 @@ private:
     bool newline_framing;
 
 	TcpListener listener;
-    PlatformUtil::Promise<TcpSocket> accept_promise;
+    PlatformUtil::Promise<std::unique_ptr<TcpSocket>> accept_promise;
     std::vector<std::unique_ptr<BridgedTcpSocket>> clients;
 
 public:

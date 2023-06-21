@@ -13,18 +13,18 @@ class TcpListener : private PlatformUtil::NoCopy
 {
 private:
 	int listen_fd;
-	PlatformUtil::FulfillerList<TcpSocket> list;
+	PlatformUtil::FulfillerList<std::unique_ptr<TcpSocket>> list;
 	PlatformUtil::Promise<short> promise;
 	FdPoller& poller;
 
 	void mark_nonblocking(int fd);
-	void close_socket(int &fd);
-	void handle_error(int &fd);
+	void close_socket();
+	void handle_error();
 
 	void fd_ready(int rev);
 
 public:
 	TcpListener(const std::string &hostname, int port, FdPoller &p);
 	~TcpListener();
-	PlatformUtil::Promise<TcpSocket> accept();
+	PlatformUtil::Promise<std::unique_ptr<TcpSocket>> accept();
 };
