@@ -160,14 +160,10 @@ json fixed_train_data_window()
     json j = R"({"active":"fixed_train_data_window"})"_json;
     std::vector<json> inputs;
 
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ifstream file(filesDir+"/"+traindata_file);
-#else
-    std::ifstream file(traindata_file);
-#endif
     json j2;
-    file >> j2;
+    std::string contents = platform->read_file(traindata_file);
+    if (!contents.empty())
+        j2 = json::parse(contents);
     std::vector<std::string> types;
     for (auto it = j2.begin(); it!=j2.end(); ++it) {
         types.push_back(it.key());

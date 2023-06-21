@@ -27,23 +27,9 @@ std::string get_text_context(std::string context, std::string id)
 }
 void set_language(std::string lang)
 {
-#if SIMRAIL
-#if _DEBUG
-    std::string file = "../locales/evc/" + lang + ".mo";
-#else
-    std::string file = "locales/evc/" + lang + ".mo";
-#endif
-#else
-    std::string file = "../locales/evc/" + lang + ".mo";
-#endif
-
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    file = filesDir+"/locales/evc/"+lang+".mo";
-#endif
     if (lang == "en" || lang == "") {
         language = "en";
-    } else if (reader.ReadFile(file.c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
+    } else if (reader.ParseData(platform->read_file("locales/evc/" + lang + ".mo")) != moFileLib::moFileReader::EC_SUCCESS) {
         std::cout<<reader.GetErrorDescription()<<std::endl;
         language = "en";
     } else {

@@ -55,14 +55,10 @@ void set_train_data(std::string spec)
     special_train_data = spec;
     conversion_model_used = false;
     if (!special_train_data.empty()) {
-#ifdef __ANDROID__
-        extern std::string filesDir;
-        std::ifstream file(filesDir+"/"+traindata_file);
-#else
-        std::ifstream file(traindata_file);
-#endif
         json j;
-        file >> j;
+        std::string contents = platform->read_file(traindata_file);
+        if (!contents.empty())
+            j = json::parse(contents);
         if (j.contains(special_train_data)) {
             json &traindata = j[special_train_data];
             set_brake_model(traindata);

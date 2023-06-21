@@ -16,16 +16,12 @@ extern std::string traindata_file;
 extern int data_entry_type;
 void load_config(std::string serie)
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ifstream file(filesDir+"/config.json");
-#else
-    std::ifstream file("config.json");
-#endif
     traindata_file = "traindata.json";
     data_entry_type = 0;
     json j;
-    file >> j;
+    std::string contents = platform->read_file("config.json");
+    if (!contents.empty())
+        j = json::parse(contents);
     if (j.contains(serie)) {
         json &cfg = j[serie];
         if (cfg.contains("TrainData")) {
