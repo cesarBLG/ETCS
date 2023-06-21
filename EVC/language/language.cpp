@@ -56,7 +56,7 @@ void set_language(std::string lang)
         msg.packets.push_back(std::shared_ptr<ETCS_packet>(pack));
         it.second->send_message(&msg);
     }
-    send_command("language", lang);
+    set_persistent_command("language", lang);
     json j = json::parse("\""+lang+"\"");
     save_cold_data("Language", j);
 }

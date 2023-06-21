@@ -39,12 +39,14 @@ using std::string;
 using std::to_string;
 int dmi_pid;
 std::unique_ptr<BasePlatform::BusSocket> dmi_socket;
+void dmi_joined(BasePlatform::BusSocket::ClientId client);
 void dmi_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
 void dmi_update_func();
 void start_dmi()
 {
     dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("EVC_"));
     if (dmi_socket) {
+        dmi_socket->on_peer_join().then(dmi_joined).detach();
         dmi_socket->receive().then(dmi_data_received).detach();
         platform->delay(100).then(dmi_update_func).detach();
     }
@@ -104,6 +106,15 @@ void parse_command(string str)
     }
     update_dialog_step(command, value);
 }
+std::map<string, string> persistent_commands;
+void dmi_joined(BasePlatform::BusSocket::ClientId client)
+{
+    dmi_socket->on_peer_join().then(dmi_joined).detach();
+
+    if (client.tid == BasePlatform::BusSocket::ClientId::fourcc("DMI_"))
+        for (const auto &entry : persistent_commands)
+            dmi_socket->send_to(client.uid, entry.first+"("+entry.second+")");
+}
 void dmi_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
 {
     parse_command(std::move(data.second));
@@ -112,6 +123,11 @@ void dmi_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string>
 void sim_write_line(const std::string &str);
 bool sendtoor=false;
 int64_t lastor;
+void set_persistent_command(string command, string value)
+{
+    send_command(command, value);
+    persistent_commands.insert(std::make_pair(command, value));
+}
 void send_command(string command, string value)
 {
     if (dmi_socket)

@@ -43,5 +43,5 @@ void load_config(std::string serie)
             }
         }
     }
-    send_command("setSerie", serie);
+    set_persistent_command("setSerie", serie);
 }

@@ -219,8 +219,8 @@ void communication_session::update()
                 open(0);
                 pending_ack = ack;
             } else {
-                terminal->setup(this);
-                rx_promise = std::move(terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1)));
+                if (terminal->setup(this))
+                    rx_promise = std::move(terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1)));
             }
         }
         if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {

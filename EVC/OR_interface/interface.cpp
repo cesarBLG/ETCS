@@ -70,7 +70,7 @@ void SetParameters()
     p = new ORserver::Parameter("time_offset");
     p->SetValue = [](string val) {
         TimeOffset::offset = atoi(val.c_str());
-        send_command("timeOffset", val);
+        set_persistent_command("timeOffset", val);
     };
     manager.AddParameter(p);
 

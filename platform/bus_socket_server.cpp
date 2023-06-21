@@ -37,14 +37,27 @@ void BusSocketServer::handle_client(ClientData &client)
             if (!client.tid.has_value()) {
                 client.tid = unpack_uint32(client.rx_buffer.data() + 1 * 4);
 
-                std::string buf;
-                buf.resize(3 * 4);
-                pack_uint32(buf.data() + 0 * 4, 1); // join
-                pack_uint32(buf.data() + 1 * 4, *client.tid);
-                pack_uint32(buf.data() + 2 * 4, client.uid);
-                for (ClientData &cl : clients)
-                    if (&cl != &client && cl.tid.has_value())
-                        cl.socket.send(buf);
+                {
+                    std::string buf;
+                    buf.resize(3 * 4);
+                    pack_uint32(buf.data() + 0 * 4, 1); // join
+                    pack_uint32(buf.data() + 1 * 4, *client.tid);
+                    pack_uint32(buf.data() + 2 * 4, client.uid);
+                    for (ClientData &cl : clients)
+                        if (&cl != &client && cl.tid.has_value())
+                            cl.socket.send(buf);
+                }
+
+                for (ClientData &cl : clients) {
+                    if (&cl == &client || !cl.tid.has_value())
+                        continue;
+                    std::string buf;
+                    buf.resize(3 * 4);
+                    pack_uint32(buf.data() + 0 * 4, 1); // join
+                    pack_uint32(buf.data() + 1 * 4, *cl.tid);
+                    pack_uint32(buf.data() + 2 * 4, cl.uid);
+                    client.socket.send(buf);
+                }
             }
             client.rx_buffer.erase(0, 2 * 4);
         } else if (msgtype == 12) { // broadcast all
