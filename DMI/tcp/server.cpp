@@ -287,30 +287,21 @@ void parseData(std::string str)
         updateTc(syms);
     }
 }
-std::unique_ptr<BasePlatform::Socket> evc_socket;
-std::string buffer;
-void data_received(const std::string &data)
+std::unique_ptr<BasePlatform::BusSocket> evc_socket;
+void data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
 {
-    if (buffer.empty())
-        buffer = std::move(data);
-    else
-        buffer += data;
-    int end;
-    while ((end=buffer.find_first_of(';'))!=std::string::npos) {
-        int start = buffer.find_first_not_of("\n\r ;");
-        std::string command = buffer.substr(start, end-start);
-        parseData(command);
-        buffer = buffer.substr(end+1);
-    }
     evc_socket->receive().then(data_received).detach();
+    parseData(std::move(data.second));
 }
 void write_command(std::string command, std::string value)
 {
-    std::string tosend = command+"("+value+");\n";
-    evc_socket->send(tosend);
+    std::string tosend = command+"("+value+")";
+    if (evc_socket)
+        evc_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("EVC_"), tosend);
 }
 void startSocket()
 {
-    evc_socket = platform->open_socket("evc_dmi");
-    evc_socket->receive().then(data_received).detach();
+    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("DMI_"));
+    if (evc_socket)
+        evc_socket->receive().then(data_received).detach();
 }

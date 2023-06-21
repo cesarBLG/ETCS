@@ -16,12 +16,23 @@ class BasePlatform : private PlatformUtil::NoCopy
 public:
 	virtual ~BasePlatform() = default;
 
-	class Socket : private PlatformUtil::NoCopy
+	class BusSocket : private PlatformUtil::NoCopy
 	{
 	public:
-		virtual ~Socket() = default;
-		virtual void send(const std::string &data) = 0;
-		virtual PlatformUtil::Promise<std::string> receive() = 0;
+		struct ClientId {
+			uint32_t tid;
+			uint32_t uid;
+			static constexpr uint32_t fourcc(char const p[5]) {
+			    return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+			}
+		};
+		virtual ~BusSocket() = default;
+		virtual void broadcast(const std::string &data) = 0;
+		virtual void broadcast(uint32_t tid, const std::string &data) = 0;
+		virtual void send_to(uint32_t uid, const std::string &data) = 0;
+		virtual PlatformUtil::Promise<std::pair<ClientId, std::string>> receive() = 0;
+		virtual PlatformUtil::Promise<ClientId> on_peer_join() = 0;
+		virtual PlatformUtil::Promise<ClientId> on_peer_leave() = 0;
 	};
 
 	struct DateTime
@@ -39,8 +50,9 @@ public:
 	virtual int64_t get_timestamp() = 0;
 	virtual DateTime get_local_time() = 0;
 
-	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) = 0;
+	virtual std::unique_ptr<BusSocket> open_socket(const std::string &bus, uint32_t tid) = 0;
 	virtual std::string read_file(const std::string &path) = 0;
+	virtual void write_file(const std::string &path, const std::string &contents) = 0;
 	virtual void debug_print(const std::string &msg) = 0;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) = 0;
@@ -122,4 +134,8 @@ public:
 	virtual PlatformUtil::Promise<InputEvent> on_input_event() = 0;
 };
 
+#ifndef EVC
 extern std::unique_ptr<UiPlatform> platform;
+#else
+extern std::unique_ptr<BasePlatform> platform;
+#endif

@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 #include <list>
+#include "platform.h"
 enum struct session_status
 {
     Inactive,
@@ -35,6 +36,9 @@ class communication_session
     bool initsent;
     int tried;
     int ntries;
+    PlatformUtil::Promise<std::shared_ptr<euroradio_message>> rx_promise;
+    void message_received(std::shared_ptr<euroradio_message> msg);
+    void update_ack();
     public:
     bool isRBC;
     contact_info contact;
@@ -53,14 +57,12 @@ class communication_session
     void open(int ntries);
     void finalize();
     void close();
-    void send(std::shared_ptr<euroradio_message_traintotrack> msg, bool lock = true);
+    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
     void update();
     void reset_radio()
     {
-        if (terminal != nullptr) {
+        if (terminal != nullptr)
             terminal->status = safe_radio_status::Failed;
-            terminal->cv.notify_all();
-        }
     }
 };
 extern communication_session *supervising_rbc;

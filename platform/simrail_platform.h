@@ -12,7 +12,7 @@
 #include <functional>
 #include "platform.h"
 
-class SimrailPlatform : public UiPlatform {
+class SimrailPlatform final : public UiPlatform {
 private:
 
 public:
@@ -45,14 +45,6 @@ public:
 		virtual void detach() override {};
 	};
 
-	class SimrailSocket : public Socket
-	{
-	public:
-		SimrailSocket() = default;
-		virtual void send(const std::string &data) override {};
-		virtual PlatformUtil::Promise<std::string> receive() override { return {}; };
-	};
-
 	SimrailPlatform(float virtual_w, float virtual_h);
 	virtual ~SimrailPlatform() override;
 
@@ -60,7 +52,7 @@ public:
 	virtual int64_t get_timestamp() override;
 	virtual DateTime get_local_time() override;
 
-	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) override;
+	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
 	virtual std::string read_file(const std::string &path) override;
 	virtual void debug_print(const std::string &msg) override;
 

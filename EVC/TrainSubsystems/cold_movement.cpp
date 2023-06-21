@@ -14,15 +14,8 @@
 #include "../Position/linking.h"
 #include <fstream>
 int cold_movement_status;
-static std::string filename;
 void initialize_cold_movement()
 {
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    filename = filesDir+"/"+"cold_data.json";
-#else
-    filename = "cold_data.json";
-#endif
     cold_movement_status = ColdMovementUnknown;
     load_language();
     setup_national_values();
@@ -32,19 +25,19 @@ void initialize_cold_movement()
 }
 void save_cold_data(std::string field, json &value)
 {
-    std::ifstream in(filename);
-    json j;
-    if (in.good()) in >> j;
+    std::string contents = platform->read_file("cold_data.json");
+    if (contents.empty())
+        return;
+    json j = json::parse(contents);
     j[field] = value;
-    std::ofstream out(filename); 
-    out << j;
+    platform->write_file("cold_data.json", j.dump());
 }
 json load_cold_data(std::string field)
 {
-    std::ifstream in(filename);
-    if (!in.good()) return json();
-    json j;
-    in >> j;
+    std::string contents = platform->read_file("cold_data.json");
+    if (contents.empty())
+        return json();
+    json j = json::parse(contents);
     if (!j.contains(field)) j[field] = json();
     return j[field];
 }

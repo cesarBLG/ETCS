@@ -12,6 +12,9 @@ Time/clock.cpp Position/geographical.cpp DMI/text_messages.cpp DMI/windows.cpp D
 TrainSubsystems/power.cpp TrainSubsystems/brake.cpp TrainSubsystems/train_interface.cpp TrainSubsystems/cold_movement.cpp
 language/language.cpp Version/version.cpp Version/translate.cpp Config/config.cpp
 NationalFN/nationalfn.cpp NationalFN/asfa.cpp
+../platform/platform.cpp
+../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp
+../platform/console_platform.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp
 )
 
 if(WIN32)
@@ -23,9 +26,12 @@ if (ANDROID)
 else()
     add_executable(evc ${SOURCES})
 endif()
-target_compile_definitions(evc PUBLIC _GLIBCXX_DEBUG NOMINMAX)
+target_compile_definitions(evc PUBLIC NOMINMAX)
 target_include_directories(evc PRIVATE ../include)
+target_include_directories(evc PRIVATE ../platform)
 target_link_libraries(evc PRIVATE orts)
+
+add_definitions(-DEVC)
 
 if(WIN32)
     target_link_libraries(evc PRIVATE imagehlp wsock32 psapi)

@@ -36,7 +36,7 @@ std::map<int, int> ntc_to_stm;
 std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
 bool stm_control_EB = false;
 bool ntc_unavailable_msg = false;
-extern ORserver::POSIXclient *s_client;
+void sim_write_line(const std::string &str);
 struct stm_transition
 {
     stm_state from;
@@ -377,7 +377,7 @@ void stm_object::send_message(stm_message *msg)
     msg->NID_STM.rawdata = nid_stm;
     bit_manipulator w;
     msg->write_to(w);
-    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+    sim_write_line("noretain(stm::command_etcs="+w.to_base64()+")");
 }
 void send_failed_msg(stm_object *stm)
 {

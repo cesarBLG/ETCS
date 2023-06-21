@@ -39,12 +39,16 @@ public:
 		virtual void detach() override {};
 	};
 
-	class NullSocket : public Socket
+	class NullBusSocket : public BusSocket
 	{
 	public:
-		NullSocket() = default;
-		virtual void send(const std::string &data) override {};
-		virtual PlatformUtil::Promise<std::string> receive() override { return {}; };
+		NullBusSocket() = default;
+		virtual void broadcast(const std::string &data) override {};
+		virtual void broadcast(uint32_t tid, const std::string &data) override {};
+		virtual void send_to(uint32_t uid, const std::string &data) override {};
+		virtual PlatformUtil::Promise<std::pair<ClientId, std::string>> receive() override { return {}; };
+		virtual PlatformUtil::Promise<ClientId> on_peer_join() override { return {}; };
+		virtual PlatformUtil::Promise<ClientId> on_peer_leave() override { return {}; };
 	};
 
 	NullPlatform() = default;
@@ -53,7 +57,7 @@ public:
 	virtual int64_t get_timestamp() override { return 0; }
 	virtual DateTime get_local_time() override { return {}; }
 
-	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) override { return std::make_unique<NullSocket>(); };
+	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override { return std::make_unique<NullBusSocket>(); };
 	virtual std::string read_file(const std::string &path) override { return ""; };
 	virtual void debug_print(const std::string &msg) override {};
 

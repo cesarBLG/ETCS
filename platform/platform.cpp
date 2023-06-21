@@ -6,4 +6,8 @@
 
 #include "platform.h"
 
+#ifndef EVC
 std::unique_ptr<UiPlatform> platform;
+#else
+std::unique_ptr<BasePlatform> platform;
+#endif

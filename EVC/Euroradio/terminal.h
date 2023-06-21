@@ -7,11 +7,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #pragma once
-#include <mutex>
-#include <atomic>
 #include <deque>
-#include <condition_variable>
 #include "../Packets/radio.h"
+#include "platform.h"
 class communication_session;
 struct contact_info
 {
@@ -42,21 +40,26 @@ enum struct safe_radio_status
     Failed,
     Connected
 };
-struct mobile_terminal
+class mobile_terminal
 {
-    communication_session *active_session;
-    std::atomic<bool> setting_up;
-    std::atomic<int> released;
-    std::deque<std::shared_ptr<euroradio_message_traintotrack>> pending_write;
-    std::deque<std::shared_ptr<euroradio_message>> pending_read;
-    std::mutex mtx;
-    std::condition_variable cv;
-    public:
-    std::atomic<safe_radio_status> status;
+    std::unique_ptr<BasePlatform::BusSocket> socket;
+
+    PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::ClientId, std::string>> rx_promise;
+    PlatformUtil::FulfillerList<std::shared_ptr<euroradio_message>> rx_list;
+    void data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
+
+public:
+    communication_session *active_session = nullptr;
+    bool setting_up = false;
+    int released = 0;
+
+    safe_radio_status status = safe_radio_status::Disconnected;
     std::string radio_network_id;
     bool registered;
     bool setup(communication_session *session);
     void release();
-    void update();
+
+    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
+    PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
 };
 extern mobile_terminal mobile_terminals[2];

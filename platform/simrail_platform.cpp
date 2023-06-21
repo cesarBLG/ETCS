@@ -103,7 +103,7 @@ PlatformUtil::Promise<void> SimrailPlatform::on_quit() {
 	return {};
 }
 
-std::unique_ptr<SimrailPlatform::Socket> SimrailPlatform::open_socket(const std::string &channel) {
+std::unique_ptr<SimrailPlatform::BusSocket> SimrailPlatform::open_socket(const std::string &channel, uint32_t) {
 	return nullptr;
 }
 
@@ -159,7 +159,7 @@ std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_text_image(const s
 	return nullptr;
 }
 
-std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_wrapped_text_image(const std::string &text, const Font &base, TextAlign align, Color c) {
+std::unique_ptr<SimrailPlatform::Image> SimrailPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
 	return nullptr;
 }
 

@@ -11,6 +11,9 @@
 #include <optional>
 #include <functional>
 #include "platform.h"
+#include "bus_socket_impl.h"
+#include "libc_time_impl.h"
+#include "fstream_file_impl.h"
 
 struct SDL_Renderer;
 struct SDL_Texture;
@@ -18,7 +21,7 @@ struct SDL_Window;
 struct _TTF_Font;
 typedef struct _TTF_Font TTF_Font;
 
-class SdlPlatform : public UiPlatform {
+class SdlPlatform final : public UiPlatform {
 private:
 	struct SdlFontWrapper
 	{
@@ -43,6 +46,15 @@ private:
 		std::atomic<bool> stop;
 	};
 
+	class SimplePoller : public FdPoller {
+		std::vector<std::pair<std::pair<int, short>, PlatformUtil::Fulfiller<short>>> fds;
+	public:
+		virtual PlatformUtil::Promise<short> on_fd_ready(int fd, short ev) override;
+		void fulfill();
+	};
+
+	SimplePoller poller;
+
 	SDL_Renderer *sdlrend;
 	SDL_Window *sdlwindow;
 	std::string load_path;
@@ -59,16 +71,12 @@ private:
 	PlatformUtil::FulfillerList<void> on_present_list;
 	size_t present_count;
 	bool running;
-	struct SocketConfig {
-		std::string name;
-		std::string hostname;
-		int port;
-		bool server;
-	};
-	std::vector<SocketConfig> socket_config;
 	std::map<std::string, std::string> ini_items;
 	void load_config();
 	std::string get_config(const std::string &key);
+	BusSocketImpl bus_socket_impl;
+	LibcTimeImpl libc_time_impl;
+	FstreamFileImpl fstream_file_impl;
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
@@ -120,30 +128,6 @@ public:
 		virtual void detach() override;
 	};
 
-	class SdlSocket : public Socket
-	{
-	private:
-		int listen_fd;
-		int peer_fd;
-		PlatformUtil::FulfillerBufferedQueue<std::string> rx_buffer;
-		std::string tx_buffer;
-		PlatformUtil::Promise<void> refresh_promise;
-
-		std::string hostname;
-		bool server;
-		int port;
-		void mark_nonblocking(int fd);
-		void close_socket(int fd);
-		void handle_error();
-		void update();
-		void connect();
-	public:
-		SdlSocket(const std::string &hostname, bool server, int port);
-		~SdlSocket();
-		virtual void send(const std::string &data) override;
-		virtual PlatformUtil::Promise<std::string> receive() override;
-	};
-
 	SdlPlatform(float virtual_w, float virtual_h);
 	virtual ~SdlPlatform() override;
 
@@ -151,8 +135,9 @@ public:
 	virtual int64_t get_timestamp() override;
 	virtual DateTime get_local_time() override;
 
-	virtual std::unique_ptr<Socket> open_socket(const std::string &channel) override;
+	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
 	virtual std::string read_file(const std::string &path) override;
+	virtual void write_file(const std::string &path, const std::string &contents) override;
 	virtual void debug_print(const std::string &msg) override;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) override;

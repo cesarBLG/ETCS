@@ -16,6 +16,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
             ../platform/platform.cpp
+            ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp
 )
 
 if(WIN32)
@@ -37,7 +38,7 @@ if (ANDROID)
 else()
     add_executable(dmi ${SOURCES})
 endif()
-target_compile_definitions(dmi PUBLIC _GLIBCXX_DEBUG NOMINMAX)
+target_compile_definitions(dmi PUBLIC NOMINMAX)
 
 if (WITH_SDL)
     if(TARGET SDL2::SDL2main)

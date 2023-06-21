@@ -6,10 +6,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <thread>
-#include <cstdio>
-#include <mutex>
-#include <condition_variable>
+
 #include "TrainSubsystems/cold_movement.h"
 #include "DMI/dmi.h"
 #include "DMI/text_message.h"
@@ -34,6 +31,8 @@
 #include "LX/level_crossing.h"
 #include "STM/stm.h"
 #include "Euroradio/terminal.h"
+#include "platform.h"
+#include "console_platform.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -159,49 +158,52 @@ void crash_handler(int sig)
 }
 #endif
 
-
-std::mutex loop_mtx;
-std::condition_variable loop_notifier;
-void loop();
+void update();
 void start();
-bool run;
+
+#ifndef __ANDROID__
 int main()
 {
-    run = true;
-#ifdef __ANDROID__
-    __android_log_print(ANDROID_LOG_DEBUG, "EVC", "\n Starting European Train Control System... \n");
-#else
-//#ifdef __unix__
+#if __unix__
     signal(SIGSEGV, crash_handler);
     signal(SIGABRT, crash_handler);
-//#endif
-#endif
-#ifdef _WIN32
+#elif _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
-    std::printf("Starting European Train Control System...\n");
+
+    platform = std::make_unique<ConsolePlatform>("");
     start();
-    loop();
+    platform->event_loop();
     return 0;
 }
-
-#ifdef __ANDROID__
+#else
 #include <jni.h>
-std::string filesDir;
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
-    filesDir = std::string(env->GetStringUTFChars(stringObject, &b));
-    main();
+    platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)));
+    start();
+    platform->event_loop();
 }
 extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 {
-    run = false;
+    if (platform)
+        platform->quit();
 }
 #endif
-bool started=false;
+
 void start()
 {
+    platform->debug_print("Starting European Train Control System...");
+    platform->on_quit_request().then([](){
+        platform->quit();
+    }).detach();
+    platform->on_quit().then([](){
+        for (auto &terminal : mobile_terminals)
+            terminal.release();
+        platform = nullptr;
+    }).detach();
+
     start_dmi();
     start_or_iface();
     start_logging();
@@ -210,7 +212,7 @@ void start()
     setup_stm_control();
     set_message_filters();
     initialize_national_functions();
-    started = true;
+    update();
 }
 void update()
 {
@@ -228,21 +230,5 @@ void update()
     update_train_subsystems();
     update_dmi_windows();
     update_track_ahead_free_request();
-}
-std::condition_variable evc_cv;
-void loop()
-{
-    while(run)
-    {
-        std::unique_lock<std::mutex> lck(loop_mtx);
-        auto prev = std::chrono::system_clock::now();
-        update();
-        std::chrono::duration<double> diff = std::chrono::system_clock::now() - prev;
-        int d = std::chrono::duration_cast<std::chrono::duration<int, std::micro>>(diff).count();
-        /*if (d>500) std::cout<<d<<std::endl;*/
-        evc_cv.wait_for(lck, std::chrono::milliseconds(80));
-    }
-    for (auto &terminal : mobile_terminals) {
-        terminal.release();
-    }
+    platform->delay(50).then(update).detach();
 }

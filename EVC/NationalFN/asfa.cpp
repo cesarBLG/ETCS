@@ -14,15 +14,11 @@
 #include "../Procedures/level_transition.h"
 #include "../STM/stm.h"
 #include <string>
-#include <mutex>
 using namespace ORserver;
-using std::mutex;
 using std::string;
 extern ParameterManager manager;
 bool AKT=false;
 bool CON=true;
-extern mutex loop_mtx;
-extern mutex iface_mtx;
 bool detected = false;
 bool connected = false;
 bool active = false;
@@ -30,7 +26,6 @@ bool brake_commanded = false;
 void register_parameter(std::string parameter);
 void initialize_asfa()
 {
-    std::unique_lock<mutex> lck(iface_mtx);
     Parameter *p;
     p = new Parameter("asfa::akt::etcs");
     p->GetValue = []() {
