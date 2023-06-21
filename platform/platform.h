@@ -19,7 +19,7 @@ public:
 	class BusSocket : private PlatformUtil::NoCopy
 	{
 	public:
-		struct ClientId {
+		struct PeerId {
 			uint32_t tid;
 			uint32_t uid;
 			static constexpr uint32_t fourcc(std::string_view p) {
@@ -30,9 +30,9 @@ public:
 		virtual void broadcast(const std::string &data) = 0;
 		virtual void broadcast(uint32_t tid, const std::string &data) = 0;
 		virtual void send_to(uint32_t uid, const std::string &data) = 0;
-		virtual PlatformUtil::Promise<std::pair<ClientId, std::string>> receive() = 0;
-		virtual PlatformUtil::Promise<ClientId> on_peer_join() = 0;
-		virtual PlatformUtil::Promise<ClientId> on_peer_leave() = 0;
+		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> receive() = 0;
+		virtual PlatformUtil::Promise<PeerId> on_peer_join() = 0;
+		virtual PlatformUtil::Promise<PeerId> on_peer_leave() = 0;
 	};
 
 	struct DateTime

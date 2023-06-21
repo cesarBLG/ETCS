@@ -6,7 +6,7 @@ std::unique_ptr<BasePlatform::BusSocket> srv_socket;
 std::map<uint32_t, std::unique_ptr<ORTSClientWrapper>> srv_clients;
 std::unique_ptr<ORserver::Server> srv_orts;
 
-void orts_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
+void orts_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     srv_socket->receive().then(orts_data_received).detach();
 
@@ -15,7 +15,7 @@ void orts_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string
         srv_orts->ParseLine(it->second.get(), std::move(data.second));
 }
 
-void orts_peer_join(BasePlatform::BusSocket::ClientId peer)
+void orts_peer_join(BasePlatform::BusSocket::PeerId peer)
 {
     srv_socket->on_peer_join().then(orts_peer_join).detach();
 
@@ -24,7 +24,7 @@ void orts_peer_join(BasePlatform::BusSocket::ClientId peer)
     srv_clients.insert(std::make_pair(peer.uid, std::move(wrapper)));
 }
 
-void orts_peer_leave(BasePlatform::BusSocket::ClientId peer)
+void orts_peer_leave(BasePlatform::BusSocket::PeerId peer)
 {
     srv_socket->on_peer_leave().then(orts_peer_leave).detach();
 
@@ -37,7 +37,7 @@ void orts_peer_leave(BasePlatform::BusSocket::ClientId peer)
 
 void orts_start()
 {
-    srv_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::ClientId::fourcc("SRV"));
+    srv_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::PeerId::fourcc("SRV"));
     if (!srv_socket)
         return;
     srv_orts = std::make_unique<ORserver::Server>();

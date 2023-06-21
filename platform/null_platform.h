@@ -46,9 +46,9 @@ public:
 		virtual void broadcast(const std::string &data) override {};
 		virtual void broadcast(uint32_t tid, const std::string &data) override {};
 		virtual void send_to(uint32_t uid, const std::string &data) override {};
-		virtual PlatformUtil::Promise<std::pair<ClientId, std::string>> receive() override { return {}; };
-		virtual PlatformUtil::Promise<ClientId> on_peer_join() override { return {}; };
-		virtual PlatformUtil::Promise<ClientId> on_peer_leave() override { return {}; };
+		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> receive() override { return {}; };
+		virtual PlatformUtil::Promise<PeerId> on_peer_join() override { return {}; };
+		virtual PlatformUtil::Promise<PeerId> on_peer_leave() override { return {}; };
 	};
 
 	NullPlatform() = default;

@@ -75,7 +75,7 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 		if (rx_buffer.size() < 3 * 4)
 			return;
 		uint32_t msgtype = unpack_uint32(rx_buffer.data() + 0 * 4);
-		ClientId id = ClientId {
+		PeerId id = PeerId {
 			unpack_uint32(rx_buffer.data() + 1 * 4),
 			unpack_uint32(rx_buffer.data() + 2 * 4) };
 
@@ -154,14 +154,14 @@ void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data)
 	socket.send(std::move(buf));
 }
 
-PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::ClientId, std::string>> BusSocketImpl::TcpBusSocket::receive() {
+PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> BusSocketImpl::TcpBusSocket::receive() {
 	return rx_list.create_and_add();
 }
 
-PlatformUtil::Promise<BasePlatform::BusSocket::ClientId> BusSocketImpl::TcpBusSocket::on_peer_join() {
+PlatformUtil::Promise<BasePlatform::BusSocket::PeerId> BusSocketImpl::TcpBusSocket::on_peer_join() {
 	return on_join_list.create_and_add();
 }
 
-PlatformUtil::Promise<BasePlatform::BusSocket::ClientId> BusSocketImpl::TcpBusSocket::on_peer_leave() {
+PlatformUtil::Promise<BasePlatform::BusSocket::PeerId> BusSocketImpl::TcpBusSocket::on_peer_leave() {
 	return on_leave_list.create_and_add();
 }

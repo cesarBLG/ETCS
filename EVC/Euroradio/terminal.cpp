@@ -12,7 +12,7 @@
 
 mobile_terminal mobile_terminals[2];
 
-void mobile_terminal::data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data) {
+void mobile_terminal::data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data) {
     rx_promise = std::move(socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1)));
 
     if (rx_buffer.empty())
@@ -42,7 +42,7 @@ void mobile_terminal::send(std::shared_ptr<euroradio_message_traintotrack> msg) 
     bit_manipulator w;
     msg->write_to(w);
     if (socket)
-        socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("RBC"), std::string((char*)w.bits.data(), w.bits.size()));
+        socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("RBC"), std::string((char*)w.bits.data(), w.bits.size()));
 }
 
 PlatformUtil::Promise<std::shared_ptr<euroradio_message>> mobile_terminal::receive() {
@@ -54,7 +54,7 @@ bool mobile_terminal::setup(communication_session *session)
     if (released > 0 || !registered)
         return false;
 
-    socket = platform->open_socket("rbc_" + std::to_string(session->contact.phone_number), BasePlatform::BusSocket::ClientId::fourcc("EVC"));
+    socket = platform->open_socket("rbc_" + std::to_string(session->contact.phone_number), BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
         active_session = session;
         status = safe_radio_status::Connected;

@@ -290,10 +290,10 @@ std::unique_ptr<BasePlatform::BusSocket> sim_socket;
 void sim_write_line(const std::string &str)
 {
     if (sim_socket)
-        sim_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("SRV"), str);
+        sim_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("SRV"), str);
 }
 
-void sim_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
+void sim_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     sim_socket->receive().then(sim_data_received).detach();
 
@@ -309,11 +309,11 @@ void register_parameter(std::string param)
     registered_params.push_back(param);
 }
 
-void sim_peer_join(BasePlatform::BusSocket::ClientId peer)
+void sim_peer_join(BasePlatform::BusSocket::PeerId peer)
 {
     sim_socket->on_peer_join().then(sim_peer_join).detach();
 
-    if (peer.tid == BasePlatform::BusSocket::ClientId::fourcc("SRV"))
+    if (peer.tid == BasePlatform::BusSocket::PeerId::fourcc("SRV"))
         for (const auto &param : registered_params)
             sim_socket->send_to(peer.uid, "register(" + param + ")");
 }
@@ -324,13 +324,13 @@ void start_or_iface()
 {
     orts_start();
 
-    sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::ClientId::fourcc("EVC"));
+    sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (!sim_socket)
         return;
 
     sim_socket->receive().then(sim_data_received).detach();
     sim_socket->on_peer_join().then(sim_peer_join).detach();
-    sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::ClientId::fourcc("SRV"), false);
+    sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::PeerId::fourcc("SRV"), false);
 
     SetParameters();
 

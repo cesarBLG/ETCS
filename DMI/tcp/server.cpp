@@ -288,7 +288,7 @@ void parseData(std::string str)
     }
 }
 std::unique_ptr<BasePlatform::BusSocket> evc_socket;
-void data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
+void data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     evc_socket->receive().then(data_received).detach();
     parseData(std::move(data.second));
@@ -297,11 +297,11 @@ void write_command(std::string command, std::string value)
 {
     std::string tosend = command+"("+value+")";
     if (evc_socket)
-        evc_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("EVC"), tosend);
+        evc_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("EVC"), tosend);
 }
 void startSocket()
 {
-    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("DMI"));
+    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("DMI"));
     if (evc_socket)
         evc_socket->receive().then(data_received).detach();
 }

@@ -14,7 +14,7 @@ private:
     class BridgedTcpSocket : private PlatformUtil::NoCopy {
     private:
         std::unique_ptr<BasePlatform::BusSocket> bus_socket;
-        PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::ClientId, std::string>> bus_rx_promise;
+        PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> bus_rx_promise;
 
         TcpSocket tcp_socket;
         PlatformUtil::Promise<std::string> tcp_rx_promise;
@@ -24,7 +24,7 @@ private:
         bool newline_framing;
 
         void tcp_rx(std::string &&data);
-        void bus_rx(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
+        void bus_rx(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data);
 
         bool alive;
 

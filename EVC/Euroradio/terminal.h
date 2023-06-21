@@ -45,9 +45,9 @@ class mobile_terminal
     std::unique_ptr<BasePlatform::BusSocket> socket;
     std::string rx_buffer;
 
-    PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::ClientId, std::string>> rx_promise;
+    PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> rx_promise;
     PlatformUtil::FulfillerList<std::shared_ptr<euroradio_message>> rx_list;
-    void data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
+    void data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data);
 
 public:
     communication_session *active_session = nullptr;

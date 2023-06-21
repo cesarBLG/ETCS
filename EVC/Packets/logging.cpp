@@ -12,7 +12,7 @@
 std::unique_ptr<BasePlatform::BusSocket> logging_socket;
 void start_logging()
 {
-    logging_socket = platform->open_socket("evc_logging", BasePlatform::BusSocket::ClientId::fourcc("EVC"));
+    logging_socket = platform->open_socket("evc_logging", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
 }
 void print_vars(std::string &str, std::vector<std::pair<std::string,std::string>> vars)
 {

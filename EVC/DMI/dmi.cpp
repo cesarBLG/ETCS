@@ -35,12 +35,12 @@ using std::string;
 using std::to_string;
 int dmi_pid;
 std::unique_ptr<BasePlatform::BusSocket> dmi_socket;
-void dmi_joined(BasePlatform::BusSocket::ClientId client);
-void dmi_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data);
+void dmi_joined(BasePlatform::BusSocket::PeerId client);
+void dmi_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data);
 void dmi_update_func();
 void start_dmi()
 {
-    dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::ClientId::fourcc("EVC"));
+    dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (dmi_socket) {
         dmi_socket->on_peer_join().then(dmi_joined).detach();
         dmi_socket->receive().then(dmi_data_received).detach();
@@ -103,15 +103,15 @@ void parse_command(string str)
     update_dialog_step(command, value);
 }
 std::map<string, string> persistent_commands;
-void dmi_joined(BasePlatform::BusSocket::ClientId client)
+void dmi_joined(BasePlatform::BusSocket::PeerId client)
 {
     dmi_socket->on_peer_join().then(dmi_joined).detach();
 
-    if (client.tid == BasePlatform::BusSocket::ClientId::fourcc("DMI"))
+    if (client.tid == BasePlatform::BusSocket::PeerId::fourcc("DMI"))
         for (const auto &entry : persistent_commands)
             dmi_socket->send_to(client.uid, entry.first+"("+entry.second+")");
 }
-void dmi_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
+void dmi_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     parse_command(std::move(data.second));
     dmi_socket->receive().then(dmi_data_received).detach();
@@ -127,7 +127,7 @@ void set_persistent_command(string command, string value)
 void send_command(string command, string value)
 {
     if (dmi_socket)
-        dmi_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("DMI"), command+"("+value+")");
+        dmi_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("DMI"), command+"("+value+")");
     if (sendtoor)
         sim_write_line("noretain(etcs::dmi::command="+command+"("+value+"))");
 }

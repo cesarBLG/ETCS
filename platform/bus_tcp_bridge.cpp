@@ -48,7 +48,7 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
     }
 }
 
-void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
+void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     if (!alive)
         return;
@@ -115,10 +115,10 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string &load_path, FdPoller 
         std::getline(key2, rx_tid, ':');
         std::getline(key2, tx_tid, ':');
         std::getline(key2, nl, ':');
-        uint32_t rxt = BasePlatform::BusSocket::ClientId::fourcc(rx_tid);
+        uint32_t rxt = BasePlatform::BusSocket::PeerId::fourcc(rx_tid);
         std::optional<uint32_t> txt;
         if (tx_tid != "*")
-            txt = BasePlatform::BusSocket::ClientId::fourcc(tx_tid);
+            txt = BasePlatform::BusSocket::PeerId::fourcc(tx_tid);
         bool newline_framing = (!nl.empty() && nl[0] == 'n');
         bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, newline_framing, tcphost, std::stoi(tcpport), fd, impl));
     }
