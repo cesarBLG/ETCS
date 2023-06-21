@@ -15,6 +15,7 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 ../platform/platform.cpp
 ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp
 ../platform/console_platform.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp
+../libs/liborts/serverlib.cpp ../libs/liborts/common.cpp
 )
 
 if(WIN32)
@@ -29,7 +30,7 @@ endif()
 target_compile_definitions(evc PUBLIC NOMINMAX)
 target_include_directories(evc PRIVATE ../include)
 target_include_directories(evc PRIVATE ../platform)
-target_link_libraries(evc PRIVATE orts)
+target_include_directories(evc PRIVATE ../libs/liborts/include)
 
 add_definitions(-DEVC)
 
@@ -38,15 +39,4 @@ if(WIN32)
 endif()
 if(ANDROID)
     target_link_libraries(evc PRIVATE log)
-endif()
-
-if(WIN32)
-    add_custom_command(TARGET evc POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:orts>              
-        $<TARGET_FILE_DIR:evc>)
-    add_custom_command(TARGET evc POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:server>              
-        $<TARGET_FILE_DIR:evc>)
 endif()

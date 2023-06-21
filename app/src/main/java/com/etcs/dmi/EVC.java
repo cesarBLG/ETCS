@@ -40,7 +40,6 @@ public class EVC extends Service {
         evcThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                SDL.loadLibrary("orts");
                 SDL.loadLibrary("evc");
                 evcMain(getExternalFilesDir(null).getAbsolutePath());
             }
