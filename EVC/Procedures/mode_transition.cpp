@@ -23,7 +23,7 @@
 #include "../language/language.h"
 #include "../TrainSubsystems/train_interface.h"
 #include <map>
-cond mode_conditions[75];
+cond mode_conditions[78];
 static std::vector<mode_transition> ordered_transitions[20];
 Mode mode=Mode::SB;
 int64_t last_mode_change;
