@@ -49,11 +49,6 @@ if (WITH_SDL)
     target_link_libraries(dmi PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf)
 endif()
 
-if(SIMRAIL)
-	include_directories(${cppzmq_INCLUDE_DIR})
-	target_link_libraries(dmi PRIVATE ${cppzmq_LIBRARY})
-endif()
-
 target_include_directories(dmi PRIVATE ../include)
 target_include_directories(dmi PRIVATE ../platform)
 
