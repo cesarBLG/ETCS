@@ -11,11 +11,7 @@
 #include "tcp/server.h"
 #include "control/control.h"
 #include "platform.h"
-#include "sdl_platform.h"
-#include "null_platform.h"
-#include "simrail_platform.h"
-#ifdef __ANDROID__
-#elif defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
@@ -113,11 +109,6 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
-void sighandler(int sig)
-{
-    if (platform)
-        platform->quit();
-}
 int addr2line(char const * const program_name, void const * const addr)
 {
     char addr2line_cmd[512] = {0};
@@ -153,15 +144,13 @@ extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 
 void startWindows();
 void initialize_stm_windows();
-#ifndef WASM_SRAPI
-int main(int argc, char** argv)
-#else
-extern "C" int init()
-#endif
+
+float platform_size_w = 640.0f, platform_size_h = 480.0f;
+
+void on_platform_ready()
 {
 #ifndef __ANDROID__
 #ifdef __unix__
-    signal(SIGINT, sighandler);
     signal(SIGSEGV, crash_handler);
     signal(SIGABRT, crash_handler);
 #endif
@@ -170,11 +159,6 @@ extern "C" int init()
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
 
-#ifdef WITH_SDL
-    platform = std::make_unique<SdlPlatform>(640.0, 480.0f);
-#else
-    platform = std::make_unique<SimrailPlatform>(640.0, 480.0f);
-#endif
     platform->on_quit_request().then([](){
         platform->quit();
     }).detach();
@@ -186,7 +170,4 @@ extern "C" int init()
     startWindows();
     initialize_stm_windows();
     drawing_start();
-
-    platform->event_loop();
-    return 0;
 }

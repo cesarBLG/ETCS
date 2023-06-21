@@ -65,7 +65,6 @@ public:
 	virtual PlatformUtil::Promise<void> on_quit_request() override { return {}; }
 	virtual PlatformUtil::Promise<void> on_quit() override { return {}; }
 
-	virtual void event_loop() override {};
 	virtual void quit() override {};
 
 	virtual void set_color(Color c) override {};

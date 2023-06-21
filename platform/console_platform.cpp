@@ -17,6 +17,17 @@
 #include <ws2tcpip.h>
 #endif
 
+int main(int argc, char *argv[])
+{
+	std::string load_path;
+	if (argc >= 2)
+		load_path = std::string(argv[1]);
+	platform = std::make_unique<ConsolePlatform>(load_path);
+	on_platform_ready();
+	static_cast<ConsolePlatform*>(platform.get())->event_loop();
+	return 0;
+}
+
 static std::atomic<bool>* quit_request_ptr;
 
 static void sigterm_handler(int sig) {

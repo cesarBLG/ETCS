@@ -11,6 +11,14 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+int main(int argc, char *argv[])
+{
+	platform = std::make_unique<SdlPlatform>(platform_size_w, platform_size_h);
+	on_platform_ready();
+	static_cast<SdlPlatform*>(platform.get())->event_loop();
+	return 0;
+}
+
 void SdlPlatform::SdlPlatform::load_config()
 {
 	std::ifstream file(load_path + "settings.ini", std::ios::binary);

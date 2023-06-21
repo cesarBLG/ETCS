@@ -30,7 +30,6 @@
 #include "STM/stm.h"
 #include "Euroradio/terminal.h"
 #include "platform.h"
-#include "console_platform.h"
 
 #include <signal.h>
 #ifdef __ANDROID__
@@ -156,32 +155,13 @@ void crash_handler(int sig)
 }
 #endif
 
-void update();
-void start();
-
-#ifndef __ANDROID__
-int main()
-{
-#if __unix__
-    signal(SIGSEGV, crash_handler);
-    signal(SIGABRT, crash_handler);
-#elif _WIN32
-    SetUnhandledExceptionFilter(windows_exception_handler);
-#endif
-
-    platform = std::make_unique<ConsolePlatform>("");
-    start();
-    platform->event_loop();
-    return 0;
-}
-#else
+#ifdef __ANDROID__
 #include <jni.h>
+int main(int argc, char *argv[]);
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
-    platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)));
-    start();
-    platform->event_loop();
+    main(2, (char**)(new const char*[]{ "evc", std::string(env->GetStringUTFChars(stringObject, &b)).c_str(), nullptr }));
 }
 extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 {
@@ -190,8 +170,19 @@ extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 }
 #endif
 
-void start()
+void update();
+
+void on_platform_ready()
 {
+#ifndef __ANDROID__
+#if __unix__
+    signal(SIGSEGV, crash_handler);
+    signal(SIGABRT, crash_handler);
+#elif defined(_WIN32)
+    SetUnhandledExceptionFilter(windows_exception_handler);
+#endif
+#endif
+
     platform->debug_print("Starting European Train Control System...");
     platform->on_quit_request().then([](){
         platform->quit();
@@ -199,7 +190,6 @@ void start()
     platform->on_quit().then([](){
         for (auto &terminal : mobile_terminals)
             terminal.release();
-        platform = nullptr;
     }).detach();
 
     start_dmi();

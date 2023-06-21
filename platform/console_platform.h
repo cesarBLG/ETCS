@@ -48,6 +48,8 @@ private:
 
 public:
 	ConsolePlatform(const std::string &load_path);
+	void event_loop();
+
 	virtual ~ConsolePlatform() override;
 
 	virtual int64_t get_timer() override;
@@ -63,6 +65,5 @@ public:
 	virtual PlatformUtil::Promise<void> on_quit_request() override;
 	virtual PlatformUtil::Promise<void> on_quit() override;
 
-	virtual void event_loop() override;
 	virtual void quit() override;
 };
