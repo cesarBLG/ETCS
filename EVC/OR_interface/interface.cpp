@@ -22,6 +22,7 @@
 #include "../Config/config.h"
 #include <orts/common.h>
 #include "platform.h"
+#include "orts_wrapper.h"
 
 //using namespace ORserver;
 
@@ -284,71 +285,69 @@ void SetParameters()
     manager.AddParameter(p);
 }
 
-class ORTSClientWrapper : public ORserver::client {
-private:
-    BasePlatform::BusSocket &bus;
-    uint32_t bus_tid;
-
-public:
-    virtual void start() override {};
-    virtual std::string ReadLine() override { return {}; };
-    virtual void handle() override {};
-
-    virtual void WriteLine(std::string line) override {
-        bus.broadcast(bus_tid, line);
-    }
-
-    ORTSClientWrapper(BasePlatform::BusSocket &b, uint32_t t) : bus(b), bus_tid(t) {
-
-    }
-};
-
-std::unique_ptr<ORTSClientWrapper> wrapper;
+std::unique_ptr<ORTSClientWrapper> sim_wrapper;
 std::unique_ptr<BasePlatform::BusSocket> sim_socket;
 void sim_write_line(const std::string &str)
 {
     if (sim_socket)
-        sim_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("SIM"), str);
+        sim_socket->broadcast(BasePlatform::BusSocket::ClientId::fourcc("SRV"), str);
 }
 
 void sim_data_received(std::pair<BasePlatform::BusSocket::ClientId, std::string> &&data)
 {
     sim_socket->receive().then(sim_data_received).detach();
 
-    manager.ParseLine(wrapper.get(), data.second);
+    platform->debug_print(data.second);
+    manager.ParseLine(sim_wrapper.get(), data.second);
     std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }
 
+std::vector<std::string> registered_params;
+
+void register_parameter(std::string param)
+{
+    registered_params.push_back(param);
+}
+
+void sim_peer_join(BasePlatform::BusSocket::ClientId peer)
+{
+    sim_socket->on_peer_join().then(sim_peer_join).detach();
+
+    if (peer.tid == BasePlatform::BusSocket::ClientId::fourcc("SRV"))
+        for (const auto &param : registered_params)
+            sim_socket->send_to(peer.uid, "register(" + param + ")");
+}
+
+void orts_start();
+
 void start_or_iface()
 {
+    orts_start();
+
     sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::ClientId::fourcc("EVC"));
     if (!sim_socket)
         return;
 
     sim_socket->receive().then(sim_data_received).detach();
-    wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::ClientId::fourcc("SIM"));
-
-    sim_write_line("register(time_offset)");
-    sim_write_line("register(ackButton)");
-    sim_write_line("register(speed)");
-    sim_write_line("register(distance)");
-    sim_write_line("register(acceleration)");
-    sim_write_line("register(etcs::telegram)");
-    sim_write_line("register(cruise_speed)");
-    sim_write_line("register(etcs::dmi::feedback)");
-    sim_write_line("register(master_key)");
-    sim_write_line("register(controller::direction)");
-    sim_write_line("register(train_orientation)");
-    sim_write_line("register(stm::command)");
-    sim_write_line("register(stm::+::isolated)");
-    sim_write_line("register(etcs::isolated)");
-    sim_write_line("register(etcs::failed)");
-    sim_write_line("register(serie)");
+    sim_socket->on_peer_join().then(sim_peer_join).detach();
+    sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::ClientId::fourcc("SRV"), false);
 
     SetParameters();
-}
 
-void register_parameter(std::string param)
-{
-    sim_write_line("register(" + param + ")");
+    register_parameter("time_offset");
+    register_parameter("ackButton");
+    register_parameter("speed");
+    register_parameter("distance");
+    register_parameter("acceleration");
+    register_parameter("etcs::telegram");
+    register_parameter("cruise_speed");
+    register_parameter("etcs::dmi::feedback");
+    register_parameter("master_key");
+    register_parameter("controller::direction");
+    register_parameter("train_orientation");
+    register_parameter("stm::command");
+    register_parameter("stm::+::isolated");
+    register_parameter("etcs::isolated");
+    register_parameter("etcs::failed");
+    register_parameter("serie");
 }
