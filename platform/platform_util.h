@@ -336,7 +336,9 @@ namespace PlatformUtil
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
 			tmp.begin()->fulfill(arg);
-			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+			auto tmp_next = std::next(tmp.begin());
+			if (tmp_next != tmp.end())
+				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 		}
 
 		void fulfill_one(T&& arg) {
@@ -345,7 +347,9 @@ namespace PlatformUtil
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
 			tmp.begin()->fulfill(std::move(arg));
-			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+			auto tmp_next = std::next(tmp.begin());
+			if (tmp_next != tmp.end())
+				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 		}
 
 		void fulfill_all(const T& arg) {
@@ -382,7 +386,9 @@ namespace PlatformUtil
 			std::vector<Fulfiller<void>> tmp = std::move(list);
 			list.clear();
 			tmp.begin()->fulfill();
-			list.insert(list.begin(), std::make_move_iterator(std::next(tmp.begin())), std::make_move_iterator(tmp.end()));
+			auto tmp_next = std::next(tmp.begin());
+			if (tmp_next != tmp.end())
+				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 		}
 
 		void fulfill_all() {
