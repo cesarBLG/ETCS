@@ -6,8 +6,16 @@
 
 #include "console_platform.h"
 
+#ifndef _WIN32
 #include <signal.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/poll.h>
+#include <netdb.h>
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 
 static std::atomic<bool>* quit_request_ptr;
 
@@ -94,6 +102,14 @@ PlatformUtil::Promise<short> ConsolePlatform::ConsoleFdPoller::on_fd_ready(int f
 	return std::move(pair.first);
 }
 
+#ifndef _WIN32
+#define sys_poll poll
+#define socket_type int
+#else
+#define sys_poll WSAPoll
+#define socket_type SOCKET
+#endif
+
 void ConsolePlatform::ConsoleFdPoller::poll(int timeout) {
 	auto tmp = std::move(fds);
 	fds.clear();
@@ -102,9 +118,9 @@ void ConsolePlatform::ConsoleFdPoller::poll(int timeout) {
 	std::vector<pollfd> pfd;
 	pfd.reserve(tmp.size());
 	for (const auto &entry : tmp)
-		pfd.push_back({ entry.first.first, entry.first.second, 0 });
+		pfd.push_back({ (socket_type)entry.first.first, entry.first.second, 0 });
 
-	::poll(pfd.data(), pfd.size(), timeout);
+	::sys_poll(pfd.data(), pfd.size(), timeout);
 
 	for (int i = 0; i < pfd.size(); i++) {
 		if (pfd[i].revents & POLLNVAL)

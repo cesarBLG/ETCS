@@ -11,3 +11,16 @@ std::unique_ptr<UiPlatform> platform;
 #else
 std::unique_ptr<BasePlatform> platform;
 #endif
+
+#ifdef _WIN32
+#include <winsock2.h>
+struct WinsockInit {
+	WinsockInit() {
+		WSADATA wsa;
+		WSAStartup(MAKEWORD(2, 2), &wsa);
+	}
+	~WinsockInit() {
+		WSACleanup();
+	}
+} WinsockInitInstance;
+#endif

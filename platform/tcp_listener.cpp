@@ -81,11 +81,6 @@ void TcpListener::fd_ready(int rev) {
 }
 
 TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : poller(p) {
-#ifdef _WIN32
-	WSADATA wsa;
-	WSAStartup(MAKEWORD(2, 2), &wsa);
-#endif
-
 	listen_fd = -1;
 	addrinfo hints, *res;
 	memset(&hints, 0, sizeof hints);
@@ -97,7 +92,7 @@ TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : p
 	listen_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(listen_fd);
 	int one = 1;
-	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+	setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&one, sizeof(one));
 	bind(listen_fd, res->ai_addr, res->ai_addrlen);
 	listen(listen_fd, 10);
 
@@ -106,9 +101,6 @@ TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : p
 
 TcpListener::~TcpListener() {
 	close_socket(listen_fd);
-#ifdef _WIN32
-	WSACleanup();
-#endif
 }
 
 PlatformUtil::Promise<TcpSocket> TcpListener::accept() {

@@ -14,7 +14,6 @@
 #include <list>
 #include <algorithm>
 #include <map>
-#include <unistd.h>
 #include "../Supervision/supervision.h"
 #include "../Supervision/targets.h"
 #include <iostream>

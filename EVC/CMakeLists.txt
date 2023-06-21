@@ -34,7 +34,7 @@ target_link_libraries(evc PRIVATE orts)
 add_definitions(-DEVC)
 
 if(WIN32)
-    target_link_libraries(evc PRIVATE imagehlp wsock32 psapi)
+    target_link_libraries(evc PRIVATE imagehlp ws2_32 psapi)
 endif()
 if(ANDROID)
     target_link_libraries(evc PRIVATE log)
