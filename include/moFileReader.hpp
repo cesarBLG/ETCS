@@ -282,7 +282,8 @@ public:
     }
 
     void read(char *dst, size_t len) {
-        memcpy(dst, buffer.data() + pos, len);
+        if (pos < buffer.size())
+            memcpy(dst, buffer.data() + pos, std::min(len, buffer.size() - pos));
         pos += len;
     }
 
@@ -291,7 +292,7 @@ public:
     }
 
     bool bad() const {
-        return false;
+        return buffer.empty();
     }
 };
 
