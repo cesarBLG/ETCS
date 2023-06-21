@@ -35,6 +35,8 @@ endif()
 
 if (ANDROID)
     add_library(dmi SHARED ${SOURCES})
+elseif(WIN32)
+	add_executable(dmi WIN32 ${SOURCES})
 else()
     add_executable(dmi ${SOURCES})
 endif()
