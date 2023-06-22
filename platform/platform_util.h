@@ -89,30 +89,38 @@ namespace PlatformUtil
 		PromisePart<T>* promise;
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
-		bool allocated;
+		bool unmanaged;
 
 		virtual void execute_callback(bool defer) override {
 			if (!callback)
 				return;
 			if (!defer) {
 				callback(std::move(*value));
+				if (promise)
+					promise->fulfiller = nullptr;
+				promise = nullptr;
 				callback = nullptr;
+				if (unmanaged)
+					delete this;
 			}
 			else {
-				DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
-				if (allocated)
-					delete this;
+				if (unmanaged) {
+					DeferredFulfillment::list.push_back(std::unique_ptr<Fulfiller<T>>(this));
+					unmanaged = false;
+				} else {
+					DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
+				}
 			}
 		}
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
-			allocated = false;
+			unmanaged = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
-			allocated = false;
+			unmanaged = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -134,7 +142,7 @@ namespace PlatformUtil
 		virtual ~Fulfiller() override {
 			if (promise) {
 				if (value)
-					(new Fulfiller<T>(std::move(*this)))->allocated = true;
+					(new Fulfiller<T>(std::move(*this)))->unmanaged = true;
 				else
 					promise->fulfiller = nullptr;
 			}
@@ -166,19 +174,27 @@ namespace PlatformUtil
 		PromisePart<void>* promise;
 		bool value;
 		typename CallbackType<void>::type callback;
-		bool allocated;
+		bool unmanaged;
 
 		virtual void execute_callback(bool defer) override {
 			if (!callback)
 				return;
 			if (!defer) {
 				callback();
+				if (promise)
+					promise->fulfiller = nullptr;
+				promise = nullptr;
 				callback = nullptr;
+				if (unmanaged)
+					delete this;
 			}
 			else {
-				DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
-				if (allocated)
-					delete this;
+				if (unmanaged) {
+					DeferredFulfillment::list.push_back(std::unique_ptr<Fulfiller<void>>(this));
+					unmanaged = false;
+				} else {
+					DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
+				}
 			}
 		}
 
@@ -186,11 +202,11 @@ namespace PlatformUtil
 		Fulfiller() {
 			promise = nullptr;
 			value = false;
-			allocated = false;
+			unmanaged = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
-			allocated = false;
+			unmanaged = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -212,7 +228,7 @@ namespace PlatformUtil
 		virtual ~Fulfiller() override {
 			if (promise) {
 				if (value)
-					(new Fulfiller<void>(std::move(*this)))->allocated = true;
+					(new Fulfiller<void>(std::move(*this)))->unmanaged = true;
 				else
 					promise->fulfiller = nullptr;
 			}
@@ -271,7 +287,7 @@ namespace PlatformUtil
 		void detach() {
 			if (p.fulfiller) {
 				p.fulfiller->promise = nullptr;
-				if (p.fulfiller->allocated)
+				if (p.fulfiller->unmanaged)
 					delete p.fulfiller;
 			}
 			p.fulfiller = nullptr;
