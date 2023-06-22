@@ -20,7 +20,7 @@ EXPORT_FUNC void free_mem(void *mem) {
 using namespace PlatformUtil;
 
 void callback_fulfill_void(Fulfiller<void>* fulfiller) {
-	fulfiller->fulfill();
+	fulfiller->fulfill(false);
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
@@ -98,19 +98,19 @@ void SimrailBasePlatform::debug_print(const std::string &msg) {
 }
 
 Promise<void> SimrailBasePlatform::delay(int ms) {
-	auto pair = PromiseFactory::create<void>(false);
+	auto pair = PromiseFactory::create<void>();
 	::delay(ms, (void*)&callback_fulfill_void, (void*)&callback_cancel_void, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 Promise<void> SimrailBasePlatform::on_quit_request() {
-	auto pair = PromiseFactory::create<void>(false);
+	auto pair = PromiseFactory::create<void>();
 	::on_quit_request((void*)&callback_fulfill_void, (void*)&callback_cancel_void, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 Promise<void> SimrailBasePlatform::on_quit() {
-	auto pair = PromiseFactory::create<void>(false);
+	auto pair = PromiseFactory::create<void>();
 	::on_quit((void*)&callback_fulfill_void, (void*)&callback_cancel_void, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
@@ -135,7 +135,7 @@ IMPORT_FUNC("simrail", "socket_on_peer_join") void socket_on_peer_join(uint32_t 
 IMPORT_FUNC("simrail", "socket_on_peer_leave") void socket_on_peer_leave(uint32_t handle, void*, void*, void*);
 
 void callback_fulfill_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket::PeerId, std::string>>* fulfiller, uint32_t tid, uint32_t uid, char* data, size_t len) {
-	fulfiller->fulfill(std::make_pair(BasePlatform::BusSocket::PeerId{ tid, uid }, std::string(data, len)));
+	fulfiller->fulfill(std::make_pair(BasePlatform::BusSocket::PeerId{ tid, uid }, std::string(data, len)), false);
 	::free_mem(data);
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
@@ -146,7 +146,7 @@ void callback_cancel_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket:
 }
 
 void callback_fulfill_socket_peer(Fulfiller<BasePlatform::BusSocket::PeerId>* fulfiller, uint32_t tid, uint32_t uid) {
-	fulfiller->fulfill(BasePlatform::BusSocket::PeerId{ tid, uid });
+	fulfiller->fulfill(BasePlatform::BusSocket::PeerId{ tid, uid }, false);
 	delete fulfiller;
 	while (DeferredFulfillment::execute());
 }
@@ -175,19 +175,19 @@ void SimrailBasePlatform::SimrailBusSocket::send_to(uint32_t uid, const std::str
 }
 
 Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> SimrailBasePlatform::SimrailBusSocket::receive() {
-	auto pair = PromiseFactory::create<std::pair<BusSocket::PeerId, std::string>>(false);
+	auto pair = PromiseFactory::create<std::pair<BusSocket::PeerId, std::string>>();
 	::socket_receive(handle, (void*)&callback_fulfill_socket_receive, (void*)&callback_cancel_socket_receive, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 Promise<BasePlatform::BusSocket::PeerId> SimrailBasePlatform::SimrailBusSocket::on_peer_join() {
-	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>(false);
+	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>();
 	::socket_on_peer_join(handle, (void*)&callback_fulfill_socket_peer, (void*)&callback_cancel_socket_peer, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 Promise<BasePlatform::BusSocket::PeerId> SimrailBasePlatform::SimrailBusSocket::on_peer_leave() {
-	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>(false);
+	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>();
 	::socket_on_peer_leave(handle, (void*)&callback_fulfill_socket_peer, (void*)&callback_cancel_socket_peer, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
@@ -197,7 +197,7 @@ Promise<BasePlatform::BusSocket::PeerId> SimrailBasePlatform::SimrailBusSocket::
 /*
 EXPORT_FUNC void callback_inputevent(Fulfiller<UiPlatform::InputEvent>* fulfiller, UiPlatform::InputEvent::Action action, float x, float y)
 {
-	fulfiller->fulfill(UiPlatform::InputEvent{action, x, y});
+	fulfiller->fulfill(UiPlatform::InputEvent{action, x, y}, false);
 	delete fulfiller;
 	while (DeferredFulfillment::execute());
 }
@@ -269,7 +269,7 @@ void SimrailUiPlatform::set_brightness(int vol) {
 Promise<UiPlatform::InputEvent> SimrailUiPlatform::on_input_event() {
 	return {};
 	/*
-	auto pair = PromiseFactory::create<InputEvent>(false);
+	auto pair = PromiseFactory::create<InputEvent>();
 	::on_input_event(new Fulfiller<InputEvent>(std::move(pair.second)));
 	return std::move(pair.first);
 	*/

@@ -69,7 +69,6 @@ private:
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
-	size_t present_count;
 	bool running;
 	std::map<std::string, std::string> ini_items;
 	void load_config();

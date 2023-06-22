@@ -80,7 +80,6 @@ namespace PlatformUtil
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
 		bool allocated;
-		bool defer;
 
 		struct DeferredFulfillerData
 		{
@@ -88,7 +87,7 @@ namespace PlatformUtil
 			typename CallbackType<T>::type callback;
 		};
 
-		void execute_callback() {
+		void execute_callback(bool defer) {
 			if (!defer) {
 				callback(std::move(*value));
 			} else {
@@ -104,12 +103,10 @@ namespace PlatformUtil
 		Fulfiller() {
 			promise = nullptr;
 			allocated = false;
-			defer = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
 			allocated = false;
-			defer = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -143,16 +140,16 @@ namespace PlatformUtil
 			return callback != nullptr || promise != nullptr;
 		}
 
-		void fulfill(T&& arg) {
+		void fulfill(T&& arg, bool defer = true) {
 			value = std::move(arg);
 			if (callback)
-				execute_callback();
+				execute_callback(defer);
 		}
 
-		void fulfill(const T& arg) {
+		void fulfill(const T& arg, bool defer = true) {
 			value = arg;
 			if (callback)
-				execute_callback();
+				execute_callback(defer);
 		}
 	};
 
@@ -166,9 +163,8 @@ namespace PlatformUtil
 		bool value;
 		typename CallbackType<void>::type callback;
 		bool allocated;
-		bool defer;
 
-		void execute_callback() {
+		void execute_callback(bool defer) {
 			if (!defer)
 				callback();
 			else
@@ -181,12 +177,10 @@ namespace PlatformUtil
 			promise = nullptr;
 			value = false;
 			allocated = false;
-			defer = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
 			allocated = false;
-			defer = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -220,10 +214,10 @@ namespace PlatformUtil
 			return callback != nullptr || promise != nullptr;
 		}
 
-		void fulfill() {
+		void fulfill(bool defer = true) {
 			value = true;
 			if (callback)
-				execute_callback();
+				execute_callback(defer);
 		}
 	};
 
@@ -278,7 +272,7 @@ namespace PlatformUtil
 			if (p.fulfiller) {
 				p.fulfiller->callback = func;
 				if (p.fulfiller->value)
-					p.fulfiller->execute_callback();
+					p.fulfiller->execute_callback(true);
 			}
 			return *this;
 		}
@@ -290,12 +284,11 @@ namespace PlatformUtil
 
 	public:
 		template <typename T>
-		static std::pair<Promise<T>, Fulfiller<T>> create(bool defer = true) {
+		static std::pair<Promise<T>, Fulfiller<T>> create() {
 			Promise<T> promise;
 			Fulfiller<T> fulfiller;
 			promise.p.fulfiller = &fulfiller;
 			fulfiller.promise = &promise.p;
-			fulfiller.defer = defer;
 			return std::make_pair(std::move(promise), std::move(fulfiller));
 		}
 	};
@@ -305,8 +298,11 @@ namespace PlatformUtil
 	{
 		std::vector<Fulfiller<T>> fulfiller_queue;
 		std::vector<T> data_queue;
+		bool defer;
 
 	public:
+		FulfillerBufferedQueue(bool defer = true) : defer(defer) {}
+
 		size_t pending_fulfillers() {
 			fulfiller_queue.erase(std::remove_if(fulfiller_queue.begin(), fulfiller_queue.end(), [](const auto &entry) { return !entry.is_pending(); }), fulfiller_queue.end());
 			return fulfiller_queue.size();
@@ -323,7 +319,7 @@ namespace PlatformUtil
 			if (it != fulfiller_queue.end()) {
 				Fulfiller<T> f = std::move(*it);
 				fulfiller_queue.erase(it);
-				f.fulfill(packet);
+				f.fulfill(packet, defer);
 			} else {
 				data_queue.push_back(packet);
 			}
@@ -336,7 +332,7 @@ namespace PlatformUtil
 			if (it != fulfiller_queue.end()) {
 				Fulfiller<T> f = std::move(*it);
 				fulfiller_queue.erase(it);
-				f.fulfill(std::move(packet));
+				f.fulfill(std::move(packet), defer);
 			} else {
 				data_queue.push_back(std::move(packet));
 			}
@@ -349,14 +345,14 @@ namespace PlatformUtil
 				auto it = data_queue.begin();
 				T packet = std::move(*it);
 				data_queue.erase(it);
-				f.fulfill(std::move(packet));
+				f.fulfill(std::move(packet), defer);
 			} else {
 				fulfiller_queue.push_back(std::move(f));
 			}
 		}
 
-		Promise<T> create_and_add(bool defer = true) {
-			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>(defer);
+		Promise<T> create_and_add() {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
 			add(std::move(pair.second));
 			return std::move(pair.first);
 		}
@@ -377,7 +373,7 @@ namespace PlatformUtil
 			list.push_back(std::move(f));
 		}
 
-		void fulfill_one(const T& arg) {
+		void fulfill_one(const T& arg, bool defer = true) {
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
 
@@ -385,14 +381,14 @@ namespace PlatformUtil
 			while (it != tmp.end() && !it->is_pending())
 				++it;
 			if (it != tmp.end()) {
-				tmp.begin()->fulfill(arg);
+				tmp.begin()->fulfill(arg, defer);
 				auto tmp_next = std::next(it);
 				if (tmp_next != tmp.end())
 					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 			}
 		}
 
-		void fulfill_one(T&& arg) {
+		void fulfill_one(T&& arg, bool defer = true) {
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
 
@@ -400,22 +396,22 @@ namespace PlatformUtil
 			while (it != tmp.end() && !it->is_pending())
 				++it;
 			if (it != tmp.end()) {
-				tmp.begin()->fulfill(std::move(arg));
+				tmp.begin()->fulfill(std::move(arg), defer);
 				auto tmp_next = std::next(it);
 				if (tmp_next != tmp.end())
 					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 			}
 		}
 
-		void fulfill_all(const T& arg) {
+		void fulfill_all(const T& arg, bool defer = true) {
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
 			for (PlatformUtil::Fulfiller<T> &f : tmp)
-				f.fulfill(arg);
+				f.fulfill(arg, defer);
 		}
 
-		Promise<T> create_and_add(bool defer = true) {
-			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>(defer);
+		Promise<T> create_and_add() {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
 			list.push_back(std::move(pair.second));
 			return std::move(pair.first);
 		}
@@ -436,7 +432,7 @@ namespace PlatformUtil
 			list.push_back(std::move(f));
 		}
 
-		void fulfill_one() {
+		void fulfill_one(bool defer = true) {
 			std::vector<Fulfiller<void>> tmp = std::move(list);
 			list.clear();
 
@@ -444,22 +440,22 @@ namespace PlatformUtil
 			while (it != tmp.end() && !it->is_pending())
 				++it;
 			if (it != tmp.end()) {
-				tmp.begin()->fulfill();
+				tmp.begin()->fulfill(defer);
 				auto tmp_next = std::next(it);
 				if (tmp_next != tmp.end())
 					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
 			}
 		}
 
-		void fulfill_all() {
+		void fulfill_all(bool defer = true) {
 			std::vector<Fulfiller<void>> tmp = std::move(list);
 			list.clear();
 			for (PlatformUtil::Fulfiller<void> &f : tmp)
-				f.fulfill();
+				f.fulfill(defer);
 		}
 
-		Promise<void> create_and_add(bool defer = true) {
-			std::pair<Promise<void>, Fulfiller<void>> pair = PromiseFactory::create<void>(defer);
+		Promise<void> create_and_add() {
+			std::pair<Promise<void>, Fulfiller<void>> pair = PromiseFactory::create<void>();
 			list.push_back(std::move(pair.second));
 			return std::move(pair.first);
 		}

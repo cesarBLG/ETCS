@@ -101,17 +101,17 @@ void ConsolePlatform::debug_print(const std::string &msg) {
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::delay(int ms) {
-	auto pair = PlatformUtil::PromiseFactory::create<void>(false);
+	auto pair = PlatformUtil::PromiseFactory::create<void>();
 	timer_queue.insert(std::make_pair(get_timer() + ms, std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::on_quit_request() {
-	return on_quit_request_list.create_and_add(false);
+	return on_quit_request_list.create_and_add();
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::on_quit() {
-	return on_quit_list.create_and_add(false);
+	return on_quit_list.create_and_add();
 }
 
 
@@ -120,7 +120,7 @@ std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const s
 }
 
 PlatformUtil::Promise<short> ConsolePlatform::ConsoleFdPoller::on_fd_ready(int fd, short ev) {
-	auto pair = PlatformUtil::PromiseFactory::create<short>(false);
+	auto pair = PlatformUtil::PromiseFactory::create<short>();
 	fds.push_back(std::make_pair(std::make_pair(fd, ev), std::move(pair.second)));
 	return std::move(pair.first);
 }
@@ -149,7 +149,7 @@ void ConsolePlatform::ConsoleFdPoller::poll(int timeout) {
 		if (pfd[i].revents & POLLNVAL)
 			platform->debug_print("POLLNVAL!");
 		else if ((pfd[i].events & pfd[i].revents) != 0 || (pfd[i].revents & (POLLERR | POLLHUP)) != 0)
-			tmp[i].second.fulfill(pfd[i].revents);
+			tmp[i].second.fulfill(pfd[i].revents, false);
 		else
 			fds.push_back(std::move(tmp[i]));
 	}
@@ -165,7 +165,7 @@ void ConsolePlatform::event_loop() {
 		do {
 			{
 				if (quit_request)
-					on_quit_request_list.fulfill_all();
+					on_quit_request_list.fulfill_all(false);
 
 				int64_t now = get_timer();
 				std::vector<PlatformUtil::Fulfiller<void>> expired;
@@ -174,7 +174,7 @@ void ConsolePlatform::event_loop() {
 					timer_queue.erase(timer_queue.begin());
 				}
 				for (PlatformUtil::Fulfiller<void> &f : expired)
-					f.fulfill();
+					f.fulfill(false);
 			}
 
 			diff = -1;
@@ -185,7 +185,7 @@ void ConsolePlatform::event_loop() {
 		poller.poll(diff);
 	};
 
-	on_quit_list.fulfill_all();
+	on_quit_list.fulfill_all(false);
 }
 
 void ConsolePlatform::quit() {
