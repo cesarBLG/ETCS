@@ -17,6 +17,7 @@
 #include "bus_socket_impl.h"
 #include "bus_socket_server.h"
 #include "bus_tcp_bridge.h"
+#include "console_fd_poller.h"
 
 class ConsolePlatform final : public BasePlatform {
 private:
@@ -27,14 +28,6 @@ private:
 	PlatformUtil::FulfillerList<void> on_quit_request_list;
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
-
-	class ConsoleFdPoller final : public FdPoller {
-		std::vector<std::pair<std::pair<int, short>, PlatformUtil::Fulfiller<short>>> fds;
-	public:
-		virtual PlatformUtil::Promise<short> on_fd_ready(int fd, short ev) override;
-		void poll(int timeout);
-		bool is_empty();
-	};
 
 	ConsoleFdPoller poller;
 

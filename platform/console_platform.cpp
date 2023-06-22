@@ -6,15 +6,8 @@
 
 #include "console_platform.h"
 
-#ifndef _WIN32
+#ifdef __unix__
 #include <signal.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/poll.h>
-#include <netdb.h>
-#else
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #endif
 
 static std::atomic<bool>* quit_request_ptr;
@@ -119,70 +112,33 @@ std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const s
 	return bus_socket_impl.open_bus_socket(channel, tid);
 }
 
-PlatformUtil::Promise<short> ConsolePlatform::ConsoleFdPoller::on_fd_ready(int fd, short ev) {
-	auto pair = PlatformUtil::PromiseFactory::create<short>();
-	fds.push_back(std::make_pair(std::make_pair(fd, ev), std::move(pair.second)));
-	return std::move(pair.first);
-}
-
-#ifndef _WIN32
-#define sys_poll poll
-#define socket_type int
-#else
-#define sys_poll WSAPoll
-#define socket_type SOCKET
-#endif
-
-void ConsolePlatform::ConsoleFdPoller::poll(int timeout) {
-	auto tmp = std::move(fds);
-	fds.clear();
-	tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](const auto &entry) { return !entry.second.is_pending(); }), tmp.end());
-
-	std::vector<pollfd> pfd;
-	pfd.reserve(tmp.size());
-	for (const auto &entry : tmp)
-		pfd.push_back({ (socket_type)entry.first.first, entry.first.second, 0 });
-
-	::sys_poll(pfd.data(), pfd.size(), timeout);
-
-	for (int i = 0; i < pfd.size(); i++) {
-		if (pfd[i].revents & POLLNVAL)
-			platform->debug_print("POLLNVAL!");
-		else if ((pfd[i].events & pfd[i].revents) != 0 || (pfd[i].revents & (POLLERR | POLLHUP)) != 0)
-			tmp[i].second.fulfill(pfd[i].revents, false);
-		else
-			fds.push_back(std::move(tmp[i]));
-	}
-}
-
-bool ConsolePlatform::ConsoleFdPoller::is_empty() {
-	return fds.empty();
-}
-
 void ConsolePlatform::event_loop() {
 	while (running) {
-		int64_t diff;
-		do {
-			{
-				if (quit_request)
-					on_quit_request_list.fulfill_all(false);
+		bool idle = true;
 
-				int64_t now = get_timer();
-				std::vector<PlatformUtil::Fulfiller<void>> expired;
-				while (!timer_queue.empty() && timer_queue.begin()->first <= now) {
-					expired.push_back(std::move(timer_queue.begin()->second));
-					timer_queue.erase(timer_queue.begin());
-				}
-				for (PlatformUtil::Fulfiller<void> &f : expired)
-					f.fulfill(false);
-			}
+		if (quit_request) {
+			idle = false;
+			on_quit_request_list.fulfill_all(false);
+		}
 
-			diff = -1;
-			if (!timer_queue.empty())
-				diff = std::max((int64_t)0, timer_queue.begin()->first - get_timer());
-		} while (PlatformUtil::DeferredFulfillment::execute());
+		int64_t now = get_timer();
+		if (!timer_queue.empty() && timer_queue.begin()->first <= now) {
+			idle = false;
+			timer_queue.begin()->second.fulfill(false);
+			timer_queue.erase(timer_queue.begin());
+		}
 
-		poller.poll(diff);
+		for (int i = 0; i < 10; i++)
+			if (PlatformUtil::DeferredFulfillment::execute())
+				idle = false;
+			else
+				break;
+
+		int64_t diff = -1;
+		if (!timer_queue.empty())
+			diff = std::max((int64_t)0, timer_queue.begin()->first - get_timer());
+
+		poller.poll(idle ? diff : 0);
 	};
 
 	on_quit_list.fulfill_all(false);

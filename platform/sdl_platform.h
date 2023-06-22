@@ -14,6 +14,7 @@
 #include "bus_socket_impl.h"
 #include "libc_time_impl.h"
 #include "fstream_file_impl.h"
+#include "console_fd_poller.h"
 
 struct SDL_Renderer;
 struct SDL_Texture;
@@ -46,14 +47,7 @@ private:
 		std::atomic<bool> stop;
 	};
 
-	class SimplePoller final : public FdPoller {
-		std::vector<std::pair<std::pair<int, short>, PlatformUtil::Fulfiller<short>>> fds;
-	public:
-		virtual PlatformUtil::Promise<short> on_fd_ready(int fd, short ev) override;
-		void fulfill();
-	};
-
-	SimplePoller poller;
+	ConsoleFdPoller poller;
 
 	SDL_Renderer *sdlrend;
 	SDL_Window *sdlwindow;
@@ -67,8 +61,8 @@ private:
 	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
 	PlatformUtil::FulfillerList<void> on_close_list;
 	PlatformUtil::FulfillerList<void> on_quit_list;
-	PlatformUtil::FulfillerList<InputEvent> on_input_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
+	PlatformUtil::FulfillerList<InputEvent> on_input_list;
 	bool running;
 	std::map<std::string, std::string> ini_items;
 	void load_config();
@@ -80,6 +74,7 @@ private:
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
 	void mixer_func(int16_t *buffer, size_t len);
+	bool poll_sdl();
 
 public:
 	class SdlImage final : public Image

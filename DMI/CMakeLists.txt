@@ -22,7 +22,7 @@ endif()
 
 if (NOT WASM)
     set(WITH_SDL TRUE)
-    list(APPEND SOURCES ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp)
+    list(APPEND SOURCES ../platform/tcp_socket.cpp ../platform/console_fd_poller.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp)
 else()
     set(WITH_SDL FALSE)
     list(APPEND SOURCES ../platform/simrail_platform.cpp)

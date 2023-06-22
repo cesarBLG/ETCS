@@ -162,76 +162,77 @@ PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {
 	return on_input_list.create_and_add();
 }
 
-PlatformUtil::Promise<short> SdlPlatform::SimplePoller::on_fd_ready(int fd, short ev) {
-	auto pair = PlatformUtil::PromiseFactory::create<short>();
-	fds.push_back(std::make_pair(std::make_pair(fd, ev), std::move(pair.second)));
-	return std::move(pair.first);
-}
+bool SdlPlatform::poll_sdl() {
+	SDL_Event ev;
+	if (SDL_PollEvent(&ev)) {
+		if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE) {
+			on_close_list.fulfill_all(false);
+		}
+		else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
+			SDL_MouseButtonEvent sdlev = ev.button;
+			if (sdlev.button == SDL_BUTTON_LEFT) {
+				InputEvent ev;
+				ev.action = (sdlev.state == SDL_PRESSED) ? InputEvent::Action::Press : InputEvent::Action::Release;
+				ev.x = (sdlev.x - ox) / s;
+				ev.y = (sdlev.y - oy) / s;
 
-void SdlPlatform::SimplePoller::fulfill() {
-	auto mv = std::move(fds);
-	fds.clear();
-	for (auto &entry : mv)
-		entry.second.fulfill(entry.first.second, false);
+				on_input_list.fulfill_all(ev, false);
+			}
+		}
+		else if (ev.type == SDL_MOUSEMOTION) {
+			SDL_MouseMotionEvent sdlev = ev.motion;
+			if (sdlev.state & SDL_BUTTON_LMASK) {
+				InputEvent ev;
+				ev.action = InputEvent::Action::Move;
+				ev.x = (sdlev.x - ox) / s;
+				ev.y = (sdlev.y - oy) / s;
+
+				on_input_list.fulfill_all(ev, false);
+			}
+		}
+		return true;
+	}
+	return false;
 }
 
 void SdlPlatform::event_loop() {
-	int64_t prev = 0;
 	while (running) {
-		{
-			int64_t now = get_timer();
-			if (now - prev < 10)
-				SDL_Delay(10 - (now - prev));
-			prev = get_timer();
+		bool idle = true;
+
+		while (poll_sdl())
+			idle = false;
+
+		int64_t now = get_timer();
+		if (!timer_queue.empty() && timer_queue.begin()->first <= now) {
+			idle = false;
+			timer_queue.begin()->second.fulfill(false);
+			timer_queue.erase(timer_queue.begin());
 		}
 
-		{
-			SDL_Event ev;
-			while (SDL_PollEvent(&ev)) {
-				if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE) {
-					on_close_list.fulfill_all(false);
-				}
-				else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
-					SDL_MouseButtonEvent sdlev = ev.button;
-					if (sdlev.button == SDL_BUTTON_LEFT) {
-						InputEvent ev;
-						ev.action = (sdlev.state == SDL_PRESSED) ? InputEvent::Action::Press : InputEvent::Action::Release;
-						ev.x = (sdlev.x - ox) / s;
-						ev.y = (sdlev.y - oy) / s;
+		for (int i = 0; i < 10; i++)
+			if (PlatformUtil::DeferredFulfillment::execute())
+				idle = false;
+			else
+				break;
 
-						on_input_list.fulfill_all(ev, false);
-					}
-				}
-				else if (ev.type == SDL_MOUSEMOTION) {
-					SDL_MouseMotionEvent sdlev = ev.motion;
-					if (sdlev.state & SDL_BUTTON_LMASK) {
-						InputEvent ev;
-						ev.action = InputEvent::Action::Move;
-						ev.x = (sdlev.x - ox) / s;
-						ev.y = (sdlev.y - oy) / s;
-
-						on_input_list.fulfill_all(ev, false);
-					}
-				}
-			}
+		if (on_present_list.pending() > 0) {
+			idle = false;
+			SDL_RenderPresent(sdlrend);
+			on_present_list.fulfill_one(false);
 		}
 
-		do
-		{
-			int64_t now = get_timer();
-			std::vector<PlatformUtil::Fulfiller<void>> expired;
-			while (!timer_queue.empty() && timer_queue.begin()->first <= now) {
-				expired.push_back(std::move(timer_queue.begin()->second));
-				timer_queue.erase(timer_queue.begin());
-			}
-			for (PlatformUtil::Fulfiller<void> &f : expired)
-				f.fulfill(false);
+		int64_t diff = -1;
+		if (!timer_queue.empty())
+			diff = std::max((int64_t)0, timer_queue.begin()->first - get_timer());
 
-			poller.fulfill();
-		} while (PlatformUtil::DeferredFulfillment::execute());
+		if (diff == -1 || diff > 10)
+			diff = 10;
 
-		on_present_list.fulfill_one(false);
-	}
+		poller.poll(idle ? diff : 0);
+	};
+
+	if (on_present_list.pending() > 0)
+		SDL_RenderPresent(sdlrend);
 
 	on_quit_list.fulfill_all(false);
 }
@@ -294,7 +295,6 @@ void SdlPlatform::clear() {
 }
 
 PlatformUtil::Promise<void> SdlPlatform::present() {
-	SDL_RenderPresent(sdlrend);
 	return on_present_list.create_and_add();
 }
 
