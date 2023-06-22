@@ -311,7 +311,7 @@ namespace PlatformUtil
 			}
 		}
 
-		Promise<T>  create_and_add() {
+		Promise<T> create_and_add() {
 			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
 			add(std::move(pair.second));
 			return std::move(pair.first);

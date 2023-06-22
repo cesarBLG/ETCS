@@ -17,22 +17,34 @@
 #include <ws2tcpip.h>
 #endif
 
-int main(int argc, char *argv[])
-{
-	std::string load_path;
-	if (argc >= 2)
-		load_path = std::string(argv[1]);
-	platform = std::make_unique<ConsolePlatform>(load_path);
-	on_platform_ready();
-	static_cast<ConsolePlatform*>(platform.get())->event_loop();
-	return 0;
-}
-
 static std::atomic<bool>* quit_request_ptr;
 
 static void sigterm_handler(int sig) {
 	*quit_request_ptr = true;
 }
+
+#ifdef __ANDROID__
+#include <jni.h>
+extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
+{
+    jboolean b;
+    platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)));
+	on_platform_ready();
+	static_cast<ConsolePlatform*>(platform.get())->event_loop();
+}
+extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
+{
+    sigterm_handler(SIGTERM);
+}
+#else
+int main(int argc, char *argv[])
+{
+	platform = std::make_unique<ConsolePlatform>("");
+	on_platform_ready();
+	static_cast<ConsolePlatform*>(platform.get())->event_loop();
+	return 0;
+}
+#endif
 
 ConsolePlatform::ConsolePlatform(const std::string &path) :
 	load_path(path),

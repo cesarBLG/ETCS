@@ -42,7 +42,9 @@ void TcpSocket::close_socket() {
 	close(peer_fd);
 #endif
 	peer_fd = -1;
-	rx_list.fulfill_one("");
+
+	auto tmp = std::move(rx_list);
+	tmp.fulfill_one("");
 }
 
 bool TcpSocket::handle_error() {

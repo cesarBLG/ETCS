@@ -13,10 +13,19 @@ TrainSubsystems/power.cpp TrainSubsystems/brake.cpp TrainSubsystems/train_interf
 language/language.cpp Version/version.cpp Version/translate.cpp Config/config.cpp
 NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 ../platform/platform.cpp
-../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp
-../platform/console_platform.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp
 ../libs/liborts/serverlib.cpp ../libs/liborts/common.cpp
 )
+
+if (NOT WASM)
+    list(APPEND SOURCES ../platform/console_platform.cpp ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp)
+else()
+    list(APPEND SOURCES ../platform/simrail_platform.cpp)
+    add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
+    add_definitions(-DNO_EXCEPTIONS)
+    add_compile_options(-fno-exceptions)
+    add_link_options(-mexec-model=reactor)
+    add_link_options(-Wl,--export=init)
+endif()
 
 if(WIN32)
     list(APPEND SOURCES resource.rc)
@@ -27,7 +36,7 @@ if (ANDROID)
 else()
     add_executable(evc ${SOURCES})
 endif()
-target_compile_definitions(evc PUBLIC NOMINMAX)
+target_compile_definitions(evc PRIVATE NOMINMAX)
 target_include_directories(evc PRIVATE ../include)
 target_include_directories(evc PRIVATE ../platform)
 target_include_directories(evc PRIVATE ../libs/liborts/include)

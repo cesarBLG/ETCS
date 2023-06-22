@@ -46,7 +46,7 @@ private:
 		std::atomic<bool> stop;
 	};
 
-	class SimplePoller : public FdPoller {
+	class SimplePoller final : public FdPoller {
 		std::vector<std::pair<std::pair<int, short>, PlatformUtil::Fulfiller<short>>> fds;
 	public:
 		virtual PlatformUtil::Promise<short> on_fd_ready(int fd, short ev) override;
@@ -83,7 +83,7 @@ private:
 	void mixer_func(int16_t *buffer, size_t len);
 
 public:
-	class SdlImage : public Image
+	class SdlImage final : public Image
 	{
 	private:
 		SDL_Texture* tex;
@@ -97,7 +97,7 @@ public:
 		virtual float height() const override;
 	};
 
-	class SdlFont : public Font
+	class SdlFont final : public Font
 	{
 	private:
 		std::shared_ptr<SdlFontWrapper> font;
@@ -109,7 +109,7 @@ public:
 		virtual std::pair<float, float> calc_size(const std::string &str) const override;
 	};
 
-	class SdlSoundData : public SoundData
+	class SdlSoundData final : public SoundData
 	{
 	private:
 		std::shared_ptr<SdlSoundDataWrapper> data;
@@ -118,7 +118,7 @@ public:
 		const std::shared_ptr<SdlSoundDataWrapper>& get() const;
 	};
 
-	class SdlSoundSource : public SoundSource
+	class SdlSoundSource final : public SoundSource
 	{
 	private:
 		std::weak_ptr<PlaybackState> state;

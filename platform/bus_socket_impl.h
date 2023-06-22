@@ -24,7 +24,7 @@ public:
 
 	std::unique_ptr<BasePlatform::BusSocket> open_bus_socket(const std::string &channel, uint32_t tid);
 
-	class TcpBusSocket : public BasePlatform::BusSocket {
+	class TcpBusSocket final : public BasePlatform::BusSocket {
 	private:
 		std::unique_ptr<TcpSocket> socket;
 		std::string rx_buffer;

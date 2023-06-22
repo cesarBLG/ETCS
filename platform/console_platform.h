@@ -28,7 +28,7 @@ private:
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
 
-	class ConsoleFdPoller : public FdPoller {
+	class ConsoleFdPoller final : public FdPoller {
 		std::vector<std::pair<std::pair<int, short>, PlatformUtil::Fulfiller<short>>> fds;
 	public:
 		virtual PlatformUtil::Promise<short> on_fd_ready(int fd, short ev) override;

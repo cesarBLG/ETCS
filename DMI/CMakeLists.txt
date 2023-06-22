@@ -1,5 +1,3 @@
-option(WITH_SDL "Compile with SDL" ON)
-
 set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp 
             graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp 
             speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp 
@@ -16,11 +14,23 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
             ../platform/platform.cpp
-            ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp
 )
 
 if(WIN32)
     list(APPEND SOURCES resource.rc)
+endif()
+
+if (NOT WASM)
+    set(WITH_SDL TRUE)
+    list(APPEND SOURCES ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp)
+else()
+    set(WITH_SDL FALSE)
+    list(APPEND SOURCES ../platform/simrail_platform.cpp)
+    add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
+    add_definitions(-DNO_EXCEPTIONS)
+    add_compile_options(-fno-exceptions)
+    add_link_options(-mexec-model=reactor)
+    add_link_options(-Wl,--export=init)
 endif()
 
 if (WITH_SDL)
@@ -30,7 +40,6 @@ if (WITH_SDL)
         find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
         find_package(SDL2_ttf REQUIRED CONFIG REQUIRED COMPONENTS SDL2_ttf)
     endif()
-    add_definitions(-DWITH_SDL)
 endif()
 
 if (ANDROID)
@@ -40,7 +49,7 @@ elseif(WIN32)
 else()
     add_executable(dmi ${SOURCES})
 endif()
-target_compile_definitions(dmi PUBLIC NOMINMAX)
+target_compile_definitions(dmi PRIVATE NOMINMAX)
 
 if (WITH_SDL)
     if(TARGET SDL2::SDL2main)
@@ -60,24 +69,13 @@ elseif(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
 endif()
 
-if (WITH_SDL)
-    if(WIN32)
-        add_custom_command(TARGET dmi POST_BUILD 
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:SDL2>              
-            $<TARGET_FILE_DIR:dmi>)
-        add_custom_command(TARGET dmi POST_BUILD 
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:SDL2_ttf>              
-            $<TARGET_FILE_DIR:dmi>)
-    endif()
-else()
-    if(WIN32)
-        add_custom_command(TARGET dmi POST_BUILD 
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE_DIR:dmi>)
-        add_custom_command(TARGET dmi POST_BUILD 
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE_DIR:dmi>)
-    endif()
+if (WITH_SDL AND WIN32)
+    add_custom_command(TARGET dmi POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL2>              
+        $<TARGET_FILE_DIR:dmi>)
+    add_custom_command(TARGET dmi POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:SDL2_ttf>              
+        $<TARGET_FILE_DIR:dmi>)
 endif()

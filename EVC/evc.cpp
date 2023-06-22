@@ -31,10 +31,7 @@
 #include "Euroradio/terminal.h"
 #include "platform.h"
 
-#include <signal.h>
-#ifdef __ANDROID__
-#include <android/log.h>
-#elif defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
@@ -136,7 +133,8 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
     print_stack(*(ExceptionInfo->ContextRecord));
     return EXCEPTION_EXECUTE_HANDLER;
 }
-#else
+#elif defined(__unix__)
+#include <signal.h>
 #include <execinfo.h>
 #include <cxxabi.h>
 #include <unistd.h>
@@ -152,21 +150,6 @@ void crash_handler(int sig)
     
     signal(sig, SIG_DFL);
     return;
-}
-#endif
-
-#ifdef __ANDROID__
-#include <jni.h>
-int main(int argc, char *argv[]);
-extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
-{
-    jboolean b;
-    main(2, (char**)(new const char*[]{ "evc", std::string(env->GetStringUTFChars(stringObject, &b)).c_str(), nullptr }));
-}
-extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
-{
-    if (platform)
-        platform->quit();
 }
 #endif
 
