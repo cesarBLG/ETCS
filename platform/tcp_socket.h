@@ -21,11 +21,12 @@ private:
 	std::string tx_buffer;
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;
+	bool rx_pending, tx_pending;
 	FdPoller* poller;
 
 	void mark_nonblocking(int fd);
 	void close_socket();
-	bool handle_error();
+	void handle_error();
 	void update();
 	void connect(const std::string &hostname, int port);
 public:

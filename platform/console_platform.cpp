@@ -101,17 +101,17 @@ void ConsolePlatform::debug_print(const std::string &msg) {
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::delay(int ms) {
-	auto pair = PlatformUtil::PromiseFactory::create<void>();
+	auto pair = PlatformUtil::PromiseFactory::create<void>(false);
 	timer_queue.insert(std::make_pair(get_timer() + ms, std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::on_quit_request() {
-	return on_quit_request_list.create_and_add();
+	return on_quit_request_list.create_and_add(false);
 }
 
 PlatformUtil::Promise<void> ConsolePlatform::on_quit() {
-	return on_quit_list.create_and_add();
+	return on_quit_list.create_and_add(false);
 }
 
 
@@ -120,7 +120,7 @@ std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const s
 }
 
 PlatformUtil::Promise<short> ConsolePlatform::ConsoleFdPoller::on_fd_ready(int fd, short ev) {
-	auto pair = PlatformUtil::PromiseFactory::create<short>();
+	auto pair = PlatformUtil::PromiseFactory::create<short>(false);
 	fds.push_back(std::make_pair(std::make_pair(fd, ev), std::move(pair.second)));
 	return std::move(pair.first);
 }
@@ -161,26 +161,26 @@ bool ConsolePlatform::ConsoleFdPoller::is_empty() {
 
 void ConsolePlatform::event_loop() {
 	while (running) {
-		if (quit_request)
-			on_quit_request_list.fulfill_all();
+		int64_t diff;
+		do {
+			if (quit_request)
+				on_quit_request_list.fulfill_all();
 
-		{
-			int64_t now = get_timer();
-			std::vector<PlatformUtil::Fulfiller<void>> expired;
-			while (!timer_queue.empty() && timer_queue.begin()->first <= now) {
-				expired.push_back(std::move(timer_queue.begin()->second));
-				timer_queue.erase(timer_queue.begin());
+			{
+				int64_t now = get_timer();
+				std::vector<PlatformUtil::Fulfiller<void>> expired;
+				while (!timer_queue.empty() && timer_queue.begin()->first <= now) {
+					expired.push_back(std::move(timer_queue.begin()->second));
+					timer_queue.erase(timer_queue.begin());
+				}
+				for (PlatformUtil::Fulfiller<void> &f : expired)
+					f.fulfill();
 			}
-			for (PlatformUtil::Fulfiller<void> &f : expired)
-				f.fulfill();
-		}
 
-		int64_t diff = -1;
-		if (!timer_queue.empty()) {
-			diff = std::max((int64_t)0, timer_queue.begin()->first - get_timer());
-		} else if (poller.is_empty()) {
-			break;
-		}
+			diff = -1;
+			if (!timer_queue.empty())
+				diff = std::max((int64_t)0, timer_queue.begin()->first - get_timer());
+		} while (PlatformUtil::DeferredFulfillment::execute());
 
 		poller.poll(diff);
 	};

@@ -49,6 +49,27 @@ namespace PlatformUtil
 		Fulfiller<T>* fulfiller;
 	};
 
+	class DeferredFulfillment
+	{
+		template <typename T> friend class Fulfiller;
+
+	private:
+		static std::vector<std::function<void()>> list;
+
+	public:
+		static bool execute() {
+			if (list.empty())
+				return false;
+
+			auto tmp = std::move(list);
+			list.clear();
+			for (auto &f : tmp)
+				f();
+
+			return true;
+		}
+	};
+
 	template <typename T>
 	class Fulfiller
 	{
@@ -59,15 +80,36 @@ namespace PlatformUtil
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
 		bool allocated;
+		bool defer;
+
+		struct DeferredFulfillerData
+		{
+			T value;
+			typename CallbackType<T>::type callback;
+		};
+
+		void execute_callback() {
+			if (!defer) {
+				callback(std::move(*value));
+			} else {
+				DeferredFulfillment::list.push_back([data = new DeferredFulfillerData({ std::move(*value), std::move(callback) })]() {
+					data->callback(std::move(data->value));
+					delete data;
+				});
+			}
+			callback = nullptr;
+		}
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
 			allocated = false;
+			defer = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
 			allocated = false;
+			defer = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -103,18 +145,14 @@ namespace PlatformUtil
 
 		void fulfill(T&& arg) {
 			value = std::move(arg);
-			if (callback) {
-				callback(std::move(*value));
-				callback = nullptr;
-			}
+			if (callback)
+				execute_callback();
 		}
 
 		void fulfill(const T& arg) {
 			value = arg;
-			if (callback) {
-				callback(std::move(*value));
-				callback = nullptr;
-			}
+			if (callback)
+				execute_callback();
 		}
 	};
 
@@ -128,16 +166,27 @@ namespace PlatformUtil
 		bool value;
 		typename CallbackType<void>::type callback;
 		bool allocated;
+		bool defer;
+
+		void execute_callback() {
+			if (!defer)
+				callback();
+			else
+				DeferredFulfillment::list.push_back(std::move(callback));
+			callback = nullptr;
+		}
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
 			value = false;
 			allocated = false;
+			defer = false;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
 			allocated = false;
+			defer = false;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -173,10 +222,8 @@ namespace PlatformUtil
 
 		void fulfill() {
 			value = true;
-			if (callback) {
-				callback();
-				callback = nullptr;
-			}
+			if (callback)
+				execute_callback();
 		}
 	};
 
@@ -227,22 +274,11 @@ namespace PlatformUtil
 			p.fulfiller = nullptr;
 		}
 
-		bool is_pending() const {
-			if (!p.fulfiller)
-				return false;
-			return !p.fulfiller->value;
-		}
-
 		Promise<T>& then(const typename CallbackType<T>::type &func) {
-			if (!p.fulfiller)
-				return *this;
-			if (p.fulfiller->value) {
-				if constexpr (std::is_void<T>::value)
-					func();
-				else
-					func(std::move(*p.fulfiller->value));
-			} else {
+			if (p.fulfiller) {
 				p.fulfiller->callback = func;
+				if (p.fulfiller->value)
+					p.fulfiller->execute_callback();
 			}
 			return *this;
 		}
@@ -254,11 +290,12 @@ namespace PlatformUtil
 
 	public:
 		template <typename T>
-		static std::pair<Promise<T>, Fulfiller<T>> create() {
+		static std::pair<Promise<T>, Fulfiller<T>> create(bool defer = true) {
 			Promise<T> promise;
 			Fulfiller<T> fulfiller;
 			promise.p.fulfiller = &fulfiller;
 			fulfiller.promise = &promise.p;
+			fulfiller.defer = defer;
 			return std::make_pair(std::move(promise), std::move(fulfiller));
 		}
 	};
@@ -311,8 +348,8 @@ namespace PlatformUtil
 			}
 		}
 
-		Promise<T> create_and_add() {
-			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
+		Promise<T> create_and_add(bool defer = true) {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>(defer);
 			add(std::move(pair.second));
 			return std::move(pair.first);
 		}
@@ -361,8 +398,8 @@ namespace PlatformUtil
 				f.fulfill(arg);
 		}
 
-		Promise<T> create_and_add() {
-			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>();
+		Promise<T> create_and_add(bool defer = true) {
+			std::pair<Promise<T>, Fulfiller<T>> pair = PromiseFactory::create<T>(defer);
 			list.push_back(std::move(pair.second));
 			return std::move(pair.first);
 		}
@@ -400,8 +437,8 @@ namespace PlatformUtil
 				f.fulfill();
 		}
 
-		Promise<void> create_and_add() {
-			std::pair<Promise<void>, Fulfiller<void>> pair = PromiseFactory::create<void>();
+		Promise<void> create_and_add(bool defer = true) {
+			std::pair<Promise<void>, Fulfiller<void>> pair = PromiseFactory::create<void>(defer);
 			list.push_back(std::move(pair.second));
 			return std::move(pair.first);
 		}

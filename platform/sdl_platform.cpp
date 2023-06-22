@@ -146,25 +146,25 @@ void SdlPlatform::debug_print(const std::string &msg) {
 }
 
 PlatformUtil::Promise<void> SdlPlatform::delay(int ms) {
-	auto pair = PlatformUtil::PromiseFactory::create<void>();
+	auto pair = PlatformUtil::PromiseFactory::create<void>(false);
 	timer_queue.insert(std::make_pair(get_timer() + ms, std::move(pair.second)));
 	return std::move(pair.first);
 }
 
 PlatformUtil::Promise<void> SdlPlatform::on_quit_request() {
-	return on_close_list.create_and_add();
+	return on_close_list.create_and_add(false);
 }
 
 PlatformUtil::Promise<void> SdlPlatform::on_quit() {
-	return on_quit_list.create_and_add();
+	return on_quit_list.create_and_add(false);
 }
 
 PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {
-	return on_input_list.create_and_add();
+	return on_input_list.create_and_add(false);
 }
 
 PlatformUtil::Promise<short> SdlPlatform::SimplePoller::on_fd_ready(int fd, short ev) {
-	auto pair = PlatformUtil::PromiseFactory::create<short>();
+	auto pair = PlatformUtil::PromiseFactory::create<short>(false);
 	fds.push_back(std::make_pair(std::make_pair(fd, ev), std::move(pair.second)));
 	return std::move(pair.first);
 }
@@ -229,6 +229,8 @@ void SdlPlatform::event_loop() {
 		}
 
 		poller.fulfill();
+
+		while (PlatformUtil::DeferredFulfillment::execute());
 
 		{
 			int present_fulfill = std::min(present_count, on_present_list.pending());
@@ -302,7 +304,7 @@ void SdlPlatform::clear() {
 PlatformUtil::Promise<void> SdlPlatform::present() {
 	SDL_RenderPresent(sdlrend);
 	present_count++;
-	return on_present_list.create_and_add();
+	return on_present_list.create_and_add(false);
 }
 
 std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string &p) {

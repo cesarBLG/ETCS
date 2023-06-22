@@ -6,6 +6,8 @@
 
 #include "platform.h"
 
+std::vector<std::function<void()>> PlatformUtil::DeferredFulfillment::list;
+
 #ifndef EVC
 std::unique_ptr<UiPlatform> platform;
 #else

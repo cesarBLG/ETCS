@@ -36,54 +36,48 @@ void TcpSocket::close_socket() {
 		return;
 	tx_promise = {};
 	rx_promise = {};
+	rx_list.fulfill_one({});
 #ifdef _WIN32
 	closesocket(peer_fd);
 #else
 	close(peer_fd);
 #endif
 	peer_fd = -1;
-
-	auto tmp = std::move(rx_list);
-	tmp.fulfill_one("");
 }
 
-bool TcpSocket::handle_error() {
+void TcpSocket::handle_error() {
 #ifdef _WIN32
 	int wsaerr = WSAGetLastError();
-	if (wsaerr != WSAEWOULDBLOCK && wsaerr != WSAEINPROGRESS) {
+	if (wsaerr != WSAEWOULDBLOCK && wsaerr != WSAEINPROGRESS)
 		close_socket();
-		return true;
-	}
 #else
-	if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINPROGRESS) {
+	if (errno != EAGAIN && errno != EWOULDBLOCK && errno != EINPROGRESS)
 		close_socket();
-		return true;
-	}
 #endif
-	return false;
 }
 
 void TcpSocket::update() {
-	if (peer_fd != -1 && !tx_promise.is_pending() && !tx_buffer.empty()) {
+	if (peer_fd != -1 && !tx_pending && !tx_buffer.empty()) {
+		tx_pending = true;
 		tx_promise = std::move(poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
+			tx_pending = false;
 			if (rev & (POLLERR | POLLHUP)) {
 				close_socket();
 			} else if (peer_fd != -1 && (rev & POLLOUT)) {
 				ssize_t ret = ::send(peer_fd, tx_buffer.data(), tx_buffer.size(), MSG_NOSIGNAL);
-				if (ret < 0) {
-					if (!handle_error())
-						update();
-				}
-				else {
+				if (ret < 0)
+					handle_error();
+				else
 					tx_buffer.erase(0, ret);
-					update();
-				}
 			}
+			update();
 		}));
 	}
 
-	if (peer_fd != -1 && !rx_promise.is_pending() && rx_list.pending() > 0) {
+	if (peer_fd != -1 && !rx_pending && rx_list.pending() > 0) {
+		rx_pending = true;
 		rx_promise = std::move(poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
+			rx_pending = false;
 			if (rev & (POLLERR | POLLHUP)) {
 				close_socket();
 			} else if (rev & POLLIN) {
@@ -91,16 +85,15 @@ void TcpSocket::update() {
 				buf.resize(4096);
 				ssize_t ret = recv(peer_fd, buf.data(), buf.size(), 0);
 				if (ret < 0) {
-					if (!handle_error())
-						update();
+					handle_error();
 				} else if (ret == 0) {
 					close_socket();
 				} else {
 					buf.resize(ret);
 					rx_list.fulfill_one(std::move(buf));
-					update();
 				}
 			}
+			update();
 		}));
 	}
 }
@@ -129,7 +122,7 @@ PlatformUtil::Promise<std::string> TcpSocket::receive() {
 	return std::move(promise);
 }
 
-TcpSocket::TcpSocket(const std::string &hostname, int port, FdPoller &p) : poller(&p) {
+TcpSocket::TcpSocket(const std::string &hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
 	connect(hostname, port);
 }
 
