@@ -31,14 +31,14 @@ void callback_cancel_void(Fulfiller<void>* fulfiller) {
 
 IMPORT_FUNC("simrail", "get_timer") int64_t get_timer();
 IMPORT_FUNC("simrail", "get_timestamp") int64_t get_timestamp();
-IMPORT_FUNC("simrail", "read_file") char* read_file(const char* t, size_t* len);
-IMPORT_FUNC("simrail", "write_file") void write_file(const char* t, const char* c, size_t len);
+IMPORT_FUNC("simrail", "read_file") char* read_file(const char* t, size_t tlen, size_t* len);
+IMPORT_FUNC("simrail", "write_file") uint32_t write_file(const char* t, size_t tlen, const char* c, size_t len);
 IMPORT_FUNC("simrail", "debug_print") void debug_print(const char* t, size_t len);
 IMPORT_FUNC("simrail", "delay") void delay(int32_t ms, void*, void*, void*);
 IMPORT_FUNC("simrail", "on_quit_request") void on_quit_request(void*, void*, void*);
 IMPORT_FUNC("simrail", "on_quit") void on_quit(void*, void*, void*);
 IMPORT_FUNC("simrail", "quit") void quit();
-IMPORT_FUNC("simrail", "open_socket") uint32_t open_socket(const char* name, uint32_t tid);
+IMPORT_FUNC("simrail", "open_socket") uint32_t open_socket(const char* name, size_t nlen, uint32_t tid);
 
 extern "C" ssize_t writev(int fd, iovec *iov, int iovcnt) {
 	ssize_t total = 0;
@@ -81,7 +81,7 @@ BasePlatform::DateTime SimrailBasePlatform::get_local_time() {
 
 std::string SimrailBasePlatform::read_file(const std::string &path) {
 	size_t len;
-	char *ret = ::read_file(path.c_str(), &len);
+	char *ret = ::read_file(path.data(), path.size(), &len);
 	if (!ret)
 		return "";
 	std::string str(ret, len);
@@ -90,7 +90,7 @@ std::string SimrailBasePlatform::read_file(const std::string &path) {
 }
 
 void SimrailBasePlatform::write_file(const std::string &path, const std::string &contents) {
-	::write_file(path.c_str(), contents.data(), contents.size());
+	::write_file(path.data(), path.size(), contents.data(), contents.size());
 }
 
 void SimrailBasePlatform::debug_print(const std::string &msg) {
@@ -116,7 +116,7 @@ Promise<void> SimrailBasePlatform::on_quit() {
 }
 
 std::unique_ptr<BasePlatform::BusSocket> SimrailBasePlatform::open_socket(const std::string &channel, uint32_t tid) {
-	uint32_t handle = ::open_socket(channel.c_str(), tid);
+	uint32_t handle = ::open_socket(channel.data(), channel.size(), tid);
 	if (!handle)
 		return nullptr;
 	return std::make_unique<SimrailBusSocket>(handle);
