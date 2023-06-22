@@ -268,13 +268,13 @@ namespace PlatformUtil
 			p.fulfiller = nullptr;
 		}
 
-		Promise<T>& then(const typename CallbackType<T>::type &func) {
+		Promise<T>&& then(const typename CallbackType<T>::type &func) {
 			if (p.fulfiller) {
 				p.fulfiller->callback = func;
 				if (p.fulfiller->value)
 					p.fulfiller->execute_callback(true);
 			}
-			return *this;
+			return std::move(*this);
 		}
 	};
 

@@ -59,7 +59,7 @@ void TcpSocket::handle_error() {
 void TcpSocket::update() {
 	if (peer_fd != -1 && !tx_pending && !tx_buffer.empty()) {
 		tx_pending = true;
-		tx_promise = std::move(poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
+		tx_promise = poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
 			tx_pending = false;
 			if (rev & (POLLERR | POLLHUP)) {
 				close_socket();
@@ -71,12 +71,12 @@ void TcpSocket::update() {
 					tx_buffer.erase(0, ret);
 			}
 			update();
-		}));
+		});
 	}
 
 	if (peer_fd != -1 && !rx_pending && rx_list.pending() > 0) {
 		rx_pending = true;
-		rx_promise = std::move(poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
+		rx_promise = poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
 			rx_pending = false;
 			if (rev & (POLLERR | POLLHUP)) {
 				close_socket();
@@ -94,7 +94,7 @@ void TcpSocket::update() {
 				}
 			}
 			update();
-		}));
+		});
 	}
 }
 

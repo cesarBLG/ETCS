@@ -75,7 +75,7 @@ void communication_session::finalize()
 }
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
-    rx_promise = std::move(terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1)));
+    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
 
     log_message(msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
@@ -195,7 +195,7 @@ void communication_session::update()
                 if (t.setup(this)) {
                     terminal = &t;
                     tried++;
-                    rx_promise = std::move(terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1)));
+                    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
                     break;
                 }
             }
@@ -220,7 +220,7 @@ void communication_session::update()
                 pending_ack = ack;
             } else {
                 if (terminal->setup(this))
-                    rx_promise = std::move(terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1)));
+                    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
             }
         }
         if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {

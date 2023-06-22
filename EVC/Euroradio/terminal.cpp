@@ -13,7 +13,7 @@
 mobile_terminal mobile_terminals[2];
 
 void mobile_terminal::data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data) {
-    rx_promise = std::move(socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1)));
+    rx_promise = socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1));
 
     if (rx_buffer.empty())
         rx_buffer = std::move(data.second);
@@ -60,7 +60,7 @@ bool mobile_terminal::setup(communication_session *session)
         status = safe_radio_status::Connected;
         released = 2;
 
-        rx_promise = std::move(socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1)));
+        rx_promise = socket->receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1));
     } else {
         status = safe_radio_status::Failed;
     }

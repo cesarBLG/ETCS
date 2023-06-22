@@ -150,7 +150,7 @@ void BusSocketServer::on_client_data(std::string &&data, uint32_t uid)
 
             clients.erase(clients.begin() + i);
         } else {
-            clients[i].rx_promise = std::move(clients[i].socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, uid)));
+            clients[i].rx_promise = clients[i].socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, uid));
             clients[i].rx_buffer += std::move(data);
             handle_client(clients[i]);
         }
@@ -160,17 +160,17 @@ void BusSocketServer::on_client_data(std::string &&data, uint32_t uid)
 
 void BusSocketServer::on_new_client(std::unique_ptr<TcpSocket> &&sock)
 {
-    accept_promise = std::move(listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1)));
+    accept_promise = listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1));
     uint32_t id = ++uid;
     clients.push_back(ClientData{ std::nullopt, id, std::move(sock), {} });
-    clients.back().rx_promise = std::move(clients.back().socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, id)));
+    clients.back().rx_promise = clients.back().socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, id));
 }
 
 BusSocketServer::BusSocketServer(const std::string &hostname, int port, FdPoller &p) :
     listener(hostname, port, p),
     uid(0)
 {
-    accept_promise = std::move(listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1)));
+    accept_promise = listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1));
 }
 
 BusSocketServerManager::BusSocketServerManager(const std::string &load_path, FdPoller &fd)

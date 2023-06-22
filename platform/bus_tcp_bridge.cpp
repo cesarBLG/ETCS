@@ -18,7 +18,7 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
         return;
     }
 
-    tcp_rx_promise = std::move(tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
+    tcp_rx_promise = tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1));
 
     if (tcp_rx_buffer.empty())
         tcp_rx_buffer = std::move(data);
@@ -53,7 +53,7 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::P
     if (!alive)
         return;
 
-    bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
+    bus_rx_promise = bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
     if (newline_framing)
         tcp_socket->send(data.second + "\r\n");
     else
@@ -63,8 +63,8 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::P
 BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl) :
     bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), newline_framing(nl), alive(true)
 {
-    tcp_rx_promise = std::move(tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1)));
-    bus_rx_promise = std::move(bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1)));
+    tcp_rx_promise = tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1));
+    bus_rx_promise = bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
 }
 
 bool BusTcpBridge::BridgedTcpSocket::is_alive() const {
@@ -73,7 +73,7 @@ bool BusTcpBridge::BridgedTcpSocket::is_alive() const {
 
 void BusTcpBridge::on_new_client(std::unique_ptr<TcpSocket> &&sock)
 {
-    accept_promise = std::move(listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1)));
+    accept_promise = listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1));
 
     std::unique_ptr<BasePlatform::BusSocket> bus_socket = bus_impl.open_bus_socket(bus, rx_tid);
     if (!bus_socket)
@@ -86,7 +86,7 @@ void BusTcpBridge::on_new_client(std::unique_ptr<TcpSocket> &&sock)
 BusTcpBridge::BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b) :
     bus(bus), listener(hostname, port, fd), rx_tid(rx_tid), tx_tid(tx_tid), newline_framing(nl), bus_impl(b)
 {
-    accept_promise = std::move(listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1)));
+    accept_promise = listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1));
 }
 
 BusTcpBridgeManager::BusTcpBridgeManager(const std::string &load_path, FdPoller &fd, BusSocketImpl &impl)

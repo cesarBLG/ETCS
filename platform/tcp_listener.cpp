@@ -73,7 +73,7 @@ void TcpListener::fd_ready(int rev) {
 		}
 	}
 	if (listen_fd != -1)
-		promise = std::move(poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1)));
+		promise = poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1));
 }
 
 TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : poller(p) {
@@ -93,7 +93,7 @@ TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : p
 
 	freeaddrinfo(res);
 
-	promise = std::move(poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1)));
+	promise = poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1));
 }
 
 TcpListener::~TcpListener() {

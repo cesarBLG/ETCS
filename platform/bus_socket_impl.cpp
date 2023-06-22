@@ -56,15 +56,15 @@ uint32_t BusSocketImpl::TcpBusSocket::unpack_uint32(const char* ptr) {
 void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 	if (data.empty()) {
 		rx_buffer.clear();
-		retry_promise = std::move(platform->delay(100).then([this](){
+		retry_promise = platform->delay(100).then([this](){
 			socket = std::make_unique<TcpSocket>(hostname, port, poller);
-			rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+			rx_promise = socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1));
 			client_hello();
-		}));
+		});
 		return;
 	}
 
-	rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+	rx_promise = socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1));
 
 	if (rx_buffer.empty())
 		rx_buffer = std::move(data);
@@ -110,7 +110,7 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 
 BusSocketImpl::TcpBusSocket::TcpBusSocket(uint32_t tid, const std::string &hostname, int port, FdPoller &poller) :
 	hostname(hostname), port(port), tid(tid), poller(poller), socket(std::make_unique<TcpSocket>(hostname, port, poller)) {
-	rx_promise = std::move(socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1)));
+	rx_promise = socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1));
 	client_hello();
 }
 
