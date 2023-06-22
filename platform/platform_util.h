@@ -38,6 +38,7 @@ namespace PlatformUtil
 	template <typename T>
 	class Fulfiller;
 	class PromiseFactory;
+	class DeferredFulfillment;
 
 	template <typename T>
 	class PromisePart
@@ -49,12 +50,21 @@ namespace PlatformUtil
 		Fulfiller<T>* fulfiller;
 	};
 
+	class TypeErasedFulfiller
+	{
+		friend class DeferredFulfillment;
+
+		virtual void execute_callback(bool defer) = 0;
+	public:
+		virtual ~TypeErasedFulfiller() = default;
+	};
+
 	class DeferredFulfillment
 	{
 		template <typename T> friend class Fulfiller;
 
 	private:
-		static std::vector<std::function<void()>> list;
+		static std::vector<std::unique_ptr<TypeErasedFulfiller>> list;
 
 	public:
 		static bool execute() {
@@ -64,14 +74,14 @@ namespace PlatformUtil
 			auto tmp = std::move(list);
 			list.clear();
 			for (auto &f : tmp)
-				f();
+				f->execute_callback(false);
 
 			return true;
 		}
 	};
 
 	template <typename T>
-	class Fulfiller
+	class Fulfiller final : public TypeErasedFulfiller
 	{
 		friend class PromiseFactory;
 		friend class Promise<T>;
@@ -81,22 +91,18 @@ namespace PlatformUtil
 		typename CallbackType<T>::type callback;
 		bool allocated;
 
-		struct DeferredFulfillerData
-		{
-			T value;
-			typename CallbackType<T>::type callback;
-		};
-
-		void execute_callback(bool defer) {
+		virtual void execute_callback(bool defer) override {
+			if (!callback)
+				return;
 			if (!defer) {
 				callback(std::move(*value));
-			} else {
-				DeferredFulfillment::list.push_back([data = new DeferredFulfillerData({ std::move(*value), std::move(callback) })]() {
-					data->callback(std::move(data->value));
-					delete data;
-				});
+				callback = nullptr;
 			}
-			callback = nullptr;
+			else {
+				DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
+				if (allocated)
+					delete this;
+			}
 		}
 
 	public:
@@ -125,7 +131,7 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		~Fulfiller() {
+		virtual ~Fulfiller() override {
 			if (promise) {
 				if (value)
 					(new Fulfiller<T>(std::move(*this)))->allocated = true;
@@ -142,19 +148,17 @@ namespace PlatformUtil
 
 		void fulfill(T&& arg, bool defer = true) {
 			value = std::move(arg);
-			if (callback)
-				execute_callback(defer);
+			execute_callback(defer);
 		}
 
 		void fulfill(const T& arg, bool defer = true) {
 			value = arg;
-			if (callback)
-				execute_callback(defer);
+			execute_callback(defer);
 		}
 	};
 
 	template <>
-	class Fulfiller<void>
+	class Fulfiller<void> final : public TypeErasedFulfiller
 	{
 		friend class PromiseFactory;
 		friend class Promise<void>;
@@ -164,12 +168,18 @@ namespace PlatformUtil
 		typename CallbackType<void>::type callback;
 		bool allocated;
 
-		void execute_callback(bool defer) {
-			if (!defer)
+		virtual void execute_callback(bool defer) override {
+			if (!callback)
+				return;
+			if (!defer) {
 				callback();
-			else
-				DeferredFulfillment::list.push_back(std::move(callback));
-			callback = nullptr;
+				callback = nullptr;
+			}
+			else {
+				DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
+				if (allocated)
+					delete this;
+			}
 		}
 
 	public:
@@ -199,7 +209,7 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		~Fulfiller() {
+		virtual ~Fulfiller() override {
 			if (promise) {
 				if (value)
 					(new Fulfiller<void>(std::move(*this)))->allocated = true;
@@ -216,8 +226,7 @@ namespace PlatformUtil
 
 		void fulfill(bool defer = true) {
 			value = true;
-			if (callback)
-				execute_callback(defer);
+			execute_callback(defer);
 		}
 	};
 
