@@ -37,6 +37,10 @@ void orts_peer_leave(BasePlatform::BusSocket::PeerId peer)
 
 void orts_start()
 {
+    std::string conf = platform->read_file("orts_server.conf");
+    if (conf.empty() || conf.front() == '0')
+        return;
+
     srv_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::PeerId::fourcc("SRV"));
     if (!srv_socket)
         return;
