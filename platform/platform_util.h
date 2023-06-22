@@ -307,17 +307,20 @@ namespace PlatformUtil
 		std::vector<T> data_queue;
 
 	public:
+		size_t pending_fulfillers() {
+			fulfiller_queue.erase(std::remove_if(fulfiller_queue.begin(), fulfiller_queue.end(), [](const auto &entry) { return !entry.is_pending(); }), fulfiller_queue.end());
+			return fulfiller_queue.size();
+		}
+
 		size_t pending_packets() {
 			return data_queue.size();
 		}
 
-		size_t pending_fulfillers() {
-			return fulfiller_queue.size();
-		}
-
 		void push_data(const T& packet) {
-			if (!fulfiller_queue.empty()) {
-				auto it = fulfiller_queue.begin();
+			auto it = fulfiller_queue.begin();
+			while (it != fulfiller_queue.end() && !it->is_pending())
+				++it;
+			if (it != fulfiller_queue.end()) {
 				Fulfiller<T> f = std::move(*it);
 				fulfiller_queue.erase(it);
 				f.fulfill(packet);
@@ -327,8 +330,10 @@ namespace PlatformUtil
 		}
 
 		void push_data(T&& packet) {
-			if (!fulfiller_queue.empty()) {
-				auto it = fulfiller_queue.begin();
+			auto it = fulfiller_queue.begin();
+			while (it != fulfiller_queue.end() && !it->is_pending())
+				++it;
+			if (it != fulfiller_queue.end()) {
 				Fulfiller<T> f = std::move(*it);
 				fulfiller_queue.erase(it);
 				f.fulfill(std::move(packet));
@@ -338,6 +343,8 @@ namespace PlatformUtil
 		}
 
 		void add(Fulfiller<T> &&f) {
+			if (!f.is_pending())
+				return;
 			if (!data_queue.empty()) {
 				auto it = data_queue.begin();
 				T packet = std::move(*it);
@@ -362,6 +369,7 @@ namespace PlatformUtil
 
 	public:
 		size_t pending() {
+			list.erase(std::remove_if(list.begin(), list.end(), [](const auto &entry) { return !entry.is_pending(); }), list.end());
 			return list.size();
 		}
 
@@ -370,25 +378,33 @@ namespace PlatformUtil
 		}
 
 		void fulfill_one(const T& arg) {
-			if (list.empty())
-				return;
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
-			tmp.begin()->fulfill(arg);
-			auto tmp_next = std::next(tmp.begin());
-			if (tmp_next != tmp.end())
-				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+
+			auto it = tmp.begin();
+			while (it != tmp.end() && !it->is_pending())
+				++it;
+			if (it != tmp.end()) {
+				tmp.begin()->fulfill(arg);
+				auto tmp_next = std::next(it);
+				if (tmp_next != tmp.end())
+					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+			}
 		}
 
 		void fulfill_one(T&& arg) {
-			if (list.empty())
-				return;
 			std::vector<Fulfiller<T>> tmp = std::move(list);
 			list.clear();
-			tmp.begin()->fulfill(std::move(arg));
-			auto tmp_next = std::next(tmp.begin());
-			if (tmp_next != tmp.end())
-				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+
+			auto it = tmp.begin();
+			while (it != tmp.end() && !it->is_pending())
+				++it;
+			if (it != tmp.end()) {
+				tmp.begin()->fulfill(std::move(arg));
+				auto tmp_next = std::next(it);
+				if (tmp_next != tmp.end())
+					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+			}
 		}
 
 		void fulfill_all(const T& arg) {
@@ -412,6 +428,7 @@ namespace PlatformUtil
 
 	public:
 		size_t pending() {
+			list.erase(std::remove_if(list.begin(), list.end(), [](const auto &entry) { return !entry.is_pending(); }), list.end());
 			return list.size();
 		}
 
@@ -420,14 +437,18 @@ namespace PlatformUtil
 		}
 
 		void fulfill_one() {
-			if (list.empty())
-				return;
 			std::vector<Fulfiller<void>> tmp = std::move(list);
 			list.clear();
-			tmp.begin()->fulfill();
-			auto tmp_next = std::next(tmp.begin());
-			if (tmp_next != tmp.end())
-				list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+
+			auto it = tmp.begin();
+			while (it != tmp.end() && !it->is_pending())
+				++it;
+			if (it != tmp.end()) {
+				tmp.begin()->fulfill();
+				auto tmp_next = std::next(it);
+				if (tmp_next != tmp.end())
+					list.insert(list.begin(), std::make_move_iterator(tmp_next), std::make_move_iterator(tmp.end()));
+			}
 		}
 
 		void fulfill_all() {

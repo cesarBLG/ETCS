@@ -21,7 +21,7 @@ using namespace PlatformUtil;
 
 void callback_fulfill_void(Fulfiller<void>* fulfiller) {
 	fulfiller->fulfill();
-	while (PlatformUtil::DeferredFulfillment::execute());
+	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
 
@@ -137,6 +137,7 @@ IMPORT_FUNC("simrail", "socket_on_peer_leave") void socket_on_peer_leave(uint32_
 void callback_fulfill_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket::PeerId, std::string>>* fulfiller, uint32_t tid, uint32_t uid, char* data, size_t len) {
 	fulfiller->fulfill(std::make_pair(BasePlatform::BusSocket::PeerId{ tid, uid }, std::string(data, len)));
 	::free_mem(data);
+	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
 
@@ -147,6 +148,7 @@ void callback_cancel_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket:
 void callback_fulfill_socket_peer(Fulfiller<BasePlatform::BusSocket::PeerId>* fulfiller, uint32_t tid, uint32_t uid) {
 	fulfiller->fulfill(BasePlatform::BusSocket::PeerId{ tid, uid });
 	delete fulfiller;
+	while (DeferredFulfillment::execute());
 }
 
 void callback_cancel_socket_peer(Fulfiller<BasePlatform::BusSocket::PeerId>* fulfiller) {
@@ -197,6 +199,7 @@ EXPORT_FUNC void callback_inputevent(Fulfiller<UiPlatform::InputEvent>* fulfille
 {
 	fulfiller->fulfill(UiPlatform::InputEvent{action, x, y});
 	delete fulfiller;
+	while (DeferredFulfillment::execute());
 }
 */
 

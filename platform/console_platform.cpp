@@ -163,10 +163,10 @@ void ConsolePlatform::event_loop() {
 	while (running) {
 		int64_t diff;
 		do {
-			if (quit_request)
-				on_quit_request_list.fulfill_all();
-
 			{
+				if (quit_request)
+					on_quit_request_list.fulfill_all();
+
 				int64_t now = get_timer();
 				std::vector<PlatformUtil::Fulfiller<void>> expired;
 				while (!timer_queue.empty() && timer_queue.begin()->first <= now) {

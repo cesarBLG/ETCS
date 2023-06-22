@@ -217,6 +217,7 @@ void SdlPlatform::event_loop() {
 			}
 		}
 
+		do
 		{
 			int64_t now = get_timer();
 			std::vector<PlatformUtil::Fulfiller<void>> expired;
@@ -226,11 +227,9 @@ void SdlPlatform::event_loop() {
 			}
 			for (PlatformUtil::Fulfiller<void> &f : expired)
 				f.fulfill();
-		}
 
-		poller.fulfill();
-
-		while (PlatformUtil::DeferredFulfillment::execute());
+			poller.fulfill();
+		} while (PlatformUtil::DeferredFulfillment::execute());
 
 		{
 			int present_fulfill = std::min(present_count, on_present_list.pending());
