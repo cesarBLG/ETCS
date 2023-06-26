@@ -38,25 +38,26 @@ private:
 	BusSocketServerManager bus_server_manager;
 	BusTcpBridgeManager bus_bridge_manager;
 #endif
+	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 
 public:
 	ConsolePlatform(const std::string &load_path);
 	void event_loop();
 
-	virtual ~ConsolePlatform() override;
+	~ConsolePlatform() override;
 
-	virtual int64_t get_timer() override;
-	virtual int64_t get_timestamp() override;
-	virtual DateTime get_local_time() override;
+	int64_t get_timer() override;
+	int64_t get_timestamp() override;
+	DateTime get_local_time() override;
 
-	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	virtual std::string read_file(const std::string &path) override;
-	virtual void write_file(const std::string &path, const std::string &contents) override;
-	virtual void debug_print(const std::string &msg) override;
+	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
+	std::string read_file(const std::string &path) override;
+	void write_file(const std::string &path, const std::string &contents) override;
+	void debug_print(const std::string &msg) override;
 
-	virtual PlatformUtil::Promise<void> delay(int ms) override;
-	virtual PlatformUtil::Promise<void> on_quit_request() override;
-	virtual PlatformUtil::Promise<void> on_quit() override;
+	PlatformUtil::Promise<void> delay(int ms) override;
+	PlatformUtil::Promise<void> on_quit_request() override;
+	PlatformUtil::Promise<void> on_quit() override;
 
-	virtual void quit() override;
+	void quit() override;
 };

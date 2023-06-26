@@ -10,6 +10,7 @@
 #include "../graphics/button.h"
 #include "../sound/sound.h"
 #include "../state/acks.h"
+#include "platform_runtime.h"
 bool isInside(Component *comp, float x, float y)
 {
 	if (comp == componentAck) return true;

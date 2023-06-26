@@ -9,6 +9,12 @@
 #include <functional>
 #include <optional>
 
+#ifndef NO_THREADS
+#define THREAD_LOCAL_DEF thread_local
+#else
+#define THREAD_LOCAL_DEF
+#endif
+
 namespace PlatformUtil
 {
 	template <typename T>
@@ -61,18 +67,17 @@ namespace PlatformUtil
 
 	class DeferredFulfillment
 	{
-		template <typename T> friend class Fulfiller;
-
-	private:
-		static std::vector<std::unique_ptr<TypeErasedFulfiller>> list;
-
 	public:
+		DeferredFulfillment() = delete;
+
+		static THREAD_LOCAL_DEF std::vector<std::unique_ptr<TypeErasedFulfiller>>* list;
+
 		static bool execute() {
-			if (list.empty())
+			if (list->empty())
 				return false;
 
-			auto tmp = std::move(list);
-			list.clear();
+			auto tmp = std::move(*list);
+			list->clear();
 			for (auto &f : tmp)
 				f->execute_callback(false);
 
@@ -91,7 +96,7 @@ namespace PlatformUtil
 		typename CallbackType<T>::type callback;
 		bool unmanaged;
 
-		virtual void execute_callback(bool defer) override {
+		void execute_callback(bool defer) override {
 			if (!callback)
 				return;
 			if (!defer) {
@@ -105,10 +110,10 @@ namespace PlatformUtil
 			}
 			else {
 				if (unmanaged) {
-					DeferredFulfillment::list.push_back(std::unique_ptr<Fulfiller<T>>(this));
+					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<T>>(this));
 					unmanaged = false;
 				} else {
-					DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
+					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
 				}
 			}
 		}
@@ -139,7 +144,7 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		virtual ~Fulfiller() override {
+		~Fulfiller() override {
 			if (promise) {
 				if (value)
 					(new Fulfiller<T>(std::move(*this)))->unmanaged = true;
@@ -176,7 +181,7 @@ namespace PlatformUtil
 		typename CallbackType<void>::type callback;
 		bool unmanaged;
 
-		virtual void execute_callback(bool defer) override {
+		void execute_callback(bool defer) override {
 			if (!callback)
 				return;
 			if (!defer) {
@@ -190,10 +195,10 @@ namespace PlatformUtil
 			}
 			else {
 				if (unmanaged) {
-					DeferredFulfillment::list.push_back(std::unique_ptr<Fulfiller<void>>(this));
+					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<void>>(this));
 					unmanaged = false;
 				} else {
-					DeferredFulfillment::list.push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
+					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
 				}
 			}
 		}
@@ -225,7 +230,7 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		virtual ~Fulfiller() override {
+		~Fulfiller() override {
 			if (promise) {
 				if (value)
 					(new Fulfiller<void>(std::move(*this)))->unmanaged = true;
@@ -433,6 +438,16 @@ namespace PlatformUtil
 			list.clear();
 			for (PlatformUtil::Fulfiller<T> &f : tmp)
 				f.fulfill(arg, defer);
+		}
+
+		void fulfill_all(T&& arg, bool defer = true) {
+			std::vector<Fulfiller<T>> tmp = std::move(list);
+			list.clear();
+			if (tmp.size() == 1)
+				tmp.begin()->fulfill(std::move(arg), defer);
+			else if (tmp.size() > 1)
+				for (PlatformUtil::Fulfiller<T> &f : tmp)
+					f.fulfill(arg, defer);
 		}
 
 		Promise<T> create_and_add() {

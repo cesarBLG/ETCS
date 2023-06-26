@@ -16,6 +16,7 @@
 #include "../sound/sound.h"
 #include "../messages/messages.h"
 #include "../tcp/server.h"
+#include "platform_runtime.h"
 
 void update_stm_windows();
 

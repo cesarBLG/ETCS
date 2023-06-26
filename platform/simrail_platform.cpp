@@ -5,6 +5,7 @@
  */
 
 #include "simrail_platform.h"
+#include "platform_runtime.h"
 
 #define EXPORT_FUNC extern "C" __attribute__((visibility("default")))
 #define IMPORT_FUNC(m, n) extern "C" __attribute__ ((import_module(m))) __attribute__ ((import_name(n)))
@@ -65,6 +66,7 @@ EXPORT_FUNC void init() {
 }
 
 SimrailBasePlatform::SimrailBasePlatform() {
+	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
 
 int64_t SimrailBasePlatform::get_timer() {
@@ -130,7 +132,7 @@ IMPORT_FUNC("simrail", "socket_close") void socket_close(uint32_t handle);
 IMPORT_FUNC("simrail", "socket_broadcast") void socket_broadcast(uint32_t handle, const char* msg, size_t len);
 IMPORT_FUNC("simrail", "socket_broadcast_tid") void socket_broadcast_tid(uint32_t handle, uint32_t tid, const char* msg, size_t len);
 IMPORT_FUNC("simrail", "socket_send_to") void socket_send_to(uint32_t handle, uint32_t uid, const char* msg, size_t len);
-IMPORT_FUNC("simrail", "socket_receive") void socket_receive(uint32_t handle, void*, void*, void*);
+IMPORT_FUNC("simrail", "socket_on_message_receive") void socket_on_message_receive(uint32_t handle, void*, void*, void*);
 IMPORT_FUNC("simrail", "socket_on_peer_join") void socket_on_peer_join(uint32_t handle, void*, void*, void*);
 IMPORT_FUNC("simrail", "socket_on_peer_leave") void socket_on_peer_leave(uint32_t handle, void*, void*, void*);
 
@@ -174,9 +176,9 @@ void SimrailBasePlatform::SimrailBusSocket::send_to(uint32_t uid, const std::str
 	::socket_send_to(handle, uid, data.data(), data.size());
 }
 
-Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> SimrailBasePlatform::SimrailBusSocket::receive() {
+Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> SimrailBasePlatform::SimrailBusSocket::on_message_receive() {
 	auto pair = PromiseFactory::create<std::pair<BusSocket::PeerId, std::string>>();
-	::socket_receive(handle, (void*)&callback_fulfill_socket_receive, (void*)&callback_cancel_socket_receive, new Fulfiller(std::move(pair.second)));
+	::socket_on_message_receive(handle, (void*)&callback_fulfill_socket_receive, (void*)&callback_cancel_socket_receive, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 

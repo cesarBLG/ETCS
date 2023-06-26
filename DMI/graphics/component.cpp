@@ -17,6 +17,7 @@
 #include "line.h"
 #include "circle.h"
 #include "button.h"
+#include "platform_runtime.h"
 using namespace std;
 
 std::set<Component*> Component::_instances;

@@ -10,7 +10,7 @@
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
-#include "platform.h"
+#include "platform_runtime.h"
 #ifdef _WIN32
 #include <windows.h>
 #include <imagehlp.h>

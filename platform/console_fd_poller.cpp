@@ -5,6 +5,7 @@
  */
 
 #include "console_fd_poller.h"
+#include "platform_runtime.h"
 
 #ifndef _WIN32
 #include <signal.h>

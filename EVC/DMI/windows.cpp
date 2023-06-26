@@ -18,6 +18,7 @@
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
 #include "../Version/version.h"
+#include "platform_runtime.h"
 dialog_sequence active_dialog;
 std::string active_dialog_step;
 json default_window = R"({"active":"default"})"_json;

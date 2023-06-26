@@ -30,7 +30,7 @@ public:
 		virtual void broadcast(const std::string &data) = 0;
 		virtual void broadcast(uint32_t tid, const std::string &data) = 0;
 		virtual void send_to(uint32_t uid, const std::string &data) = 0;
-		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> receive() = 0;
+		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() = 0;
 		virtual PlatformUtil::Promise<PeerId> on_peer_join() = 0;
 		virtual PlatformUtil::Promise<PeerId> on_peer_leave() = 0;
 	};
@@ -132,13 +132,3 @@ public:
 
 	virtual PlatformUtil::Promise<InputEvent> on_input_event() = 0;
 };
-
-extern float platform_size_w;
-extern float platform_size_h;
-void on_platform_ready();
-
-#ifndef EVC
-extern std::unique_ptr<UiPlatform> platform;
-#else
-extern std::unique_ptr<BasePlatform> platform;
-#endif

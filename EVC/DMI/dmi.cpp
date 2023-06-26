@@ -26,7 +26,7 @@
 #include "track_ahead_free.h"
 #include "text_message.h"
 #include "windows.h"
-#include "platform.h"
+#include "platform_runtime.h"
 
 using std::map;
 using std::set;
@@ -43,7 +43,7 @@ void start_dmi()
     dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (dmi_socket) {
         dmi_socket->on_peer_join().then(dmi_joined).detach();
-        dmi_socket->receive().then(dmi_data_received).detach();
+        dmi_socket->on_message_receive().then(dmi_data_received).detach();
         platform->delay(100).then(dmi_update_func).detach();
     }
 }
@@ -114,7 +114,7 @@ void dmi_joined(BasePlatform::BusSocket::PeerId client)
 void dmi_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
     parse_command(std::move(data.second));
-    dmi_socket->receive().then(dmi_data_received).detach();
+    dmi_socket->on_message_receive().then(dmi_data_received).detach();
 }
 void sim_write_line(const std::string &str);
 bool sendtoor=false;

@@ -9,6 +9,7 @@
 #include "language.h"
 #include <moFileReader.hpp>
 #include "../graphics/text_button.h"
+#include "platform_runtime.h"
 std::string language = "en";
 moFileLib::moFileReader reader;
 std::string get_text(std::string id)

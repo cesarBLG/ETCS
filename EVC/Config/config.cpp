@@ -10,6 +10,7 @@
 #include "../DMI/dmi.h"
 #include "../Procedures/level_transition.h"
 #include <nlohmann/json.hpp>
+#include "platform_runtime.h"
 using json = nlohmann::json;
 extern std::string traindata_file;
 extern int data_entry_type;

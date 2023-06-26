@@ -10,6 +10,7 @@
 #include "../optional.h"
 #include "../Packets/logging.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "platform_runtime.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
 bool Q_NVDRIVER_ADHES;

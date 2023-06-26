@@ -4,6 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+#pragma once
+
 #include "platform.h"
 
-THREAD_LOCAL_DEF std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>>* PlatformUtil::DeferredFulfillment::list;
+extern float platform_size_w;
+extern float platform_size_h;
+void on_platform_ready();
+
+#ifndef EVC
+extern std::unique_ptr<UiPlatform> platform;
+#else
+extern std::unique_ptr<BasePlatform> platform;
+#endif

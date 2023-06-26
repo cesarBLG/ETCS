@@ -13,12 +13,14 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             language/language.cpp
             ../EVC/Packets/io/io.cpp ../EVC/Packets/io/base64.cpp
             Config/config.cpp
-            ../platform/platform.cpp
+            ../platform/platform.cpp ../platform/platform_runtime.cpp
 )
 
 if(WIN32)
     list(APPEND SOURCES resource.rc)
 endif()
+
+add_definitions(-DNO_THREADS)
 
 if (NOT WASM)
     set(WITH_SDL TRUE)

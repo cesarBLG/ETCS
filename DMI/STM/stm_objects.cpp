@@ -17,6 +17,7 @@
 #include "../../EVC/Packets/STM/35.h"
 #include "../../EVC/Packets/STM/38.h"
 #include "../../EVC/Packets/STM/39.h"
+#include "platform_runtime.h"
 std::map<int, std::vector<int>> but_pos; 
 std::map<int, std::vector<int>> ind_pos;
 ntc_window *active_ntc_window;

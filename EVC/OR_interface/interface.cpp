@@ -21,7 +21,7 @@
 #include "../../DMI/time_etcs.h"
 #include "../Config/config.h"
 #include <orts/common.h>
-#include "platform.h"
+#include "platform_runtime.h"
 #include "orts_wrapper.h"
 
 //using namespace ORserver;
@@ -295,7 +295,7 @@ void sim_write_line(const std::string &str)
 
 void sim_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
-    sim_socket->receive().then(sim_data_received).detach();
+    sim_socket->on_message_receive().then(sim_data_received).detach();
 
     manager.ParseLine(sim_wrapper.get(), data.second);
     std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
@@ -327,7 +327,7 @@ void start_or_iface()
     if (!sim_socket)
         return;
 
-    sim_socket->receive().then(sim_data_received).detach();
+    sim_socket->on_message_receive().then(sim_data_received).detach();
     sim_socket->on_peer_join().then(sim_peer_join).detach();
     sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::PeerId::fourcc("SRV"), false);
 

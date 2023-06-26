@@ -53,7 +53,7 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(std::pair<BasePlatform::BusSocket::P
     if (!alive)
         return;
 
-    bus_rx_promise = bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
+    bus_rx_promise = bus_socket->on_message_receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
     if (newline_framing)
         tcp_socket->send(data.second + "\r\n");
     else
@@ -64,7 +64,7 @@ BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::B
     bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), newline_framing(nl), alive(true)
 {
     tcp_rx_promise = tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1));
-    bus_rx_promise = bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
+    bus_rx_promise = bus_socket->on_message_receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
 }
 
 bool BusTcpBridge::BridgedTcpSocket::is_alive() const {

@@ -12,6 +12,7 @@
 #include "../language/language.h"
 #include "../Euroradio/session.h"
 #include "../Position/linking.h"
+#include "platform_runtime.h"
 int cold_movement_status;
 void initialize_cold_movement()
 {

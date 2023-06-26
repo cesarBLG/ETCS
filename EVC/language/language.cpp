@@ -12,6 +12,7 @@
 #include "../STM/stm.h"
 #include "../Packets/STM/30.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "platform_runtime.h"
 moFileLib::moFileReader reader;
 std::string language = "en";
 std::string get_text(std::string id)

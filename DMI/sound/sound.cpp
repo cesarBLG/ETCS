@@ -10,6 +10,7 @@
 #include "sound.h"
 #include <map>
 #include <string>
+#include "platform_runtime.h"
 
 StmSound::StmSound(std::unique_ptr<UiPlatform::SoundData> &&in) : data(std::move(in)) {
 

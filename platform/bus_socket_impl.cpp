@@ -5,6 +5,7 @@
  */
 
 #include "bus_socket_impl.h"
+#include "platform_runtime.h"
 #include <map>
 #include <fstream>
 #include <sstream>
@@ -96,10 +97,10 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 				return;
 			if (rx_buffer.size() - 4 * 4 == len) {
 				rx_buffer.erase(0, 4 * 4);
-				rx_list.fulfill_one(std::make_pair(id, std::move(rx_buffer)));
+				rx_list.fulfill_all(std::make_pair(id, std::move(rx_buffer)));
 				rx_buffer.clear();
 			} else {
-				rx_list.fulfill_one(std::make_pair(id, rx_buffer.substr(4 * 4, len)));
+				rx_list.fulfill_all(std::make_pair(id, rx_buffer.substr(4 * 4, len)));
 				rx_buffer.erase(0, 4 * 4 + len);
 			}
 		} else {
@@ -154,7 +155,7 @@ void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data)
 	socket->send(std::move(buf));
 }
 
-PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> BusSocketImpl::TcpBusSocket::receive() {
+PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> BusSocketImpl::TcpBusSocket::on_message_receive() {
 	return rx_list.create_and_add();
 }
 

@@ -5,6 +5,7 @@
  */
 
 #include "console_platform.h"
+#include "platform_runtime.h"
 
 #ifdef __unix__
 #include <signal.h>
@@ -56,6 +57,7 @@ ConsolePlatform::ConsolePlatform(const std::string &path) :
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
 #endif
+	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
 
 ConsolePlatform::~ConsolePlatform() {

@@ -9,6 +9,7 @@
 #include "volume.h"
 #include "../tcp/server.h"
 #include <cstdlib>
+#include "platform_runtime.h"
 static int current_volume = 50;
 void set_volume(int percent)
 {

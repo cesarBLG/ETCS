@@ -1,4 +1,4 @@
-#include "platform.h"
+#include "platform_runtime.h"
 #include "orts_wrapper.h"
 #include <orts/server.h>
 
@@ -8,7 +8,7 @@ std::unique_ptr<ORserver::Server> srv_orts;
 
 void orts_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
-    srv_socket->receive().then(orts_data_received).detach();
+    srv_socket->on_message_receive().then(orts_data_received).detach();
 
     auto it = srv_clients.find(data.first.uid);
     if (it != srv_clients.end())
@@ -45,7 +45,7 @@ void orts_start()
     if (!srv_socket)
         return;
     srv_orts = std::make_unique<ORserver::Server>();
-    srv_socket->receive().then(orts_data_received).detach();
+    srv_socket->on_message_receive().then(orts_data_received).detach();
     srv_socket->on_peer_join().then(orts_peer_join).detach();
     srv_socket->on_peer_leave().then(orts_peer_leave).detach();
 }

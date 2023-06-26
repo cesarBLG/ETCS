@@ -35,6 +35,7 @@
 #include "../Version/version.h"
 #include "../Version/translate.h"
 #include <algorithm>
+#include "platform_runtime.h"
 static int reading_nid_bg=-1;
 static int reading_nid_c=-1;
 static std::vector<eurobalise_telegram> telegrams;

@@ -8,6 +8,7 @@
  */
 #include "keyboard.h"
 #include "../language/language.h"
+#include "platform_runtime.h"
 std::vector<Button*> getNumericKeyboard(input_data *input)
 {
     input->character_separation = true;

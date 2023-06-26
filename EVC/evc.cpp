@@ -29,7 +29,7 @@
 #include "LX/level_crossing.h"
 #include "STM/stm.h"
 #include "Euroradio/terminal.h"
-#include "platform.h"
+#include "platform_runtime.h"
 
 #ifdef _WIN32
 #include <windows.h>

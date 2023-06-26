@@ -15,32 +15,34 @@ private:
 		uint32_t handle;
 	public:
 		SimrailBusSocket(uint32_t handle);
-		virtual ~SimrailBusSocket() override;
-		virtual void broadcast(const std::string &data) override;
-		virtual void broadcast(uint32_t tid, const std::string &data) override;
-		virtual void send_to(uint32_t uid, const std::string &data) override;
-		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> receive() override;
-		virtual PlatformUtil::Promise<PeerId> on_peer_join() override;
-		virtual PlatformUtil::Promise<PeerId> on_peer_leave() override;
+		~SimrailBusSocket() override;
+		void broadcast(const std::string &data) override;
+		void broadcast(uint32_t tid, const std::string &data) override;
+		void send_to(uint32_t uid, const std::string &data) override;
+		PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() override;
+		PlatformUtil::Promise<PeerId> on_peer_join() override;
+		PlatformUtil::Promise<PeerId> on_peer_leave() override;
 	};
+
+	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 
 public:
 	SimrailBasePlatform();
 
-	virtual int64_t get_timer() override;
-	virtual int64_t get_timestamp() override;
-	virtual DateTime get_local_time() override;
+	int64_t get_timer() override;
+	int64_t get_timestamp() override;
+	DateTime get_local_time() override;
 
-	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	virtual std::string read_file(const std::string &path) override;
-	virtual void write_file(const std::string &path, const std::string &contents) override;
-	virtual void debug_print(const std::string &msg) override;
+	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
+	std::string read_file(const std::string &path) override;
+	void write_file(const std::string &path, const std::string &contents) override;
+	void debug_print(const std::string &msg) override;
 
-	virtual PlatformUtil::Promise<void> delay(int ms) override;
-	virtual PlatformUtil::Promise<void> on_quit_request() override;
-	virtual PlatformUtil::Promise<void> on_quit() override;
+	PlatformUtil::Promise<void> delay(int ms) override;
+	PlatformUtil::Promise<void> on_quit_request() override;
+	PlatformUtil::Promise<void> on_quit() override;
 
-	virtual void quit() override;
+	void quit() override;
 };
 
 class SimrailUiPlatform final : public UiPlatform {
@@ -52,16 +54,16 @@ public:
 	{
 	public:
 		SimrailImage() = default;
-		virtual float width() const override { return 0.0f; };
-		virtual float height() const override { return 0.0f; };
+		float width() const override { return 0.0f; };
+		float height() const override { return 0.0f; };
 	};
 
 	class SimrailFont : public Font
 	{
 	public:
 		SimrailFont() = default;
-		virtual float ascent() const override { return 0.0f; }
-		virtual std::pair<float, float> calc_size(const std::string &str) const override { return std::make_pair(0.0f, 0.0f); }
+		float ascent() const override { return 0.0f; }
+		std::pair<float, float> calc_size(const std::string &str) const override { return std::make_pair(0.0f, 0.0f); }
 	};
 
 	class SimrailSoundData : public SoundData
@@ -74,44 +76,44 @@ public:
 	{
 	public:
 		SimrailSoundSource() = default;
-		virtual void detach() override {};
+		void detach() override {};
 	};
 
-	virtual int64_t get_timer() override { return base.get_timer(); };
-	virtual int64_t get_timestamp() override { return base.get_timestamp(); };
-	virtual DateTime get_local_time() override { return base.get_local_time(); };
+	int64_t get_timer() override { return base.get_timer(); };
+	int64_t get_timestamp() override { return base.get_timestamp(); };
+	DateTime get_local_time() override { return base.get_local_time(); };
 
-	virtual std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override { return base.open_socket(channel, tid); };
-	virtual std::string read_file(const std::string &path) override { return base.read_file(path); };
-	virtual void write_file(const std::string &path, const std::string &contents) override { base.write_file(path, contents); };
-	virtual void debug_print(const std::string &msg) override { base.debug_print(msg); };
+	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override { return base.open_socket(channel, tid); };
+	std::string read_file(const std::string &path) override { return base.read_file(path); };
+	void write_file(const std::string &path, const std::string &contents) override { base.write_file(path, contents); };
+	void debug_print(const std::string &msg) override { base.debug_print(msg); };
 
-	virtual PlatformUtil::Promise<void> delay(int ms) override { return base.delay(ms); };
-	virtual PlatformUtil::Promise<void> on_quit_request() override { return base.on_quit_request(); };
-	virtual PlatformUtil::Promise<void> on_quit() override { return base.on_quit(); };
+	PlatformUtil::Promise<void> delay(int ms) override { return base.delay(ms); };
+	PlatformUtil::Promise<void> on_quit_request() override { return base.on_quit_request(); };
+	PlatformUtil::Promise<void> on_quit() override { return base.on_quit(); };
 
-	virtual void quit() override { base.quit(); };
+	void quit() override { base.quit(); };
 
-	virtual void set_color(Color c) override;
-	virtual void draw_line(float x1, float y1, float x2, float y2) override;
-	virtual void draw_rect(float x, float y, float w, float h) override;
-	virtual void draw_rect_filled(float x, float y, float w, float h) override;
-	virtual void draw_image(const Image &img, float x, float y, float w, float h) override;
-	virtual void draw_circle_filled(float x, float y, float rad) override;
-	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
-	virtual void clear() override;
-	virtual PlatformUtil::Promise<void> present() override;
-	virtual std::unique_ptr<Image> load_image(const std::string &path) override;
-	virtual std::unique_ptr<Font> load_font(float size, bool bold) override;
-	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
-	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
+	void set_color(Color c) override;
+	void draw_line(float x1, float y1, float x2, float y2) override;
+	void draw_rect(float x, float y, float w, float h) override;
+	void draw_rect_filled(float x, float y, float w, float h) override;
+	void draw_image(const Image &img, float x, float y, float w, float h) override;
+	void draw_circle_filled(float x, float y, float rad) override;
+	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
+	void clear() override;
+	PlatformUtil::Promise<void> present() override;
+	std::unique_ptr<Image> load_image(const std::string &path) override;
+	std::unique_ptr<Font> load_font(float size, bool bold) override;
+	std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
+	std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
 
-	virtual void set_volume(int vol) override;
-	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) override;
-	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
-	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
+	void set_volume(int vol) override;
+	std::unique_ptr<SoundData> load_sound(const std::string &path) override;
+	std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
+	std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
-	virtual void set_brightness(int br) override;
+	void set_brightness(int br) override;
 
-	virtual PlatformUtil::Promise<InputEvent> on_input_event() override;
+	PlatformUtil::Promise<InputEvent> on_input_event() override;
 };

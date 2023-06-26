@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "logging.h"
-#include "platform.h"
+#include "platform_runtime.h"
 
 std::unique_ptr<BasePlatform::BusSocket> logging_socket;
 void start_logging()

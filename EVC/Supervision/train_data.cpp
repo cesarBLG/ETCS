@@ -12,6 +12,7 @@
 #include "../Supervision/speed_profile.h"
 #include "../TrainSubsystems/brake.h"
 #include <list>
+#include "platform_runtime.h"
 using json = nlohmann::json;
 enum Electrifications
 {

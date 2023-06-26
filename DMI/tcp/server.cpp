@@ -22,6 +22,7 @@
 #include "../language/language.h"
 #include "../speed/gauge.h"
 #include "../Config/config.h"
+#include "platform_runtime.h"
 
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
@@ -290,7 +291,7 @@ void parseData(std::string str)
 std::unique_ptr<BasePlatform::BusSocket> evc_socket;
 void data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
 {
-    evc_socket->receive().then(data_received).detach();
+    evc_socket->on_message_receive().then(data_received).detach();
     parseData(std::move(data.second));
 }
 void write_command(std::string command, std::string value)
@@ -303,5 +304,5 @@ void startSocket()
 {
     evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("DMI"));
     if (evc_socket)
-        evc_socket->receive().then(data_received).detach();
+        evc_socket->on_message_receive().then(data_received).detach();
 }

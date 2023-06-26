@@ -47,11 +47,11 @@ public:
 	public:
 		TcpBusSocket(uint32_t tid, const std::string &hostname, int port, FdPoller &poller);
 
-		virtual void broadcast(const std::string &data) override;
-		virtual void broadcast(uint32_t tid, const std::string &data) override;
-		virtual void send_to(uint32_t uid, const std::string &data) override;
-		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> receive() override;
-		virtual PlatformUtil::Promise<PeerId> on_peer_join() override;
-		virtual PlatformUtil::Promise<PeerId> on_peer_leave() override;
+		void broadcast(const std::string &data) override;
+		void broadcast(uint32_t tid, const std::string &data) override;
+		void send_to(uint32_t uid, const std::string &data) override;
+		PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() override;
+		PlatformUtil::Promise<PeerId> on_peer_join() override;
+		PlatformUtil::Promise<PeerId> on_peer_leave() override;
 	};
 };

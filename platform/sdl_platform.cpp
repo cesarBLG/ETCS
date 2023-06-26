@@ -6,6 +6,7 @@
 
 #include "sdl_platform.h"
 #include "sdl_gfx/gfx_primitives.h"
+#include "platform_runtime.h"
 #include <algorithm>
 #include <fstream>
 #include <SDL.h>
@@ -105,6 +106,8 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h) :
 	SDL_PauseAudioDevice(audio_device, 0);
 
 	running = true;
+
+	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
 
 SdlPlatform::~SdlPlatform() {

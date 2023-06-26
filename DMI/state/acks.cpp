@@ -13,6 +13,7 @@
 #include "../messages/messages.h"
 #include "acks.h"
 #include <list>
+#include "platform_runtime.h"
 using namespace std;
 void dispAcks();
 Component c234(37*3, 50, nullptr);
