@@ -85,6 +85,25 @@ namespace PlatformUtil
 		}
 	};
 
+	class FuncFulfiller final : public TypeErasedFulfiller
+	{
+		template <typename T> friend class Promise;
+		std::function<void()> callback;
+
+		void execute_callback(bool defer) override {
+			if (!defer)
+				callback();
+			else
+				DeferredFulfillment::list->push_back(std::make_unique<FuncFulfiller>(std::move(*this)));
+		}
+
+		struct CreateTicket { };
+
+	public:
+		FuncFulfiller(std::function<void()> &&func, CreateTicket t) : callback(std::move(func)) {}
+		FuncFulfiller(const std::function<void()> &func, CreateTicket t) : callback(func) {}
+	};
+
 	template <typename T>
 	class Fulfiller final : public TypeErasedFulfiller
 	{
@@ -94,28 +113,32 @@ namespace PlatformUtil
 		PromisePart<T>* promise;
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
+		std::function<void()> cancel_callback;
 		bool unmanaged;
 
 		void execute_callback(bool defer) override {
-			if (!callback)
-				return;
-			if (!defer) {
-				callback(std::move(*value));
-				if (promise)
-					promise->fulfiller = nullptr;
-				promise = nullptr;
-				callback = nullptr;
-				if (unmanaged)
-					delete this;
-			}
-			else {
+			if (defer) {
 				if (unmanaged) {
 					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<T>>(this));
 					unmanaged = false;
 				} else {
 					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
 				}
+				return;
 			}
+
+			if (value)
+				callback(std::move(*value));
+			else
+				cancel_callback();
+
+			if (promise)
+				promise->fulfiller = nullptr;
+			promise = nullptr;
+			callback = nullptr;
+			cancel_callback = nullptr;
+			if (unmanaged)
+				delete this;
 		}
 
 	public:
@@ -138,9 +161,11 @@ namespace PlatformUtil
 
 			value = std::move(other.value);
 			callback = std::move(other.callback);
+			cancel_callback = std::move(other.cancel_callback);
 
 			other.promise = nullptr;
 			other.callback = nullptr;
+			other.cancel_callback = nullptr;
 
 			return *this;
 		}
@@ -151,6 +176,8 @@ namespace PlatformUtil
 				else
 					promise->fulfiller = nullptr;
 			}
+			if (!value && cancel_callback)
+				execute_callback(true);
 		}
 
 		bool is_pending() const {
@@ -161,12 +188,14 @@ namespace PlatformUtil
 
 		void fulfill(T&& arg, bool defer = true) {
 			value = std::move(arg);
-			execute_callback(defer);
+			if (callback)
+				execute_callback(defer);
 		}
 
 		void fulfill(const T& arg, bool defer = true) {
 			value = arg;
-			execute_callback(defer);
+			if (callback)
+				execute_callback(defer);
 		}
 	};
 
@@ -179,28 +208,35 @@ namespace PlatformUtil
 		PromisePart<void>* promise;
 		bool value;
 		typename CallbackType<void>::type callback;
+		std::function<void()> cancel_callback;
 		bool unmanaged;
 
 		void execute_callback(bool defer) override {
-			if (!callback)
-				return;
-			if (!defer) {
-				callback();
-				if (promise)
-					promise->fulfiller = nullptr;
-				promise = nullptr;
-				callback = nullptr;
-				if (unmanaged)
-					delete this;
-			}
-			else {
+			if (defer) {
 				if (unmanaged) {
 					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<void>>(this));
 					unmanaged = false;
 				} else {
 					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
 				}
+				return;
 			}
+
+			if (value) {
+				if (callback)
+					callback();
+			} else {
+				if (cancel_callback)
+					cancel_callback();
+			}
+
+			if (promise)
+				promise->fulfiller = nullptr;
+			promise = nullptr;
+			callback = nullptr;
+			cancel_callback = nullptr;
+			if (unmanaged)
+				delete this;
 		}
 
 	public:
@@ -224,9 +260,11 @@ namespace PlatformUtil
 
 			value = other.value;
 			callback = std::move(other.callback);
+			cancel_callback = std::move(other.cancel_callback);
 
 			other.promise = nullptr;
 			other.callback = nullptr;
+			other.cancel_callback = nullptr;
 
 			return *this;
 		}
@@ -237,6 +275,8 @@ namespace PlatformUtil
 				else
 					promise->fulfiller = nullptr;
 			}
+			if (!value && cancel_callback)
+				execute_callback(true);
 		}
 
 		bool is_pending() const {
@@ -247,7 +287,8 @@ namespace PlatformUtil
 
 		void fulfill(bool defer = true) {
 			value = true;
-			execute_callback(defer);
+			if (callback)
+				execute_callback(defer);
 		}
 	};
 
@@ -260,8 +301,10 @@ namespace PlatformUtil
 		PromisePart<T> p;
 
 		void cancel() {
-			if (p.fulfiller)
+			if (p.fulfiller) {
 				p.fulfiller->callback = nullptr;
+				p.fulfiller->cancel_callback = nullptr;
+			}
 		}
 
 	public:
@@ -304,6 +347,31 @@ namespace PlatformUtil
 				if (p.fulfiller->value)
 					p.fulfiller->execute_callback(true);
 			}
+			return std::move(*this);
+		}
+
+		Promise<T>&& then(typename CallbackType<T>::type &&func) {
+			if (p.fulfiller) {
+				p.fulfiller->callback = std::move(func);
+				if (p.fulfiller->value)
+					p.fulfiller->execute_callback(true);
+			}
+			return std::move(*this);
+		}
+
+		Promise<T>&& otherwise(const std::function<void()> &func) {
+			if (p.fulfiller)
+				p.fulfiller->cancel_callback = func;
+			else
+				DeferredFulfillment::list->push_back(std::make_unique<FuncFulfiller>(func, FuncFulfiller::CreateTicket()));
+			return std::move(*this);
+		}
+
+		Promise<T>&& otherwise(std::function<void()> &&func) {
+			if (p.fulfiller)
+				p.fulfiller->cancel_callback = std::move(func);
+			else
+				DeferredFulfillment::list->push_back(std::make_unique<FuncFulfiller>(std::move(func), FuncFulfiller::CreateTicket()));
 			return std::move(*this);
 		}
 	};

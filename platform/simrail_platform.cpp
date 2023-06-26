@@ -21,6 +21,7 @@ EXPORT_FUNC void free_mem(void *mem) {
 using namespace PlatformUtil;
 
 void callback_fulfill_void(Fulfiller<void>* fulfiller) {
+	platform->debug_print("def fulfill");
 	fulfiller->fulfill(false);
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
