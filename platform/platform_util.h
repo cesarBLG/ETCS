@@ -65,6 +65,17 @@ namespace PlatformUtil
 		virtual ~TypeErasedFulfiller() = default;
 	};
 
+	template <typename T>
+	class FulfillerTypeEraser final : public TypeErasedFulfiller {
+		friend class Fulfiller<T>;
+
+		Fulfiller<T> fulfiller;
+
+		void execute_callback(bool defer) override { fulfiller.execute_callback(defer); }
+	public:
+		FulfillerTypeEraser(Fulfiller<T> &&f) : fulfiller(std::move(f)) {}
+	};
+
 	class DeferredFulfillment
 	{
 	public:
@@ -105,24 +116,25 @@ namespace PlatformUtil
 	};
 
 	template <typename T>
-	class Fulfiller final : public TypeErasedFulfiller
+	class Fulfiller
 	{
 		friend class PromiseFactory;
 		friend class Promise<T>;
+		friend class FulfillerTypeEraser<T>;
 
 		PromisePart<T>* promise;
 		std::optional<T> value;
 		typename CallbackType<T>::type callback;
 		std::function<void()> cancel_callback;
-		bool unmanaged;
+		FulfillerTypeEraser<T>* unmanaged;
 
-		void execute_callback(bool defer) override {
+		void execute_callback(bool defer) {
 			if (defer) {
 				if (unmanaged) {
-					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<T>>(this));
-					unmanaged = false;
+					DeferredFulfillment::list->push_back(std::unique_ptr<FulfillerTypeEraser<T>>(unmanaged));
+					unmanaged = nullptr;
 				} else {
-					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<T>>(std::move(*this)));
+					DeferredFulfillment::list->push_back(std::make_unique<FulfillerTypeEraser<T>>(std::move(*this)));
 				}
 				return;
 			}
@@ -138,17 +150,17 @@ namespace PlatformUtil
 			callback = nullptr;
 			cancel_callback = nullptr;
 			if (unmanaged)
-				delete this;
+				delete unmanaged;
 		}
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
-			unmanaged = false;
+			unmanaged = nullptr;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
-			unmanaged = false;
+			unmanaged = nullptr;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -169,12 +181,14 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		~Fulfiller() override {
+		~Fulfiller() {
 			if (promise) {
-				if (value)
-					(new Fulfiller<T>(std::move(*this)))->unmanaged = true;
-				else
+				if (value) {
+					auto e = new FulfillerTypeEraser<T>(std::move(*this));
+					e->fulfiller.unmanaged = e;
+				} else {
 					promise->fulfiller = nullptr;
+				}
 			}
 			if (!value && cancel_callback)
 				execute_callback(true);
@@ -200,24 +214,25 @@ namespace PlatformUtil
 	};
 
 	template <>
-	class Fulfiller<void> final : public TypeErasedFulfiller
+	class Fulfiller<void>
 	{
 		friend class PromiseFactory;
 		friend class Promise<void>;
+		friend class FulfillerTypeEraser<void>;
 
 		PromisePart<void>* promise;
 		bool value;
 		typename CallbackType<void>::type callback;
 		std::function<void()> cancel_callback;
-		bool unmanaged;
+		FulfillerTypeEraser<void>* unmanaged;
 
-		void execute_callback(bool defer) override {
+		void execute_callback(bool defer) {
 			if (defer) {
 				if (unmanaged) {
-					DeferredFulfillment::list->push_back(std::unique_ptr<Fulfiller<void>>(this));
-					unmanaged = false;
+					DeferredFulfillment::list->push_back(std::unique_ptr<FulfillerTypeEraser<void>>(unmanaged));
+					unmanaged = nullptr;
 				} else {
-					DeferredFulfillment::list->push_back(std::make_unique<Fulfiller<void>>(std::move(*this)));
+					DeferredFulfillment::list->push_back(std::make_unique<FulfillerTypeEraser<void>>(std::move(*this)));
 				}
 				return;
 			}
@@ -236,18 +251,18 @@ namespace PlatformUtil
 			callback = nullptr;
 			cancel_callback = nullptr;
 			if (unmanaged)
-				delete this;
+				delete unmanaged;
 		}
 
 	public:
 		Fulfiller() {
 			promise = nullptr;
 			value = false;
-			unmanaged = false;
+			unmanaged = nullptr;
 		}
 		Fulfiller(Fulfiller &&other) {
 			promise = nullptr;
-			unmanaged = false;
+			unmanaged = nullptr;
 			*this = std::move(other);
 		}
 		Fulfiller& operator=(Fulfiller &&other) {
@@ -268,12 +283,14 @@ namespace PlatformUtil
 
 			return *this;
 		}
-		~Fulfiller() override {
+		~Fulfiller() {
 			if (promise) {
-				if (value)
-					(new Fulfiller<void>(std::move(*this)))->unmanaged = true;
-				else
+				if (value) {
+					auto e = new FulfillerTypeEraser<void>(std::move(*this));
+					e->fulfiller.unmanaged = e;
+				} else {
 					promise->fulfiller = nullptr;
+				}
 			}
 			if (!value && cancel_callback)
 				execute_callback(true);
@@ -336,7 +353,7 @@ namespace PlatformUtil
 			if (p.fulfiller) {
 				p.fulfiller->promise = nullptr;
 				if (p.fulfiller->unmanaged)
-					delete p.fulfiller;
+					delete p.fulfiller->unmanaged;
 			}
 			p.fulfiller = nullptr;
 		}
@@ -374,6 +391,21 @@ namespace PlatformUtil
 				DeferredFulfillment::list->push_back(std::make_unique<FuncFulfiller>(std::move(func), FuncFulfiller::CreateTicket()));
 			return std::move(*this);
 		}
+	};
+
+	class TypeErasedPromise {
+	public:
+		virtual ~TypeErasedPromise() = default;
+		virtual void detach() = 0;
+	};
+
+	template <typename T>
+	class PromiseTypeEraser final : public TypeErasedPromise {
+		Promise<T> promise;
+
+	public:
+		PromiseTypeEraser(Promise<T> &&p) : promise(std::move(p)) {}
+		void detach() override { promise.detach(); }
 	};
 
 	class PromiseFactory
