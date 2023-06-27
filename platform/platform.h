@@ -25,6 +25,12 @@ public:
 			static constexpr uint32_t fourcc(std::string_view p) {
 			    return ((p.size() >= 1 ? p[0] : '_') << 24) | ((p.size() >= 2 ? p[1] : '_') << 16) | ((p.size() >= 3 ? p[2] : '_') << 8) | (p.size() >= 4 ? p[3] : '_');
 			}
+			bool operator==(const PeerId &other) const {
+				return uid == other.uid;
+			}
+			bool operator<(const PeerId &other) const {
+				return uid < other.uid;
+			}
 		};
 		virtual ~BusSocket() = default;
 		virtual void broadcast(const std::string &data) = 0;
@@ -131,4 +137,12 @@ public:
 	virtual void set_brightness(int br) = 0;
 
 	virtual PlatformUtil::Promise<InputEvent> on_input_event() = 0;
+};
+
+template <>
+struct std::hash<BasePlatform::BusSocket::PeerId>
+{
+	std::size_t operator()(const BasePlatform::BusSocket::PeerId &id) const {
+		return id.uid;
+	}
 };
