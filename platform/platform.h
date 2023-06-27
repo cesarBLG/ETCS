@@ -23,7 +23,7 @@ public:
 		struct PeerId {
 			uint32_t tid;
 			uint32_t uid;
-			static constexpr uint32_t fourcc(std::string_view p) {
+			static constexpr uint32_t fourcc(const std::string_view p) {
 			    return ((p.size() >= 1 ? p[0] : '_') << 24) | ((p.size() >= 2 ? p[1] : '_') << 16) | ((p.size() >= 3 ? p[2] : '_') << 8) | (p.size() >= 4 ? p[3] : '_');
 			}
 			bool operator==(const PeerId &other) const {
@@ -38,9 +38,9 @@ public:
 		struct Message { PeerId peer; std::string data; };
 		typedef std::variant<JoinNotification, LeaveNotification, Message> ReceiveResult;
 		virtual ~BusSocket() = default;
-		virtual void broadcast(const std::string &data) = 0;
-		virtual void broadcast(uint32_t tid, const std::string &data) = 0;
-		virtual void send_to(uint32_t uid, const std::string &data) = 0;
+		virtual void broadcast(const std::string_view data) = 0;
+		virtual void broadcast(uint32_t tid, const std::string_view data) = 0;
+		virtual void send_to(uint32_t uid, const std::string_view data) = 0;
 		virtual PlatformUtil::Promise<ReceiveResult> receive() = 0;
 	};
 
@@ -59,10 +59,10 @@ public:
 	virtual int64_t get_timestamp() = 0;
 	virtual DateTime get_local_time() = 0;
 
-	virtual std::unique_ptr<BusSocket> open_socket(const std::string &bus, uint32_t tid) = 0;
-	virtual std::optional<std::string> read_file(const std::string &path) = 0;
-	virtual bool write_file(const std::string &path, const std::string &contents) = 0;
-	virtual void debug_print(const std::string &msg) = 0;
+	virtual std::unique_ptr<BusSocket> open_socket(const std::string_view bus, uint32_t tid) = 0;
+	virtual std::optional<std::string> read_file(const std::string_view path) = 0;
+	virtual bool write_file(const std::string_view path, const std::string_view contents) = 0;
+	virtual void debug_print(const std::string_view msg) = 0;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) = 0;
 	virtual PlatformUtil::Promise<void> on_quit_request() = 0;
@@ -87,7 +87,7 @@ public:
 	public:
 		virtual ~Font() = default;
 		virtual float ascent() const = 0;
-		virtual std::pair<float, float> calc_size(const std::string &str) const = 0;
+		virtual std::pair<float, float> calc_size(const std::string_view str) const = 0;
 	};
 
 	class SoundData : private PlatformUtil::NoCopy
@@ -127,13 +127,13 @@ public:
 	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) = 0;
 	virtual void clear() = 0;
 	virtual PlatformUtil::Promise<void> present() = 0;
-	virtual std::unique_ptr<Image> load_image(const std::string &path) = 0;
+	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) = 0;
-	virtual std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) = 0;
-	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) = 0;
+	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
+	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
 
 	virtual void set_volume(int vol) = 0;
-	virtual std::unique_ptr<SoundData> load_sound(const std::string &path) = 0;
+	virtual std::unique_ptr<SoundData> load_sound(const std::string_view path) = 0;
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) = 0;
 

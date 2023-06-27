@@ -35,7 +35,7 @@ void SdlPlatform::SdlPlatform::load_config()
 	}
 }
 
-std::string SdlPlatform::SdlPlatform::get_config(const std::string &key)
+std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key)
 {
 	auto it = ini_items.find(key);
 	if (it == ini_items.end())
@@ -119,7 +119,7 @@ SdlPlatform::~SdlPlatform() {
 	SDL_Quit();
 }
 
-std::unique_ptr<SdlPlatform::BusSocket> SdlPlatform::open_socket(const std::string &channel, uint32_t tid) {
+std::unique_ptr<SdlPlatform::BusSocket> SdlPlatform::open_socket(const std::string_view channel, uint32_t tid) {
 	return bus_socket_impl.open_bus_socket(channel, tid);
 }
 
@@ -135,16 +135,16 @@ SdlPlatform::DateTime SdlPlatform::get_local_time() {
 	return libc_time_impl.get_local_time();
 }
 
-std::optional<std::string> SdlPlatform::read_file(const std::string &path) {
+std::optional<std::string> SdlPlatform::read_file(const std::string_view path) {
 	return fstream_file_impl.read_file(path);
 }
 
-bool SdlPlatform::write_file(const std::string &path, const std::string &contents) {
+bool SdlPlatform::write_file(const std::string_view path, const std::string_view contents) {
 	return fstream_file_impl.write_file(path, contents);
 }
 
-void SdlPlatform::debug_print(const std::string &msg) {
-	SDL_Log("debug_print: %s", msg.c_str());
+void SdlPlatform::debug_print(const std::string_view msg) {
+	SDL_Log("debug_print: %.*s", msg.size(), msg.data());
 }
 
 PlatformUtil::Promise<void> SdlPlatform::delay(int ms) {
@@ -301,8 +301,8 @@ PlatformUtil::Promise<void> SdlPlatform::present() {
 	return on_present_list.create_and_add();
 }
 
-std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string &p) {
-	std::string path = load_path + p;
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_view p) {
+	std::string path = load_path + std::string(p);
 	SDL_Surface *surf = SDL_LoadBMP(path.c_str());
 	if (surf == nullptr) {
 		printf("Error loading BMP %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
@@ -344,14 +344,14 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold)
 	return std::make_unique<SdlFont>(wrapper, scale);
 }
 
-std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::string &text, const Font &base, Color c) {
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
 	if (text.empty())
 		return nullptr;
 
 	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended(font.get(), text.c_str(), color);
+	SDL_Surface *surf = TTF_RenderUTF8_Blended(font.get(), std::string(text).c_str(), color);
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -369,7 +369,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::stri
 	return img;
 }
 
-std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
 	if (text.empty())
 		return nullptr;
 
@@ -379,7 +379,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 
 	//if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), text.c_str(), color, 0);
+	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), std::string(text).c_str(), color, 0);
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -433,9 +433,9 @@ float SdlPlatform::SdlFont::ascent() const {
 	return TTF_FontAscent(font->font) / scale;
 }
 
-std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string &str) const {
+std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str) const {
 	int w, h;
-	TTF_SizeUTF8(font->font, str.c_str(), &w, &h);
+	TTF_SizeUTF8(font->font, std::string(str).c_str(), &w, &h);
 	return std::make_pair(w / scale, h / scale);
 }
 
@@ -501,8 +501,8 @@ void SdlPlatform::set_volume(int vol) {
 	audio_volume = vol;
 }
 
-std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string &path) {
-	std::string file = load_path + "sound/" + path + ".wav";
+std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string_view path) {
+	std::string file = load_path + "sound/" + std::string(path) + ".wav";
 
 	SDL_AudioSpec spec;
 	uint8_t* buffer;

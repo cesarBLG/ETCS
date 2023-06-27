@@ -28,11 +28,11 @@ private:
 	void close_socket();
 	void handle_error();
 	void update();
-	void connect(const std::string &hostname, int port);
+	void connect(const std::string_view hostname, int port);
 public:
-	TcpSocket(const std::string &hostname, int port, FdPoller &p);
+	TcpSocket(const std::string_view hostname, int port, FdPoller &p);
 	TcpSocket(int fd, FdPoller &p);
 	~TcpSocket();
-	void send(const std::string &data);
+	void send(const std::string_view data);
 	PlatformUtil::Promise<std::string> receive();
 };

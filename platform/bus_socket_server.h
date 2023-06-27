@@ -30,12 +30,12 @@ private:
 	void on_new_client(std::unique_ptr<TcpSocket> &&sock);
 
 public:
-	BusSocketServer(const std::string &hostname, int port, FdPoller &p);
+	BusSocketServer(const std::string_view hostname, int port, FdPoller &p);
 };
 
 class BusSocketServerManager : private PlatformUtil::NoCopy {
 private:
     std::vector<std::unique_ptr<BusSocketServer>> servers;
 public:
-    BusSocketServerManager(const std::string &load_path, FdPoller &fd);
+    BusSocketServerManager(const std::string_view load_path, FdPoller &fd);
 };

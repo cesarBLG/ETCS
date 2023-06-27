@@ -24,7 +24,7 @@ private:
 	void fd_ready(int rev);
 
 public:
-	TcpListener(const std::string &hostname, int port, FdPoller &p);
+	TcpListener(const std::string_view hostname, int port, FdPoller &p);
 	~TcpListener();
 	PlatformUtil::Promise<std::unique_ptr<TcpSocket>> accept();
 };

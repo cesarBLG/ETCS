@@ -41,7 +41,7 @@ private:
 	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 
 public:
-	ConsolePlatform(const std::string &load_path);
+	ConsolePlatform(const std::string_view load_path);
 	void event_loop();
 
 	~ConsolePlatform() override;
@@ -50,10 +50,10 @@ public:
 	int64_t get_timestamp() override;
 	DateTime get_local_time() override;
 
-	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	std::optional<std::string> read_file(const std::string &path) override;
-	bool write_file(const std::string &path, const std::string &contents) override;
-	void debug_print(const std::string &msg) override;
+	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
+	std::optional<std::string> read_file(const std::string_view path) override;
+	bool write_file(const std::string_view path, const std::string_view contents) override;
+	void debug_print(const std::string_view msg) override;
 
 	PlatformUtil::Promise<void> delay(int ms) override;
 	PlatformUtil::Promise<void> on_quit_request() override;

@@ -81,7 +81,7 @@ BasePlatform::DateTime SimrailBasePlatform::get_local_time() {
 	return {};
 }
 
-std::optional<std::string> SimrailBasePlatform::read_file(const std::string &path) {
+std::optional<std::string> SimrailBasePlatform::read_file(const std::string_view path) {
 	size_t len;
 	char *ret = ::read_file(path.data(), path.size(), &len);
 	if (!ret)
@@ -91,11 +91,11 @@ std::optional<std::string> SimrailBasePlatform::read_file(const std::string &pat
 	return str;
 }
 
-bool SimrailBasePlatform::write_file(const std::string &path, const std::string &contents) {
+bool SimrailBasePlatform::write_file(const std::string_view path, const std::string_view contents) {
 	return ::write_file(path.data(), path.size(), contents.data(), contents.size()) == 1;
 }
 
-void SimrailBasePlatform::debug_print(const std::string &msg) {
+void SimrailBasePlatform::debug_print(const std::string_view msg) {
 	::debug_print(msg.data(), msg.size());
 }
 
@@ -117,7 +117,7 @@ Promise<void> SimrailBasePlatform::on_quit() {
 	return std::move(pair.first);
 }
 
-std::unique_ptr<BasePlatform::BusSocket> SimrailBasePlatform::open_socket(const std::string &channel, uint32_t tid) {
+std::unique_ptr<BasePlatform::BusSocket> SimrailBasePlatform::open_socket(const std::string_view channel, uint32_t tid) {
 	uint32_t handle = ::open_socket(channel.data(), channel.size(), tid);
 	if (!handle)
 		return nullptr;
@@ -159,15 +159,15 @@ SimrailBasePlatform::SimrailBusSocket::~SimrailBusSocket() {
 	::socket_close(handle);
 }
 
-void SimrailBasePlatform::SimrailBusSocket::broadcast(const std::string &data) {
+void SimrailBasePlatform::SimrailBusSocket::broadcast(const std::string_view data) {
 	::socket_broadcast(handle, data.data(), data.size());
 }
 
-void SimrailBasePlatform::SimrailBusSocket::broadcast(uint32_t tid, const std::string &data) {
+void SimrailBasePlatform::SimrailBusSocket::broadcast(uint32_t tid, const std::string_view data) {
 	::socket_broadcast_tid(handle, tid, data.data(), data.size());
 }
 
-void SimrailBasePlatform::SimrailBusSocket::send_to(uint32_t uid, const std::string &data) {
+void SimrailBasePlatform::SimrailBusSocket::send_to(uint32_t uid, const std::string_view data) {
 	::socket_send_to(handle, uid, data.data(), data.size());
 }
 
@@ -216,7 +216,7 @@ Promise<void> SimrailUiPlatform::present() {
 	return {};
 }
 
-std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string &p) {
+std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {
 	return nullptr;
 }
 
@@ -224,18 +224,18 @@ std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size
 	return nullptr;
 }
 
-std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string &text, const Font &base, Color c) {
+std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
 	return nullptr;
 }
 
-std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string &text, const Font &base, int align, Color c) {
+std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
 	return nullptr;
 }
 
 void SimrailUiPlatform::set_volume(int vol) {
 }
 
-std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::string &path) {
+std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::string_view path) {
 	return nullptr;
 }
 

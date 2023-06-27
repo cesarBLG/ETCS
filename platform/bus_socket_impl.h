@@ -20,9 +20,9 @@ private:
 	std::vector<SocketConfig> socket_config;
 
 public:
-	BusSocketImpl(const std::string &load_path, FdPoller &p);
+	BusSocketImpl(const std::string_view load_path, FdPoller &p);
 
-	std::unique_ptr<BasePlatform::BusSocket> open_bus_socket(const std::string &channel, uint32_t tid);
+	std::unique_ptr<BasePlatform::BusSocket> open_bus_socket(const std::string_view channel, uint32_t tid);
 
 	class TcpBusSocket final : public BasePlatform::BusSocket {
 	private:
@@ -43,11 +43,11 @@ public:
 		uint32_t tid;
 		FdPoller& poller;
 	public:
-		TcpBusSocket(uint32_t tid, const std::string &hostname, int port, FdPoller &poller);
+		TcpBusSocket(uint32_t tid, const std::string_view hostname, int port, FdPoller &poller);
 
-		void broadcast(const std::string &data) override;
-		void broadcast(uint32_t tid, const std::string &data) override;
-		void send_to(uint32_t uid, const std::string &data) override;
+		void broadcast(const std::string_view data) override;
+		void broadcast(uint32_t tid, const std::string_view data) override;
+		void send_to(uint32_t uid, const std::string_view data) override;
 		PlatformUtil::Promise<ReceiveResult> receive() override;
 	};
 };

@@ -10,8 +10,8 @@
 #include <fstream>
 #include <sstream>
 
-BusSocketImpl::BusSocketImpl(const std::string &load_path, FdPoller &p) : poller(p) {
-	std::ifstream file(load_path + "tcp_bus_client.conf", std::ios::binary);
+BusSocketImpl::BusSocketImpl(const std::string_view load_path, FdPoller &p) : poller(p) {
+	std::ifstream file(std::string(load_path) + "tcp_bus_client.conf", std::ios::binary);
 	std::string line;
 
 	std::map<std::string, std::string> ini_items;
@@ -33,11 +33,11 @@ BusSocketImpl::BusSocketImpl(const std::string &load_path, FdPoller &p) : poller
 	}
 }
 
-std::unique_ptr<BasePlatform::BusSocket> BusSocketImpl::open_bus_socket(const std::string &channel, uint32_t tid) {
+std::unique_ptr<BasePlatform::BusSocket> BusSocketImpl::open_bus_socket(const std::string_view channel, uint32_t tid) {
 	for (const SocketConfig &conf : socket_config)
 		if (conf.name == channel)
 			return std::make_unique<TcpBusSocket>(tid, conf.hostname, conf.port, poller);
-	platform->debug_print("unconfigured bus socket channel \"" + channel + "\"!");
+	platform->debug_print("unconfigured bus socket channel \"" + std::string(channel) + "\"!");
 	return nullptr;
 }
 
@@ -70,7 +70,7 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 	if (rx_buffer.empty())
 		rx_buffer = std::move(data);
 	else
-		rx_buffer += data;
+		rx_buffer += std::move(data);
 
 	while (true) {
 		if (rx_buffer.size() < 3 * 4)
@@ -109,7 +109,7 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 	}
 }
 
-BusSocketImpl::TcpBusSocket::TcpBusSocket(uint32_t tid, const std::string &hostname, int port, FdPoller &poller) :
+BusSocketImpl::TcpBusSocket::TcpBusSocket(uint32_t tid, const std::string_view hostname, int port, FdPoller &poller) :
 	hostname(hostname), port(port), tid(tid), poller(poller), socket(std::make_unique<TcpSocket>(hostname, port, poller)) {
 	rx_promise = socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1));
 	client_hello();
@@ -123,7 +123,7 @@ void BusSocketImpl::TcpBusSocket::client_hello() {
 	socket->send(std::move(buf));
 }
 
-void BusSocketImpl::TcpBusSocket::broadcast(const std::string &data) {
+void BusSocketImpl::TcpBusSocket::broadcast(const std::string_view data) {
 	std::string buf;
 	buf.reserve(2 * 4 + data.size());
 	buf.resize(2 * 4);
@@ -133,7 +133,7 @@ void BusSocketImpl::TcpBusSocket::broadcast(const std::string &data) {
 	socket->send(std::move(buf));
 }
 
-void BusSocketImpl::TcpBusSocket::broadcast(uint32_t tid, const std::string &data) {
+void BusSocketImpl::TcpBusSocket::broadcast(uint32_t tid, const std::string_view data) {
 	std::string buf;
 	buf.reserve(3 * 4 + data.size());
 	buf.resize(3 * 4);
@@ -144,7 +144,7 @@ void BusSocketImpl::TcpBusSocket::broadcast(uint32_t tid, const std::string &dat
 	socket->send(std::move(buf));
 }
 
-void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data) {
+void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string_view data) {
 	std::string buf;
 	buf.reserve(3 * 4 + data.size());
 	buf.resize(3 * 4);

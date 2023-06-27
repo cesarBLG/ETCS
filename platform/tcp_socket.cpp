@@ -98,11 +98,11 @@ void TcpSocket::update() {
 	}
 }
 
-void TcpSocket::connect(const std::string &hostname, int port) {
+void TcpSocket::connect(const std::string_view hostname, int port) {
 	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
-	getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &res);
+	getaddrinfo(std::string(hostname).c_str(), std::to_string(port).c_str(), &hints, &res);
 
 	peer_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(peer_fd);
@@ -111,7 +111,7 @@ void TcpSocket::connect(const std::string &hostname, int port) {
 	freeaddrinfo(res);
 }
 
-void TcpSocket::send(const std::string &data) {
+void TcpSocket::send(const std::string_view data) {
 	tx_buffer += data;
 	update();
 }
@@ -122,7 +122,7 @@ PlatformUtil::Promise<std::string> TcpSocket::receive() {
 	return std::move(promise);
 }
 
-TcpSocket::TcpSocket(const std::string &hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
+TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
 	connect(hostname, port);
 }
 

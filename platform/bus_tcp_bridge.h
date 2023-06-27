@@ -46,12 +46,12 @@ private:
     std::vector<std::unique_ptr<BridgedTcpSocket>> clients;
 
 public:
-    BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b);
+    BusTcpBridge(const std::string_view bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b);
 };
 
 class BusTcpBridgeManager : private PlatformUtil::NoCopy {
 private:
     std::vector<std::unique_ptr<BusTcpBridge>> bridges;
 public:
-    BusTcpBridgeManager(const std::string &load_path, FdPoller &fd, BusSocketImpl &impl);
+    BusTcpBridgeManager(const std::string_view load_path, FdPoller &fd, BusSocketImpl &impl);
 };

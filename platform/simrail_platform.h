@@ -16,9 +16,9 @@ private:
 	public:
 		SimrailBusSocket(uint32_t handle);
 		~SimrailBusSocket() override;
-		void broadcast(const std::string &data) override;
-		void broadcast(uint32_t tid, const std::string &data) override;
-		void send_to(uint32_t uid, const std::string &data) override;
+		void broadcast(const std::string_view data) override;
+		void broadcast(uint32_t tid, const std::string_view data) override;
+		void send_to(uint32_t uid, const std::string_view data) override;
 		PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> receive() override;
 	};
 
@@ -31,10 +31,10 @@ public:
 	int64_t get_timestamp() override;
 	DateTime get_local_time() override;
 
-	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	std::optional<std::string> read_file(const std::string &path) override;
-	bool write_file(const std::string &path, const std::string &contents) override;
-	void debug_print(const std::string &msg) override;
+	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
+	std::optional<std::string> read_file(const std::string_view path) override;
+	bool write_file(const std::string_view path, const std::string_view contents) override;
+	void debug_print(const std::string_view msg) override;
 
 	PlatformUtil::Promise<void> delay(int ms) override;
 	PlatformUtil::Promise<void> on_quit_request() override;
@@ -61,7 +61,7 @@ public:
 	public:
 		SimrailFont() = default;
 		float ascent() const override { return 0.0f; }
-		std::pair<float, float> calc_size(const std::string &str) const override { return std::make_pair(0.0f, 0.0f); }
+		std::pair<float, float> calc_size(const std::string_view str) const override { return std::make_pair(0.0f, 0.0f); }
 	};
 
 	class SimrailSoundData : public SoundData
@@ -81,10 +81,10 @@ public:
 	int64_t get_timestamp() override { return base.get_timestamp(); };
 	DateTime get_local_time() override { return base.get_local_time(); };
 
-	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override { return base.open_socket(channel, tid); };
-	std::optional<std::string> read_file(const std::string &path) override { return base.read_file(path); };
-	bool write_file(const std::string &path, const std::string &contents) override { return base.write_file(path, contents); };
-	void debug_print(const std::string &msg) override { base.debug_print(msg); };
+	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override { return base.open_socket(channel, tid); };
+	std::optional<std::string> read_file(const std::string_view path) override { return base.read_file(path); };
+	bool write_file(const std::string_view path, const std::string_view contents) override { return base.write_file(path, contents); };
+	void debug_print(const std::string_view msg) override { base.debug_print(msg); };
 
 	PlatformUtil::Promise<void> delay(int ms) override { return base.delay(ms); };
 	PlatformUtil::Promise<void> on_quit_request() override { return base.on_quit_request(); };
@@ -101,13 +101,13 @@ public:
 	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
 	void clear() override;
 	PlatformUtil::Promise<void> present() override;
-	std::unique_ptr<Image> load_image(const std::string &path) override;
+	std::unique_ptr<Image> load_image(const std::string_view path) override;
 	std::unique_ptr<Font> load_font(float size, bool bold) override;
-	std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
-	std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
+	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
+	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
 
 	void set_volume(int vol) override;
-	std::unique_ptr<SoundData> load_sound(const std::string &path) override;
+	std::unique_ptr<SoundData> load_sound(const std::string_view path) override;
 	std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 

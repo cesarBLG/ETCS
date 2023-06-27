@@ -23,7 +23,7 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
     if (tcp_rx_buffer.empty())
         tcp_rx_buffer = std::move(data);
     else
-        tcp_rx_buffer += data;
+        tcp_rx_buffer += std::move(data);
 
     if (newline_framing) {
         size_t it;
@@ -88,15 +88,15 @@ void BusTcpBridge::on_new_client(std::unique_ptr<TcpSocket> &&sock)
     clients.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), tx_tid, newline_framing));
 }
 
-BusTcpBridge::BusTcpBridge(const std::string &bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b) :
+BusTcpBridge::BusTcpBridge(const std::string_view bus, uint32_t rx_tid, std::optional<uint32_t> tx_tid, bool nl, const std::string hostname, int port, FdPoller &fd, BusSocketImpl& b) :
     bus(bus), listener(hostname, port, fd), rx_tid(rx_tid), tx_tid(tx_tid), newline_framing(nl), bus_impl(b)
 {
     accept_promise = listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1));
 }
 
-BusTcpBridgeManager::BusTcpBridgeManager(const std::string &load_path, FdPoller &fd, BusSocketImpl &impl)
+BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPoller &fd, BusSocketImpl &impl)
 {
-    std::ifstream file(load_path + "tcp_bus_bridge.conf", std::ios::binary);
+    std::ifstream file(std::string(load_path) + "tcp_bus_bridge.conf", std::ios::binary);
     std::string line;
 
     std::map<std::string, std::string> ini_items;

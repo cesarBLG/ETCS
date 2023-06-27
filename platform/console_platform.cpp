@@ -6,6 +6,7 @@
 
 #include "console_platform.h"
 #include "platform_runtime.h"
+#include <iostream>
 
 #ifdef __unix__
 #include <signal.h>
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
 }
 #endif
 
-ConsolePlatform::ConsolePlatform(const std::string &path) :
+ConsolePlatform::ConsolePlatform(const std::string_view path) :
 	load_path(path),
 	bus_socket_impl(load_path, poller),
 	fstream_file_impl(load_path)
@@ -79,19 +80,19 @@ ConsolePlatform::DateTime ConsolePlatform::get_local_time() {
 	return libc_time_impl.get_local_time();
 }
 
-std::optional<std::string> ConsolePlatform::read_file(const std::string &path) {
+std::optional<std::string> ConsolePlatform::read_file(const std::string_view path) {
 	return fstream_file_impl.read_file(path);
 }
 
-bool ConsolePlatform::write_file(const std::string &path, const std::string &contents) {
+bool ConsolePlatform::write_file(const std::string_view path, const std::string_view contents) {
 	return fstream_file_impl.write_file(path, contents);
 }
 
-void ConsolePlatform::debug_print(const std::string &msg) {
+void ConsolePlatform::debug_print(const std::string_view msg) {
 #ifdef __ANDROID__
 	__android_log_print(ANDROID_LOG_DEBUG, "ConsolePlatform", (msg + "\n").c_str());
 #else
-	printf("%s\n", msg.c_str());
+	std::cout << msg << std::endl;
 #endif
 }
 
@@ -110,7 +111,7 @@ PlatformUtil::Promise<void> ConsolePlatform::on_quit() {
 }
 
 
-std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const std::string &channel, uint32_t tid) {
+std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const std::string_view channel, uint32_t tid) {
 	return bus_socket_impl.open_bus_socket(channel, tid);
 }
 

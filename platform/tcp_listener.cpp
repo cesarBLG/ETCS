@@ -76,13 +76,13 @@ void TcpListener::fd_ready(int rev) {
 		promise = poller.on_fd_ready(listen_fd, POLLIN).then(std::bind(&TcpListener::fd_ready, this, std::placeholders::_1));
 }
 
-TcpListener::TcpListener(const std::string &hostname, int port, FdPoller &p) : poller(p) {
+TcpListener::TcpListener(const std::string_view hostname, int port, FdPoller &p) : poller(p) {
 	listen_fd = -1;
 	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	getaddrinfo(hostname.c_str(), std::to_string(port).c_str(), &hints, &res);
+	getaddrinfo(std::string(hostname).c_str(), std::to_string(port).c_str(), &hints, &res);
 
 	listen_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(listen_fd);

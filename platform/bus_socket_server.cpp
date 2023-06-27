@@ -166,16 +166,16 @@ void BusSocketServer::on_new_client(std::unique_ptr<TcpSocket> &&sock)
     clients.back().rx_promise = clients.back().socket->receive().then(std::bind(&BusSocketServer::on_client_data, this, std::placeholders::_1, id));
 }
 
-BusSocketServer::BusSocketServer(const std::string &hostname, int port, FdPoller &p) :
+BusSocketServer::BusSocketServer(const std::string_view hostname, int port, FdPoller &p) :
     listener(hostname, port, p),
     uid(0)
 {
     accept_promise = listener.accept().then(std::bind(&BusSocketServer::on_new_client, this, std::placeholders::_1));
 }
 
-BusSocketServerManager::BusSocketServerManager(const std::string &load_path, FdPoller &fd)
+BusSocketServerManager::BusSocketServerManager(const std::string_view load_path, FdPoller &fd)
 {
-    std::ifstream file(load_path + "tcp_bus_server.conf", std::ios::binary);
+    std::ifstream file(std::string(load_path) + "tcp_bus_server.conf", std::ios::binary);
     std::string line;
 
     std::map<std::string, std::string> ini_items;

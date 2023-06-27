@@ -64,9 +64,9 @@ private:
 	PlatformUtil::FulfillerList<void> on_present_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
 	bool running;
-	std::map<std::string, std::string> ini_items;
+	std::map<std::string, std::string, std::less<>> ini_items;
 	void load_config();
-	std::string get_config(const std::string &key);
+	std::string get_config(const std::string_view key);
 	BusSocketImpl bus_socket_impl;
 	LibcTimeImpl libc_time_impl;
 	FstreamFileImpl fstream_file_impl;
@@ -101,7 +101,7 @@ public:
 		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
 		float ascent() const override;
-		std::pair<float, float> calc_size(const std::string &str) const override;
+		std::pair<float, float> calc_size(const std::string_view str) const override;
 	};
 
 	class SdlSoundData final : public SoundData
@@ -132,10 +132,10 @@ public:
 	int64_t get_timestamp() override;
 	DateTime get_local_time() override;
 
-	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	std::optional<std::string> read_file(const std::string &path) override;
-	bool write_file(const std::string &path, const std::string &contents) override;
-	void debug_print(const std::string &msg) override;
+	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
+	std::optional<std::string> read_file(const std::string_view path) override;
+	bool write_file(const std::string_view path, const std::string_view contents) override;
+	void debug_print(const std::string_view msg) override;
 
 	PlatformUtil::Promise<void> delay(int ms) override;
 	PlatformUtil::Promise<void> on_quit_request() override;
@@ -152,13 +152,13 @@ public:
 	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
 	void clear() override;
 	PlatformUtil::Promise<void> present() override;
-	std::unique_ptr<Image> load_image(const std::string &path) override;
+	std::unique_ptr<Image> load_image(const std::string_view path) override;
 	std::unique_ptr<Font> load_font(float size, bool bold) override;
-	std::unique_ptr<Image> make_text_image(const std::string &text, const Font &font, Color c) override;
-	std::unique_ptr<Image> make_wrapped_text_image(const std::string &text, const Font &font, int align, Color c) override;
+	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
+	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
 
 	void set_volume(int vol) override;
-	std::unique_ptr<SoundData> load_sound(const std::string &path) override;
+	std::unique_ptr<SoundData> load_sound(const std::string_view path) override;
 	std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
