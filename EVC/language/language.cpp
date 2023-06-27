@@ -29,11 +29,14 @@ void set_language(std::string lang)
 {
     if (lang == "en" || lang == "") {
         language = "en";
-    } else if (reader.ParseData(platform->read_file("locales/evc/" + lang + ".mo")) != moFileLib::moFileReader::EC_SUCCESS) {
-        platform->debug_print(reader.GetErrorDescription());
-        language = "en";
     } else {
-        language = lang;
+        auto contents = platform->read_file("locales/evc/" + lang + ".mo");
+        if (!contents || reader.ParseData(*contents) != moFileLib::moFileReader::EC_SUCCESS) {
+            platform->debug_print(reader.GetErrorDescription());
+            language = "en";
+        } else {
+            language = lang;
+        }
     }
     for (auto it : installed_stms) {
         stm_message msg;

@@ -133,8 +133,8 @@ public:
 	DateTime get_local_time() override;
 
 	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	std::string read_file(const std::string &path) override;
-	void write_file(const std::string &path, const std::string &contents) override;
+	std::optional<std::string> read_file(const std::string &path) override;
+	bool write_file(const std::string &path, const std::string &contents) override;
 	void debug_print(const std::string &msg) override;
 
 	PlatformUtil::Promise<void> delay(int ms) override;

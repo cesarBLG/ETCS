@@ -56,9 +56,9 @@ void set_train_data(std::string spec)
     conversion_model_used = false;
     if (!special_train_data.empty()) {
         json j;
-        std::string contents = platform->read_file(traindata_file);
-        if (!contents.empty())
-            j = json::parse(contents);
+        auto contents = platform->read_file(traindata_file);
+        if (contents)
+            j = json::parse(*contents);
         if (j.contains(special_train_data)) {
             json &traindata = j[special_train_data];
             set_brake_model(traindata);

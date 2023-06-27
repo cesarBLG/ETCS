@@ -81,18 +81,18 @@ BasePlatform::DateTime SimrailBasePlatform::get_local_time() {
 	return {};
 }
 
-std::string SimrailBasePlatform::read_file(const std::string &path) {
+std::optional<std::string> SimrailBasePlatform::read_file(const std::string &path) {
 	size_t len;
 	char *ret = ::read_file(path.data(), path.size(), &len);
 	if (!ret)
-		return "";
+		return std::nullopt;
 	std::string str(ret, len);
 	::free_mem(ret);
 	return str;
 }
 
-void SimrailBasePlatform::write_file(const std::string &path, const std::string &contents) {
-	::write_file(path.data(), path.size(), contents.data(), contents.size());
+bool SimrailBasePlatform::write_file(const std::string &path, const std::string &contents) {
+	return ::write_file(path.data(), path.size(), contents.data(), contents.size()) == 1;
 }
 
 void SimrailBasePlatform::debug_print(const std::string &msg) {

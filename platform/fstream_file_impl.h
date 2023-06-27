@@ -13,6 +13,6 @@ class FstreamFileImpl {
 
 public:
     FstreamFileImpl(const std::string &load_path);
-	std::string read_file(const std::string &path);
-    void write_file(const std::string &path, const std::string &contents);
+	std::optional<std::string> read_file(const std::string &path);
+    bool write_file(const std::string &path, const std::string &contents);
 };

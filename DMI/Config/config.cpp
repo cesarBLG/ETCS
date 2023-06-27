@@ -17,9 +17,9 @@ void load_config(std::string serie)
 {
     etcsDialMaxSpeed = 400;
     stm_layout_file = "stm_windows.json";
-    std::string contents = platform->read_file("config.json");
-    if (!contents.empty()) {
-        json j = json::parse(contents);
+    auto contents = platform->read_file("config.json");
+    if (contents) {
+        json j = json::parse(*contents);
         if (j.contains(serie)) {
             json &cfg = j[serie];
             if (cfg.contains("SpeedDial")) {

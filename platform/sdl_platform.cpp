@@ -135,11 +135,11 @@ SdlPlatform::DateTime SdlPlatform::get_local_time() {
 	return libc_time_impl.get_local_time();
 }
 
-std::string SdlPlatform::read_file(const std::string &path) {
+std::optional<std::string> SdlPlatform::read_file(const std::string &path) {
 	return fstream_file_impl.read_file(path);
 }
 
-void SdlPlatform::write_file(const std::string &path, const std::string &contents) {
+bool SdlPlatform::write_file(const std::string &path, const std::string &contents) {
 	return fstream_file_impl.write_file(path, contents);
 }
 

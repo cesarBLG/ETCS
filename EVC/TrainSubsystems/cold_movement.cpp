@@ -25,19 +25,19 @@ void initialize_cold_movement()
 }
 void save_cold_data(std::string field, json &value)
 {
-    std::string contents = platform->read_file("cold_data.json");
-    if (contents.empty())
+    auto contents = platform->read_file("cold_data.json");
+    if (!contents)
         return;
-    json j = json::parse(contents);
+    json j = json::parse(*contents);
     j[field] = value;
     platform->write_file("cold_data.json", j.dump());
 }
 json load_cold_data(std::string field)
 {
-    std::string contents = platform->read_file("cold_data.json");
-    if (contents.empty())
+    auto contents = platform->read_file("cold_data.json");
+    if (!contents)
         return json();
-    json j = json::parse(contents);
+    json j = json::parse(*contents);
     if (!j.contains(field)) j[field] = json();
     return j[field];
 }

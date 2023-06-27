@@ -19,9 +19,9 @@ void load_config(std::string serie)
     traindata_file = "traindata.json";
     data_entry_type = 0;
     json j;
-    std::string contents = platform->read_file("config.json");
-    if (!contents.empty())
-        j = json::parse(contents);
+    auto contents = platform->read_file("config.json");
+    if (contents)
+        j = json::parse(*contents);
     if (j.contains(serie)) {
         json &cfg = j[serie];
         if (cfg.contains("TrainData")) {

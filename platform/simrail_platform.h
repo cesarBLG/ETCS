@@ -34,8 +34,8 @@ public:
 	DateTime get_local_time() override;
 
 	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override;
-	std::string read_file(const std::string &path) override;
-	void write_file(const std::string &path, const std::string &contents) override;
+	std::optional<std::string> read_file(const std::string &path) override;
+	bool write_file(const std::string &path, const std::string &contents) override;
 	void debug_print(const std::string &msg) override;
 
 	PlatformUtil::Promise<void> delay(int ms) override;
@@ -84,8 +84,8 @@ public:
 	DateTime get_local_time() override { return base.get_local_time(); };
 
 	std::unique_ptr<BusSocket> open_socket(const std::string &channel, uint32_t tid) override { return base.open_socket(channel, tid); };
-	std::string read_file(const std::string &path) override { return base.read_file(path); };
-	void write_file(const std::string &path, const std::string &contents) override { base.write_file(path, contents); };
+	std::optional<std::string> read_file(const std::string &path) override { return base.read_file(path); };
+	bool write_file(const std::string &path, const std::string &contents) override { return base.write_file(path, contents); };
 	void debug_print(const std::string &msg) override { base.debug_print(msg); };
 
 	PlatformUtil::Promise<void> delay(int ms) override { return base.delay(ms); };

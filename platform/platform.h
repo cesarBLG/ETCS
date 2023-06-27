@@ -51,8 +51,8 @@ public:
 	virtual DateTime get_local_time() = 0;
 
 	virtual std::unique_ptr<BusSocket> open_socket(const std::string &bus, uint32_t tid) = 0;
-	virtual std::string read_file(const std::string &path) = 0;
-	virtual void write_file(const std::string &path, const std::string &contents) = 0;
+	virtual std::optional<std::string> read_file(const std::string &path) = 0;
+	virtual bool write_file(const std::string &path, const std::string &contents) = 0;
 	virtual void debug_print(const std::string &msg) = 0;
 
 	virtual PlatformUtil::Promise<void> delay(int ms) = 0;

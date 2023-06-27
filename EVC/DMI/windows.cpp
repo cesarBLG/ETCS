@@ -161,9 +161,9 @@ json fixed_train_data_window()
     std::vector<json> inputs;
 
     json j2;
-    std::string contents = platform->read_file(traindata_file);
-    if (!contents.empty())
-        j2 = json::parse(contents);
+    auto contents = platform->read_file(traindata_file);
+    if (contents)
+        j2 = json::parse(*contents);
     std::vector<std::string> types;
     for (auto it = j2.begin(); it!=j2.end(); ++it) {
         types.push_back(it.key());

@@ -65,9 +65,9 @@ void setup_areas()
 }
 ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
-    std::string contents = platform->read_file(stm_layout_file);
-    if (!contents.empty()) {
-        json j = json::parse(contents);
+    auto contents = platform->read_file(stm_layout_file);
+    if (contents) {
+        json j = json::parse(*contents);
         for (json &stm : j["STM"])
         {
             if (stm["nid_stm"].get<int>() == nid_stm)
