@@ -36,7 +36,7 @@ void TcpSocket::close_socket() {
 		return;
 	tx_promise = {};
 	rx_promise = {};
-	rx_list.fulfill_one({});
+	rx_list.push_data({});
 #ifdef _WIN32
 	closesocket(peer_fd);
 #else
@@ -74,7 +74,7 @@ void TcpSocket::update() {
 		});
 	}
 
-	if (peer_fd != -1 && !rx_pending && rx_list.pending() > 0) {
+	if (peer_fd != -1 && !rx_pending && rx_list.pending_fulfillers() > 0) {
 		rx_pending = true;
 		rx_promise = poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
 			rx_pending = false;
@@ -90,7 +90,7 @@ void TcpSocket::update() {
 					close_socket();
 				} else {
 					buf.resize(ret);
-					rx_list.fulfill_one(std::move(buf));
+					rx_list.push_data(std::move(buf));
 				}
 			}
 			update();

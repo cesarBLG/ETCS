@@ -13,7 +13,7 @@ class TcpListener : private PlatformUtil::NoCopy
 {
 private:
 	int listen_fd;
-	PlatformUtil::FulfillerList<std::unique_ptr<TcpSocket>> list;
+	PlatformUtil::FulfillerBufferedQueue<std::unique_ptr<TcpSocket>> list;
 	PlatformUtil::Promise<short> promise;
 	FdPoller& poller;
 

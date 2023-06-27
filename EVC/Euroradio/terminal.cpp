@@ -38,7 +38,7 @@ void mobile_terminal::data_receive(BasePlatform::BusSocket::ReceiveResult &&resu
         rx_buffer.erase(0, size);
 
         bit_manipulator r(std::move(pack));
-        rx_list.fulfill_one(euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version));
+        rx_list.push_data(euroradio_message::build(r, active_session == nullptr ? -1 : active_session->version));
     }
 }
 

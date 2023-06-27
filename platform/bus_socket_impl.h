@@ -30,7 +30,7 @@ public:
 		std::string rx_buffer;
 		PlatformUtil::Promise<std::string> rx_promise;
 		PlatformUtil::Promise<void> retry_promise;
-		PlatformUtil::FulfillerList<ReceiveResult> rx_list;
+		PlatformUtil::FulfillerBufferedQueue<ReceiveResult> rx_list;
 
 		void pack_uint32(char* ptr, uint32_t v);
 		uint32_t unpack_uint32(const char *ptr);

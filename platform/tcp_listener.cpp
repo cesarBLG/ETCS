@@ -69,7 +69,7 @@ void TcpListener::fd_ready(int rev) {
 		} else {
 			int peer_fd = ret;
 			mark_nonblocking(peer_fd);
-			list.fulfill_one(std::make_unique<TcpSocket>(peer_fd, poller));
+			list.push_data(std::make_unique<TcpSocket>(peer_fd, poller));
 		}
 	}
 	if (listen_fd != -1)

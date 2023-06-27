@@ -81,11 +81,11 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 			unpack_uint32(rx_buffer.data() + 2 * 4) };
 
 		if (msgtype == 1) { // join
-			rx_list.fulfill_one(JoinNotification{ id });
+			rx_list.push_data(JoinNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}
 		else if (msgtype == 2) { // leave
-			rx_list.fulfill_one(LeaveNotification{ id });
+			rx_list.push_data(LeaveNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}
 		else if (msgtype == 3) { // data
@@ -97,10 +97,10 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 				return;
 			if (rx_buffer.size() - 4 * 4 == len) {
 				rx_buffer.erase(0, 4 * 4);
-				rx_list.fulfill_one(Message{ id, std::move(rx_buffer) });
+				rx_list.push_data(Message{ id, std::move(rx_buffer) });
 				rx_buffer.clear();
 			} else {
-				rx_list.fulfill_one(Message{ id, rx_buffer.substr(4 * 4, len) });
+				rx_list.push_data(Message{ id, rx_buffer.substr(4 * 4, len) });
 				rx_buffer.erase(0, 4 * 4 + len);
 			}
 		} else {

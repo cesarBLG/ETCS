@@ -17,7 +17,7 @@ class TcpSocket : private PlatformUtil::NoCopy
 {
 private:
 	int peer_fd;
-	PlatformUtil::FulfillerList<std::string> rx_list;
+	PlatformUtil::FulfillerBufferedQueue<std::string> rx_list;
 	std::string tx_buffer;
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;

@@ -46,7 +46,7 @@ class mobile_terminal
     std::string rx_buffer;
 
     PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> rx_promise;
-    PlatformUtil::FulfillerList<std::shared_ptr<euroradio_message>> rx_list;
+    PlatformUtil::FulfillerBufferedQueue<std::shared_ptr<euroradio_message>> rx_list;
     void data_receive(BasePlatform::BusSocket::ReceiveResult &&msg);
 
 public:
