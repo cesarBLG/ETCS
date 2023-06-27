@@ -132,28 +132,23 @@ IMPORT_FUNC("simrail", "socket_close") void socket_close(uint32_t handle);
 IMPORT_FUNC("simrail", "socket_broadcast") void socket_broadcast(uint32_t handle, const char* msg, size_t len);
 IMPORT_FUNC("simrail", "socket_broadcast_tid") void socket_broadcast_tid(uint32_t handle, uint32_t tid, const char* msg, size_t len);
 IMPORT_FUNC("simrail", "socket_send_to") void socket_send_to(uint32_t handle, uint32_t uid, const char* msg, size_t len);
-IMPORT_FUNC("simrail", "socket_on_message_receive") void socket_on_message_receive(uint32_t handle, void*, void*, void*);
-IMPORT_FUNC("simrail", "socket_on_peer_join") void socket_on_peer_join(uint32_t handle, void*, void*, void*);
-IMPORT_FUNC("simrail", "socket_on_peer_leave") void socket_on_peer_leave(uint32_t handle, void*, void*, void*);
+IMPORT_FUNC("simrail", "socket_receive") void socket_receive(uint32_t handle, void*, void*, void*);
 
-void callback_fulfill_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket::PeerId, std::string>>* fulfiller, uint32_t tid, uint32_t uid, char* data, size_t len) {
-	fulfiller->fulfill(std::make_pair(BasePlatform::BusSocket::PeerId{ tid, uid }, std::string(data, len)), false);
-	::free_mem(data);
+void callback_fulfill_socket_receive(Fulfiller<BasePlatform::BusSocket::ReceiveResult>* fulfiller, uint32_t action, uint32_t tid, uint32_t uid, char* data, size_t len) {
+	BasePlatform::BusSocket::PeerId peer { tid, uid };
+	if (action == 1) {
+		fulfiller->fulfill(BasePlatform::BusSocket::JoinNotification { peer }, false);
+	} else if (action == 2) {
+		fulfiller->fulfill(BasePlatform::BusSocket::LeaveNotification { peer }, false);
+	} else if (action == 3) {
+		fulfiller->fulfill(BasePlatform::BusSocket::Message { peer, std::string(data, len) }, false);
+		::free_mem(data);
+	}
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
 
-void callback_cancel_socket_receive(Fulfiller<std::pair<BasePlatform::BusSocket::PeerId, std::string>>* fulfiller) {
-	delete fulfiller;
-}
-
-void callback_fulfill_socket_peer(Fulfiller<BasePlatform::BusSocket::PeerId>* fulfiller, uint32_t tid, uint32_t uid) {
-	fulfiller->fulfill(BasePlatform::BusSocket::PeerId{ tid, uid }, false);
-	delete fulfiller;
-	while (DeferredFulfillment::execute());
-}
-
-void callback_cancel_socket_peer(Fulfiller<BasePlatform::BusSocket::PeerId>* fulfiller) {
+void callback_cancel_socket_receive(Fulfiller<BasePlatform::BusSocket::ReceiveResult>* fulfiller) {
 	delete fulfiller;
 }
 
@@ -176,21 +171,9 @@ void SimrailBasePlatform::SimrailBusSocket::send_to(uint32_t uid, const std::str
 	::socket_send_to(handle, uid, data.data(), data.size());
 }
 
-Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> SimrailBasePlatform::SimrailBusSocket::on_message_receive() {
-	auto pair = PromiseFactory::create<std::pair<BusSocket::PeerId, std::string>>();
-	::socket_on_message_receive(handle, (void*)&callback_fulfill_socket_receive, (void*)&callback_cancel_socket_receive, new Fulfiller(std::move(pair.second)));
-	return std::move(pair.first);
-}
-
-Promise<BasePlatform::BusSocket::PeerId> SimrailBasePlatform::SimrailBusSocket::on_peer_join() {
-	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>();
-	::socket_on_peer_join(handle, (void*)&callback_fulfill_socket_peer, (void*)&callback_cancel_socket_peer, new Fulfiller(std::move(pair.second)));
-	return std::move(pair.first);
-}
-
-Promise<BasePlatform::BusSocket::PeerId> SimrailBasePlatform::SimrailBusSocket::on_peer_leave() {
-	auto pair = PromiseFactory::create<BasePlatform::BusSocket::PeerId>();
-	::socket_on_peer_leave(handle, (void*)&callback_fulfill_socket_peer, (void*)&callback_cancel_socket_peer, new Fulfiller(std::move(pair.second)));
+PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> SimrailBasePlatform::SimrailBusSocket::receive() {
+	auto pair = PromiseFactory::create<BasePlatform::BusSocket::ReceiveResult>();
+	::socket_receive(handle, (void*)&callback_fulfill_socket_receive, (void*)&callback_cancel_socket_receive, new Fulfiller(std::move(pair.second)));
 	return std::move(pair.first);
 }
 

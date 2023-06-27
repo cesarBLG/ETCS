@@ -13,13 +13,17 @@
 
 mobile_terminal mobile_terminals[2];
 
-void mobile_terminal::data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data) {
-    rx_promise = socket->on_message_receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1));
+void mobile_terminal::data_receive(BasePlatform::BusSocket::ReceiveResult &&result) {
+    rx_promise = socket->receive().then(std::bind(&mobile_terminal::data_receive, this, std::placeholders::_1));
+
+    if (!std::holds_alternative<BasePlatform::BusSocket::Message>(result))
+        return;
+    auto msg = std::move(std::get<BasePlatform::BusSocket::Message>(result));
 
     if (rx_buffer.empty())
-        rx_buffer = std::move(data.second);
+        rx_buffer = std::move(msg.data);
     else
-        rx_buffer += data.second;
+        rx_buffer += std::move(msg.data);
 
     while (true) {
         if (rx_buffer.size() < 3)
@@ -61,7 +65,7 @@ bool mobile_terminal::setup(communication_session *session)
         status = safe_radio_status::Connected;
         released = 2;
 
-        rx_promise = socket->on_message_receive().then(std::bind(&mobile_terminal::data_received, this, std::placeholders::_1));
+        rx_promise = socket->receive().then(std::bind(&mobile_terminal::data_receive, this, std::placeholders::_1));
     } else {
         status = safe_radio_status::Failed;
     }

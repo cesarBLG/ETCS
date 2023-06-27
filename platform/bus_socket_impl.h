@@ -30,9 +30,7 @@ public:
 		std::string rx_buffer;
 		PlatformUtil::Promise<std::string> rx_promise;
 		PlatformUtil::Promise<void> retry_promise;
-		PlatformUtil::FulfillerList<std::pair<PeerId, std::string>> rx_list;
-		PlatformUtil::FulfillerList<PeerId> on_join_list;
-		PlatformUtil::FulfillerList<PeerId> on_leave_list;
+		PlatformUtil::FulfillerList<ReceiveResult> rx_list;
 
 		void pack_uint32(char* ptr, uint32_t v);
 		uint32_t unpack_uint32(const char *ptr);
@@ -50,8 +48,6 @@ public:
 		void broadcast(const std::string &data) override;
 		void broadcast(uint32_t tid, const std::string &data) override;
 		void send_to(uint32_t uid, const std::string &data) override;
-		PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() override;
-		PlatformUtil::Promise<PeerId> on_peer_join() override;
-		PlatformUtil::Promise<PeerId> on_peer_leave() override;
+		PlatformUtil::Promise<ReceiveResult> receive() override;
 	};
 };

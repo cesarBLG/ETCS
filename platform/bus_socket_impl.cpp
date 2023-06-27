@@ -81,11 +81,11 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 			unpack_uint32(rx_buffer.data() + 2 * 4) };
 
 		if (msgtype == 1) { // join
-			on_join_list.fulfill_all(id);
+			rx_list.fulfill_one(JoinNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}
 		else if (msgtype == 2) { // leave
-			on_leave_list.fulfill_all(id);
+			rx_list.fulfill_one(LeaveNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}
 		else if (msgtype == 3) { // data
@@ -97,10 +97,10 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 				return;
 			if (rx_buffer.size() - 4 * 4 == len) {
 				rx_buffer.erase(0, 4 * 4);
-				rx_list.fulfill_all(std::make_pair(id, std::move(rx_buffer)));
+				rx_list.fulfill_one(Message{ id, std::move(rx_buffer) });
 				rx_buffer.clear();
 			} else {
-				rx_list.fulfill_all(std::make_pair(id, rx_buffer.substr(4 * 4, len)));
+				rx_list.fulfill_one(Message{ id, rx_buffer.substr(4 * 4, len) });
 				rx_buffer.erase(0, 4 * 4 + len);
 			}
 		} else {
@@ -155,14 +155,6 @@ void BusSocketImpl::TcpBusSocket::send_to(uint32_t uid, const std::string &data)
 	socket->send(std::move(buf));
 }
 
-PlatformUtil::Promise<std::pair<BasePlatform::BusSocket::PeerId, std::string>> BusSocketImpl::TcpBusSocket::on_message_receive() {
+PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> BusSocketImpl::TcpBusSocket::receive() {
 	return rx_list.create_and_add();
-}
-
-PlatformUtil::Promise<BasePlatform::BusSocket::PeerId> BusSocketImpl::TcpBusSocket::on_peer_join() {
-	return on_join_list.create_and_add();
-}
-
-PlatformUtil::Promise<BasePlatform::BusSocket::PeerId> BusSocketImpl::TcpBusSocket::on_peer_leave() {
-	return on_leave_list.create_and_add();
 }

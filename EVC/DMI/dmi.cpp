@@ -35,15 +35,20 @@ using std::string;
 using std::to_string;
 int dmi_pid;
 std::unique_ptr<BasePlatform::BusSocket> dmi_socket;
-void dmi_joined(BasePlatform::BusSocket::PeerId client);
-void dmi_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data);
+void dmi_receive(BasePlatform::BusSocket::JoinNotification &&msg);
+void dmi_receive(BasePlatform::BusSocket::LeaveNotification &&msg);
+void dmi_receive(BasePlatform::BusSocket::Message &&msg);
 void dmi_update_func();
+void dmi_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
+{
+    dmi_socket->receive().then(dmi_receive_handler).detach();
+    std::visit([](auto&& arg){ dmi_receive(std::move(arg)); }, std::move(result));
+}
 void start_dmi()
 {
     dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (dmi_socket) {
-        dmi_socket->on_peer_join().then(dmi_joined).detach();
-        dmi_socket->on_message_receive().then(dmi_data_received).detach();
+        dmi_socket->receive().then(dmi_receive_handler).detach();
         platform->delay(100).then(dmi_update_func).detach();
     }
 }
@@ -103,18 +108,17 @@ void parse_command(string str)
     update_dialog_step(command, value);
 }
 std::map<string, string> persistent_commands;
-void dmi_joined(BasePlatform::BusSocket::PeerId client)
+void dmi_receive(BasePlatform::BusSocket::JoinNotification &&msg)
 {
-    dmi_socket->on_peer_join().then(dmi_joined).detach();
-
-    if (client.tid == BasePlatform::BusSocket::PeerId::fourcc("DMI"))
+    if (msg.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("DMI"))
         for (const auto &entry : persistent_commands)
-            dmi_socket->send_to(client.uid, entry.first+"("+entry.second+")");
+            dmi_socket->send_to(msg.peer.uid, entry.first+"("+entry.second+")");
 }
-void dmi_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
+void dmi_receive(BasePlatform::BusSocket::LeaveNotification &&msg) {
+}
+void dmi_receive(BasePlatform::BusSocket::Message &&msg)
 {
-    parse_command(std::move(data.second));
-    dmi_socket->on_message_receive().then(dmi_data_received).detach();
+    parse_command(std::move(msg.data));
 }
 void sim_write_line(const std::string &str);
 bool sendtoor=false;

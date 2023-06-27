@@ -6,33 +6,33 @@ std::unique_ptr<BasePlatform::BusSocket> srv_socket;
 std::map<uint32_t, std::unique_ptr<ORTSClientWrapper>> srv_clients;
 std::unique_ptr<ORserver::Server> srv_orts;
 
-void orts_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
+void orts_receive(BasePlatform::BusSocket::Message &&msg)
 {
-    srv_socket->on_message_receive().then(orts_data_received).detach();
-
-    auto it = srv_clients.find(data.first.uid);
+    auto it = srv_clients.find(msg.peer.uid);
     if (it != srv_clients.end())
-        srv_orts->ParseLine(it->second.get(), std::move(data.second));
+        srv_orts->ParseLine(it->second.get(), std::move(msg.data));
 }
 
-void orts_peer_join(BasePlatform::BusSocket::PeerId peer)
+void orts_receive(BasePlatform::BusSocket::JoinNotification &&msg)
 {
-    srv_socket->on_peer_join().then(orts_peer_join).detach();
-
-    std::unique_ptr<ORTSClientWrapper> wrapper = std::make_unique<ORTSClientWrapper>(*srv_socket, peer.uid, true);
+    std::unique_ptr<ORTSClientWrapper> wrapper = std::make_unique<ORTSClientWrapper>(*srv_socket, msg.peer.uid, true);
     srv_orts->AddClient(wrapper.get());
-    srv_clients.insert(std::make_pair(peer.uid, std::move(wrapper)));
+    srv_clients.insert(std::make_pair(msg.peer.uid, std::move(wrapper)));
 }
 
-void orts_peer_leave(BasePlatform::BusSocket::PeerId peer)
+void orts_receive(BasePlatform::BusSocket::LeaveNotification &&msg)
 {
-    srv_socket->on_peer_leave().then(orts_peer_leave).detach();
-
-    auto it = srv_clients.find(peer.uid);
+    auto it = srv_clients.find(msg.peer.uid);
     if (it != srv_clients.end()) {
         srv_orts->RemoveClient(it->second.get());
         srv_clients.erase(it);
     }
+}
+
+void orts_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
+{
+    srv_socket->receive().then(orts_receive_handler).detach();
+    std::visit([](auto&& arg){ orts_receive(std::move(arg)); }, std::move(result));
 }
 
 void orts_start()
@@ -45,7 +45,5 @@ void orts_start()
     if (!srv_socket)
         return;
     srv_orts = std::make_unique<ORserver::Server>();
-    srv_socket->on_message_receive().then(orts_data_received).detach();
-    srv_socket->on_peer_join().then(orts_peer_join).detach();
-    srv_socket->on_peer_leave().then(orts_peer_leave).detach();
+    srv_socket->receive().then(orts_receive_handler).detach();
 }

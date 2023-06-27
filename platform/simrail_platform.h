@@ -19,9 +19,7 @@ private:
 		void broadcast(const std::string &data) override;
 		void broadcast(uint32_t tid, const std::string &data) override;
 		void send_to(uint32_t uid, const std::string &data) override;
-		PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() override;
-		PlatformUtil::Promise<PeerId> on_peer_join() override;
-		PlatformUtil::Promise<PeerId> on_peer_leave() override;
+		PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> receive() override;
 	};
 
 	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;

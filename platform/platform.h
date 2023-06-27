@@ -9,6 +9,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <variant>
 #include "platform_util.h"
 
 class BasePlatform : private PlatformUtil::NoCopy
@@ -32,13 +33,15 @@ public:
 				return uid < other.uid;
 			}
 		};
+		struct JoinNotification { PeerId peer; };
+		struct LeaveNotification { PeerId peer; };
+		struct Message { PeerId peer; std::string data; };
+		typedef std::variant<JoinNotification, LeaveNotification, Message> ReceiveResult;
 		virtual ~BusSocket() = default;
 		virtual void broadcast(const std::string &data) = 0;
 		virtual void broadcast(uint32_t tid, const std::string &data) = 0;
 		virtual void send_to(uint32_t uid, const std::string &data) = 0;
-		virtual PlatformUtil::Promise<std::pair<PeerId, std::string>> on_message_receive() = 0;
-		virtual PlatformUtil::Promise<PeerId> on_peer_join() = 0;
-		virtual PlatformUtil::Promise<PeerId> on_peer_leave() = 0;
+		virtual PlatformUtil::Promise<ReceiveResult> receive() = 0;
 	};
 
 	struct DateTime

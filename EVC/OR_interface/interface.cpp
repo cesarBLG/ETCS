@@ -287,34 +287,38 @@ void SetParameters()
 
 std::unique_ptr<ORTSClientWrapper> sim_wrapper;
 std::unique_ptr<BasePlatform::BusSocket> sim_socket;
+std::vector<std::string> registered_params;
 void sim_write_line(const std::string &str)
 {
     if (sim_socket)
         sim_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("SRV"), str);
 }
 
-void sim_data_received(std::pair<BasePlatform::BusSocket::PeerId, std::string> &&data)
-{
-    sim_socket->on_message_receive().then(sim_data_received).detach();
-
-    manager.ParseLine(sim_wrapper.get(), data.second);
-    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
-}
-
-std::vector<std::string> registered_params;
-
 void register_parameter(std::string param)
 {
     registered_params.push_back(param);
 }
 
-void sim_peer_join(BasePlatform::BusSocket::PeerId peer)
+void sim_receive(BasePlatform::BusSocket::Message &&msg)
 {
-    sim_socket->on_peer_join().then(sim_peer_join).detach();
+    manager.ParseLine(sim_wrapper.get(), msg.data);
+    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
+}
 
-    if (peer.tid == BasePlatform::BusSocket::PeerId::fourcc("SRV"))
+void sim_receive(BasePlatform::BusSocket::JoinNotification &&msg)
+{
+    if (msg.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("SRV"))
         for (const auto &param : registered_params)
-            sim_socket->send_to(peer.uid, "register(" + param + ")");
+            sim_socket->send_to(msg.peer.uid, "register(" + param + ")");
+}
+
+void sim_receive(BasePlatform::BusSocket::LeaveNotification &&msg) {
+}
+
+void sim_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
+{
+    sim_socket->receive().then(sim_receive_handler).detach();
+    std::visit([](auto&& arg){ sim_receive(std::move(arg)); }, std::move(result));
 }
 
 void orts_start();
@@ -327,8 +331,7 @@ void start_or_iface()
     if (!sim_socket)
         return;
 
-    sim_socket->on_message_receive().then(sim_data_received).detach();
-    sim_socket->on_peer_join().then(sim_peer_join).detach();
+    sim_socket->receive().then(sim_receive_handler).detach();
     sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::PeerId::fourcc("SRV"), false);
 
     SetParameters();
