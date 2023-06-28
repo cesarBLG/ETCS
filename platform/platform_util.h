@@ -139,10 +139,13 @@ namespace PlatformUtil
 				return;
 			}
 
-			if (value)
-				callback(std::move(*value));
-			else
-				cancel_callback();
+			if (value) {
+				if (callback)
+					callback(std::move(*value));
+			} else {
+				if (cancel_callback)
+					cancel_callback();
+			}
 
 			if (promise)
 				promise->fulfiller = nullptr;
