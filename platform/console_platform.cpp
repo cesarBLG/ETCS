@@ -23,7 +23,7 @@ static void sigterm_handler(int sig) {
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
-    platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)));
+	platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)), {});
 	on_platform_ready();
 	static_cast<ConsolePlatform*>(platform.get())->event_loop();
 }
@@ -34,16 +34,19 @@ extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 #else
 int main(int argc, char *argv[])
 {
-	platform = std::make_unique<ConsolePlatform>("");
+	std::vector<std::string> args;
+	for (int i = 1; i < argc; i++)
+		args.push_back(std::string(argv[i]));
+	platform = std::make_unique<ConsolePlatform>("", args);
 	on_platform_ready();
 	static_cast<ConsolePlatform*>(platform.get())->event_loop();
 	return 0;
 }
 #endif
 
-ConsolePlatform::ConsolePlatform(const std::string_view path) :
+ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<std::string> &args) :
 	load_path(path),
-	bus_socket_impl(load_path, poller),
+	bus_socket_impl(load_path, poller, args),
 	fstream_file_impl(load_path)
 #ifdef EVC
 	,
