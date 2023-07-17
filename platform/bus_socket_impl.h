@@ -20,7 +20,7 @@ private:
 	std::vector<SocketConfig> socket_config;
 
 public:
-	BusSocketImpl(const std::string_view load_path, FdPoller &p);
+	BusSocketImpl(const std::string_view load_path, FdPoller &p, const std::vector<std::string> &args);
 
 	std::unique_ptr<BasePlatform::BusSocket> open_bus_socket(const std::string_view channel, uint32_t tid);
 

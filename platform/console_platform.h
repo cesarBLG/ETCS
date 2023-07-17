@@ -41,7 +41,7 @@ private:
 	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 
 public:
-	ConsolePlatform(const std::string_view load_path);
+	ConsolePlatform(const std::string_view load_path, const std::vector<std::string> &args);
 	void event_loop();
 
 	~ConsolePlatform() override;

@@ -14,7 +14,10 @@
 
 int main(int argc, char *argv[])
 {
-	platform = std::make_unique<SdlPlatform>(platform_size_w, platform_size_h);
+	std::vector<std::string> args;
+	for (int i = 1; i < argc; i++)
+		args.push_back(std::string(argv[i]));
+	platform = std::make_unique<SdlPlatform>(platform_size_w, platform_size_h, args);
 	on_platform_ready();
 	static_cast<SdlPlatform*>(platform.get())->event_loop();
 	return 0;
@@ -43,11 +46,11 @@ std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key)
 	return it->second;
 }
 
-SdlPlatform::SdlPlatform(float virtual_w, float virtual_h) :
+SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args) :
 #ifdef __ANDROID__
 	load_path(std::string(SDL_AndroidGetExternalStoragePath()) + "/"),
 #endif
-	bus_socket_impl(load_path, poller),
+	bus_socket_impl(load_path, poller, args),
 	fstream_file_impl(load_path)
 {
 	SDL_Init(SDL_INIT_EVERYTHING);

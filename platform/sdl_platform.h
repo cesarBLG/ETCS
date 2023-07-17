@@ -123,7 +123,7 @@ public:
 		void detach() override;
 	};
 
-	SdlPlatform(float virtual_w, float virtual_h);
+	SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args);
 	void event_loop();
 
 	~SdlPlatform() override;

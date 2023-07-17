@@ -10,18 +10,30 @@
 #include <fstream>
 #include <sstream>
 
-BusSocketImpl::BusSocketImpl(const std::string_view load_path, FdPoller &p) : poller(p) {
-	std::ifstream file(std::string(load_path) + "tcp_bus_client.conf", std::ios::binary);
-	std::string line;
-
+BusSocketImpl::BusSocketImpl(const std::string_view load_path, FdPoller &p, const std::vector<std::string> &args) : poller(p) {
 	std::map<std::string, std::string> ini_items;
-	while (std::getline(file, line)) {
-		while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
-			line.pop_back();
-		int pos = line.find('=');
-		if (pos == -1)
-			continue;
-		ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos+1)));
+	if (args.empty()) {
+		std::ifstream file(std::string(load_path) + "tcp_bus_client.conf", std::ios::binary);
+		std::string line;
+
+		while (std::getline(file, line)) {
+			while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+				line.pop_back();
+			int pos = line.find('=');
+			if (pos == -1)
+				continue;
+			ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos + 1)));
+		}
+	}
+	else {
+		for (std::string line : args) {
+			while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+				line.pop_back();
+			int pos = line.find('=');
+			if (pos == -1)
+				continue;
+			ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos + 1)));
+		}
 	}
 
 	for (const auto &entry : ini_items) {
