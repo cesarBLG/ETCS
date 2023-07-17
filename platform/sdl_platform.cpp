@@ -9,6 +9,7 @@
 #include "platform_runtime.h"
 #include <algorithm>
 #include <fstream>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
