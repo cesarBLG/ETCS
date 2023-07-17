@@ -126,7 +126,7 @@ TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : p
 	connect(hostname, port);
 }
 
-TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p) {
+TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
 	peer_fd = fd;
 }
 
