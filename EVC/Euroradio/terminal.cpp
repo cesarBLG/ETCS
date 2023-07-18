@@ -29,7 +29,8 @@ void mobile_terminal::data_receive(BasePlatform::BusSocket::ReceiveResult &&resu
         if (rx_buffer.size() < 3)
             return;
 
-        int size = (rx_buffer[1]<<2)|(rx_buffer[2]>>6);
+        size_t size = ((unsigned char)rx_buffer[1]<<2)|((unsigned char)rx_buffer[2]>>6);
+
         if (rx_buffer.size() < size)
             return;
 
