@@ -436,6 +436,11 @@ namespace PlatformUtil
 	public:
 		FulfillerBufferedQueue(bool defer = true) : defer(defer) {}
 
+		void clear() {
+			fulfiller_queue.clear();
+			data_queue.clear();
+		}
+
 		size_t pending_fulfillers() {
 			fulfiller_queue.erase(std::remove_if(fulfiller_queue.begin(), fulfiller_queue.end(), [](const auto &entry) { return !entry.is_pending(); }), fulfiller_queue.end());
 			return fulfiller_queue.size();
@@ -497,6 +502,10 @@ namespace PlatformUtil
 		std::vector<Fulfiller<T>> list;
 
 	public:
+		void clear() {
+			list.clear();
+		}
+
 		size_t pending() {
 			list.erase(std::remove_if(list.begin(), list.end(), [](const auto &entry) { return !entry.is_pending(); }), list.end());
 			return list.size();
@@ -566,6 +575,10 @@ namespace PlatformUtil
 		std::vector<Fulfiller<void>> list;
 
 	public:
+		void clear() {
+			list.clear();
+		}
+
 		size_t pending() {
 			list.erase(std::remove_if(list.begin(), list.end(), [](const auto &entry) { return !entry.is_pending(); }), list.end());
 			return list.size();

@@ -65,6 +65,12 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 }
 
 ConsolePlatform::~ConsolePlatform() {
+	on_quit_request_list.clear();
+	on_quit_list.clear();
+	timer_queue.clear();
+	while (PlatformUtil::DeferredFulfillment::execute());
+	PlatformUtil::DeferredFulfillment::list = nullptr;
+
 #ifdef __unix__
 	signal(SIGTERM, SIG_DFL);
 	signal(SIGINT, SIG_DFL);

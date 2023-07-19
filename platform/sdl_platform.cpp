@@ -115,6 +115,14 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 }
 
 SdlPlatform::~SdlPlatform() {
+	timer_queue.clear();
+	on_close_list.clear();
+	on_quit_list.clear();
+	on_present_list.clear();
+	on_input_list.clear();
+	while (PlatformUtil::DeferredFulfillment::execute());
+	PlatformUtil::DeferredFulfillment::list = nullptr;
+
 	SDL_CloseAudioDevice(audio_device);
 	loaded_fonts.clear();
 	TTF_Quit();
