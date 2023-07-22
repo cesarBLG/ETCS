@@ -34,15 +34,15 @@ struct stm_monitoring_data
     stm_monitoring_data() = default;
     stm_monitoring_data(const STMSupervisionInformation &info)
     {
-        needle_color = info.M_COLOUR_SP.get_value();
+        needle_color = Color::from_etcs(info.M_COLOUR_SP.get_value());
         Vperm_display = info.Q_DISPLAY_PS.rawdata;
-        Vperm_color = info.M_COLOUR_PS.get_value();
+        Vperm_color = Color::from_etcs(info.M_COLOUR_PS.get_value());
         Vtarget_display = info.Q_DISPLAY_TS.rawdata;
-        Vtarget_color = info.M_COLOUR_TS.get_value();
+        Vtarget_color = Color::from_etcs(info.M_COLOUR_TS.get_value());
         Vrelease_display = info.Q_DISPLAY_RS.rawdata;
-        Vrelease_color = info.M_COLOUR_RS.get_value();
+        Vrelease_color = Color::from_etcs(info.M_COLOUR_RS.get_value());
         Vsbi_display = info.Q_DISPLAY_IS.rawdata;
-        Vsbi_color = info.M_COLOUR_IS.get_value();
+        Vsbi_color = Color::from_etcs(info.M_COLOUR_IS.get_value());
         Dtarget_display = info.Q_DISPLAY_TD.rawdata;
     }
 };
@@ -85,7 +85,7 @@ struct customized_dmi
     double slow_flash_freq;
     double fast_flash_freq;
     int flash_style;
-    std::map<int, sdlsounddata*> sounds;
+    std::map<int, std::unique_ptr<StmSound>> sounds;
     std::map<std::string,moved_area> moved_areas;
     customized_dmi(json &j)
     {
@@ -120,7 +120,7 @@ struct customized_dmi
         flash_style = j["flash_style"].get<std::string>() == "area" ? 1 : 0;
         for (auto &snds : j["sounds"])
         {
-            sounds[snds["id"].get<int>()] = loadSound(snds["file"].get<std::string>());
+            sounds[snds["id"].get<int>()] = loadStmSound(snds["file"].get<std::string>());
         }
         if (j.contains("moved_areas"))
         {
@@ -133,25 +133,17 @@ struct customized_dmi
             }
         }
     }
-    ~customized_dmi()
-    {
-        for (auto &kvp : sounds)
-        {
-            stopSound(kvp.second);
-            delete kvp.second;
-        }
-    }
 };
 class ntc_window : public window
 {
     int nid_stm;
     std::map<int, Component*> indicators;
-    std::map<int, std::shared_ptr<Renderer::Image>> icons;
+    std::map<int, std::shared_ptr<UiPlatform::Image>> icons;
     public:
     stm_state state;
     int64_t last_time;
     std::map<int, Message> messages;
-    std::list<std::pair<int, sdlsounddata*>> generated_sounds;
+    std::list<std::pair<int, std::unique_ptr<StmSound>>> generated_sounds;
     customized_dmi *customized;
     stm_monitoring_data monitoring_data;
     Color get_color(int col, bool bg)
@@ -190,11 +182,6 @@ class ntc_window : public window
         for (auto &it : messages)
         {
             revokeMessage(it.second.Id);
-        }
-        for (auto &snd : generated_sounds)
-        {
-            stopSound(snd.second);
-            delete snd.second;
         }
         if (customized != nullptr) delete customized;
     }

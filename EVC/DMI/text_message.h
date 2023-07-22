@@ -14,7 +14,6 @@
 #include "../Packets/76.h"
 #include "../Position/distance.h"
 #include "../Euroradio/session.h"
-#include <ctime>
 #include <list>
 enum struct text_message_type
 {

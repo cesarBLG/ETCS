@@ -27,7 +27,6 @@
 subwindow *active = nullptr;
 std::string active_name;
 window *default_window;
-#include <iostream>
 void startWindows()
 {
     etcs_default_window.construct();
@@ -126,8 +125,7 @@ void setWindow(json &data)
             else
             {
                 json& def = j["WindowDefinition"];
-                int nfields = def["Inputs"].size();
-                t = new train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>(), nfields);
+                t = new train_data_window(def["WindowTitle"].get<std::string>(), j["Switchable"].get<bool>());
                 ((input_window*)t)->buildFrom(def);
             }
             w = t;

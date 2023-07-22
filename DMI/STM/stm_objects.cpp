@@ -17,7 +17,7 @@
 #include "../../EVC/Packets/STM/35.h"
 #include "../../EVC/Packets/STM/38.h"
 #include "../../EVC/Packets/STM/39.h"
-#include <fstream>
+#include "platform_runtime.h"
 std::map<int, std::vector<int>> but_pos; 
 std::map<int, std::vector<int>> ind_pos;
 ntc_window *active_ntc_window;
@@ -65,21 +65,19 @@ void setup_areas()
 }
 ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
-    #ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ifstream file(filesDir+"/"+stm_layout_file);
-#else
-    std::ifstream file(stm_layout_file);
-#endif
-    json j;
-    file >> j;
-    for (json &stm : j["STM"])
-    {
-        if (stm["nid_stm"].get<int>() == nid_stm)
+    auto contents = platform->read_file(stm_layout_file);
+    if (contents) {
+        json j = json::parse(*contents);
+        for (json &stm : j["STM"])
         {
-            customized = new customized_dmi(stm);
-            break;
+            if (stm["nid_stm"].get<int>() == nid_stm)
+            {
+                customized = new customized_dmi(stm);
+                break;
+            }
         }
+    } else {
+        platform->debug_print("failed to load stm layout");
     }
     constructfun = [this](window *w) {construct_main(w, customized != nullptr);};
 }
@@ -325,14 +323,12 @@ void parse_stm_message(const stm_message &message)
                 {
                     if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
                     {
-                        stopSound(window->customized->sounds[snd.NID_SOUND]);
+                        window->customized->sounds[snd.NID_SOUND]->stop();
                     }
                     for (auto it = window->generated_sounds.begin(); it != window->generated_sounds.end();)
                     {
                         if (it->first == snd.NID_SOUND)
                         {
-                            stopSound(it->second);
-                            delete it->second;
                             it = window->generated_sounds.erase(it);
                             continue;
                         }
@@ -341,17 +337,16 @@ void parse_stm_message(const stm_message &message)
                 }
                 else
                 {
-                    sdlsounddata *s;
                     if (window->customized != nullptr && window->customized->sounds.find(snd.NID_SOUND) != window->customized->sounds.end())
                     {
-                        s = window->customized->sounds[snd.NID_SOUND];
+                        window->customized->sounds[snd.NID_SOUND]->play(snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
                     }
                     else
                     {
-                        s = loadSound(snd);
-                        window->generated_sounds.push_front({snd.NID_SOUND, s});
+                        std::unique_ptr<StmSound> s = loadStmSound(snd);
+                        s->play(snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
+                        window->generated_sounds.push_front({snd.NID_SOUND, std::move(s)});
                     }
-                    play(s, snd.Q_SOUND == Q_SOUND_t::PlayContinuously);
                 }
             }
             int count = 0;
@@ -360,8 +355,6 @@ void parse_stm_message(const stm_message &message)
                 count++;
                 if (count > 2)
                 {
-                    stopSound(it->second);
-                    delete it->second;
                     it = window->generated_sounds.erase(it);
                     continue;
                 }

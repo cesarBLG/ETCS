@@ -15,8 +15,7 @@
 #include "../monitor.h"
 #include <string>
 #include <cmath>
-#include <cstring>
-#include <cstdio>
+#include "platform_runtime.h"
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
 int etcsDialMaxSpeed = 400;
@@ -27,7 +26,6 @@ const float amed = -42*PI/180.0;
 const float ang1 = 54*PI/180.0;
 const float cx = 140;
 const float cy = 150;
-TTF_Font* font;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
@@ -88,7 +86,7 @@ void drawNeedle()
     }
     Color speedColor = needleColor == Red ? White : Black;
     float an = speedToAngle(Vest);
-    setColor(needleColor);
+    platform->set_color(needleColor);
     csg.drawCircle(25,cx,cy);
     float px[] = {-4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5};
     float py[] = {-15,-15,-82,-90,-105,-105,-90,-82};
@@ -126,7 +124,7 @@ void drawHook(float speed)
 }
 void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 {
-    setColor(color);
+    platform->set_color(color);
     float ang0 = speedToAngle(minspeed);
     float ang1 = speedToAngle(maxspeed);
     csg.drawSolidArc(ang0,ang1,rmin,137,cx,cy);
@@ -140,10 +138,10 @@ void drawSetSpeed()
     if (Vset == 0) return;
     float an = speedToAngle(Vset);
 
-    setColor(White);
+    platform->set_color(White);
     csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
 
-    setColor(Magenta);
+    platform->set_color(Magenta);
     csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
 
 }
@@ -164,15 +162,15 @@ void displayCSG()
         stm_monitoring_data stm = active_ntc_window->monitoring_data;
         if (stm.Vtarget_display & 2 || stm.Vperm_display & 2 || stm.Vsbi_display & 2 || stm.Vrelease_display & 2)
         {
-            setColor(DarkGrey);
+            platform->set_color(DarkGrey);
             csg.drawSolidArc(ang00, ang0, 128, 137, cx, cy);
         }
-        setColor(stm.Vsbi_color);
+        platform->set_color(stm.Vsbi_color);
         if (stm.Vsbi_display) drawGauge(Vperm, Vsbi, stm.Vsbi_color, stm.Vsbi_display == 2 ? 117 : 128);
-        setColor(stm.Vtarget_color);
+        platform->set_color(stm.Vtarget_color);
         if (stm.Vtarget_display & 2) drawGauge(stm.Vperm_display && Vperm < Vtarget ? Vperm : 0, Vtarget, stm.Vtarget_color);
         if (stm.Vtarget_display & 1) drawHook(Vtarget);
-        setColor(stm.Vperm_color);
+        platform->set_color(stm.Vperm_color);
         if (stm.Vperm_display & 2) drawGauge(stm.Vtarget_display && Vperm >= Vtarget ? Vtarget : 0, Vperm, stm.Vperm_color);
         if (stm.Vperm_display & 1) drawHook(Vperm);
         if (stm.Vrelease_display & 2) drawGauge(0,Vrelease,stm.Vrelease_color,133);
@@ -182,22 +180,22 @@ void displayCSG()
     {
         if((mode == Mode::OS || mode == Mode::SR) && showSpeeds)
         {
-            setColor(White);
+            platform->set_color(White);
             drawHook(Vperm);
             if(monitoring != CSM || (Vtarget<Vperm && Vtarget>=0))
             {
-                setColor(MediumGrey);
+                platform->set_color(MediumGrey);
                 drawHook(Vtarget);
             }
         }
         if((mode == Mode::SH && showSpeeds) || mode == Mode::RV)
         {
-            setColor(White);
+            platform->set_color(White);
             drawHook(Vperm);
         }
         return;
     } 
-    setColor(DarkGrey);
+    platform->set_color(DarkGrey);
     csg.drawSolidArc(ang00, ang0, 128, 137, cx, cy);
     if(monitoring == CSM)
     {
@@ -217,7 +215,7 @@ void displayCSG()
     }
     if(monitoring == RSM)
     {
-        setColor(Yellow);
+        platform->set_color(Yellow);
         drawHook(Vperm);
     }
     if(supervision == OvS || supervision == WaS) drawGauge(Vperm,Vsbi,Orange,117);
@@ -228,9 +226,9 @@ void displayCSG()
         {
             drawGauge(0, Vrelease, MediumGrey);
             float ang = speedToAngle(Vperm);
-            setColor(Black);
+            platform->set_color(Black);
             csg.drawSolidArc(ang0,ang,132,133,cx,cy);
-            setColor(Yellow);
+            platform->set_color(Yellow);
             csg.drawSolidArc(ang0,ang,128, 132,cx,cy);
         }
         else
@@ -244,13 +242,14 @@ void displayCSG()
 static int initSpeed = 0;
 void displayLines()
 {
-    if (font == nullptr)
-        font = openFont(fontPath, 16);
-
     bool inited = initSpeed == maxSpeed;
     initSpeed = maxSpeed;
-    if (!inited) csg.clear();
-    setColor(White);
+    std::unique_ptr<UiPlatform::Font> gaugeFont;
+    if (!inited) {
+        csg.clear();
+        gaugeFont = platform->load_font(16, false);
+    }
+    platform->set_color(White);
 
 #if SIMRAIL
     int step = 5;
@@ -270,15 +269,12 @@ void displayLines()
         if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
-            const char *str = s.c_str();
             float hx = 0;
             float hy = 12/2.0;
-            
-            float width;
-            float height;
-            getFontSize(font, str, &width, &height);
-            hx = width/2 + 1;
-            hy = TTF_FontAscent(font)/getScale(1)/2 - 2;
+
+            std::pair<float, float> wh = gaugeFont->calc_size(s);
+            hx = wh.first/2 + 1;
+            hy = gaugeFont->ascent()/2 - 2;
             float maxan = atanf(hy/hx);
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
@@ -290,9 +286,9 @@ void displayLines()
             texture *t = new texture();
             t->x = cx-val*cosf(an);
             t->y = cy-val*sinf(an);
-            t->width = width;
-            t->height = height;
-            t->tex = rend_backend->make_text_image(str, 16, 0, Renderer::Color{ White.R, White.G, White.B });
+            t->width = wh.first;
+            t->height = wh.second;
+            t->tex = platform->make_text_image(s, *gaugeFont, White);
             csg.add(t);
         }
         csg.drawRadius(cx, cy, size, -125, an);

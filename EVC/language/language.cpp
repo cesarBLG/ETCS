@@ -11,8 +11,8 @@
 #include "../DMI/dmi.h"
 #include "../STM/stm.h"
 #include "../Packets/STM/30.h"
-#include <iostream>
 #include "../TrainSubsystems/cold_movement.h"
+#include "platform_runtime.h"
 moFileLib::moFileReader reader;
 std::string language = "en";
 std::string get_text(std::string id)
@@ -27,27 +27,16 @@ std::string get_text_context(std::string context, std::string id)
 }
 void set_language(std::string lang)
 {
-#if SIMRAIL
-#if _DEBUG
-    std::string file = "../locales/evc/" + lang + ".mo";
-#else
-    std::string file = "locales/evc/" + lang + ".mo";
-#endif
-#else
-    std::string file = "../locales/evc/" + lang + ".mo";
-#endif
-
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    file = filesDir+"/locales/evc/"+lang+".mo";
-#endif
     if (lang == "en" || lang == "") {
         language = "en";
-    } else if (reader.ReadFile(file.c_str()) != moFileLib::moFileReader::EC_SUCCESS) {
-        std::cout<<reader.GetErrorDescription()<<std::endl;
-        language = "en";
     } else {
-        language = lang;
+        auto contents = platform->read_file("locales/evc/" + lang + ".mo");
+        if (!contents || reader.ParseData(*contents) != moFileLib::moFileReader::EC_SUCCESS) {
+            platform->debug_print(reader.GetErrorDescription());
+            language = "en";
+        } else {
+            language = lang;
+        }
     }
     for (auto it : installed_stms) {
         stm_message msg;
@@ -56,7 +45,7 @@ void set_language(std::string lang)
         msg.packets.push_back(std::shared_ptr<ETCS_packet>(pack));
         it.second->send_message(&msg);
     }
-    send_command("language", lang);
+    set_persistent_command("language", lang);
     json j = json::parse("\""+lang+"\"");
     save_cold_data("Language", j);
 }

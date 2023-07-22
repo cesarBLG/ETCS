@@ -10,6 +10,7 @@
 #include "../optional.h"
 #include "../Packets/logging.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "platform_runtime.h"
 #define TO_MPS(kph) kph/3.6
 #include <limits>
 bool Q_NVDRIVER_ADHES;
@@ -227,12 +228,9 @@ void setup_national_values()
     bit_manipulator r(j.get<std::string>());
     NationalValues nv = NationalValues();
     nv.copy(r);
-    std::cout<<"Loading national values\n";
+    platform->debug_print("Loading national values");
     for (auto &var : r.log_entries)
-    {
-        std::cout<<var.first<<"\t"<<var.second<<"\n";
-    }
-    std::cout<<std::endl;
+        platform->debug_print(var.first+"="+var.second);
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {
         reset_national_values();
     } else{

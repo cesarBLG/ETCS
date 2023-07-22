@@ -19,7 +19,6 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
-#include <iostream>
 #include <deque>
 struct eurobalise_telegram : public ETCS_message
 {

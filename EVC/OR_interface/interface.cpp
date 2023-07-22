@@ -7,8 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "interface.h"
-#include <orts/client.h>
-#include <orts/common.h>
 #include <set>
 #include <bitset>
 #include <algorithm>
@@ -22,20 +20,13 @@
 #include "../STM/stm.h"
 #include "../../DMI/time_etcs.h"
 #include "../Config/config.h"
-#include <iostream>
-#include <sstream>
-#include <thread>
-#include <chrono>
-#include <mutex>
-using namespace ORserver;
+#include <orts/common.h>
+#include "platform_runtime.h"
+#include "orts_wrapper.h"
+
+//using namespace ORserver;
+
 using std::string;
-using std::cout;
-using std::endl;
-using std::thread;
-using std::mutex;
-extern mutex loop_mtx;
-extern std::condition_variable evc_cv;
-extern bool run;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
@@ -45,16 +36,13 @@ extern bool desk_open;
 extern bool sleep_signal;
 double or_dist;
 int TimeOffset::offset;
-POSIXclient *s_client;
-ParameterManager manager;
-mutex iface_mtx;
-static threadwait *poller;
+ORserver::ParameterManager manager;
+
 //std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str);
 void SetParameters()
 {
-    std::unique_lock<mutex> lck(iface_mtx);
-    Parameter *p = new Parameter("distance");
+    ORserver::Parameter *p = new ORserver::Parameter("distance");
     p->SetValue = [](string val) {
         or_dist = stod(val);
         if (odometer_value > or_dist)
@@ -66,7 +54,7 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("speed");
+    p = new ORserver::Parameter("speed");
     p->SetValue = [](string val) {
         double prev = V_est;
         V_est = stod(val)/3.6;
@@ -80,20 +68,20 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("time_offset");
+    p = new ORserver::Parameter("time_offset");
     p->SetValue = [](string val) {
         TimeOffset::offset = atoi(val.c_str());
-        send_command("timeOffset", val);
+        set_persistent_command("timeOffset", val);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("acceleration");
+    p = new ORserver::Parameter("acceleration");
     p->SetValue = [](string val) {
         A_est = stod(val);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("master_key");
+    p = new ORserver::Parameter("master_key");
     p->SetValue = [](string val) {
         cab_active[0] = cab_active[1] = false;
         if (val == "1") {
@@ -106,19 +94,19 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("controller::direction");
+    p = new ORserver::Parameter("controller::direction");
     p->SetValue = [](string val) {
         reverser_direction = stoi(val);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("train_orientation");
+    p = new ORserver::Parameter("train_orientation");
     p->SetValue = [](string val) {
         current_odometer_orientation = stoi(val);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::telegram");
+    p = new ORserver::Parameter("etcs::telegram");
     p->SetValue = [](string val) {
         std::vector<unsigned char> message((val.size()+7)>>3);
         for (int i=0; i<val.size(); i++) {
@@ -128,41 +116,52 @@ void SetParameters()
         bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
         pending_telegrams.push_back({t,{distance(odometer_value-odometer_reference, odometer_orientation, 0), get_milliseconds()}});
-        evc_cv.notify_all();
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::emergency");
+    p = new ORserver::Parameter("etcs::level");
+    p->GetValue = []() {
+        return std::to_string((int)level);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::mode");
+    p->GetValue = []() {
+        return std::to_string((int)mode);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::emergency");
     p->GetValue = []() {
         return EB_command ? "true" : "false";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::fullbrake");
+    p = new ORserver::Parameter("etcs::fullbrake");
     p->GetValue = []() {
         return SB_command ? "true" : "false";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::tractioncutoff");
+    p = new ORserver::Parameter("etcs::tractioncutoff");
     p->GetValue = []() {
         return traction_cutoff_status ? "false" : "true";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::neutral_section");
+    p = new ORserver::Parameter("etcs::neutral_section");
     p->GetValue = []() {
         return (neutral_section_info.start ? std::to_string(*neutral_section_info.start) : "")+";"+(neutral_section_info.end ? std::to_string(*neutral_section_info.end) : "");
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::lower_pantographs");
+    p = new ORserver::Parameter("etcs::lower_pantographs");
     p->GetValue = []() {
         return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::atf");
+    p = new ORserver::Parameter("etcs::atf");
     p->GetValue = []() {
         if (mode != Mode::FS) return std::string("-1");
         extern const target *indication_target;
@@ -184,31 +183,31 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("cruise_speed");
+    p = new ORserver::Parameter("cruise_speed");
     p->SetValue = [](string val) {
         V_set = stod(val)/3.6;
     };
     manager.AddParameter(p);
     
-    p = new Parameter("etcs::vperm");
+    p = new ORserver::Parameter("etcs::vperm");
     p->GetValue = []() {
         return std::to_string(V_perm*3.6);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::vtarget");
+    p = new ORserver::Parameter("etcs::vtarget");
     p->GetValue = []() {
         return std::to_string(V_target*3.6);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::vsbi");
+    p = new ORserver::Parameter("etcs::vsbi");
     p->GetValue = []() {
         return std::to_string(V_sbi*3.6);
     };
     manager.AddParameter(p);
     
-    p = new Parameter("etcs::supervision");
+    p = new ORserver::Parameter("etcs::supervision");
     p->GetValue = []() {
         string s = "";
         extern SupervisionStatus supervision;
@@ -234,12 +233,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::dmi::feedback");
+    p = new ORserver::Parameter("etcs::dmi::feedback");
     p->SetValue = [](string val) {
         parse_command(val);
     };
 
-    p = new Parameter("stm::command");
+    p = new ORserver::Parameter("stm::command");
     p->SetValue = [](std::string val) {
         bit_manipulator r(val);
         stm_message msg(r);
@@ -252,7 +251,7 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("stm::lzb::isolated");
+    p = new ORserver::Parameter("stm::lzb::isolated");
     p->SetValue = [](std::string val) {
         auto it = installed_stms.find(10);
         if (it != installed_stms.end())
@@ -260,100 +259,97 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::isolated");
+    p = new ORserver::Parameter("etcs::isolated");
     p->SetValue = [](std::string val) {
         isolated = val == "1";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("etcs::failed");
+    p = new ORserver::Parameter("etcs::failed");
     p->SetValue = [](std::string val) {
         failed = val == "1";
     };
     manager.AddParameter(p);
 
-    p = new Parameter("serie");
+    p = new ORserver::Parameter("serie");
     p->SetValue = [](std::string val) {
         load_config(val);
     };
     manager.AddParameter(p);
 
-    p = new Parameter("ackButton");
+    p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
-        std::cout << "Yellow ack button: " << val << " ms" << std::endl;
+        platform->debug_print("Yellow ack button: " + val + " ms");
         send_command("ackButton", val);
     };
     manager.AddParameter(p);
 }
-void register_parameter(string parameter)
+
+std::unique_ptr<ORTSClientWrapper> sim_wrapper;
+std::unique_ptr<BasePlatform::BusSocket> sim_socket;
+std::vector<std::string> registered_params;
+void sim_write_line(const std::string &str)
 {
-    s_client->WriteLine("register("+parameter+")");
+    if (sim_socket)
+        sim_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("SRV"), str);
 }
 
-void polling()
+void register_parameter(std::string param)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    while(s_client->connected && run) {
-        int nfds = poller->poll(300);
-        s_client->handle();
-        string s = s_client->ReadLine();
-        std::unique_lock<mutex> lck(iface_mtx);
-        std::unique_lock<mutex> lck2(loop_mtx);
-        while(s!="") {
-            manager.ParseLine(s_client, s);
-            s = s_client->ReadLine();
-        }
-        std::for_each(manager.parameters.begin(), manager.parameters.end(), [](Parameter* p){p->Send();});
-    }
+    registered_params.push_back(param);
 }
-#ifdef _WIN32
-#include <processthreadsapi.h>
-#endif
+
+void sim_receive(BasePlatform::BusSocket::Message &&msg)
+{
+    manager.ParseLine(sim_wrapper.get(), msg.data);
+    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
+}
+
+void sim_receive(BasePlatform::BusSocket::JoinNotification &&msg)
+{
+    if (msg.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("SRV"))
+        for (const auto &param : registered_params)
+            sim_socket->send_to(msg.peer.uid, "register(" + param + ")");
+}
+
+void sim_receive(BasePlatform::BusSocket::LeaveNotification &&msg) {
+}
+
+void sim_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
+{
+    sim_socket->receive().then(sim_receive_handler).detach();
+    std::visit([](auto&& arg){ sim_receive(std::move(arg)); }, std::move(result));
+}
+
+void orts_start();
+
 void start_or_iface()
 {
-#ifdef _WIN32
-    STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    ZeroMemory( &si, sizeof(si) );
-    si.cb = sizeof(si);
-    ZeroMemory( &pi, sizeof(pi) );
-    std::cout << "Starting TCP server..." << std::endl;
-    
-#if SIMRAIL
-#if _DEBUG
-    if (!CreateProcess(nullptr, "../EVC/Debug/server.exe", nullptr, nullptr, false, 0, nullptr, "../EVC", &si, &pi))
-#else
-    if (!CreateProcess(nullptr, "server.exe", nullptr, nullptr, false, 0, nullptr, "./", &si, &pi))
-#endif
-#else
-    if (!CreateProcess(nullptr, "../EVC/Debug/server.exe", nullptr, nullptr, false, 0, nullptr, "../../ETCS/EVC", &si, &pi))
-#endif
-    {
-        std::string message = "SERVER.EXE CreateProcess failed. " + std::system_category().message(GetLastError());
-        std::cout << message << std::endl;
-        exit(1);
-    }
-    Sleep(1000);
-#endif
-    poller = new threadwait();
-    s_client = TCPclient::connect_to_server(poller);
-    s_client->WriteLine("register(time_offset)");
-    s_client->WriteLine("register(ackButton)");
-    s_client->WriteLine("register(speed)");
-    s_client->WriteLine("register(distance)");
-    s_client->WriteLine("register(acceleration)");
-    s_client->WriteLine("register(etcs::telegram)");
-    s_client->WriteLine("register(cruise_speed)");
-    s_client->WriteLine("register(etcs::dmi::feedback)");
-    s_client->WriteLine("register(master_key)");
-    s_client->WriteLine("register(controller::direction)");
-    s_client->WriteLine("register(train_orientation)");
-    s_client->WriteLine("register(stm::command)");
-    s_client->WriteLine("register(stm::+::isolated)");
-    s_client->WriteLine("register(etcs::isolated)");
-    s_client->WriteLine("register(etcs::failed)");
-    s_client->WriteLine("register(serie)");
+    orts_start();
+
+    sim_socket = platform->open_socket("evc_sim", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
+    if (!sim_socket)
+        return;
+
+    sim_socket->receive().then(sim_receive_handler).detach();
+    sim_wrapper = std::make_unique<ORTSClientWrapper>(*sim_socket, BasePlatform::BusSocket::PeerId::fourcc("SRV"), false);
+
     SetParameters();
-    thread t(polling);
-    t.detach();
+
+    register_parameter("time_offset");
+    register_parameter("ackButton");
+    register_parameter("speed");
+    register_parameter("distance");
+    register_parameter("acceleration");
+    register_parameter("etcs::telegram");
+    register_parameter("cruise_speed");
+    register_parameter("etcs::dmi::feedback");
+    register_parameter("master_key");
+    register_parameter("controller::direction");
+    register_parameter("train_orientation");
+    register_parameter("stm::command");
+    register_parameter("stm::+::isolated");
+    register_parameter("etcs::isolated");
+    register_parameter("etcs::failed");
+    register_parameter("serie");
 }

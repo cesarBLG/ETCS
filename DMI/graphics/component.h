@@ -30,27 +30,13 @@ class Component
         static void externalAckButton(int time);
 
     protected:
-        inline int getX(float val)
+        inline float getX(float val)
         {
-            return round(getScale(val+x) + offset[0]);
+            return val + x;
         }
-        inline int getY(float val)
+        inline float getY(float val)
         {   
-            return round(getScale(val+y) + offset[1]);
-        }
-        void getXpoints(float *source, short * dest, int n)
-        {
-            for(int i=0; i<n; i++)
-            {
-                dest[i] = (short)getX(source[i]);
-            }
-        }
-        void getYpoints(float *source, short * dest, int n)
-        {
-            for(int i=0; i<n; i++)
-            {
-                dest[i] = (short)getY(source[i]);
-            }
+            return val + y;
         }
         Color bgColor = DarkBlue;
         Color fgColor = White;
@@ -93,15 +79,15 @@ class Component
         void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
         void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
         void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
-        void drawTexture(std::shared_ptr<Renderer::Image> tex, float cx, float cy, float sx, float sy);
+        void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy);
         void add(graphic* g) { graphics.push_back(g); }
         void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
         text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
         std::unique_ptr<text_graphic> getTextUnique(const std::string &text, float x = 0, float y = 0, float size = 12, Color col = White, int align = CENTER, int aspect = 0);
-        static std::shared_ptr<Renderer::Image> getTextGraphic(std::string text, float size, Color col, int aspect, int align=CENTER);
+        static std::shared_ptr<UiPlatform::Image> getTextGraphic(std::string text, float size, Color col, int aspect, int align=CENTER);
         void addImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
         image_graphic *getImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
-        static std::shared_ptr<Renderer::Image> getImageGraphic(std::string path);
+        static std::shared_ptr<UiPlatform::Image> getImageGraphic(std::string path);
         void setBackgroundColor(Color c);
         void setForegroundColor(Color c);
         std::string text;

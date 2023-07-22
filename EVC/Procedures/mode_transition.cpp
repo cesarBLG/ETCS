@@ -23,7 +23,8 @@
 #include "../language/language.h"
 #include "../TrainSubsystems/train_interface.h"
 #include <map>
-cond mode_conditions[75];
+#include "platform_runtime.h"
+cond mode_conditions[78];
 static std::vector<mode_transition> ordered_transitions[20];
 Mode mode=Mode::SB;
 int64_t last_mode_change;
@@ -278,9 +279,8 @@ void update_mode_status()
     for (mode_transition &t : available) {
         int i = t.happens();
         if (t.from == mode && i>=0 && t.priority < priority) {
-            if (t.to == Mode::TR) {
-                std::cout<<"TRIP "<<i<<std::endl;
-            }
+            if (t.to == Mode::TR)
+                platform->debug_print("TRIP " + std::to_string(i));
             transition = t.to;
             priority = t.priority;
             transition_index = i;

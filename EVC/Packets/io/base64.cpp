@@ -67,7 +67,11 @@ static unsigned int pos_of_char(const unsigned char chr) {
  // 2020-10-23: Throw std::exception rather than const char*
  //(Pablo Martin-Gomez, https://github.com/Bouska)
  //
+#ifndef NO_EXCEPTIONS
     throw std::runtime_error("Input is not valid base64-encoded data.");
+#else
+    return 0;
+#endif
 }
 
 static std::string insert_linebreaks(std::string str, size_t distance) {

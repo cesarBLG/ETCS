@@ -10,6 +10,7 @@
 #include "data_entry.h"
 #include "../graphics/flash.h"
 #include "keyboard.h"
+#include "platform_runtime.h"
 input_data::input_data(std::string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
 data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
 {
@@ -25,10 +26,9 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
         }
     }
     else data_comp = new Button(204+102,50);
-    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data), 10, 0, 12, selected ? Black : (accepted ? White : DarkGrey), LEFT);
     data_comp->add(data_tex);
     data_comp->showBorder = false;
-    font = openFont(fontPath, 12);
     data_comp->setDisplayFunction([this]
     {
         data_comp->setBorder(MediumGrey);
@@ -39,17 +39,15 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
             std::string text = getFormattedData(data);
             if (text.find('\n') != std::string::npos)
             {
-                if (font == nullptr) return;
-                float x;
-                float y;
-                getFontSize(font, text.substr(text.find('\n')+1).c_str(), &x, &y);
-                curx = data_tex->offx + x;
+                auto font = platform->load_font(12, false);
+                if (font == nullptr)
+                    return;
+                curx = data_tex->offx + font->calc_size(text.substr(text.find('\n')+1)).first;
                 cury = 42;
             }
-            time_t now;
-            time(&now);
+            int64_t now = platform->get_timer();
             if (keybd_data.empty()) curx = data_tex->offx;
-            else if (difftime(now, holdcursor)<2) curx-=9;
+            else if (now - holdcursor<2000) curx-=9;
             data_comp->drawRectangle(curx, cury, 9, 1, Black);
         }
     });
@@ -101,7 +99,7 @@ void input_data::updateText()
 {
     data_comp->setBackgroundColor(selected ? MediumGrey : DarkGrey);
     data_comp->clear();
-    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : Grey), LEFT);
+    data_tex = data_comp->getText(getFormattedData(data),10,0,12, selected ? Black : (accepted ? White : DarkGrey), LEFT);
     data_comp->add(data_tex);
     if(label!="" && show_echo)
     {
@@ -115,7 +113,7 @@ void input_data::updateText()
         else if (operatcross_invalid)
             data_echo->addText("????", 4, 0, 12, Yellow, LEFT);
         else
-            data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : Grey, LEFT);
+            data_echo->addText(getFormattedData(data), 4, 0, 12, accepted ? White : DarkGrey, LEFT);
     }
 }
 input_data::~input_data()

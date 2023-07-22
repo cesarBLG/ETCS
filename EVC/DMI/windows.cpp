@@ -18,7 +18,7 @@
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
 #include "../Version/version.h"
-#include <fstream>
+#include "platform_runtime.h"
 dialog_sequence active_dialog;
 std::string active_dialog_step;
 json default_window = R"({"active":"default"})"_json;
@@ -30,7 +30,6 @@ bool any_button_pressed_async = false;
 bool any_button_pressed = false;
 bool flexible_data_entry = false;
 int data_entry_type = 0;
-std::map<std::string, std::string> predefined_train_data;
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
     json j;
@@ -161,14 +160,10 @@ json fixed_train_data_window()
     json j = R"({"active":"fixed_train_data_window"})"_json;
     std::vector<json> inputs;
 
-#ifdef __ANDROID__
-    extern std::string filesDir;
-    std::ifstream file(filesDir+"/"+traindata_file);
-#else
-    std::ifstream file(traindata_file);
-#endif
     json j2;
-    file >> j2;
+    auto contents = platform->read_file(traindata_file);
+    if (contents)
+        j2 = json::parse(*contents);
     std::vector<std::string> types;
     for (auto it = j2.begin(); it!=j2.end(); ++it) {
         types.push_back(it.key());
@@ -181,22 +176,14 @@ json train_data_window()
 {
     json j = R"({"active":"train_data_window"})"_json;
     std::vector<json> inputs;
-
-    if(!predefined_train_data.count("Length"))
     inputs.push_back(build_numeric_field(get_text("Length (m)"), L_TRAIN > 0 ? std::to_string((int)L_TRAIN) : ""));
-    if (!predefined_train_data.count("BrakePercentage"))
     inputs.push_back(build_numeric_field(get_text("Brake percentage"), brake_percentage > 0 ? std::to_string(brake_percentage) : ""));
-    if (!predefined_train_data.count("MaxSpeed"))
     inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), V_train > 0 ? std::to_string((int)(V_train*3.6)) : ""));
-    if (!predefined_train_data.count("LoadingGauge"))
-        inputs.push_back(build_input_field(get_text("Loading gauge"), loading_gauge, {"G1", "GA", "GB", "GC", get_text("Out of GC")}));
-    if (!predefined_train_data.count("TrainCategory"))
-        inputs.push_back(build_input_field(get_text("Train category"), train_category, {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
+    inputs.push_back(build_input_field(get_text("Loading gauge"), "", {"G1", "GA", "GB", "GC", get_text("Out of GC")}));
+    inputs.push_back(build_input_field(get_text("Train category"), "", {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
         get_text("TILT 1"),get_text("TILT 2"),get_text("TILT 3"),get_text("TILT 4"),get_text("TILT 5"),get_text("TILT 6"),get_text("TILT 7"),
         get_text("FP 1"),get_text("FP2"),get_text("FP 3"),get_text("FP 4"),get_text("FG 1"),get_text("FG 2"),get_text("FG 3"),get_text("FG 4")}));
-    if (!predefined_train_data.count("AxleLoadCategory"))
-        inputs.push_back(build_input_field(get_text("Axle load category"), axle_load_category, {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
-
+    inputs.push_back(build_input_field(get_text("Axle load category"), "", {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
     j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
     j["Switchable"] = data_entry_type == 2;
     return j;
@@ -837,12 +824,12 @@ void validate_data_entry(std::string name, json &result)
         } else {
             if (flexible_data_entry) {
                 train_data_valid = false;
-                L_TRAIN = predefined_train_data.count("Length") ? stoi(predefined_train_data["Length"]) : stoi(result[get_text("Length (m)")].get<std::string>());
-                loading_gauge = predefined_train_data.count("LoadingGauge") ? predefined_train_data["LoadingGauge"] : result[get_text("Loading gauge")].get<std::string>();
-                axle_load_category = predefined_train_data.count("AxleLoadCategory") ? predefined_train_data["AxleLoadCategory"] : result[get_text("Axle load category")].get<std::string>();
-                train_category = predefined_train_data.count("TrainCategory") ? predefined_train_data["TrainCategory"] : result[get_text("Train category")].get<std::string>();
-                set_train_max_speed((predefined_train_data.count("MaxSpeed") ? stoi(predefined_train_data["MaxSpeed"]) : stoi(result[get_text("Max speed (km/h)")].get<std::string>()))/3.6);
-                brake_percentage = predefined_train_data.count("BrakePercentage") ? stoi(predefined_train_data["BrakePercentage"]) : stoi(result[get_text("Brake percentage")].get<std::string>());
+                L_TRAIN = stoi(result[get_text("Length (m)")].get<std::string>());
+                loading_gauge = result[get_text("Loading gauge")].get<std::string>();
+                axle_load_category = result[get_text("Axle load category")].get<std::string>();
+                train_category = result[get_text("Train category")].get<std::string>();
+                set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
+                brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
                 std::string str = result[get_text("Train category")].get<std::string>();
                 int cant;
                 int cat;

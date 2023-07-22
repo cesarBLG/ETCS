@@ -20,7 +20,6 @@
 #include "../TrainSubsystems/brake.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../TrainSubsystems/power.h"
-#include <iostream>
 #include <cmath>
 double V_est=0;
 double V_ura = 0;
@@ -205,8 +204,6 @@ void update_monitor_transitions(bool suptargchang, const std::list<target> &supe
         monitoring = nmonitor;
     }
 }
-#include <chrono>
-#include <iostream>
 optional<float> standstill_position;
 bool standstill_applied;
 optional<float> rollaway_position;

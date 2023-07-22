@@ -8,8 +8,6 @@
  */
 #ifndef _DRAWING_H
 #define _DRAWING_H
-#include <SDL.h>
-#include <SDL_ttf.h>
 #include "color.h"
 #include <string>
 #define CENTER 0
@@ -17,19 +15,5 @@
 #define LEFT 2
 #define UP 4
 #define DOWN 8
-extern std::string fontPath;
-extern std::string fontPathb;
-extern SDL_Window *sdlwin;
-extern SDL_Renderer *sdlren;
-int getScale(float val);
-float getAntiScale(float val);
-void startDisplay(bool fullscreen, int display, int width, int height, bool borderless, bool rotate);
-void display();
-void quitDisplay();
-void clear();
-void setColor(Color color);
-TTF_Font *openFont(std::string text, float size);
-void getFontSize(TTF_Font *font, const char *str, float *width, float *height);
-void init_video();
-void loop_video();
+void drawing_start();
 #endif

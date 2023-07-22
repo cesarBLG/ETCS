@@ -62,7 +62,7 @@ void displayPlanning()
         else planning_distance.drawRectangle(40, posy[i], 200, 1, DarkGrey);
     }
 }
-std::map<int,std::shared_ptr<Renderer::Image>> object_textures;
+std::map<int,std::shared_ptr<UiPlatform::Image>> object_textures;
 void displayObjects()
 {
     if (mode == Mode::OS && !showSpeeds) return;
@@ -78,10 +78,10 @@ void displayObjects()
     }
 }
 std::vector<gradient_element> gradient_elements;
-/*std::shared_ptr<Renderer::Image> plus_white;
-std::shared_ptr<Renderer::Image> plus_black;
-std::shared_ptr<Renderer::Image> minus_white;
-std::shared_ptr<Renderer::Image> minus_black;*/
+/*std::shared_ptr<UiPlatform::Image> plus_white;
+std::shared_ptr<UiPlatform::Image> plus_black;
+std::shared_ptr<UiPlatform::Image> minus_white;
+std::shared_ptr<UiPlatform::Image> minus_black;*/
 void displayGradient()
 {
     /*if (plus_white == nullptr)
@@ -171,10 +171,10 @@ void displayPASP()
     }
     if(imarker.start_distance>0 && imarker.start_distance <= divs[8]*planning_scale) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
 }
-std::shared_ptr<Renderer::Image> pl21;
-std::shared_ptr<Renderer::Image> pl22;
-std::shared_ptr<Renderer::Image> pl23;
-//std::map<int, std::shared_ptr<Renderer::Image>> plspeeds;
+std::shared_ptr<UiPlatform::Image> pl21;
+std::shared_ptr<UiPlatform::Image> pl22;
+std::shared_ptr<UiPlatform::Image> pl23;
+//std::map<int, std::shared_ptr<UiPlatform::Image>> plspeeds;
 void displaySpeed()
 {
     if (pl21 == nullptr)

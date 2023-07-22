@@ -32,7 +32,6 @@ int64_t level_timer;
 std::map<int, std::string> ntc_names;
 std::set<int> ntc_available_no_stm;
 std::set<int> unsupported_levels;
-#include <fstream>
 void load_level()
 {
     //std::ifstream file("level.dat");

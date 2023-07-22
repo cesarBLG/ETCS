@@ -11,7 +11,6 @@
 #include "../Supervision/national_values.h"
 #include "linking.h"
 #include <limits>
-#include <iostream>
 #define DISTANCE_COW
 distance *distance::begin = nullptr;
 distance *distance::end = nullptr;

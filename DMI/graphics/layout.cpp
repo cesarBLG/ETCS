@@ -8,8 +8,6 @@
  */
 #include "layout.h"
 #include <vector>
-#include <chrono>
-#include <cstdio>
 using namespace std;
 void Layout::add(Component *comp, ComponentAlignment *alignment)
 {
