@@ -378,11 +378,7 @@ void update_euroradio()
                 radio_hole = true;
         }
     }
-    if (radio_hole || (level != Level::N2 && level != Level::N3))
-        first_supervised_timestamp = -1;
     if (!radio_hole && (level == Level::N2 || level == Level::N3) && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
-        if (first_supervised_timestamp < 0)
-            first_supervised_timestamp = get_milliseconds();
         int64_t supervised_timestamp = first_supervised_timestamp;
         if (supervising_rbc && supervising_rbc->last_valid_timestamp > first_supervised_timestamp)
             supervised_timestamp = supervising_rbc->last_valid_timestamp;
@@ -409,6 +405,8 @@ void update_euroradio()
                 supervising_rbc->reset_radio();
         }
     } else {
+        if (radio_hole || (level != Level::N2 && level != Level::N3 && (!supervising_rbc || supervising_rbc->status != session_status::Established)))
+            first_supervised_timestamp = get_milliseconds();
         radio_reaction_applied = false;
         radio_reaction_reconnected = false;
     }
