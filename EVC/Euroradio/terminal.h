@@ -61,7 +61,7 @@ public:
     bool registered;
     bool setup(communication_session *session);
     void release();
-
+    void update();
     void send(std::shared_ptr<euroradio_message_traintotrack> msg);
     PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
 };
