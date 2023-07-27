@@ -1295,10 +1295,12 @@ void update_dialog_step(std::string step, std::string step2)
             add_message(text_message(get_text("SH refused"), true, false, 0, [](text_message &t){return any_button_pressed;}));
             active_dialog = dialog_sequence::Main;
             active_dialog_step = "S1";
+            return;
         } else if (step == "SH authorised") {
             active_dialog = dialog_sequence::None;
             if (V_est == 0 && (level == Level::N2 || level == Level::N3))
                 trigger_condition(6);
+            return;
         }
     } else if (active_dialog == dialog_sequence::Special) {
         if (step == "Adhesion") {
