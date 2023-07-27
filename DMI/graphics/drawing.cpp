@@ -19,34 +19,34 @@
 #include "platform_runtime.h"
 
 void update_stm_windows();
-
+UiPlatform::InputEvent last_event = {UiPlatform::InputEvent::Action::Release, 0, 0};
+void process_input(UiPlatform::InputEvent ev)
+{
+    for (auto &w : active_windows)
+    {
+        if (w->active) w->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
+        else w->event(0, -100, -100);
+    }
+}
 void present_frame()
 {
+    process_input(last_event);
     update_stm_windows();
     platform->set_color(DarkBlue);
     platform->clear();
     displayETCS();
     platform->present().then(present_frame).detach();
 }
-
-void process_input(UiPlatform::InputEvent ev)
+void input_received(UiPlatform::InputEvent ev)
 {
-    std::vector<window *> windows;
-    for (auto it = active_windows.begin(); it != active_windows.end(); ++it)
-    {
-        windows.push_back(*it);
-    }
-    for (int i = 0; i < windows.size(); i++)
-    {
-        if (windows[i]->active) windows[i]->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
-        else windows[i]->event(0, -100, -100);
-    }
-    platform->on_input_event().then(process_input).detach();
+    last_event = ev;
+    process_input(last_event);
+    platform->on_input_event().then(input_received).detach();
 }
 
 void drawing_start()
 {
-    platform->on_input_event().then(process_input).detach();
+    platform->on_input_event().then(input_received).detach();
 
     loadBeeps();
     setupFlash();
