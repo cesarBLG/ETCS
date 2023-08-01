@@ -672,9 +672,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                 info = new SR_authorisation_info();
                 break;
             case 6:
-                info = new etcs_information(37, 39, []() {
-                    trip_exit_acknowledged = true;
-                });
+                info = new trip_exit_acknowledge_information();
                 break;
             case 8:
                 info = new etcs_information(38, 40, [session]() {
@@ -1179,7 +1177,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_p
         return false;
     } else {
         if (s.exceptions.find(1) != s.exceptions.end()) {
-            if (level == Level::N1 || !trip_exit_acknowledged/*|| info->timestamp < trip_exit_timestamp*/) return false;
+            if (level == Level::N1 || !trip_exit_acknowledged || info->timestamp < trip_exit_acknowledge_timestamp) return false;
         }
         if (s.exceptions.find(2) != s.exceptions.end()) {
             if (!cab_active[0] && !cab_active[1]) return false;

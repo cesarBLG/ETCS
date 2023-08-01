@@ -364,3 +364,19 @@ struct X_VALUE_t : ETCS_variable
         return text;
     }
 };
+struct V_STMMAX_t : V_t
+{
+    static const uint32_t NoMaxSpeed = 127;
+};
+struct V_STMSYS_t : V_t
+{
+    static const uint32_t NoSystemSpeed = 127;
+};
+struct D_STMSYS_t : ETCS_variable
+{
+    D_STMSYS_t() : ETCS_variable(15) {}
+    double get_value()
+    {
+        return rawdata * 10;
+    }
+};

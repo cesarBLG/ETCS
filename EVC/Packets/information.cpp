@@ -56,6 +56,7 @@
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
 #include "../Procedures/stored_information.h"
+#include "../Procedures/train_trip.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrackConditions/route_suitability.h"
 #include "../DMI/text_message.h"
@@ -360,6 +361,11 @@ void track_condition_big_metal_information::handle()
 {
     TrackConditionBigMetalMasses tc = *(TrackConditionBigMetalMasses*)linked_packets.front().get();
     load_track_condition_bigmetal(tc, ref);
+}
+void trip_exit_acknowledge_information::handle()
+{
+    trip_exit_acknowledged = true;
+    trip_exit_acknowledge_timestamp = timestamp;
 }
 void ma_shortening_information::handle()
 {

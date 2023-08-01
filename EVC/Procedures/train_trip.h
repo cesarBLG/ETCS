@@ -9,5 +9,6 @@
 #pragma once
 #include "../DMI/text_message.h"
 extern bool trip_exit_acknowledged;
+extern int64_t trip_exit_acknowledge_timestamp;
 void train_trip(int reason);
 void update_trip();
