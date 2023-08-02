@@ -226,7 +226,7 @@ void level_transition_information::set_leveldata(std::vector<target_level_inform
             }
         }
         if (p.level == Level::N2) {
-            for (auto &t : mobile_terminals) {
+            for (auto *t : mobile_terminals) {
                 leveldata = p;
                 return;
             }

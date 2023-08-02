@@ -43,29 +43,26 @@ enum struct safe_radio_status
 };
 class mobile_terminal
 {
-    std::unique_ptr<BasePlatform::BusSocket> socket;
+protected:
     std::string rx_buffer;
-
-    PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> rx_promise;
     PlatformUtil::FulfillerBufferedQueue<std::shared_ptr<euroradio_message>> rx_list;
-    void data_receive(BasePlatform::BusSocket::ReceiveResult &&msg);
-
+    void data_receive(std::string &&data);
 public:
+    int released = 0;
     communication_session *active_session = nullptr;
     bool setting_up = false;
-    int released = 0;
-
     safe_radio_status status = safe_radio_status::Disconnected;
     std::string radio_network_id;
     optional<int64_t> last_register_order;
     bool registered;
-    bool setup(communication_session *session);
-    void release();
-    void update();
+    virtual bool setup(communication_session *session) = 0;
+    virtual void release();
+    virtual void update();
     void send(std::shared_ptr<euroradio_message_traintotrack> msg);
+    virtual void send(unsigned char *data, size_t size) = 0;
     PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
 };
-extern mobile_terminal mobile_terminals[2];
+extern mobile_terminal *mobile_terminals[2];
 extern optional<std::vector<std::string>> AllowedRadioNetworks;
 extern std::string RadioNetworkId;
 void retrieve_radio_networks();

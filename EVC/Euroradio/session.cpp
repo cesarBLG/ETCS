@@ -191,9 +191,9 @@ void communication_session::update()
                 terminal->active_session = nullptr;
             }
             terminal = nullptr;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.setup(this)) {
-                    terminal = &t;
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->setup(this)) {
+                    terminal = t;
                     tried++;
                     rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
                     break;
@@ -301,13 +301,13 @@ bool radio_reaction_applied = false;
 bool radio_reaction_reconnected = false;
 void update_euroradio()
 {
-    for (mobile_terminal &t : mobile_terminals) {
-        t.update();
-        if (t.radio_network_id != RadioNetworkId && (t.released == 0 && t.active_session == nullptr)) {
-            t.radio_network_id = RadioNetworkId;
-            t.registered = false;
-            if (RadioNetworkId != "" && !t.last_register_order)
-                t.last_register_order = get_milliseconds();
+    for (mobile_terminal *t : mobile_terminals) {
+        t->update();
+        if (t->radio_network_id != RadioNetworkId && (t->released == 0 && t->active_session == nullptr)) {
+            t->radio_network_id = RadioNetworkId;
+            t->registered = false;
+            if (RadioNetworkId != "" && !t->last_register_order)
+                t->last_register_order = get_milliseconds();
         }
     }
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {

@@ -59,8 +59,8 @@ void update_SoM()
             break;
         case D7: {
             bool registered = false;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
@@ -83,12 +83,12 @@ void update_SoM()
         case S4: {
             bool registered = false;
             bool timeout = true;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
-                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                if (t->last_register_order && get_milliseconds() - *t->last_register_order < T_network_registration * 1000)
                     timeout = false;
             }
             if (registered)

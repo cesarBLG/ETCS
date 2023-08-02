@@ -373,12 +373,12 @@ void update_dmi_windows()
                 active_window_dmi = radio_window_radio_wait;
             bool registered = false;
             bool timeout = true;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
-                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                if (t->last_register_order && get_milliseconds() - *t->last_register_order < T_network_registration * 1000)
                     timeout = false;
             }
             if (registered || timeout)
@@ -421,8 +421,8 @@ void update_dmi_windows()
                 active_dialog_step = "S10";
         } else if (active_dialog_step == "D7") {
             bool registered = false;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
@@ -493,12 +493,12 @@ void update_dmi_windows()
                 active_window_dmi = radio_window_radio_wait;
             bool registered = false;
             bool timeout = true;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
-                if (t.last_register_order && get_milliseconds() - *t.last_register_order < T_network_registration * 1000)
+                if (t->last_register_order && get_milliseconds() - *t->last_register_order < T_network_registration * 1000)
                     timeout = false;
             }
             if (registered || timeout)
@@ -565,8 +565,8 @@ void update_dmi_windows()
             }
         } else if (active_dialog_step == "D5") {
             bool registered = false;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
@@ -740,8 +740,8 @@ void update_dmi_windows()
     } else if (active == "menu_radio" && !active_window_dmi.contains("hour_glass")) {
         json &enabled = active_window_dmi["enabled"];
         bool registered = false;
-        for (mobile_terminal &t : mobile_terminals) {
-            if (t.registered) {
+        for (mobile_terminal *t : mobile_terminals) {
+            if (t->registered) {
                 registered = true;
                 break;
             }
@@ -1002,12 +1002,12 @@ void validate_data_entry(std::string name, json &result)
         std::string id = result[""];
         if (id != "") {
             RadioNetworkId = id;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (RadioNetworkId != "" && (!t.registered || t.radio_network_id != RadioNetworkId) && (t.released == 0 && t.active_session == nullptr)) {
-                    if (!t.last_register_order) {
-                        t.last_register_order = get_milliseconds();
-                        t.radio_network_id = RadioNetworkId;
-                        t.registered = false;
+            for (mobile_terminal *t : mobile_terminals) {
+                if (RadioNetworkId != "" && (!t->registered || t->radio_network_id != RadioNetworkId) && (t->released == 0 && t->active_session == nullptr)) {
+                    if (!t->last_register_order) {
+                        t->last_register_order = get_milliseconds();
+                        t->radio_network_id = RadioNetworkId;
+                        t->registered = false;
                     }
                 }
             }

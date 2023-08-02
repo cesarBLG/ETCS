@@ -31,7 +31,9 @@
 #include "Euroradio/terminal.h"
 #include "platform_runtime.h"
 
-#ifdef _WIN32
+#ifdef __ANDROID__
+#include <android/log.h>
+#elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
@@ -171,8 +173,8 @@ void on_platform_ready()
         platform->quit();
     }).detach();
     platform->on_quit().then([](){
-        for (auto &terminal : mobile_terminals)
-            terminal.release();
+        for (auto *terminal : mobile_terminals)
+            terminal->release();
     }).detach();
 
     start_dmi();
