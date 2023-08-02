@@ -8,10 +8,7 @@
 
 #include "tcp_listener.h"
 #include "bus_socket_impl.h"
-
-class BusTcpBridge : private PlatformUtil::NoCopy {
-private:
-    class BridgedTcpSocket : private PlatformUtil::NoCopy {
+class BridgedTcpSocket : private PlatformUtil::NoCopy {
     private:
         std::unique_ptr<BasePlatform::BusSocket> bus_socket;
         PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> bus_rx_promise;
@@ -32,6 +29,8 @@ private:
         BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl);
         bool is_alive() const;
     };
+class BusTcpBridge : private PlatformUtil::NoCopy {
+private:
 
     void on_new_client(std::unique_ptr<TcpSocket> &&sock);
 
@@ -51,7 +50,8 @@ public:
 
 class BusTcpBridgeManager : private PlatformUtil::NoCopy {
 private:
-    std::vector<std::unique_ptr<BusTcpBridge>> bridges;
+    std::vector<std::unique_ptr<BridgedTcpSocket>> client_bridges;
+    std::vector<std::unique_ptr<BusTcpBridge>> server_bridges;
 public:
     BusTcpBridgeManager(const std::string_view load_path, FdPoller &fd, BusSocketImpl &impl);
 };

@@ -6,4 +6,4 @@
 	url = https://github.com/libsdl-org/SDL
 [submodule "libs/liborts"]
 	path = libs/liborts
-	url = https://github.com/Milek7/liborts
+	url = https://github.com/cesarBLG/liborts

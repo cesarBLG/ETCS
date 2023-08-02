@@ -19,7 +19,7 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 add_definitions(-DNO_THREADS)
 
 if (NOT WASM)
-    list(APPEND SOURCES ../platform/console_platform.cpp ../platform/console_fd_poller.cpp ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp)
+    list(APPEND SOURCES ../platform/console_platform.cpp ../platform/console_fd_poller.cpp ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp ../libs/liborts/client.cpp)
 else()
     list(APPEND SOURCES ../platform/simrail_platform.cpp)
     add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)

@@ -10,7 +10,7 @@
 #include <map>
 #include "bus_tcp_bridge.h"
 
-void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
+void BridgedTcpSocket::tcp_rx(std::string &&data)
 {
     if (data.empty()) {
         alive = false;
@@ -48,7 +48,7 @@ void BusTcpBridge::BridgedTcpSocket::tcp_rx(std::string &&data)
     }
 }
 
-void BusTcpBridge::BridgedTcpSocket::bus_rx(BasePlatform::BusSocket::ReceiveResult &&result)
+void BridgedTcpSocket::bus_rx(BasePlatform::BusSocket::ReceiveResult &&result)
 {
     if (!alive)
         return;
@@ -65,14 +65,14 @@ void BusTcpBridge::BridgedTcpSocket::bus_rx(BasePlatform::BusSocket::ReceiveResu
         tcp_socket->send(msg.data);
 }
 
-BusTcpBridge::BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl) :
+BridgedTcpSocket::BridgedTcpSocket(std::unique_ptr<BasePlatform::BusSocket> &&bus, std::unique_ptr<TcpSocket> &&tcp, std::optional<uint32_t> tid, bool nl) :
     bus_socket(std::move(bus)), tcp_socket(std::move(tcp)), bus_tid(tid), newline_framing(nl), alive(true)
 {
     tcp_rx_promise = tcp_socket->receive().then(std::bind(&BridgedTcpSocket::tcp_rx, this, std::placeholders::_1));
     bus_rx_promise = bus_socket->receive().then(std::bind(&BridgedTcpSocket::bus_rx, this, std::placeholders::_1));
 }
 
-bool BusTcpBridge::BridgedTcpSocket::is_alive() const {
+bool BridgedTcpSocket::is_alive() const {
     return alive;
 }
 
@@ -93,7 +93,7 @@ BusTcpBridge::BusTcpBridge(const std::string_view bus, uint32_t rx_tid, std::opt
 {
     accept_promise = listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1));
 }
-
+#include <orts/clientext.h>
 BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPoller &fd, BusSocketImpl &impl)
 {
     std::ifstream file(std::string(load_path) + "tcp_bus_bridge.conf", std::ios::binary);
@@ -125,6 +125,15 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPol
         if (tx_tid != "*")
             txt = BasePlatform::BusSocket::PeerId::fourcc(tx_tid);
         bool newline_framing = (!nl.empty() && nl[0] == 'n');
-        bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, newline_framing, tcphost, std::stoi(tcpport), fd, impl));
+        if (busname == "evc_sim") {
+            std::unique_ptr<BasePlatform::BusSocket> bus_socket = impl.open_bus_socket(busname, rxt);
+            if (!bus_socket)
+                continue;
+            tcphost = ORserver::TCPclient::discover_server_ip();
+            auto sock = std::make_unique<TcpSocket>(tcphost, std::stoi(tcpport), fd);
+            client_bridges.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), txt, newline_framing));
+        } else {
+            server_bridges.push_back(std::make_unique<BusTcpBridge>(busname, rxt, txt, newline_framing, tcphost, std::stoi(tcpport), fd, impl));
+        }
     }
 }
