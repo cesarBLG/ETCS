@@ -107,11 +107,13 @@ public:
 	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
 
 	void set_volume(int vol) override;
+	int get_volume() override;
 	std::unique_ptr<SoundData> load_sound(const std::string_view path) override;
 	std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) override;
 	std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) override;
 
 	void set_brightness(int br) override;
+	int get_brightness() override;
 
 	PlatformUtil::Promise<InputEvent> on_input_event() override;
 };

@@ -6,15 +6,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include "volume.h"
+#include "brightness.h"
 #include "../tcp/server.h"
 #include <cstdlib>
 #include "platform_runtime.h"
-volume_window::volume_window() : input_window("Volume", 1, false)
+brightness_window::brightness_window() : input_window("Brightness", 1, false)
 {
-    int vol_orig = platform->get_volume();
+    int br_orig = platform->get_brightness();
     inputs[0] = new input_data("", false);
-    inputs[0]->data = std::to_string(vol_orig);
+    inputs[0]->data = std::to_string(br_orig);
     inputs[0]->setAccepted(true);
     std::vector<Button*> keys;
     for (int i=0; i<12; i++) {
@@ -24,38 +24,38 @@ volume_window::volume_window() : input_window("Volume", 1, false)
     keys[2] = new TextButton(get_text("+"), 102, 50);
     keys[0]->setPressedAction([this]
     {
-        int vol = stoi(inputs[0]->data);
-        if (vol >= 30) {
-            vol -= 10;
-            platform->set_volume(vol);
-            inputs[0]->setData(std::to_string(vol));
+        int br = stoi(inputs[0]->data);
+        if (br >= 30) {
+            br -= 10;
+            platform->set_brightness(br);
+            inputs[0]->setData(std::to_string(br));
         }
     });
     keys[2]->setPressedAction([this]
     {
-        int vol = stoi(inputs[0]->data);
-        if (vol <= 90) {
-            vol += 10;
-            platform->set_volume(vol);
-            inputs[0]->setData(std::to_string(vol));
+        int br = stoi(inputs[0]->data);
+        if (br <= 90) {
+            br += 10;
+            platform->set_brightness(br);
+            inputs[0]->setData(std::to_string(br));
         }
     });
     keys[0]->upType = false;
     keys[2]->upType = false;
     inputs[0]->keys = keys;
-    exit_button.setPressedAction([this, vol_orig]
+    exit_button.setPressedAction([this, br_orig]
     {
-        platform->set_volume(vol_orig);
+        platform->set_brightness(br_orig);
         write_command("json",R"({"DriverSelection":"CloseWindow"})");
     });
     create();
 }
-void volume_window::setLayout()
+void brightness_window::setLayout()
 {
     input_window::setLayout();
 }
-void volume_window::sendInformation()
+void brightness_window::sendInformation()
 {
-    platform->set_volume(stoi(inputs[0]->data_accepted));
+    platform->set_brightness(stoi(inputs[0]->data_accepted));
     input_window::sendInformation();
 }

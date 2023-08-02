@@ -16,6 +16,7 @@
 #include "../window/fixed_train_data.h"
 #include "../window/driver_id.h"
 #include "../window/volume.h"
+#include "../window/brightness.h"
 #include "../window/menu_main.h"
 #include "../window/menu_radio.h"
 #include "../window/menu_override.h"
@@ -145,7 +146,10 @@ void setWindow(json &data)
             else v = new volume_window();
             w = v;
         } else if (name == "brightness_window") {
-            w = active; //TODO
+            brightness_window *v;
+            if (same) v = (brightness_window*)active;
+            else v = new brightness_window();
+            w = v;
         } else {
             if (same) w = active;
             else

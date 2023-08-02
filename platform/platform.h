@@ -133,11 +133,13 @@ public:
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
 
 	virtual void set_volume(int vol) = 0;
+	virtual int get_volume() = 0;
 	virtual std::unique_ptr<SoundData> load_sound(const std::string_view path) = 0;
 	virtual std::unique_ptr<SoundData> load_sound(const std::vector<std::pair<int, int>> &melody) = 0;
 	virtual std::unique_ptr<SoundSource> play_sound(const SoundData &snd, bool looping) = 0;
 
 	virtual void set_brightness(int br) = 0;
+	virtual int get_brightness() = 0;
 
 	virtual PlatformUtil::Promise<InputEvent> on_input_event() = 0;
 };

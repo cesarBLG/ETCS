@@ -513,6 +513,10 @@ void SdlPlatform::set_volume(int vol) {
 	audio_volume = vol;
 }
 
+int SdlPlatform::get_volume() {
+	return audio_volume;
+}
+
 std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string_view path) {
 	std::string file = load_path + "sound/" + std::string(path) + ".wav";
 
@@ -579,6 +583,10 @@ std::unique_ptr<SdlPlatform::SoundSource> SdlPlatform::play_sound(const SoundDat
 	return std::make_unique<SdlSoundSource>(state);
 }
 
-void SdlPlatform::set_brightness(int vol) {
+void SdlPlatform::set_brightness(int val) {
+	SDL_SetWindowBrightness(sdlwindow, val / 100.0f);
+}
 
+int SdlPlatform::get_brightness() {
+	return (int)(SDL_GetWindowBrightness(sdlwindow) * 100);
 }

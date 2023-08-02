@@ -231,6 +231,10 @@ std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_i
 void SimrailUiPlatform::set_volume(int vol) {
 }
 
+int SimrailUiPlatform::get_volume() {
+	return 50;
+}
+
 std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::string_view path) {
 	return nullptr;
 }
@@ -245,6 +249,10 @@ std::unique_ptr<SimrailUiPlatform::SoundSource> SimrailUiPlatform::play_sound(co
 
 void SimrailUiPlatform::set_brightness(int vol) {
 
+}
+
+int SimrailUiPlatform::get_brightness() {
+	return 0;
 }
 
 Promise<UiPlatform::InputEvent> SimrailUiPlatform::on_input_event() {
