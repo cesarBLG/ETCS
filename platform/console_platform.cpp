@@ -11,7 +11,9 @@
 #ifdef __unix__
 #include <signal.h>
 #endif
-
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 static std::atomic<bool>* quit_request_ptr;
 
 static void sigterm_handler(int sig) {
@@ -23,7 +25,8 @@ static void sigterm_handler(int sig) {
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
-	platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)), {});
+	std::vector<std::string> args;
+	platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)) + "/", args);
 	on_platform_ready();
 	static_cast<ConsolePlatform*>(platform.get())->event_loop();
 }
@@ -99,7 +102,7 @@ bool ConsolePlatform::write_file(const std::string_view path, const std::string_
 
 void ConsolePlatform::debug_print(const std::string_view msg) {
 #ifdef __ANDROID__
-	__android_log_print(ANDROID_LOG_DEBUG, "ConsolePlatform", (msg + "\n").c_str());
+	__android_log_print(ANDROID_LOG_DEBUG, "ConsolePlatform" ,"%s\n", std::string(msg).c_str());
 #else
 	std::cout << msg << std::endl;
 #endif

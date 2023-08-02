@@ -11,7 +11,8 @@
 #include "tcp/server.h"
 #include "control/control.h"
 #include "platform_runtime.h"
-#ifdef _WIN32
+#ifdef __ANDROID__
+#elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
