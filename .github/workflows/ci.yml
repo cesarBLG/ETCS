@@ -81,3 +81,25 @@ jobs:
         path: |
           ${{github.workspace}}/build/DMI/dmi.wasm
           ${{github.workspace}}/build/EVC/evc.wasm
+
+  compile_locales:
+    name: Compile locales
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Compile
+      run: |
+        cd ${{github.workspace}}/locales
+        ./compile_locales.sh
+
+    - name: Publish
+      uses: actions/upload-artifact@v3
+      with:
+        name: locales
+        path: |
+          ${{github.workspace}}/locales/dmi/*.mo
+          ${{github.workspace}}/locales/evc/*.mo
