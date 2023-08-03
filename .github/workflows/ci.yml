@@ -46,6 +46,11 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
     - name: Cache wasi-sdk
       id: cache-wasi-sdk
       uses: actions/cache@v3
@@ -60,13 +65,8 @@ jobs:
         cd ${{github.workspace}}/wasi-sdk
         export WASI_VERSION=20
         export WASI_VERSION_FULL=${WASI_VERSION}.0
-        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
-        tar xvf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz --strip-components=1
-
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: 'recursive'
+        wget -nv https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
+        tar xf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz --strip-components=1
 
     - name: Configure
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DSIMRAIL=${{matrix.sr_flag}} -DWASI_HOST_EXE_SUFFIX= -DWASI_SDK_PREFIX=${{github.workspace}}/wasi-sdk -DCMAKE_TOOLCHAIN_FILE=wasi-sdk.cmake
