@@ -29,7 +29,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config Release
 
     - name: Publish
-      uses: actions/upload-artifact@3
+      uses: actions/upload-artifact@v3
       with:
         name: build-win64-sr${{matrix.sr_flag}}
         path: |
@@ -46,7 +46,15 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Setup wasi-sdk
+    - name: Cache wasi-sdk
+      id: cache-wasi-sdk
+      uses: actions/cache@v3
+      with:
+        path: ${{github.workspace}}/wasi-sdk
+        key: wasi-sdk-20
+
+    - name: Download wasi-sdk
+      if: steps.cache-wasi-sdk.outputs.cache-hit != 'true'
       run: |
         mkdir -p ${{github.workspace}}/wasi-sdk
         cd ${{github.workspace}}/wasi-sdk
@@ -67,7 +75,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config Release
 
     - name: Publish
-      uses: actions/upload-artifact@3
+      uses: actions/upload-artifact@v3
       with:
         name: build-wasm-sr${{matrix.sr_flag}}
         path: |
