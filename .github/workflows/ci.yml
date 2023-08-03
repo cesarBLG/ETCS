@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build_win:
+    name: Build for Win64
+
+    strategy:
+      matrix:
+        sr_flag: ["ON", "OFF"]
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -A x64 -DSIMRAIL=${{matrix.sr_flag}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Publish
+      uses: actions/upload-artifact@3
+      with:
+        name: build-win64-sr${{matrix.sr_flag}}
+        path: |
+          ${{github.workspace}}/build/DMI/Release
+          ${{github.workspace}}/build/EVC/Release
+
+  build_wasm:
+    name: Build for WASM
+
+    strategy:
+      matrix:
+        sr_flag: ["ON", "OFF"]
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Setup wasi-sdk
+      run: |
+        mkdir -p ${{github.workspace}}/wasi-sdk
+        cd ${{github.workspace}}/wasi-sdk
+        export WASI_VERSION=20
+        export WASI_VERSION_FULL=${WASI_VERSION}.0
+        wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
+        tar xvf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz --strip-components=1
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DSIMRAIL=${{matrix.sr_flag}} -DWASI_HOST_EXE_SUFFIX= -DWASI_SDK_PREFIX=${{github.workspace}}/wasi-sdk -DCMAKE_TOOLCHAIN_FILE=wasi-sdk.cmake
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Publish
+      uses: actions/upload-artifact@3
+      with:
+        name: build-wasm-sr${{matrix.sr_flag}}
+        path: |
+          ${{github.workspace}}/build/DMI/dmi.wasm
+          ${{github.workspace}}/build/EVC/evc.wasm
