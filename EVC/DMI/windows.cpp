@@ -1003,7 +1003,7 @@ void validate_data_entry(std::string name, json &result)
         if (id != "") {
             RadioNetworkId = id;
             for (mobile_terminal *t : mobile_terminals) {
-                if (RadioNetworkId != "" && (!t->registered || t->radio_network_id != RadioNetworkId) && (t->released == 0 && t->active_session == nullptr)) {
+                if (RadioNetworkId != "" && (!t->registered || t->radio_network_id != RadioNetworkId) && t->connections.empty()) {
                     if (!t->last_register_order) {
                         t->last_register_order = get_milliseconds();
                         t->radio_network_id = RadioNetworkId;

@@ -32,7 +32,7 @@ struct msg_expecting_ack
 };
 class communication_session
 {
-    mobile_terminal *terminal=nullptr;
+    std::shared_ptr<safe_radio_connection> connection=nullptr;
     bool initsent;
     int tried;
     int ntries;
@@ -61,8 +61,11 @@ class communication_session
     void update();
     void reset_radio()
     {
-        if (terminal != nullptr)
-            terminal->status = safe_radio_status::Failed;
+        if (connection != nullptr) {
+            radio_status = safe_radio_status::Failed;
+            connection->release();
+            connection = nullptr;
+        }
     }
 };
 extern communication_session *supervising_rbc;

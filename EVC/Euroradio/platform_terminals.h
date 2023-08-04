@@ -8,25 +8,25 @@
  */
 #include "terminal.h"
 #include "tcp_socket.h"
-class bus_mobile_terminal : public mobile_terminal
+class bus_safe_connection : public safe_radio_connection
 {
     std::unique_ptr<BasePlatform::BusSocket> socket;
     PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> rx_promise;
     void data_receive(BasePlatform::BusSocket::ReceiveResult &&msg);
-
 public:
-    bool setup(communication_session *session) override;
+    bus_safe_connection(communication_session *session, mobile_terminal *terminal);
+    void update() override;
     void release() override;
     void send(unsigned char *data, size_t size) override;
 };
-/*class internet_mobile_terminal : public mobile_terminal
+class tcp_safe_connection : public safe_radio_connection
 {
     std::unique_ptr<TcpSocket> socket;
     PlatformUtil::Promise<std::string> rx_promise;
     void data_receive(std::string &&msg);
 public:
-    bool setup(communication_session *session) override;
+    tcp_safe_connection(communication_session *session, mobile_terminal *terminal, FdPoller &poller);
+    void update() override;
     void release() override;
     void send(unsigned char *data, size_t size) override;
-    void update() override;
-};*/
+};

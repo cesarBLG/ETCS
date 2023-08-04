@@ -99,7 +99,7 @@ void TcpSocket::update() {
 	}
 }
 
-void TcpSocket::connect(const std::string_view hostname, int port) {
+void TcpSocket::create_and_connect(const std::string_view hostname, int port) {
 	addrinfo hints = {}, *res = nullptr;
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
@@ -107,7 +107,43 @@ void TcpSocket::connect(const std::string_view hostname, int port) {
 
 	peer_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(peer_fd);
-	::connect(peer_fd, res->ai_addr, res->ai_addrlen);
+	connect_promise = poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
+		if (rev & (POLLERR | POLLHUP))
+			close_socket();
+		else if (rev & POLLOUT)
+			connected = true;
+	});
+	if (::connect(peer_fd, res->ai_addr, res->ai_addrlen) == 0)
+		connected = true;
+	else
+		handle_error();
+
+	freeaddrinfo(res);
+}
+
+void TcpSocket::connect(const std::string_view hostname, int port) {
+	connected = false;
+	if (peer_fd < 0)
+		return;
+	addrinfo hints = {}, *res = nullptr;
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	getaddrinfo(std::string(hostname).c_str(), std::to_string(port).c_str(), &hints, &res);
+	if (res == nullptr) {
+		close_socket();
+		return;
+	}
+	mark_nonblocking(peer_fd);
+	connect_promise = poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
+		if (rev & (POLLERR | POLLHUP))
+			close_socket();
+		else if (rev & POLLOUT)
+			connected = true;
+	});
+	if (::connect(peer_fd, res->ai_addr, res->ai_addrlen) == 0)
+		connected = true;
+	else 
+		handle_error();
 
 	freeaddrinfo(res);
 }
@@ -123,14 +159,22 @@ PlatformUtil::Promise<std::string> TcpSocket::receive() {
 	return std::move(promise);
 }
 
-TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
-	connect(hostname, port);
+TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), connected(false) {
+	create_and_connect(hostname, port);
 }
 
-TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
+TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), connected(false) {
 	peer_fd = fd;
 }
 
 TcpSocket::~TcpSocket() {
 	close_socket();
+}
+
+bool TcpSocket::is_connected() {
+	return peer_fd >= 0 && connected;
+}
+
+bool TcpSocket::is_failed() {
+	return peer_fd < 0;
 }

@@ -68,14 +68,16 @@ void communication_session::finalize()
     status = session_status::Inactive;
     if (radio_status == safe_radio_status::Connected)
         radio_status = safe_radio_status::Disconnected;
-    if (terminal && terminal->active_session == this)
-        terminal->release();
-    terminal = nullptr;
+    if (connection && connection->active_session == this) {
+        connection->release();
+        connection = nullptr;
+    }
     closing = false;
 }
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
-    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
+    if (connection != nullptr)
+        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
 
     log_message(msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
@@ -163,8 +165,8 @@ void communication_session::update_ack()
                     }
                 }
                 log_message(msg.message, d_estfront, get_milliseconds());
-                if (terminal != nullptr) {
-                    terminal->send(msg.message);
+                if (connection != nullptr) {
+                    connection->send(msg.message);
                 }
             }
         }
@@ -176,8 +178,10 @@ void communication_session::update()
         connection_timer = false;
         return;
     }
-    if (terminal != nullptr)
-        radio_status = terminal->status;
+    if (connection != nullptr)
+        radio_status = connection->status;
+    else if (radio_status == safe_radio_status::Connected)
+        radio_status = safe_radio_status::Failed;
     if (radio_status == safe_radio_status::Connected) {
         last_active = get_milliseconds();
         connection_timer = false;
@@ -186,21 +190,21 @@ void communication_session::update()
         close();
     }
     if (status == session_status::Establishing) {
-        if (tried == 0 || ((tried<ntries || ntries <= 0) && radio_status == safe_radio_status::Failed && (terminal == nullptr || !terminal->setting_up))) {
-            if (terminal != nullptr && terminal->active_session == this) {
-                terminal->active_session = nullptr;
+        if (tried == 0 || ((tried<ntries || ntries <= 0) && radio_status == safe_radio_status::Failed)) {
+            if (connection != nullptr && connection->active_session == this) {
+                connection->active_session = nullptr;
             }
-            terminal = nullptr;
+            connection = nullptr;
             for (mobile_terminal *t : mobile_terminals) {
-                if (t->setup(this)) {
-                    terminal = t;
+                connection = t->setup_connection(this);
+                if (connection != nullptr) {
                     tried++;
-                    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
+                    rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
                     break;
                 }
             }
         }
-        if (tried >= ntries && ntries > 0 && radio_status == safe_radio_status::Failed && (terminal == nullptr || !terminal->setting_up))
+        if (tried >= ntries && ntries > 0 && radio_status == safe_radio_status::Failed)
             status = session_status::Inactive;
         if (radio_status == safe_radio_status::Connected && !initsent) {
             auto init = std::shared_ptr<euroradio_message_traintotrack>(new init_communication_session());
@@ -209,7 +213,7 @@ void communication_session::update()
             initsent = true;
         }
     } else if (status == session_status::Established) {
-        if (radio_status == safe_radio_status::Failed && !terminal->setting_up) {
+        if (radio_status == safe_radio_status::Failed) {
             connection_timer = true;
             if (train_data_ack_pending && train_data_ack_sent)
                 train_data_ack_sent = false;
@@ -219,8 +223,14 @@ void communication_session::update()
                 open(0);
                 pending_ack = ack;
             } else {
-                if (terminal->setup(this))
-                    rx_promise = terminal->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
+                connection = nullptr;
+                for (mobile_terminal *t : mobile_terminals) {
+                    connection = t->setup_connection(this);
+                    if (connection != nullptr) {
+                        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
+                        break;
+                    }
+                }
             }
         }
         if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {
@@ -292,8 +302,8 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
         pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.message->NID_MESSAGE == msg->NID_MESSAGE;});
         pending_ack.push_back({ack,msg,1,get_milliseconds()});
     }
-    if (radio_status == safe_radio_status::Connected && terminal != nullptr) {
-        terminal->send(msg);
+    if (radio_status == safe_radio_status::Connected && connection != nullptr) {
+        connection->send(msg);
     }
 }
 int64_t first_supervised_timestamp;
@@ -303,7 +313,7 @@ void update_euroradio()
 {
     for (mobile_terminal *t : mobile_terminals) {
         t->update();
-        if (t->radio_network_id != RadioNetworkId && (t->released == 0 && t->active_session == nullptr)) {
+        if (t->radio_network_id != RadioNetworkId && t->connections.empty()) {
             t->radio_network_id = RadioNetworkId;
             t->registered = false;
             if (RadioNetworkId != "" && !t->last_register_order)

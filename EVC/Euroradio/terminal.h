@@ -10,8 +10,9 @@
 #include <deque>
 #include <vector>
 #include "../Packets/radio.h"
+#include "safe_radio.h"
 #include "platform.h"
-class communication_session;
+#include <functional>
 struct contact_info
 {
     unsigned int country;
@@ -35,32 +36,16 @@ struct contact_info
         return !(*this == o);
     }
 };
-enum struct safe_radio_status
-{
-    Disconnected,
-    Failed,
-    Connected
-};
 class mobile_terminal
 {
-protected:
-    std::string rx_buffer;
-    PlatformUtil::FulfillerBufferedQueue<std::shared_ptr<euroradio_message>> rx_list;
-    void data_receive(std::string &&data);
 public:
-    int released = 0;
-    communication_session *active_session = nullptr;
-    bool setting_up = false;
-    safe_radio_status status = safe_radio_status::Disconnected;
+    std::set<std::shared_ptr<safe_radio_connection>> connections;
     std::string radio_network_id;
     optional<int64_t> last_register_order;
     bool registered;
-    virtual bool setup(communication_session *session) = 0;
-    virtual void release();
-    virtual void update();
-    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
-    virtual void send(unsigned char *data, size_t size) = 0;
-    PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
+    mobile_terminal();
+    void update();
+    std::function<std::shared_ptr<safe_radio_connection>(communication_session *session)> setup_connection;
 };
 extern mobile_terminal *mobile_terminals[2];
 extern optional<std::vector<std::string>> AllowedRadioNetworks;

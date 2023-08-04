@@ -172,10 +172,6 @@ void on_platform_ready()
     platform->on_quit_request().then([](){
         platform->quit();
     }).detach();
-    platform->on_quit().then([](){
-        for (auto *terminal : mobile_terminals)
-            terminal->release();
-    }).detach();
 
     start_dmi();
     start_or_iface();

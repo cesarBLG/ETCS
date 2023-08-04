@@ -14,6 +14,9 @@
 #ifdef __ANDROID__
 #include <android/log.h>
 #endif
+#ifdef EVC
+#include "../EVC/Euroradio/platform_terminals.h"
+#endif
 static std::atomic<bool>* quit_request_ptr;
 
 static void sigterm_handler(int sig) {
@@ -46,7 +49,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 #endif
-
 ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<std::string> &args) :
 	load_path(path),
 	bus_socket_impl(load_path, poller, args),
@@ -63,6 +65,19 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 	quit_request_ptr = &quit_request;
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
+#endif
+#ifdef EVC
+#if !SIMRAIL
+	for (auto *t : mobile_terminals) {
+		t->setup_connection = [t, this](communication_session *session) {
+			if (!t->registered || t->radio_network_id != RadioNetworkId)
+				return std::shared_ptr<safe_radio_connection>(nullptr);
+			auto conn = std::shared_ptr<safe_radio_connection>(new tcp_safe_connection(session, t, poller));
+			t->connections.insert(conn);
+			return conn;
+		};
+	}
+#endif
 #endif
 	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
