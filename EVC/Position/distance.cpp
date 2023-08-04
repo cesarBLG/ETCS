@@ -140,10 +140,14 @@ double distance::operator-(const distance d) const
 }
 distance d_maxsafefront(int orientation, double reference)
 {
+    if (d_estfront.get()-reference < 0)
+        return d_minsafefront(orientation, reference);
     return distance((d_estfront.get()-reference)*1.01+odometer_orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
 }
 distance d_minsafefront(int orientation, double reference)
 {
+    if (d_estfront.get()-reference < 0)
+        return d_maxsafefront(orientation, reference);
     return distance((d_estfront.get()-reference)*0.99-odometer_orientation*(reference==0 && !lrbgs.empty() ? lrbgs.back().locacc : Q_NVLOCACC), orientation, reference);
 }
 distance d_maxsafefront(const distance&ref)

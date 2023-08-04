@@ -333,7 +333,8 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     int nid_bg=-1;
     int nid_c=-1;
     int m_version=-1;
-    int dir=-1;
+    int passed_dir=-1;
+    int orientated_dir=-1;
     int prevno=-1;
     int n_total=-1;
     std::vector<eurobalise_telegram> read_telegrams;
@@ -346,7 +347,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
             if (prevno == -1)
                 prevno = t.N_PIG;
             else
-                dir = t.N_PIG<prevno;
+                passed_dir = t.N_PIG<prevno;
             n_total = t.N_TOTAL;
             read_telegrams.push_back(t);
         }
@@ -373,12 +374,16 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
         else if (odometer_direction == odometer_orientation)
             orientation = 0;
     }
+    if (orientation == 1 && passed_dir != -1)
+        orientated_dir = 1-passed_dir;
+    else
+        orientated_dir = passed_dir;
+    
+    int dir = orientated_dir;
     if (orientation == 1) {
         if (mode == Mode::SH || mode == Mode::PS || mode == Mode::SL) {
             bg_reference = distance(bg_reference.get(), -odometer_orientation, 0);
-        } else {
-            if (dir != -1)
-                dir = 1-dir;
+            dir = passed_dir;
         }
     }
 
@@ -415,7 +420,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
                     if (containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)) {
                         reject = false;
                     } else {
-                        if (dir!=-1) {
+                        if (passed_dir!=-1) {
                             reject = false;
                         } else {
                             bool directional = false;
@@ -456,7 +461,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
             continue;
         if (c1 || !(c2||c3))
             message.push_back(t);
-        if ((c2 && dir==0) || (c3 && dir==1)) {
+        if ((c2 && passed_dir==0) || (c3 && passed_dir==1)) {
             eurobalise_telegram first = t;
             eurobalise_telegram second = c2 ? read_telegrams[i+1] : read_telegrams[i-1];
             bool seconddefault = false;
@@ -523,7 +528,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, distance bg_re
     }
     
     if (dir == -1 && containedinlinking && (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS))
-        dir = balise_link.reverse_dir;
+        dir = passed_dir = orientated_dir = balise_link.reverse_dir;
     if (dir == -1 && orientation == -1)
         bg_reference = distance(bg_reference.get(), 0, 0);
     bg_reference = update_location_reference({nid_c, nid_bg}, dir, bg_reference, linked, containedinlinking ? balise_link : optional<link_data>());
@@ -576,7 +581,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, distance dist, i
             ETCS_packet *p = t.packets[j].get();
             if (p->directional) {
                 auto *dp = (ETCS_directional_packet*)p;
-                if (dir == -1 || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
                     continue;
             }
             if (p->NID_PACKET == 136) {
@@ -639,8 +644,11 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         if (info.nid_lrbg == lrbg) {
             valid_lrbg = true;
             ref = info.position;
-            platform->debug_print("Ref: " + std::to_string(ref.get()));
-            dir = info.dir;
+            platform->debug_print("NID_LRBG position: " + std::to_string(ref.get()));
+            if (mode == Mode::SH || mode == Mode::PS || mode == Mode::SL)
+                dir = odometer_direction * info.position.get_orientation() == 1 ? info.dir : 1-info.dir;
+            else
+                dir = odometer_orientation * info.position.get_orientation() == 1 ? info.dir : 1-info.dir;
             break;
         }
     }
@@ -649,6 +657,8 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
+            if ((dir == -1 && emerg->Q_DIR != Q_DIR_t::Both) || (emerg->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (emerg->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                return;
             ref += emerg->D_REF.get_value(emerg->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -659,6 +669,8 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         }
         case 34: {
             auto *taf = (taf_request_message*)message.get();
+            if ((dir == -1 && taf->Q_DIR != Q_DIR_t::Both) || (taf->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (taf->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                return;
             ref += taf->D_REF.get_value(taf->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -768,7 +780,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         ETCS_packet *p = message->packets[j].get();
         if (p->directional) {
             auto *dp = (ETCS_directional_packet*)p;
-            if ((dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+            if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
                 continue;
         }
         if (p->NID_PACKET == 136) {
