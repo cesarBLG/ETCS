@@ -121,8 +121,8 @@ void bus_safe_connection::release()
     status = safe_radio_status::Disconnected;
 }
 #ifdef _WIN32
-#include <Winsock2.h>
-#include <Ws2tcpip.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -156,18 +156,22 @@ tcp_safe_connection::tcp_safe_connection(communication_session *session, mobile_
         status = safe_radio_status::Failed;
         return;
     }
+#ifdef _WIN32
+    char t;
+#else
     int t;
+#endif
     t = 1;
     setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &t, sizeof(t));
+    t = 1;
+    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &t, sizeof(t));
+    #ifndef _WIN32
     t = 3;
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &t, sizeof(t));
     t = 12;
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &t, sizeof(t));
     t = 3;
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &t, sizeof(t));
-    t = 1;
-    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &t, sizeof(t));
-    #ifndef _WIN32
     t = 20000;
     setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &t, sizeof(t));
     t = 1416;
