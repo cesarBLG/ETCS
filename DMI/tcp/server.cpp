@@ -24,6 +24,8 @@
 #include "../Config/config.h"
 #include "platform_runtime.h"
 
+void input_received(UiPlatform::InputEvent ev);
+
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {
@@ -217,7 +219,8 @@ void parseData(std::string str)
         TimeOffset::offset = stoi(value);
     }
     else if (command == "ackButton") {
-        Component::externalAckButton(stoi(value));
+        bool pressed = stoi(value) > 0;
+        input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, 0, 0});
     }
     if (command != "json") return;
     json j = json::parse(value);

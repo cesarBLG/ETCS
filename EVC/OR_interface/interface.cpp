@@ -279,7 +279,12 @@ void SetParameters()
 
     p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
-        platform->debug_print("Yellow ack button: " + val + " ms");
+        send_command("ackButton", val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::button::ack");
+    p->SetValue = [](std::string val) {
         send_command("ackButton", val);
     };
     manager.AddParameter(p);
@@ -338,6 +343,7 @@ void start_or_iface()
 
     register_parameter("time_offset");
     register_parameter("ackButton");
+    register_parameter("etcs::button::*");
     register_parameter("speed");
     register_parameter("distance");
     register_parameter("acceleration");

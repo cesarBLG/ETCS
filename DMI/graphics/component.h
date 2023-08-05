@@ -26,8 +26,6 @@ class Component
         float y;
         float sx;
         float sy;
-        static std::set<Component*> _instances;
-        static void externalAckButton(int time);
 
     protected:
         inline float getX(float val)
