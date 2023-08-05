@@ -71,6 +71,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
 	bool ontop = get_config("alwaysOnTop") == "true";
+	bool hidecursor = get_config("hideCursor") == "true";
 
 	int flags = 0;
 	if (borderless)
@@ -86,6 +87,8 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	if (ontop)
 		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
+	if (hidecursor)
+		SDL_ShowCursor(SDL_DISABLE);
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
