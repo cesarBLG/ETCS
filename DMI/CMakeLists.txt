@@ -74,6 +74,10 @@ elseif(ANDROID)
     target_link_libraries(dmi PRIVATE log android GLESv1_CM GLESv2 OpenSLES)
 endif()
 
+if (WASM)
+    set_target_properties(dmi PROPERTIES SUFFIX ".wasm")
+endif()
+
 if (WITH_SDL AND WIN32)
     add_custom_command(TARGET dmi POST_BUILD 
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

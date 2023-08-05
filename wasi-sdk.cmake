@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
@@ -20,10 +20,10 @@ set(CMAKE_C_COMPILER_TARGET ${triple})
 set(CMAKE_CXX_COMPILER_TARGET ${triple})
 set(CMAKE_ASM_COMPILER_TARGET ${triple})
 
-if(NOT CMAKE_HOST_WIN32)
-	set(CMAKE_C_FLAGS "--sysroot=/usr/share/wasi-sysroot")
-	set(CMAKE_CXX_FLAGS "--sysroot=/usr/share/wasi-sysroot")
-	set(CMAKE_LD_FLAGS "--sysroot=/usr/share/wasi-sysroot")
+if(DEFINED WASI_SDK_SYSROOT)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --sysroot=${WASI_SDK_SYSROOT}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --sysroot=${WASI_SDK_SYSROOT}")
+	set(CMAKE_LD_FLAGS "${CMAKE_LD_FLAGS} --sysroot=${WASI_SDK_SYSROOT}")
 endif()
 
 # Don't look in the sysroot for executables to run during the build
