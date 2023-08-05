@@ -410,10 +410,10 @@ void update_dmi_windows()
             add_message(text_message(get_text("Train is rejected"), true, false, 0, [](text_message &t){return any_button_pressed;})); // TODO
             active_dialog_step = "S10";
         } else if (active_dialog_step == "D2") {
-            if (level_valid)
-                active_dialog_step = "D3";
-            else
+            if (som_status == S2)
                 active_dialog_step = "S2";
+            else if (som_status != D2)
+                active_dialog_step = "D3";
         } else if (active_dialog_step == "D3") {
             if (level == Level::N2 || level == Level::N3)
                 active_dialog_step = "D7";
