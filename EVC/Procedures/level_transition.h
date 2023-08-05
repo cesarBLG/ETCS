@@ -42,6 +42,7 @@ struct level_transition_information
 void update_level_status();
 void level_transition_received(level_transition_information info);
 void driver_set_level(level_information level);
+void load_level();
 extern optional<level_transition_information> ongoing_transition;
 extern optional<level_transition_information> sh_transition;
 extern optional<distance> max_ack_distance;

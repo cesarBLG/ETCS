@@ -1213,6 +1213,8 @@ void update_dialog_step(std::string step, std::string step2)
             }
         } else if (step == "Level") {
             active_dialog_step = "S4";
+            position_valid = false;
+            rbc_contact_valid = false;
         } else if (step == "RadioData") {
             active_dialog_step = "S5-1";
         } else if (step == "DriverID") {

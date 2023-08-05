@@ -22,11 +22,12 @@
 #include "../LX/level_crossing.h"
 #include "../language/language.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../TrainSubsystems/cold_movement.h"
 #include <map>
 #include "platform_runtime.h"
 cond mode_conditions[78];
 static std::vector<mode_transition> ordered_transitions[20];
-Mode mode=Mode::SB;
+Mode mode=Mode::NP;
 int64_t last_mode_change;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
@@ -292,6 +293,9 @@ void update_mode_status()
         Mode prevmode = mode;
         mode = transition;
         last_mode_change = get_milliseconds();
+        if (prevmode == Mode::NP) {
+            initialize_cold_movement();
+        }
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {

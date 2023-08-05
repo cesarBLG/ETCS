@@ -170,18 +170,19 @@ void on_platform_ready()
 
     platform->debug_print("Starting European Train Control System...");
     platform->on_quit_request().then([](){
+        json odo(odometer_value);
+        save_cold_data("odometer_value", odo);
         platform->quit();
     }).detach();
 
     start_dmi();
     start_or_iface();
     start_logging();
-    initialize_cold_movement();
     initialize_mode_transitions();
     setup_stm_control();
     set_message_filters();
     initialize_national_functions();
-    update();
+    platform->delay(500).then(update).detach();
 }
 void update()
 {

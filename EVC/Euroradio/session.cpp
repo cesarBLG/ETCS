@@ -433,10 +433,16 @@ void load_contact_info()
 {
     //TODO: Radio Network
     json j = load_cold_data("RBCData");
-    if (j.is_null()) return;
-    uint64_t phone_number = j["PhoneNumber"];
-    if (phone_number != 0) rbc_contact = {j["NID_C"].get<unsigned int>(), j["NID_RBC"].get<unsigned int>(), phone_number};
-    rbc_contact_valid = cold_movement_status == NoColdMovement;
+    if (!j.is_null()) {
+        rbc_contact = {j["NID_C"].get<unsigned int>(), j["NID_RBC"].get<unsigned int>(), j["PhoneNumber"]};
+        rbc_contact_valid = cold_movement_status == NoColdMovement;
+    } else {
+        rbc_contact_valid = false;
+        rbc_contact = {};
+    }
+    j = load_cold_data("RadioNetworkId");
+    if (!j.is_null())
+        RadioNetworkId = j;
 }
 void set_rbc_contact(contact_info contact)
 {
