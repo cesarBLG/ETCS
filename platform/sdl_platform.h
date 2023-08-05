@@ -67,6 +67,7 @@ private:
 	std::map<std::string, std::string, std::less<>> ini_items;
 	void load_config();
 	std::string get_config(const std::string_view key);
+	std::string get_config(const std::string_view key, const std::string_view default);
 	BusSocketImpl bus_socket_impl;
 	LibcTimeImpl libc_time_impl;
 	FstreamFileImpl fstream_file_impl;

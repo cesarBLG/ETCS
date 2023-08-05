@@ -41,9 +41,14 @@ void SdlPlatform::SdlPlatform::load_config()
 
 std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key)
 {
+	return get_config(key, "");
+}
+
+std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key, const std::string_view default)
+{
 	auto it = ini_items.find(key);
 	if (it == ini_items.end())
-		return "";
+		return std::string(default);
 	return it->second;
 }
 
@@ -61,16 +66,22 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	int display = std::stoi(get_config("display"));
 	int width = std::stoi(get_config("width"));
 	int height = std::stoi(get_config("height"));
+	int xpos = std::stoi(get_config("xpos", "0"));
+	int ypos = std::stoi(get_config("ypos", "0"));
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
 
-	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-	sdlwindow = SDL_CreateWindow("SdlPlatform", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);
-
+	int flags = 0;
 	if (borderless)
-		SDL_SetWindowBordered(sdlwindow, SDL_FALSE);
+		flags |= SDL_WINDOW_BORDERLESS;
 	if (fullscreen)
-		SDL_SetWindowFullscreen(sdlwindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		flags |= SDL_WINDOW_FULLSCREEN;
+
+	int x = fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : (borderless ? xpos : SDL_WINDOWPOS_UNDEFINED);
+	int y = fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : (borderless ? ypos : SDL_WINDOWPOS_UNDEFINED);
+
+	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+	sdlwindow = SDL_CreateWindow("SdlPlatform", x, y, width, height, flags);
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
