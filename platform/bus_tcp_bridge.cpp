@@ -93,7 +93,7 @@ BusTcpBridge::BusTcpBridge(const std::string_view bus, uint32_t rx_tid, std::opt
 {
     accept_promise = listener.accept().then(std::bind(&BusTcpBridge::on_new_client, this, std::placeholders::_1));
 }
-#include <orts/clientext.h>
+#include <orts/ip_discovery.h>
 BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPoller &fd, BusSocketImpl &impl)
 {
     std::ifstream file(std::string(load_path) + "tcp_bus_bridge.conf", std::ios::binary);
@@ -125,11 +125,12 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPol
         if (tx_tid != "*")
             txt = BasePlatform::BusSocket::PeerId::fourcc(tx_tid);
         bool newline_framing = (!nl.empty() && nl[0] == 'n');
-        if (busname == "evc_sim") {
+        if (busname == "evc_sim" || busname == "rbc_5015") {
             std::unique_ptr<BasePlatform::BusSocket> bus_socket = impl.open_bus_socket(busname, rxt);
             if (!bus_socket)
                 continue;
-            tcphost = ORserver::TCPclient::discover_server_ip();
+            if (busname == "evc_sim")
+                tcphost = ORserver::discover_server_ip();
             auto sock = std::make_unique<TcpSocket>(tcphost, std::stoi(tcpport), fd);
             client_bridges.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), txt, newline_framing));
         } else {
