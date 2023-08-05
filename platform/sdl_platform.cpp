@@ -63,13 +63,14 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	load_config();
 	bool fullscreen = get_config("fullScreen") == "true";
-	int display = std::stoi(get_config("display"));
-	int width = std::stoi(get_config("width"));
-	int height = std::stoi(get_config("height"));
+	int display = std::stoi(get_config("display", "0"));
+	int width = std::stoi(get_config("width", "800"));
+	int height = std::stoi(get_config("height", "600"));
 	int xpos = std::stoi(get_config("xpos", "0"));
 	int ypos = std::stoi(get_config("ypos", "0"));
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
+	bool ontop = get_config("alwaysOnTop") == "true";
 
 	int flags = 0;
 	if (borderless)
@@ -77,11 +78,14 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	if (fullscreen)
 		flags |= SDL_WINDOW_FULLSCREEN;
 
-	int x = fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : (borderless ? xpos : SDL_WINDOWPOS_UNDEFINED);
-	int y = fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : (borderless ? ypos : SDL_WINDOWPOS_UNDEFINED);
+	int x = borderless ? xpos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
+	int y = borderless ? ypos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
 
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 	sdlwindow = SDL_CreateWindow("SdlPlatform", x, y, width, height, flags);
+
+	if (ontop)
+		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
