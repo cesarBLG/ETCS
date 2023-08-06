@@ -22,6 +22,7 @@
 #include "../language/language.h"
 #include "../speed/gauge.h"
 #include "../Config/config.h"
+#include "../softkeys/softkey.h"
 #include "platform_runtime.h"
 
 void input_received(UiPlatform::InputEvent ev);
@@ -221,6 +222,9 @@ void parseData(std::string str)
     else if (command == "ackButton") {
         bool pressed = stoi(value) > 0;
         input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, 0, 0});
+    } else if (command.size() == 5 && command.substr(0, 3) == "key") {
+        if (command[3] == 'F') softF[stoi(command.substr(4, 1))].setPressed(value == "1" || value == "true");
+        else if (command[3] == 'H') softH[stoi(command.substr(4, 1))].setPressed(value == "1" || value == "true");
     }
     if (command != "json") return;
     json j = json::parse(value);

@@ -288,6 +288,22 @@ void SetParameters()
         send_command("ackButton", val);
     };
     manager.AddParameter(p);
+
+    for (int i=1; i<11; i++) {
+        p = new ORserver::Parameter("etcs::button::f"+std::to_string(i));
+        p->SetValue = [i](std::string val) {
+            send_command("keyF"+std::to_string(i), val);
+        };
+        manager.AddParameter(p);
+    }
+
+    for (int i=1; i<8; i++) {
+        p = new ORserver::Parameter("etcs::button::h"+std::to_string(i));
+        p->SetValue = [i](std::string val) {
+            send_command("keyH"+std::to_string(i), val);
+        };
+        manager.AddParameter(p);
+    }
 }
 
 std::unique_ptr<ORTSClientWrapper> sim_wrapper;

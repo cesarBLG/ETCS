@@ -2,7 +2,7 @@ set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/compone
             graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp 
             speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp 
             state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp 
-            messages/messages.cpp graphics/flash.cpp 
+            messages/messages.cpp graphics/flash.cpp softkeys/softkey.cpp
             window/window_main.cpp state/time_hour.cpp window/subwindow.cpp window/data_entry.cpp window/data_validation.cpp 
             window/nav_buttons.cpp window/menu.cpp window/menu_main.cpp window/menu_override.cpp window/menu_radio.cpp 
             window/menu_spec.cpp window/menu_settings.cpp window/menu_ntc.cpp window/track_ahead_free.cpp 

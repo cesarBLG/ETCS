@@ -16,6 +16,7 @@
 #include "../sound/sound.h"
 #include "../messages/messages.h"
 #include "../tcp/server.h"
+#include "../softkeys/softkey.h"
 #include "platform_runtime.h"
 
 void update_stm_windows();
@@ -48,6 +49,7 @@ void drawing_start()
 {
     platform->on_input_event().then(input_received).detach();
 
+    setupSoftKeys();
     loadBeeps();
     setupFlash();
     present_frame();
