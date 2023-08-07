@@ -7,7 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "menu.h"
-#include <chrono>
+#include "platform_runtime.h"
 menu::menu(std::string title) : subwindow(title)
 {
     for(int i=0; i<10; i++)
@@ -31,11 +31,10 @@ void menu::setHourGlass(bool show)
     if (show)
     {
         if (!hourGlass->graphics.empty()) return;
-        auto t = std::chrono::system_clock::now();
+        int64_t t = platform->get_timer();
         hourGlass->setDisplayFunction([this,t] {
 
-            std::chrono::duration<double> diff = std::chrono::system_clock::now() - t;
-            int d = std::chrono::duration_cast<std::chrono::duration<int, std::milli>>(diff).count();
+            int d = platform->get_timer() - t;
             ((texture*)hourGlass->graphics[0])->x = 264/2+d*26/1000%254;
         });
         hourGlass->addImage("symbols/Status/ST_05.bmp",-264/2);

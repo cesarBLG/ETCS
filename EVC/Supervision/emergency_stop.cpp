@@ -15,9 +15,9 @@ void handle_unconditional_emergency_stop(int id)
     trigger_condition(20);
     emergency_stops[id] = {};
 }
-int handle_conditional_emergency_stop(int id, distance location)
+int handle_conditional_emergency_stop(int id, distance location, distance minsafe)
 {
-    if (d_minsafefront(location) > location)
+    if (minsafe > location)
         return 3;
     emergency_stops[id] = location;
     bool used = !SvL || *SvL > location;

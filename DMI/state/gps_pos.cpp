@@ -8,7 +8,7 @@
  */
 #include "gps_pos.h"
 Component gps_pos(120,50,display_gps);
-static bool show_pos = false;
+static bool show_pos = true;
 int prevkm=-1;
 int prevm=-1;
 double pk=-1;

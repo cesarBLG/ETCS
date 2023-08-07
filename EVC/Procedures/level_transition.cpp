@@ -32,21 +32,54 @@ int64_t level_timer;
 std::map<int, std::string> ntc_names;
 std::set<int> ntc_available_no_stm;
 std::set<int> unsupported_levels;
-#include <fstream>
+void from_json(const json &j, level_information &l)
+{
+    l.level = (Level)j["Level"].get<int>();
+    if (l.level == Level::NTC)
+        l.nid_ntc = j["NID_NTC"];
+}
+void to_json(json &j, const level_information &l)
+{
+    j["Level"] = (int)l.level;
+    if (l.level == Level::NTC)
+        j["NID_NTC"] = l.nid_ntc;
+}
 void load_level()
 {
-    //std::ifstream file("level.dat");
-    if (cold_movement_status == NoColdMovement) {
-        level_valid = true;
-        priority_levels_valid = true;
+    json j = load_cold_data("Level");
+    if (!j.is_null()) {
+        level = (Level)j["Level"].get<int>();
+        if (level == Level::NTC)
+            nid_ntc = j["NID_NTC"];
+        level_valid = cold_movement_status == NoColdMovement;
     } else {
         level_valid = false;
+        level = Level::Unknown;
+    }
+    j = load_cold_data("TracksideLevels");
+    if (!j.is_null() && cold_movement_status == NoColdMovement) {
+        priority_levels = j;
+        priority_levels_valid = true;
+    } else {
+        priority_levels_valid = false;
         priority_levels.clear();
+        j = nullptr;
+        save_cold_data("TracksideLevels", j);
     }
 }
 void save_level()
 {
-    //std::ofstream file("level.dat");
+    json j;
+    if (level_valid)
+        j = level_information({level, nid_ntc});
+    else
+        j = nullptr;
+    save_cold_data("Level", j);
+    if (priority_levels_valid)
+        j = priority_levels;
+    else
+        j = nullptr;
+    save_cold_data("TracksideLevels", j);
 }
 void driver_set_level(level_information li)
 {
@@ -136,7 +169,7 @@ void update_level_status()
         perform_transition();
     }
     if (!ongoing_transition) return;
-    if (ongoing_transition->start<=d_estfront)
+    if (ongoing_transition->immediate || ongoing_transition->start<=d_estfront)
         perform_transition();
     else if (mode != Mode::SB && 
     (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0) && 
@@ -178,8 +211,6 @@ void level_transition_received(level_transition_information info)
     ongoing_transition = info;
     level_to_ack = ongoing_transition->leveldata.level;
     ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
-    if (ongoing_transition->immediate)
-        perform_transition();
 }
 level_transition_information::level_transition_information(LevelTransitionOrder o, distance ref)
 {
@@ -229,7 +260,7 @@ void level_transition_information::set_leveldata(std::vector<target_level_inform
             }
         }
         if (p.level == Level::N2) {
-            for (auto &t : mobile_terminals) {
+            for (auto *t : mobile_terminals) {
                 leveldata = p;
                 return;
             }

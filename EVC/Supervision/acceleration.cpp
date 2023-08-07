@@ -7,8 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "acceleration.h"
-#include <iostream>
-#include <chrono>
 acceleration operator+(const acceleration &a1, const acceleration &a2)
 {
     acceleration an = acceleration();

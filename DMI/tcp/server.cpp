@@ -7,18 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include <string>
-#include <cstdio>
-#include <thread>
-#include <chrono>
 #include <set>
-#include <cmath>
-#ifndef _WIN32
-#include <unistd.h>
-#include <arpa/inet.h>
-#else
-#include <winsock2.h>
-#include <windows.h>
-#endif
 #include "server.h"
 #include "../monitor.h"
 #include "../sound/sound.h"
@@ -33,17 +22,10 @@
 #include "../language/language.h"
 #include "../speed/gauge.h"
 #include "../Config/config.h"
-#include <mutex>
-int server;
-int clients[3];
-int active_channel;
-#define BUFF_SIZE 1024
-#define PORT 5010
-static char data[BUFF_SIZE];
-std::string buffer;
-std::mutex server_mtx;
-static SDL_Event ev;
-#include <iostream>
+#include "platform_runtime.h"
+
+void input_received(UiPlatform::InputEvent ev);
+
 template<class T>
 void fill_non_existent(json &j, std::string str, T def)
 {
@@ -228,9 +210,17 @@ void parseData(std::string str)
     {
         load_config(value);
     }
-    else if (command == "ackButton")
+    else if (command == "setVset")
     {
-        externalAck(value!="false");
+        Vset = stof(value);
+    }
+    else if (command == "timeOffset")
+    {
+        TimeOffset::offset = stoi(value);
+    }
+    else if (command == "ackButton") {
+        bool pressed = stoi(value) > 0;
+        input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, 0, 0});
     }
     if (command != "json") return;
     json j = json::parse(value);
@@ -301,114 +291,22 @@ void parseData(std::string str)
         updateTc(syms);
     }
 }
-extern bool running;
-int read(int channel)
+std::unique_ptr<BasePlatform::BusSocket> evc_socket;
+void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
 {
-    int result = recv(clients[channel], ::data, BUFF_SIZE-1, 0);
-    if(result>0)
-    {
-        ::data[result] = 0;
-        std::unique_lock<std::mutex> lck(server_mtx);
-        buffer += ::data;
-    }
-    return result;
-}
-void updateDrawCommands()
-{
-    std::unique_lock<std::mutex> lck(server_mtx);
-    int end;
-    while ((end=buffer.find_first_of(';'))!=std::string::npos) {
-        int start = buffer.find_first_not_of("\n\r ;");
-        std::string command = buffer.substr(start, end-start);
-        parseData(command);
-        buffer = buffer.substr(end+1);
-    }
+    evc_socket->receive().then(data_received).detach();
+    if (std::holds_alternative<BasePlatform::BusSocket::Message>(result))
+        parseData(std::move(std::get<BasePlatform::BusSocket::Message>(result).data));
 }
 void write_command(std::string command, std::string value)
 {
-    if (active_channel < 0)
-        return;
-    std::string tosend = command+"("+value+");\n";
-    send(clients[active_channel], tosend.c_str(), tosend.size(), 0);
-}
-void listenChannels()
-{
-    while(active_channel == -1 && running)
-    {
-        struct sockaddr_in addr;
-        int c = sizeof(struct sockaddr_in);
-        int cl = accept(server, (struct sockaddr *)&addr, 
-#ifdef _WIN32
-        (int *)
-#else
-        (socklen_t *)
-#endif
-        &c);
-        if(cl == -1) {
-            perror("accept");
-            continue;
-        }
-        for (int i=0; i<3; i++) {
-            if (clients[i] < 0) {
-                clients[i] = cl;
-                active_channel = i;
-                break;
-            }
-        }
-    }
+    std::string tosend = command+"("+value+")";
+    if (evc_socket)
+        evc_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("EVC"), tosend);
 }
 void startSocket()
 {
-#ifdef _WIN32
-    WSADATA wsa;
-    WSAStartup(MAKEWORD(2,2), &wsa);
-#endif
-    server = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in serv;
-    serv.sin_family = AF_INET;
-    serv.sin_port = htons(PORT);
-    serv.sin_addr.s_addr = INADDR_ANY;
-    if (server == -1) {
-        perror("socket");
-        return;
-    }
-    if (0 != ::bind(server, (struct sockaddr *)&(serv), sizeof(serv))) {
-        perror("bind");
-        return;
-    }
-    if (listen(server, 3) == -1) {
-        perror("listen");
-        return;
-    }
-    active_channel = -1;
-    for (int i=0; i<3; i++)
-        clients[i] = -1;
-}
-void loopSocket()
-{
-    listenChannels();
-    while(running)
-    {
-        int res = read(active_channel);
-        if (res < 0)
-        {
-#ifdef _WIN32
-            closesocket(clients[active_channel]);
-#else
-            close(clients[active_channel]);
-#endif
-            clients[active_channel] = -1;
-            active_channel = -1;
-            if (running) listenChannels();
-        }
-    }
-    closeSocket();
-}
-void closeSocket()
-{
-#ifdef _WIN32
-    closesocket(server);
-#else
-    close(server);
-#endif
+    evc_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("DMI"));
+    if (evc_socket)
+        evc_socket->receive().then(data_received).detach();
 }

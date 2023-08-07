@@ -40,7 +40,12 @@ void zoominp()
 }
 void zoomoutp()
 {
+#if SIMRAIL
+    // SimRail track scanner has max distance of 16km
+    if(planning_scale<=8)
+#else
     if(planning_scale<=16)
+#endif
     {
         planning_scale*=2;
         speedLines();
@@ -57,7 +62,7 @@ void displayPlanning()
         else planning_distance.drawRectangle(40, posy[i], 200, 1, DarkGrey);
     }
 }
-std::map<int,std::shared_ptr<sdl_texture>> object_textures;
+std::map<int,std::shared_ptr<UiPlatform::Image>> object_textures;
 void displayObjects()
 {
     if (mode == Mode::OS && !showSpeeds) return;
@@ -73,10 +78,10 @@ void displayObjects()
     }
 }
 std::vector<gradient_element> gradient_elements;
-/*std::shared_ptr<sdl_texture> plus_white;
-std::shared_ptr<sdl_texture> plus_black;
-std::shared_ptr<sdl_texture> minus_white;
-std::shared_ptr<sdl_texture> minus_black;*/
+/*std::shared_ptr<UiPlatform::Image> plus_white;
+std::shared_ptr<UiPlatform::Image> plus_black;
+std::shared_ptr<UiPlatform::Image> minus_white;
+std::shared_ptr<UiPlatform::Image> minus_black;*/
 void displayGradient()
 {
     /*if (plus_white == nullptr)
@@ -166,10 +171,10 @@ void displayPASP()
     }
     if(imarker.start_distance>0 && imarker.start_distance <= divs[8]*planning_scale) PASP.drawRectangle(14, getPlanningHeight(imarker.start_distance)-15, 93, 2, Yellow);
 }
-std::shared_ptr<sdl_texture> pl21;
-std::shared_ptr<sdl_texture> pl22;
-std::shared_ptr<sdl_texture> pl23;
-//std::map<int, std::shared_ptr<sdl_texture>> plspeeds;
+std::shared_ptr<UiPlatform::Image> pl21;
+std::shared_ptr<UiPlatform::Image> pl22;
+std::shared_ptr<UiPlatform::Image> pl23;
+//std::map<int, std::shared_ptr<UiPlatform::Image>> plspeeds;
 void displaySpeed()
 {
     if (pl21 == nullptr)
@@ -219,7 +224,7 @@ void speedLines()
     {
         if(i==0||i>4)
         {
-            planning_distance.addText(std::to_string(divs[i]*planning_scale), 208, posy[i]-150, 10, White, RIGHT);
+            planning_distance.addText(std::to_string(divs[i]*planning_scale), 208, posy[i]-150, 9, White, RIGHT);
         }
     }
 }

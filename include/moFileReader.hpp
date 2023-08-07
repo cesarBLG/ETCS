@@ -271,6 +271,31 @@ struct moFileInfo
     moTranslationPairList m_translationPairInformation;
 };
 
+class moBinaryReader
+{
+private:
+    std::string buffer;
+    size_t pos;
+public:
+    moBinaryReader(const std::string &s) : buffer(s) {
+        pos = 0;
+    }
+
+    void read(char *dst, size_t len) {
+        if (pos < buffer.size())
+            memcpy(dst, buffer.data() + pos, std::min(len, buffer.size() - pos));
+        pos += len;
+    }
+
+    void seekg(size_t p) {
+        pos = p;
+    }
+
+    bool bad() const {
+        return buffer.empty();
+    }
+};
+
 /**
  * \brief This class is a gettext-replacement.
  *
@@ -349,7 +374,7 @@ class moFileReader
     moFileReader::eErrorCode ParseData(const std::string &data)
     {
         // Opening the file.
-        std::stringstream stream(data);
+        moBinaryReader stream(data);
 
         return ReadStream(stream);
     }
@@ -502,17 +527,21 @@ class moFileReader
             else
             {
                 // try-catch for handling out_of_range exceptions
+#ifndef NO_EXCEPTIONS
                 try
+#endif
                 {
                     m_lookup_context[original_str.substr(0, ctxSeparator)]
                                     [original_str.substr(ctxSeparator + 1, original_str.length())] = translation_str;
                     numStrings++;
                 }
+#ifndef NO_EXCEPTIONS
                 catch (...)
                 {
                     m_error = "Stream bad during reading. The .mo-file seems to be invalid or has bad descriptions!";
                     return moFileReader::EC_ERROR;
                 }
+#endif
             }
 
             // Cleanup...

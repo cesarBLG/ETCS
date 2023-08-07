@@ -11,15 +11,14 @@
 #include "../Supervision/supervision.h"
 #include "../language/language.h"
 #include "../Version/version.h"
-#include "../../DMI/time_etcs.h"
+
 unsigned char idcount=0;
 text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
     : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)
 {
-    std::time_t t = std::time(0);
-    std::tm* now = std::localtime(&t);
-    hour = now->tm_hour;
-    minute = now->tm_min;
+    auto datetime = offset_time();
+    hour = datetime.hour;
+    minute = datetime.minute;
     start_condition = [](text_message &t){return true;};
     id = idcount++;
     acknowledged = false;

@@ -14,6 +14,7 @@
 #include <string>
 bool trip_acknowledged = false;
 bool trip_exit_acknowledged = false;
+int64_t trip_exit_acknowledge_timestamp;
 void train_trip(int reason)
 {
     std::string str;

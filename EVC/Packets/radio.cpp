@@ -270,7 +270,7 @@ void fill_message(euroradio_message_traintotrack *m)
     int64_t timestamp = get_milliseconds()/10;
     if (last_sent_timestamp >= timestamp)
         timestamp = last_sent_timestamp + 1;
-    m->T_TRAIN.rawdata = timestamp;
+    m->T_TRAIN.rawdata = timestamp & 4294967295ULL;
     last_sent_timestamp = timestamp;
 }
 ETCS_packet *get_position_report()

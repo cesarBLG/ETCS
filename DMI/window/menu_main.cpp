@@ -17,7 +17,6 @@
 #include "../control/control.h"
 #include "../tcp/server.h"
 
-#include <chrono>
 menu_main::menu_main() : menu(get_text("Main"))
 {
     buttons[0] = new TextButton(get_text("Start"), 153, 50);

@@ -11,6 +11,8 @@
 #include "6.h"
 #include "13.h"
 #include "15.h"
+#include "16.h"
+#include "17.h"
 #include "18.h"
 #include "32.h"
 #include "35.h"
@@ -37,6 +39,8 @@ ETCS_packet *construct_stm_packet(bit_manipulator &r)
         case 6: p = new STMOverrideActivation(); break;
         case 13: p = new STMStateRequest(); break;
         case 15: p = new STMStateReport(); break;
+        case 16: p = new STMMaxSpeed(); break;
+        case 17: p = new STMSystemSpeed(); break;
         case 18: p = new STMNationalTrip(); break;
         case 32: p = new STMIconRequest(); break;
         case 35: p = new STMIconRequest(); break;

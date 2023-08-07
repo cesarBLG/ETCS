@@ -15,6 +15,7 @@ bool sl_signal;
 bool ps_signal;
 bool nl_signal;
 bool isolated;
+bool failed;
 bool SB_command;
 bool EB_command;
 double brake_pressure;

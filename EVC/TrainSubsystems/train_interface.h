@@ -12,6 +12,7 @@ extern bool sl_signal;
 extern bool ps_signal;
 extern bool nl_signal;
 extern bool isolated;
+extern bool failed;
 extern bool SB_command;
 extern double brake_pressure;
 extern bool EB_command;

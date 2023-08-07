@@ -22,10 +22,12 @@
 #include "../LX/level_crossing.h"
 #include "../language/language.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../TrainSubsystems/cold_movement.h"
 #include <map>
-cond mode_conditions[75];
+#include "platform_runtime.h"
+cond mode_conditions[78];
 static std::vector<mode_transition> ordered_transitions[20];
-Mode mode=Mode::SB;
+Mode mode=Mode::NP;
 int64_t last_mode_change;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
@@ -88,6 +90,11 @@ void initialize_mode_transitions()
     c[72] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
     c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    
+    // Out of SRS conditions
+    c[75] = [](){return !isolated;};
+    c[76] = [](){return failed; };
+    c[77] = [](){return !failed;};
 
     std::vector<mode_transition> transitions;
     transitions.push_back({Mode::SB, Mode::SR, {8,37}, 7});
@@ -198,6 +205,26 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::SN, Mode::IS, {1}, 1});
     transitions.push_back({Mode::RV, Mode::IS, {1}, 1});
 
+    // Out of SRS conditions
+    transitions.push_back({ Mode::IS, Mode::SB, {75}, 1 });
+    transitions.push_back({ Mode::NP, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SB, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::PS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SH, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::FS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::LS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SR, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::OS, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SL, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::NL, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::UN, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::TR, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::PT, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SF, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SN, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::RV, Mode::SF, {76}, 1 });
+    transitions.push_back({ Mode::SF, Mode::SB, {77}, 1 });
+
     for (mode_transition &t : transitions) {
         ordered_transitions[(int)t.from].push_back(t);
     }
@@ -253,9 +280,8 @@ void update_mode_status()
     for (mode_transition &t : available) {
         int i = t.happens();
         if (t.from == mode && i>=0 && t.priority < priority) {
-            if (t.to == Mode::TR) {
-                std::cout<<"TRIP "<<i<<std::endl;
-            }
+            if (t.to == Mode::TR)
+                platform->debug_print("TRIP " + std::to_string(i));
             transition = t.to;
             priority = t.priority;
             transition_index = i;
@@ -267,6 +293,9 @@ void update_mode_status()
         Mode prevmode = mode;
         mode = transition;
         last_mode_change = get_milliseconds();
+        if (prevmode == Mode::NP) {
+            initialize_cold_movement();
+        }
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {

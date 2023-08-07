@@ -8,6 +8,7 @@
  */
 #include "keyboard.h"
 #include "../language/language.h"
+#include "platform_runtime.h"
 std::vector<Button*> getNumericKeyboard(input_data *input)
 {
     input->character_separation = true;
@@ -69,10 +70,9 @@ std::vector<Button*> getAlphaNumericKeyboard(input_data *input)
         {
             std::string data = input->keybd_data;
             //if(i<11 && data=="0") data = "";
-            time_t now;
-            time(&now);
+            int64_t now = platform->get_timer();
             bool replaced = false;
-            if (difftime(now, input->holdcursor)<2)
+            if (now - input->holdcursor<2000)
             {
                 char lc = data[data.size()-1];
                 if (i==1)

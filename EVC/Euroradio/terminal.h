@@ -7,12 +7,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #pragma once
-#include <mutex>
-#include <atomic>
 #include <deque>
-#include <condition_variable>
+#include <vector>
 #include "../Packets/radio.h"
-class communication_session;
+#include "safe_radio.h"
+#include "platform.h"
+#include <functional>
 struct contact_info
 {
     unsigned int country;
@@ -36,27 +36,18 @@ struct contact_info
         return !(*this == o);
     }
 };
-enum struct safe_radio_status
+class mobile_terminal
 {
-    Disconnected,
-    Failed,
-    Connected
-};
-struct mobile_terminal
-{
-    communication_session *active_session;
-    std::atomic<bool> setting_up;
-    std::atomic<int> released;
-    std::deque<std::shared_ptr<euroradio_message_traintotrack>> pending_write;
-    std::deque<std::shared_ptr<euroradio_message>> pending_read;
-    std::mutex mtx;
-    std::condition_variable cv;
-    public:
-    std::atomic<safe_radio_status> status;
+public:
+    std::set<std::shared_ptr<safe_radio_connection>> connections;
     std::string radio_network_id;
+    optional<int64_t> last_register_order;
     bool registered;
-    bool setup(communication_session *session);
-    void release();
+    mobile_terminal();
     void update();
+    std::function<std::shared_ptr<safe_radio_connection>(communication_session *session)> setup_connection;
 };
-extern mobile_terminal mobile_terminals[2];
+extern mobile_terminal *mobile_terminals[2];
+extern optional<std::vector<std::string>> AllowedRadioNetworks;
+extern std::string RadioNetworkId;
+void retrieve_radio_networks();

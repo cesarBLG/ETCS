@@ -7,12 +7,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "flash.h"
-#include <cstdio>
-#include "drawing.h"
-using namespace std;
+#include "platform_runtime.h"
+
 int flash_state = 0;
-Uint32 flash(Uint32 interval, void *param)
-{
-    flash_state = (flash_state + 1) % 4;
-    return interval;
+
+std::function<void()> flash_func;
+void setupFlash() {
+    flash_func = [](){
+        flash_state = (flash_state + 1) % 4;
+        platform->delay(250).then(flash_func).detach();
+    };
+    flash_func();
 }

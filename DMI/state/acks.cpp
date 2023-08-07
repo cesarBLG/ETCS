@@ -14,6 +14,7 @@
 #include "../graphics/display.h"
 #include "acks.h"
 #include <list>
+#include "platform_runtime.h"
 using namespace std;
 void dispAcks();
 Component c234(37*3, 50, nullptr);
@@ -110,11 +111,9 @@ void dispAcks()
     }
     else c1.setAck(nullptr);
 }
-#include <chrono>
 int64_t get_milliseconds()
 {
-    return (std::chrono::duration_cast<std::chrono::milliseconds>
-        (std::chrono::system_clock::now().time_since_epoch())).count();
+    return platform->get_timer();
 }
 int64_t lastAck;
 void updateAcks()

@@ -15,13 +15,36 @@ std::list<link_data> linking;
 std::list<link_data>::iterator link_expected = linking.end();
 std::list<lrbg_info> lrbgs;
 bool position_valid=false;
+void from_json(const json &pos, lrbg_info &lrbg)
+{
+    lrbg = {bg_id({pos["NID_C"], pos["NID_BG"]}), pos["Direction"], distance(pos["Position"], pos["Orientation"], 0), pos["Q_LOCACC"]};
+}
+void to_json(json &pos, const lrbg_info &lrbg)
+{
+    pos["NID_C"] = lrbg.nid_lrbg.NID_C;
+    pos["NID_BG"] = lrbg.nid_lrbg.NID_BG;
+    pos["Q_LOCACC"] = lrbg.locacc;
+    pos["Direction"] = lrbg.dir;
+    pos["Orientation"] = lrbg.position.get_orientation();
+    pos["Position"] = lrbg.position.get() - lrbg.position.get_reference() + odometer_reference;
+}
 void load_train_position()
 {
-    position_valid = cold_movement_status == NoColdMovement;
+    json pos = load_cold_data("LRBGs");
+    if (!pos.is_null() && cold_movement_status == NoColdMovement) {
+        lrbgs = pos;
+        position_valid = true;
+    } else {
+        lrbgs.clear();
+        position_valid = false;
+        pos = nullptr;
+        save_cold_data("LRBGs", pos);
+    }
 }
 void save_train_position()
 {
-
+    json pos = lrbgs;
+    save_cold_data("LRBGs", pos);
 }
 distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link)
 {
@@ -38,6 +61,7 @@ distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bo
         if (lrbgs.size() > 10) lrbgs.pop_front();
         if (!pos_report_params || pos_report_params->LRBG)
             position_report_reasons[9] = true;
+        save_train_position();
         return group_pos;
     } else {
         double offset = group_pos.get();
@@ -47,6 +71,7 @@ distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bo
         if (lrbgs.size() > 10) lrbgs.pop_front();
         if (!pos_report_params || pos_report_params->LRBG)
             position_report_reasons[9] = true;
+        save_train_position();
         return distance(0, group_pos.get_orientation(), 0);
     }
 }

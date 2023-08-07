@@ -42,3 +42,4 @@ void update_linking(distance start, Linking link, bool infill, bg_id this_bg);
 void delete_linking();
 void delete_linking(distance from);
 void load_train_position();
+void save_train_position();

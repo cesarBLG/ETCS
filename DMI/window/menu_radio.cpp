@@ -15,13 +15,13 @@
 #include "../control/control.h"
 #include "../tcp/server.h"
 
-#include <chrono>
 menu_radio::menu_radio() : menu(get_text("RBC data"))
 {
     buttons[0] = new TextButton(get_text("Contact last RBC"), 153, 50);
     buttons[1] = new TextButton(get_text("Use short number"), 153, 50);
     buttons[2] = new TextButton(get_text("Enter RBC data"), 153, 50);
     buttons[3] = new TextButton(get_text("Radio Network ID"), 153, 50);
+    buttons[3]->delayType = true;
     buttons[0]->setPressedAction([this]
     {
         write_command("ContactLastRBC","");
@@ -42,8 +42,15 @@ menu_radio::menu_radio() : menu(get_text("RBC data"))
 }
 void menu_radio::setEnabled(bool contactlast, bool shortno, bool enterdata, bool radionetwork)
 {
+#if SIMRAIL
+    buttons[0]->setEnabled(contactlast);
+    buttons[1]->setEnabled(false);
+    buttons[2]->setEnabled(enterdata);
+    buttons[3]->setEnabled(false);
+#else
     buttons[0]->setEnabled(contactlast);
     buttons[1]->setEnabled(shortno);
     buttons[2]->setEnabled(enterdata);
     buttons[3]->setEnabled(radionetwork);
+#endif
 }

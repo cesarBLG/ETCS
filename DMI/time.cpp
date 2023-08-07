@@ -6,23 +6,33 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <ctime>
 #include "time.h"
-using namespace std;
-tm getTime()
-{
-    time_t t = time(nullptr);
-    return *localtime(&t);
+#include "time_etcs.h"
+#include "platform_runtime.h"
+
+int TimeOffset::offset;
+
+static BasePlatform::DateTime offset_time() {
+    BasePlatform::DateTime clock = platform->get_local_time();
+    int secs = clock.hour * 3600 + clock.minute * 60 + clock.second + TimeOffset::offset;
+    while (secs < 0)
+        secs += 86400;
+    secs %= 86400;
+    clock.hour = secs / 3600;
+    clock.minute = (secs - clock.hour * 3600) / 60;
+    clock.second = secs - clock.hour * 3600 - clock.minute * 60;
+    return clock;
 }
+
 int getHour()
 {
-    return getTime().tm_hour;
+    return offset_time().hour;
 }
 int getMinute()
 {
-    return getTime().tm_min;
+    return offset_time().minute;
 }
 int getSecond()
 {
-    return getTime().tm_sec;
+    return offset_time().second;
 }

@@ -15,6 +15,7 @@
 #include <memory>
 #include <set>
 #include <list>
+#include "platform.h"
 enum struct session_status
 {
     Inactive,
@@ -31,10 +32,13 @@ struct msg_expecting_ack
 };
 class communication_session
 {
-    mobile_terminal *terminal=nullptr;
+    std::shared_ptr<safe_radio_connection> connection=nullptr;
     bool initsent;
     int tried;
     int ntries;
+    PlatformUtil::Promise<std::shared_ptr<euroradio_message>> rx_promise;
+    void message_received(std::shared_ptr<euroradio_message> msg);
+    void update_ack();
     public:
     bool isRBC;
     contact_info contact;
@@ -53,13 +57,14 @@ class communication_session
     void open(int ntries);
     void finalize();
     void close();
-    void send(std::shared_ptr<euroradio_message_traintotrack> msg, bool lock = true);
+    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
     void update();
     void reset_radio()
     {
-        if (terminal != nullptr) {
-            terminal->status = safe_radio_status::Failed;
-            terminal->cv.notify_all();
+        if (connection != nullptr) {
+            radio_status = safe_radio_status::Failed;
+            connection->release();
+            connection = nullptr;
         }
     }
 };
@@ -69,6 +74,7 @@ extern communication_session *handing_over_rbc;
 extern optional<contact_info> rbc_contact;
 extern bool rbc_contact_valid;
 extern bool radio_reaction_applied;
+extern std::map<contact_info, communication_session*> active_sessions;
 void load_contact_info();
 void set_rbc_contact(contact_info contact);
 void update_euroradio();

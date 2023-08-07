@@ -11,7 +11,6 @@
 #include "keyboard.h"
 #include "../tcp/server.h"
 #include "../monitor.h"
-#include <fstream>
 using json = nlohmann::json;
 fixed_train_data_window::fixed_train_data_window(std::string title, bool switchable) : input_window(title, 1, true), SelectType(get_text("Enter\ndata"),60,50), switchable(switchable)
 {

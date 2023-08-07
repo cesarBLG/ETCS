@@ -9,34 +9,19 @@
 #ifndef _TEXTURE_H
 #define _TEXTURE_H
 #include "graphic.h"
-#include <SDL.h>
 #include <functional>
 #include <memory>
-class sdl_texture
-{
-    public:
-    SDL_Texture *tex;
-    int width;
-    int height;
-    sdl_texture(SDL_Texture *tex) : tex(tex) {}
-    ~sdl_texture()
-    {
-        if(tex!=nullptr)
-        {
-            SDL_DestroyTexture(tex);
-            tex = nullptr;
-        }
-    }
-};
+#include "platform.h"
+
 class texture : public graphic
 {
     public:
-    std::shared_ptr<sdl_texture> tex;
+    std::shared_ptr<UiPlatform::Image> tex;
     float width;
     float height;
     float x;
     float y;
     texture() : graphic(TEXTURE){};
-    texture(std::shared_ptr<sdl_texture> tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
+    texture(std::shared_ptr<UiPlatform::Image> tex, float sx, float sy, float x, float y) : graphic(TEXTURE), tex(tex), width(sx), height(sy), x(x), y(y) {}
 };
 #endif

@@ -21,7 +21,7 @@ struct etcs_information
     virtual void handle() {handle_fun();}
     distance ref;
     int64_t timestamp;
-    bool infill;
+    optional<bg_id> infill;
     communication_session *fromRBC;
     int dir;
     bg_id nid_bg;

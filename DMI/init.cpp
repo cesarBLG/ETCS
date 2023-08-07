@@ -6,20 +6,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include <thread>
 #include "monitor.h"
 #include "graphics/drawing.h"
 #include "tcp/server.h"
 #include "control/control.h"
-#include "Settings/settings.h"
-bool running = true;
-void quit()
-{
-    //std::unique_lock<std::mutex> lck(window_mtx);
-    running = false;
-    //window_cv.notify_one();
-    printf("quit\n");
-}
+#include "platform_runtime.h"
 #ifdef __ANDROID__
 #elif defined(_WIN32)
 #include <windows.h>
@@ -119,10 +110,6 @@ LONG WINAPI windows_exception_handler(EXCEPTION_POINTERS * ExceptionInfo)
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
-void sighandler(int sig)
-{
-    quit();
-}
 int addr2line(char const * const program_name, void const * const addr)
 {
     char addr2line_cmd[512] = {0};
@@ -149,21 +136,22 @@ void crash_handler(int sig)
 #endif
 #ifdef __ANDROID__
 #include <jni.h>
-std::string filesDir;
 extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
 {
-    running = false;
+    if (platform)
+        platform->quit();
 }
 #endif
-#include <fstream>
-#include "graphics/text_button.h"
-int main(int argc, char** argv)
+
+void startWindows();
+void initialize_stm_windows();
+
+float platform_size_w = 640.0f, platform_size_h = 480.0f;
+
+void on_platform_ready()
 {
-#ifdef __ANDROID__
-    filesDir = SDL_AndroidGetExternalStoragePath();
-#else
+#ifndef __ANDROID__
 #ifdef __unix__
-    signal(SIGINT, sighandler);
     signal(SIGSEGV, crash_handler);
     signal(SIGABRT, crash_handler);
 #endif
@@ -171,18 +159,16 @@ int main(int argc, char** argv)
 #ifdef _WIN32
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
-    Settings::Init();
+
+    platform->on_quit_request().then([](){
+        platform->quit();
+    }).detach();
+
     setSpeeds(0, 0, 0, 0, 0, 0);
     setMonitor(CSM);
     setSupervision(NoS);
     startSocket();
-    init_video();
-    void startWindows();
     startWindows();
-    void initialize_stm_windows();
     initialize_stm_windows();
-    std::thread tcp(loopSocket);
-    loop_video();
-    tcp.join();
-    return 0;
+    drawing_start();
 }

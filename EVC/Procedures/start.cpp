@@ -46,10 +46,13 @@ void update_SoM()
                 som_status = D2;
             break;
         case D2:
-            if (level_valid && position_valid)
+            if (level_valid && position_valid) {
                 som_status = D3;
-            else
+            } else {
                 som_status = S2;
+                position_valid = false;
+                level_valid = false;
+            }
             break;
         case D3:
             if (level == Level::N2 || level == Level::N3)
@@ -59,8 +62,8 @@ void update_SoM()
             break;
         case D7: {
             bool registered = false;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
@@ -82,15 +85,18 @@ void update_SoM()
             break;
         case S4: {
             bool registered = false;
-            for (mobile_terminal &t : mobile_terminals) {
-                if (t.registered) {
+            bool timeout = true;
+            for (mobile_terminal *t : mobile_terminals) {
+                if (t->registered) {
                     registered = true;
                     break;
                 }
+                if (t->last_register_order && get_milliseconds() - *t->last_register_order < T_network_registration * 1000)
+                    timeout = false;
             }
             if (registered)
                 som_status = A31;
-            else if (true/*TODO: timer elapses*/)
+            else if (timeout)
                 som_status = A29;
             break; }
         case A29:
@@ -109,8 +115,11 @@ void update_SoM()
         case S25:
             break;
         case A31:
-            if (prev_status != A31 && supervising_rbc)
-                supervising_rbc->open(N_tries_radio);
+            if (prev_status != A31) {
+                set_supervising_rbc(*rbc_contact);
+                if (supervising_rbc)
+                    supervising_rbc->open(N_tries_radio);
+            }
             if (!supervising_rbc || supervising_rbc->status != session_status::Establishing)
                 som_status = D31;
             break;

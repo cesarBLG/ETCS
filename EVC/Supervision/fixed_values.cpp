@@ -44,4 +44,5 @@ const int N_message_repetition = 3;
 const double T_message_repetition = 15;
 const double T_keep_session = 300; 
 const double T_connection_status = 45; 
+const double T_network_registration = 40; 
 const double T_disconnect_radio = 60;

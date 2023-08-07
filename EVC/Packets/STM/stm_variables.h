@@ -8,7 +8,6 @@
  */
 #pragma once
 #include "../variables.h"
-#include "../../../DMI/graphics/color.h"
 struct L_CAPTION_t : ETCS_variable
 {
     L_CAPTION_t() : ETCS_variable(6) {}
@@ -187,25 +186,9 @@ struct M_COLOUR_t : ETCS_variable
     {
         invalid.insert(7);
     }
-    Color get_value() const
+    int get_value() const
     {
-        switch (rawdata) {
-            case 0:
-                return White;
-            case 1:
-                return Grey;
-            case 2:
-                return MediumGrey;
-            case 3:
-                return DarkGrey;
-            case 4:
-                return Yellow;
-            case 5:
-                return Orange;
-            case 6:
-                return Red;
-        }
-        return White;
+        return rawdata;
     }
 };
 struct M_XATTRIBUTE_t : ETCS_variable
@@ -379,5 +362,21 @@ struct X_VALUE_t : ETCS_variable
             }
         }
         return text;
+    }
+};
+struct V_STMMAX_t : V_t
+{
+    static const uint32_t NoMaxSpeed = 127;
+};
+struct V_STMSYS_t : V_t
+{
+    static const uint32_t NoSystemSpeed = 127;
+};
+struct D_STMSYS_t : ETCS_variable
+{
+    D_STMSYS_t() : ETCS_variable(15) {}
+    double get_value()
+    {
+        return rawdata * 10;
     }
 };

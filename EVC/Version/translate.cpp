@@ -375,8 +375,8 @@ std::shared_ptr<euroradio_message_traintotrack> translate_message(std::shared_pt
                 mode.rawdata = 3;
         }
     }
-    trans->NID_ENGINE = trans->NID_ENGINE;
-    trans->T_TRAIN = trans->T_TRAIN;
+    trans->NID_ENGINE = message->NID_ENGINE;
+    trans->T_TRAIN = message->T_TRAIN;
     auto packs = message->optional_packets;
     trans->optional_packets.clear();
     for (auto &p : packs) {

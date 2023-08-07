@@ -18,6 +18,8 @@
 #include "../Packets/STM/13.h"
 #include "../Packets/STM/14.h"
 #include "../Packets/STM/15.h"
+#include "../Packets/STM/16.h"
+#include "../Packets/STM/17.h"
 #include "../Packets/STM/30.h"
 #include "../Packets/STM/128.h"
 #include "../Packets/STM/129.h"
@@ -36,7 +38,8 @@ std::map<int, int> ntc_to_stm;
 std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
 bool stm_control_EB = false;
 bool ntc_unavailable_msg = false;
-extern ORserver::POSIXclient *s_client;
+int STM_max_speed_ntc;
+void sim_write_line(const std::string &str);
 struct stm_transition
 {
     stm_state from;
@@ -306,6 +309,10 @@ void stm_level_change(level_information newlevel, bool driver)
     if (newlevel.level != Level::NTC || nid_ntc != newlevel.nid_ntc)
         ntc_to_stm.erase(nid_ntc);
 
+    if (level == Level::NTC && nid_ntc == STM_max_speed_ntc && (newlevel.level != Level::NTC || newlevel.nid_ntc != STM_max_speed_ntc)) {
+        STM_max_speed = {};
+    }
+
     stm_message msg;
     auto *stat = new ETCSStatusData();
     stat->M_LEVEL.set_value(level);
@@ -330,6 +337,10 @@ void stm_level_transition_received(level_transition_information info)
                 stm1->trigger_condition("J4a");
             }
         }
+    }
+    if (!ongoing_transition || ongoing_transition->leveldata.level != Level::NTC || info.leveldata.level != Level::NTC || info.leveldata.nid_ntc != ongoing_transition->leveldata.nid_ntc) {
+        STM_max_speed = {};
+        STM_system_speed = {};
     }
 }
 void stm_object::report_trip()
@@ -377,7 +388,7 @@ void stm_object::send_message(stm_message *msg)
     msg->NID_STM.rawdata = nid_stm;
     bit_manipulator w;
     msg->write_to(w);
-    s_client->WriteLine("noretain(stm::command_etcs="+w.to_base64()+")");
+    sim_write_line("noretain(stm::command_etcs="+w.to_base64()+")");
 }
 void send_failed_msg(stm_object *stm)
 {
@@ -391,9 +402,16 @@ void request_STM_max_speed(stm_object *stm, double speed)
         if (stm->state == stm_state::HS && stm == get_stm(ongoing_transition->leveldata.nid_ntc)) {
             auto info = std::shared_ptr<etcs_information>(new etcs_information(8));
             info->handle_fun = [speed]() {
-                STM_max_speed = speed_restriction(speed, ongoing_transition->start, distance(std::numeric_limits<double>::max(), 0, 0), false);
+                if (speed == -1) {
+                    STM_max_speed = {};
+                } else {
+                    STM_max_speed = speed_restriction(speed, ongoing_transition->start, distance(std::numeric_limits<double>::max(), 0, 0), false);
+                    STM_max_speed_ntc = ongoing_transition->leveldata.nid_ntc;
+                }
                 recalculate_MRSP();
             };
+            info->infill = {};
+            info->timestamp = get_milliseconds();
             std::list<std::shared_ptr<etcs_information>> msg = {info};
             if (mode_filter(info, msg))
                 info->handle();
@@ -409,9 +427,14 @@ void request_STM_system_speed(stm_object *stm, double speed, double dist)
             distance start = ongoing_transition->start - dist;
             distance end = ongoing_transition->start;
             info->handle_fun = [speed, start, end]() {
-                STM_system_speed = speed_restriction(speed, start, end, false);
+                if (speed == -1)
+                    STM_system_speed = {};
+                else
+                    STM_system_speed = speed_restriction(speed, start, end, false);
                 recalculate_MRSP();
             };
+            info->infill = {};
+            info->timestamp = get_milliseconds();
             std::list<std::shared_ptr<etcs_information>> msg = {info};
             if (mode_filter(info, msg))
                 info->handle();
@@ -510,10 +533,17 @@ void update_stm_control()
             stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && !STM_max_speed) {
+    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && (!STM_max_speed || STM_max_speed->get_speed() > 0)) {
         stm = get_stm(ongoing_transition->leveldata.nid_ntc);
         if (stm != nullptr && !stm->available())
             request_STM_max_speed(stm, 0);
+    }
+    if (!ongoing_transition)
+        STM_system_speed = {};
+    if (level == Level::NTC && nid_ntc == STM_max_speed_ntc) {
+        stm = get_stm(nid_ntc);
+        if (stm == nullptr || stm->state == stm_state::DA || stm->state == stm_state::FA)
+            STM_max_speed = {};
     }
 }
 void stm_send_train_data()
@@ -653,6 +683,24 @@ void handle_stm_message(const stm_message &msg)
             case 15:
                 stm->report_received((stm_state)((STMStateReport*)pack.get())->NID_STMSTATE.rawdata);
                 break;
+            case 16:
+            {
+                auto &max = *((STMMaxSpeed*)pack.get());
+                if (level != Level::NTC || stm != get_stm(nid_ntc)) {
+                    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && stm == get_stm(ongoing_transition->leveldata.nid_ntc))
+                        request_STM_max_speed(stm, max.V_STMMAX == V_STMMAX_t::NoMaxSpeed ? -1 : max.V_STMMAX.get_value());
+                }
+                break;
+            }
+            case 17:
+            {
+                auto &sys = *((STMSystemSpeed*)pack.get());
+                if (level != Level::NTC) {
+                    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && stm == get_stm(ongoing_transition->leveldata.nid_ntc))
+                        request_STM_system_speed(stm, sys.V_STMSYS == V_STMSYS_t::NoSystemSpeed ? -1 : sys.V_STMSYS.get_value(), sys.D_STMSYS.get_value());
+                }
+                break;
+            }
             case 18:
                 stm->report_trip();
                 break;

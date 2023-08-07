@@ -153,6 +153,11 @@ struct track_condition_big_metal_information : etcs_information
     track_condition_big_metal_information() : etcs_information(35,37) {}
     void handle() override;
 };
+struct trip_exit_acknowledge_information : etcs_information
+{
+    trip_exit_acknowledge_information() : etcs_information(37,39) {}
+    void handle() override;
+};
 struct ma_shortening_information : etcs_information
 {
     ma_shortening_information() : etcs_information(39,41) {}

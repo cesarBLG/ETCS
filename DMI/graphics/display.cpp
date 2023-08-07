@@ -17,10 +17,9 @@ using namespace std;
 unordered_set<window*> active_windows;
 unordered_set<window*> old_windows;
 extern Mode mode;
-#include <iostream>
 void displayETCS()
 {
-    if (mode == Mode::SL || mode == Mode::NP || mode == Mode::IS || mode == Mode::PS)
+    if (mode == Mode::SL || mode == Mode::NP || mode == Mode::PS)
     {
         return;
     }
