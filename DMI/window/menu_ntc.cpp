@@ -12,18 +12,16 @@ menu_ntc::menu_ntc(std::vector<std::string> stms) : menu(get_text("NTC data entr
 {
     for (int i=0; i<stms.size(); i++)
     {
-        buttons[i] = new TextButton(stms[i], 153, 50);
-        buttons[i]->setPressedAction([stms,i]
-        { 
-            write_command("STM",stms[i]);
-        });
+        entries[i] = {stms[i], "", [stms,i]
+        {
+            write_command("STM", stms[i]);
+        }, false};
     }
-    buttons[9] = new TextButton(get_text("End of data entry"), 153, 50);
-    buttons[9]->setPressedAction([this]
-    { 
+    entries[9] = {get_text("End of data entry"), "", []
+    {
         write_command("EndDataEntry","");
-    });
-    setLayout();
+    }, false};
+    buildMenu();
 }
 void menu_ntc::setEnabled(json &enabled)
 {

@@ -17,28 +17,23 @@
 
 menu_radio::menu_radio() : menu(get_text("RBC data"))
 {
-    buttons[0] = new TextButton(get_text("Contact last RBC"), 153, 50);
-    buttons[1] = new TextButton(get_text("Use short number"), 153, 50);
-    buttons[2] = new TextButton(get_text("Enter RBC data"), 153, 50);
-    buttons[3] = new TextButton(get_text("Radio Network ID"), 153, 50);
-    buttons[3]->delayType = true;
-    buttons[0]->setPressedAction([this]
+    entries[0] = {get_text("Contact last RBC"), "", []
     {
         write_command("ContactLastRBC","");
-    });
-    buttons[1]->setPressedAction([this] 
+    }, false};
+    entries[1] = {get_text("Use short number"), "", []
     {
         write_command("UseShortNumber","");
-    });
-    buttons[2]->setPressedAction([this] 
+    }, false};
+    entries[2] = {get_text("Enter RBC data"), "", []
     {
         write_command("EnterRBCdata","");
-    });
-    buttons[3]->setPressedAction([this] 
+    }, false};
+    entries[3] = {get_text("Radio Network ID"), "", []
     {
         write_command("RadioNetworkID","");
-    });
-    setLayout();
+    }, true};
+    buildMenu();
 }
 void menu_radio::setEnabled(bool contactlast, bool shortno, bool enterdata, bool radionetwork)
 {

@@ -12,12 +12,12 @@
 #include "keyboard.h"
 #include "platform_runtime.h"
 input_data::input_data(std::string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
-data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", 102, 50)
+data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", softkeys ? 64 : 102, 50), enter_button("symbols/Navigation/NA_20.bmp", 40, 64, nullptr, "symbols/Navigation/NA_20.bmp")
 {
     holdcursor = {0};
     if(label!="")
     {
-        label_comp = new Component(204,50);
+        label_comp = new Component(softkeys ? 164 : 204,50);
         data_comp = new Button(102,50);
         if (show_echo)
         {
@@ -25,7 +25,7 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
             data_echo = new Component(100,16);
         }
     }
-    else data_comp = new Button(204+102,50);
+    else data_comp = new Button((softkeys ? 164 : 204)+102,50);
 #if SIMRAIL
     data_tex = data_comp->getText(getFormattedData(data), 10, 0, 12, selected ? Black : (accepted ? White : DarkGrey), LEFT);
 #else
@@ -130,10 +130,15 @@ void input_data::updateText()
 }
 input_data::~input_data()
 {
-    for(int i=0; i<keys.size(); i++)
+    for(auto *comp : keybd.keys)
     {
-        if (keys[i]!=nullptr) delete keys[i];
+        if (comp != nullptr) delete comp;
     }
+    for(auto *comp : keybd.labels)
+    {
+        if (comp != nullptr) delete comp;
+    }
+    if (keybd.del != nullptr) delete keybd.del;
     if(label_comp!=nullptr) delete label_comp;
     if(data_comp!=nullptr) delete data_comp;
     if(label_echo!=nullptr) delete label_echo;

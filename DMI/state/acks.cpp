@@ -23,6 +23,7 @@ Component c4(37, 50, nullptr);
 Component c1(58, 50, dispAcks);
 Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
+Component ackButton(40, 64);
 extern Component c9;
 extern Component textArea;
 bool prevAck = false;
@@ -143,6 +144,14 @@ void updateAcks()
         }
         AllowedAck = type;
         if (AllowedAck == AckType::Message) updateMessages();
+        if (componentAck != nullptr)
+        {
+            ackButton.delayType = componentAck->delayType;
+            ackButton.setAck([] {
+                if (componentAck != nullptr) componentAck->setPressed();
+            });
+            ackButton.addImage("symbols/Driver Request/DR_04.bmp");
+        }
     }
     if (level_announce)
     {
@@ -153,7 +162,12 @@ void updateAcks()
         }
     }
     else if (levelAck == 1) levelAck = 0;
-    if (AllowedAck == AckType::None) componentAck = nullptr;
+    if (AllowedAck == AckType::None && componentAck != nullptr)
+    {
+        ackButton.clear();
+        ackButton.setAck(nullptr);
+        componentAck = nullptr;
+    }
 }
 void setAck(AckType type, int id, bool ack)
 {

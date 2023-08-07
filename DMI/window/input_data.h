@@ -13,6 +13,7 @@
 #include "../graphics/button.h"
 #include "../graphics/text_button.h"
 #include "../graphics/icon_button.h"
+#include "keyboard.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 class input_window;
@@ -46,7 +47,8 @@ class input_data
     void setAccepted(bool val);
     bool isAccepted() {return accepted;}
     IconButton more;
-    std::vector<Button*> keys;
+    IconButton enter_button;
+    keyboard keybd;
     int keypage=0;
     input_data(std::string label_text="", bool echo=true);
     std::function<std::string()> data_get;

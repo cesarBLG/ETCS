@@ -19,53 +19,37 @@
 
 menu_main::menu_main() : menu(get_text("Main"))
 {
-    buttons[0] = new TextButton(get_text("Start"), 153, 50);
-    buttons[1] = new TextButton(get_text("Driver ID"), 153, 50);
-    buttons[2] = new TextButton(get_text("Train Data"), 153, 50);
-    buttons[4] = new TextButton(get_text("Level"), 153, 50);
-    buttons[5] = new TextButton(get_text("Train running number"), 153, 50);
-    buttons[6] = new TextButton(mode == Mode::SH ? get_text("Exit Shunting") : get_text("Shunting"), 153, 50);
-    buttons[7] = new TextButton(get_text("Non-Leading"), 153, 50);
-    buttons[8] = new TextButton(get_text("Maintain shunting"), 153, 50);
-    buttons[9] = new TextButton(get_text("Radio data"), 153, 50);
-    buttons[6]->delayType = true;
-    buttons[0]->setPressedAction([this]
+    entries[0] = {get_text("Start"), "", []
     {
         write_command("Start","");
-    });
-    buttons[1]->setPressedAction([this] 
+    }, false};
+    entries[1] = {get_text("Driver ID"), "", []
     {
         write_command("DriverID","");
-    });
-    buttons[2]->setPressedAction([this] 
+    }, false};
+    entries[2] = {get_text("Train Data"), "", []
     {
         write_command("TrainData","");
-    });
-    buttons[4]->setPressedAction([this] 
+    }, false};
+    entries[4] = {get_text("Level"), "", []
     {
         write_command("Level","");
-    });
-    buttons[5]->setPressedAction([this] 
+    }, false};
+    entries[5] = {get_text("Train running number"), "", []
     {
         write_command("TrainRunningNumber","");
-    });
-    buttons[6]->setPressedAction([this]
+    }, false};
+    entries[6] = {mode == Mode::SH ? get_text("Exit Shunting") : get_text("Shunting"), "", []
     {
         write_command("Shunting","");
-    });
-    buttons[7]->setPressedAction([this]
-    { 
-        
-    });
-    buttons[8]->setPressedAction([this]
-    { 
-        
-    });
-    buttons[9]->setPressedAction([this]
-    { 
+    }, true};
+    entries[7] = {get_text("Non-Leading"), "", nullptr, false};
+    entries[8] = {get_text("Maintain shunting"), "", nullptr, false};
+    entries[9] = {get_text("Radio data"), "", []
+    {
         write_command("RadioData","");
-    });
-    setLayout();
+    }, false};
+    buildMenu();
 }
 void menu_main::setEnabled(bool start, bool driverid, bool traindata, bool level, bool trn, bool sh, bool nl, bool maintainsh, bool radiodata)
 {

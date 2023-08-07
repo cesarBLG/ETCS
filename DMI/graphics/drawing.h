@@ -15,5 +15,6 @@
 #define LEFT 2
 #define UP 4
 #define DOWN 8
+extern bool softkeys;
 void drawing_start();
 #endif

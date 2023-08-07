@@ -6,42 +6,98 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include "keyboard.h"
+#include "keyboards.h"
 #include "../language/language.h"
 #include "platform_runtime.h"
-std::vector<Button*> getNumericKeyboard(input_data *input)
+Button *delButton(input_data *input)
+{
+    Button *del = new IconButton("symbols/Navigation/NA_21.bmp", softkeys ? 40 : 102, softkeys ? 64 : 50, nullptr);
+    del->upType = false;
+    del->setPressedAction([input]
+    {
+        std::string s = input->keybd_data;
+        s = s.substr(0, s.size()-1);
+        input->setData(s);
+    });
+    return del;
+}
+keyboard getNumericKeyboard(input_data *input)
 {
     input->character_separation = true;
-    std::vector<Button*> keys;
-    for(int i=0; i<9; i++)
+    keyboard k;
+    std::vector<Button*> &keys = k.keys;
+    bool enhanced = false;
+    keys.push_back(new TextButton(softkeys && enhanced ? "1 ." : "1", softkeys ? 64 : 102, 50, nullptr, 16));
+    for(int i=1; i<9; i++)
     {
-        keys.push_back(new TextButton(std::to_string(i+1), 102, 50, nullptr, 16));
+        keys.push_back(new TextButton(std::to_string(i+1), softkeys ? 64 : 102, 50, nullptr, 16));
     }
-    keys.push_back(new IconButton("symbols/Navigation/NA_21.bmp", 102, 50, nullptr));
-    keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
-    keys.push_back(new TextButton(".", 102, 50));
-    for(int i=0; i<12; i++)
+    if (softkeys) k.del = delButton(input);
+    else keys.push_back(delButton(input));
+    keys.push_back(new TextButton("0", softkeys ? 64 : 102, 50, nullptr, 16));
+    if (!softkeys)
+    {
+        keys.push_back(new TextButton(".", 102, 50));
+        keys.back()->setEnabled(enhanced);
+    }
+    for(int i=0; i<keys.size(); i++)
     {
         keys[i]->upType = false;
-        keys[i]->setPressedAction([i, input]
+        if (softkeys)
         {
-            std::string s = input->keybd_data;
-            //if(i<11 && s=="0") s = "";
-            if(i<9) s = s + std::to_string(i+1);
-            if(i==9) s = s.substr(0, s.size()-1);
-            if(i==10) s = s + "0";
-            input->setData(s);
-        });
+            keys[i]->setPressedAction([i, input, enhanced]
+            {
+                std::string s = input->keybd_data;
+                int64_t now = platform->get_timer();
+                if (i==0 && enhanced)
+                {
+                    bool replaced = false;
+                    if (now - input->holdcursor<2000)
+                    {
+                        char lc = s[s.size()-1];
+                        if (lc == '1') lc = '.';
+                        else if (lc == '.') lc = '1';
+                        if (lc!=s[s.size()-1])
+                        {
+                            replaced = true;
+                            s[s.size()-1] = lc;
+                        }
+                    }
+                    if (!replaced)
+                    {
+                        s = s + std::to_string(i+1);
+                    }
+                }
+                else if(i<9) s = s + std::to_string(i+1);
+                else if (i==9) s = s + "0";
+                if (i == 0 && enhanced) input->holdcursor = now;
+                else input->holdcursor = {0};
+                input->setData(s);
+            });
+        }
+        else
+        {
+            keys[i]->setPressedAction([i, input]
+            {
+                std::string s = input->keybd_data;
+                //if(i<11 && s=="0") s = "";
+                if(i<9) s = s + std::to_string(i+1);
+                if(i==9) s = s.substr(0, s.size()-1);
+                if(i==10) s = s + "0";
+                input->setData(s);
+            });
+        }
     }
-    return keys;
+    return k;
 }
-std::vector<Button*> getAlphaNumericKeyboard(input_data *input)
+keyboard getAlphaNumericKeyboard(input_data *input)
 {
     input->character_separation = true;
-    std::vector<Button*> keys;
+    keyboard k;
+    std::vector<Button*> &keys = k.keys;
     for(int i=0; i<9; i++)
     {
-        keys.push_back(new Button(102, 50, nullptr, nullptr));
+        keys.push_back(new Button(softkeys ? 64 : 102, 50, nullptr, nullptr));
     }
     keys[0]->addText("1",0,0,16);
     keys[1]->addText("2",-15,0,16);
@@ -60,16 +116,20 @@ std::vector<Button*> getAlphaNumericKeyboard(input_data *input)
     keys[7]->addText("tuv",4,0,10);
     keys[8]->addText("9",-15,0,16);
     keys[8]->addText("wxyz",10,0,10);
-    keys.push_back(new IconButton("symbols/Navigation/NA_21.bmp", 102, 50, nullptr));
-    keys.push_back(new TextButton("0", 102, 50, nullptr, 16));
-    keys.push_back(new TextButton(".", 102, 50, nullptr));
-    for(int i=0; i<12; i++)
+    if (softkeys) k.del = delButton(input);
+    else keys.push_back(delButton(input));
+    keys.push_back(new TextButton("0", softkeys ? 64 : 102, 50, nullptr, 16));
+    if (!softkeys)
+    {
+        keys.push_back(new TextButton(".", 102, 50, nullptr));
+        keys.back()->setEnabled(false);
+    }
+    for(int i=0; i<keys.size(); i++)
     {
         keys[i]->upType = false;
         keys[i]->setPressedAction([input, i]
         {
             std::string data = input->keybd_data;
-            //if(i<11 && data=="0") data = "";
             int64_t now = platform->get_timer();
             bool replaced = false;
             if (now - input->holdcursor<2000)
@@ -142,38 +202,47 @@ std::vector<Button*> getAlphaNumericKeyboard(input_data *input)
             if (!replaced)
             {
                 if(i<9) data = data + std::to_string(i+1);
-                if(i==9) data = data.substr(0, data.size()-1);
-                if(i==10) data = data + "0";
+                else if(i==9 && !softkeys) data = data.substr(0, data.size()-1);
+                else data = data + "0";
             }
             if (i!=0 && i!=9 && i!=10 && i!= 11) input->holdcursor = now;
             else input->holdcursor = {0};
             input->setData(data);
         });
     }
-    return keys;
+    return k;
 }
-std::vector<Button*> getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_data *input)
+keyboard getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_data *input)
 {
-    std::vector<Button*> keys;
+    keyboard k;
     for(int i=0; i<posibilities.size(); i++)
     {
-        keys.push_back(new TextButton(posibilities[i], 102, 50));
-        keys[i]->upType = false;
-        keys[i]->setPressedAction([input, i, posibilities]
+        if (softkeys)
+        {
+            std::string id = std::to_string(posibilities.size() > 10 ? ((i%9)+1) : i);
+            Component *label = new Component(266, 24);
+            label->addText(id + " - " + posibilities[i], 15, 0, 12, White, LEFT);
+            k.labels.push_back(label);
+            k.keys.push_back(new TextButton(id, 64, 50, nullptr, 16));
+        }
+        else k.keys.push_back(new TextButton(posibilities[i], 102, 50));
+        k.keys[i]->upType = false;
+        k.keys[i]->setPressedAction([input, i, posibilities]
         {
             input->setData(posibilities[i]);
         });
     }
-    return keys;
+    return k;
 }
-std::vector<Button*> getYesNoKeyboard(input_data *input)
+keyboard getYesNoKeyboard(input_data *input)
 {
-    std::vector<Button*> keys;
+    keyboard k;
+    std::vector<Button*> &keys = k.keys;
     for (int i=0; i<12; i++) {
         keys.push_back(nullptr);
     }
-    keys[6] = new TextButton(get_text("No"), 102, 50);
-    keys[7] = new TextButton(get_text("Yes"), 102, 50);
+    keys[6] = new TextButton(get_text("No"), softkeys ? 64 : 102, 50);
+    keys[7] = new TextButton(get_text("Yes"), softkeys ? 64 : 102, 50);
     keys[6]->setPressedAction([input]
     {
         input->setData(get_text("No"));
@@ -184,14 +253,14 @@ std::vector<Button*> getYesNoKeyboard(input_data *input)
     });
     keys[6]->upType = false;
     keys[7]->upType = false;
-    return keys;
+    return k;
 }
-std::vector<Button*> getKeyboard(const json &j, input_data *input)
+keyboard getKeyboard(const json &j, input_data *input)
 {
     std::string type = j["Type"].get<std::string>();
     if (type == "Alphanumeric") return getAlphaNumericKeyboard(input);
     else if (type == "Numeric") return getNumericKeyboard(input);
     else if (type == "YesNo") return getYesNoKeyboard(input);
     else if (type == "Dedicated") return getSingleChoiceKeyboard(j["Keys"].get<std::vector<std::string>>(), input);
-    return std::vector<Button*>();
+    return keyboard();
 }

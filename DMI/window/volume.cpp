@@ -16,7 +16,8 @@ volume_window::volume_window() : input_window("Volume", 1, false)
     inputs[0] = new input_data("", false);
     inputs[0]->data = std::to_string(vol_orig);
     inputs[0]->setAccepted(true);
-    std::vector<Button*> keys;
+    keyboard k;
+    std::vector<Button*> &keys = k.keys;
     for (int i=0; i<12; i++) {
         keys.push_back(nullptr);
     }
@@ -42,7 +43,7 @@ volume_window::volume_window() : input_window("Volume", 1, false)
     });
     keys[0]->upType = false;
     keys[2]->upType = false;
-    inputs[0]->keys = keys;
+    inputs[0]->keybd = k;
     exit_button.setPressedAction([this, vol_orig]
     {
         platform->set_volume(vol_orig);

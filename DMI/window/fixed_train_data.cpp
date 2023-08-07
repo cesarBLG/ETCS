@@ -12,14 +12,35 @@
 #include "../tcp/server.h"
 #include "../monitor.h"
 using json = nlohmann::json;
-fixed_train_data_window::fixed_train_data_window(std::string title, bool switchable) : input_window(title, 1, true), SelectType(get_text("Enter\ndata"),60,50), switchable(switchable)
+fixed_train_data_window::fixed_train_data_window(std::string title, bool switchable) : input_window(title, 1, true), SelectType(softkeys ? 64 : 60,50), softSelectType(get_text("Enter\ndata"), 64, 50), switchable(switchable)
 {
+    if (softkeys)
+    {
+        SelectType.addText(get_text("Enter\ndata"), 0, 0, 12, Black);
+        SelectType.setBackgroundColor(MediumGrey);
+        SelectType.showBorder = false;
+    }
+    else
+    {
+        SelectType.addText(get_text("Enter\ndata"));
+    }
     SelectType.setPressedAction([this]() {
+        write_command("EnterData", "");
+    });
+    softSelectType.setPressedAction([this]() {
         write_command("EnterData", "");
     });
 }
 void fixed_train_data_window::setLayout()
 {
     input_window::setLayout();
-    if (switchable) addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
+    if (switchable)
+    {
+        if (softkeys)
+        {
+            addToLayout(&SelectType, new RelativeAlignment(nullptr, 334+178,380,0));
+            if (cursor == -1) addToLayout(&softSelectType, new ConsecutiveAlignment(&SelectType, DOWN, 0));
+        }
+        else addToLayout(&SelectType, new RelativeAlignment(&exit_button, 246+30,25,0));
+    }
 }

@@ -19,6 +19,7 @@
 #include "../softkeys/softkey.h"
 #include "platform_runtime.h"
 
+bool softkeys=true;
 void update_stm_windows();
 UiPlatform::InputEvent last_event = {UiPlatform::InputEvent::Action::Release, 0, 0};
 void process_input(UiPlatform::InputEvent ev)

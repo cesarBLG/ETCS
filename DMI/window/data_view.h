@@ -19,11 +19,12 @@ class data_view_window : public subwindow
     void setLayout() override
     {
         clearLayout();
+        int offset = softkeys ? 0 : 15;
         for (int i=(current_page-1)*10; i<components.size()/2 && i<current_page*10; i++)
         {
             if (components[2*i] == nullptr) continue;
-            addToLayout(components[2*i], new RelativeAlignment(nullptr, 320+104, 15+62+(i%10)*16, 0));
-            addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+204, 15+62+(i%10)*16, 0));
+            addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*16, 0));
+            addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*16, 0));
         }
         subwindow::setLayout();
     }
@@ -33,10 +34,10 @@ class data_view_window : public subwindow
         for (int i=0; i<data.size(); i++)
         {
             int rows = data[i].first.find('\n') != std::string::npos ? 2 : 1;
-            Component *c1 = new Component(100,16*rows);
-            Component *c2 = new Component(100,16);
+            Component *c1 = new Component(softkeys ? 176 : 204, 16*rows);
+            Component *c2 = new Component(softkeys ? 104 : 116, 16);
             c1->addText(data[i].first, 5, 0, 12, White, RIGHT);
-            c2->addText(data[i].second, 4, 0, 12, White, LEFT);
+            c2->addText(data[i].second, 5, 0, 12, White, LEFT);
             components.push_back(c1);
             components.push_back(c2);
             for (int j=0; j<(rows-2)*2; j++) components.push_back(nullptr);

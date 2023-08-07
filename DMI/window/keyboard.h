@@ -11,20 +11,10 @@
 #include <vector>
 #include <string>
 #include "../graphics/button.h"
-#include "input_data.h"
 struct keyboard
 {
     std::vector<Button*> keys;
-    enum keyboard_type
-    {
-        NumericKeyboard,
-        AlphaNumericKeyboard,
-        DedicatedKeyboard
-    } type;
+    std::vector<Component*> labels;
+    Button* del = nullptr;
 };
-std::vector<Button*> getNumericKeyboard(input_data *input);
-std::vector<Button*> getAlphaNumericKeyboard(input_data *input);
-std::vector<Button*> getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_data *input);
-std::vector<Button*> getYesNoKeyboard(input_data *input);
-std::vector<Button*> getKeyboard(const json &j, input_data *input);
 #endif

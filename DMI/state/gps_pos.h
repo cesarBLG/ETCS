@@ -8,9 +8,10 @@
  */
 #ifndef _GPS_POS_H
 #define _GPS_POS_H
-#include "../graphics/component.h"
+#include "../graphics/icon_button.h"
 extern double pk;
 extern Component gps_pos;
+extern Button gpsButton;
 void display_gps();
 #endif
 

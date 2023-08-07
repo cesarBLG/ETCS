@@ -9,15 +9,24 @@
 #ifndef _MENU_H
 #define _MENU_H
 #include "subwindow.h"
+struct text_menu_entry
+{
+    std::string label;
+    std::string icon;
+    std::function<void()> pressed;
+    bool delay;
+};
 class menu : public subwindow
 {
     protected:
-    Button *empty_button[10];
     Component *hourGlass=nullptr;
     Button* buttons[10];
+    Component* labels[10];
+    std::map<int,text_menu_entry> entries;
     public:
     menu(std::string title);
     ~menu();
+    void buildMenu();
     void setLayout() override;
     void setHourGlass(bool show);
 };

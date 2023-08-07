@@ -7,7 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "gps_pos.h"
-Component gps_pos(120,50,display_gps);
+Component gps_pos(120,softkeys ? 30 : 50,display_gps);
+Button gpsButton(64, 50);
 static bool show_pos = true;
 int prevkm=-1;
 int prevm=-1;
@@ -23,13 +24,20 @@ void display_gps()
     prevpk = pk;
     if (changed) {
         gps_pos.clear();
+        gpsButton.clear();
         if (pk < 0) {
             gps_pos.setBackgroundColor(DarkBlue);
             gps_pos.setPressedAction(nullptr);
+            gpsButton.setPressedAction(nullptr);
+            gpsButton.setEnabled(false);
         } else {
-            gps_pos.setPressedAction([]() {show_pos = !show_pos; prevpk = -1;});
+            auto action = []() {show_pos = !show_pos; prevpk = -1;};
+            gps_pos.setPressedAction(action);
+            gpsButton.setPressedAction(action);
+            gpsButton.setEnabled(true);
+            gpsButton.addImage("symbols/Driver Request/DR_03.bmp");
             if (!show_pos) {
-                gps_pos.addImage("symbols/Driver Request/DR_03.bmp");
+                if (!softkeys) gps_pos.addImage("symbols/Driver Request/DR_03.bmp");
                 gps_pos.setBackgroundColor(DarkBlue);
             } else {
                 std::string tm = std::to_string(m/100)+std::to_string((m/10)%10)+std::to_string(m%10);

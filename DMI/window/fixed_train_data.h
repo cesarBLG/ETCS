@@ -14,7 +14,8 @@ class fixed_train_data_window : public input_window
 {
     bool switchable;
     public:
-    TextButton SelectType;
+    Button SelectType;
+    TextButton softSelectType;
     fixed_train_data_window(std::string title, bool switchable);
     void setLayout() override;
 };

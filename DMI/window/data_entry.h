@@ -16,10 +16,13 @@ using json = nlohmann::json;
 class input_window : public subwindow
 {
     TextButton button_yes;
+    TextButton softYes;
     Button* empty_button[12];
-    int cursor=0;
+    IconButton down_button;
+    IconButton up_button;
     int nfields;
     protected:
+    int cursor=0;
     Component confirmation_label;
     std::map<int, input_data*> inputs;
     Button* buttons[12];

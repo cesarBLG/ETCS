@@ -10,23 +10,19 @@
 #include "../tcp/server.h"
 menu_spec::menu_spec() : menu(get_text("Special"))
 {
-    buttons[0] = new TextButton(get_text("Adhesion"), 153, 50);
-    buttons[1] = new TextButton(get_text("SR Speed/Distance"), 153, 50);
-    buttons[2] = new TextButton(get_text("Train integrity"), 153, 50);
-    buttons[2]->delayType = true;
-    buttons[0]->setPressedAction([this]
+    entries[0] = {get_text("Adhesion"), "", []
     {
         write_command("Adhesion","");
-    });
-    buttons[1]->setPressedAction([this] 
+    }, false};
+    entries[1] = {get_text("SR Speed/Distance"), "", []
     {
         write_command("SRspeed","");
-    });
-    buttons[2]->setPressedAction([this] 
+    }, false};
+    entries[2] = {get_text("Train integrity"), "", []
     {
         write_command("TrainIntegrity","");
-    });
-    setLayout();
+    }, false};
+    buildMenu();
 }
 void menu_spec::setEnabled(bool adhesion, bool sr, bool integrity)
 {

@@ -10,37 +10,31 @@
 #include "../tcp/server.h"
 menu_settings::menu_settings() : menu(get_text("Settings"))
 {
-    buttons[0] = new IconButton("symbols/Setting/SE_03.bmp", 153, 50);
-    buttons[1] = new IconButton("symbols/Setting/SE_02.bmp", 153, 50);
-    buttons[2] = new IconButton("symbols/Setting/SE_01.bmp", 153, 50);
-    buttons[3] = new TextButton(get_text("System version"), 153, 50);
-    buttons[4] = new TextButton(get_text("Set VBC"), 153, 50);
-    buttons[5] = new TextButton(get_text("Remove VBC"), 153, 50);
-    buttons[0]->setPressedAction([this]
+    entries[0] = {get_text("Language"), "symbols/Setting/SE_03.bmp", []
     {
         write_command("Language","");
-    });
-    buttons[1]->setPressedAction([this] 
+    }, false};
+    entries[1] = {get_text("Volume"), "symbols/Setting/SE_02.bmp", []
     {
         write_command("Volume","");
-    });
-    buttons[2]->setPressedAction([this] 
+    }, false};
+    entries[2] = {get_text("Brightness"), "symbols/Setting/SE_01.bmp", []
     {
         write_command("Brightness","");
-    });
-    buttons[3]->setPressedAction([this] 
+    }, false};
+    entries[3] = {get_text("System version"), "", []
     {
         write_command("SystemVersion","");
-    });
-    buttons[4]->setPressedAction([this] 
+    }, false};
+    entries[4] = {get_text("Set VBC"), "", []
     {
         write_command("SetVBC","");
-    });
-    buttons[5]->setPressedAction([this] 
+    }, false};
+    entries[5] = {get_text("Remove VBC"), "", []
     {
         write_command("RemoveVBC","");
-    });
-    setLayout();
+    }, false};
+    buildMenu();
 };
 void menu_settings::setEnabled(bool language, bool volume, bool brightness, bool version, bool setvbc, bool removevbc)
 {

@@ -8,8 +8,8 @@
  */
 #include "subwindow.h"
 #include "../tcp/server.h"
-subwindow::subwindow(std::string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", 82, 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", 82,50, nullptr, "symbols/Navigation/NA_19.bmp"),
-    next_button("symbols/Navigation/NA_17.bmp", 82,50, nullptr, "symbols/Navigation/NA_18.2.bmp"), title_bar(full ? 334 : 306,24), page_count(npages)
+subwindow::subwindow(std::string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_19.bmp"),
+    next_button("symbols/Navigation/NA_17.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_18.2.bmp"), title_bar(full ? 334 : (softkeys ? 266 : 306) ,24), page_count(npages)
 {
     title_bar.setBackgroundColor(Black);
     exit_button.setPressedAction([this]
@@ -46,13 +46,23 @@ void subwindow::updatePage(int num)
 }
 void subwindow::setLayout()
 {
-    extern IconButton downArrow;
-    if(fullscreen) addToLayout(&title_bar, new RelativeAlignment(nullptr,0,15,0));
-    else addToLayout(&title_bar, new RelativeAlignment(nullptr,334,15,0));
-    addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));
-    if (page_count > 1)
+    int offset = softkeys ? 0 : 15;
+    if(fullscreen) addToLayout(&title_bar, new RelativeAlignment(nullptr,0,offset,0));
+    else addToLayout(&title_bar, new RelativeAlignment(nullptr,334,offset,0));
+    if (softkeys)
     {
-        addToLayout(&prev_button, new ConsecutiveAlignment(&exit_button, RIGHT, 0));
-        addToLayout(&next_button, new ConsecutiveAlignment(&prev_button, RIGHT, 0));
+        if (current_page == 1) addToLayout(&exit_button, new RelativeAlignment(nullptr, 600, 92, 0));
+        else addToLayout(&prev_button, new RelativeAlignment(nullptr, 600, 92, 0));
+        if (current_page < page_count) addToLayout(&next_button, new RelativeAlignment(nullptr, 600, 156, 0));
+    }
+    else
+    {
+        extern IconButton downArrow;
+        addToLayout(&exit_button, new ConsecutiveAlignment(&downArrow,RIGHT,0));
+        if (page_count > 1)
+        {
+            addToLayout(&prev_button, new ConsecutiveAlignment(&exit_button, RIGHT, 0));
+            addToLayout(&next_button, new ConsecutiveAlignment(&prev_button, RIGHT, 0));
+        }
     }
 }

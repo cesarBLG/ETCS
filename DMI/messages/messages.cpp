@@ -21,14 +21,17 @@
 #include <algorithm>
 using namespace std;
 Component e2(54, 25, nullptr);
-Component e3(54, 25, nullptr);
+Component e3(54, softkeys ? 30 : 25, nullptr);
 Component e4(54, 25, nullptr);
-Component textArea(234, 100, displayMessages);
+int nlines = softkeys ? 4 : 5;
+Component textArea(234, 20*nlines, displayMessages);
 void displayArrows();
 void arrowUp();
 void arrowDown();
-IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, 50, arrowUp, "symbols/Navigation/NA_15.bmp");
-IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, 50, arrowDown, "symbols/Navigation/NA_16.bmp");
+IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, softkeys ? 40 : 50, arrowUp, "symbols/Navigation/NA_15.bmp");
+IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, softkeys ? 40 : 50, arrowDown, "symbols/Navigation/NA_16.bmp");
+IconButton softUpArrow("symbols/Navigation/NA_13.bmp", 40, 64, arrowUp, "symbols/Navigation/NA_15.bmp");
+IconButton softDownArrow("symbols/Navigation/NA_14.bmp", 40, 64, arrowDown, "symbols/Navigation/NA_16.bmp");
 std::deque<Message> messageList;
 int line;
 int current=0;
@@ -71,6 +74,8 @@ void displayMessages()
 {
     upArrow.enabled = current>0;
     downArrow.enabled = line>5+current;
+    softUpArrow.enabled = upArrow.enabled;
+    softDownArrow.enabled = downArrow.enabled;
 }
 void updateMessages()
 {
@@ -113,7 +118,7 @@ void updateMessages()
         std::string &text = m.text;
         int last = text.size();
         if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
-        if(line<5+current && line>=current)
+        if(line<nlines+current && line>=current)
         {
             if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
             m.shown = true;
@@ -138,8 +143,8 @@ void arrowUp()
 }
 void arrowDown()
 {
-    if(line<=5+current) return;
+    if(line<=nlines+current) return;
     current++;
-    if(current>line-5) current = line-5;
+    if(current>line-nlines) current = line-nlines;
     updateMessages();
 }

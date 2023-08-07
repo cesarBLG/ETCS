@@ -11,13 +11,11 @@
 #include "../tcp/server.h"
 menu_override::menu_override() : menu(get_text("Override"))
 {
-    buttons[0] = new TextButton(get_text("EoA"), 153, 50);
-    buttons[0]->setPressedAction([this]
+    entries[0] = {get_text("EoA"), "", []
     {
         write_command("Override","");
-        //exit(this);
-    });
-    setLayout();
+    }, false};
+    buildMenu();
 };
 void menu_override::setEnabled(bool eoa)
 {
