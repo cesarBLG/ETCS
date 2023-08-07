@@ -19,6 +19,7 @@ class IconButton : public Button
     void paint() override;
     void setEnabledImage(std::string path);
     void setDisabledImage(std::string path);
+    IconButton() {}
     IconButton(std::string enabled_path, float sx, float sy, std::function<void()> pressed = nullptr, std::string disabled_path = "");
     ~IconButton();
 };

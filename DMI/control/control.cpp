@@ -30,6 +30,14 @@ std::string active_name;
 window *default_window;
 void startWindows()
 {
+    // Hack to allow layout change after global constructors are called
+    void setupMessages();
+    void setupTimeHour();
+    void setupGpsPos();
+    setupMessages();
+    setupTimeHour();
+    setupGpsPos();
+
     etcs_default_window.construct();
     navigation_bar.construct();
     planning_area.construct();

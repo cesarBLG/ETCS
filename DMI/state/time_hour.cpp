@@ -9,7 +9,11 @@
 #include "time_hour.h"
 #include "../time_etcs.h"
 int lastsec = -1;
-Component time_hour(63, softkeys ? 30 : 50,timeHour);
+Component time_hour;
+void setupTimeHour()
+{
+    time_hour = Component(63, softkeys ? 30 : 50,timeHour);
+}
 void timeHour()
 {
     if (lastsec == getSecond()) return;

@@ -7,13 +7,17 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "gps_pos.h"
-Component gps_pos(120,softkeys ? 30 : 50,display_gps);
+Component gps_pos;
 Button gpsButton(64, 50);
 static bool show_pos = true;
 int prevkm=-1;
 int prevm=-1;
 double pk=-1;
 double prevpk=-1;
+void setupGpsPos()
+{
+    gps_pos = Component(120,softkeys ? 30 : 50,display_gps);
+}
 void display_gps()
 {
     int m = ((int)pk)%1000;

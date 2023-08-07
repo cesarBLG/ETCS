@@ -21,20 +21,28 @@
 #include <algorithm>
 using namespace std;
 Component e2(54, 25, nullptr);
-Component e3(54, softkeys ? 30 : 25, nullptr);
+Component e3;
 Component e4(54, 25, nullptr);
-int nlines = softkeys ? 4 : 5;
-Component textArea(234, 20*nlines, displayMessages);
+int nlines;
+Component textArea;
 void displayArrows();
 void arrowUp();
 void arrowDown();
-IconButton upArrow("symbols/Navigation/NA_13.bmp", 46, softkeys ? 40 : 50, arrowUp, "symbols/Navigation/NA_15.bmp");
-IconButton downArrow("symbols/Navigation/NA_14.bmp", 46, softkeys ? 40 : 50, arrowDown, "symbols/Navigation/NA_16.bmp");
+IconButton upArrow;
+IconButton downArrow;
 IconButton softUpArrow("symbols/Navigation/NA_13.bmp", 40, 64, arrowUp, "symbols/Navigation/NA_15.bmp");
 IconButton softDownArrow("symbols/Navigation/NA_14.bmp", 40, 64, arrowDown, "symbols/Navigation/NA_16.bmp");
 std::deque<Message> messageList;
 int line;
 int current=0;
+void setupMessages()
+{
+    e3 = Component(54, softkeys ? 30 : 25, nullptr);
+    nlines = softkeys ? 4 : 5;
+    textArea = Component(234, 20*nlines, displayMessages);
+    upArrow = IconButton("symbols/Navigation/NA_13.bmp", 46, softkeys ? 40 : 50, arrowUp, "symbols/Navigation/NA_15.bmp");
+    downArrow = IconButton("symbols/Navigation/NA_14.bmp", 46, softkeys ? 40 : 50, arrowDown, "symbols/Navigation/NA_16.bmp");
+}
 void addMsg(Message m)
 {
     bool found = false;

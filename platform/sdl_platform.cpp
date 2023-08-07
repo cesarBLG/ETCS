@@ -63,6 +63,8 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	int height = std::stoi(get_config("height"));
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
+	extern bool softkeys;
+	softkeys = get_config("softkeys") == "true";
 
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 	sdlwindow = SDL_CreateWindow("SdlPlatform", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);

@@ -23,6 +23,7 @@ class TextButton : public Button
         caption = name;
         enabled_text = disabled_text = nullptr;
     }
+    TextButton() {}
     TextButton(std::string text, float sx, float sy, std::function<void()> pressed = nullptr, int size = 12);
     ~TextButton();
 };
