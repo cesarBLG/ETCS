@@ -14,7 +14,7 @@
 #include "../graphics/display.h"
 #include "../tcp/server.h"
 input_window::input_window(std::string title, int nfields, bool full) : subwindow(title, full, (nfields-1)/4 + 1), confirmation_label(334, 50), button_yes(get_text("Yes"),334,50),
-    softYes("Yes", 64, 50), up_button("symbols/Navigation/NA_13.bmp", 40, 64, nullptr, "symbols/Navigation/NA_15.bmp"), down_button("symbols/Navigation/NA_14.bmp", 40, 64, nullptr, "symbols/Navigation/NA_16.bmp"),
+    softYes(get_text("Yes"), 64, 50), up_button("symbols/Navigation/NA_13.bmp", 40, 64, nullptr, "symbols/Navigation/NA_15.bmp"), down_button("symbols/Navigation/NA_14.bmp", 40, 64, nullptr, "symbols/Navigation/NA_16.bmp"),
     nfields(nfields)
 {
     for(int i=0; i<12; i++)

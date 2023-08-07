@@ -10,7 +10,7 @@
 #include "../tcp/server.h"
 #include <cstdlib>
 #include "platform_runtime.h"
-brightness_window::brightness_window() : input_window("Brightness", 1, false)
+brightness_window::brightness_window() : input_window(get_text("Brightness"), 1, false)
 {
     int br_orig = platform->get_brightness();
     inputs[0] = new input_data("", false);
@@ -21,8 +21,8 @@ brightness_window::brightness_window() : input_window("Brightness", 1, false)
     for (int i=0; i<12; i++) {
         keys.push_back(nullptr);
     }
-    keys[0] = new TextButton(get_text("-"), 102, 50);
-    keys[2] = new TextButton(get_text("+"), 102, 50);
+    keys[0] = new TextButton("-", 102, 50);
+    keys[2] = new TextButton("+", 102, 50);
     keys[0]->setPressedAction([this]
     {
         int br = stoi(inputs[0]->data);

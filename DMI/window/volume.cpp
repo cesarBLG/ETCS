@@ -10,7 +10,7 @@
 #include "../tcp/server.h"
 #include <cstdlib>
 #include "platform_runtime.h"
-volume_window::volume_window() : input_window("Volume", 1, false)
+volume_window::volume_window() : input_window(get_text("Volume"), 1, false)
 {
     int vol_orig = platform->get_volume();
     inputs[0] = new input_data("", false);
@@ -21,8 +21,8 @@ volume_window::volume_window() : input_window("Volume", 1, false)
     for (int i=0; i<12; i++) {
         keys.push_back(nullptr);
     }
-    keys[0] = new TextButton(get_text("-"), 102, 50);
-    keys[2] = new TextButton(get_text("+"), 102, 50);
+    keys[0] = new TextButton("-", 102, 50);
+    keys[2] = new TextButton("+", 102, 50);
     keys[0]->setPressedAction([this]
     {
         int vol = stoi(inputs[0]->data);

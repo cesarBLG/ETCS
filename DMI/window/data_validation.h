@@ -35,6 +35,7 @@ class validation_window : public subwindow
         addToLayout(confirmation->data_comp, new RelativeAlignment(nullptr, 334, softkeys ? 0 : 15, 0));
         if (softkeys)
         {
+            addToLayout(&confirmation->enter_button, new RelativeAlignment(nullptr, 600, 348, 0));
             addToLayout(buttons[0], new RelativeAlignment(nullptr, 0, 430, 0));
             for (int i=1; i<10; i++)
             {
@@ -73,11 +74,13 @@ class validation_window : public subwindow
             if (confirmation->keybd.keys[i] == nullptr) buttons[i] = emptybuttons[i];
             else buttons[i]=confirmation->keybd.keys[i];
         }
-        confirmation->data_comp->setPressedAction([this]
+        auto act = [this]
         {
             confirmation->setAccepted(true);
             sendInformation();
-        });
+        };
+        confirmation->data_comp->setPressedAction(act);
+        confirmation->enter_button.setPressedAction(act);
         setLayout();
         confirmation->setSelected(true);
         confirmation->setData(get_text("Yes"));
