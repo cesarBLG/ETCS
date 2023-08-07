@@ -59,8 +59,8 @@ void construct_main(window *w, bool custom)
     w->addToLayout(&e1, new RelativeAlignment(nullptr, 0, 350+offset));
     w->addToLayout(&c1, new RelativeAlignment(nullptr, 165, 300+offset));
     w->addToLayout(&c7, new RelativeAlignment(nullptr, 297, 300+offset));
-    w->addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 259+offset, -2));
-    w->addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 259+offset, -2));
+    w->addToLayout(&modeRegion, new RelativeAlignment(&csg, 254, 274, -2));
+    w->addToLayout(&releaseRegion, new RelativeAlignment(&csg, 26, 274, -2));
     w->addToLayout(&textArea, new RelativeAlignment(nullptr, 54, 350+offset));
     w->addToLayout(&upArrow, new ConsecutiveAlignment(&textArea, UP|RIGHT, 0));
     w->addToLayout(&downArrow, new ConsecutiveAlignment(&upArrow, DOWN, 0));
@@ -77,7 +77,7 @@ void construct_main(window *w, bool custom)
         w->addToLayout(&e2, new RelativeAlignment(nullptr, 0, 375+offset));
         w->addToLayout(&e3, new ConsecutiveAlignment(&e2, DOWN));
         if (!softkeys) w->addToLayout(&e4, new ConsecutiveAlignment(&e3, DOWN));
-        w->addToLayout(&b4, new RelativeAlignment(&csg, 140, 259+offset, -2));
+        w->addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
         w->addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
         w->addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
     }
