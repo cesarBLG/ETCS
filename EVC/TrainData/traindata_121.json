@@ -1,21 +1,19 @@
 {
-	 "1UT" : {
-        "length": 202,
-        "speed": 300,
+"1UT" : {
+        "length": 107,
+        "speed": 250,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0},
+			{"name": "DC3kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.8, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -24,18 +22,18 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0},
-						{"speed": 38.8889, "value": 0.9},
-						{"speed": 55.5556, "value": 0.8}
+                        {"speed": 0, "value": 1.12},
+						{"speed": 33.3333, "value": 0.85},
+						{"speed": 55.5556, "value": 0.80}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                          {"speed": 0, "value": 1.0},
-						{"speed": 38.8889, "value": 0.9},
-						{"speed": 55.5556, "value": 0.8}
+                        {"speed": 0, "value": 1.02},
+						{"speed": 33.3333, "value": 0.70},
+						{"speed": 55.5556, "value": 0.60}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -69,23 +67,21 @@
             
         }
     },
-    "2UT" : {
-        "length": 404,
-        "speed": 300,
+	"2UT" : {
+        "length": 214,
+        "speed": 250,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0},
+			{"name": "DC3kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.8, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -94,18 +90,18 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0},
-						{"speed": 38.8889, "value": 0.9},
-						{"speed": 55.5556, "value": 0.8}
+                        {"speed": 0, "value": 1.12},
+						{"speed": 33.3333, "value": 0.85},
+						{"speed": 55.5556, "value": 0.80}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                          {"speed": 0, "value": 1.0},
-						{"speed": 38.8889, "value": 0.9},
-						{"speed": 55.5556, "value": 0.8}
+                        {"speed": 0, "value": 1.02},
+						{"speed": 33.3333, "value": 0.70},
+						{"speed": 55.5556, "value": 0.60}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
