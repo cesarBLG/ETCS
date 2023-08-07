@@ -271,7 +271,7 @@
                 }
             ],
             "etcs_supervision": true,
-            "etcs_dial_range": 250,
+            "etcs_dial_range": 250
         }
     ]
 }
