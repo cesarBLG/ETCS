@@ -72,6 +72,10 @@ void construct_nav(window *w)
         extern IconButton softUpArrow;
         extern IconButton softDownArrow;
         extern Component ackButton;
+        extern IconButton softzoomin;
+        extern IconButton softzoomout;
+        w->addToLayout(&softzoomout, new ConsecutiveAlignment(&gpsButton, RIGHT, 0));
+        w->addToLayout(&softzoomin, new ConsecutiveAlignment(&softzoomout, RIGHT, 0));
         w->addToLayout(&softUpArrow, new RelativeAlignment(nullptr, 600, 220, 0));
         w->addToLayout(&softDownArrow, new ConsecutiveAlignment(&softUpArrow, DOWN, 0));
         w->addToLayout(&ackButton, new ConsecutiveAlignment(&softDownArrow, DOWN, 0));

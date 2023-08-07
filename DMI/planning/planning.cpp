@@ -26,10 +26,21 @@ Component planning_objects(246,300, displayObjects);
 Component planning_gradient(18,270, displayGradient);
 Component PASP(99,270, displayPASP);
 Component planning_speed(99,270, displaySpeed);
+void zoominp();
+void zoomoutp();
+IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
+IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
+IconButton softzoomin("symbols/Navigation/NA_07.bmp",64,50,zoominp,"symbols/Navigation/NA_09.bmp");
+IconButton softzoomout("symbols/Navigation/NA_08.bmp",64,50,zoomoutp,"symbols/Navigation/NA_10.bmp");
 extern bool showSpeeds;
 void displayScaleUp();
 void displayScaleDown();
 void speedLines();
+#if SIMRAIL
+#define MAX_SCALE 16
+#else
+#define MAX_SCALE 32
+#endif
 void zoominp()
 {
     if(planning_scale>1)
@@ -37,22 +48,23 @@ void zoominp()
         planning_scale/=2;
         speedLines();
     }
+    zoomin.setEnabled(planning_scale > 1);
+    softzoomin.setEnabled(planning_scale > 1);
+    zoomout.setEnabled(planning_scale < MAX_SCALE);
+    softzoomout.setEnabled(planning_scale < MAX_SCALE);
 }
 void zoomoutp()
 {
-#if SIMRAIL
-    // SimRail track scanner has max distance of 16km
-    if(planning_scale<=8)
-#else
-    if(planning_scale<=16)
-#endif
+    if(planning_scale<MAX_SCALE)
     {
         planning_scale*=2;
         speedLines();
     }
+    zoomin.setEnabled(planning_scale > 1);
+    softzoomin.setEnabled(planning_scale > 1);
+    zoomout.setEnabled(planning_scale < MAX_SCALE);
+    softzoomout.setEnabled(planning_scale < MAX_SCALE);
 }
-IconButton zoomin("symbols/Navigation/NA_03.bmp",40,15,zoominp);
-IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
 std::vector<planning_element> planning_elements;
 void displayPlanning()
 {

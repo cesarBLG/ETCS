@@ -47,6 +47,7 @@ void menu::buildMenu()
 {
     for (int i=0; i<10; i++)
     {
+        labels[i] = nullptr;
         auto it = entries.find(i);
         if (it != entries.end())
         {
@@ -71,7 +72,6 @@ void menu::buildMenu()
         {
             buttons[i] = new Button(softkeys ? 64 : 153,50);
             buttons[i]->showBorder = false;
-            labels[i] = nullptr;
         }
     }
     setLayout();
