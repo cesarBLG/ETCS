@@ -219,10 +219,12 @@ void parseData(std::string str)
     {
         TimeOffset::offset = stoi(value);
     }
-    else if (command == "ackButton") {
-        bool pressed = stoi(value) > 0;
-        input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, 0, 0});
-    } else if (command.size() == 5 && command.substr(0, 3) == "key") {
+    else if (command == "ackButton")
+    {
+        externalAckButton.setPressed(stoi(value) > 0);
+    }
+    else if (command.size() == 5 && command.substr(0, 3) == "key")
+    {
         if (command[3] == 'F') softF[stoi(command.substr(4, 1))].setPressed(value == "1" || value == "true");
         else if (command[3] == 'H') softH[stoi(command.substr(4, 1))].setPressed(value == "1" || value == "true");
     }

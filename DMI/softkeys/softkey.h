@@ -9,6 +9,7 @@
 #pragma once
 #include "../graphics/component.h"
 #include "platform_runtime.h"
+#include "../state/acks.h"
 #include <map>
 void input_received(UiPlatform::InputEvent ev);
 void setupSoftKeys();
@@ -27,12 +28,24 @@ class SoftKey
 };
 extern std::map<int,SoftKey> softF;
 extern std::map<int,SoftKey> softH;
-class HardwareButton : SoftKey
+class HardwareButton
 {
+    protected:
     Component *attachedComponent;
-    void setPressed(bool pressed)
+    public:
+    virtual void setPressed(bool pressed)
     {
         if (attachedComponent == nullptr) return;
         input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, attachedComponent->x + attachedComponent->sx/2, attachedComponent->y + attachedComponent->sy/2});
     }
 };
+class ExternalAckButton : public HardwareButton
+{
+    public:
+    void setPressed(bool pressed) override
+    {
+        attachedComponent = componentAck;
+        HardwareButton::setPressed(pressed);
+    }
+};
+extern ExternalAckButton externalAckButton;

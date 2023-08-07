@@ -10,6 +10,7 @@
 #include <map>
 std::map<int,SoftKey> softF;
 std::map<int,SoftKey> softH;
+ExternalAckButton externalAckButton;
 void setupSoftKeys()
 {
     for (int i=1; i<11; i++) {
