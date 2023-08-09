@@ -23,7 +23,7 @@ Component c4(37, 50, nullptr);
 Component c1(58, 50, dispAcks);
 Component c5(37, 50, nullptr);
 Component c6(37, 50, nullptr);
-Component ackButton(40, 64);
+Component ackButton(40, 82);
 extern Component c9;
 extern Component textArea;
 bool prevAck = false;

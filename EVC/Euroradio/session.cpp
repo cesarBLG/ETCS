@@ -447,6 +447,7 @@ void load_contact_info()
 void set_rbc_contact(contact_info contact)
 {
     rbc_contact = contact;
+    rbc_contact_valid = true;
     json j;
     j["NID_C"] = rbc_contact->country;
     j["NID_RBC"] = rbc_contact->id;
@@ -461,7 +462,7 @@ void set_supervising_rbc(contact_info info)
     handing_over_rbc = accepting_rbc = nullptr;
     handover_report_accepting = handover_report_max = handover_report_min = false;
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.phone_number = 5015;
+        info.phone_number = 139637976798103;
     }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)

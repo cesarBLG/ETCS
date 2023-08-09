@@ -22,7 +22,6 @@ class SoftKey
     SoftKey(float x, float y) : x(x), y(y) {}
     void setPressed(bool pressed)
     {
-        platform->debug_print("Soft key "+std::to_string(pressed));
         input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, x, y});
     }
 };

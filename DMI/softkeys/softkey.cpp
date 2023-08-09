@@ -20,5 +20,5 @@ void setupSoftKeys()
     for (int i=2; i<7; i++) {
         softH[i] = SoftKey(620, 60+64*(i-2));
     }
-    softH[7] = SoftKey(620, 413);
+    softH[7] = SoftKey(620, 389);
 }

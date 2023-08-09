@@ -63,7 +63,7 @@ void SetParameters()
         {
             V_est = V_ura = 0;
         }
-        if (prev != 0 && V_est == 0)
+        if (prev != 0 && V_est == 0 && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::RV))
             position_report_reasons[0] = true;
     };
     manager.AddParameter(p);

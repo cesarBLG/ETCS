@@ -156,6 +156,7 @@ void update_SoM()
             }
             break;
         case A35:
+            position_valid = true;
             som_status = S10;
             break;
         case A23:

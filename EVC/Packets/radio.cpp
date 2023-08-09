@@ -225,6 +225,8 @@ void send_position_report(bool som)
         if (rbcs.empty())
             return;
         for (auto *session : rbcs) {
+            if (session->status != session_status::Established)
+                continue;
             auto *rep = new position_report();
             fill_message(rep);
             auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
