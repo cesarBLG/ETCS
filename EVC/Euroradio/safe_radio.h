@@ -11,7 +11,7 @@
 #include <vector>
 #include "../Packets/radio.h"
 #include "safe_radio.h"
-#include "platform.h"
+#include "platform_runtime.h"
 class communication_session;
 class mobile_terminal;
 enum struct safe_radio_status
@@ -39,4 +39,15 @@ public:
     virtual void release() = 0;
     void send(std::shared_ptr<euroradio_message_traintotrack> msg);
     PlatformUtil::Promise<std::shared_ptr<euroradio_message>> receive();
+};
+class bus_safe_connection : public safe_radio_connection
+{
+    std::unique_ptr<BasePlatform::BusSocket> socket;
+    PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> rx_promise;
+    void data_receive(BasePlatform::BusSocket::ReceiveResult &&msg);
+public:
+    bus_safe_connection(communication_session *session, mobile_terminal *terminal);
+    void update() override;
+    void release() override;
+    void send(unsigned char *data, size_t size) override;
 };

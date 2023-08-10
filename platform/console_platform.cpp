@@ -15,7 +15,8 @@
 #include <android/log.h>
 #endif
 #ifdef EVC
-#include "../EVC/Euroradio/platform_terminals.h"
+#include "../EVC/Euroradio/terminal.h"
+#include "../EVC/Euroradio/tcp_safe_connection.h"
 #endif
 static std::atomic<bool>* quit_request_ptr;
 

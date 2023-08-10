@@ -293,9 +293,6 @@ void update_mode_status()
         Mode prevmode = mode;
         mode = transition;
         last_mode_change = get_milliseconds();
-        if (prevmode == Mode::NP) {
-            initialize_cold_movement();
-        }
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {
@@ -374,6 +371,9 @@ void update_mode_status()
             position_report_reasons[1] = true;
         }
         calculate_SvL();
+        if (prevmode == Mode::NP) {
+            initialize_cold_movement();
+        }
     }
 }
 void set_mode_deleted_data()
