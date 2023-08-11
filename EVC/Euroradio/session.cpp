@@ -462,7 +462,8 @@ void set_supervising_rbc(contact_info info)
     handing_over_rbc = accepting_rbc = nullptr;
     handover_report_accepting = handover_report_max = handover_report_min = false;
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.phone_number = 139637976798103;
+        info.country = 0;
+        info.id = 0;
     }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)

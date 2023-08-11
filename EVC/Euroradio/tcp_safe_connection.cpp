@@ -7,8 +7,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "tcp_safe_connection.h"
+#include "console_platform.h"
 #include "session.h"
-#include <thread>
 #include <sstream>
 #include <iomanip>
 #ifdef _WIN32
@@ -36,25 +36,14 @@ tcp_safe_connection::tcp_safe_connection(communication_session *session, mobile_
     hostname += domain;
     platform->debug_print("Trying RBC "+hostname);
 
-    std::thread thr([hostname, this]() {
-        addrinfo hints = {}, *res = nullptr;
-        hints.ai_family = AF_INET;
-        hints.ai_socktype = SOCK_STREAM;
-        getaddrinfo(hostname.c_str(), "30998", &hints, &res);
-        std::unique_lock<std::mutex> lck(mtx);
-        if (res == nullptr) {
-            dns_query = "failed";
-            return;
-        }
-        char buff[INET_ADDRSTRLEN];
-        const char *ip = inet_ntop(AF_INET, &((const sockaddr_in *)res->ai_addr)->sin_addr, buff, INET_ADDRSTRLEN);
-        if (ip == nullptr)
-            dns_query = "failed";
-        else
-            dns_query = std::string(ip);
-	    freeaddrinfo(res);
-    });
-    thr.detach();
+    if (session->contact.phone_number == 0xFFFFFFFFFFFFFFFFUL) {
+        connect({"", ""});
+    } else {
+        dns_query = static_cast<ConsolePlatform*>(platform.get())->query_dns(hostname);
+        dns_query->promise.then([this](dns_entry &&e){
+            connect(std::move(e));
+        });
+    }
 }
 
 void tcp_safe_connection::send(unsigned char *data, size_t size)
@@ -72,18 +61,43 @@ void tcp_safe_connection::release()
 {
     socket = nullptr;
     rx_promise = {};
+    dns_query = {};
     status = safe_radio_status::Disconnected;
 }
 
-void tcp_safe_connection::update()
+void tcp_safe_connection::connect(dns_entry &&dns)
 {
-    safe_radio_connection::update();
-    std::unique_lock<std::mutex> lck(mtx);
-    if (setting_up && socket == nullptr && (dns_query != "" || get_milliseconds() - connect_time > 5000)) {
-        std::string ip;
-        int port;
-        if (dns_query != "" && dns_query != "failed") {
-            ip = dns_query;
+    dns_query = {};
+    std::string ip;
+    int port;
+    std::map<std::string, std::string> config;
+    {
+        std::vector<std::string> params;
+        std::string s = dns.txt;
+        for (;;) {
+            size_t pos = s.find_first_of(';');
+            if (pos == std::string::npos) {
+                if (!s.empty())
+                    params.push_back(s);
+                break;
+            }
+            params.push_back(s.substr(0,pos));
+            s = s.substr(pos+1);
+        }
+        for (std::string &p : params) {
+            size_t pos = p.find('=');
+            if (pos != std::string::npos)
+                config[p.substr(0, pos)] = p.substr(pos+1);
+        }
+    }
+    if (dns.a != "" && config["txm"] != "CS") {
+        ip = dns.a;
+        port = 30998;
+    } else {
+        // CSD GSM-R call
+        // Use TCP anyway, but derive address from phone number
+        if (active_session->contact.phone_number == 0xFFFFFFFFFFFFFFFFULL) {
+            ip = "127.0.0.1";
             port = 30998;
         } else {
             for (int i=3; i>=0; i--)
@@ -93,40 +107,58 @@ void tcp_safe_connection::update()
             }
             port = active_session->contact.phone_number & 65535;
         }
-        platform->debug_print("Connecting to RBC at "+ip+":"+std::to_string(port));
-        int sock = ::socket(AF_INET, SOCK_STREAM, 0);
-        if (sock < 0) {
-            status = safe_radio_status::Failed;
-            return;
-        }
-#ifdef _WIN32
-        char t;
-#else
-        int t;
-#endif
-        t = 1;
-        setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &t, sizeof(t));
-        t = 1;
-        setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &t, sizeof(t));
-        #ifndef _WIN32
-        t = 3;
-        setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &t, sizeof(t));
-        t = 12;
-        setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &t, sizeof(t));
-        t = 3;
-        setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &t, sizeof(t));
-        t = 20000;
-        setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &t, sizeof(t));
-        t = 1416;
-        setsockopt(sock, IPPROTO_TCP, TCP_MAXSEG, &t, sizeof(t));
-        #endif
-        socket = std::make_unique<TcpSocket>(sock, poller);
-        socket->connect(ip, port);
-        rx_promise = socket->receive().then(std::bind(&tcp_safe_connection::data_receive, this, std::placeholders::_1));
     }
+    platform->debug_print("Connecting to RBC at "+ip+":"+std::to_string(port));
+    platform->debug_print("Connection parameters: "+dns.txt);
+    int sock = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) {
+        status = safe_radio_status::Failed;
+        return;
+    }
+
+#ifdef _WIN32
+    char t;
+#else
+    int t;
+#endif
+    t = 1;
+    setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &t, sizeof(t));
+    t = 1;
+    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &t, sizeof(t));
+    #ifndef _WIN32
+    int tp[5] = {12, 3, 3, 20000, 1416};
+    {
+        std::string tp_str = config["tp"];
+        for (int i=0; i<5; i++) {
+            size_t pos = tp_str.find_first_of(',');
+            std::string sub = tp_str.substr(0,pos);
+            if (!sub.empty())
+                tp[i] = stoi(sub);
+            if (pos == std::string::npos)
+                break;
+            tp_str = tp_str.substr(pos+1);
+        }
+    }
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &tp[0], sizeof(tp[0]));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &tp[1], sizeof(tp[1]));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &tp[2], sizeof(tp[2]));
+    setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &tp[3], sizeof(tp[3]));
+    setsockopt(sock, IPPROTO_TCP, TCP_MAXSEG, &tp[4], sizeof(tp[4]));
+    #endif
+    socket = std::make_unique<TcpSocket>(sock, poller);
+    socket->connect(ip, port);
+    rx_promise = socket->receive().then(std::bind(&tcp_safe_connection::data_receive, this, std::placeholders::_1));
+}
+
+void tcp_safe_connection::update()
+{
+    safe_radio_connection::update();
+    if (setting_up && socket == nullptr && get_milliseconds() - connect_time > 5000)
+        connect({"",""});
     if ((setting_up && get_milliseconds() - connect_time > 40000) || (socket != nullptr && socket->is_failed())) {
         socket = nullptr;
         rx_promise = {};
+        dns_query = {};
         status = safe_radio_status::Failed;
     }
     if (status == safe_radio_status::Disconnected && socket && socket->is_connected()) {

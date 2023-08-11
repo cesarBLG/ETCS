@@ -69,7 +69,12 @@ void safe_radio_connection::update()
 
 bus_safe_connection::bus_safe_connection(communication_session *session, mobile_terminal *terminal) : safe_radio_connection(session, terminal)
 {
-    socket = platform->open_socket("rbc_" + std::to_string(session->contact.phone_number), BasePlatform::BusSocket::PeerId::fourcc("EVC"));
+    std::string rbc = "rbc_";
+    if (session->contact.phone_number == 0xFFFFFFFFFFFFFFFFULL)
+        rbc += "5015";
+    else
+        rbc += std::to_string(session->contact.phone_number);
+    socket = platform->open_socket(rbc, BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
         rx_promise = socket->receive().then(std::bind(&bus_safe_connection::data_receive, this, std::placeholders::_1));
     } else {

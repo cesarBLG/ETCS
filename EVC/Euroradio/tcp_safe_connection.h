@@ -9,15 +9,15 @@
 #pragma once
 #include "safe_radio.h"
 #include "tcp_socket.h"
-#include <mutex>
+#include "dns.h"
 class tcp_safe_connection : public safe_radio_connection
 {
-    std::mutex mtx;
-    std::string dns_query;
+    std::unique_ptr<DNSQuery> dns_query;
     std::unique_ptr<TcpSocket> socket;
     PlatformUtil::Promise<std::string> rx_promise;
     FdPoller &poller;
     void data_receive(std::string &&msg);
+    void connect(dns_entry &&e);
 public:
     tcp_safe_connection(communication_session *session, mobile_terminal *terminal, FdPoller &poller);
     void update() override;

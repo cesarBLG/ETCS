@@ -7,3 +7,6 @@
 [submodule "libs/liborts"]
 	path = libs/liborts
 	url = https://github.com/cesarBLG/liborts
+[submodule "libs/c-ares"]
+	path = libs/c-ares
+	url = https://github.com/c-ares/c-ares/
