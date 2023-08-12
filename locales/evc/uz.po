@@ -5,36 +5,35 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: ETCS EVC\n"
-"Language: sv\n"
+"Language: uz\n"
 
 #: DMI/windows.cpp:76 DMI/windows.cpp:281 DMI/windows.cpp:981
-#, fuzzy
 msgid "Driver ID"
-msgstr "Förar-ID"
+msgstr "Haydovchi identifikatori"
 
 #: DMI/windows.cpp:85 DMI/windows.cpp:106 DMI/windows.cpp:829
 msgid "Level 0"
-msgstr "Nivå 0"
+msgstr "0-daraja"
 
 #: DMI/windows.cpp:88 DMI/windows.cpp:109 DMI/windows.cpp:831
 msgid "Level 1"
-msgstr "Nivå 1"
+msgstr "1-daraja"
 
 #: DMI/windows.cpp:91 DMI/windows.cpp:112 DMI/windows.cpp:833
 msgid "Level 2"
-msgstr "Nivå 2"
+msgstr "2-daraja"
 
 #: DMI/windows.cpp:94 DMI/windows.cpp:115 DMI/windows.cpp:835
 msgid "Level 3"
-msgstr "Nivå 3"
+msgstr "3-daraja"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:825
 msgid "Level"
-msgstr "Nivå"
+msgstr "Daraja"
 
 #: DMI/windows.cpp:145 DMI/windows.cpp:283 DMI/windows.cpp:853
 msgid "Train running number"
-msgstr "Tågnummer"
+msgstr "Poezd yugurish raqami"
 
 #: DMI/windows.cpp:152 DMI/windows.cpp:293 DMI/windows.cpp:991
 #: DMI/windows.cpp:1147
@@ -43,141 +42,133 @@ msgstr "RBC ID"
 
 #: DMI/windows.cpp:153 DMI/windows.cpp:294 DMI/windows.cpp:992
 msgid "RBC phone number"
-msgstr "RBC telefon"
+msgstr "RBC telefon raqami"
 
 #: DMI/windows.cpp:157 DMI/windows.cpp:990 DMI/windows.cpp:1146
 msgid "RBC data"
-msgstr "RBC-data"
+msgstr "RBC bilan tanishish"
 
 #: DMI/windows.cpp:179 DMI/windows.cpp:195 DMI/windows.cpp:874
 #: DMI/windows.cpp:1131
-#, fuzzy
 msgid "Train data"
-msgstr "Tågdata"
+msgstr "Poyezd ma'lumotlari"
 
 #: DMI/windows.cpp:237 DMI/windows.cpp:1026 DMI/windows.cpp:1155
-#, fuzzy
 msgid "SR speed (km/h)"
-msgstr "SR hastighet (km/h)"
+msgstr "SR tezligi (km/soat)"
 
 #: DMI/windows.cpp:238 DMI/windows.cpp:1027 DMI/windows.cpp:1152
-#, fuzzy
 msgid "SR distance (m)"
-msgstr "Avstånd i SR (m)"
+msgstr "SR masofasi (m)"
 
 #: DMI/windows.cpp:240 DMI/windows.cpp:1024 DMI/windows.cpp:1151
-#, fuzzy
 msgid "SR speed/distance"
-msgstr "SR dist/fart"
+msgstr "SR tezligi/masofasi"
 
 #: DMI/windows.cpp:246 DMI/windows.cpp:1020
 msgid "Language"
-msgstr "Språk"
+msgstr "Til"
 
 #: DMI/windows.cpp:187 DMI/windows.cpp:286 DMI/windows.cpp:900
 #: DMI/windows.cpp:1132
-#, fuzzy
 msgid "Length (m)"
-msgstr "Längd (m)"
+msgstr "Uzunlik (m)"
 
 #: DMI/windows.cpp:287
 msgid "Brake percentaje"
-msgstr "bromsprocent"
+msgstr "Tormoz foizi"
 
 #: DMI/windows.cpp:288
-#, fuzzy
 msgid "Maximum speed (km/h)"
-msgstr "Maxhastighet (km/h)"
+msgstr "Maksimal tezlik (km/soat)"
 
 #: DMI/windows.cpp:289
 msgid "Airtight"
-msgstr "Trycksättning"
+msgstr "Havo o'tkazmaydigan"
 
 #: DMI/windows.cpp:289
 msgid "Yes"
-msgstr "Ja"
+msgstr "Vilkalar"
 
 #: DMI/windows.cpp:289
 msgid "No"
-msgstr "Nej"
+msgstr "Yo'q"
 
 #: DMI/windows.cpp:303
 msgid "Data view"
-msgstr "Se data"
+msgstr "ma'lumotlar ko'rinishi"
 
 #: DMI/windows.cpp:410
 msgid "Train is rejected"
-msgstr "avvisat tåg"
+msgstr "Poyezd rad etilgan"
 
 #: DMI/windows.cpp:672
 msgid "Shunting request failed"
-msgstr "omöjlig manöver"
+msgstr "Manevr so‘rovi bajarilmadi"
 
 #: DMI/windows.cpp:879 DMI/windows.cpp:883
-#, fuzzy
 msgid "Validate train data"
-msgstr "Validera tågdata"
+msgstr "Poyezd ma’lumotlarini tasdiqlash"
 
 #: DMI/windows.cpp:179 DMI/windows.cpp:285 DMI/windows.cpp:969
 msgid "Train type"
-msgstr "Typ tåg"
+msgstr "Poezd turi"
 
 #: DMI/windows.cpp:189 DMI/windows.cpp:904 DMI/windows.cpp:1140
-#, fuzzy
 msgid "Max speed (km/h)"
-msgstr "fart max (km/h)"
+msgstr "Maksimal tezlik (km/soat)"
 
 #: DMI/windows.cpp:188 DMI/windows.cpp:905 DMI/windows.cpp:1136
 msgid "Brake percentage"
-msgstr "bromsprocent"
+msgstr "Tormoz foizi"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:903 DMI/windows.cpp:906
 msgid "Train category"
-msgstr "tågtyp"
+msgstr "Poyezd toifasi"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:909
 msgid "PASS 1"
-msgstr "RESA N"
+msgstr "1-QADAM"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:912
 msgid "PASS 2"
-msgstr "STEG 2"
+msgstr "2-QADAM"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:915
 msgid "PASS 3"
-msgstr "RESOR"
+msgstr "3-QADAM"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:918
 msgid "TILT 1"
-msgstr "LUTA 1"
+msgstr "TILT 1"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:921
 msgid "TILT 2"
-msgstr "RESA B"
+msgstr "TILT 2"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:924
 msgid "TILT 3"
-msgstr "LUTA 3"
+msgstr "TILT 3"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:927
 msgid "TILT 4"
-msgstr "RESA C"
+msgstr "TILT 4"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:930
 msgid "TILT 5"
-msgstr "LUTA 5"
+msgstr "TILT 5"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:933
 msgid "TILT 6"
-msgstr "RESA D"
+msgstr "TILT 6"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:936
 msgid "TILT 7"
-msgstr "LUTA 7"
+msgstr "TILT 7"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:939
 msgid "FP 1"
-msgstr "MERC P/V N"
+msgstr "PF 1"
 
 #: DMI/windows.cpp:942
 msgid "FP 2"
@@ -193,7 +184,7 @@ msgstr "PF 4"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:951
 msgid "FG 1"
-msgstr "MERC F/G N"
+msgstr "GF 1"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:954
 msgid "FG 2"
@@ -209,109 +200,108 @@ msgstr "FG 4"
 
 #: DMI/windows.cpp:252 DMI/windows.cpp:1036
 msgid "Set VBC"
-msgstr "Lägg till VBC"
+msgstr "VBC to'plami"
 
 #: DMI/windows.cpp:1041 DMI/windows.cpp:1054
 msgid "Validate set VBC"
-msgstr "Validera VBC har lagts till"
+msgstr "VBC to'plamini tasdiqlash"
 
 #: DMI/windows.cpp:258 DMI/windows.cpp:1045
 msgid "Remove VBC"
-msgstr "Ta bort VBC"
+msgstr "VBC-ni olib tashlang"
 
 #: DMI/windows.cpp:1050 DMI/windows.cpp:1071
 msgid "Validate remove VBC"
-msgstr "Validera borttagning av VBC"
+msgstr "VBCni olib tashlashni tasdiqlang"
 
 #: DMI/windows.cpp:252 DMI/windows.cpp:258 DMI/windows.cpp:1066
 #: DMI/windows.cpp:1067 DMI/windows.cpp:1083
 msgid "VBC code"
-msgstr "VBC-kod"
+msgstr "VBC kodi"
 
 #: DMI/windows.cpp:1297 Procedures/train_trip.cpp:40
 msgid "SH refused"
-msgstr "Manöver avvisad"
+msgstr "SH rad etdi"
 
 #: Procedures/mode_transition.cpp:328
 msgid "Entering FS"
-msgstr "Inträde i FS"
+msgstr "FSga kirish"
 
 #: Procedures/mode_transition.cpp:335
 msgid "Entering OS"
-msgstr "in i OS"
+msgstr "OSga kirish"
 
 #: Procedures/train_trip.cpp:26
-#, fuzzy
 msgid "Unauthorized passing of EoA/LoA"
-msgstr "EoA eller LoA överskrids"
+msgstr "EoA/LoA ruxsatsiz o'tishi"
 
 #: Procedures/train_trip.cpp:30 TrainSubsystems/brake.cpp:30
 msgid "Balise read error"
-msgstr "Beacon läsning misslyckande"
+msgstr "Balise o'qish xatosi"
 
 #: Procedures/train_trip.cpp:34
 msgid "No MA received at level transition"
-msgstr "Ingen MA vid nivåövergång"
+msgstr "Darajaga o'tishda hech qanday MA olinmadi"
 
 #: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:63
 msgid "Communication error"
-msgstr "kommunikationsfel"
+msgstr "aloqa xatosi"
 
 #: Euroradio/session.cpp:123 Procedures/train_trip.cpp:43
 msgid "Trackside not compatible"
-msgstr "sökväg stöds inte"
+msgstr "Trackside mos emas"
 
 #: Procedures/train_trip.cpp:46
 msgid "SR distance exceeded"
-msgstr "SR-avståndet har överskridits"
+msgstr "SR masofasi oshib ketdi"
 
 #: Procedures/train_trip.cpp:50
 msgid "SH stop order"
-msgstr "Stopporder i SH"
+msgstr "SH to'xtatish tartibi"
 
 #: Procedures/train_trip.cpp:54
 msgid "SR stop order"
-msgstr "SR stoppkommando"
+msgstr "SR to'xtatish tartibi"
 
 #: Procedures/train_trip.cpp:57
 msgid "Emergency stop"
-msgstr "Nödstopp"
+msgstr "Favqulodda to'xtash"
 
 #: Procedures/train_trip.cpp:60
 msgid "No track description"
-msgstr "inga spårdata"
+msgstr "Trek tavsifi yo'q"
 
 #: Procedures/train_trip.cpp:71
 msgid " brake demand"
-msgstr " bromsbehov"
+msgstr " tormoz so'rovi"
 
 #: STM/stm.cpp:395
 msgid " failed"
-msgstr " misslyckades"
+msgstr " muvaffaqiyatsiz"
 
 #: STM/stm.cpp:516
 msgid " not available"
-msgstr " inte tillgänglig"
+msgstr " mavjud emas"
 
 #: TrainSubsystems/brake.cpp:49
 msgid "Runaway movement"
-msgstr "Glida"
+msgstr "Qochqin harakati"
 
 #: DMI/text_messages.cpp:117
 msgid "Level crossing not protected"
-msgstr "Plankorsning ej skyddad"
+msgstr "O'tish joyi himoyalanmagan"
 
 #: DMI/text_messages.cpp:118
 msgid "Acknowledgement"
-msgstr "Bekräftelse"
+msgstr "Tasdiqlash"
 
 #: DMI/windows.cpp:190 DMI/windows.cpp:901
 msgid "Loading gauge"
-msgstr "Laddningsmätare"
+msgstr "Yuk ko'rsatkichi"
 
 #: DMI/windows.cpp:190
 msgid "Out of GC"
-msgstr "Ute från GC"
+msgstr "GCdan tashqari"
 
 #: DMI/windows.cpp:193
 msgid "FP2"
@@ -319,70 +309,70 @@ msgstr "FP2"
 
 #: DMI/windows.cpp:194 DMI/windows.cpp:902
 msgid "Axle load category"
-msgstr "Axellastkategori"
+msgstr "Aks yuki toifasi"
 
 #: DMI/windows.cpp:221 DMI/windows.cpp:1095 DMI/windows.cpp:1100
 #: DMI/windows.cpp:1104
 msgid " data"
-msgstr " data"
+msgstr " ma'lumotlar"
 
 #: DMI/windows.cpp:230 DMI/windows.cpp:1033
 msgid "Adhesion"
-msgstr "Adhesion"
+msgstr "Qo'shilish"
 
 #: DMI/windows.cpp:230
 msgid "Non slippery rail"
-msgstr "Halkfri skena"
+msgstr "Silliq bo'lmagan temir yo'l"
 
 #: DMI/windows.cpp:230 DMI/windows.cpp:1034
 msgid "Slippery rail"
-msgstr "Halt skena"
+msgstr "Sirpanchiq temir yo'l"
 
 #: DMI/windows.cpp:309
 msgid "System version"
-msgstr "Systemversion"
+msgstr "Tizim versiyasi"
 
 #: DMI/windows.cpp:309
 msgid "Operated system version"
-msgstr "Operativt systemversion"
+msgstr "Operatsion tizim versiyasi"
 
 #: DMI/windows.cpp:1100 DMI/windows.cpp:1104
 msgid "Validate "
-msgstr "Bekräfta "
+msgstr "Tasdiqlash "
 
 #: TrackConditions/route_suitability.cpp:44
 msgid "Route suitability - loading gauge"
-msgstr "Ruttlämplighet - lastmätare"
+msgstr "Marshrutning mosligi - yuk ko'rsatkichi"
 
 #: TrackConditions/route_suitability.cpp:47
 msgid "Route suitability - axle load category"
-msgstr "Ruttlämplighet - axellastkategori"
+msgstr "Marshrutning mosligi - o'q yuki toifasi"
 
 #: TrackConditions/route_suitability.cpp:50
 msgid "Route suitability - traction system"
-msgstr "Ruttlämplighet - dragsystem"
+msgstr "Marshrutning mosligi - tortish tizimi"
 
 #: TrainSubsystems/brake.cpp:85
 msgid "Train data changed"
-msgstr "Tågdata har ändrats"
+msgstr "Poyezd maʼlumotlari oʻzgartirildi"
 
 #: DMI/windows.cpp:130
 msgid "Level "
-msgstr "Nivå "
+msgstr "Daraja "
 
 #: DMI/windows.cpp:163 DMI/windows.cpp:291 DMI/windows.cpp:1001
 msgid "Radio network ID"
-msgstr "Radionätverks-ID"
+msgstr "Radio tarmoq identifikatori"
 
 #: DMI/windows.cpp:399 DMI/windows.cpp:507
 msgid "Radio network registration failed"
-msgstr "Registrering av radionätverk misslyckades"
+msgstr "Radio tarmog‘ini ro‘yxatdan o‘tkazish amalga oshmadi"
 
 #: DMI/windows.cpp:1087
 msgid "Brightness"
-msgstr "Glöd"
+msgstr "Yorqinlik"
 
 #: DMI/windows.cpp:1089
 msgid "Volume"
-msgstr "Volym"
+msgstr "Ovoz balandligi"
 

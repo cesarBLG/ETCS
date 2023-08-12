@@ -7,173 +7,182 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: hu\n"
 
-#: window/menu_main.cpp:31
+#: window/menu_main.cpp:20
 msgid "Main"
 msgstr "Fő"
 
-#: window/data_entry.cpp:25 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:82
-#: window/keyboard.cpp:186 window/keyboard.cpp:193
-#: window/track_ahead_free.cpp:15
+#: window/data_entry.cpp:16 window/data_entry.cpp:17
+#: window/data_validation.cpp:19 window/data_validation.h:19
+#: window/data_validation.h:86 window/keyboard.cpp:245 window/keyboard.cpp:252
+#: window/track_ahead_free.cpp:26
 msgid "Yes"
 msgstr "Igen"
 
-#: window/data_entry.cpp:54
+#: window/data_entry.cpp:62
 msgid " entry complete?"
 msgstr " teljes belépés?"
 
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
+#: window/keyboard.cpp:244 window/keyboard.cpp:248
 msgid "No"
 msgstr "Nem"
 
-#: window/driver_id.cpp:26
+#: window/driver_id.cpp:16
 msgid "TRN"
 msgstr "NTRAIN"
 
-#: window/fixed_train_data.cpp:26
+#: window/fixed_train_data.cpp:15 window/fixed_train_data.cpp:19
+#: window/fixed_train_data.cpp:25
 msgid "Enter\n"
 "data"
 msgstr "Int.\n"
 "adat"
 
-#: window/keyboard.cpp:29
-msgid "DEL"
-msgstr "A"
-
-#: window/menu_main.cpp:33
+#: window/menu_main.cpp:22
 msgid "Start"
 msgstr "Rajt"
 
-#: window/menu_main.cpp:34
+#: window/menu_main.cpp:26
 msgid "Driver ID"
 msgstr "Illesztőprogram adatai"
 
-#: window/menu_main.cpp:35
+#: window/menu_main.cpp:30
 msgid "Train Data"
 msgstr "Vonatadatok"
 
-#: window/menu_main.cpp:36
+#: window/menu_main.cpp:34
 msgid "Level"
 msgstr "Szint"
 
-#: window/menu_main.cpp:37
+#: window/menu_main.cpp:38
 msgid "Train running number"
 msgstr "Vonatszám"
 
-#: window/menu_main.cpp:38
+#: window/menu_main.cpp:42
 msgid "Exit Shunting"
 msgstr "Vége a manővereknek"
 
-#: window/menu_main.cpp:38
+#: window/menu_main.cpp:42
 msgid "Shunting"
 msgstr "Manővereket"
 
-#: window/menu_main.cpp:39
+#: window/menu_main.cpp:46
 msgid "Non-Leading"
 msgstr "Kettős tapadás"
 
-#: window/menu_main.cpp:40
+#: window/menu_main.cpp:47
 msgid "Maintain shunting"
 msgstr "Tartsa manővert"
 
-#: window/menu_main.cpp:41
+#: window/menu_main.cpp:48
 msgid "Radio data"
 msgstr "Rádiós adatok"
 
-#: window/menu_override.cpp:22
+#: window/menu_override.cpp:12
 msgid "Override"
 msgstr "Túlfutás"
 
-#: window/menu_override.cpp:24
+#: window/menu_override.cpp:14
 msgid "EoA"
 msgstr "EoA"
 
-#: window/menu_radio.cpp:31
+#: window/menu_radio.cpp:20
 msgid "Contact last RBC"
 msgstr "Lépjen kapcsolatba az utolsó RBC-vel"
 
-#: window/menu_radio.cpp:32
+#: window/menu_radio.cpp:24
 msgid "Use short number"
 msgstr "Rövid számot használjon"
 
-#: window/menu_radio.cpp:33
+#: window/menu_radio.cpp:28
 msgid "Enter RBC data"
 msgstr "Írja be az RBC-adatokat"
 
-#: window/menu_radio.cpp:34
+#: window/menu_radio.cpp:32
 msgid "Radio Network ID"
 msgstr "Rádióhálózat azonosítója"
 
-#: window/menu_settings.cpp:21
+#: window/menu_settings.cpp:11
 msgid "Settings"
 msgstr "Beállítások"
 
-#: window/menu_settings.cpp:26
+#: window/menu_settings.cpp:25
 msgid "System version"
 msgstr "Rendszerverzió"
 
-#: window/menu_settings.cpp:27
+#: window/menu_settings.cpp:29
 msgid "Set VBC"
 msgstr "Adja hozzá a VBC-t"
 
-#: window/menu_settings.cpp:28
+#: window/menu_settings.cpp:33
 msgid "Remove VBC"
 msgstr "Távolítsa el a VBC-t"
 
-#: window/menu_spec.cpp:21
+#: window/menu_spec.cpp:11
 msgid "Special"
 msgstr "Különleges"
 
-#: window/menu_spec.cpp:23
+#: window/menu_spec.cpp:13
 msgid "Adhesion"
 msgstr "Tapadás"
 
-#: window/menu_spec.cpp:24
+#: window/menu_spec.cpp:17
 msgid "SR Speed/Distance"
 msgstr "SR sebesség/távolság"
 
-#: window/menu_spec.cpp:25
+#: window/menu_spec.cpp:21
 msgid "Train integrity"
 msgstr "A vonat integritása"
 
-#: window/train_data.cpp:24
+#: window/train_data.cpp:14 window/train_data.cpp:18 window/train_data.cpp:24
 msgid "Select\n"
 "type"
 msgstr "Sel.\n"
 "fickó"
 
-#: language/language.cpp:36 window/nav_buttons.cpp:29
+#: language/language.cpp:42 window/nav_buttons.cpp:19
 msgctxt "Navigation bar"
 msgid "Main"
 msgstr "Fő"
 
-#: language/language.cpp:37 window/nav_buttons.cpp:35
+#: language/language.cpp:43 window/nav_buttons.cpp:25
 msgctxt "Navigation bar"
 msgid "Over-\n"
 "ride"
 msgstr "Felül-\n"
 "bírálás"
 
-#: language/language.cpp:38 window/nav_buttons.cpp:41
+#: language/language.cpp:44 window/nav_buttons.cpp:31
 msgctxt "Navigation bar"
 msgid "Data\n"
 "view"
 msgstr "Adat"
 
-#: language/language.cpp:39 window/nav_buttons.cpp:47
+#: language/language.cpp:45 window/nav_buttons.cpp:37
 msgctxt "Navigation bar"
 msgid "Spec"
 msgstr "Különleges"
 
-#: window/menu_ntc.cpp:21
+#: window/menu_ntc.cpp:11
 msgid "NTC data entry"
 msgstr "NTC adatbevitel"
 
-#: window/menu_ntc.cpp:31
+#: window/menu_ntc.cpp:20
 msgid "End of data entry"
 msgstr "Az adatbevitel vége"
 
-#: window/menu_radio.cpp:29
+#: window/menu_radio.cpp:18
 msgid "RBC data"
 msgstr "RBC adatok"
+
+#: window/brightness.cpp:13 window/menu_settings.cpp:21
+msgid "Brightness"
+msgstr "Világít"
+
+#: window/menu_settings.cpp:13
+msgid "Language"
+msgstr "Nyelv"
+
+#: window/menu_settings.cpp:17 window/volume.cpp:13
+msgid "Volume"
+msgstr "Hangerő"
 
