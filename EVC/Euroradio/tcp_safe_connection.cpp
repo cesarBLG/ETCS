@@ -92,7 +92,7 @@ void tcp_safe_connection::connect(dns_entry &&dns)
     }
     if (dns.a != "" && config["txm"] != "CS") {
         ip = dns.a;
-        port = 30998;
+        port = config.find("port") != config.end() ? stoi(config["port"]) : 30998;
     } else {
         // CSD GSM-R call
         // Use TCP anyway, but derive address from phone number
