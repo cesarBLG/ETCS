@@ -100,9 +100,17 @@ void tcp_safe_connection::connect(dns_entry &&dns)
             ip = "127.0.0.1";
             port = 30998;
         } else {
+            uint64_t num=0;
+            for (int i=15; i>=0; i--)
+            {
+                int c = (active_session->contact.phone_number>>(4*i))&15;
+                if (c == 15)
+                    continue;
+                num = 10*num + c;
+            }
             for (int i=3; i>=0; i--)
             {
-                ip += std::to_string((active_session->contact.phone_number>>(i*8+16)) & 255);
+                ip += std::to_string((num>>(i*8+16)) & 255);
                 if (i>0) ip += ".";
             }
             port = active_session->contact.phone_number & 65535;

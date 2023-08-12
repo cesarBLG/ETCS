@@ -73,7 +73,7 @@ bus_safe_connection::bus_safe_connection(communication_session *session, mobile_
     if (session->contact.phone_number == 0xFFFFFFFFFFFFFFFFULL)
         rbc += "5015";
     else
-        rbc += std::to_string(session->contact.phone_number);
+        rbc += from_bcd(session->contact.phone_number);
     socket = platform->open_socket(rbc, BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
         rx_promise = socket->receive().then(std::bind(&bus_safe_connection::data_receive, this, std::placeholders::_1));

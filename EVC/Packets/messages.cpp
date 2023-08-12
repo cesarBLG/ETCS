@@ -946,7 +946,7 @@ bool level_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_
                 for (auto m : message) {
                     if (m->index_level == 16) {
                         RBCTransitionOrder o = *(RBCTransitionOrder*)m->linked_packets.front().get();
-                        contact_info info2 = {o.NID_C, o.NID_RBC, o.NID_RADIO.get_value()};
+                        contact_info info2 = {o.NID_C, o.NID_RBC, o.NID_RADIO};
                         if (info2 == info)
                             return false;
                     }
