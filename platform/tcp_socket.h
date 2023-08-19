@@ -23,7 +23,6 @@ private:
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;
 	PlatformUtil::Promise<short> connect_promise;
-	bool rx_pending, tx_pending;
 	FdPoller* poller;
 
 	void mark_nonblocking(int fd);
@@ -32,6 +31,7 @@ private:
 	void update();
 	void create_and_connect(const std::string_view hostname, int port);
 public:
+	bool rx_pending, tx_pending;
 	void connect(const std::string_view hostname, int port);
 	TcpSocket(const std::string_view hostname, int port, FdPoller &p);
 	TcpSocket(int fd, FdPoller &p);

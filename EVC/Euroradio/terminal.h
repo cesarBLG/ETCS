@@ -10,7 +10,8 @@
 #include <deque>
 #include <vector>
 #include "../Packets/radio.h"
-#include "safe_radio.h"
+#include "radio_connection.h"
+#include "cfm.h"
 #include "platform.h"
 #include <functional>
 struct contact_info
@@ -39,15 +40,21 @@ struct contact_info
 class mobile_terminal
 {
 public:
-    std::set<std::shared_ptr<safe_radio_connection>> connections;
-    std::string radio_network_id;
+    std::list<std::weak_ptr<cfm>> ps_connections;
+    std::optional<std::weak_ptr<cfm>> cs_connection;
+    bool csd_available;
+    bool mobile_data_available;
+    int network_id;
     optional<int64_t> last_register_order;
     bool registered;
     mobile_terminal();
     void update();
-    std::function<std::shared_ptr<safe_radio_connection>(communication_session *session)> setup_connection;
+    void network_register(int network);
+    void set_mobile_data(bool active);
 };
 extern mobile_terminal *mobile_terminals[2];
-extern optional<std::vector<std::string>> AllowedRadioNetworks;
-extern std::string RadioNetworkId;
+extern std::map<int, std::string> RadioNetworkNames;
+extern optional<std::vector<int>> AllowedRadioNetworks;
+extern int RadioNetworkId;
 void retrieve_radio_networks();
+std::string radio_network_name(int id);

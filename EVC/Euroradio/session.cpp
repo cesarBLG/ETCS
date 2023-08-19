@@ -19,6 +19,7 @@
 #include "../Version/version.h"
 #include "../Version/translate.h"
 #include "platform_runtime.h"
+#include "cfm.h"
 #include <map>
 communication_session *supervising_rbc = nullptr;
 communication_session *accepting_rbc = nullptr;
@@ -69,7 +70,7 @@ void communication_session::finalize()
     status = session_status::Inactive;
     if (radio_status == safe_radio_status::Connected)
         radio_status = safe_radio_status::Disconnected;
-    if (connection && connection->active_session == this) {
+    if (connection) {
         connection->release();
         connection = nullptr;
     }
@@ -195,21 +196,11 @@ void communication_session::update()
     }
     if (status == session_status::Establishing) {
         if (tried == 0 || ((tried<ntries || ntries <= 0) && radio_status == safe_radio_status::Failed)) {
-            if (connection != nullptr && connection->active_session == this) {
-                connection->active_session = nullptr;
-            }
-            connection = nullptr;
-            for (mobile_terminal *t : mobile_terminals) {
-                connection = t->setup_connection(this);
-                if (connection != nullptr) {
-                    tried++;
-                    rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
-                    break;
-                }
-            }
-        }
-        if (tried >= ntries && ntries > 0 && radio_status == safe_radio_status::Failed)
+            setup_connection();
+        } else if (tried >= ntries && ntries > 0 && radio_status == safe_radio_status::Failed) {
             status = session_status::Inactive;
+            connection = nullptr;
+        }
         if (radio_status == safe_radio_status::Connected && !initsent) {
             auto init = std::shared_ptr<euroradio_message_traintotrack>(new init_communication_session());
             fill_message(init.get());
@@ -227,14 +218,7 @@ void communication_session::update()
                 open(0);
                 pending_ack = ack;
             } else {
-                connection = nullptr;
-                for (mobile_terminal *t : mobile_terminals) {
-                    connection = t->setup_connection(this);
-                    if (connection != nullptr) {
-                        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
-                        break;
-                    }
-                }
+                setup_connection();
             }
         }
         if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {
@@ -283,6 +267,18 @@ void communication_session::update()
     update_ack();
 }
 
+void communication_session::setup_connection()
+{
+    #if RADIO_TCP
+        connection = std::make_unique<safe_radio_connection>(this);
+    #else
+        connection = std::make_unique<bus_radio_connection>(this);
+    #endif
+        connection->Sa_connect_request({{isRBC ? 1 : 0, (contact.country<<16)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
+        tried++;
+        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
+}
+
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)
 {
     msg = translate_message(msg, version);
@@ -315,15 +311,7 @@ bool radio_reaction_applied = false;
 bool radio_reaction_reconnected = false;
 void update_euroradio()
 {
-    for (mobile_terminal *t : mobile_terminals) {
-        t->update();
-        if (t->radio_network_id != RadioNetworkId && t->connections.empty()) {
-            t->radio_network_id = RadioNetworkId;
-            t->registered = false;
-            if (RadioNetworkId != "" && !t->last_register_order)
-                t->last_register_order = get_milliseconds();
-        }
-    }
+    update_cfm();
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {
         if (it->second->status == session_status::Inactive && it->second != supervising_rbc && it->second != accepting_rbc && it->second != handing_over_rbc) {
             delete it->second;
@@ -461,15 +449,14 @@ void set_supervising_rbc(contact_info info)
     }
     handing_over_rbc = accepting_rbc = nullptr;
     handover_report_accepting = handover_report_max = handover_report_min = false;
-    if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.country = 0;
-        info.id = 0;
-    }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)
             info = *rbc_contact;
         else
             return;
+    } else if (info.phone_number == NID_RADIO_t::UseShortNumber) {
+        if (info.country == 0 && info.id == 0)
+            info.id = 0x3FF;
     }
     if (supervising_rbc && supervising_rbc->contact == info)
         return;

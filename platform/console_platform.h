@@ -60,9 +60,5 @@ public:
 	PlatformUtil::Promise<void> on_quit_request() override;
 	PlatformUtil::Promise<void> on_quit() override;
 
-#if RADIO_TCP
-	std::unique_ptr<DNSQuery> query_dns(std::string hostname);
-#endif
-
 	void quit() override;
 };

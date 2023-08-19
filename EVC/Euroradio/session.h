@@ -32,7 +32,7 @@ struct msg_expecting_ack
 };
 class communication_session
 {
-    std::shared_ptr<safe_radio_connection> connection=nullptr;
+    std::shared_ptr<radio_connection> connection;
     bool initsent;
     int tried;
     int ntries;
@@ -65,8 +65,10 @@ class communication_session
             radio_status = safe_radio_status::Failed;
             connection->release();
             connection = nullptr;
+            ntries = 0;
         }
     }
+    void setup_connection();
 };
 extern communication_session *supervising_rbc;
 extern communication_session *accepting_rbc;

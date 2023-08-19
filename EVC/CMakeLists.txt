@@ -4,7 +4,8 @@ Supervision/speed_profile.cpp Supervision/supervision.cpp Supervision/targets.cp
 Supervision/emergency_stop.cpp 
 Supervision/acceleration.cpp antenna.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp 
 OR_interface/interface.cpp OR_interface/orts_server.cpp SSP/ssp.cpp Packets/packets.cpp Procedures/mode_transition.cpp LX/level_crossing.cpp
-Packets/messages.cpp Packets/information.cpp Packets/radio.cpp Packets/vbc.cpp Euroradio/session.cpp Euroradio/terminal.cpp 
+Packets/messages.cpp Packets/information.cpp Packets/radio.cpp Packets/vbc.cpp 
+Euroradio/session.cpp Euroradio/terminal.cpp Euroradio/radio_connection.cpp Euroradio/safe_radio_connection.cpp Euroradio/cfm.cpp
 Packets/logging.cpp Packets/io/io.cpp Packets/io/base64.cpp STM/stm.cpp Packets/STM/message.cpp
 Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp 
 Procedures/stored_information.cpp TrackConditions/track_conditions.cpp  TrackConditions/route_suitability.cpp
@@ -18,8 +19,8 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 
 add_definitions(-DNO_THREADS)
 
-if (RADIO_TCP)
-    list (APPEND SOURCES Euroradio/tcp_safe_connection.cpp)
+if (RADIO_CFM)
+    list (APPEND SOURCES Euroradio/tcp_cfm.cpp)
 endif()
 
 if (NOT WASM)
@@ -52,7 +53,7 @@ target_include_directories(evc PRIVATE ../libs/liborts/include)
 
 add_definitions(-DEVC)
 
-if (RADIO_TCP)
+if (RADIO_CFM)
     if (ETCS_VENDORED)
         target_link_libraries(evc PRIVATE c-ares)
     else()
