@@ -6,7 +6,8 @@
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "diesel", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 0},
+            {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
@@ -76,7 +77,8 @@
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "diesel", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 0},
+            {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {

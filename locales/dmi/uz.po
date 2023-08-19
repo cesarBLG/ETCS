@@ -5,81 +5,81 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: ETCS DMI\n"
-"Language: el\n"
+"Language: uz\n"
 
 #: window/menu_main.cpp:20
 msgid "Main"
-msgstr "Κύριο μενού"
+msgstr "Asosiy"
 
 #: window/data_entry.cpp:16 window/data_entry.cpp:17
 #: window/data_validation.cpp:19 window/data_validation.h:19
 #: window/data_validation.h:86 window/keyboard.cpp:245 window/keyboard.cpp:252
 #: window/track_ahead_free.cpp:26
 msgid "Yes"
-msgstr "Vαι"
+msgstr "Vilkalar"
 
 #: window/data_entry.cpp:62
 msgid " entry complete?"
-msgstr " πλήρης είσοδος;"
+msgstr " kirish tugallandimi?"
 
 #: window/keyboard.cpp:244 window/keyboard.cpp:248
 msgid "No"
-msgstr "Οχι"
+msgstr "Yo'q"
 
 #: window/driver_id.cpp:16
 msgid "TRN"
-msgstr "NTRAIN"
+msgstr "TRN"
 
 #: window/fixed_train_data.cpp:15 window/fixed_train_data.cpp:19
 #: window/fixed_train_data.cpp:25
 msgid "Enter\n"
 "data"
-msgstr "Int.\n"
-"δεδομένα"
+msgstr "Kirish\n"
+"ma'lumotlar"
 
 #: window/menu_main.cpp:22
 msgid "Start"
-msgstr "Αρχή"
+msgstr "Boshlash"
 
 #: window/menu_main.cpp:26
 msgid "Driver ID"
-msgstr "Ταυτότητα οδηγού"
+msgstr "Haydovchi identifikatori"
 
 #: window/menu_main.cpp:30
 msgid "Train Data"
-msgstr "Δεδομένα τρένου"
+msgstr "Poezd sanalari"
 
 #: window/menu_main.cpp:34
 msgid "Level"
-msgstr "Επίπεδο"
+msgstr "Daraja"
 
 #: window/menu_main.cpp:38
 msgid "Train running number"
-msgstr "αριθμός τρένου"
+msgstr "Poezd yugurish raqami"
 
 #: window/menu_main.cpp:42
 msgid "Exit Shunting"
-msgstr "Τέλος ελιγμών"
+msgstr "Chiqish manyovrlari"
 
 #: window/menu_main.cpp:42
 msgid "Shunting"
-msgstr "γυμνάσια"
+msgstr "Manyovr"
 
 #: window/menu_main.cpp:46
 msgid "Non-Leading"
-msgstr "διπλή έλξη"
+msgstr "Etakchi bo'lmagan"
 
 #: window/menu_main.cpp:47
 msgid "Maintain shunting"
-msgstr "κρατήστε ελιγμό"
+msgstr "Manevrni saqlang"
 
 #: window/menu_main.cpp:48
 msgid "Radio data"
-msgstr "ραδιοφωνικά δεδομένα"
+msgstr "Radio sanalari"
 
 #: window/menu_override.cpp:12
 msgid "Override"
-msgstr "υπερβαίνω"
+msgstr "Qayta belgilash"
 
 #: window/menu_override.cpp:14
 msgid "EoA"
@@ -87,103 +87,103 @@ msgstr "EoA"
 
 #: window/menu_radio.cpp:20
 msgid "Contact last RBC"
-msgstr "Επικοινωνήστε με το τελευταίο RBC"
+msgstr "Oxirgi RBC bilan bog'laning"
 
 #: window/menu_radio.cpp:24
 msgid "Use short number"
-msgstr "χρησιμοποιήστε σύντομο αριθμό"
+msgstr "Qisqa raqamdan foydalaning"
 
 #: window/menu_radio.cpp:28
 msgid "Enter RBC data"
-msgstr "Εισαγάγετε δεδομένα RBC"
+msgstr "RBC ma'lumotlarini kiriting"
 
 #: window/menu_radio.cpp:32
 msgid "Radio Network ID"
-msgstr "Αναγνωριστικό δικτύου ραδιοφώνου"
+msgstr "Radio tarmoq identifikatori"
 
 #: window/menu_settings.cpp:11
 msgid "Settings"
-msgstr "Ρυθμίσεις"
+msgstr "Sozlamalar"
 
 #: window/menu_settings.cpp:25
 msgid "System version"
-msgstr "έκδοση συστήματος"
+msgstr "tizim versiyasi"
 
 #: window/menu_settings.cpp:29
 msgid "Set VBC"
-msgstr "Προσθήκη VBC"
+msgstr "VBC to'plami"
 
 #: window/menu_settings.cpp:33
 msgid "Remove VBC"
-msgstr "Αφαιρέστε το VBC"
+msgstr "VBC-ni olib tashlang"
 
 #: window/menu_spec.cpp:11
 msgid "Special"
-msgstr "Ειδικός"
+msgstr "Maxsus"
 
 #: window/menu_spec.cpp:13
 msgid "Adhesion"
-msgstr "Προσκόλληση"
+msgstr "Qo'shilish"
 
 #: window/menu_spec.cpp:17
 msgid "SR Speed/Distance"
-msgstr "SR Ταχύτητα/Απόσταση"
+msgstr "SR tezligi/masofasi"
 
 #: window/menu_spec.cpp:21
 msgid "Train integrity"
-msgstr "ακεραιότητα του τρένου"
+msgstr "Butunlikni o'rgatish"
 
 #: window/train_data.cpp:14 window/train_data.cpp:18 window/train_data.cpp:24
 msgid "Select\n"
 "type"
-msgstr "Sel.\n"
-"ο τύπος"
+msgstr "Tanlang\n"
+"turi"
 
 #: language/language.cpp:42 window/nav_buttons.cpp:19
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Μενού"
+msgstr "Asosiy"
 
 #: language/language.cpp:43 window/nav_buttons.cpp:25
 msgctxt "Navigation bar"
 msgid "Over-\n"
 "ride"
-msgstr "κατα-\n"
-"πατώ"
+msgstr "Ustida-\n"
+"minish"
 
 #: language/language.cpp:44 window/nav_buttons.cpp:31
 msgctxt "Navigation bar"
 msgid "Data\n"
 "view"
-msgstr "Δεδο-\n"
-"μένα"
+msgstr "Ma'lumotlar\n"
+"ko'rinish"
 
 #: language/language.cpp:45 window/nav_buttons.cpp:37
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Ειδικός"
+msgstr "Maxsus"
 
 #: window/menu_ntc.cpp:11
 msgid "NTC data entry"
-msgstr "Εισαγωγή δεδομένων NTC"
+msgstr "NTC ma'lumotlarini kiritish"
 
 #: window/menu_ntc.cpp:20
 msgid "End of data entry"
-msgstr "Τέλος εισαγωγής δεδομένων"
+msgstr "Ma'lumotlarni kiritish tugashi"
 
 #: window/menu_radio.cpp:18
 msgid "RBC data"
-msgstr "Δεδομένα RBC"
+msgstr "RBC bilan tanishish"
 
 #: window/brightness.cpp:13 window/menu_settings.cpp:21
 msgid "Brightness"
-msgstr "Λάμψη"
+msgstr "Yorqinlik"
 
 #: window/menu_settings.cpp:13
 msgid "Language"
-msgstr "Γλώσσα"
+msgstr "Til"
 
 #: window/menu_settings.cpp:17 window/volume.cpp:13
 msgid "Volume"
-msgstr "ένταση ήχου"
+msgstr "Ovoz balandligi"
 
