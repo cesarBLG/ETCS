@@ -323,7 +323,6 @@ void register_parameter(std::string param)
 void sim_receive(BasePlatform::BusSocket::Message &&msg)
 {
     manager.ParseLine(sim_wrapper.get(), msg.data);
-    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }
 
 void sim_receive(BasePlatform::BusSocket::JoinNotification &&msg)
@@ -374,4 +373,9 @@ void start_or_iface()
     register_parameter("etcs::isolated");
     register_parameter("etcs::failed");
     register_parameter("serie");
+}
+
+void update_or_iface()
+{
+    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }

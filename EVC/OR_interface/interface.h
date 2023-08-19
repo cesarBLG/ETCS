@@ -10,4 +10,4 @@
 #include <list>
 #include "../Packets/radio.h"
 void start_or_iface();
-//extern std::list<euroradio_message_traintotrack> pendingmessages;
+void update_or_iface();
