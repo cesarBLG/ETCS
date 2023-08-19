@@ -81,3 +81,5 @@ void update_euroradio();
 void set_supervising_rbc(contact_info info);
 void terminate_session(contact_info info);
 void rbc_handover(distance d, contact_info newrbc);
+std::string from_bcd(uint64_t number);
+uint64_t to_bcd(std::string number);

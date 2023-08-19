@@ -6,24 +6,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-#include "terminal.h"
+#pragma once
+#include "safe_radio.h"
 #include "tcp_socket.h"
-class bus_safe_connection : public safe_radio_connection
-{
-    std::unique_ptr<BasePlatform::BusSocket> socket;
-    PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> rx_promise;
-    void data_receive(BasePlatform::BusSocket::ReceiveResult &&msg);
-public:
-    bus_safe_connection(communication_session *session, mobile_terminal *terminal);
-    void update() override;
-    void release() override;
-    void send(unsigned char *data, size_t size) override;
-};
+#include "dns.h"
 class tcp_safe_connection : public safe_radio_connection
 {
+    std::unique_ptr<DNSQuery> dns_query;
     std::unique_ptr<TcpSocket> socket;
     PlatformUtil::Promise<std::string> rx_promise;
+    FdPoller &poller;
     void data_receive(std::string &&msg);
+    void connect(dns_entry &&e);
 public:
     tcp_safe_connection(communication_session *session, mobile_terminal *terminal, FdPoller &poller);
     void update() override;

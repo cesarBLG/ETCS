@@ -150,7 +150,7 @@ json rbc_data_window()
     json j = R"({"active":"rbc_data_window"})"_json;
     std::vector<json> inputs = {
         build_numeric_field(get_text("RBC ID"), rbc_contact ? std::to_string(rbc_contact->country<<14 | rbc_contact->id) : ""),
-        build_numeric_field(get_text("RBC phone number"), rbc_contact ? std::to_string(rbc_contact->phone_number) : "")
+        build_numeric_field(get_text("RBC phone number"), rbc_contact ? from_bcd(rbc_contact->phone_number) : "")
     };
     inputs[0]["Echo"] = false;
     inputs[1]["Echo"] = false;
@@ -291,7 +291,7 @@ json data_view_window()
         fields.push_back(build_field(get_text("Radio network ID"), RadioNetworkId));
         if (rbc_contact) {
             fields.push_back(build_field(get_text("RBC ID"), std::to_string(rbc_contact->id)));
-            fields.push_back(build_field(get_text("RBC phone number"), std::to_string(rbc_contact->phone_number)));
+            fields.push_back(build_field(get_text("RBC phone number"), from_bcd(rbc_contact->phone_number)));
             
         }
         fields.push_back(build_field("", ""));
@@ -989,7 +989,7 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "S1";
     } else if (name == get_text("RBC data")) {
         uint32_t id = atoll(result[get_text("RBC ID")].get<std::string>().c_str());
-        uint64_t number = atoll(result[get_text("RBC phone number")].get<std::string>().c_str());
+        uint64_t number = to_bcd(result[get_text("RBC phone number")].get<std::string>().c_str());
         set_supervising_rbc(contact_info({id>>14,id&((1<<14) - 1),number}));
         if (som_active && som_status == S3 ) {
             som_status = A31;

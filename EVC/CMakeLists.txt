@@ -18,6 +18,10 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 
 add_definitions(-DNO_THREADS)
 
+if (RADIO_TCP)
+    list (APPEND SOURCES Euroradio/tcp_safe_connection.cpp)
+endif()
+
 if (NOT WASM)
     list(APPEND SOURCES ../platform/console_platform.cpp ../platform/console_fd_poller.cpp ../platform/tcp_socket.cpp ../platform/bus_socket_impl.cpp ../platform/tcp_listener.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp ../platform/bus_socket_server.cpp ../platform/bus_tcp_bridge.cpp ../libs/liborts/ip_discovery.cpp)
 else()
@@ -48,9 +52,21 @@ target_include_directories(evc PRIVATE ../libs/liborts/include)
 
 add_definitions(-DEVC)
 
+if (RADIO_TCP)
+    if (ETCS_VENDORED)
+        target_link_libraries(evc PRIVATE c-ares)
+    else()
+        find_package(c-ares REQUIRED CONFIG REQUIRED COMPONENTS c-ares)
+        target_link_libraries(evc PRIVATE ${c-ares_LIBRARY})
+    endif()
+endif()
+
 if(WIN32)
     target_link_libraries(evc PRIVATE imagehlp ws2_32 psapi)
 endif()
 if(ANDROID)
     target_link_libraries(evc PRIVATE log)
+endif()
+if (WASM)
+    set_target_properties(evc PROPERTIES SUFFIX ".wasm")
 endif()

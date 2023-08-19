@@ -293,9 +293,6 @@ void update_mode_status()
         Mode prevmode = mode;
         mode = transition;
         last_mode_change = get_milliseconds();
-        if (prevmode == Mode::NP) {
-            initialize_cold_movement();
-        }
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {
@@ -364,8 +361,19 @@ void update_mode_status()
         for (int i=0; i<info.size(); i++) {
             info[i].handle(prevmode, mode);
         }
-        position_report_reasons[1] = true;
+        if (mode != Mode::NP && mode != Mode::PS && (mode != Mode::SH || prevmode != Mode::PS)) {
+            if ((level == Level::N2 || level == Level::N3) && !end_mission
+            && (!supervising_rbc || supervising_rbc->status == session_status::Inactive) && rbc_contact_valid) {
+                set_supervising_rbc(*rbc_contact);
+                    if (supervising_rbc)
+                        supervising_rbc->open(N_tries_radio);
+            }
+            position_report_reasons[1] = true;
+        }
         calculate_SvL();
+        if (prevmode == Mode::NP) {
+            initialize_cold_movement();
+        }
     }
 }
 void set_mode_deleted_data()

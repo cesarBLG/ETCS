@@ -189,7 +189,7 @@ void session_management_information::handle()
 {
     SessionManagement &session = *(SessionManagement*)linked_packets.front().get();
     if (mode != Mode::SL || session.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
-        contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO.get_value()};
+        contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
         if (session.Q_RBC == Q_RBC_t::EstablishSession) {
             set_supervising_rbc(info);
             if (supervising_rbc && mode != Mode::SH && mode != Mode::PS)
@@ -313,7 +313,7 @@ void rbc_transition_information::handle()
 {
     RBCTransitionOrder o = *(RBCTransitionOrder*)linked_packets.front().get();
     if (mode != Mode::SL || o.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
-        contact_info info = {o.NID_C, o.NID_RBC, o.NID_RADIO.get_value()};
+        contact_info info = {o.NID_C, o.NID_RBC, o.NID_RADIO};
         rbc_handover(ref + o.D_RBCTR.get_value(o.Q_SCALE), info);
     }
 }

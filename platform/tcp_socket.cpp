@@ -104,7 +104,8 @@ void TcpSocket::create_and_connect(const std::string_view hostname, int port) {
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	getaddrinfo(std::string(hostname).c_str(), std::to_string(port).c_str(), &hints, &res);
-
+	if (res == nullptr)
+		return;
 	peer_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	mark_nonblocking(peer_fd);
 	connect_promise = poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {

@@ -447,6 +447,7 @@ void load_contact_info()
 void set_rbc_contact(contact_info contact)
 {
     rbc_contact = contact;
+    rbc_contact_valid = true;
     json j;
     j["NID_C"] = rbc_contact->country;
     j["NID_RBC"] = rbc_contact->id;
@@ -461,7 +462,8 @@ void set_supervising_rbc(contact_info info)
     handing_over_rbc = accepting_rbc = nullptr;
     handover_report_accepting = handover_report_max = handover_report_min = false;
     if (info.phone_number == NID_RADIO_t::UseShortNumber) {
-        info.phone_number = 5015;
+        info.country = 0;
+        info.id = 0;
     }
     if (info.id == NID_RBC_t::ContactLastRBC) {
         if (rbc_contact)
@@ -517,4 +519,28 @@ void terminate_session(contact_info info)
                 accepting_rbc = nullptr;
         }
     }
+}
+std::string from_bcd(uint64_t number)
+{
+    std::string str;
+    for (int i=15; i>=0; i--)
+    {
+        int c = (number>>(4*i))&15;
+        if (c == 15)
+            continue;
+        if (c >= 10)
+            return "";
+        str += (char)(c+48);
+    }
+    return str;
+}
+uint64_t to_bcd(std::string number)
+{
+    uint64_t bcd = 0;
+    for (int i=0; i<16; i++) {
+        if (i < number.size())
+            bcd = (bcd<<4) | (number[i]-48);
+        else bcd = (bcd<<4) | 0xF;
+    }
+    return bcd;
 }

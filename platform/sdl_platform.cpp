@@ -41,9 +41,14 @@ void SdlPlatform::SdlPlatform::load_config()
 
 std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key)
 {
+	return get_config(key, "");
+}
+
+std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key, const std::string_view def)
+{
 	auto it = ini_items.find(key);
 	if (it == ini_items.end())
-		return "";
+		return std::string(def);
 	return it->second;
 }
 
@@ -58,21 +63,34 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	load_config();
 	bool fullscreen = get_config("fullScreen") == "true";
-	int display = std::stoi(get_config("display"));
-	int width = std::stoi(get_config("width"));
-	int height = std::stoi(get_config("height"));
+	int display = std::stoi(get_config("display", "0"));
+	int width = std::stoi(get_config("width", "800"));
+	int height = std::stoi(get_config("height", "600"));
+	int xpos = std::stoi(get_config("xpos", "0"));
+	int ypos = std::stoi(get_config("ypos", "0"));
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
 	extern bool softkeys;
 	softkeys = get_config("softkeys") == "true";
+	bool ontop = get_config("alwaysOnTop") == "true";
+	bool hidecursor = get_config("hideCursor") == "true";
+
+	int flags = 0;
+	if (borderless)
+		flags |= SDL_WINDOW_BORDERLESS;
+	if (fullscreen)
+		flags |= SDL_WINDOW_FULLSCREEN;
+
+	int x = borderless ? xpos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
+	int y = borderless ? ypos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
 
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-	sdlwindow = SDL_CreateWindow("SdlPlatform", SDL_WINDOWPOS_CENTERED_DISPLAY(display), SDL_WINDOWPOS_CENTERED_DISPLAY(display), width, height, SDL_WINDOW_SHOWN);
+	sdlwindow = SDL_CreateWindow("SdlPlatform", x, y, width, height, flags);
 
-	if (borderless)
-		SDL_SetWindowBordered(sdlwindow, SDL_FALSE);
-	if (fullscreen)
-		SDL_SetWindowFullscreen(sdlwindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	if (ontop)
+		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
+	if (hidecursor)
+		SDL_ShowCursor(SDL_DISABLE);
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 

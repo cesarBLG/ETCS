@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build_win:
+    name: Build for Win64
+
+    strategy:
+      matrix:
+        sr_flag: ["ON", "OFF"]
+
+    runs-on: windows-2022
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -A x64 -DSIMRAIL=${{matrix.sr_flag}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Publish
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-win64-sr${{matrix.sr_flag}}
+        path: |
+          ${{github.workspace}}/build/DMI/Release
+          ${{github.workspace}}/build/EVC/Release
+
+  build_wasm:
+    name: Build for WASM
+
+    strategy:
+      matrix:
+        sr_flag: ["ON", "OFF"]
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - name: Cache wasi-sdk
+      id: cache-wasi-sdk
+      uses: actions/cache@v3
+      with:
+        path: ${{github.workspace}}/wasi-sdk
+        key: wasi-sdk-20
+
+    - name: Download wasi-sdk
+      if: steps.cache-wasi-sdk.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p ${{github.workspace}}/wasi-sdk
+        cd ${{github.workspace}}/wasi-sdk
+        export WASI_VERSION=20
+        export WASI_VERSION_FULL=${WASI_VERSION}.0
+        wget -nv https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${WASI_VERSION}/wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz
+        tar xf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz --strip-components=1
+
+    - name: Configure
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DSIMRAIL=${{matrix.sr_flag}} -DWASI_HOST_EXE_SUFFIX= -DWASI_SDK_PREFIX=${{github.workspace}}/wasi-sdk -DCMAKE_TOOLCHAIN_FILE=wasi-sdk.cmake
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Publish
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-wasm-sr${{matrix.sr_flag}}
+        path: |
+          ${{github.workspace}}/build/DMI/dmi.wasm
+          ${{github.workspace}}/build/EVC/evc.wasm
+
+  compile_locales:
+    name: Compile locales
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install gettext
+      run: |
+        sudo apt-get install -y gettext
+
+    - name: Compile
+      run: |
+        cd ${{github.workspace}}/locales
+        ./compile_locales.sh
+
+    - name: Publish
+      uses: actions/upload-artifact@v3
+      with:
+        name: locales
+        path: |
+          ${{github.workspace}}/locales/dmi/*.mo
+          ${{github.workspace}}/locales/evc/*.mo

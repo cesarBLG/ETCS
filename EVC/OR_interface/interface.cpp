@@ -63,7 +63,7 @@ void SetParameters()
         {
             V_est = V_ura = 0;
         }
-        if (prev != 0 && V_est == 0)
+        if (prev != 0 && V_est == 0 && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::RV))
             position_report_reasons[0] = true;
     };
     manager.AddParameter(p);
@@ -323,7 +323,6 @@ void register_parameter(std::string param)
 void sim_receive(BasePlatform::BusSocket::Message &&msg)
 {
     manager.ParseLine(sim_wrapper.get(), msg.data);
-    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }
 
 void sim_receive(BasePlatform::BusSocket::JoinNotification &&msg)
@@ -374,4 +373,9 @@ void start_or_iface()
     register_parameter("etcs::isolated");
     register_parameter("etcs::failed");
     register_parameter("serie");
+}
+
+void update_or_iface()
+{
+    std::for_each(manager.parameters.begin(), manager.parameters.end(), [](ORserver::Parameter* p){p->Send();});
 }

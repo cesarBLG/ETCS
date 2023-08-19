@@ -14,8 +14,10 @@
 #ifdef __ANDROID__
 #include <android/log.h>
 #endif
-#ifdef EVC
-#include "../EVC/Euroradio/platform_terminals.h"
+#ifdef RADIO_TCP
+#include "../EVC/Euroradio/terminal.h"
+#include "../EVC/Euroradio/tcp_safe_connection.h"
+#include "ares_dns.h"
 #endif
 static std::atomic<bool>* quit_request_ptr;
 
@@ -66,8 +68,8 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
 #endif
-#ifdef EVC
-#if !SIMRAIL
+#if RADIO_TCP
+	ares_library_init(ARES_LIB_INIT_ALL);
 	for (auto *t : mobile_terminals) {
 		t->setup_connection = [t, this](communication_session *session) {
 			if (!t->registered || t->radio_network_id != RadioNetworkId)
@@ -78,9 +80,15 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 		};
 	}
 #endif
-#endif
 	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
+
+#if RADIO_TCP
+std::unique_ptr<DNSQuery> ConsolePlatform::query_dns(std::string hostname)
+{
+	return std::make_unique<AresQuery>(poller, hostname);
+}
+#endif
 
 ConsolePlatform::~ConsolePlatform() {
 	on_quit_request_list.clear();
@@ -92,6 +100,9 @@ ConsolePlatform::~ConsolePlatform() {
 #ifdef __unix__
 	signal(SIGTERM, SIG_DFL);
 	signal(SIGINT, SIG_DFL);
+#endif
+#if RADIO_TCP
+	ares_library_cleanup();
 #endif
 }
 

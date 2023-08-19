@@ -129,8 +129,11 @@ BusTcpBridgeManager::BusTcpBridgeManager(const std::string_view load_path, FdPol
             std::unique_ptr<BasePlatform::BusSocket> bus_socket = impl.open_bus_socket(busname, rxt);
             if (!bus_socket)
                 continue;
-            if (busname == "evc_sim")
-                tcphost = ORserver::discover_server_ip();
+            if (busname == "evc_sim") {
+                std::string disc = ORserver::discover_server_ip();
+                if (disc != "")
+                    tcphost = disc;
+            }
             auto sock = std::make_unique<TcpSocket>(tcphost, std::stoi(tcpport), fd);
             client_bridges.push_back(std::make_unique<BridgedTcpSocket>(std::move(bus_socket), std::move(sock), txt, newline_framing));
         } else {

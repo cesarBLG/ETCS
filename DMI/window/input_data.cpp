@@ -12,7 +12,7 @@
 #include "keyboard.h"
 #include "platform_runtime.h"
 input_data::input_data(std::string label_text, bool echo) : label(label_text), show_echo(echo), data_get([this] {return getData();}), 
-data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", softkeys ? 64 : 102, 50), enter_button("symbols/Navigation/NA_20.bmp", 40, 64, nullptr, "symbols/Navigation/NA_20.bmp")
+data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp", softkeys ? 64 : 102, 50), enter_button("symbols/Navigation/NA_20.bmp", 40, 82, nullptr, "symbols/Navigation/NA_20.bmp")
 {
     holdcursor = {0};
     if(label!="")
