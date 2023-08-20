@@ -416,17 +416,17 @@ void tcp_cfm::update()
         }
     }
 }
-void initialize_cfm(FdPoller &p)
+void initialize_cfm(BasePlatform *pl, FdPoller &po)
 {
 	ares_library_init(ARES_LIB_INIT_ALL);
-    poller = &p;
-    /*platform->on_quit().then([](){
+    poller = &po;
+    get_cfm_handle = [](std::weak_ptr<safe_radio_connection> conn)
+    {
+        auto cfm = std::make_shared<tcp_cfm>(conn, *poller);
+        cfm_connections.insert(cfm);
+        return cfm;
+    };
+    pl->on_quit().then([](){
         ares_library_cleanup();
-    }).detach();*/
-}
-std::shared_ptr<cfm> get_cfm_handle(std::weak_ptr<safe_radio_connection> conn)
-{
-    auto cfm = std::make_shared<tcp_cfm>(conn, *poller);
-    cfm_connections.insert(cfm);
-    return cfm;
+    }).detach();
 }

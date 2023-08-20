@@ -66,10 +66,10 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
 #endif
-#if RADIO_CFM
-	initialize_cfm(poller);
-#endif
 	PlatformUtil::DeferredFulfillment::list = &event_list;
+#if RADIO_CFM
+	initialize_cfm(this, poller);
+#endif
 }
 
 ConsolePlatform::~ConsolePlatform() {

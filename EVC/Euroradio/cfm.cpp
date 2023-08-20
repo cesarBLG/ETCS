@@ -11,6 +11,7 @@
 #include <memory>
 #include "terminal.h"
 std::set<std::shared_ptr<cfm>> cfm_connections;
+std::function<std::shared_ptr<cfm>(std::weak_ptr<safe_radio_connection>)> get_cfm_handle;
 
 void cfm::T_connect_indication(etcs_id id, std::vector<unsigned char> &&data)
 {

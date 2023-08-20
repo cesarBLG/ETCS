@@ -46,5 +46,5 @@ public:
 
 extern std::set<std::shared_ptr<cfm>> cfm_connections;
 
-std::shared_ptr<cfm> get_cfm_handle(std::weak_ptr<safe_radio_connection> conn);
+extern std::function<std::shared_ptr<cfm>(std::weak_ptr<safe_radio_connection>)> get_cfm_handle;
 void update_cfm();

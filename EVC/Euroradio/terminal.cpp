@@ -25,6 +25,7 @@ std::string radio_network_name(int id)
 mobile_terminal::mobile_terminal()
 {
     network_id = -1;
+    registered = mobile_data_available = csd_available = false;
 }
 
 void mobile_terminal::update()
