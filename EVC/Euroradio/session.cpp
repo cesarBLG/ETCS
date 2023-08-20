@@ -269,12 +269,12 @@ void communication_session::update()
 
 void communication_session::setup_connection()
 {
-    #if RADIO_TCP
+    #if RADIO_CFM
         connection = std::make_unique<safe_radio_connection>(this);
     #else
         connection = std::make_unique<bus_radio_connection>(this);
     #endif
-        connection->Sa_connect_request({{isRBC ? 1 : 0, (contact.country<<16)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
+        connection->Sa_connect_request({{isRBC ? 1u : 0u, (contact.country<<16)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
         tried++;
         rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
 }

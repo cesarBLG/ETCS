@@ -208,7 +208,7 @@ void tcp_cfm::data_received(std::string &&data)
         }
         if (header.PacketType == 2) {
             uint32_t responder_id = (ale[0]<<24)|(ale[1]<<16)|(ale[2]<<8)|ale[3];
-            int type = responder_id>>24;
+            unsigned int type = responder_id>>24;
             peer_address.id = {type, responder_id&16777215};
             ale.erase(ale.begin(), ale.begin() + 4);
             state = cfm_state::Connected;

@@ -20,8 +20,8 @@ enum struct safe_radio_status
 };
 struct etcs_id
 {
-    int type;
-    int id;
+    unsigned int type;
+    unsigned int id;
     bool operator<(const struct etcs_id &o) const
     {
         return ((type<<24)|id) < ((o.type<<24)|o.id); 
