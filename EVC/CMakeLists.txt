@@ -71,3 +71,9 @@ endif()
 if (WASM)
     set_target_properties(evc PROPERTIES SUFFIX ".wasm")
 endif()
+if (RADIO_CFM AND WIN32)
+    add_custom_command(TARGET evc POST_BUILD 
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:c-ares>              
+        $<TARGET_FILE_DIR:evc>)
+endif()

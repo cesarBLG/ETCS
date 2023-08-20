@@ -8,13 +8,13 @@ else {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         if (buildAsApplication) {
             applicationId "com.etcs.dmi"
         }
         minSdkVersion 16
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 6
         versionName "0.6"
         externalNativeBuild {
