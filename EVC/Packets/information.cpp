@@ -192,8 +192,17 @@ void session_management_information::handle()
         contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
         if (session.Q_RBC == Q_RBC_t::EstablishSession) {
             set_supervising_rbc(info);
-            if (supervising_rbc && mode != Mode::SH && mode != Mode::PS)
-                supervising_rbc->open(0);
+            if (supervising_rbc && mode != Mode::SH && mode != Mode::PS) {
+                bool radio = false;
+                for (auto *t : mobile_terminals) {
+                    if (t->powered) {
+                        radio = true;
+                        break;
+                    }
+                }
+                if (radio)
+                    supervising_rbc->open(0);
+            }
         } else {
             terminate_session(info);
         }

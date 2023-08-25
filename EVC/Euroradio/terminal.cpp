@@ -8,7 +8,7 @@
  */
 #include "terminal.h"
 #include "platform_runtime.h"
-mobile_terminal *mobile_terminals[2] = {new mobile_terminal(), new mobile_terminal()};
+std::vector<mobile_terminal*> mobile_terminals = {new mobile_terminal(), new mobile_terminal()};
 
 std::map<int, std::string> RadioNetworkNames;
 optional<std::vector<int>> AllowedRadioNetworks;
@@ -24,25 +24,32 @@ std::string radio_network_name(int id)
 
 mobile_terminal::mobile_terminal()
 {
+    powered = true;
     network_id = -1;
     registered = mobile_data_available = csd_available = false;
 }
 
 void mobile_terminal::update()
 {
-    if (cs_connection && cs_connection->expired())
-        cs_connection = {};
+    if (cs_connection) {
+        if (cs_connection->expired())
+            cs_connection = {};
+    }
     for (auto it=ps_connections.begin(); it != ps_connections.end();) {
+
         if (it->expired())
             it = ps_connections.erase(it);
         else
             ++it;
     }
-
-    if (!registered && last_register_order && get_milliseconds() - *last_register_order > 4000)
+    if (powered && !registered && last_register_order && get_milliseconds() - *last_register_order > 4000)
         registered = true;
+
     if (registered && last_register_order)
         last_register_order = {};
+    
+    if (!powered)
+        registered = false;
 
     csd_available = mobile_data_available = registered;
         

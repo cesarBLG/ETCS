@@ -41,7 +41,7 @@ public:
 	virtual void T_connect_request(called_address address, etcs_id calling_address, std::vector<unsigned char> &&data) = 0;
     virtual void T_data_request(std::vector<unsigned char> &&ale) = 0;
     virtual void T_disconnect_request(std::vector<unsigned char> &&data) = 0;
-    virtual void update() {}
+    virtual void update();
 };
 
 extern std::set<std::shared_ptr<cfm>> cfm_connections;

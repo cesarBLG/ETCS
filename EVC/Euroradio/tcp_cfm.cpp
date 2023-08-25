@@ -98,7 +98,7 @@ void tcp_cfm::T_connect_request(called_address address, etcs_id calling_address,
     own_id = calling_address;
     peer_address = address;
     au1 = std::move(data);
-    if ((peer_address.id.id & 0x3FFF) == 0x3FF) {
+    if ((peer_address.id.id & 0x3FFF) == 0x3FFF) {
         connect_dns({"", ""});
     } else {
         if (connection_modes[peer_address.id] == radio_connection_mode::CS) {
@@ -171,57 +171,57 @@ void tcp_cfm::T_disconnect_request(std::vector<unsigned char> &&data)
 void tcp_cfm::data_received(std::string &&data)
 {
     rx_promise = socket->receive().then(std::bind(&tcp_cfm::data_received, this, std::placeholders::_1));
-    
+
     if (rx_buffer.empty())
         rx_buffer = std::move(data);
     else
         rx_buffer += std::move(data);
 
-    while (true) {
-        if (rx_buffer.size() < 2)
-            return;
-
-        size_t size = (((size_t)rx_buffer[0])<<8)|(rx_buffer[1]);
-
+    while (rx_buffer.size() >= 2) {
+        size_t size = ((rx_buffer[0]&255)<<8)|(rx_buffer[1]&255);
         if (rx_buffer.size() < size + 2)
             return;
 
         std::vector<unsigned char> ale;
         ale.insert(ale.end(), rx_buffer.begin(), rx_buffer.begin() + size + 2);
         rx_buffer.erase(0, size + 2);
-
-        ALE_header header(ale);
-        uint16_t checksum = crc16(ale.data(), 8);
-        if (header.Checksum != checksum) {
-            platform->debug_print("Bad checksum");
-            rx_promise = {};
-            dns_query = {};
-            dns_timer = {};
-            socket = nullptr;
-            connect();
-            return;
-        }
-        ale.erase(ale.begin(), ale.begin() + 10);
-        if (header.AppType != (peer_address.id.type == 1 ? 16 : 17)) {
-            handle_error(6, 1);
-            return;
-        }
-        if (header.PacketType == 2) {
-            uint32_t responder_id = (ale[0]<<24)|(ale[1]<<16)|(ale[2]<<8)|ale[3];
-            unsigned int type = responder_id>>24;
-            peer_address.id = {type, responder_id&16777215};
-            ale.erase(ale.begin(), ale.begin() + 4);
-            state = cfm_state::Connected;
-            T_connect_indication(peer_address.id, std::move(ale));
-        } else if (header.PacketType == 3) {
-            T_data_indication(std::move(ale));
-        } else if (header.PacketType == 4) {
-            T_disconnect_indication(std::move(ale));
-            rx_promise = {};
-            dns_query = {};
-            dns_timer = {};
-            state = cfm_state::Releasing;
-        }
+        parse_ALE(std::move(ale));
+    }
+}
+void tcp_cfm::parse_ALE(std::vector<unsigned char> &&ale)
+{
+    ALE_header header(ale);
+    uint16_t checksum = crc16(ale.data(), 8);
+    if (header.Checksum != checksum) {
+        platform->debug_print("Bad checksum");
+        rx_buffer.clear();
+        rx_promise = {};
+        dns_query = {};
+        dns_timer = {};
+        socket = nullptr;
+        connect();
+        return;
+    }
+    ale.erase(ale.begin(), ale.begin() + 10);
+    if (header.AppType != (peer_address.id.type == 1 ? 16 : 17)) {
+        handle_error(6, 1);
+        return;
+    }
+    if (header.PacketType == 2) {
+        uint32_t responder_id = (ale[0]<<24)|(ale[1]<<16)|(ale[2]<<8)|ale[3];
+        unsigned int type = responder_id>>24;
+        peer_address.id = {type, responder_id&16777215};
+        ale.erase(ale.begin(), ale.begin() + 4);
+        state = cfm_state::Connected;
+        T_connect_indication(peer_address.id, std::move(ale));
+    } else if (header.PacketType == 3) {
+        T_data_indication(std::move(ale));
+    } else if (header.PacketType == 4) {
+        T_disconnect_indication(std::move(ale));
+        rx_promise = {};
+        dns_query = {};
+        dns_timer = {};
+        state = cfm_state::Releasing;
     }
 }
 
@@ -254,8 +254,8 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
         int port = config.find("port") != config.end() ? stoi(config["port"]) : 0x7911;
         connection_modes[peer_address.id] = radio_connection_mode::PS;
         platform->debug_print("Connecting to RBC at "+ip+":"+std::to_string(port));
-        platform->debug_print("Connection parameters: "+dns.txt);
         params = {ip, port, config["tp"]};
+        connection_mode = radio_connection_mode::PS;
         connect();
     } else {
         if (connection_modes[peer_address.id] == radio_connection_mode::PS && config["txm"] != "CS") {
@@ -273,7 +273,7 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
             }
         }
         for (mobile_terminal *terminal : mobile_terminals) {
-            if (terminal->csd_available) {
+            if (terminal->csd_available && !terminal->cs_connection) {
                 terminal->cs_connection = weak_from_this();
                 t = terminal;
                 break;
@@ -284,6 +284,7 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
             return;
         }
         // CSD GSM-R call
+        connection_mode = radio_connection_mode::CS;
         connection_modes[peer_address.id] = radio_connection_mode::CS;
         // Use TCP anyway, but derive address from phone number
         // as CS mode is unsupported
@@ -312,10 +313,11 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
         params = {ip, port, ""};
         connect();
     }
+    if (dns.txt != "")
+        platform->debug_print("Connection parameters: "+dns.txt);
 }
 void tcp_cfm::connect()
 {
-    connection_mode = radio_connection_mode::PS;
     int sock = ::socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         handle_error(1, 3);
@@ -387,7 +389,21 @@ void tcp_cfm::update()
     if (socket != nullptr && socket->is_failed()) {
         handle_error(1, 1);
     }
-    if ((peer_address.id.id & 0x3FF) != 0x3FF && poll_dns && polling_dns_query == nullptr) {
+    for (mobile_terminal *terminal : mobile_terminals) {
+        for (auto conn : terminal->ps_connections) {
+            auto *ptr = conn.lock().get();
+            if (ptr == this && !terminal->mobile_data_available) {
+                if (connection_mode == radio_connection_mode::PS)
+                    handle_error(1, 1);
+                dns_query = {};
+                polling_dns_query = {};
+            }
+        }
+        if (terminal->cs_connection && terminal->cs_connection->lock().get() == this && !terminal->csd_available) {
+            handle_error(1, 1);
+        }
+    }
+    if ((peer_address.id.id & 0x3FFF) != 0x3FFF && poll_dns && polling_dns_query == nullptr) {
         for (mobile_terminal *t : mobile_terminals) {
             if (t->mobile_data_available) {
                 auto ptr = weak_from_this();

@@ -41,6 +41,11 @@ void cfm::T_disconnect_indication(int r, int subr)
     else
         state = cfm_state::Released;
 }
+void cfm::update()
+{
+    if (connection.expired())
+        state = cfm_state::Released;
+}
 
 void update_cfm()
 {

@@ -304,6 +304,14 @@ void SetParameters()
         };
         manager.AddParameter(p);
     }
+
+    p = new ORserver::Parameter("gsmr::active");
+    p->SetValue = [](std::string val) {
+        for (auto *t : mobile_terminals) {
+            t->powered = val != "0";
+        }
+    };
+    manager.AddParameter(p);
 }
 
 std::unique_ptr<ORTSClientWrapper> sim_wrapper;
@@ -372,6 +380,7 @@ void start_or_iface()
     register_parameter("stm::+::isolated");
     register_parameter("etcs::isolated");
     register_parameter("etcs::failed");
+    register_parameter("gsmr::active");
     register_parameter("serie");
 }
 

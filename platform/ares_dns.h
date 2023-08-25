@@ -29,7 +29,7 @@ class AresQuery : public DNSQuery
     std::optional<std::string> a;
     std::optional<std::string> txt;
     static void callback_a(void *arg, int status, int timeouts, struct hostent *host)
-    {    
+    {
         AresQuery *q = (AresQuery*)arg;        
         if (status == ARES_SUCCESS && host->h_length > 0) {
             char ip[INET_ADDRSTRLEN];
@@ -61,12 +61,14 @@ public:
     AresQuery(FdPoller &poller, std::string hostname) : DNSQuery(hostname), poller(poller)
     {
         ares_init(&channel);
+        ares_set_servers_csv(channel, "8.8.8.8,8.8.4.4");
         ares_gethostbyname(channel, hostname.c_str(), AF_INET, callback_a, this);
         ares_query(channel, hostname.c_str(), 1, 16, callback_txt, this);
         process();
     }
     ~AresQuery()
     {
+        promise = {};
         ares_destroy(channel);
     }
 protected:
@@ -83,14 +85,15 @@ protected:
             | (ARES_GETSOCK_WRITABLE(flags, i) ? POLLOUT : 0)).then([this, fd](int rev){
                 ares_process_fd(channel, (rev & POLLIN) ? fd : ARES_SOCKET_BAD, (rev & POLLOUT) ? fd : ARES_SOCKET_BAD);
                 promises.erase(fd);
-                if (promises.empty()) process();
+                if (promises.empty())
+                    process();
             });
         }
         timeval req;
         req.tv_sec = 1;
         req.tv_usec = 0;
         timeval tv;
-        ares_timeout(channel, &req, &tv);
+        tv = *ares_timeout(channel, &req, &tv);
         timeout = platform->delay(tv.tv_sec*1000 + tv.tv_usec/1000).then([this](){process();});
     }
 };

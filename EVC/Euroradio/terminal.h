@@ -40,6 +40,7 @@ struct contact_info
 class mobile_terminal
 {
 public:
+    bool powered;
     std::list<std::weak_ptr<cfm>> ps_connections;
     std::optional<std::weak_ptr<cfm>> cs_connection;
     bool csd_available;
@@ -52,7 +53,7 @@ public:
     void network_register(int network);
     void set_mobile_data(bool active);
 };
-extern mobile_terminal *mobile_terminals[2];
+extern std::vector<mobile_terminal*> mobile_terminals;
 extern std::map<int, std::string> RadioNetworkNames;
 extern optional<std::vector<int>> AllowedRadioNetworks;
 extern int RadioNetworkId;

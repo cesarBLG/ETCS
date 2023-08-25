@@ -187,8 +187,10 @@ void level_transition_received(level_transition_information info)
     }
     level_acknowledgeable = false;
     level_timer_started = false;
-    transition_buffer.clear();
-    transition_buffer.push_back({});
+    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level || (info.leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc != info.leveldata.nid_ntc)) {
+        transition_buffer.clear();
+        transition_buffer.push_back({});
+    }
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {
         ongoing_transition = {};
         STM_max_speed = {};
@@ -260,9 +262,13 @@ void level_transition_information::set_leveldata(std::vector<target_level_inform
             }
         }
         if (p.level == Level::N2) {
-            for (auto *t : mobile_terminals) {
-                leveldata = p;
-                return;
+            if (unsupported_levels.find(2) == unsupported_levels.end()) {
+                for (auto *t : mobile_terminals) {
+                    if (t->powered) {
+                        leveldata = p;
+                        return;
+                    }
+                }
             }
         }
         if (p.level == Level::N0 || p.level == Level::N1) {

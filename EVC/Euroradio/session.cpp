@@ -220,24 +220,39 @@ void communication_session::update()
             } else {
                 setup_connection();
             }
-        }
-        if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {
-            train_data_ack_sent = true;
-            train_running_number_sent = true;
-            auto *tdm = new validated_train_data_message();
-            fill_message(tdm);
-            auto *td = new TrainDataPacket();
-            td->NC_CDTRAIN.set_value(cant_deficiency);
-            td->NC_TRAIN.rawdata = 0;
-            for (int t : other_train_categories) {
-                td->NC_TRAIN.rawdata |= 1<<t;
+        } else if (!closing) {    
+            if ((train_data_valid && train_data_ack_pending && !train_data_ack_sent) || (VERSION_X(version) == 1 && train_running_number_valid && !train_running_number_sent)) {
+                train_data_ack_sent = true;
+                train_running_number_sent = true;
+                auto *tdm = new validated_train_data_message();
+                fill_message(tdm);
+                auto *td = new TrainDataPacket();
+                td->NC_CDTRAIN.set_value(cant_deficiency);
+                td->NC_TRAIN.rawdata = 0;
+                for (int t : other_train_categories) {
+                    td->NC_TRAIN.rawdata |= 1<<t;
+                }
+                td->L_TRAIN.set_value(L_TRAIN);
+                td->V_MAXTRAIN.set_value(V_train);
+                td->N_AXLE.rawdata = axle_number;
+                td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
+                tdm->TrainData = std::shared_ptr<TrainDataPacket>(td);
+                if (VERSION_X(version) != 1) {
+                    auto *trn = new TrainRunningNumber();
+                    trn->NID_OPERATIONAL.rawdata = 0;
+                    int tmp = train_running_number;
+                    for (int i=0; i<8; i++) {
+                        trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
+                        tmp /= 10;
+                    }
+                    tdm->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+                }
+                send(std::shared_ptr<validated_train_data_message>(tdm));
             }
-            td->L_TRAIN.set_value(L_TRAIN);
-            td->V_MAXTRAIN.set_value(V_train);
-            td->N_AXLE.rawdata = axle_number;
-            td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
-            tdm->TrainData = std::shared_ptr<TrainDataPacket>(td);
-            if (VERSION_X(version) != 1) {
+            if (!train_running_number_sent && train_running_number_valid) {
+                train_running_number_sent = true;
+                auto *rep = new position_report();
+                fill_message(rep);
                 auto *trn = new TrainRunningNumber();
                 trn->NID_OPERATIONAL.rawdata = 0;
                 int tmp = train_running_number;
@@ -245,23 +260,9 @@ void communication_session::update()
                     trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
                     tmp /= 10;
                 }
-                tdm->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+                rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
+                send(std::shared_ptr<euroradio_message_traintotrack>(rep));
             }
-            send(std::shared_ptr<validated_train_data_message>(tdm));
-        }
-        if (!train_running_number_sent && train_running_number_valid) {
-            train_running_number_sent = true;
-            auto *rep = new position_report();
-            fill_message(rep);
-            auto *trn = new TrainRunningNumber();
-            trn->NID_OPERATIONAL.rawdata = 0;
-            int tmp = train_running_number;
-            for (int i=0; i<8; i++) {
-                trn->NID_OPERATIONAL.rawdata |= (tmp % 10)<<(4*i);
-                tmp /= 10;
-            }
-            rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
-            send(std::shared_ptr<euroradio_message_traintotrack>(rep));
         }
     }
     update_ack();
@@ -274,7 +275,7 @@ void communication_session::setup_connection()
     #else
         connection = std::make_unique<bus_radio_connection>(this);
     #endif
-        connection->Sa_connect_request({{isRBC ? 1u : 0u, (contact.country<<16)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
+        connection->Sa_connect_request({{isRBC ? 1u : 0u, (contact.country<<14)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
         tried++;
         rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
 }
@@ -435,7 +436,7 @@ void load_contact_info()
 void set_rbc_contact(contact_info contact)
 {
     rbc_contact = contact;
-    rbc_contact_valid = true;
+    rbc_contact_valid = contact.id != 0x3FFF;
     json j;
     j["NID_C"] = rbc_contact->country;
     j["NID_RBC"] = rbc_contact->id;
@@ -456,7 +457,7 @@ void set_supervising_rbc(contact_info info)
             return;
     } else if (info.phone_number == NID_RADIO_t::UseShortNumber) {
         if (info.country == 0 && info.id == 0)
-            info.id = 0x3FF;
+            info.id = 0x3FFF;
     }
     if (supervising_rbc && supervising_rbc->contact == info)
         return;

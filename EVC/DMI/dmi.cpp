@@ -183,7 +183,7 @@ void dmi_update_func()
     j["CurrentMonitoringStatus"] = (int)monitoring;
     j["CurrentSupervisionStatus"] = (int)supervision;
     j["CurrentMode"] = (int)mode;
-    j["CurrentLevel"] = (int)level;
+    j["CurrentLevel"] = (int)(level_valid ? level : Level::Unknown);
     if (level == Level::NTC)
         j["CurrentNTC"] = nid_ntc;
     j["TimeToPermittedS"] = TTP;

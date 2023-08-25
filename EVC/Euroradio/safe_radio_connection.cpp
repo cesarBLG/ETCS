@@ -115,6 +115,13 @@ bool safe_radio_connection::validate_sapdu(std::vector<unsigned char> &data)
         Sa_handle_error(5, 1);
         return false;
     }
+    if (header.MTI == 2) {
+        etcs_id id = {header.ETY, (unsigned int)((data[1]<<16) | (data[2]<<8) | data[3])};
+        if (peer_address.id.id != 0x3FFF && (id.id != peer_address.id.id || id.type != peer_address.id.type)) {
+            Sa_handle_error(8, 4);
+            return false;
+        }
+    }
     if (header.MTI != 1 && header.MTI != 8) {
         uint64_t mac = 0;
         for (int i=0; i<8; i++) {
@@ -140,9 +147,15 @@ bool safe_radio_connection::validate_sapdu(std::vector<unsigned char> &data)
 
 void safe_radio_connection::T_connect_indication(etcs_id id, std::vector<unsigned char> &&data)
 {
-    peer_address.id = id;
     if (!validate_sapdu(data))
         return;
+    peer_address.id = id;
+    if (session != nullptr) {
+        session->contact.country = id.id>>14;
+        session->contact.id = id.id & 0x3FFF;
+        if (session == supervising_rbc)
+            set_rbc_contact(session->contact);
+    }
     PDU_header header(data[0]);
     if (header.MTI == 2) {
         PDU_header auth;

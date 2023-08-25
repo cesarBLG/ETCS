@@ -55,6 +55,7 @@ class tcp_cfm : public cfm
     int seqno_tx;
     std::vector<unsigned char> au1;
     void data_received(std::string &&msg);
+    void parse_ALE(std::vector<unsigned char> &&data);
 	ALE_header fill_ALE(std::vector<unsigned char> &data, int type);
     void connect();
     void connect_dns(dns_entry &&e);
