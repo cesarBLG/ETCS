@@ -148,7 +148,10 @@ struct MA_message : euroradio_message
         T_TRAIN.copy(w);
         M_ACK.copy(w);
         NID_LRBG.copy(w);
-        MA->copy(w);
+        if (w.write_mode)
+            MA->write_to(w);
+        else
+            MA->copy(w);
     }
 };
 struct MA_shortening_message : euroradio_message
@@ -166,7 +169,10 @@ struct MA_shortening_message : euroradio_message
         T_TRAIN.copy(w);
         M_ACK.copy(w);
         NID_LRBG.copy(w);
-        MA->copy(w);
+        if (w.write_mode)
+            MA->write_to(w);
+        else
+            MA->copy(w);
     }
 };
 struct TR_exit_recognition : euroradio_message
@@ -310,7 +316,10 @@ struct MA_shifted_message : euroradio_message
         NID_LRBG.copy(w);
         Q_SCALE.copy(w);
         D_REF.copy(w);
-        MA->copy(w);
+        if (w.write_mode)
+            MA->write_to(w);
+        else
+            MA->copy(w);
     }
 };
 struct ack_session_termination : euroradio_message
@@ -498,7 +507,10 @@ struct validated_train_data_message : euroradio_message_traintotrack
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
         copy_position_report(r);
-        TrainData->copy(r);
+        if (r.write_mode)
+            TrainData->write_to(r);
+        else
+            TrainData->copy(r);
     }
 };
 struct no_compatible_session_supported : euroradio_message_traintotrack
@@ -537,7 +549,10 @@ struct communication_session_established : euroradio_message_traintotrack
         L_MESSAGE.copy(r);
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
-        SupportedVersions->copy(r);
+        if (r.write_mode)
+            SupportedVersions->write_to(r);
+        else
+            SupportedVersions->copy(r);
     }
 };
 namespace V1
@@ -557,7 +572,10 @@ struct communication_session_established : euroradio_message_traintotrack
         L_MESSAGE.copy(r);
         T_TRAIN.copy(r);
         NID_ENGINE.copy(r);
-        PhoneNumbers->copy(r);
+        if (r.write_mode)
+            PhoneNumbers->write_to(r);
+        else
+            PhoneNumbers->copy(r);
     }
 };  
 }

@@ -37,9 +37,11 @@ struct ETCS_packet
     virtual void write_to(bit_manipulator &w)
     {
         int start = w.position;
+        int log_start = w.log_entries.size();
         copy(w);
         L_PACKET.rawdata = w.position-start;
         w.replace(&L_PACKET, start+8);
+        w.log_entries[log_start+1].second = std::to_string(L_PACKET.rawdata);
     }
     static ETCS_packet *construct(bit_manipulator &r, int m_version);
 };
@@ -69,8 +71,10 @@ struct ETCS_directional_packet : ETCS_packet
     void write_to(bit_manipulator &w) override
     {
         int start = w.position;
+        int log_start = w.log_entries.size();
         copy(w);
         L_PACKET.rawdata = w.position-start;
         w.replace(&L_PACKET, start+10);
+        w.log_entries[log_start+2].second = std::to_string(L_PACKET.rawdata);
     }
 };
