@@ -17,27 +17,22 @@ class TcpSocket : private PlatformUtil::NoCopy
 {
 private:
 	int peer_fd;
-	bool connected;
 	PlatformUtil::FulfillerBufferedQueue<std::string> rx_list;
 	std::string tx_buffer;
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;
-	PlatformUtil::Promise<short> connect_promise;
+	bool rx_pending, tx_pending;
 	FdPoller* poller;
 
 	void mark_nonblocking(int fd);
 	void close_socket();
 	void handle_error();
 	void update();
-	void create_and_connect(const std::string_view hostname, int port);
-public:
-	bool rx_pending, tx_pending;
 	void connect(const std::string_view hostname, int port);
+public:
 	TcpSocket(const std::string_view hostname, int port, FdPoller &p);
 	TcpSocket(int fd, FdPoller &p);
 	~TcpSocket();
-	bool is_connected();
-	bool is_failed();
 	void send(const std::string_view data);
 	PlatformUtil::Promise<std::string> receive();
 };

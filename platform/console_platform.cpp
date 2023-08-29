@@ -14,9 +14,7 @@
 #ifdef __ANDROID__
 #include <android/log.h>
 #endif
-#ifdef RADIO_CFM
-#include "../EVC/Euroradio/tcp_cfm.h"
-#endif
+
 static std::atomic<bool>* quit_request_ptr;
 
 static void sigterm_handler(int sig) {
@@ -67,9 +65,6 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 	signal(SIGINT, &sigterm_handler);
 #endif
 	PlatformUtil::DeferredFulfillment::list = &event_list;
-#if RADIO_CFM
-	initialize_cfm(this, poller);
-#endif
 }
 
 ConsolePlatform::~ConsolePlatform() {
@@ -130,6 +125,10 @@ PlatformUtil::Promise<void> ConsolePlatform::on_quit() {
 
 std::unique_ptr<ConsolePlatform::BusSocket> ConsolePlatform::open_socket(const std::string_view channel, uint32_t tid) {
 	return bus_socket_impl.open_bus_socket(channel, tid);
+}
+
+ConsoleFdPoller& ConsolePlatform::get_poller() {
+	return poller;
 }
 
 void ConsolePlatform::event_loop() {
