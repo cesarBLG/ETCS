@@ -112,8 +112,6 @@ void perform_transition()
         transition_border = lti.start;
     else
         transition_border = {};
-    priority_levels = lti.priority_table;
-    priority_levels_valid = true;
     ongoing_transition = {};
     STM_max_speed = {};
     STM_system_speed = {};
@@ -144,6 +142,21 @@ void perform_transition()
         pos_report_params = {};
         ma_params = {30000, (int64_t)(T_CYCRQSTD*1000), 30000};
         taf_request = {};
+    }
+    if (prevlevel == Level::N2 || prevlevel == Level::N3) {
+        bool supported = false;
+        for (auto &lev : lti.priority_table) {
+            if (lev.level == Level::N2 || lev.level == Level::N3) {
+                supported = true;
+                break;
+            }
+        }
+        if (!supported) {
+            for (auto &kvp : active_sessions) {
+                if (kvp.second->status == session_status::Establishing)
+                    kvp.second->finalize();
+            }
+        }
     }
     save_level();
 }
@@ -191,22 +204,20 @@ void level_transition_received(level_transition_information info)
         transition_buffer.clear();
         transition_buffer.push_back({});
     }
+    priority_levels = info.priority_table;
+    priority_levels_valid = true;
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {
         ongoing_transition = {};
         STM_max_speed = {};
         STM_system_speed = {};
-        priority_levels = info.priority_table;
-        priority_levels_valid = true;
         save_level();
         return;
     }
     if (mode == Mode::SH || mode == Mode::PS) {
         sh_transition = info;
-        priority_levels = info.priority_table;
         ongoing_transition = {};
         STM_max_speed = {};
         STM_system_speed = {};
-        priority_levels_valid = true;
         save_level();
         return;
     }

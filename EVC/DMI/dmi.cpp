@@ -23,6 +23,7 @@
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../TrackConditions/track_condition.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "track_ahead_free.h"
 #include "text_message.h"
 #include "windows.h"
@@ -46,11 +47,7 @@ void dmi_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
 }
 void start_dmi()
 {
-    dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
-    if (dmi_socket) {
-        dmi_socket->receive().then(dmi_receive_handler).detach();
-        platform->delay(100).then(dmi_update_func).detach();
-    }
+    platform->delay(100).then(dmi_update_func).detach();
 }
 extern double V_target;
 extern double V_perm;
@@ -174,6 +171,20 @@ void dmi_update_func()
     sendtoor = get_milliseconds() - lastor > 250;
     if (sendtoor) lastor = get_milliseconds();
     json j;
+    if ((!cab_active[0] && !cab_active[1]) || mode == Mode::NP || mode == Mode::PS || mode == Mode::SL) {
+        dmi_socket = nullptr;
+        platform->delay(1000).then(dmi_update_func).detach();
+        return;
+    }
+    if (!dmi_socket) {
+        dmi_socket = platform->open_socket("evc_dmi", BasePlatform::BusSocket::PeerId::fourcc("EVC"));
+        if (dmi_socket) {
+            dmi_socket->receive().then(dmi_receive_handler).detach();
+        } else {
+            platform->delay(5000).then(dmi_update_func).detach();
+            return;
+        }
+    }
     j["AllowedSpeedMpS"] = V_perm;
     j["InterventionSpeedMpS"] = V_sbi;
     j["TargetSpeedMpS"] = V_target;

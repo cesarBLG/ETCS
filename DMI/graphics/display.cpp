@@ -17,13 +17,11 @@ using namespace std;
 unordered_set<window*> active_windows;
 unordered_set<window*> old_windows;
 extern Mode mode;
+bool dmi_active;
 void displayETCS()
 {
-    if (mode == Mode::SL || mode == Mode::NP || mode == Mode::PS)
-    {
-        return;
-    }
     updateAcks();
+    if (!dmi_active) return;
     for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
     {
         window *w = *it;

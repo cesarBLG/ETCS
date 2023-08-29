@@ -24,8 +24,14 @@ bool status_changed;
 void update_SoM()
 {
     som_step save_status = som_status;
-    if (som_active && !cab_active[0] && !cab_active[1])
+    if (som_active && !cab_active[0] && !cab_active[1]) {
+        for (auto &kvp : active_sessions) {
+            // TODO: Check against SRS
+            // 3.5.3.8 only mentions stop trying to establish
+            kvp.second->close();
+        }
         desk_closed_som();
+    }
     if (mode != Mode::SB || (!cab_active[0] && !cab_active[1])) {
         som_active = false;
         som_status = S0;

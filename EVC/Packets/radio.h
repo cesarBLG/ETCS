@@ -629,6 +629,21 @@ struct taf_granted : euroradio_message_traintotrack
         copy_position_report(r);
     }
 };
+struct end_mission_message : euroradio_message_traintotrack
+{
+    end_mission_message()
+    {
+        NID_MESSAGE.rawdata = 150;
+    }
+    void copy(bit_manipulator &r) override
+    {
+        NID_MESSAGE.copy(r);
+        L_MESSAGE.copy(r);
+        T_TRAIN.copy(r);
+        NID_ENGINE.copy(r);
+        copy_position_report(r);
+    }
+};
 struct text_message_ack_message : euroradio_message_traintotrack
 {
     NID_TEXTMESSAGE_t NID_TEXTMESSAGE;

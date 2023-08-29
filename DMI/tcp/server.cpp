@@ -301,8 +301,13 @@ std::unique_ptr<BasePlatform::BusSocket> evc_socket;
 void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
 {
     evc_socket->receive().then(data_received).detach();
+    extern bool dmi_active;
     if (std::holds_alternative<BasePlatform::BusSocket::Message>(result))
         parseData(std::move(std::get<BasePlatform::BusSocket::Message>(result).data));
+    else if (std::holds_alternative<BasePlatform::BusSocket::JoinNotification>(result))
+        dmi_active = true;
+    else if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result))
+        dmi_active = false;
 }
 void write_command(std::string command, std::string value)
 {

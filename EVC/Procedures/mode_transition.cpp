@@ -350,12 +350,17 @@ void update_mode_status()
             end_mission = true;
         if (end_mission) {
             ongoing_mission = false;
-            if (handing_over_rbc)
-                handing_over_rbc->close();
-            if (accepting_rbc)
-                accepting_rbc->close();
-            if (supervising_rbc)
-                supervising_rbc->close();
+            for (auto &kvp : active_sessions) {
+                if (!kvp.second->isRBC)
+                    kvp.second->close();
+                else if (kvp.second->status == session_status::Establishing)
+                    kvp.second->finalize();
+            }
+            if (supervising_rbc) {
+                auto *msg = new end_mission_message();
+                fill_message(msg);
+                supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
+            }
         }
         std::vector<deleted_information> info = deleted_informations[mode];
         for (int i=0; i<info.size(); i++) {

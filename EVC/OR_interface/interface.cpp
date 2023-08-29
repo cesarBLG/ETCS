@@ -33,7 +33,6 @@ extern distance d_estfront;
 extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
-extern bool sleep_signal;
 double or_dist;
 int TimeOffset::offset;
 ORserver::ParameterManager manager;
