@@ -77,8 +77,8 @@ void bus_radio_connection::Sa_connect_request(const called_address &address, con
         rbc += from_bcd(peer_address.phone_number);
     socket = platform->open_socket(rbc, BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
-        Sa_connect_confirm(peer_address.id);
         rx_promise = socket->receive().then(std::bind(&bus_radio_connection::data_receive, this, std::placeholders::_1));
+        bus_peer = 0;
     } else {
         Sa_handle_error(1, 1);
     }
@@ -87,9 +87,28 @@ void bus_radio_connection::data_receive(BasePlatform::BusSocket::ReceiveResult &
 {
     rx_promise = socket->receive().then(std::bind(&bus_radio_connection::data_receive, this, std::placeholders::_1));
 
+    if (std::holds_alternative<BasePlatform::BusSocket::JoinNotification>(result)) {
+        auto &join = std::get<BasePlatform::BusSocket::JoinNotification>(result);
+        if (bus_peer == 0 && join.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("RBC")) {
+            bus_peer = join.peer.uid;
+            Sa_connect_confirm(peer_address.id);
+        }
+    }
+
+    if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result)) {
+        auto &leave = std::get<BasePlatform::BusSocket::LeaveNotification>(result);
+        if (leave.peer.uid == bus_peer)
+            Sa_handle_error(1, 1);
+    }
+
     if (!std::holds_alternative<BasePlatform::BusSocket::Message>(result))
         return;
-    auto data = std::move(std::get<BasePlatform::BusSocket::Message>(result).data);
+
+    auto &msg = std::get<BasePlatform::BusSocket::Message>(result);
+    if (msg.peer.uid != bus_peer)
+        return;
+
+    auto data = std::move(msg.data);
 
     if (rx_buffer.empty())
         rx_buffer = std::move(data);
@@ -121,10 +140,12 @@ void bus_radio_connection::Sa_disconnect_request(int reason, int subreason)
     radio_connection::Sa_disconnect_request(reason, subreason);
     socket = nullptr;
     rx_promise = {};
+    rx_buffer.clear();
 }
 void bus_radio_connection::Sa_handle_error(int reason, int subr)
 {
     Sa_disconnect_indication(reason, subr);
     socket = nullptr;
     rx_promise = {};
+    rx_buffer.clear();
 }

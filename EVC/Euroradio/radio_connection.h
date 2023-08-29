@@ -45,6 +45,7 @@ protected:
     void Sa_data_indication(std::vector<unsigned char>&& data);
     void Sa_disconnect_indication(int reason, int subreason);
     virtual void Sa_handle_error(int reason, int subreason) = 0;
+    uint32_t bus_peer;
 public:
     communication_session *session;
     safe_radio_status status = safe_radio_status::Disconnected;
