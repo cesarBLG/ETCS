@@ -77,7 +77,7 @@ void bus_radio_connection::Sa_connect_request(const called_address &address, con
         rbc += from_bcd(peer_address.phone_number);
     socket = platform->open_socket(rbc, BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
-        status = safe_radio_status::Connected;
+        Sa_connect_confirm(peer_address.id);
         rx_promise = socket->receive().then(std::bind(&bus_radio_connection::data_receive, this, std::placeholders::_1));
     } else {
         Sa_handle_error(1, 1);
