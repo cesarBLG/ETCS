@@ -31,9 +31,7 @@
 #include "Euroradio/terminal.h"
 #include "platform_runtime.h"
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#elif defined(_WIN32)
+#if defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
