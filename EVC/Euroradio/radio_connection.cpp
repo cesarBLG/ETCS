@@ -77,6 +77,7 @@ void bus_radio_connection::Sa_connect_request(const called_address &address, con
         rbc += from_bcd(peer_address.phone_number);
     socket = platform->open_socket(rbc, BasePlatform::BusSocket::PeerId::fourcc("EVC"));
     if (socket) {
+        Sa_connect_confirm(peer_address.id);
         rx_promise = socket->receive().then(std::bind(&bus_radio_connection::data_receive, this, std::placeholders::_1));
     } else {
         Sa_handle_error(1, 1);
@@ -86,18 +87,8 @@ void bus_radio_connection::data_receive(BasePlatform::BusSocket::ReceiveResult &
 {
     rx_promise = socket->receive().then(std::bind(&bus_radio_connection::data_receive, this, std::placeholders::_1));
 
-    if (std::holds_alternative<BasePlatform::BusSocket::JoinNotification>(result)) {
-        status = safe_radio_status::Connected;
+    if (!std::holds_alternative<BasePlatform::BusSocket::Message>(result))
         return;
-    }
-    if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result)) {
-        if (status == safe_radio_status::Connected)
-            status = safe_radio_status::Failed;
-        rx_promise = {};
-        rx_buffer.clear();
-        socket = nullptr;
-        return;
-    }
     auto data = std::move(std::get<BasePlatform::BusSocket::Message>(result).data);
 
     if (rx_buffer.empty())
@@ -109,7 +100,7 @@ void bus_radio_connection::data_receive(BasePlatform::BusSocket::ReceiveResult &
         if (rx_buffer.size() < 3)
             return;
 
-        size_t size = ((unsigned char)rx_buffer[1]<<2)|((unsigned char)rx_buffer[2]>>6);
+        size_t size = ((rx_buffer[1]&255)<<2)|((rx_buffer[2]&255)>>6);
 
         if (rx_buffer.size() < size)
             return;
