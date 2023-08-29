@@ -69,6 +69,9 @@ uint32_t BusSocketImpl::TcpBusSocket::unpack_uint32(const char* ptr) {
 void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 	if (data.empty()) {
 		rx_buffer.clear();
+		for (auto &p : peers)
+			rx_list.push_data(LeaveNotification{ p });
+		peers.clear();
 		retry_promise = platform->delay(100).then([this](){
 			socket = std::make_unique<TcpSocket>(hostname, port, poller);
 			rx_promise = socket->receive().then(std::bind(&TcpBusSocket::data_received, this, std::placeholders::_1));
@@ -93,10 +96,12 @@ void BusSocketImpl::TcpBusSocket::data_received(std::string &&data) {
 			unpack_uint32(rx_buffer.data() + 2 * 4) };
 
 		if (msgtype == 1) { // join
+			peers.push_back(id);
 			rx_list.push_data(JoinNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}
 		else if (msgtype == 2) { // leave
+			peers.erase(std::remove_if(peers.begin(), peers.end(), [id](PeerId p){ return p.uid == id.uid; }), peers.end());
 			rx_list.push_data(LeaveNotification{ id });
 			rx_buffer.erase(0, 3 * 4);
 		}

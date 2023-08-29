@@ -31,6 +31,7 @@ public:
 		PlatformUtil::Promise<std::string> rx_promise;
 		PlatformUtil::Promise<void> retry_promise;
 		PlatformUtil::FulfillerBufferedQueue<ReceiveResult> rx_list;
+		std::vector<PeerId> peers;
 
 		void pack_uint32(char* ptr, uint32_t v);
 		uint32_t unpack_uint32(const char *ptr);
