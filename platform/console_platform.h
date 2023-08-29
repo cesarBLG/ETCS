@@ -18,7 +18,6 @@
 #include "bus_socket_server.h"
 #include "bus_tcp_bridge.h"
 #include "console_fd_poller.h"
-#include "dns.h"
 
 class ConsolePlatform final : public BasePlatform {
 private:
