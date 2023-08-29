@@ -70,8 +70,6 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	int ypos = std::stoi(get_config("ypos", "0"));
 	bool borderless = get_config("borderless") == "true";
 	bool rotate = get_config("rotateScreen") == "true";
-	extern bool softkeys;
-	softkeys = get_config("softkeys") == "true";
 	bool ontop = get_config("alwaysOnTop") == "true";
 	bool hidecursor = get_config("hideCursor") == "true";
 

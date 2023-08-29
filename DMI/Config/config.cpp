@@ -12,6 +12,7 @@
 using json = nlohmann::json;
 extern int maxSpeed;
 extern int etcsDialMaxSpeed;
+extern bool softkeys;
 extern std::string stm_layout_file;
 void load_config(std::string serie)
 {
@@ -27,6 +28,9 @@ void load_config(std::string serie)
             }
             if (cfg.contains("STMLayout")) {
                 stm_layout_file = cfg["STMLayout"];
+            }
+            if (cfg.contains("SoftKeys")) {
+                softkeys = cfg["SoftKeys"];
             }
         }
     } else {
