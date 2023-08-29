@@ -248,19 +248,6 @@ void update_track_comm()
         check_linking();
         if (reading) {
             double elapsed = d_estfront_dir[odometer_orientation == -1]-L_antenna_front-last_passed_distance;
-            /*if (prevpig==-1) {
-                if (elapsed > 12*8)
-                    balise_group_passed();
-            } else {
-                int v1 = (totalbg-prevpig-1);
-                int v2 = prevpig;
-                if (dir == 0 && elapsed > v1*12)
-                    balise_group_passed();
-                else if (dir == 1 && elapsed > v2*12)
-                    balise_group_passed();
-                else if (dir == -1 && elapsed > std::max(v1, v2)*12)
-                    balise_group_passed();
-            }*/
             if (elapsed > 12)
                 balise_group_passed();
         }
@@ -1015,14 +1002,15 @@ void set_level_filter()
         {"","","","","","R","R","R","A3,4,5","A3,4,5"},
         {"","","","","","R2","R2","R2","A","A"},
         {"","","","","","R2","R2","R2","A","A"},
+        {"","","","","","R","R","R","A","A"},
         {"","","","","","R","R","R","A3","A3"},
         {"","","","","","R","R","R","A3","A3"},
         {"A","A","A","A","A","A","A","A","A","A"},
         {"A","A","A","A","A","","","","",""},
         {"","","","","","R","R","R","A3","A3"},
-        {"","","","","","R","R","R","A3","A3"},
-        {"A","A","A","A","A","A","A","A","A","A"},
         {"","","","","","R","R","R","A","A"},
+        {"A","A","A","A","A","A","A","A","A","A"},
+        {"A","A","A","A","A","","","","",""},
         {"","","","","","R","R","R","A","A"},
         {"","","","","","R","R","R","A","A"},
         {"R1","R1","A","R1","R1","R2","R2","R2","A3","A3"},
