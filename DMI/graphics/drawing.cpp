@@ -22,7 +22,7 @@
 bool softkeys=false;
 void update_stm_windows();
 UiPlatform::InputEvent last_event = {UiPlatform::InputEvent::Action::Release, 0, 0};
-void process_input(UiPlatform::InputEvent ev)
+void update_window_input(UiPlatform::InputEvent ev)
 {
     for (auto &w : active_windows)
     {
@@ -32,7 +32,8 @@ void process_input(UiPlatform::InputEvent ev)
 }
 void present_frame()
 {
-    process_input(last_event);
+    if (last_event.action != UiPlatform::InputEvent::Action::Release)
+        update_window_input(last_event);
     update_stm_windows();
     platform->set_color(DarkBlue);
     platform->clear();
@@ -42,7 +43,7 @@ void present_frame()
 void input_received(UiPlatform::InputEvent ev)
 {
     last_event = ev;
-    process_input(last_event);
+    update_window_input(last_event);
     platform->on_input_event().then(input_received).detach();
 }
 
