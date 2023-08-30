@@ -46,6 +46,7 @@ class window
     }
     void construct()
     {
+        clearLayout();
         if(constructfun != nullptr) constructfun(this);
     }
     void display();

@@ -17,11 +17,11 @@ using namespace std;
 unordered_set<window*> active_windows;
 unordered_set<window*> old_windows;
 extern Mode mode;
-bool dmi_active;
+extern uint32_t evc_peer;
 void displayETCS()
 {
     updateAcks();
-    if (!dmi_active) return;
+    if (!evc_peer) return;
     for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
     {
         window *w = *it;

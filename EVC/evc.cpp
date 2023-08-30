@@ -31,9 +31,12 @@
 #include "Euroradio/terminal.h"
 #include "platform_runtime.h"
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#elif defined(_WIN32)
+#ifdef RADIO_CFM
+#include "../EVC/Euroradio/tcp_cfm.h"
+#include "console_platform.h"
+#endif
+
+#if defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>
@@ -166,6 +169,10 @@ void on_platform_ready()
 #elif defined(_WIN32)
     SetUnhandledExceptionFilter(windows_exception_handler);
 #endif
+#endif
+
+#if RADIO_CFM
+    initialize_cfm(platform.get(), dynamic_cast<ConsolePlatform&>(*platform).get_poller());
 #endif
 
     platform->debug_print("Starting European Train Control System...");

@@ -170,6 +170,11 @@ void tcp_cfm::T_disconnect_request(std::vector<unsigned char> &&data)
 
 void tcp_cfm::data_received(std::string &&data)
 {
+    if (data.empty()) {
+        handle_error(1, 1);
+        return;
+    }
+
     rx_promise = socket->receive().then(std::bind(&tcp_cfm::data_received, this, std::placeholders::_1));
 
     if (rx_buffer.empty())
@@ -318,6 +323,7 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
 }
 void tcp_cfm::connect()
 {
+/*
     int sock = ::socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
         handle_error(1, 3);
@@ -353,8 +359,8 @@ void tcp_cfm::connect()
     setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &tp[3], sizeof(tp[3]));
     setsockopt(sock, IPPROTO_TCP, TCP_MAXSEG, &tp[4], sizeof(tp[4]));
     #endif
-    socket = std::make_unique<TcpSocket>(sock, poller);
-    socket->connect(params.ip, params.port);
+*/
+    socket = std::make_unique<TcpSocket>(params.ip, params.port, poller);
     rx_buffer.clear();
     rx_promise = socket->receive().then(std::bind(&tcp_cfm::data_received, this, std::placeholders::_1));
 }
@@ -371,7 +377,7 @@ void tcp_cfm::handle_error(int reason, int subreason)
 void tcp_cfm::update()
 {
     cfm::update();
-    if (socket != nullptr && socket->is_connected() && !au1.empty()) {
+    if (socket != nullptr && !au1.empty()) {
         std::vector<unsigned char> data = std::move(au1);
         au1.clear();
         ALE_header header = fill_ALE(data, 1);
@@ -385,9 +391,6 @@ void tcp_cfm::update()
         ale.push_back(0);
         data.insert(data.begin(), ale.begin(), ale.end());
         socket->send(std::string((char*)data.data(), data.size()));
-    }
-    if (socket != nullptr && socket->is_failed()) {
-        handle_error(1, 1);
     }
     for (mobile_terminal *terminal : mobile_terminals) {
         for (auto conn : terminal->ps_connections) {
@@ -426,10 +429,8 @@ void tcp_cfm::update()
         }
     }
     if (state == cfm_state::Releasing) {
-        if (socket == nullptr || !socket->tx_pending) {
-            state = cfm_state::Released;
-            socket = nullptr;
-        }
+        state = cfm_state::Released;
+        socket = nullptr;
     }
 }
 void initialize_cfm(BasePlatform *pl, FdPoller &po)

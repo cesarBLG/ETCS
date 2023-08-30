@@ -298,16 +298,26 @@ void parseData(std::string str)
     }
 }
 std::unique_ptr<BasePlatform::BusSocket> evc_socket;
+uint32_t evc_peer;
 void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
 {
     evc_socket->receive().then(data_received).detach();
-    extern bool dmi_active;
-    if (std::holds_alternative<BasePlatform::BusSocket::Message>(result))
-        parseData(std::move(std::get<BasePlatform::BusSocket::Message>(result).data));
-    else if (std::holds_alternative<BasePlatform::BusSocket::JoinNotification>(result))
-        dmi_active = true;
-    else if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result))
-        dmi_active = false;
+
+    if (std::holds_alternative<BasePlatform::BusSocket::JoinNotification>(result)) {
+        auto &join = std::get<BasePlatform::BusSocket::JoinNotification>(result);
+        if (!evc_peer && join.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("EVC"))
+            evc_peer = join.peer.uid;
+    }
+    if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result)) {
+        auto &leave = std::get<BasePlatform::BusSocket::LeaveNotification>(result);
+        if (leave.peer.uid == evc_peer)
+            evc_peer = 0;
+    }
+    if (std::holds_alternative<BasePlatform::BusSocket::Message>(result)) {
+        auto &msg = std::get<BasePlatform::BusSocket::Message>(result);
+        if (msg.peer.uid == evc_peer)
+            parseData(std::move(msg.data));
+    }
 }
 void write_command(std::string command, std::string value)
 {
