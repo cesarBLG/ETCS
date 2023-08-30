@@ -123,7 +123,7 @@ int64_t lastor;
 void set_persistent_command(string command, string value)
 {
     send_command(command, value);
-    persistent_commands.insert(std::make_pair(command, value));
+    persistent_commands.insert_or_assign(command, value);
 }
 void send_command(string command, string value)
 {
