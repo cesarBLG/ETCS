@@ -14,6 +14,7 @@ extern int maxSpeed;
 extern int etcsDialMaxSpeed;
 extern bool softkeys;
 extern std::string stm_layout_file;
+void startWindows();
 void load_config(std::string serie)
 {
     etcsDialMaxSpeed = 400;
@@ -30,7 +31,11 @@ void load_config(std::string serie)
                 stm_layout_file = cfg["STMLayout"];
             }
             if (cfg.contains("SoftKeys")) {
-                softkeys = cfg["SoftKeys"];
+                bool v = cfg["SoftKeys"];
+                if (softkeys != v) {
+                    softkeys = v;
+                    startWindows();
+                }
             }
         }
     } else {

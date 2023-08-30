@@ -407,7 +407,6 @@ void update_stm_windows()
                 }
             }
         }
-        default_window->clearLayout();
         default_window->construct();
         if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr)
         {

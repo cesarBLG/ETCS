@@ -28,16 +28,16 @@
 subwindow *active = nullptr;
 std::string active_name;
 window *default_window;
+void setupMessages();
+void setupTimeHour();
+void setupGpsPos();
 void startWindows()
 {
-    // Hack to allow layout change after global constructors are called
-    void setupMessages();
-    void setupTimeHour();
-    void setupGpsPos();
     setupMessages();
     setupTimeHour();
     setupGpsPos();
 
+    active_windows.clear();
     etcs_default_window.construct();
     navigation_bar.construct();
     planning_area.construct();
