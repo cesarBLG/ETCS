@@ -96,6 +96,15 @@ void TcpSocket::update() {
 			update();
 		});
 	}
+
+	if (peer_fd != -1 && !tx_pending && shutdown_requested) {
+#ifdef _WIN32
+		::shutdown(peer_fd, SD_BOTH);
+#else
+		::shutdown(peer_fd, SHUT_RDWR);
+#endif
+		shutdown_requested = false;
+	}
 }
 
 void TcpSocket::connect(const std::string_view hostname, int port) {
@@ -116,17 +125,22 @@ void TcpSocket::send(const std::string_view data) {
 	update();
 }
 
+void TcpSocket::shutdown() {
+	shutdown_requested = true;
+	update();
+}
+
 PlatformUtil::Promise<std::string> TcpSocket::receive() {
 	PlatformUtil::Promise<std::string> promise = rx_list.create_and_add();
 	update();
 	return std::move(promise);
 }
 
-TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
+TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), shutdown_requested(false) {
 	connect(hostname, port);
 }
 
-TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false) {
+TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), shutdown_requested(false) {
 	peer_fd = fd;
 }
 

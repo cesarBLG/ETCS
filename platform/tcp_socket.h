@@ -22,6 +22,7 @@ private:
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;
 	bool rx_pending, tx_pending;
+	bool shutdown_requested;
 	FdPoller* poller;
 
 	void mark_nonblocking(int fd);
@@ -34,5 +35,6 @@ public:
 	TcpSocket(int fd, FdPoller &p);
 	~TcpSocket();
 	void send(const std::string_view data);
+	void shutdown();
 	PlatformUtil::Promise<std::string> receive();
 };

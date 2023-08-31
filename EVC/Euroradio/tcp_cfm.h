@@ -60,6 +60,7 @@ class tcp_cfm : public cfm
     void connect();
     void connect_dns(dns_entry &&e);
     std::unique_ptr<DNSQuery> query_dns();
+    void shutdown();
     void handle_error(int reason, int subreason) override;
 public:
 	tcp_cfm(std::weak_ptr<safe_radio_connection> conn, FdPoller &poller)
