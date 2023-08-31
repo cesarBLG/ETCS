@@ -826,6 +826,8 @@ void close_window()
 }
 void validate_data_entry(std::string name, json &result)
 {
+    if (name != active_window_dmi["WindowDefinition"]["WindowTitle"])
+        return;
     if (name == get_text("Level")) {
         std::string sel = result[""];
         Level lv = Level::Unknown;
@@ -1283,6 +1285,8 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog_step = "S5-2-1";
         }
     } else if (active_dialog == dialog_sequence::NTCData) {
+        if (active_window_dmi["active"] != "menu_ntc" || !active_window_dmi["enabled"][step])
+            return;
         if (step == "EndDataEntry") {
             active_dialog = dialog_sequence::Main;
             active_dialog_step = "D6";
@@ -1296,7 +1300,7 @@ void update_dialog_step(std::string step, std::string step2)
             }
         }
     } else if (active_dialog == dialog_sequence::Override) {
-        if (step == "Override") {
+        if (step == "Override" && active_window_dmi["enabled"]["EoA"]) {
             start_override();
             active_dialog = dialog_sequence::None;
         }
@@ -1313,6 +1317,8 @@ void update_dialog_step(std::string step, std::string step2)
             return;
         }
     } else if (active_dialog == dialog_sequence::Special) {
+        if (active_window_dmi["active"] != "menu_spec" || !active_window_dmi["enabled"][step])
+            return;
         if (step == "Adhesion") {
             active_dialog_step = "S2";
         } else if (step == "SRspeed") {
@@ -1321,6 +1327,8 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog = dialog_sequence::None;
         }
     } else if (active_dialog == dialog_sequence::Settings) {
+        if (active_window_dmi["active"] != "menu_settings" || !active_window_dmi["enabled"][step])
+            return;
         if (step == "Language")
             active_dialog_step = "S2";
         else if (step == "Volume")
