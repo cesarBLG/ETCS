@@ -53,9 +53,9 @@ void save_cold_data(std::string field, json &value)
 json load_cold_data(std::string field)
 {
     auto contents = platform->read_file("cold_data.json");
-    json j;
-    if (contents)
-        j = json::parse(*contents);
+    if (!contents)
+        return json();
+    json j = json::parse(*contents);
     if (!j.contains(field)) j[field] = json();
     return j[field];
 }
