@@ -54,7 +54,8 @@ ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<
 #ifdef EVC
 	,
 	bus_server_manager(load_path, poller),
-	bus_bridge_manager(load_path, poller, bus_socket_impl)
+	bus_bridge_manager(load_path, poller, bus_socket_impl),
+	orts_bridge(load_path, poller, bus_socket_impl)
 #endif
 	{
 	running = true;
