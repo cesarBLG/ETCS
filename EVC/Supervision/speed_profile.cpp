@@ -246,3 +246,11 @@ speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end
     }*/
     return speed_restriction((((int)(V_pbd*3.6))/5)*5/3.6, start, end, false);
 }
+void delete_PBD()
+{
+    PBDs.clear();
+}
+void delete_PBD(distance from)
+{
+    PBDs.remove_if([from](auto &pbd) { return pbd.end > from; });
+}

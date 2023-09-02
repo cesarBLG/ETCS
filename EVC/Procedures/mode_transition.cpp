@@ -362,10 +362,7 @@ void update_mode_status()
                 supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
             }
         }
-        std::vector<deleted_information> info = deleted_informations[mode];
-        for (int i=0; i<info.size(); i++) {
-            info[i].handle(prevmode, mode);
-        }
+        delete_information(prevmode);
         if (mode != Mode::NP && mode != Mode::PS && (mode != Mode::SH || prevmode != Mode::PS)) {
             if ((level == Level::N2 || level == Level::N3) && !end_mission
             && (!supervising_rbc || supervising_rbc->status == session_status::Inactive) && rbc_contact_valid) {
@@ -530,5 +527,12 @@ void trigger_condition(int num)
             mode_conditions[num].trigger();
             break;
         }
+    }
+}
+void delete_information(Mode prev)
+{
+    std::vector<deleted_information> info = deleted_informations[mode];
+    for (int i=0; i<info.size(); i++) {
+        info[i].handle(prev, mode);
     }
 }

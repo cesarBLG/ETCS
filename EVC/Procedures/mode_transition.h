@@ -74,3 +74,4 @@ extern optional<std::set<bg_id>> sr_balises;
 void initialize_mode_transitions();
 void update_mode_status();
 void trigger_condition(int num);
+void delete_information(Mode prev);

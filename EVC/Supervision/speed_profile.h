@@ -25,6 +25,8 @@ void delete_gradient();
 void delete_gradient(distance from);
 void delete_TSR();
 void delete_TSR(distance from);
+void delete_PBD();
+void delete_PBD(distance from);
 std::map<distance,double> &get_MRSP();
 inline double dV_ebi(double vel)
 {

@@ -202,11 +202,6 @@ void load_national_values(NationalValues nv)
     json j = w.to_base64();
     save_cold_data("NationalValues", j);
 }
-struct StoredNationalValueSet
-{
-    distance first_applicable;
-    NationalValues nv;
-};
 optional<StoredNationalValueSet> not_yet_applicable_nv;
 void national_values_received(NationalValues nv, distance reference)
 {
