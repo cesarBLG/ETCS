@@ -32,8 +32,8 @@ class AresQuery : public DNSQuery
     {
         AresQuery *q = (AresQuery*)arg;        
         if (status == ARES_SUCCESS && host->h_length > 0) {
-            char ip[INET_ADDRSTRLEN];
-            ares_inet_ntop(host->h_addrtype, host->h_addr_list[0], ip, INET_ADDRSTRLEN);
+            char ip[INET6_ADDRSTRLEN];
+            ares_inet_ntop(host->h_addrtype, host->h_addr_list[0], ip, INET6_ADDRSTRLEN);
             q->a = ip;
         } else {
             q->a = "";
@@ -62,7 +62,7 @@ public:
     {
         ares_init(&channel);
         ares_set_servers_csv(channel, "8.8.8.8,8.8.4.4");
-        ares_gethostbyname(channel, hostname.c_str(), AF_INET, callback_a, this);
+        ares_gethostbyname(channel, hostname.c_str(), AF_UNSPEC, callback_a, this);
         ares_query(channel, hostname.c_str(), 1, 16, callback_txt, this);
         process();
     }

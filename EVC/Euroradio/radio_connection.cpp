@@ -14,7 +14,12 @@ void radio_connection::Sa_connect_confirm(const etcs_id &id)
     t_estab_timer = {};
     status = safe_radio_status::Connected;
     peer_address.id = id;
-    if (session != nullptr) session->contact.id = id.id;
+    if (session != nullptr) {
+        session->contact.country = id.id>>14;
+        session->contact.id = id.id & 0x3FFF;
+        if (session == supervising_rbc)
+            set_rbc_contact(session->contact);
+    }
 }
 void radio_connection::Sa_data_indication(std::vector<unsigned char>&& data)
 {

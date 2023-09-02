@@ -89,9 +89,14 @@ void SetParameters()
             else
                 cab_active[1] = true;
         }
-        sl_signal = !cab_active[0] && !cab_active[1];
     };
     manager.AddParameter(p);
+
+    /*p = new ORserver::Parameter("other_master_key");
+    p->SetValue = [](string val) {
+        sl_signal = val == "1" && !cab_active[0] && !cab_active[1];
+    };
+    manager.AddParameter(p);*/
 
     p = new ORserver::Parameter("controller::direction");
     p->SetValue = [](string val) {

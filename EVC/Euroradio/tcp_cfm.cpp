@@ -99,6 +99,7 @@ void tcp_cfm::T_connect_request(called_address address, etcs_id calling_address,
     peer_address = address;
     au1 = std::move(data);
     if ((peer_address.id.id & 0x3FFF) == 0x3FFF) {
+        poll_dns = true;
         connect_dns({"", ""});
     } else {
         if (connection_modes[peer_address.id] == radio_connection_mode::CS) {
@@ -161,17 +162,19 @@ void tcp_cfm::T_disconnect_request(std::vector<unsigned char> &&data)
     auto ale = header.get_bytes();
     data.insert(data.begin(), ale.begin(), ale.end());
     socket->send(std::string((char*)data.data(), data.size()));
-
-    dns_query = {};
-    dns_timer = {};
-    rx_promise = {};
-    state = cfm_state::Releasing;
+    shutdown();
 }
 
 void tcp_cfm::data_received(std::string &&data)
 {
     if (data.empty()) {
-        handle_error(1, 1);
+        if (state == cfm_state::Releasing) {
+            socket = nullptr;
+            rx_promise = {};
+            state = cfm_state::Released;
+        } else {
+            handle_error(1, 3);
+        }
         return;
     }
 
@@ -199,12 +202,7 @@ void tcp_cfm::parse_ALE(std::vector<unsigned char> &&ale)
     uint16_t checksum = crc16(ale.data(), 8);
     if (header.Checksum != checksum) {
         platform->debug_print("Bad checksum");
-        rx_buffer.clear();
-        rx_promise = {};
-        dns_query = {};
-        dns_timer = {};
-        socket = nullptr;
-        connect();
+        handle_error(7, 2);
         return;
     }
     ale.erase(ale.begin(), ale.begin() + 10);
@@ -223,10 +221,7 @@ void tcp_cfm::parse_ALE(std::vector<unsigned char> &&ale)
         T_data_indication(std::move(ale));
     } else if (header.PacketType == 4) {
         T_disconnect_indication(std::move(ale));
-        rx_promise = {};
-        dns_query = {};
-        dns_timer = {};
-        state = cfm_state::Releasing;
+        shutdown();
     }
 }
 
@@ -323,8 +318,11 @@ void tcp_cfm::connect_dns(dns_entry &&dns)
 }
 void tcp_cfm::connect()
 {
-/*
-    int sock = ::socket(AF_INET, SOCK_STREAM, 0);
+    addrinfo hints = {}, *res = nullptr;
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	getaddrinfo(std::string(params.ip).c_str(), std::to_string(params.port).c_str(), &hints, &res);
+    int sock = ::socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sock < 0) {
         handle_error(1, 3);
         return;
@@ -359,8 +357,16 @@ void tcp_cfm::connect()
     setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &tp[3], sizeof(tp[3]));
     setsockopt(sock, IPPROTO_TCP, TCP_MAXSEG, &tp[4], sizeof(tp[4]));
     #endif
-*/
-    socket = std::make_unique<TcpSocket>(params.ip, params.port, poller);
+	unsigned long one = 1;
+#ifdef _WIN32
+	ioctlsocket(sock, FIONBIO, &one);
+#else
+	ioctl(sock, FIONBIO, &one);
+#endif
+	::connect(sock, res->ai_addr, res->ai_addrlen);
+	freeaddrinfo(res);
+
+    socket = std::make_unique<TcpSocket>(sock, poller);
     rx_buffer.clear();
     rx_promise = socket->receive().then(std::bind(&tcp_cfm::data_received, this, std::placeholders::_1));
 }
@@ -368,10 +374,23 @@ void tcp_cfm::connect()
 void tcp_cfm::handle_error(int reason, int subreason)
 {
     cfm::handle_error(reason, subreason);
-    rx_promise = {};
     dns_query = {};
     dns_timer = {};
-    state = cfm_state::Releasing;
+    rx_promise = {};
+    socket = nullptr;
+    state = cfm_state::Released;
+}
+
+void tcp_cfm::shutdown()
+{
+    dns_query = {};
+    dns_timer = {};
+    if (socket == nullptr) {
+        state = cfm_state::Released;
+    } else {
+        state = cfm_state::Releasing;
+        socket->shutdown();
+    }
 }
 
 void tcp_cfm::update()
@@ -427,10 +446,6 @@ void tcp_cfm::update()
                 break;
             }
         }
-    }
-    if (state == cfm_state::Releasing) {
-        state = cfm_state::Released;
-        socket = nullptr;
     }
 }
 void initialize_cfm(BasePlatform *pl, FdPoller &po)

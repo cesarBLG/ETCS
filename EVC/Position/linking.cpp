@@ -43,6 +43,8 @@ void load_train_position()
 }
 void save_train_position()
 {
+    if (!lrbgs.empty())
+        position_valid = true;
     json pos = lrbgs;
     save_cold_data("LRBGs", pos);
 }

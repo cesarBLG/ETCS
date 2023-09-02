@@ -73,6 +73,7 @@ class communication_session
 extern communication_session *supervising_rbc;
 extern communication_session *accepting_rbc;
 extern communication_session *handing_over_rbc;
+extern distance rbc_transition_position;
 extern optional<contact_info> rbc_contact;
 extern bool rbc_contact_valid;
 extern bool radio_reaction_applied;

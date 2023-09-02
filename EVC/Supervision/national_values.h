@@ -66,7 +66,14 @@ extern double A_NVMAXREDADH1;
 extern double A_NVMAXREDADH2;
 extern double A_NVMAXREDADH3;
 
-extern std::set<int> NV_NID_Cs; 
+extern std::set<int> NV_NID_Cs;
+
+struct StoredNationalValueSet
+{
+    distance first_applicable;
+    NationalValues nv;
+};
+extern std::optional<StoredNationalValueSet> not_yet_applicable_nv;
 
 void setup_national_values();
 void national_values_received(NationalValues nv, distance reference);

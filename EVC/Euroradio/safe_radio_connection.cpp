@@ -149,13 +149,6 @@ void safe_radio_connection::T_connect_indication(etcs_id id, std::vector<unsigne
 {
     if (!validate_sapdu(data))
         return;
-    peer_address.id = id;
-    if (session != nullptr) {
-        session->contact.country = id.id>>14;
-        session->contact.id = id.id & 0x3FFF;
-        if (session == supervising_rbc)
-            set_rbc_contact(session->contact);
-    }
     PDU_header header(data[0]);
     if (header.MTI == 2) {
         PDU_header auth;

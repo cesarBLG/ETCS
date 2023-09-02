@@ -10,29 +10,59 @@
 #include "../Position/linking.h"
 #include "stored_information.h"
 #include "../MA/movement_authority.h"
+#include "../Supervision/national_values.h"
 #include "../Packets/radio.h"
+#include "../Procedures/mode_transition.h"
+#include "../TrackConditions/track_condition.h"
+#include "../TrackConditions/route_suitability.h"
+void shorten(bool include_ma, distance d)
+{
+    if (not_yet_applicable_nv->first_applicable > d)
+        not_yet_applicable_nv = {};
+    delete_linking(d);
+    if (include_ma)
+        delete_MA(d_estfront, d);
+    delete_gradient(d);
+    delete_SSP(d);
+    if (mode != Mode::SH)
+        sh_balises = {};
+    for (auto it = mode_profiles.begin(); it != mode_profiles.end();) {
+        if (it->start > d)
+            it = mode_profiles.erase(it);
+        else
+            ++it;
+    }
+    if (accepting_rbc && rbc_transition_position > d)
+        accepting_rbc = handing_over_rbc = nullptr;
+    for (auto it = route_suitability.begin(); it != route_suitability.end();) {
+        if (it->second > d)
+            it = route_suitability.erase(it);
+        else
+            ++it;
+    }
+    for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+        if (it->get()->start > d)
+            it = track_conditions.erase(it);
+        else
+            ++it;
+    }
+    delete_PBD(d);
+}
 void svl_shorten(char condition)
 {
     if (!MA || !MA->SvL_ma) return;
-    distance d = *MA->SvL_ma;
-    // MA already shortened
-    delete_linking(d);
-    delete_gradient(d);
+    shorten(false, *MA->SvL_ma);
     if (condition != 'a' && condition != 'b' && condition != 'f' && (level == Level::N2 || level == Level::N3))
         ma_rq_reasons[3] = true;
 }
 void train_shorten(char condition)
 {
-    distance d = d_maxsafefront(odometer_orientation, 0);
-    delete_linking(d);
-    delete_gradient(d);
-    delete_MA(d_estfront, d);
+    shorten(true, d_maxsafefront(odometer_orientation, 0));
     if (level == Level::N2 || level == Level::N3)
         ma_rq_reasons[3] = true;
 }
 void desk_closed_som()
 {
-    /*delete_linking();
-    delete_TSRs();
-    recalculate_MRSP();*/
+    not_yet_applicable_nv = {};
+    delete_information(Mode::SB);
 }

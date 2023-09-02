@@ -16,31 +16,31 @@
 #include "../state/time_hour.h"
 #include "../state/gps_pos.h"
 #include "../tcp/server.h"
-TextButton main_button(get_text_context("Navigation bar", "Main"), softkeys ? 64 : 60, 50, mainbut_pressed);
+TextButton main_button;
 void mainbut_pressed()
 {
     write_command("navButton","main");
     //right_menu(new menu_main());
 }
-TextButton override_button(get_text_context("Navigation bar", "Over-\nride"), softkeys ? 64 : 60, 50, overridebut_pressed);
+TextButton override_button;
 void overridebut_pressed()
 {
     write_command("navButton","override");
     //right_menu(new menu_override());
 }
-TextButton dataview_button(get_text_context("Navigation bar", "Data\nview"), softkeys ? 64 : 60, 50, dataviewbut_pressed);
+TextButton dataview_button;
 void dataviewbut_pressed()
 {
     write_command("navButton","data_view");
     //right_menu(new data_view_window());
 }
-TextButton special_button(get_text_context("Navigation bar", "Spec"), softkeys ? 64 : 60, 50, specbut_pressed);
+TextButton special_button;
 void specbut_pressed()
 {
     write_command("navButton","spec");
     //right_menu(new menu_spec());
 }
-IconButton config_button("symbols/Setting/SE_04.bmp", softkeys ? 64 : 60, 50, configbut_pressed);
+IconButton config_button;
 void configbut_pressed()
 {
     write_command("navButton","settings");
@@ -48,6 +48,11 @@ void configbut_pressed()
 }
 void construct_nav(window *w)
 {
+    main_button = TextButton(get_text_context("Navigation bar", "Main"), softkeys ? 64 : 60, 50, mainbut_pressed);
+    override_button = TextButton(get_text_context("Navigation bar", "Over-\nride"), softkeys ? 64 : 60, 50, overridebut_pressed);
+    dataview_button = TextButton(get_text_context("Navigation bar", "Data\nview"), softkeys ? 64 : 60, 50, dataviewbut_pressed);
+    special_button = TextButton(get_text_context("Navigation bar", "Spec"), softkeys ? 64 : 60, 50, specbut_pressed);
+    config_button = IconButton("symbols/Setting/SE_04.bmp", softkeys ? 64 : 60, 50, configbut_pressed);
     if (softkeys)
     {
         w->addToLayout(&main_button, new RelativeAlignment(nullptr, 0, 430, 0));

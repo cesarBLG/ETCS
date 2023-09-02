@@ -18,6 +18,7 @@
 #include "bus_socket_server.h"
 #include "bus_tcp_bridge.h"
 #include "console_fd_poller.h"
+#include "orts_bridge.h"
 
 class ConsolePlatform final : public BasePlatform {
 private:
@@ -37,6 +38,7 @@ private:
 #ifdef EVC
 	BusSocketServerManager bus_server_manager;
 	BusTcpBridgeManager bus_bridge_manager;
+	OrtsBridge orts_bridge;
 #endif
 	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 

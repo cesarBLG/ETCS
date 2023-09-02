@@ -315,7 +315,7 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
         ack = {32};
     else if (msg->NID_MESSAGE == 156)
         ack = {39};
-    else if (msg->NID_MESSAGE == 157)
+    else if (msg->NID_MESSAGE == 157 && ((SoM_position_report*)msg.get())->Q_STATUS != Q_STATUS_t::Valid)
         ack = {40,41,43};
     if (!ack.empty()) {
         pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.message->NID_MESSAGE == msg->NID_MESSAGE;});
