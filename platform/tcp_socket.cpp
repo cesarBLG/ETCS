@@ -20,6 +20,7 @@
 #define socklen_t int
 #define ssize_t int
 #define MSG_NOSIGNAL 0
+#define SHUT_WR SD_SEND
 #endif
 
 void TcpSocket::mark_nonblocking(int fd) {
