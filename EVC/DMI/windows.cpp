@@ -1285,12 +1285,12 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog_step = "S5-2-1";
         }
     } else if (active_dialog == dialog_sequence::NTCData) {
-        if (active_window_dmi["active"] != "menu_ntc" || !active_window_dmi["enabled"][step])
+        if (active_window_dmi["active"] != "menu_ntc")
             return;
-        if (step == "EndDataEntry") {
+        if (step == "EndDataEntry" && active_window_dmi["enabled"][step]) {
             active_dialog = dialog_sequence::Main;
             active_dialog_step = "D6";
-        } else {
+        } else if (step == "STM" && active_window_dmi["enabled"].contains(step2) && active_window_dmi["enabled"][step2]) {
             for (auto &kvp : installed_stms) {
                 auto *stm = kvp.second;
                 if (step2 == get_ntc_name(kvp.first) && stm->data_entry == stm_object::data_entry_state::Active) {
@@ -1317,7 +1317,7 @@ void update_dialog_step(std::string step, std::string step2)
             return;
         }
     } else if (active_dialog == dialog_sequence::Special) {
-        if (active_window_dmi["active"] != "menu_spec" || !active_window_dmi["enabled"][step])
+        if (active_window_dmi["active"] != "menu_spec" || !active_window_dmi["enabled"].contains(step) || !active_window_dmi["enabled"][step])
             return;
         if (step == "Adhesion") {
             active_dialog_step = "S2";
@@ -1327,7 +1327,7 @@ void update_dialog_step(std::string step, std::string step2)
             active_dialog = dialog_sequence::None;
         }
     } else if (active_dialog == dialog_sequence::Settings) {
-        if (active_window_dmi["active"] != "menu_settings" || !active_window_dmi["enabled"][step])
+        if (active_window_dmi["active"] != "menu_settings" || !active_window_dmi["enabled"].contains(step) || !active_window_dmi["enabled"][step])
             return;
         if (step == "Language")
             active_dialog_step = "S2";
