@@ -37,8 +37,11 @@ void OrtsBridge::tcp_rx(std::string &&data)
     size_t it;
     while ((it = tcp_rx_buffer.find_first_of("\r\n")) != -1) {
         if (it != 0)
-            bus_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("EVC"), tcp_rx_buffer.substr(0, it));
-        tcp_rx_buffer.erase(0, tcp_rx_buffer.find_first_not_of("\r\n", it));
+            bus_socket->broadcast(tcp_rx_buffer.substr(0, it));
+        tcp_rx_buffer.erase(0, it);
+        size_t i = 0;
+        while (i < tcp_rx_buffer.size() && (tcp_rx_buffer[i] == '\r' || tcp_rx_buffer[i] == '\n'))
+            tcp_rx_buffer.erase(0, 1);
     }
 }
 
