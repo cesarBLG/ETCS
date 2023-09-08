@@ -19,6 +19,8 @@ private:
     std::unique_ptr<BasePlatform::BusSocket> bus_socket;
     PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> bus_rx_promise;
 
+    std::string ip;
+
     std::unique_ptr<TcpSocket> tcp_socket;
     PlatformUtil::Promise<std::string> tcp_rx_promise;
     std::string tcp_rx_buffer;
