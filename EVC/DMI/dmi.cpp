@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <map>
 #include "../Supervision/supervision.h"
+#include "../Supervision/supervision_targets.h"
 #include "../Supervision/targets.h"
 #include "../Supervision/train_data.h"
 #include "../Supervision/speed_profile.h"
@@ -49,13 +50,7 @@ void start_dmi()
 {
     platform->delay(100).then(dmi_update_func).detach();
 }
-extern double V_target;
-extern double V_perm;
-extern double V_est;
 extern double V_set;
-extern double V_release;
-extern double V_sbi;
-extern double D_target;
 extern double TTI;
 extern double TTP;
 extern bool EB_command;
@@ -222,7 +217,6 @@ void dmi_update_func()
         double v = calc_ceiling_limit();
         speeds.push_back({0,v});
         std::map<::distance,double> MRSP = get_MRSP();
-        extern const target* indication_target;
         extern double indication_distance;
         double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end()) : 0;
         const std::list<std::shared_ptr<target>> &targets = get_supervised_targets();
