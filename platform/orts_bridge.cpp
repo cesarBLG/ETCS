@@ -15,8 +15,12 @@ OrtsBridge::OrtsBridge(const std::string_view load_path, FdPoller &fd, BusSocket
     std::ifstream file(std::string(load_path) + "orts_bridge.conf", std::ios::binary);
     bool start=false;
     file>>start;
-    if (start)
+    if (start) {
+        ip = ORserver::discover_server_ip();
+        if (ip == "")
+            ip = "127.0.0.1";
         setup();
+    }
 }
 
 void OrtsBridge::tcp_rx(std::string &&data)
@@ -37,8 +41,11 @@ void OrtsBridge::tcp_rx(std::string &&data)
     size_t it;
     while ((it = tcp_rx_buffer.find_first_of("\r\n")) != -1) {
         if (it != 0)
-            bus_socket->broadcast(BasePlatform::BusSocket::PeerId::fourcc("EVC"), tcp_rx_buffer.substr(0, it));
-        tcp_rx_buffer.erase(0, tcp_rx_buffer.find_first_not_of("\r\n", it));
+            bus_socket->broadcast(tcp_rx_buffer.substr(0, it));
+        tcp_rx_buffer.erase(0, it);
+        size_t i = 0;
+        while (i < tcp_rx_buffer.size() && (tcp_rx_buffer[i] == '\r' || tcp_rx_buffer[i] == '\n'))
+            tcp_rx_buffer.erase(0, 1);
     }
 }
 
@@ -62,8 +69,6 @@ void OrtsBridge::setup()
         return;
     bus_rx_promise = bus_socket->receive().then(std::bind(&OrtsBridge::bus_rx, this, std::placeholders::_1));
 
-    std::string ip = ORserver::discover_server_ip();
-    if (ip == "") ip = "127.0.0.1";
     tcp_socket = std::make_unique<TcpSocket>(ip, 5090, poller);
     tcp_rx_promise = tcp_socket->receive().then(std::bind(&OrtsBridge::tcp_rx, this, std::placeholders::_1));
 }

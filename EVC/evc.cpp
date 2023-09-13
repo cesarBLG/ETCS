@@ -36,7 +36,8 @@
 #include "console_platform.h"
 #endif
 
-#if defined(_WIN32)
+#ifdef __ANDROID__
+#elif defined(_WIN32)
 #include <windows.h>
 #include <imagehlp.h>
 #include <errhandlingapi.h>

@@ -50,6 +50,21 @@
         "SpeedDial": 400,
         "STMLayout": "stm_siemens.json"
     },
+    "106": {
+        "TrainData": "TrainData/traindata_106.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+    "107": {
+        "TrainData": "TrainData/traindata_107.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
+    "162": {
+        "TrainData": "TrainData/traindata_162.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json"
+    },
     "120": {
         "TrainData": "TrainData/traindata_120.json",
         "SpeedDial": 400,
