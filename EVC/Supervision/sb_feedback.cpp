@@ -8,8 +8,7 @@
  */
 #include "sb_feedback.h"
 #include "targets.h"
-extern target MRDT;
-target prevMRDT;
+#include "supervision.h"
 double T_bs1_prev;
 const double k1 = 2.0;
 bool Q_feedback_active = false;
@@ -20,7 +19,6 @@ bool Q_displaylocked_SBI = false;
 bool Q_displaylocked_P = false;
 bool Q_Tbslocked;
 double T_bs_feedback;
-extern MonitoringStatus monitoring;
 double p0;
 double p1;
 double p2;
@@ -36,7 +34,7 @@ void sb_feedback()
 {
     double p_cylinder;
     double p = 500-p_cylinder/k1;
-	if (monitoring == TSM || monitoring == CSM) {
+	if (monitoring == TSM || monitoring == RSM) {
 		if (Q_Tbslocked) {
 			T_bs1 = T_bs1_locked;
 			T_bs2 = T_bs2_locked;

@@ -9,8 +9,8 @@
 #include "level_crossing.h"
 #include "../MA/movement_authority.h"
 #include "../Supervision/targets.h"
+#include "../Supervision/supervision_targets.h"
 std::set<level_crossing> level_crossings;
-extern target MRDT;
 bool inform_lx = false;
 void load_lx(LevelCrossingInformation lxi, distance ref)
 {
@@ -30,36 +30,34 @@ void update_lx()
 {
     inform_lx = false;
     for (auto it=level_crossings.begin(); it!=level_crossings.end(); ) {
-        if (it->lx_protected) {
-            ++it;
-            continue;
-        }
-        if (it->svl_replaced && d_minsafefront(it->start) < it->start+it->length) inform_lx = true;
-        if (V_est == 0 && it->stop && d_estfront > it->start-it->stoplength) {
-            it->svl_replaced = d_estfront_dir[odometer_orientation == -1];
-            calculate_SvL();
-        }
-        if (EoA && *EoA == it->start && !it->svl_replaced) {
-            const std::list<target> &supervised_targets = get_supervised_targets();
-            const target *tEoA, *tSvL;
-            for (auto it = supervised_targets.begin(); it != supervised_targets.end(); ++it) {
-                if (it->type == target_class::EoA)
-                    tEoA = &*it;
-                if (it->type == target_class::SvL)
-                    tSvL = &*it;
-            }
-            if (MRDT == *tEoA || MRDT == *tSvL) inform_lx = true;
-            if (it->stop) {
-                ++it;
-                continue;
-            }
-            tEoA->calculate_curves(it->V_LX);
-            tSvL->calculate_curves(it->V_LX);
-            bool c1 = tEoA->d_P < d_estfront;
-            bool c2 = tSvL->d_P < d_maxsafefront(tSvL->d_P);
-            if (c1 || c2) {
-                it->svl_replaced = c1 ? d_estfront : d_maxsafefront(tSvL->d_P);
+        if (!it->lx_protected) {
+            if (it->svl_replaced && d_minsafefront(it->start) < it->start+it->length) inform_lx = true;
+            if (V_est == 0 && it->stop && d_estfront > it->start-it->stoplength) {
+                it->svl_replaced = d_estfront_dir[odometer_orientation == -1];
                 calculate_SvL();
+            }
+            if (EoA && *EoA == it->start && !it->svl_replaced) {
+                const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
+                std::shared_ptr<target> tEoA, tSvL;
+                for (auto &it : supervised_targets) {
+                    if (it->type == target_class::EoA)
+                        tEoA = it;
+                    if (it->type == target_class::SvL)
+                        tSvL = it;
+                }
+                if (MRDT && (*MRDT == *tEoA || *MRDT == *tSvL)) inform_lx = true;
+                if (it->stop) {
+                    ++it;
+                    continue;
+                }
+                tEoA->calculate_curves(it->V_LX);
+                tSvL->calculate_curves(it->V_LX);
+                bool c1 = tEoA->d_P < d_estfront;
+                bool c2 = tSvL->d_P < d_maxsafefront(tSvL->d_P);
+                if (c1 || c2) {
+                    it->svl_replaced = c1 ? d_estfront : d_maxsafefront(tSvL->d_P);
+                    calculate_SvL();
+                }
             }
         }
         if (d_minsafefront(it->start) > it->start+it->length)

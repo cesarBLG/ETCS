@@ -24,22 +24,34 @@ enum struct target_class
     SR_distance,
     PBD
 };
-class target
+class basic_target
 {
 protected:
     distance d_target;
     double V_target;
-    bool is_valid;
-    bool use_brake_combination = true;
 public:
     target_class type;
     bool is_EBD_based;
     bool is_TSR = false;
-    double default_gradient=0;
-    target();
-    target(distance dist, double speed, target_class type);
+    basic_target() {}
+    basic_target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type)
+    {
+        is_EBD_based = type != target_class::EoA;
+    }
     double get_target_speed() const { return V_target; }
     distance get_target_position() const { return d_target; }
+    bool operator== (const basic_target &t) const
+    {
+        return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
+    }
+};
+class target : public basic_target
+{
+protected:
+    bool use_brake_combination = true;
+public:
+    double default_gradient=0;
+    target(distance dist, double speed, target_class type);
     virtual distance get_distance_curve (double velocity) const;
     double get_speed_curve(distance dist) const;
     distance get_distance_gui_curve(double velocity) const;
@@ -70,26 +82,6 @@ public:
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     virtual void calculate_decelerations();
     void calculate_decelerations(const std::map<distance,double> &gradient);
-    bool operator< (const target &t) const
-    {
-        if (!is_valid)
-            return t.is_valid;
-        if (!t.is_valid)
-            return !is_valid;
-        if (d_target == t.d_target) {
-            if (V_target == t.V_target) {
-                return (int)type<(int)t.type;
-            }
-            return V_target<t.V_target;
-        }
-        return d_target<t.d_target;
-    }
-    bool operator== (const target &t) const
-    {
-        if (!is_valid || !t.is_valid)
-            return false;
-        return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
-    }
     static void recalculate_all_decelerations();
 };
 extern optional<distance> EoA;
@@ -99,5 +91,5 @@ extern optional<double> D_STFF_rbc;
 extern optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();
-const std::list<target> &get_supervised_targets();
+const std::list<std::shared_ptr<target>> &get_supervised_targets();
 bool supervised_targets_changed();

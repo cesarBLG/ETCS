@@ -21,7 +21,6 @@ void load_route_suitability(RouteSuitabilityData &data, distance ref)
         return;
     }
     restore_route_suitability = {};
-    route_suitability.clear();
     std::vector<RouteSuitability_element> elements;
     elements.push_back(data.element);
     elements.insert(elements.end(), data.elements.begin(), data.elements.end());

@@ -11,6 +11,7 @@
 #include "speed_profile.h"
 #include "conversion_model.h"
 #include "supervision.h"
+#include "supervision_targets.h"
 #include "national_values.h"
 #include "fixed_values.h"
 #include "train_data.h"
@@ -19,11 +20,9 @@
 #include "../MA/movement_authority.h"
 #include "../TrainSubsystems/train_interface.h"
 #include <set>
-std::list<PBD_target> PBDs;
-target::target() : is_valid(false), type(target_class::MRSP) {};
-target::target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), is_valid(true), type(type)
+std::list<std::shared_ptr<PBD_target>> PBDs;
+target::target(distance dist, double speed, target_class type) : basic_target(dist, speed, type)
 {
-    is_EBD_based = type != target_class::EoA;
     calculate_decelerations();
 }
 distance target::get_distance_curve(double velocity) const
@@ -171,12 +170,11 @@ optional<distance> SR_dist;
 optional<double> D_STFF_rbc;
 optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
-static std::list<target> supervised_targets;
+static std::list<std::shared_ptr<target>> supervised_targets;
 bool changed = false;
 void set_supervised_targets()
 {
     changed = true;
-    extern const target *indication_target;
     indication_target = nullptr;
     supervised_targets.clear();
     if (mode != Mode::SR && mode != Mode::UN && mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) return;
@@ -186,10 +184,10 @@ void set_supervised_targets()
         auto prev = minMRSP;
         for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
             if (it->second < prev->second && d_maxsafefront(it->first)<it->first) {
-                target t(it->first, it->second, target_class::MRSP);
+                auto t = std::make_shared<target>(it->first, it->second, target_class::MRSP);
                 for (auto &tsr : TSRs) {
                     if (it->first == tsr.restriction.get_start() && it->second == tsr.restriction.get_speed()) {
-                        t.is_TSR = true;
+                        t->is_TSR = true;
                         break;
                     }
                 }
@@ -200,21 +198,21 @@ void set_supervised_targets()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         if (SvL)
-            supervised_targets.push_back(target(*SvL, 0, target_class::SvL));
+            supervised_targets.push_back(std::make_shared<target>(*SvL, 0, target_class::SvL));
         if (EoA)
-            supervised_targets.push_back(target(*EoA, 0, target_class::EoA));
+            supervised_targets.push_back(std::make_shared<target>(*EoA, 0, target_class::EoA));
         if (LoA)
-            supervised_targets.push_back(target(LoA->first, LoA->second, target_class::LoA));
+            supervised_targets.push_back(std::make_shared<target>(LoA->first, LoA->second, target_class::LoA));
     }
     if (SR_dist && mode == Mode::SR) {
-        supervised_targets.push_back(target(*SR_dist, 0, target_class::SR_distance));
+        supervised_targets.push_back(std::make_shared<target>(*SR_dist, 0, target_class::SR_distance));
     }
 }
 bool supervised_targets_changed()
 {
     bool removed = false;
     for (auto it = supervised_targets.begin(); it!=supervised_targets.end(); ) {
-        if (it->type == target_class::MRSP && d_maxsafefront(it->get_target_position()) >= it->get_target_position()) {
+        if ((*it)->type == target_class::MRSP && d_maxsafefront((*it)->get_target_position()) >= (*it)->get_target_position()) {
             removed = true;
             it = supervised_targets.erase(it);
         } else {
@@ -227,7 +225,7 @@ bool supervised_targets_changed()
     }
     return false;
 }
-const std::list<target> &get_supervised_targets()
+const std::list<std::shared_ptr<target>> &get_supervised_targets()
 {
     return supervised_targets;
 }
@@ -296,18 +294,16 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
 }
 void target::recalculate_all_decelerations()
 {
-    std::set<target*> targets;
+    std::vector<std::shared_ptr<target>> targets;
     for (auto &t : supervised_targets) {
-        targets.insert(&t);
+        targets.push_back(t);
     }
-    extern std::map<track_condition*, std::vector<target>> track_condition_targets; 
+    extern std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
     for (auto &kvp : track_condition_targets) {
         for (auto &t : kvp.second)
-            targets.insert(&t);
+            targets.push_back(t);
     }
-    for (target *t : targets) {
-        if (!t->is_valid)
-            continue;
+    for (auto &t : targets) {
         if (t->is_TSR)
             t->default_gradient = default_gradient_tsr;
         t->calculate_decelerations();
@@ -361,14 +357,14 @@ void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
     }
     reset_pbd = {};
     distance start = ref+pbd.element.D_PBDSR.get_value(pbd.Q_SCALE);
-    PBDs.remove_if([start](const PBD_target &t) {return t.start < start;});
+    PBDs.remove_if([start](std::shared_ptr<PBD_target> &t) {return t->start < start;});
     std::vector<PBD_element> elements;
     elements.push_back(pbd.element);
     elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());
     for (auto &e : elements) {
         ref += e.D_PBDSR.get_value(pbd.Q_SCALE);
         double grad = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_PBDSR;
-        PBDs.push_back(PBD_target(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == Q_PBDSR_t::EBIntervention, grad));
+        PBDs.push_back(std::make_shared<PBD_target>(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == Q_PBDSR_t::EBIntervention, grad));
     }
     recalculate_MRSP();
 }

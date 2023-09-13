@@ -225,12 +225,12 @@ void dmi_update_func()
         extern const target* indication_target;
         extern double indication_distance;
         double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end()) : 0;
-        const std::list<target> &targets = get_supervised_targets();
-        for (const target &t : targets)
+        const std::list<std::shared_ptr<target>> &targets = get_supervised_targets();
+        for (auto &t : targets)
         {
-            distance td = t.get_target_position();
-            double d = td - (t.is_EBD_based ? d_maxsafefront(td) : d_estfront);
-            if (t.get_target_speed() == 0 && d<last_distance)
+            distance td = t->get_target_position();
+            double d = td - (t->is_EBD_based ? d_maxsafefront(td) : d_estfront);
+            if (t->get_target_speed() == 0 && d<last_distance)
                 last_distance = d;
         }
         j["IndicationMarkerTarget"] = nullptr;

@@ -17,7 +17,7 @@ std::list<std::shared_ptr<track_condition>> track_conditions;
 optional<distance> restore_initial_states_various;
 optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
-std::map<track_condition*, std::vector<target>> track_condition_targets; 
+std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
 void add_condition();
 bool ep_available = true;
 void update_brake_contributions()
@@ -115,14 +115,14 @@ void update_track_conditions()
         if (c->condition == TrackConditions::NonStoppingArea) {
             if (track_condition_targets.find(c) == track_condition_targets.end())
             {
-                std::vector<target> l;
-                l.push_back(target(c->start, 0, target_class::EoA));
-                l.push_back(target(c->end + L_TRAIN, 0, target_class::EoA));
+                std::vector<std::shared_ptr<target>> l;
+                l.push_back(std::make_shared<target>(c->start, 0, target_class::EoA));
+                l.push_back(std::make_shared<target>(c->end + L_TRAIN, 0, target_class::EoA));
                 track_condition_targets[c] = l;
             }
-            std::vector<target> &l = track_condition_targets[c];
-            target &SBId = l[0];
-            target &SBIg = l[1];
+            std::vector<std::shared_ptr<target>> &l = track_condition_targets[c];
+            auto &SBId = *l[0];
+            auto &SBIg = *l[1];
             SBId.calculate_curves();
             SBIg.calculate_curves();
             distance max = d_maxsafefront(c->start);
@@ -353,6 +353,7 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
         restore_initial_states_various = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
         return;
     }
+    restore_initial_states_various = {};
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         TrackConditions c = it->get()->condition;

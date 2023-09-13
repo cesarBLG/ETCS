@@ -32,5 +32,5 @@ class PBD_target : public target
     }
     void calculate_restriction();
 };
-extern std::list<PBD_target> PBDs;
+extern std::list<std::shared_ptr<PBD_target>> PBDs;
 void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref);

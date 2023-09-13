@@ -50,8 +50,8 @@ void delete_back_info()
     TSRs.remove_if([mindist](const TSR &t) {
         return t.restriction.get_end()<mindist;
     });
-    PBDs.remove_if([mindist](const PBD_target &t) {
-        return t.end < mindist;
+    PBDs.remove_if([mindist](std::shared_ptr<PBD_target> &t) {
+        return t->end < mindist;
     });
 }
 void delete_SSP(distance d)
@@ -108,7 +108,7 @@ void recalculate_MRSP()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         for (auto &pbd : PBDs) {
-            restrictions.insert(pbd.restriction);
+            restrictions.insert(pbd->restriction);
         }
     }
     if (train_speed && 
@@ -252,5 +252,5 @@ void delete_PBD()
 }
 void delete_PBD(distance from)
 {
-    PBDs.remove_if([from](auto &pbd) { return pbd.end > from; });
+    PBDs.remove_if([from](auto &pbd) { return pbd->end > from; });
 }

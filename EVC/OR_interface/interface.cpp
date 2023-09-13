@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "../Position/distance.h"
 #include "../Supervision/speed_profile.h"
+#include "../Supervision/supervision_targets.h"
 #include "../MA/movement_authority.h"
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
@@ -168,10 +169,8 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::atf");
     p->GetValue = []() {
         if (mode != Mode::FS) return std::string("-1");
-        extern const target *indication_target;
-        extern target MRDT;
         extern MonitoringStatus monitoring;
-        const target *t = (monitoring == CSM) ? indication_target : &MRDT;
+        std::shared_ptr<target> t = (monitoring == CSM) ? indication_target : MRDT;
         if (t != nullptr) {
             //t->calculate_curves();
             double speed = t->get_target_speed();
