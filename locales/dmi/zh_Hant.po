@@ -3,19 +3,21 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-04-01 16:28+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2023-08-08 09:55+0000\n"
+"Last-Translator: Rin Hsu <rinnyanneko@outlook.com>\n"
+"Language-Team: Chinese (Traditional) <https://sts.simkol.pl:18443/projects/"
+"simrail/etcs-dmi/zh_Hant/>\n"
+"Language: zh_Hant\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.2.2\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 4.14.2\n"
 "X-Poedit-Basepath: ../../DMI\n"
 "X-Poedit-KeywordsList: get_text;get_text_context:1c,2\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -23,14 +25,14 @@ msgstr ""
 #: language/language.cpp:36 window/nav_buttons.cpp:29
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr ""
+msgstr "主畫面"
 
 #: language/language.cpp:37 window/nav_buttons.cpp:35
 msgctxt "Navigation bar"
 msgid ""
 "Over-\n"
 "ride"
-msgstr ""
+msgstr "超控"
 
 #: language/language.cpp:38 window/nav_buttons.cpp:41
 msgctxt "Navigation bar"
@@ -38,155 +40,161 @@ msgid ""
 "Data\n"
 "view"
 msgstr ""
+"資訊\n"
+"總覽"
 
 #: language/language.cpp:39 window/nav_buttons.cpp:47
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr ""
+msgstr "其他"
 
 #: window/data_entry.cpp:25 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:82
 #: window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr ""
+msgstr "確認"
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr ""
+msgstr " 確認輸入?"
 
 #: window/driver_id.cpp:26
 msgid "TRN"
-msgstr ""
+msgstr "車次"
 
 #: window/fixed_train_data.cpp:26
 msgid ""
 "Enter\n"
 "data"
 msgstr ""
+"輸入\n"
+"資料"
 
 #: window/keyboard.cpp:29
 msgid "DEL"
-msgstr ""
+msgstr "刪除"
 
 #: window/keyboard.cpp:185 window/keyboard.cpp:189
 msgid "No"
-msgstr ""
+msgstr "取消"
 
 #: window/menu_main.cpp:31
 msgid "Main"
-msgstr ""
+msgstr "主畫面"
 
 #: window/menu_main.cpp:33
 msgid "Start"
-msgstr ""
+msgstr "啟動"
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr ""
+msgstr "司機員代號"
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr ""
+msgstr "列車資訊"
 
 #: window/menu_main.cpp:36
 msgid "Level"
-msgstr ""
+msgstr "Level"
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr ""
+msgstr "車次"
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr ""
+msgstr "退出調車"
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr ""
+msgstr "調車"
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr ""
+msgstr "補機"
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr ""
+msgstr "恢復調車"
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr ""
+msgstr "通訊數據"
 
 #: window/menu_ntc.cpp:21
 msgid "NTC data entry"
-msgstr ""
+msgstr "輸入NTC資料"
 
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
-msgstr ""
+msgstr "資料輸入完畢"
 
 #: window/menu_override.cpp:22
 msgid "Override"
-msgstr ""
+msgstr "超控"
 
 #: window/menu_override.cpp:24
 msgid "EoA"
-msgstr ""
+msgstr "行車許可終點"
 
 #: window/menu_radio.cpp:29
 msgid "RBC data"
-msgstr ""
+msgstr "RBC資訊"
 
 #: window/menu_radio.cpp:31
 msgid "Contact last RBC"
-msgstr ""
+msgstr "聯絡最近RBC"
 
 #: window/menu_radio.cpp:32
 msgid "Use short number"
-msgstr ""
+msgstr "撥打短碼"
 
 #: window/menu_radio.cpp:33
 msgid "Enter RBC data"
-msgstr ""
+msgstr "輸入RBC資料"
 
 #: window/menu_radio.cpp:34
 msgid "Radio Network ID"
-msgstr ""
+msgstr "無線電網路ID"
 
 #: window/menu_settings.cpp:21
 msgid "Settings"
-msgstr ""
+msgstr "設定"
 
 #: window/menu_settings.cpp:26
 msgid "System version"
-msgstr ""
+msgstr "系統版本"
 
 #: window/menu_settings.cpp:27
 msgid "Set VBC"
-msgstr ""
+msgstr "設定VBC"
 
 #: window/menu_settings.cpp:28
 msgid "Remove VBC"
-msgstr ""
+msgstr "清除VBC"
 
 #: window/menu_spec.cpp:21
 msgid "Special"
-msgstr ""
+msgstr "其他"
 
 #: window/menu_spec.cpp:23
 msgid "Adhesion"
-msgstr ""
+msgstr "抓地力調節"
 
 #: window/menu_spec.cpp:24
 msgid "SR Speed/Distance"
-msgstr ""
+msgstr "SR限速/距離"
 
 #: window/menu_spec.cpp:25
 msgid "Train integrity"
-msgstr ""
+msgstr "列車完整性檢查"
 
 #: window/train_data.cpp:24
 msgid ""
 "Select\n"
 "type"
 msgstr ""
+"選擇\n"
+"種別"
