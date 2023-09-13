@@ -18,12 +18,12 @@ class TcpSocket : private PlatformUtil::NoCopy
 private:
 	int peer_fd;
 	PlatformUtil::FulfillerBufferedQueue<std::string> rx_list;
+	PlatformUtil::FulfillerList<void> shut_list;
 	std::string tx_buffer;
 	PlatformUtil::Promise<short> rx_promise;
 	PlatformUtil::Promise<short> tx_promise;
-	bool rx_pending, tx_pending;
-	bool shutdown_requested;
-	FdPoller* poller;
+	bool rx_pending, tx_pending, shut_rd, shut_wr, shut_wrq;
+	FdPoller& poller;
 
 	void mark_nonblocking(int fd);
 	void close_socket();
@@ -36,5 +36,6 @@ public:
 	~TcpSocket();
 	void send(const std::string_view data);
 	void shutdown();
+	PlatformUtil::Promise<void> on_shutdown();
 	PlatformUtil::Promise<std::string> receive();
 };

@@ -7,382 +7,365 @@ msgstr ""
 "Project-Id-Version: ETCS EVC\n"
 "Language: hu\n"
 
-#: DMI/windows.cpp:76 DMI/windows.cpp:281 DMI/windows.cpp:981
+#: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
 #, fuzzy
 msgid "Driver ID"
 msgstr "Vezetői azonosító"
 
-#: DMI/windows.cpp:85 DMI/windows.cpp:106 DMI/windows.cpp:829
+#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
+#: DMI/windows.cpp:741
 msgid "Level 0"
 msgstr "0. szint"
 
-#: DMI/windows.cpp:88 DMI/windows.cpp:109 DMI/windows.cpp:831
+#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
+#: DMI/windows.cpp:743
 msgid "Level 1"
 msgstr "1. szint"
 
-#: DMI/windows.cpp:91 DMI/windows.cpp:112 DMI/windows.cpp:833
+#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
+#: DMI/windows.cpp:745
 msgid "Level 2"
 msgstr "2. szint"
 
-#: DMI/windows.cpp:94 DMI/windows.cpp:115 DMI/windows.cpp:835
+#: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
 msgid "Level 3"
 msgstr "3. szint"
 
-#: DMI/windows.cpp:139 DMI/windows.cpp:825
+#: DMI/windows.cpp:123 DMI/windows.cpp:737
 msgid "Level"
 msgstr "Szint"
 
-#: DMI/windows.cpp:145 DMI/windows.cpp:283 DMI/windows.cpp:853
+#: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
 msgstr "vonatszám"
 
-#: DMI/windows.cpp:152 DMI/windows.cpp:293 DMI/windows.cpp:991
-#: DMI/windows.cpp:1147
+#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
+#: DMI/windows.cpp:1033
 msgid "RBC ID"
 msgstr "RBC azonosító"
 
-#: DMI/windows.cpp:153 DMI/windows.cpp:294 DMI/windows.cpp:992
+#: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
 msgstr "RBC telefon"
 
-#: DMI/windows.cpp:157 DMI/windows.cpp:990 DMI/windows.cpp:1146
+#: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
 msgstr "RBC adatok"
 
-#: DMI/windows.cpp:179 DMI/windows.cpp:195 DMI/windows.cpp:874
-#: DMI/windows.cpp:1131
+#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
+#: DMI/windows.cpp:1017
 #, fuzzy
 msgid "Train data"
 msgstr "Vonatadatok"
 
-#: DMI/windows.cpp:237 DMI/windows.cpp:1026 DMI/windows.cpp:1155
+#: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
 #, fuzzy
 msgid "SR speed (km/h)"
 msgstr "SR sebesség (km/h)"
 
-#: DMI/windows.cpp:238 DMI/windows.cpp:1027 DMI/windows.cpp:1152
+#: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
 #, fuzzy
 msgid "SR distance (m)"
 msgstr "Távolság SR-ben (m)"
 
-#: DMI/windows.cpp:240 DMI/windows.cpp:1024 DMI/windows.cpp:1151
+#: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
 #, fuzzy
 msgid "SR speed/distance"
 msgstr "SR dist/seb"
 
-#: DMI/windows.cpp:246 DMI/windows.cpp:1020
+#: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
 msgstr "Nyelv"
 
-#: DMI/windows.cpp:187 DMI/windows.cpp:286 DMI/windows.cpp:900
-#: DMI/windows.cpp:1132
+#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
+#: DMI/windows.cpp:1018
 #, fuzzy
 msgid "Length (m)"
 msgstr "Hossz (m)"
 
-#: DMI/windows.cpp:287
+#: DMI/windows.cpp:266
 msgid "Brake percentaje"
 msgstr "fékszázalék"
 
-#: DMI/windows.cpp:288
+#: DMI/windows.cpp:267
 #, fuzzy
 msgid "Maximum speed (km/h)"
 msgstr "Maximális sebesség (km/h)"
 
-#: DMI/windows.cpp:289
+#: DMI/windows.cpp:268
 msgid "Airtight"
 msgstr "Nyomástartás"
 
-#: DMI/windows.cpp:289
+#: DMI/windows.cpp:268
 msgid "Yes"
 msgstr "Igen"
 
-#: DMI/windows.cpp:289
+#: DMI/windows.cpp:268
 msgid "No"
 msgstr "Nem"
 
-#: DMI/windows.cpp:303
+#: DMI/windows.cpp:280
 msgid "Data view"
 msgstr "Lásd az adatokat"
 
-#: DMI/windows.cpp:410
+#: DMI/windows.cpp:359
 msgid "Train is rejected"
 msgstr "elutasított vonat"
 
-#: DMI/windows.cpp:672
+#: DMI/windows.cpp:589
 msgid "Shunting request failed"
 msgstr "lehetetlen manőver"
 
-#: DMI/windows.cpp:879 DMI/windows.cpp:883
+#: DMI/windows.cpp:791 DMI/windows.cpp:795
 #, fuzzy
 msgid "Validate train data"
 msgstr "A vonatadatok érvényesítése"
 
-#: DMI/windows.cpp:179 DMI/windows.cpp:285 DMI/windows.cpp:969
+#: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
 msgstr "Amolyan vonat"
 
-#: DMI/windows.cpp:189 DMI/windows.cpp:904 DMI/windows.cpp:1140
+#: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 #, fuzzy
 msgid "Max speed (km/h)"
 msgstr "sebesség maximum (km/h)"
 
-#: DMI/windows.cpp:188 DMI/windows.cpp:905 DMI/windows.cpp:1136
+#: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
 msgstr "fékszázalék"
 
-#: DMI/windows.cpp:191 DMI/windows.cpp:903 DMI/windows.cpp:906
+#: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
 msgstr "vonattípus"
 
-#: DMI/windows.cpp:191 DMI/windows.cpp:909
+#: DMI/windows.cpp:171 DMI/windows.cpp:818
 msgid "PASS 1"
 msgstr "UTAZÁS N"
 
-#: DMI/windows.cpp:191 DMI/windows.cpp:912
+#: DMI/windows.cpp:171 DMI/windows.cpp:821
 msgid "PASS 2"
 msgstr "2. LÉPÉS"
 
-#: DMI/windows.cpp:191 DMI/windows.cpp:915
+#: DMI/windows.cpp:171 DMI/windows.cpp:824
 msgid "PASS 3"
 msgstr "UTAZÁSOK"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:918
+#: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
 msgstr "DÖNTÉS 1"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:921
+#: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
 msgstr "UTAZÁS B"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:924
+#: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
 msgstr "DÖNTÉS 3"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:927
+#: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
 msgstr "UTAZÁS C"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:930
+#: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
 msgstr "DÖNTÉS 5"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:933
+#: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
 msgstr "UTAZÁS D"
 
-#: DMI/windows.cpp:192 DMI/windows.cpp:936
+#: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
 msgstr "DÖNTÉS 7"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:939
+#: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
 msgstr "MERC P/V N"
 
-#: DMI/windows.cpp:942
+#: DMI/windows.cpp:851
 msgid "FP 2"
 msgstr "PF 2"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:945
+#: DMI/windows.cpp:173 DMI/windows.cpp:854
 msgid "FP 3"
 msgstr "PF 3"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:948
+#: DMI/windows.cpp:173 DMI/windows.cpp:857
 msgid "FP 4"
 msgstr "PF 4"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:951
+#: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
 msgstr "MERC F/G N"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:954
+#: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
 msgstr "FG 2"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:957
+#: DMI/windows.cpp:173 DMI/windows.cpp:866
 msgid "FG 3"
 msgstr "FG 3"
 
-#: DMI/windows.cpp:193 DMI/windows.cpp:960
+#: DMI/windows.cpp:173 DMI/windows.cpp:869
 msgid "FG 4"
 msgstr "FG 4"
 
-#: DMI/windows.cpp:252 DMI/windows.cpp:1036
+#: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
 msgstr "Adja hozzá a VBC-t"
 
-#: DMI/windows.cpp:1041 DMI/windows.cpp:1054
+#: DMI/windows.cpp:931 DMI/windows.cpp:944
 msgid "Validate set VBC"
 msgstr "Érvényesítse a VBC hozzáadását"
 
-#: DMI/windows.cpp:258 DMI/windows.cpp:1045
+#: DMI/windows.cpp:237 DMI/windows.cpp:935
 msgid "Remove VBC"
 msgstr "Távolítsa el a VBC-t"
 
-#: DMI/windows.cpp:1050 DMI/windows.cpp:1071
+#: DMI/windows.cpp:940 DMI/windows.cpp:961
 msgid "Validate remove VBC"
 msgstr "Érvényesítse a VBC eltávolítását"
 
-#: DMI/windows.cpp:252 DMI/windows.cpp:258 DMI/windows.cpp:1066
-#: DMI/windows.cpp:1067 DMI/windows.cpp:1083
+#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
+#: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
 msgstr "VBC kód"
 
-#: DMI/windows.cpp:1297 Procedures/train_trip.cpp:40
+#: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
 msgid "SH refused"
 msgstr "A manővert elutasították"
 
-#: Procedures/mode_transition.cpp:328
+#: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
 msgstr "Belépés az FS-be"
 
-#: Procedures/mode_transition.cpp:335
+#: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
 msgstr "bemenet az OS-be"
 
-#: Procedures/train_trip.cpp:26
+#: Procedures/train_trip.cpp:34
 #, fuzzy
 msgid "Unauthorized passing of EoA/LoA"
 msgstr "EoA vagy LoA túllépve"
 
-#: Procedures/train_trip.cpp:30 TrainSubsystems/brake.cpp:30
+#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
 msgstr "Beacon olvasási hiba"
 
-#: Procedures/train_trip.cpp:34
+#: Procedures/train_trip.cpp:42
 msgid "No MA received at level transition"
 msgstr "Nincs MA szintváltáskor"
 
-#: Procedures/train_trip.cpp:37 TrainSubsystems/brake.cpp:63
+#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
 msgstr "kommunikációs hiba"
 
-#: Euroradio/session.cpp:123 Procedures/train_trip.cpp:43
+#: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
 msgid "Trackside not compatible"
 msgstr "az elérési út nem támogatott"
 
-#: Procedures/train_trip.cpp:46
+#: Procedures/train_trip.cpp:54
 msgid "SR distance exceeded"
 msgstr "SR távolság túllépve"
 
-#: Procedures/train_trip.cpp:50
+#: Procedures/train_trip.cpp:58
 msgid "SH stop order"
 msgstr "Megrendelés leállítása SH-ban"
 
-#: Procedures/train_trip.cpp:54
+#: Procedures/train_trip.cpp:62
 msgid "SR stop order"
 msgstr "SR stop parancs"
 
-#: Procedures/train_trip.cpp:57
+#: Procedures/train_trip.cpp:65
 msgid "Emergency stop"
 msgstr "Vészmegálló"
 
-#: Procedures/train_trip.cpp:60
+#: Procedures/train_trip.cpp:68
 msgid "No track description"
 msgstr "nincsenek pályaadatok"
 
-#: Procedures/train_trip.cpp:71
+#: Procedures/train_trip.cpp:79
 msgid " brake demand"
 msgstr " fékigény"
 
-#: STM/stm.cpp:395
+#: STM/stm.cpp:362
 msgid " failed"
 msgstr " nem sikerült"
 
-#: STM/stm.cpp:516
+#: STM/stm.cpp:460
 msgid " not available"
 msgstr " nem elérhető"
 
-#: TrainSubsystems/brake.cpp:49
+#: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
 msgstr "Siklik"
 
-#: DMI/text_messages.cpp:117
+#: DMI/text_messages.cpp:126
 msgid "Level crossing not protected"
 msgstr "A vasúti átjáró nem védett"
 
-#: DMI/text_messages.cpp:118
+#: DMI/text_messages.cpp:127
 msgid "Acknowledgement"
 msgstr "Elismerés"
 
-#: DMI/windows.cpp:190 DMI/windows.cpp:901
+#: DMI/windows.cpp:170
 msgid "Loading gauge"
 msgstr "Rakodási szelvény"
 
-#: DMI/windows.cpp:190
+#: DMI/windows.cpp:170
 msgid "Out of GC"
 msgstr "Elfogyott a GC"
 
-#: DMI/windows.cpp:193
+#: DMI/windows.cpp:173
 msgid "FP2"
 msgstr "FP2"
 
-#: DMI/windows.cpp:194 DMI/windows.cpp:902
+#: DMI/windows.cpp:174
 msgid "Axle load category"
 msgstr "Tengelyterhelési kategória"
 
-#: DMI/windows.cpp:221 DMI/windows.cpp:1095 DMI/windows.cpp:1100
-#: DMI/windows.cpp:1104
+#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
+#: DMI/windows.cpp:990
 msgid " data"
 msgstr " adat"
 
-#: DMI/windows.cpp:230 DMI/windows.cpp:1033
+#: DMI/windows.cpp:209 DMI/windows.cpp:923
 msgid "Adhesion"
 msgstr "Tapadás"
 
-#: DMI/windows.cpp:230
+#: DMI/windows.cpp:209
 msgid "Non slippery rail"
 msgstr "Nincs csúszós sín"
 
-#: DMI/windows.cpp:230 DMI/windows.cpp:1034
+#: DMI/windows.cpp:209 DMI/windows.cpp:924
 msgid "Slippery rail"
 msgstr "Csúszós sín"
 
-#: DMI/windows.cpp:309
+#: DMI/windows.cpp:286
 msgid "System version"
 msgstr "Rendszerverzió"
 
-#: DMI/windows.cpp:309
+#: DMI/windows.cpp:286
 msgid "Operated system version"
 msgstr "Az operációs rendszer verziója"
 
-#: DMI/windows.cpp:1100 DMI/windows.cpp:1104
+#: DMI/windows.cpp:986 DMI/windows.cpp:990
 msgid "Validate "
 msgstr "Érvényesít "
 
-#: TrackConditions/route_suitability.cpp:44
+#: TrackConditions/route_suitability.cpp:53
 msgid "Route suitability - loading gauge"
 msgstr "Útvonal-alkalmasság - rakszelvény"
 
-#: TrackConditions/route_suitability.cpp:47
+#: TrackConditions/route_suitability.cpp:56
 msgid "Route suitability - axle load category"
 msgstr "Útvonal-alkalmasság - tengelyterhelési kategória"
 
-#: TrackConditions/route_suitability.cpp:50
+#: TrackConditions/route_suitability.cpp:59
 msgid "Route suitability - traction system"
 msgstr "Útvonal-alkalmasság - vontatási rendszer"
 
-#: TrainSubsystems/brake.cpp:85
+#: TrainSubsystems/brake.cpp:94
 msgid "Train data changed"
 msgstr "A vonatadatok megváltoztak"
-
-#: DMI/windows.cpp:130
-msgid "Level "
-msgstr "Szint "
-
-#: DMI/windows.cpp:163 DMI/windows.cpp:291 DMI/windows.cpp:1001
-msgid "Radio network ID"
-msgstr "Rádióhálózat azonosítója"
-
-#: DMI/windows.cpp:399 DMI/windows.cpp:507
-msgid "Radio network registration failed"
-msgstr "A rádióhálózat regisztrációja sikertelen"
-
-#: DMI/windows.cpp:1087
-msgid "Brightness"
-msgstr "Világít"
-
-#: DMI/windows.cpp:1089
-msgid "Volume"
-msgstr "Hangerő"
 

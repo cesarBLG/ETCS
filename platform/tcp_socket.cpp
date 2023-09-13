@@ -21,6 +21,7 @@
 #define socklen_t int
 #define ssize_t int
 #define MSG_NOSIGNAL 0
+#define SHUT_WR SD_SEND
 #endif
 
 void TcpSocket::mark_nonblocking(int fd) {
@@ -37,7 +38,10 @@ void TcpSocket::close_socket() {
 		return;
 	tx_promise = {};
 	rx_promise = {};
-	rx_list.push_data({});
+	if (!shut_rd)
+		rx_list.push_data({});
+	if (!shut_wr)
+		shut_list.fulfill_all();
 #ifdef _WIN32
 	closesocket(peer_fd);
 #else
@@ -58,37 +62,45 @@ void TcpSocket::handle_error() {
 }
 
 void TcpSocket::update() {
-	if (peer_fd != -1 && !tx_pending && !tx_buffer.empty()) {
+	if (peer_fd != -1 && !tx_pending && (!tx_buffer.empty() || (shut_wrq && !shut_wr))) {
 		tx_pending = true;
-		tx_promise = poller->on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
+		tx_promise = poller.on_fd_ready(peer_fd, POLLOUT).then([this](int rev) {
 			tx_pending = false;
 			if (rev & (POLLERR | POLLHUP)) {
 				close_socket();
 			} else if (peer_fd != -1 && (rev & POLLOUT)) {
-				ssize_t ret = ::send(peer_fd, tx_buffer.data(), tx_buffer.size(), MSG_NOSIGNAL);
-				if (ret < 0)
-					handle_error();
-				else
-					tx_buffer.erase(0, ret);
+				if (!tx_buffer.empty()) {
+					ssize_t ret = ::send(peer_fd, tx_buffer.data(), tx_buffer.size(), MSG_NOSIGNAL);
+					if (ret < 0)
+						handle_error();
+					else
+						tx_buffer.erase(0, ret);
+				} else {
+					shut_wr = true;
+					shut_list.fulfill_all();
+					if (::shutdown(peer_fd, SHUT_WR) < 0)
+						close_socket();
+				}
 			}
 			update();
 		});
 	}
 
-	if (peer_fd != -1 && !rx_pending && rx_list.pending_fulfillers() > 0) {
+	if (peer_fd != -1 && !shut_rd && !rx_pending && rx_list.pending_fulfillers() > 0) {
 		rx_pending = true;
-		rx_promise = poller->on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
+		rx_promise = poller.on_fd_ready(peer_fd, POLLIN).then([this](int rev) {
 			rx_pending = false;
-			if (rev & (POLLERR | POLLHUP)) {
+			if (rev & POLLERR) {
 				close_socket();
-			} else if (rev & POLLIN) {
+			} else if (peer_fd != -1 && (rev & (POLLIN | POLLHUP))) {
 				std::string buf;
 				buf.resize(4096);
 				ssize_t ret = recv(peer_fd, buf.data(), buf.size(), 0);
 				if (ret < 0) {
 					handle_error();
 				} else if (ret == 0) {
-					close_socket();
+					shut_rd = true;
+					rx_list.push_data({});
 				} else {
 					buf.resize(ret);
 					rx_list.push_data(std::move(buf));
@@ -96,15 +108,6 @@ void TcpSocket::update() {
 			}
 			update();
 		});
-	}
-
-	if (peer_fd != -1 && !tx_pending && shutdown_requested) {
-#ifdef _WIN32
-		::shutdown(peer_fd, SD_BOTH);
-#else
-		::shutdown(peer_fd, SHUT_RDWR);
-#endif
-		shutdown_requested = false;
 	}
 }
 
@@ -122,13 +125,21 @@ void TcpSocket::connect(const std::string_view hostname, int port) {
 }
 
 void TcpSocket::send(const std::string_view data) {
-	tx_buffer += data;
-	update();
+	if (!shut_wrq) {
+		tx_buffer += data;
+		update();
+	}
 }
 
 void TcpSocket::shutdown() {
-	shutdown_requested = true;
-	update();
+	if (!shut_wrq) {
+		shut_wrq = true;
+		update();
+	}
+}
+
+PlatformUtil::Promise<void> TcpSocket::on_shutdown() {
+	return shut_list.create_and_add();
 }
 
 PlatformUtil::Promise<std::string> TcpSocket::receive() {
@@ -137,11 +148,11 @@ PlatformUtil::Promise<std::string> TcpSocket::receive() {
 	return std::move(promise);
 }
 
-TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), shutdown_requested(false) {
+TcpSocket::TcpSocket(const std::string_view hostname, int port, FdPoller &p) : poller(p), rx_pending(false), tx_pending(false), shut_rd(false), shut_wr(false), shut_wrq(false) {
 	connect(hostname, port);
 }
 
-TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(&p), rx_pending(false), tx_pending(false), shutdown_requested(false) {
+TcpSocket::TcpSocket(int fd, FdPoller &p) : poller(p), rx_pending(false), tx_pending(false), shut_rd(false), shut_wr(false), shut_wrq(false) {
 	peer_fd = fd;
 }
 

@@ -1,179 +1,192 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-01 16:28+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: POEditor.com\n"
-"Project-Id-Version: ETCS DMI\n"
-"Language: pt\n"
+"X-Generator: Poedit 3.2.2\n"
+"X-Poedit-Basepath: ../../DMI\n"
+"X-Poedit-KeywordsList: get_text;get_text_context:1c,2\n"
+"X-Poedit-SearchPath-0: .\n"
 
-#: window/menu_main.cpp:31
+#: language/language.cpp:36 window/nav_buttons.cpp:29
+msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Principal"
+msgstr ""
+
+#: language/language.cpp:37 window/nav_buttons.cpp:35
+msgctxt "Navigation bar"
+msgid ""
+"Over-\n"
+"ride"
+msgstr ""
+
+#: language/language.cpp:38 window/nav_buttons.cpp:41
+msgctxt "Navigation bar"
+msgid ""
+"Data\n"
+"view"
+msgstr ""
+
+#: language/language.cpp:39 window/nav_buttons.cpp:47
+msgctxt "Navigation bar"
+msgid "Spec"
+msgstr ""
 
 #: window/data_entry.cpp:25 window/data_validation.cpp:11
 #: window/data_validation.h:28 window/data_validation.h:82
 #: window/keyboard.cpp:186 window/keyboard.cpp:193
 #: window/track_ahead_free.cpp:15
 msgid "Yes"
-msgstr "Sim"
+msgstr ""
 
 #: window/data_entry.cpp:54
 msgid " entry complete?"
-msgstr " entrada completa?"
-
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
-msgid "No"
-msgstr "Não"
+msgstr ""
 
 #: window/driver_id.cpp:26
 msgid "TRN"
-msgstr "NTRAIN"
+msgstr ""
 
 #: window/fixed_train_data.cpp:26
-msgid "Enter\n"
+msgid ""
+"Enter\n"
 "data"
-msgstr "Int.\n"
-"dados"
+msgstr ""
 
 #: window/keyboard.cpp:29
 msgid "DEL"
-msgstr "DO"
+msgstr ""
+
+#: window/keyboard.cpp:185 window/keyboard.cpp:189
+msgid "No"
+msgstr ""
+
+#: window/menu_main.cpp:31
+msgid "Main"
+msgstr ""
 
 #: window/menu_main.cpp:33
 msgid "Start"
-msgstr "Começar"
+msgstr ""
 
 #: window/menu_main.cpp:34
 msgid "Driver ID"
-msgstr "Dados Motorista"
+msgstr ""
 
 #: window/menu_main.cpp:35
 msgid "Train Data"
-msgstr "Dados Trem"
+msgstr ""
 
 #: window/menu_main.cpp:36
 msgid "Level"
-msgstr "Nível"
+msgstr ""
 
 #: window/menu_main.cpp:37
 msgid "Train running number"
-msgstr "Número do trem"
+msgstr ""
 
 #: window/menu_main.cpp:38
 msgid "Exit Shunting"
-msgstr "Manobras finais"
+msgstr ""
 
 #: window/menu_main.cpp:38
 msgid "Shunting"
-msgstr "Manobras"
+msgstr ""
 
 #: window/menu_main.cpp:39
 msgid "Non-Leading"
-msgstr "Tração dupla"
+msgstr ""
 
 #: window/menu_main.cpp:40
 msgid "Maintain shunting"
-msgstr "Manobra de espera"
+msgstr ""
 
 #: window/menu_main.cpp:41
 msgid "Radio data"
-msgstr "Dados de rádio"
-
-#: window/menu_override.cpp:22
-msgid "Override"
-msgstr "Superação"
-
-#: window/menu_override.cpp:24
-msgid "EoA"
-msgstr "EoA"
-
-#: window/menu_radio.cpp:31
-msgid "Contact last RBC"
-msgstr "Contato último RBC"
-
-#: window/menu_radio.cpp:32
-msgid "Use short number"
-msgstr "Usar número curto"
-
-#: window/menu_radio.cpp:33
-msgid "Enter RBC data"
-msgstr "Insira os dados RBC"
-
-#: window/menu_radio.cpp:34
-msgid "Radio Network ID"
-msgstr "ID da rede de rádio"
-
-#: window/menu_settings.cpp:21
-msgid "Settings"
-msgstr "Configurações"
-
-#: window/menu_settings.cpp:26
-msgid "System version"
-msgstr "Versão do sistema"
-
-#: window/menu_settings.cpp:27
-msgid "Set VBC"
-msgstr "Adicionar VBC"
-
-#: window/menu_settings.cpp:28
-msgid "Remove VBC"
-msgstr "Remover VBC"
-
-#: window/menu_spec.cpp:21
-msgid "Special"
-msgstr "Especial"
-
-#: window/menu_spec.cpp:23
-msgid "Adhesion"
-msgstr "Aderência"
-
-#: window/menu_spec.cpp:24
-msgid "SR Speed/Distance"
-msgstr "SR Velocidade/Distância"
-
-#: window/menu_spec.cpp:25
-msgid "Train integrity"
-msgstr "Treinar integridade"
-
-#: window/train_data.cpp:24
-msgid "Select\n"
-"type"
-msgstr "Sel.\n"
-"cara"
-
-#: language/language.cpp:36 window/nav_buttons.cpp:29
-msgctxt "Navigation bar"
-msgid "Main"
-msgstr "Cardá-\n"
-"pio"
-
-#: language/language.cpp:37 window/nav_buttons.cpp:35
-msgctxt "Navigation bar"
-msgid "Over-\n"
-"ride"
-msgstr "Superação"
-
-#: language/language.cpp:38 window/nav_buttons.cpp:41
-msgctxt "Navigation bar"
-msgid "Data\n"
-"view"
-msgstr "Dados"
-
-#: language/language.cpp:39 window/nav_buttons.cpp:47
-msgctxt "Navigation bar"
-msgid "Spec"
-msgstr "Especial"
+msgstr ""
 
 #: window/menu_ntc.cpp:21
 msgid "NTC data entry"
-msgstr "Entrada de dados NTC"
+msgstr ""
 
 #: window/menu_ntc.cpp:31
 msgid "End of data entry"
-msgstr "Fim da entrada de dados"
+msgstr ""
+
+#: window/menu_override.cpp:22
+msgid "Override"
+msgstr ""
+
+#: window/menu_override.cpp:24
+msgid "EoA"
+msgstr ""
 
 #: window/menu_radio.cpp:29
 msgid "RBC data"
-msgstr "Dados RBC"
+msgstr ""
 
+#: window/menu_radio.cpp:31
+msgid "Contact last RBC"
+msgstr ""
+
+#: window/menu_radio.cpp:32
+msgid "Use short number"
+msgstr ""
+
+#: window/menu_radio.cpp:33
+msgid "Enter RBC data"
+msgstr ""
+
+#: window/menu_radio.cpp:34
+msgid "Radio Network ID"
+msgstr ""
+
+#: window/menu_settings.cpp:21
+msgid "Settings"
+msgstr ""
+
+#: window/menu_settings.cpp:26
+msgid "System version"
+msgstr ""
+
+#: window/menu_settings.cpp:27
+msgid "Set VBC"
+msgstr ""
+
+#: window/menu_settings.cpp:28
+msgid "Remove VBC"
+msgstr ""
+
+#: window/menu_spec.cpp:21
+msgid "Special"
+msgstr ""
+
+#: window/menu_spec.cpp:23
+msgid "Adhesion"
+msgstr ""
+
+#: window/menu_spec.cpp:24
+msgid "SR Speed/Distance"
+msgstr ""
+
+#: window/menu_spec.cpp:25
+msgid "Train integrity"
+msgstr ""
+
+#: window/train_data.cpp:24
+msgid ""
+"Select\n"
+"type"
+msgstr ""

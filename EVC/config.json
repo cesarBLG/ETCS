@@ -1,77 +1,122 @@
- {
-    "TraxxDC3_PL":{
-       "TrainData":"TrainData/traindata_TraxxDC3.json",
-       "SpeedDial":240,
-       "STMLayout":"stm_bombardier.json",
-       "UnsupportedLevels":[
-          0
-       ],
-       "AvailableNTC":[
-          26
-       ]
-    },
-    "465": {
-        "TrainData": "TrainData/traindata_465.json",
-        "SpeedDial": 150,
-        "STMLayout": "stm_siemens.json"
-    },
-	"450": {
-        "TrainData": "TrainData/traindata_450.json",
-        "SpeedDial": 160,
-        "STMLayout": "stm_siemens.json"
-    },
-	"447": {
-        "TrainData": "TrainData/traindata_447.json",
-        "SpeedDial": 140,
-        "STMLayout": "stm_siemens.json"
-    },
-	"446": {
-        "TrainData": "TrainData/traindata_446.json",
-        "SpeedDial": 120,
-        "STMLayout": "stm_siemens.json"
-    },
-	"449": {
-        "TrainData": "TrainData/traindata_449.json",
-        "SpeedDial": 180,
-        "STMLayout": "stm_siemens.json"
-    },
-	"490": {
-        "TrainData": "TrainData/traindata_490.json",
-        "SpeedDial": 180,
-        "STMLayout": "stm_siemens.json"
-    },
-	"104": {
-        "TrainData": "TrainData/traindata_104.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-    "105": {
-        "TrainData": "TrainData/traindata_105.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-    "120": {
-        "TrainData": "TrainData/traindata_120.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-    "121": {
-        "TrainData": "TrainData/traindata_121.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"114": {
-        "TrainData": "TrainData/traindata_114.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-    "130":{
-       "TrainData":"TrainData/traindata_130.json",
-       "SpeedDial":400,
-       "STMLayout":"stm_bombardier.json",
-       "AvailableNTC":[
-          0
-       ]
+{
+   "SimRail/Traxx3":{
+      "TrainData":"TrainData/traindata_TraxxDC3.json",
+      "SpeedDial":240,
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
+   "SimRail/Traxx3-CA":{
+      "TrainData":"TrainData/traindata_TraxxDC3.json",
+      "SpeedDial":240,
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
+   "SimRail/E6ACT":{
+      "TrainData":"TrainData/traindata_E6ACT.json",
+      "SpeedDial":160,
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
+   "SimRail/36wed-lka":{
+      "TrainData":"TrainData/traindata_36WED.json",
+      "SpeedDial":240,
+      "STMLayout":"stm_bombardier.json",
+      "AvailableNTC":[
+         26
+      ]
+   },
+   "465":{
+      "TrainData":"TrainData/traindata_465.json",
+      "SpeedDial":150,
+      "STMLayout":"stm_siemens.json"
+   },
+   "450":{
+      "TrainData":"TrainData/traindata_450.json",
+      "SpeedDial":160,
+      "STMLayout":"stm_siemens.json"
+   },
+   "447":{
+      "TrainData":"TrainData/traindata_447.json",
+      "SpeedDial":140,
+      "STMLayout":"stm_siemens.json"
+   },
+   "446":{
+      "TrainData":"TrainData/traindata_446.json",
+      "SpeedDial":120,
+      "STMLayout":"stm_siemens.json"
+   },
+   "449":{
+      "TrainData":"TrainData/traindata_449.json",
+      "SpeedDial":180,
+      "STMLayout":"stm_siemens.json"
+   },
+   "490":{
+      "TrainData":"TrainData/traindata_490.json",
+      "SpeedDial":180,
+      "STMLayout":"stm_siemens.json"
+   },
+   "104":{
+      "TrainData":"TrainData/traindata_104.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "105":{
+      "TrainData":"TrainData/traindata_105.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "106":{
+      "TrainData":"TrainData/traindata_106.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "107":{
+      "TrainData":"TrainData/traindata_107.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "162":{
+      "TrainData":"TrainData/traindata_162.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "120":{
+      "TrainData":"TrainData/traindata_120.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "121":{
+      "TrainData":"TrainData/traindata_121.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "114":{
+      "TrainData":"TrainData/traindata_114.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "130":{
+      "TrainData":"TrainData/traindata_130.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_bombardier.json",
+      "AvailableNTC":[
+         0
+      ]
    },
    "1305":{
       "TrainData":"TrainData/traindata_1305.json",
@@ -80,48 +125,48 @@
       "AvailableNTC":[
          0
       ]
-  },
-  "1302":{
-     "TrainData":"TrainData/traindata_1302.json",
-     "SpeedDial":400,
-     "STMLayout":"stm_bombardier.json",
-     "AvailableNTC":[
-        0
-     ]
- },
-	"112": {
-        "TrainData": "TrainData/traindata_112.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"102": {
-        "TrainData": "TrainData/traindata_102.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"103": {
-        "TrainData": "TrainData/traindata_103.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"108": {
-        "TrainData": "TrainData/traindata_108.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"109": {
-        "TrainData": "TrainData/traindata_109.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    },
-	"454": {
-        "TrainData": "TrainData/traindata_454.json",
-        "SpeedDial": 180,
-        "STMLayout": "stm_siemens.json"
-    },
-	"100": {
-        "TrainData": "TrainData/traindata_100.json",
-        "SpeedDial": 400,
-        "STMLayout": "stm_siemens.json"
-    }
- }
+   },
+   "1302":{
+      "TrainData":"TrainData/traindata_1302.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_bombardier.json",
+      "AvailableNTC":[
+         0
+      ]
+   },
+   "112":{
+      "TrainData":"TrainData/traindata_112.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "102":{
+      "TrainData":"TrainData/traindata_102.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "103":{
+      "TrainData":"TrainData/traindata_103.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "108":{
+      "TrainData":"TrainData/traindata_108.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "109":{
+      "TrainData":"TrainData/traindata_109.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   },
+   "454":{
+      "TrainData":"TrainData/traindata_454.json",
+      "SpeedDial":180,
+      "STMLayout":"stm_siemens.json"
+   },
+   "100":{
+      "TrainData":"TrainData/traindata_100.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_siemens.json"
+   }
+}
