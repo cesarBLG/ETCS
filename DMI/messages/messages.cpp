@@ -70,6 +70,16 @@ void revokeMessage(unsigned int id)
     setAck(AckType::Message, id, false);
     updateMessages();
 }
+void revokeMessages()
+{
+    current = 0;
+    for(auto &msg : messageList)
+    {
+        setAck(AckType::Message, msg.Id, false);
+    }
+    messageList.clear();
+    updateMessages();
+}
 bool operator < (Message a, Message b)
 {
     if(a.firstGroup && !b.firstGroup) return true;

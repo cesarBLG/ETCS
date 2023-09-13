@@ -310,8 +310,10 @@ void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
     }
     if (std::holds_alternative<BasePlatform::BusSocket::LeaveNotification>(result)) {
         auto &leave = std::get<BasePlatform::BusSocket::LeaveNotification>(result);
-        if (leave.peer.uid == evc_peer)
+        if (leave.peer.uid == evc_peer) {
             evc_peer = 0;
+            revokeMessages();
+        }
     }
     if (std::holds_alternative<BasePlatform::BusSocket::Message>(result)) {
         auto &msg = std::get<BasePlatform::BusSocket::Message>(result);
