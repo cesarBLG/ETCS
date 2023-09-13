@@ -145,6 +145,12 @@
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
+   "1126": {
+        "TrainData": "TrainData/traindata_1126.json",
+        "SpeedDial": 400,
+        "STMLayout": "stm_siemens.json",
+        "SoftKeys": true
+    },
   "102": {
        "TrainData": "TrainData/traindata_102.json",
        "SpeedDial": 400,
