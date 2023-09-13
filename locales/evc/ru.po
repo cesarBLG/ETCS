@@ -3,371 +3,374 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-03-30 20:36+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2023-08-08 09:55+0000\n"
+"Last-Translator: Loongeron (Russian team) <loongeron.ilia@gmail.com>\n"
+"Language-Team: Russian <https://sts.simkol.pl:18443/projects/simrail/"
+"etcs-evc/ru/>\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.2.2\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Weblate 4.14.2\n"
 "X-Poedit-Basepath: ../../EVC\n"
 "X-Poedit-KeywordsList: get_text;get_text_context:c1,2\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: DMI/text_messages.cpp:126
 msgid "Level crossing not protected"
-msgstr ""
+msgstr "Переезд не охраняется"
 
 #: DMI/text_messages.cpp:127
 msgid "Acknowledgement"
-msgstr ""
+msgstr "Подтверждение"
 
 #: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
 msgid "Driver ID"
-msgstr ""
+msgstr "ID Машиниста"
 
 #: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
 #: DMI/windows.cpp:741
 msgid "Level 0"
-msgstr ""
+msgstr "Уровень 0"
 
 #: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
 #: DMI/windows.cpp:743
 msgid "Level 1"
-msgstr ""
+msgstr "Уровень 1"
 
 #: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
 #: DMI/windows.cpp:745
 msgid "Level 2"
-msgstr ""
+msgstr "Уровень 2"
 
 #: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
 msgid "Level 3"
-msgstr ""
+msgstr "Уровень 3"
 
 #: DMI/windows.cpp:123 DMI/windows.cpp:737
 msgid "Level"
-msgstr ""
+msgstr "Уровень"
 
 #: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
 msgid "Train running number"
-msgstr ""
+msgstr "Номер поезда"
 
 #: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
 #: DMI/windows.cpp:1033
 msgid "RBC ID"
-msgstr ""
+msgstr "ID RBC"
 
 #: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
 msgid "RBC phone number"
-msgstr ""
+msgstr "Номер телефона RBC"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
 msgid "RBC data"
-msgstr ""
+msgstr "Данные RBC"
 
 #: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
 #: DMI/windows.cpp:1017
 msgid "Train data"
-msgstr ""
+msgstr "Данные по поездам"
 
 #: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
 msgid "Train type"
-msgstr ""
+msgstr "Тип поезда"
 
 #: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
 #: DMI/windows.cpp:1018
 msgid "Length (m)"
-msgstr ""
+msgstr "Длина (м)"
 
 #: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
 msgid "Brake percentage"
-msgstr ""
+msgstr "Процент торможения"
 
 #: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
 msgid "Max speed (km/h)"
-msgstr ""
+msgstr "Макс. скорость (км/ч)"
 
 #: DMI/windows.cpp:170
 msgid "Loading gauge"
-msgstr ""
+msgstr "Манометр"
 
 #: DMI/windows.cpp:170
 msgid "Out of GC"
-msgstr ""
+msgstr "За пределами GC"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:815
 msgid "Train category"
-msgstr ""
+msgstr "Категория поезда"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:818
 msgid "PASS 1"
-msgstr ""
+msgstr "PASS 1"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:821
 msgid "PASS 2"
-msgstr ""
+msgstr "PASS 2"
 
 #: DMI/windows.cpp:171 DMI/windows.cpp:824
 msgid "PASS 3"
-msgstr ""
+msgstr "PASS 3"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:827
 msgid "TILT 1"
-msgstr ""
+msgstr "TILT 1"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:830
 msgid "TILT 2"
-msgstr ""
+msgstr "TILT 2"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:833
 msgid "TILT 3"
-msgstr ""
+msgstr "TILT 3"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:836
 msgid "TILT 4"
-msgstr ""
+msgstr "TILT 4"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:839
 msgid "TILT 5"
-msgstr ""
+msgstr "TILT 5"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:842
 msgid "TILT 6"
-msgstr ""
+msgstr "TILT 6"
 
 #: DMI/windows.cpp:172 DMI/windows.cpp:845
 msgid "TILT 7"
-msgstr ""
+msgstr "TILT 7"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:848
 msgid "FP 1"
-msgstr ""
+msgstr "FP 1"
 
 #: DMI/windows.cpp:173
 msgid "FP2"
-msgstr ""
+msgstr "FP2"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:854
 msgid "FP 3"
-msgstr ""
+msgstr "FP 3"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:857
 msgid "FP 4"
-msgstr ""
+msgstr "FP 4"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:860
 msgid "FG 1"
-msgstr ""
+msgstr "FG 1"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:863
 msgid "FG 2"
-msgstr ""
+msgstr "FG 2"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:866
 msgid "FG 3"
-msgstr ""
+msgstr "FG 3"
 
 #: DMI/windows.cpp:173 DMI/windows.cpp:869
 msgid "FG 4"
-msgstr ""
+msgstr "FG 4"
 
 #: DMI/windows.cpp:174
 msgid "Axle load category"
-msgstr ""
+msgstr "Категория нагрузки на ось"
 
 #: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
 #: DMI/windows.cpp:990
 msgid " data"
-msgstr ""
+msgstr " данные"
 
 #: DMI/windows.cpp:209 DMI/windows.cpp:923
 msgid "Adhesion"
-msgstr ""
+msgstr "Адгезия"
 
 #: DMI/windows.cpp:209
 msgid "Non slippery rail"
-msgstr ""
+msgstr "Сухая поверхность рельса"
 
 #: DMI/windows.cpp:209 DMI/windows.cpp:924
 msgid "Slippery rail"
-msgstr ""
+msgstr "Мокрая поверхность рельс"
 
 #: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
 msgid "SR speed (km/h)"
-msgstr ""
+msgstr "Скорость SR (км/ч)"
 
 #: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
 msgid "SR distance (m)"
-msgstr ""
+msgstr "Расстояние SR (м)"
 
 #: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
 msgid "SR speed/distance"
-msgstr ""
+msgstr "SR скорость/расстояние"
 
 #: DMI/windows.cpp:225 DMI/windows.cpp:910
 msgid "Language"
-msgstr ""
+msgstr "Язык"
 
 #: DMI/windows.cpp:231 DMI/windows.cpp:926
 msgid "Set VBC"
-msgstr ""
+msgstr "Установить VBC"
 
 #: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
 #: DMI/windows.cpp:957 DMI/windows.cpp:973
 msgid "VBC code"
-msgstr ""
+msgstr "Код VBC"
 
 #: DMI/windows.cpp:237 DMI/windows.cpp:935
 msgid "Remove VBC"
-msgstr ""
+msgstr "Удалить VBC"
 
 #: DMI/windows.cpp:266
 msgid "Brake percentaje"
-msgstr ""
+msgstr "Процент торможения"
 
 #: DMI/windows.cpp:267
 msgid "Maximum speed (km/h)"
-msgstr ""
+msgstr "Максимальная скорость (км/ч)"
 
 #: DMI/windows.cpp:268
 msgid "Airtight"
-msgstr ""
+msgstr "Опрессовка"
 
 #: DMI/windows.cpp:268
 msgid "Yes"
-msgstr ""
+msgstr "Да"
 
 #: DMI/windows.cpp:268
 msgid "No"
-msgstr ""
+msgstr "Нет"
 
 #: DMI/windows.cpp:280
 msgid "Data view"
-msgstr ""
+msgstr "Просмотр данных"
 
 #: DMI/windows.cpp:286
 msgid "System version"
-msgstr ""
+msgstr "Версия системы"
 
 #: DMI/windows.cpp:286
 msgid "Operated system version"
-msgstr ""
+msgstr "Поддерживаемая версия системы"
 
 #: DMI/windows.cpp:359
 msgid "Train is rejected"
-msgstr ""
+msgstr "Поезд отклонен"
 
 #: DMI/windows.cpp:589
 msgid "Shunting request failed"
-msgstr ""
+msgstr "Отказ от маневрирования"
 
 #: DMI/windows.cpp:791 DMI/windows.cpp:795
 msgid "Validate train data"
-msgstr ""
+msgstr "Проверка данных поезда"
 
 #: DMI/windows.cpp:851
 msgid "FP 2"
-msgstr ""
+msgstr "FP 2"
 
 #: DMI/windows.cpp:931 DMI/windows.cpp:944
 msgid "Validate set VBC"
-msgstr ""
+msgstr "Добавлена верификация VBC"
 
 #: DMI/windows.cpp:940 DMI/windows.cpp:961
 msgid "Validate remove VBC"
-msgstr ""
+msgstr "Подтверждение удаления VBC"
 
 #: DMI/windows.cpp:986 DMI/windows.cpp:990
 msgid "Validate "
-msgstr ""
+msgstr "Проверить "
 
 #: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
 msgid "SH refused"
-msgstr ""
+msgstr "SH отказался"
 
 #: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
 msgid "Trackside not compatible"
-msgstr ""
+msgstr "Ошибка в оборудовании пути"
 
 #: Procedures/mode_transition.cpp:308
 msgid "Entering FS"
-msgstr ""
+msgstr "Вход в режим ПОЛНОГО УПРАВЛЕНИЯ"
 
 #: Procedures/mode_transition.cpp:315
 msgid "Entering OS"
-msgstr ""
+msgstr "Вход в режим ВИЗУАЛЬНЫЙ"
 
 #: Procedures/train_trip.cpp:34
 msgid "Unauthorized passing of EoA/LoA"
-msgstr ""
+msgstr "Превышение EoA или LoA"
 
 #: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
 msgid "Balise read error"
-msgstr ""
+msgstr "Ошибка считывания баланса"
 
 #: Procedures/train_trip.cpp:42
 msgid "No MA received at level transition"
-msgstr ""
+msgstr "При изменении уровня не было получено MA"
 
 #: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
 msgid "Communication error"
-msgstr ""
+msgstr "Ошибка связи"
 
 #: Procedures/train_trip.cpp:54
 msgid "SR distance exceeded"
-msgstr ""
+msgstr "Превышение расстояния SR"
 
 #: Procedures/train_trip.cpp:58
 msgid "SH stop order"
-msgstr ""
+msgstr "Стоп-приказ SH"
 
 #: Procedures/train_trip.cpp:62
 msgid "SR stop order"
-msgstr ""
+msgstr "Стоп-приказ SR"
 
 #: Procedures/train_trip.cpp:65
 msgid "Emergency stop"
-msgstr ""
+msgstr "Аварийная остановка"
 
 #: Procedures/train_trip.cpp:68
 msgid "No track description"
-msgstr ""
+msgstr "Описание пути отсутствует"
 
 #: Procedures/train_trip.cpp:79
 msgid " brake demand"
-msgstr ""
+msgstr " тормозное требование"
 
 #: STM/stm.cpp:362
 msgid " failed"
-msgstr ""
+msgstr " неудачный"
 
 #: STM/stm.cpp:460
 msgid " not available"
-msgstr ""
+msgstr " недоступно"
 
 #: TrackConditions/route_suitability.cpp:53
 msgid "Route suitability - loading gauge"
-msgstr ""
+msgstr "Несовместимость маршрута - погрузочная колея"
 
 #: TrackConditions/route_suitability.cpp:56
 msgid "Route suitability - axle load category"
-msgstr ""
+msgstr "Соответствие маршруту - категория нагрузки на ось"
 
 #: TrackConditions/route_suitability.cpp:59
 msgid "Route suitability - traction system"
-msgstr ""
+msgstr "Пригодность маршрута - система тяги"
 
 #: TrainSubsystems/brake.cpp:58
 msgid "Runaway movement"
-msgstr ""
+msgstr "Боксование"
 
 #: TrainSubsystems/brake.cpp:94
 msgid "Train data changed"
-msgstr ""
+msgstr "Изменены данные по поездам"
