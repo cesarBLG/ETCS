@@ -190,12 +190,8 @@ void ntc_window::display_text(int id, bool ack, std::string text, int properties
 void initialize_stm_windows()
 {
     setup_areas();
-
-    /*std::string val = "00101011""0000001100100""01""0100000000""0010000""0000000000""0100000010""000001000000000"
-        "000""010""11""011""10""000""00""101""00""11";
-    parse_stm_message(val);*/
 }
-void parse_stm_message(const stm_message &message)
+void parse_stm_message(stm_message &message)
 {
     if (!message.valid) return;
     int nid_stm = message.NID_STM.rawdata;
@@ -256,10 +252,6 @@ void parse_stm_message(const stm_message &message)
                 }
                 window->display_indicator(button.NID_BUTTON, button.NID_BUTPOS, button.NID_ICON, text, button.M_BUT_ATTRIB, true);
             }
-            /*for (auto &var : r.log_entries)
-            {
-                std::cout<<var.first<<"\t"<<var.second<<"\n";
-            }*/
         }
         else if (pack->NID_PACKET == 35)
         {
@@ -282,10 +274,6 @@ void parse_stm_message(const stm_message &message)
                 }
                 window->display_indicator(icon.NID_INDICATOR, icon.NID_INDPOS, icon.NID_ICON, text, icon.M_IND_ATTRIB, false);
             }
-            /*for (auto &var : r.log_entries)
-            {
-                std::cout<<var.first<<"\t"<<var.second<<"\n";
-            }*/
         }
         else if (pack->NID_PACKET == 38)
         {
@@ -387,7 +375,7 @@ void update_stm_windows()
             it = ntc_windows.erase(it);
             continue;
         }
-        if (it->second->state == stm_state::DA)
+        if (it->second->state == stm_state::DA && (active_ntc_window == nullptr || it->second == prev_default_window))
             default_window = active_ntc_window = it->second;
         ++it;
     }
@@ -407,7 +395,6 @@ void update_stm_windows()
                 }
             }
         }
-        default_window->construct();
         if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr)
         {
             //extern TextButton main_button;

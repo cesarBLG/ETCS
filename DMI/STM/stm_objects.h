@@ -189,4 +189,4 @@ class ntc_window : public window
 extern ntc_window *active_ntc_window;
 void initialize_ntc_windows();
 void update_ntc_windows();
-void parse_stm_message(const stm_message &message);
+void parse_stm_message(stm_message &message);
