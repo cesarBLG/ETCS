@@ -106,3 +106,7 @@ window::~window()
 {
     delete l;
 }
+void window::updateLayout()
+{
+	l->updateLocations();
+}

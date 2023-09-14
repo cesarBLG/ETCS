@@ -51,5 +51,6 @@ class window
     }
     void display();
     void event(int evNo, float x, float y);
+    void updateLayout();
 };
 #endif

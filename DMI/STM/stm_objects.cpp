@@ -395,6 +395,7 @@ void update_stm_windows()
                 }
             }
         }
+        default_window->updateLayout();
         if (active_ntc_window != nullptr && active_ntc_window->customized != nullptr)
         {
             //extern TextButton main_button;
