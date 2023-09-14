@@ -35,6 +35,7 @@ extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
 double or_dist;
+int ack_button_light;
 int TimeOffset::offset;
 ORserver::ParameterManager manager;
 
@@ -280,6 +281,7 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    // TODO: directly connect to DMI instead of forwarding button state
     p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
@@ -289,6 +291,12 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::button::ack");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::button::ack::light");
+    p->GetValue = []() {
+        return std::to_string(ack_button_light);
     };
     manager.AddParameter(p);
 

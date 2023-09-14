@@ -97,6 +97,11 @@ void parse_command(string str)
             }
         }
     }
+    if (command == "ackButtonLight")
+    {
+        extern int ack_button_light;
+        ack_button_light = stoi(value);
+    }
     update_dialog_step(command, value);
 }
 std::map<string, string> persistent_commands;
