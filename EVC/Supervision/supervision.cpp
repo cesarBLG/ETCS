@@ -213,6 +213,7 @@ optional<float> rmp_position;
 bool rmp_applied;
 optional<distance> pt_position;
 bool pt_applied;
+bool traindata_applied;
 void update_supervision()
 {
     if (mode == Mode::TR || mode == Mode::SF) {
@@ -289,6 +290,8 @@ void update_supervision()
         pt_position = {};
         pt_applied = false;
     }
+    if (traindata_applied && brake_acknowledged)
+        traindata_applied = false;
     brake_acknowledged = false;
     if (!(mode == Mode::OS || mode == Mode::FS || mode == Mode::LS || mode == Mode::SN ||
         mode == Mode::SR || mode == Mode::SH || mode == Mode::UN || mode == Mode::RV)) {

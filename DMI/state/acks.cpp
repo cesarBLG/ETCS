@@ -28,6 +28,7 @@ Component ackButton(40, 82);
 extern Component c9;
 extern Component textArea;
 bool prevAck = false;
+bool ackAllowed;
 int prevlevel = 0;
 bool level_announce = false;
 AckType AllowedAck = AckType::None;
@@ -120,7 +121,7 @@ int64_t get_milliseconds()
 int64_t lastAck;
 void updateAcks()
 {
-    if (AllowedAck == AckType::None && lastAck + 1000 < get_milliseconds() && !pendingAcks.empty())
+    if (AllowedAck == AckType::None && lastAck + 1000 < get_milliseconds() && !pendingAcks.empty() && ackAllowed)
     {
         AckType type = pendingAcks.front().first;
         switch (type)
@@ -155,6 +156,7 @@ void updateAcks()
             ackButton.addImage("symbols/Driver Request/DR_04.bmp");
         }
     }
+    if (!ackAllowed) AllowedAck = AckType::None;
     if (level_announce)
     {
         if (AllowedAck != AckType::Mode && AllowedAck != AckType::Level)

@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "windows.h"
+#include "acks.h"
 #include "../language/language.h"
 #include "../Supervision/emergency_stop.h"
 #include "../Supervision/supervision.h"
@@ -215,6 +216,7 @@ json ntc_data_window()
         auto *stm = kvp.second;
         if (stm->data_entry == stm_object::data_entry_state::Driver) {
             json j = R"({"active":"ntc_data_window"})"_json;
+            j["ntc"] = get_ntc_name(kvp.first);
             std::vector<json> inputs;
             for (auto &field : stm->specific_data) {
                 if (field.keys.empty())
@@ -317,6 +319,7 @@ static dialog_sequence prev_dialog;
 static std::string prev_step;
 void update_dmi_windows()
 {
+    update_acks();
     any_button_pressed = any_button_pressed_async;
     any_button_pressed_async = false;
     //json prev_active = active_window_dmi;
@@ -718,31 +721,29 @@ void update_dmi_windows()
 
         }
     }
-    std::string active = active_window_dmi["active"];
-    if (active == "menu_main" && !active_window_dmi.contains("hour_glass")) {
-        json &enabled = active_window_dmi["enabled"];
+    std::map<std::string, bool> enabled_buttons;
+    if (active_dialog != dialog_sequence::None) {
         bool c1 = V_est == 0 && mode == Mode::SB && train_data_valid && level != Level::Unknown;
         bool c2 = V_est == 0 && mode == Mode::PT && train_data_valid && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && trip_exit_acknowledged && supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()));
         bool c3 = mode == Mode::SR && (level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established;
-        enabled["Start"] = c1 || c2 || c3;
-        enabled["Driver ID"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) || ((M_NVDERUN || (!M_NVDERUN && V_est == 0)) &&
+        enabled_buttons["Start"] = c1 || c2 || c3;
+        enabled_buttons["Driver ID"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) || ((M_NVDERUN || (!M_NVDERUN && V_est == 0)) &&
             (mode == Mode::SH || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN));
-        enabled["Train Data"] = V_est == 0 && driver_id_valid && level_valid &&
+        enabled_buttons["Train Data"] = V_est == 0 && driver_id_valid && level_valid &&
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN);
-        enabled["Maintain Shunting"] = mode == Mode::SH && false;
-        enabled["Level"] = V_est == 0 && driver_id_valid &&
+        enabled_buttons["Maintain Shunting"] = mode == Mode::SH && false;
+        enabled_buttons["Level"] = V_est == 0 && driver_id_valid &&
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN);
-        enabled["Train Running Number"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) ||
+        enabled_buttons["Train Running Number"] = (V_est == 0 && mode == Mode::SB && driver_id_valid && level_valid) ||
             (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::SN);
-        enabled["Shunting"] = (mode == Mode::SH && V_est == 0) ||
+        enabled_buttons["Shunting"] = (mode == Mode::SH && V_est == 0) ||
             (V_est == 0 && driver_id_valid && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN)
                 && level_valid && (level == Level::N0 || level == Level::N1 || level == Level::NTC || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established))) ||
             (V_est == 0 && mode == Mode::PT && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && trip_exit_acknowledged && supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty())));
-        enabled["Non Leading"] = false;
-        enabled["Radio Data"] = V_est == 0 && driver_id_valid && level_valid &&
-            (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT || mode == Mode::UN || mode == Mode::SN);;
-    } else if (active == "menu_radio" && !active_window_dmi.contains("hour_glass")) {
-        json &enabled = active_window_dmi["enabled"];
+        enabled_buttons["Non Leading"] = false;
+        enabled_buttons["Radio Data"] = V_est == 0 && driver_id_valid && level_valid &&
+            (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT || mode == Mode::UN || mode == Mode::SN);
+        
         bool registered = false;
         for (mobile_terminal *t : mobile_terminals) {
             if (t->registered) {
@@ -750,39 +751,120 @@ void update_dmi_windows()
                 break;
             }
         }
-        enabled["Contact last RBC"] = V_est == 0 && driver_id_valid && 
+        enabled_buttons["Contact last RBC"] = V_est == 0 && driver_id_valid && 
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT) && 
             level_valid && (level == Level::N2 || level == Level::N3) && registered && rbc_contact;
-        enabled["Use short number"] = V_est == 0 && driver_id_valid && 
+        enabled_buttons["Use short number"] = V_est == 0 && driver_id_valid && 
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT) && 
             level_valid && (level == Level::N2 || level == Level::N3) && registered;
-        enabled["Enter RBC data"] = V_est == 0 && driver_id_valid && 
+        enabled_buttons["Enter RBC data"] = V_est == 0 && driver_id_valid && 
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT) && 
             level_valid && (level == Level::N2 || level == Level::N3) && registered;
-        enabled["Radio Network ID"] = V_est == 0 && driver_id_valid && 
+        enabled_buttons["Radio Network ID"] = V_est == 0 && driver_id_valid && 
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT) && 
             level_valid;
+
+        enabled_buttons["Adhesion"] = (V_est == 0 && mode == Mode::SB && Q_NVDRIVER_ADHES && driver_id_valid && train_data_valid && level_valid) || (Q_NVDRIVER_ADHES && (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN));
+        enabled_buttons["SRspeed"] = V_est == 0 && mode == Mode::SR;
+        enabled_buttons["TrainIntegrity"] = V_est == 0 && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::PT) && driver_id_valid && train_data_valid && level_valid;
+
+        bool c = (V_est == 0 && mode == Mode::SB) || (mode == Mode::SH || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::TR || mode == Mode::PT || mode == Mode::SN || mode == Mode::RV);
+        enabled_buttons["Language"] = c;
+        enabled_buttons["Volume"] = c;
+        enabled_buttons["Brightness"] = c;
+        enabled_buttons["SystemVersion"] = c;
+        enabled_buttons["SetVBC"] = V_est == 0 && mode == Mode::SB;
+        enabled_buttons["RemoveVBC"] = V_est == 0 && mode == Mode::SB && !vbcs.empty();
+
+
+        for (auto &kvp : installed_stms) {
+            auto *stm = kvp.second;
+            enabled_buttons[get_ntc_name(kvp.first)] = stm->data_entry == stm_object::data_entry_state::Active;
+        }
+        enabled_buttons["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
+    }
+    std::string active = active_window_dmi["active"];
+    if (active == "menu_main" && !active_window_dmi.contains("hour_glass")) {
+        json &enabled = active_window_dmi["enabled"];
+        enabled["Start"] = enabled_buttons["Start"];
+        enabled["Driver ID"] = enabled_buttons["Driver ID"];
+        enabled["Train Data"] = enabled_buttons["Train Data"];
+        enabled["Maintain Shunting"] = enabled_buttons["Maintain Shunting"];
+        enabled["Level"] = enabled_buttons["Level"];
+        enabled["Train Running Number"] = enabled_buttons["Train Running Number"];
+        enabled["Shunting"] = enabled_buttons["Shunting"];
+        enabled["Non Leading"] = enabled_buttons["Non Leading"];
+        enabled["Radio Data"] = enabled_buttons["Radio Data"];
+    } else if (active == "menu_radio" && !active_window_dmi.contains("hour_glass")) {
+        json &enabled = active_window_dmi["enabled"];
+        enabled["Contact last RBC"] = enabled_buttons["Contact last RBC"];
+        enabled["Use short number"] = enabled_buttons["Use short number"];
+        enabled["Enter RBC data"] = enabled_buttons["Enter RBC data"];
+        enabled["Radio Network ID"] = enabled_buttons["Radio Network ID"];
     } else if (active == "menu_override") {
         active_window_dmi["enabled"]["EoA"] = V_est <= V_NVALLOWOVTRP && (((mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN || mode == Mode::PT || mode == Mode::SB || mode == Mode::SN) && train_data_valid) || mode == Mode::SH);
     } else if (active == "menu_spec") {
         json &enabled = active_window_dmi["enabled"];
-        enabled["Adhesion"] = (V_est == 0 && mode == Mode::SB && Q_NVDRIVER_ADHES && driver_id_valid && train_data_valid && level_valid) || (Q_NVDRIVER_ADHES && (mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN));
-        enabled["SRspeed"] = V_est == 0 && mode == Mode::SR;
-        enabled["TrainIntegrity"] = V_est == 0 && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::PT) && driver_id_valid && train_data_valid && level_valid;
+        enabled["Adhesion"] = enabled_buttons["Adhesion"];
+        enabled["SRspeed"] = enabled_buttons["SRspeed"];
+        enabled["TrainIntegrity"] = enabled_buttons["TrainIntegrity"];
     } else if (active == "menu_settings") {
-        bool c = (V_est == 0 && mode == Mode::SB) || (mode == Mode::SH || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::UN || mode == Mode::TR || mode == Mode::PT || mode == Mode::SN || mode == Mode::RV);
-        active_window_dmi["enabled"]["Language"] = c;
-        active_window_dmi["enabled"]["Volume"] = c;
-        active_window_dmi["enabled"]["Brightness"] = c;
-        active_window_dmi["enabled"]["SystemVersion"] = c;
-        active_window_dmi["enabled"]["SetVBC"] = V_est == 0 && mode == Mode::SB;
-        active_window_dmi["enabled"]["RemoveVBC"] = V_est == 0 && mode == Mode::SB && !vbcs.empty();
+        json &enabled = active_window_dmi["enabled"];
+        enabled["Language"] = enabled_buttons["Language"];
+        enabled["Volume"] = enabled_buttons["Volume"];
+        enabled["Brightness"] = enabled_buttons["Brightness"];
+        enabled["SystemVersion"] = enabled_buttons["SystemVersion"];
+        enabled["SetVBC"] = enabled_buttons["SetVBC"];
+        enabled["RemoveVBC"] = enabled_buttons["RemoveVBC"];
     } else if (active == "menu_ntc") {
+        json &enabled = active_window_dmi["enabled"];
         for (auto &kvp : installed_stms) {
             auto *stm = kvp.second;
-            active_window_dmi["enabled"][get_ntc_name(kvp.first)] = stm->data_entry == stm_object::data_entry_state::Active;
+            enabled[get_ntc_name(kvp.first)] = enabled_buttons[get_ntc_name(kvp.first)];
         }
-        active_window_dmi["enabled"]["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
+        enabled["EndDataEntry"] = enabled_buttons["EndDataEntry"];
+    }
+    if (active_dialog != dialog_sequence::None && active_dialog != dialog_sequence::StartUp && (!som_active || som_status != S1)) {
+        extern bool traindata_applied;
+        if ((active == "trn_window" && !enabled_buttons["Train Running Number"])
+        || (active == "driver_window" && !enabled_buttons["Driver ID"])
+        || (active == "level_window" && !enabled_buttons["Level"])
+        || ((active == "train_data_validation_window" || active == "train_data_window" || active == "fixed_train_data_validation_window" || active == "fixed_train_data_window") && !enabled_buttons["Train Data"])) {
+            active_dialog_step = "S1";
+            if ((active == "fixed_train_data_window" || active == "fixed_train_data_validation_window" || active == "train_data_window" || active == "train_data_validation_window") && V_est != 0) {
+                traindata_applied = true;
+                trigger_brake_reason(1);
+            }
+        }
+        if ((active == "rbc_data_window" && !enabled_buttons["Enter RBC data"])
+        || (active == "radio_network_window" && !enabled_buttons["Radio Network ID"]) ) {
+            active_dialog_step = "S5-1";
+        }
+        if ((active == "language_window" && !enabled_buttons["Language"])
+        || (active == "volume_window" && !enabled_buttons["Volume"])
+        || (active == "brightness_window" && !enabled_buttons["Brightness"]) ) {
+            active_dialog_step = "S1";
+        }
+        if ((active == "adhesion_window" && !enabled_buttons["Adhesion"])
+        || (active == "sr_data_window" && !enabled_buttons["SRspeed"]) ) {
+            active_dialog_step = "S1";
+            if (active == "sr_data_window" && V_est != 0) {
+                traindata_applied = true;
+                trigger_brake_reason(1);
+            }
+        }
+        if ((active == "ntc_data_window" || active == "ntc_data_validation_window") && !enabled_buttons[active_window_dmi["ntc"]]) {
+            for (auto &kvp : installed_stms) {
+                auto *stm = kvp.second;
+                if (stm->data_entry == stm_object::data_entry_state::Driver)
+                    stm->data_entry = stm_object::data_entry_state::Active;
+            }
+            active_dialog_step = "S2";
+            if (V_est != 0) {
+                traindata_applied = true;
+                trigger_brake_reason(1);
+            }
+        }
     }
 }
 void close_window()
@@ -1107,6 +1189,7 @@ void validate_data_entry(std::string name, json &result)
                 if ((name == get_ntc_name(kvp.first)+get_text(" data"))) {
                     active_dialog_step = "S3-2";
                     json j = R"({"active":"ntc_data_validation_window"})"_json;
+                    j["ntc"] = get_ntc_name(kvp.first);
                     json def;
                     def["WindowType"] = "DataValidation";
                     def["WindowTitle"] = get_text("Validate ")+get_ntc_name(kvp.first)+get_text(" data");

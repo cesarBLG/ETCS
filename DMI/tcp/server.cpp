@@ -281,6 +281,8 @@ void parseData(std::string str)
     display_taf = j["DisplayTAF"].get<bool>();
     if (j.contains("LSSMA")) setLSSMA((int)(j["LSSMA"].get<double>()*3.6 + 0.01));
     else setLSSMA(-1);
+    extern bool ackAllowed;
+    ackAllowed = j.contains("AllowedAck") && j["AllowedAck"];
     setAck(AckType::Brake, 0, j["BrakeAcknowledge"].get<bool>());
     {
         speed_elements = j["SpeedTargets"].get<std::vector<speed_element>>();

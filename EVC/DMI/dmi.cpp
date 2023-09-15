@@ -28,6 +28,7 @@
 #include "track_ahead_free.h"
 #include "text_message.h"
 #include "windows.h"
+#include "acks.h"
 #include "platform_runtime.h"
 
 using std::map;
@@ -215,6 +216,7 @@ void dmi_update_func()
     else j["GeographicalPositionKM"]=nullptr;
     j["TextMessages"] = messages;
     j["DisplayTAF"] = start_display_taf && !stop_display_taf;
+    j["AllowedAck"] = ack_allowed;
     if (display_lssma) j["LSSMA"] = lssma;
     if (mode == Mode::FS || mode == Mode::OS)
     {
