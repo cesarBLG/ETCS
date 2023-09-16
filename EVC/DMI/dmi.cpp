@@ -108,9 +108,13 @@ void parse_command(string str)
 std::map<string, string> persistent_commands;
 void dmi_receive(BasePlatform::BusSocket::JoinNotification &&msg)
 {
-    if (msg.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("DMI"))
+    if (msg.peer.tid == BasePlatform::BusSocket::PeerId::fourcc("DMI")) {
         for (const auto &entry : persistent_commands)
             dmi_socket->send_to(msg.peer.uid, entry.first+"("+entry.second+")");
+        for (auto &t : messages) {
+            dmi_socket->send_to(msg.peer.uid, "setMessage("+std::to_string(t.id)+","+std::to_string(t.text.size())+","+t.text+","+std::to_string(t.hour)+","+std::to_string(t.minute)+","+(t.firstGroup?"true,":"false,")+(t.ack?"true,":"false,")+std::to_string(t.reason)+")");
+        }
+    }
 }
 void dmi_receive(BasePlatform::BusSocket::LeaveNotification &&msg) {
 }

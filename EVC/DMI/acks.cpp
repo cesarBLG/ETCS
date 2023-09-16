@@ -20,7 +20,7 @@ void update_acks()
 {
     ack_required = mode_acknowledgeable || level_acknowledgeable || brake_acknowledgeable;
     for (auto &msg : messages) {
-        if (msg.ack)
+        if (msg.ack && !msg.acknowledged)
             ack_required = true;
     }
     if (ack_required && active_dialog != dialog_sequence::StartUp) {

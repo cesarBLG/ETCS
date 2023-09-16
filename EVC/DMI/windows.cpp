@@ -779,7 +779,7 @@ void update_dmi_windows()
 
         for (auto &kvp : installed_stms) {
             auto *stm = kvp.second;
-            enabled_buttons[get_ntc_name(kvp.first)] = stm->data_entry == stm_object::data_entry_state::Active;
+            enabled_buttons[get_ntc_name(kvp.first)] = stm->data_entry == stm_object::data_entry_state::Active || stm->data_entry == stm_object::data_entry_state::Driver;
         }
         enabled_buttons["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
     }

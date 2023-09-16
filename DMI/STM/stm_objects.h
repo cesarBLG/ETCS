@@ -11,6 +11,7 @@
 #include "../graphics/color.h"
 #include "../graphics/button.h"
 #include "../graphics/component.h"
+#include "../graphics/drawing.h"
 #include "../messages/messages.h"
 #include "../window/window.h"
 #include "../../EVC/Packets/STM/43.h"
@@ -98,11 +99,11 @@ struct customized_dmi
         {
             buttons[inds["id"].get<int>()] = indicator(inds);
         }
-        for (auto &pos : j["positions"])
+        for (auto &pos : j[softkeys ? "positions_softkeys" : "positions"])
         {
             positions[pos["id"].get<int>()] = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
         }
-        for (auto &pos : j["button_positions"])
+        for (auto &pos : j[softkeys ? "button_positions_softkeys" : "button_positions"])
         {
             button_positions[pos["id"].get<int>()] = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
         }
