@@ -8,4 +8,5 @@
  */
 #pragma once
 extern bool ack_allowed;
+extern bool ack_required;
 void update_acks();

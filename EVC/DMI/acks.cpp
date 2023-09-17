@@ -25,15 +25,12 @@ void update_acks()
     }
     if (ack_required && active_dialog != dialog_sequence::StartUp) {
         if (active_dialog != dialog_sequence::None) {
-            if (active_dialog == dialog_sequence::NTCData) {
-                for (auto &kvp : installed_stms) {
-                    auto *stm = kvp.second;
-                    if (stm->data_entry == stm_object::data_entry_state::Driver)
-                        stm->data_entry = stm_object::data_entry_state::Active;
-                }
+            std::string active = active_window_dmi["active"];
+            if (active != "menu_main" && active != "menu_override" && active != "menu_spec" && 
+            active != "menu_settings" && active != "menu_radio" && active != "menu_ntc") {
+                close_window();
+                last_ack_time = get_milliseconds();
             }
-            active_dialog = dialog_sequence::None;
-            last_ack_time = get_milliseconds();
         }
         if (get_milliseconds() > last_ack_time + 1000)
             ack_allowed = true;

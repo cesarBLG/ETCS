@@ -128,7 +128,8 @@ void handle_brake_command()
             }
         }
     }
-    if ((prevEB || prevSB) && !EB_command && !SB_command) send_command("playSinfo","");
+    extern bool any_button_pressed;
+    if ((prevEB || prevSB) && !EB_command && !SB_command && !any_button_pressed) send_command("playSinfo","");
     prevEB = EB_command;
     prevSB = SB_command;
 }

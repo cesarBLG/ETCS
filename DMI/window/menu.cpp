@@ -90,6 +90,8 @@ void menu::setLayout()
         {
             if (labels[i] != nullptr) addToLayout(labels[i], new RelativeAlignment(nullptr, 334, 100+24*i, 0));
         }
+        extern Component ackButton;
+        addToLayout(&ackButton, new RelativeAlignment(nullptr, 600, 348, 0));
     }
     else
     {

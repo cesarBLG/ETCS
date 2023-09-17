@@ -783,6 +783,11 @@ void update_dmi_windows()
         }
         enabled_buttons["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
     }
+    if (ack_required) {
+        for (auto &kvp : enabled_buttons) {
+            kvp.second = false;
+        }
+    }
     std::string active = active_window_dmi["active"];
     if (active == "menu_main" && !active_window_dmi.contains("hour_glass")) {
         json &enabled = active_window_dmi["enabled"];
@@ -826,11 +831,12 @@ void update_dmi_windows()
     }
     if (active_dialog != dialog_sequence::None && active_dialog != dialog_sequence::StartUp && (!som_active || som_status != S1)) {
         extern bool traindata_applied;
+        bool close = false;
         if ((active == "trn_window" && !enabled_buttons["Train Running Number"])
         || (active == "driver_window" && !enabled_buttons["Driver ID"])
         || (active == "level_window" && !enabled_buttons["Level"])
         || ((active == "train_data_validation_window" || active == "train_data_window" || active == "fixed_train_data_validation_window" || active == "fixed_train_data_window") && !enabled_buttons["Train Data"])) {
-            active_dialog_step = "S1";
+            close = true;
             if ((active == "fixed_train_data_window" || active == "fixed_train_data_validation_window" || active == "train_data_window" || active == "train_data_validation_window") && V_est != 0) {
                 traindata_applied = true;
                 trigger_brake_reason(1);
@@ -838,33 +844,30 @@ void update_dmi_windows()
         }
         if ((active == "rbc_data_window" && !enabled_buttons["Enter RBC data"])
         || (active == "radio_network_window" && !enabled_buttons["Radio Network ID"]) ) {
-            active_dialog_step = "S5-1";
+            close = true;
         }
         if ((active == "language_window" && !enabled_buttons["Language"])
         || (active == "volume_window" && !enabled_buttons["Volume"])
         || (active == "brightness_window" && !enabled_buttons["Brightness"]) ) {
-            active_dialog_step = "S1";
+            close = true;
         }
         if ((active == "adhesion_window" && !enabled_buttons["Adhesion"])
         || (active == "sr_data_window" && !enabled_buttons["SRspeed"]) ) {
-            active_dialog_step = "S1";
+            close = true;
             if (active == "sr_data_window" && V_est != 0) {
                 traindata_applied = true;
                 trigger_brake_reason(1);
             }
         }
         if ((active == "ntc_data_window" || active == "ntc_data_validation_window") && !enabled_buttons[active_window_dmi["ntc"]]) {
-            for (auto &kvp : installed_stms) {
-                auto *stm = kvp.second;
-                if (stm->data_entry == stm_object::data_entry_state::Driver)
-                    stm->data_entry = stm_object::data_entry_state::Active;
-            }
-            active_dialog_step = "S2";
+            close = true;
             if (V_est != 0) {
                 traindata_applied = true;
                 trigger_brake_reason(1);
             }
         }
+        if (close)
+            close_window();
     }
 }
 void close_window()
