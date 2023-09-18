@@ -7,6 +7,5 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #pragma once
-#include "window.h"
-extern window taf_window;
 extern bool display_taf;
+void setTAF(bool visible);

@@ -10,6 +10,7 @@
 #include "../graphics/display.h"
 #include "../graphics/drawing.h"
 #include "../monitor.h"
+#include "../planning/planning.h"
 #include "../window/window.h"
 #include "../window/data_view.h"
 #include "../window/train_data.h"
@@ -39,18 +40,11 @@ void startWindows()
 
     active_windows.clear();
     etcs_default_window.construct();
-    navigation_bar.construct();
-    planning_area.construct();
-    taf_window.construct();
     default_window = &etcs_default_window;
     extern int maxSpeed;
     extern int etcsDialMaxSpeed;
     maxSpeed = etcsDialMaxSpeed;
-    active_windows.insert(default_window);
-    active_windows.insert(&navigation_bar);
-    active_windows.insert(&planning_area);
-    active_windows.insert(&taf_window);
-    taf_window.active = false;
+    active_windows.push_front(default_window);
     active_name = "default";
 }
 void setWindow(json &data)
@@ -66,12 +60,14 @@ void setWindow(json &data)
     json j = data["ActiveWindow"];
     subwindow *w = nullptr;
     std::string name = j["active"].get<std::string>();
-    if (name == "default") {
+    if (name == "default")
+    {
         extern bool showSpeeds;
-        navigation_bar.active = default_window->active = true;
-        planning_area.active = !display_taf && (mode == Mode::FS || (mode == Mode::OS && showSpeeds));
-        taf_window.active = display_taf;
-    } else {
+        setPlanning(!display_taf && (mode == Mode::FS || (mode == Mode::OS && showSpeeds)));
+        setTAF(display_taf);
+    }
+    else
+    {
         bool same = name == active_name;
         if (name == "menu_main") {
             menu_main *m;
@@ -199,17 +195,24 @@ void setWindow(json &data)
         {
             w->exit_button.enabled = !j.contains("enabled") || !j["enabled"].contains("Exit") || j["enabled"]["Exit"].get<bool>();
         }
-        navigation_bar.active = planning_area.active = false;
-        default_window->active = w == nullptr || !w->fullscreen;
+        setPlanning(false);
+        setTAF(false);
     }
     active_name = name;
     if (active != w) {
         if (active != nullptr) {
-            old_windows.insert(active);
-            active_windows.erase(active);
+            for (auto it = active_windows.begin(); it != active_windows.end(); )
+            {
+                if (*it == active)
+                {
+                    delete *it;
+                    it = active_windows.erase(it);
+                }
+                else ++it;
+            }
         }
         active = w;
         if (active != nullptr)
-            active_windows.insert(w);
+            active_windows.push_back(w);
     }
 }

@@ -16,6 +16,19 @@ void Layout::add(Component *comp, ComponentAlignment *alignment)
     if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();
 }
+void Layout::bringFront(Component *comp)
+{
+    if (comp == nullptr) return;
+    for(auto it = elements.begin(); it != elements.end(); ++it)
+    {
+        if (it->comp == comp)
+        {
+            LayoutElement e = *it;
+            elements.erase(it);
+            add(e.comp, e.alignment);
+        }
+    }
+}
 void Layout::remove(Component *comp)
 {
     if(comp == nullptr) return;
@@ -38,19 +51,23 @@ void Layout::removeAll()
     }
     elements.clear();
 }
-void Layout::update()
-{   
-    if(!order.empty())
-    {
-        for(int i=0; i<elements.size(); i++)
-        {
-            order[i]->paint();
-        }
-        return;
-    }
+void Layout::update(std::vector<std::vector<int>> &alreadyDrawn)
+{
     for(int i=0; i<elements.size(); i++)
     {
-        elements[i].comp->paint();
+        Component *comp = elements[i].comp;
+        bool paint = true;
+        for (auto &vec : alreadyDrawn)
+        {
+            bool outsideX = comp->x + comp->sx <= vec[0] || comp->x >= vec[0]+vec[2];
+            bool outsideY = comp->y + comp->sy <= vec[1] || comp->y >= vec[1]+vec[3];
+            if (!outsideX && !outsideY)
+            {
+                paint = false;
+                break;
+            }
+        }
+        if (paint && comp->visible) comp->paint();
     }
 }
 void Layout::updateLocations()

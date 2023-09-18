@@ -11,6 +11,9 @@
 #include "../graphics/icon_button.h"
 #include "../graphics/text_button.h"
 #include "../STM/stm_objects.h"
+void planningConstruct(window *w);
+void construct_nav(window *w, bool custom);
+void build_taf(window *w);
 void construct_main(window *w, bool custom)
 {
     extern Component csg;
@@ -80,7 +83,11 @@ void construct_main(window *w, bool custom)
         w->addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
         w->addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
         w->addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
+
+        planningConstruct(w);
+        build_taf(w);
     }
+    construct_nav(w, custom);
     
     c2.dispBorder = false;
     c3.dispBorder = false;

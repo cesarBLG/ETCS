@@ -88,6 +88,7 @@ struct customized_dmi
     int flash_style;
     std::map<int, std::unique_ptr<StmSound>> sounds;
     std::map<std::string,moved_area> moved_areas;
+    std::map<std::string, std::pair<int,int>> softkeys_coordinates;
     customized_dmi(json &j)
     {
         nid_stm = j["nid_stm"].get<int>();
@@ -105,7 +106,10 @@ struct customized_dmi
         }
         for (auto &pos : j[softkeys ? "button_positions_softkeys" : "button_positions"])
         {
-            button_positions[pos["id"].get<int>()] = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
+            std::vector<int> coords = {pos["x"].get<int>(),pos["y"].get<int>(),pos["width"].get<int>(),pos["height"].get<int>()};
+            button_positions[pos["id"].get<int>()] = coords;
+            if (pos.contains("softkey"))
+                softkeys_coordinates[pos["softkey"]] = {coords[0]+1,coords[1]+1};
         }
         for (auto &ics : j["icons"])
         {
@@ -131,6 +135,8 @@ struct customized_dmi
                 a.x = area["x"];
                 a.y = area["y"];
                 moved_areas[area["area"]] = a;
+                if (area.contains("softkey"))
+                    softkeys_coordinates[area["softkey"]] = {a.x + 1, a.y + 1};
             }
         }
     }

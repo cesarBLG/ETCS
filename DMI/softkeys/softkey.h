@@ -17,13 +17,11 @@ class SoftKey
 {
     float x;
     float y;
+    std::string name;
     public:
     SoftKey() = default;
-    SoftKey(float x, float y) : x(x), y(y) {}
-    void setPressed(bool pressed)
-    {
-        input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, x, y});
-    }
+    SoftKey(float x, float y, std::string name);
+    void setPressed(bool pressed);
 };
 extern std::map<int,SoftKey> softF;
 extern std::map<int,SoftKey> softH;

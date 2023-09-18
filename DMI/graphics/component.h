@@ -26,6 +26,7 @@ class Component
         float y;
         float sx;
         float sy;
+        bool visible = true;
 
     protected:
         inline float getX(float val)

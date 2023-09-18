@@ -24,9 +24,9 @@ void update_stm_windows();
 UiPlatform::InputEvent last_event = {UiPlatform::InputEvent::Action::Release, 0, 0};
 void update_window_input(UiPlatform::InputEvent ev)
 {
-    for (auto &w : active_windows)
+    for (auto *w : active_windows)
     {
-        if (w->active) w->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
+        if (w == active_windows.back()) w->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
         else w->event(0, -100, -100);
     }
 }

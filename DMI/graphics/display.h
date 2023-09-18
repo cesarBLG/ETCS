@@ -8,14 +8,10 @@
  */
 #ifndef _DISPLAY_H
 #define _DISPLAY_H
-#include <unordered_set>
+#include <list>
 #include "../window/window.h"
 extern window etcs_default_window;
 extern window* default_window;
-extern window navigation_bar;
-//extern window menu_main;
-extern window planning_area;;
-extern std::unordered_set<window*> active_windows;
-extern std::unordered_set<window*> old_windows;
+extern std::list<window*> active_windows;
 void displayETCS();
 #endif

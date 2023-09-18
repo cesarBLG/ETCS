@@ -15,8 +15,6 @@
 #include "../graphics/display.h"
 #include "../graphics/rectangle.h"
 
-void planningConstruct(window *w);
-window planning_area(planningConstruct);
 const int posy[] = {283,250,206,182,164,150,107,64,21};
 const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
 int planning_scale = 1;
@@ -77,7 +75,6 @@ void displayPlanning()
 std::map<int,std::shared_ptr<UiPlatform::Image>> object_textures;
 void displayObjects()
 {
-    if (mode == Mode::OS && !showSpeeds) return;
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
@@ -249,8 +246,6 @@ void planningConstruct(window *w)
     w->addToLayout(&planning_gradient, new RelativeAlignment(&planning_distance, 115+9, 15+135, 0));
     w->addToLayout(&PASP, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
     w->addToLayout(&planning_speed, new ConsecutiveAlignment(&planning_gradient, RIGHT, 0));
-    w->bringFront(&zoomin);
-    w->bringFront(&zoomout);
     w->bringFront(&PASP);
     w->bringFront(&planning_distance);
     w->bringFront(&planning_objects);
@@ -270,4 +265,14 @@ float getPlanningHeight(float dist)
     float first_line = divs[1]*planning_scale;
     if(dist<first_line) return posy[0]-((posy[0]-posy[1])/first_line)*dist;
     else return posy[1]-(posy[1]-posy[8])/log10(divs[8]*planning_scale/first_line)*log10(dist/first_line);
+}
+void setPlanning(bool visible)
+{
+    planning_distance.visible = visible;
+    planning_objects.visible = visible;
+    planning_gradient.visible = visible;
+    PASP.visible = visible;
+    planning_speed.visible = visible;
+    zoomin.visible = visible;
+    zoomout.visible = visible;
 }

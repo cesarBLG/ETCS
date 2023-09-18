@@ -11,6 +11,9 @@
 subwindow::subwindow(std::string title, bool full, int npages) : window(), fullscreen(full), title(title), exit_button("symbols/Navigation/NA_11.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_12.bmp"), prev_button("symbols/Navigation/NA_18.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_19.bmp"),
     next_button("symbols/Navigation/NA_17.bmp", softkeys ? 40 : 82, softkeys ? 64 : 50, nullptr, "symbols/Navigation/NA_18.2.bmp"), title_bar(full ? 334 : (softkeys ? 266 : 306) ,24), page_count(npages)
 {
+    if (fullscreen) bounds = {{0, softkeys ? 0 : 15, 640, softkeys ? 480 : 450}};
+    else if (softkeys) bounds = {{334, 0, 306, 430}, {0, 430, 640, 50}};
+    else bounds = {{334, 15, 306, 450}};
     title_bar.setBackgroundColor(Black);
     exit_button.setPressedAction([this]
     {

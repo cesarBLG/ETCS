@@ -98,9 +98,9 @@ void window::event(int evNo, float x, float y)
 	}
 	if (validButtonPressed!=nullptr) validButtonPressed->setPressed();
 }
-void window::display()
+void window::display(std::vector<std::vector<int>> &alreadyDrawn)
 {
-    l->update();
+    l->update(alreadyDrawn);
 }
 window::~window()
 {

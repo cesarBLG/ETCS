@@ -9,6 +9,7 @@
 #include "track_ahead_free.h"
 #include "../tcp/server.h"
 #include "../graphics/text_button.h"
+#include "window.h"
 bool display_taf;
 Component question_part(162, 50);
 Component answer_part(82, 50);
@@ -26,4 +27,9 @@ void build_taf(window *w)
     answer_part.addText(get_text("Yes"),0,0,12,Black);
     answer_part.setPressedAction([](){write_command("json",R"({"DriverSelection":"TrackAheadFree"})");});
 }
-window taf_window(build_taf);
+void setTAF(bool visible)
+{
+    question_part.visible = visible;
+    answer_part.visible = visible;
+    softYes.visible = visible;
+}

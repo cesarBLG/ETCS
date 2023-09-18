@@ -48,4 +48,5 @@ void displaySpeed();
 void displayPASP();
 float getPlanningHeight(float dist);
 void drawObjects(int num, int distance);
+void setPlanning(bool visible);
 #endif
