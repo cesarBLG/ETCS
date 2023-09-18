@@ -150,9 +150,7 @@ void communication_session::update_ack()
                 if (msg.message->NID_MESSAGE == 155 || msg.message->NID_MESSAGE == 156) {
                     finalize();
                 } else {
-#if !SIMRAIL
                     close();
-#endif
                 }
                 break;
             } else {
