@@ -22,7 +22,7 @@ void SoftKey::setPressed(bool pressed)
         if (cust->softkeys_coordinates.find(name) != cust->softkeys_coordinates.end())
         {
             auto &coords = cust->softkeys_coordinates[name];
-            input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, coords.first, coords.second});
+            input_received({pressed ? UiPlatform::InputEvent::Action::Press : UiPlatform::InputEvent::Action::Release, (float)coords.first, (float)coords.second});
             return;
         }
         if (cust->moved_areas.find(name) != cust->moved_areas.end())
