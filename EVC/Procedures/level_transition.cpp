@@ -152,9 +152,9 @@ void perform_transition()
             }
         }
         if (!supported) {
-            for (auto &kvp : active_sessions) {
-                if (kvp.second->status == session_status::Establishing)
-                    kvp.second->finalize();
+            for (auto *session : active_sessions) {
+                if (session->status == session_status::Establishing)
+                    session->finalize();
             }
         }
     }

@@ -77,7 +77,7 @@ extern distance rbc_transition_position;
 extern optional<contact_info> rbc_contact;
 extern bool rbc_contact_valid;
 extern bool radio_reaction_applied;
-extern std::map<contact_info, communication_session*> active_sessions;
+extern std::set<communication_session*> active_sessions;
 void load_contact_info();
 void set_rbc_contact(contact_info contact);
 void update_euroradio();

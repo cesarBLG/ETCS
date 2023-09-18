@@ -350,11 +350,11 @@ void update_mode_status()
             end_mission = true;
         if (end_mission) {
             ongoing_mission = false;
-            for (auto &kvp : active_sessions) {
-                if (!kvp.second->isRBC)
-                    kvp.second->close();
-                else if (kvp.second->status == session_status::Establishing)
-                    kvp.second->finalize();
+            for (auto *session : active_sessions) {
+                if (!session->isRBC)
+                    session->close();
+                else if (session->status == session_status::Establishing)
+                    session->finalize();
             }
             if (supervising_rbc) {
                 auto *msg = new end_mission_message();

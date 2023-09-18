@@ -29,7 +29,7 @@ bool handover_report_min = false;
 bool handover_report_max = false;
 distance rbc_transition_position;
 safe_radio_status radio_status_driver;
-std::map<contact_info, communication_session*> active_sessions;
+std::set<communication_session*> active_sessions;
 bool radio_hole = false;
 void communication_session::open(int ntries)
 {
@@ -44,9 +44,9 @@ void communication_session::open(int ntries)
     status = session_status::Establishing;
     radio_status = safe_radio_status::Disconnected;
     connection = nullptr;
-    for (auto it : active_sessions) {
-        if (it.second != this && it.second != accepting_rbc && it.second != handing_over_rbc && it.second != supervising_rbc)
-            it.second->close();
+    for (auto *session : active_sessions) {
+        if (session != this && session != accepting_rbc && session != handing_over_rbc && session != supervising_rbc)
+            session->close();
     }
     last_active = get_milliseconds();
     connection_timer = true;
@@ -332,11 +332,11 @@ void update_euroradio()
 {
     update_cfm();
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {
-        if (it->second->status == session_status::Inactive && it->second != supervising_rbc && it->second != accepting_rbc && it->second != handing_over_rbc) {
-            delete it->second;
+        if ((*it)->status == session_status::Inactive && *it != supervising_rbc && *it != accepting_rbc && *it != handing_over_rbc) {
+            delete *it;
             it = active_sessions.erase(it);
         } else {
-            it->second->update();
+            (*it)->update();
             ++it;
         }
     }
@@ -435,9 +435,9 @@ void update_euroradio()
         radio_reaction_reconnected = false;
     }
     if (prev_radio_hole && !radio_hole) {
-        for (auto &kvp : active_sessions) {
-            if (kvp.second->status == session_status::Inactive)
-                kvp.second->open(0);
+        for (auto *session : active_sessions) {
+            if (session->status == session_status::Inactive)
+                session->open(0);
         }
     }
     if (supervising_rbc && supervising_rbc->status == session_status::Established && (level == Level::N2 || level == Level::N3))
@@ -489,12 +489,14 @@ void set_supervising_rbc(contact_info info)
     if (supervising_rbc && supervising_rbc->contact == info)
         return;
     set_rbc_contact(info);
-    if (active_sessions.find(info) != active_sessions.end()) {
-        supervising_rbc = active_sessions[info];
-    } else {
-        supervising_rbc = new communication_session(info, true);
-        active_sessions[info] = supervising_rbc;
+    for (auto *session : active_sessions) {
+        if (session->contact == info) {
+            supervising_rbc = session;
+            return;
+        }
     }
+    supervising_rbc = new communication_session(info, true);
+    active_sessions.insert(supervising_rbc);
 }
 void rbc_handover(distance d, contact_info newrbc)
 {
@@ -502,13 +504,17 @@ void rbc_handover(distance d, contact_info newrbc)
     handover_report_accepting = handover_report_max = handover_report_min = false;
     if (supervising_rbc && supervising_rbc->contact == newrbc)
         return;
+    if (accepting_rbc && accepting_rbc->contact == newrbc) {
+        accepting_rbc->open(0);
+        return;
+    }
     if (accepting_rbc && accepting_rbc->contact != newrbc)
         accepting_rbc->close();
     if (handing_over_rbc && handing_over_rbc != supervising_rbc)
         handing_over_rbc->close();
     handing_over_rbc = supervising_rbc;
     accepting_rbc = new communication_session(newrbc, true);
-    active_sessions[newrbc] = accepting_rbc;
+    active_sessions.insert(accepting_rbc);
     accepting_rbc->open(0);
 }
 void terminate_session(contact_info info)
@@ -519,18 +525,18 @@ void terminate_session(contact_info info)
         else
             return;
     }
-    for (auto &it : active_sessions) {
+    for (auto *session : active_sessions) {
 #if SIMRAIL
-        if ((it.first.country == info.country && it.first.id == info.id) || active_sessions.size() == 1) {
+        if ((session->contact.country == info.country && session->contact.id == info.id) || active_sessions.size() == 1) {
 #else
-        if (it.first.country == info.country && it.first.id == info.id) {
+        if (session->contact.country == info.country && session->contact.id == info.id) {
 #endif
-            it.second->close();
-            if (it.second == supervising_rbc)
+            session->close();
+            if (session == supervising_rbc)
                 supervising_rbc = nullptr;
-            if (it.second == handing_over_rbc)
+            if (session == handing_over_rbc)
                 handing_over_rbc = nullptr;
-            if (it.second == accepting_rbc)
+            if (session == accepting_rbc)
                 accepting_rbc = handing_over_rbc = nullptr;
         }
     }

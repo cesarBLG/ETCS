@@ -1294,9 +1294,9 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "EnterRBCdata") {
             active_dialog_step = "S3-3";
         } else if (step == "RadioNetworkID") {
-            for (auto &kvp : active_sessions) {
-                if (kvp.second->status != session_status::Inactive)
-                    kvp.second->close();
+            for (auto *session : active_sessions) {
+                if (session->status != session_status::Inactive)
+                    session->close();
             }
             retrieve_radio_networks();
             active_dialog_step = "S3-2-1";
