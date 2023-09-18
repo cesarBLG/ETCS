@@ -783,7 +783,7 @@ void update_dmi_windows()
         }
         enabled_buttons["EndDataEntry"] = active_dialog_step != "S1" && active_dialog_step != "S4";
     }
-    if (ack_required) {
+    if (ack_required && active_dialog != dialog_sequence::StartUp) {
         for (auto &kvp : enabled_buttons) {
             kvp.second = false;
         }
