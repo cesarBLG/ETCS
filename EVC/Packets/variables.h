@@ -484,6 +484,9 @@ struct M_LEVEL_t : ETCS_variable
 {
     M_LEVEL_t() : ETCS_variable(3)
     {
+#if BASELINE == 4
+        invalid.insert(4);
+#endif
         invalid.insert(5);
         invalid.insert(6);
         invalid.insert(7);
@@ -499,8 +502,10 @@ struct M_LEVEL_t : ETCS_variable
                 return Level::N1;
             case 3:
                 return Level::N2;
+#if BASELINE < 4
             case 4:
                 return Level::N3;
+#endif
             default:
                 return Level::Unknown;
         }
@@ -520,9 +525,11 @@ struct M_LEVEL_t : ETCS_variable
             case Level::N2:
                 rawdata = 3;
                 break;
+#if BASELINE < 4
             case Level::N3:
                 rawdata = 4;
                 break;
+#endif
             default:
                 rawdata = 5;
                 break;
@@ -535,10 +542,17 @@ struct M_LEVELTEXTDISPLAY_t : ETCS_variable
     static const uint32_t NTC=1;
     static const uint32_t N1=2;
     static const uint32_t N2=3;
+#if BASELINE < 4
     static const uint32_t N3=4;
     static const uint32_t NoLevelLimited=5;
+#else
+    static const uint32_t NoLevelLimited=4;
+#endif
     M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
     {
+#if BASELINE == 4
+        invalid.insert(5);
+#endif
         invalid.insert(6);
         invalid.insert(7);
     }
@@ -551,8 +565,10 @@ struct M_LEVELTEXTDISPLAY_t : ETCS_variable
                 return Level::N1;
             case N2:
                 return Level::N2;
+#if BASELINE < 4
             case N3:
                 return Level::N3;
+#endif
             case NTC:
                 return Level::NTC;
             default:
@@ -564,6 +580,9 @@ struct M_LEVELTR_t : ETCS_variable
 {
     M_LEVELTR_t() : ETCS_variable(3)
     {
+#if BASELINE == 4
+        invalid.insert(4);
+#endif
         invalid.insert(5);
         invalid.insert(6);
         invalid.insert(7);
@@ -579,8 +598,10 @@ struct M_LEVELTR_t : ETCS_variable
                 return Level::N1;
             case 3:
                 return Level::N2;
+#if BASELINE < 4
             case 4:
                 return Level::N3;
+#endif
             default:
                 return Level::N0;
         }

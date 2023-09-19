@@ -36,9 +36,11 @@ void displayLevel()
         case Level::N2:
             num=4;
             break;
+#if BASELINE < 4
         case Level::N3:
             num=5;
             break;
+#endif
     }
     if (num == 0) return;
     if(num<10) path+="0";

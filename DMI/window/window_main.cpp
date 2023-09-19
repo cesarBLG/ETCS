@@ -45,6 +45,9 @@ void construct_main(window *w, bool custom)
     extern Component b3;
     extern Component b4;
     extern Component b5;
+#if BASELINE == 4
+    extern Component b8;
+#endif
     
     if (!softkeys)
     {
@@ -83,6 +86,9 @@ void construct_main(window *w, bool custom)
         w->addToLayout(&b4, new RelativeAlignment(&csg, 140, 274, -2));
         w->addToLayout(&b3, new ConsecutiveAlignment(&b4, LEFT, -2));
         w->addToLayout(&b5, new ConsecutiveAlignment(&b4, RIGHT, -2));
+#if BASELINE == 4
+        w->addToLayout(&b8, new RelativeAlignment(&csg, 140, 216, -2));
+#endif
 
         planningConstruct(w);
         build_taf(w);

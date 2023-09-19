@@ -31,6 +31,9 @@ bool showSpeeds = false;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
+#if BASELINE == 4
+Component b8(36,36);
+#endif
 IconButton togglingButton("symbols/Driver Request/DR_01.bmp", 64, 50, []() {showSpeeds = !showSpeeds;});
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
@@ -70,6 +73,12 @@ void drawNeedle()
     {
         if (active_ntc_window != nullptr) needleColor = active_ntc_window->monitoring_data.needle_color;
     }
+#if BASELINE == 4
+    else if (mode == Mode::AD)
+    {
+        needleColor = Vtarget<=Vest || monitoring == RSM ? White : Grey;
+    }
+#endif
     else if(supervision == IntS)
     {
         needleColor = Red;
@@ -183,9 +192,17 @@ void displayCSG()
         if (stm.Vrelease_display & 2) drawGauge(0,Vrelease,stm.Vrelease_color,133);
         return;
     }
-    if(mode != Mode::FS)
+#if BASELINE < 4
+    if (mode != Mode::FS)
+#else
+    if (mode != Mode::FS && mode != Mode::AD)
+#endif
     {
-        if((mode == Mode::OS || mode == Mode::SR) && showSpeeds)
+        if((mode == Mode::OS || mode == Mode::SR) && showSpeeds
+#if BASELINE == 4
+        || mode == Mode::SM
+#endif
+        )
         {
             platform->set_color(White);
             drawHook(Vperm);
@@ -217,15 +234,30 @@ void displayCSG()
     if(monitoring == TSM)
     {
         drawGauge(0,Vtarget, DarkGrey);
+#if BASELINE == 4
+        drawGauge(Vtarget, Vperm, mode == Mode::AD ? White : Yellow);
+#else
         drawGauge(Vtarget, Vperm, Yellow);
+#endif
         drawHook(Vperm);
     }
     if(monitoring == RSM)
     {
+#if BASELINE == 4
+        platform->set_color(mode == Mode::AD ? White : Yellow);
+#else
         platform->set_color(Yellow);
+#endif
         drawHook(Vperm);
     }
-    if(supervision == OvS || supervision == WaS) drawGauge(Vperm,Vsbi,Orange,117);
+    if(supervision == OvS || supervision == WaS)
+    {
+#if BASELINE == 4
+        drawGauge(Vperm,Vsbi, mode == Mode::AD ? (Vtarget<Vperm ? White : DarkGrey) : Orange,117);
+#else
+        drawGauge(Vperm,Vsbi,Orange,117);
+#endif
+    }
     if(supervision == IntS) drawGauge(Vperm,Vsbi,Red,117);
     if(Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM))
     {
@@ -235,12 +267,23 @@ void displayCSG()
             float ang = speedToAngle(Vperm);
             platform->set_color(Black);
             csg.drawSolidArc(ang0,ang,132,133,cx,cy);
+#if BASELINE == 4
+            platform->set_color(mode == Mode::AD ? White : Yellow);
+#else
             platform->set_color(Yellow);
+#endif
             csg.drawSolidArc(ang0,ang,128, 132,cx,cy);
         }
         else
         {
-            if(monitoring == RSM) drawGauge(0, Vperm, Yellow);
+            if(monitoring == RSM)
+            {
+#if BASELINE == 4
+                drawGauge(0, Vperm, mode == Mode::AD ? White : Yellow);
+#else
+                drawGauge(0, Vperm, Yellow);
+#endif
+            }
             drawGauge(0,Vrelease,Black,132);
             drawGauge(0,Vrelease,MediumGrey,133);
         }
@@ -319,7 +362,13 @@ void displayVrelease()
         {
             releaseSignShown = true;
             releaseRegion.clear();
-            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
+            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, 
+#if BASELINE == 4
+            mode == Mode::AD ? MediumGrey : Yellow,
+#else
+            MediumGrey,
+#endif
+            CENTER, 0);
             prevVrelease = Vrelease;
         }
     } else {
@@ -353,9 +402,20 @@ void setLSSMA(int nlssma)
 void displaya1()
 {
     if(mode == Mode::LS) return;
-    if((mode == Mode::FS || ((mode == Mode::OS || mode == Mode::SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
+    if((mode == Mode::FS
+#if BASELINE == 4
+    || mode == Mode::AD || mode == Mode::SM
+#endif
+    || ((mode == Mode::OS || mode == Mode::SR) && showSpeeds)) && monitoring == CSM && TTI < TdispTTI)
     {
-        if(!ttiShown) playSinfo();
+        if(!ttiShown)
+        {
+#if BASELINE == 4
+            if (mode != Mode::AD) playSinfo();
+#else
+            playSinfo();
+#endif
+        }
         ttiShown = true;
         int n;
         for(n = 1; n<11; n++)
