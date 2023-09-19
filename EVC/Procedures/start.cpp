@@ -26,8 +26,6 @@ void update_SoM()
     som_step save_status = som_status;
     if (som_active && !cab_active[0] && !cab_active[1]) {
         for (auto *session : active_sessions) {
-            // TODO: Check against SRS
-            // 3.5.3.8 only mentions stop trying to establish
             session->close();
         }
         desk_closed_som();

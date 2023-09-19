@@ -76,7 +76,7 @@ void window::event(int evNo, float x, float y)
         for(int i=0; i<el.size(); i++)
         {
             Component *comp = el[i].comp;
-			if (!comp->isSensitive())
+			if (!comp->isSensitive() || !comp->visible)
 				continue;
 			if (comp->isButton) ((Button*)comp)->pressed = false;
 			if (isInside(comp, x, y) && (!comp->isButton || ((Button*)comp)->enabled))

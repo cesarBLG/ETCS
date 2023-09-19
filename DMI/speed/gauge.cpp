@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "../graphics/component.h"
+#include "../graphics/icon_button.h"
 #include "../graphics/texture.h"
 #include "../graphics/color.h"
 #include "../sound/sound.h"
@@ -26,9 +27,11 @@ const float amed = -42*PI/180.0;
 const float ang1 = 54*PI/180.0;
 const float cx = 140;
 const float cy = 150;
+bool showSpeeds = false;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
+IconButton togglingButton("symbols/Driver Request/DR_01.bmp", 64, 50, []() {showSpeeds = !showSpeeds;});
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
 
@@ -145,16 +148,20 @@ void drawSetSpeed()
     csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
 
 }
-bool showSpeeds = false;
+static Mode prevmode;
 void displayCSG()
 {
+    if (mode != prevmode) showSpeeds = false;
+    prevmode = mode;
     if (mode == Mode::OS || mode == Mode::SR || mode == Mode::SH)
     {
         csg.setPressedAction([]() {showSpeeds = !showSpeeds;});
+        togglingButton.visible = true;
     }
     else
     {
         csg.setPressedAction(nullptr);
+        togglingButton.visible = false;
     }
     if (mode == Mode::SN)
     {
