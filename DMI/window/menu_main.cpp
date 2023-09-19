@@ -43,12 +43,22 @@ menu_main::menu_main() : menu(get_text("Main"))
     {
         write_command("Shunting","");
     }, true};
-    entries[7] = {get_text("Non-Leading"), "", nullptr, false};
-    entries[8] = {get_text("Maintain shunting"), "", nullptr, false};
+    entries[7] = {get_text("Non-Leading"), "", nullptr, true};
+    entries[8] = {get_text("Maintain shunting"), "", nullptr, true};
     entries[9] = {get_text("Radio data"), "", []
     {
         write_command("RadioData","");
     }, false};
+#if BASELINE == 4
+    entries[10] = {mode == Mode::SM ? get_text("Continue in SM") : get_text("Initiate SM"), "", []
+    {
+        write_command("SupervisedManouevre","");
+    }, true};
+    entries[11] = {get_text("Exit SM"), "", []
+    {
+        write_command("ExitSM","");
+    }, true};
+#endif
     buildMenu();
 }
 void menu_main::setEnabled(bool start, bool driverid, bool traindata, bool level, bool trn, bool sh, bool nl, bool maintainsh, bool radiodata)
@@ -62,4 +72,8 @@ void menu_main::setEnabled(bool start, bool driverid, bool traindata, bool level
     buttons[7]->setEnabled(nl);
     buttons[8]->setEnabled(maintainsh);
     buttons[9]->setEnabled(radiodata);
+#if BASELINE == 4
+    buttons[10]->setEnabled(false);
+    buttons[11]->setEnabled(false);
+#endif
 }
