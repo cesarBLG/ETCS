@@ -1152,6 +1152,7 @@ struct NC_TRAIN_t : ETCS_variable
 };
 struct NID_BG_t : ETCS_variable
 {
+    static const uint32_t Unknown=16383;
     NID_BG_t() : ETCS_variable(14) {}
 };
 struct NID_C_t : ETCS_variable

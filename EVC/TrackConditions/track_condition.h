@@ -110,25 +110,25 @@ struct track_condition
     virtual double get_distance_to_train()
     {
         if (condition == TrackConditions::BigMetalMasses)
-            return start-d_maxsafefront(start)+L_antenna_front;
+            return start.max-d_maxsafefront(start)+L_antenna_front;
         if (condition == TrackConditions::TunnelStoppingArea || condition == TrackConditions::SoundHorn)
-            return start-d_estfront;
-        return start-d_maxsafefront(start);
+            return start.est-d_estfront;
+        return start.max-d_maxsafefront(start);
     }
     double get_end_distance_to_train()
     {
         if (!profile) {
             if (condition == TrackConditions::ChangeOfTractionSystem)
-                return start-d_minsafefront(start)+L_TRAIN;
+                return start.min-d_minsafefront(start)+L_TRAIN;
             return get_distance_to_train();
         }
         if (condition == TrackConditions::BigMetalMasses)
-            return end-d_minsafefront(end)+L_antenna_front;
+            return end.min-d_minsafefront(end)+L_antenna_front;
         if (condition == TrackConditions::TunnelStoppingArea || condition == TrackConditions::SoundHorn)
-            return end-d_estfront;
+            return end.est-d_estfront;
         if (condition == TrackConditions::PowerLessSectionLowerPantograph || condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || condition == TrackConditions::StationPlatform)
-            return end-d_minsafefront(end);
-        return end-d_minsafefront(end)+L_TRAIN;
+            return end.min-d_minsafefront(end);
+        return end.min-d_minsafefront(end)+L_TRAIN;
     }
 };
 struct track_condition_platforms : track_condition

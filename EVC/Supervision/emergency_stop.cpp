@@ -15,12 +15,12 @@ void handle_unconditional_emergency_stop(int id)
     trigger_condition(20);
     emergency_stops[id] = {};
 }
-int handle_conditional_emergency_stop(int id, distance location, distance minsafe)
+int handle_conditional_emergency_stop(int id, distance location, dist_base minsafe)
 {
-    if (minsafe > location)
+    if (minsafe > location.min)
         return 3;
     emergency_stops[id] = location;
-    bool used = !SvL || *SvL > location;
+    bool used = !SvL || SvL->max > location.max;
     delete_MA(location, location);
     calculate_SvL();
     svl_shorten('a');

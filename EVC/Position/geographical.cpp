@@ -27,11 +27,11 @@ void handle_geographical_position(GeographicalPosition p, bg_id this_bg)
         geo_references.push_back(g);
     }
 }
-void geographical_position_handle_bg_passed(bg_id id, distance ref, bool reverse)
+void geographical_position_handle_bg_passed(bg_id id, dist_base ref, bool reverse)
 {
     for (geographical_position &p : geo_references) {
         if (!p.bg_ref && p.id == id) {
-            p.bg_ref = ref;
+            p.bg_ref = distance::from_odometer(ref);
             if (reverse) {
                 p.forwards = !p.forwards;
             }
@@ -41,13 +41,13 @@ void geographical_position_handle_bg_passed(bg_id id, distance ref, bool reverse
 void update_geographical_position()
 {
     for (auto it = geo_references.begin(); it != geo_references.end(); ++it) {
-        if (it->bg_ref && *it->bg_ref+it->start_offset < d_estfront) {
+        if (it->bg_ref && it->bg_ref->est+it->start_offset < d_estfront) {
             if (it->initial_val < 0)
                 valid_geo_reference = {};
             else
                 valid_geo_reference = *it;
             std::remove_if(geo_references.begin(), geo_references.end(), 
-                [](geographical_position p){return p.bg_ref && *p.bg_ref+p.start_offset<d_estfront;});
+                [](geographical_position p){return p.bg_ref && p.bg_ref->est+p.start_offset<d_estfront;});
             break;
         }
     }
