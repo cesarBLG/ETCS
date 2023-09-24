@@ -183,7 +183,7 @@ void update_level_status()
         perform_transition();
     else if (mode != Mode::SB && 
     (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0) && 
-    (!ongoing_transition->ref_loc || ongoing_transition->ref_loc->max - ongoing_transition->leveldata.acklength < d_maxsafefront(*ongoing_transition->ref_loc)) && !level_acknowledged) {
+    (!ongoing_transition->ref_loc || ongoing_transition->ref_loc->max + ongoing_transition->dist - ongoing_transition->leveldata.acklength < d_maxsafefront(*ongoing_transition->ref_loc)) && !level_acknowledged) {
         level_acknowledgeable = true;
     }
 }
