@@ -16,96 +16,134 @@ extern double odometer_reference;
 extern int odometer_orientation;
 extern int current_odometer_orientation;
 extern int odometer_direction;
-/*struct _dist_base
+struct dist_base
 {
-    int refcount;
-    _dist_base(double dist, int orientation, double ref=0) : dist(dist), ref(ref), refcount(1), orientation(orientation) {}
-    _dist_base(const _dist_base &d) : dist(d.dist), ref(d.ref), refcount(1), orientation(d.orientation) {}
-    double get()
-    {
-        return ref+dist;
-    }
-};*/
-class distance
-{
-private:
     double dist;
-    double ref;
     int orientation;
-    static distance* begin;
-    static distance* end;
-    distance *prev=nullptr;
-    distance *next=nullptr;
-public:
-    static void update_distances(double expected, double estimated);
-    static void update_unlinked_reference(double newref);
-    double get() const
-    {
-        return dist+ref;
-    }
-    double get_reference() const
-    {
-        return ref;
-    }
-    int get_orientation() const
-    {
-        return orientation;
-    }
-    distance();
-    distance(double val, int orientation, double ref);
-    distance(const distance &d);
-    distance(distance &&d);
-    ~distance();
-    distance &operator = (const distance& d);
-    distance &operator = (distance&& d);
-    bool operator<(const distance d) const;
-    bool operator>(const distance d) const
+    dist_base() = default;
+    dist_base(double dist, int orientation) : dist(dist), orientation(orientation) {}
+    dist_base &operator = (const dist_base& d);
+    static dist_base max;
+    static dist_base min;
+    bool operator<(const dist_base &d) const;
+    bool operator>(const dist_base &d) const
     {
         return d<*this;
     }
-    bool operator==(const distance d) const
+    bool operator==(const dist_base &d) const
     {
-        return get()==d.get();
+        return dist == d.dist;
     }
-    bool operator!=(const distance d) const
+    bool operator!=(const dist_base &d) const
     {
-        return !(*this==d);
+        return dist != d.dist;
     }
-    bool operator<=(const distance d) const
+    bool operator<=(const dist_base &d) const
     {
         return !(*this>d);
     }
-    bool operator>=(const distance d) const
+    bool operator>=(const dist_base &d) const
     {
         return !(*this<d);
     }
-    distance operator+(const double d) const
+    dist_base operator+(const double d) const
     {
-        distance dist=*this;
+        dist_base dist=*this;
         dist+=d;
         return dist;
     }
-    distance operator-(const double d) const
+    dist_base operator-(const double d) const
     {
-        distance dist=*this;
+        dist_base dist=*this;
         dist+=-d;
         return dist;
     }
-    distance &operator+=(const double d);
-    distance &operator-=(const double d)
+    dist_base &operator+=(const double d);
+    dist_base &operator-=(const double d)
     {
         *this += -d;
         return *this;
     }
-    double operator-(const distance d) const;
+    double operator-(const dist_base &d) const;
 };
-extern distance d_estfront;
-extern distance d_estfront_dir[2];
-distance d_maxsafefront(int orientation, double reference);
-distance d_minsafefront(int orientation, double reference);
-distance d_maxsafefront(const distance&ref);
-distance d_minsafefront(const distance&ref);
-distance d_maxsafe(distance &d);
-distance d_minsafe(distance &d);
+struct distance;
+struct confidence_data
+{
+    dist_base ref;
+    double locacc;
+    static confidence_data from_distance(const distance &d);
+    static confidence_data basic();
+};
+struct confidenced_distance : dist_base, confidence_data
+{
+    confidenced_distance() = default;
+    confidenced_distance(dist_base d)
+    {
+        (dist_base&)*this = d;
+        ref = dist_base(0, orientation);
+        locacc = 0;
+    }
+    confidenced_distance(dist_base d, confidence_data c)
+    {
+        (dist_base&)*this = d;
+        (confidence_data&)*this = c;
+    }
+};
+struct distance
+{
+    static distance* begin;
+    static distance* end;
+    distance *prev=nullptr;
+    distance *next=nullptr;
+    dist_base min;
+    dist_base est;
+    dist_base max;
+    dist_base ref;
+    bool balise_based=true;
+    distance();
+    ~distance();
+    distance(double val, int orientation, double ref=0);
+    distance(const distance &d);
+    distance &operator = (const distance& d);
+    distance &operator+=(double dist)
+    {
+        min += dist;
+        est += dist;
+        max += dist;
+        return *this;
+    }
+    distance &operator-=(double dist)
+    {
+        min -= dist;
+        est -= dist;
+        max -= dist;
+        return *this;
+    }
+    distance operator+(double dist) const
+    {
+        distance d = *this;
+        d += dist;
+        return d;
+    }
+    distance operator-(double dist) const
+    {
+        distance d = *this;
+        d -= dist;
+        return d;
+    }
+#if BASELINE == 4
+    bool relocated_c;
+    optional<bg_id> relocated_c_earlier;
+#endif
+    static distance from_odometer(const dist_base &dist);
+};
+extern dist_base d_estfront;
+extern dist_base d_estfront_dir[2];
+dist_base d_maxsafe(const dist_base &d, const confidence_data &conf);
+dist_base d_minsafe(const dist_base &d, const confidence_data &conf);
+dist_base d_maxsafefront(const confidence_data &conf);
+dist_base d_minsafefront(const confidence_data &conf);
+dist_base d_maxsafefront(const distance&ref);
+dist_base d_minsafefront(const distance&ref);
 void update_odometer();
 void reset_odometer(double dist);

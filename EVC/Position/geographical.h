@@ -18,11 +18,11 @@ struct geographical_position
     float initial_val;
     float start_offset;
     optional<distance> bg_ref;
-    float get_position(distance d)
+    float get_position(dist_base d)
     {
         if (!bg_ref)
             return -1;
-        float travelled = d-*bg_ref+start_offset;
+        float travelled = d-bg_ref->est+start_offset;
         if (forwards)
             return initial_val + travelled;
         else
@@ -31,5 +31,5 @@ struct geographical_position
 };
 extern optional<geographical_position> valid_geo_reference;
 void handle_geographical_position(GeographicalPosition p, bg_id this_bg);
-void geographical_position_handle_bg_passed(bg_id id, distance ref, bool reverse);
+void geographical_position_handle_bg_passed(bg_id id, dist_base ref, bool reverse);
 void update_geographical_position();

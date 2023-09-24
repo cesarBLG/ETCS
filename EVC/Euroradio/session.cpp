@@ -344,7 +344,7 @@ void update_euroradio()
     }
     if (handing_over_rbc && handing_over_rbc->status == session_status::Inactive)
         handing_over_rbc = nullptr;
-    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position) {
+    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position.max) {
         if (!handover_report_accepting && accepting_rbc->status == session_status::Established) {
             handover_report_accepting = true;
             handover_report_max = true;
@@ -366,7 +366,7 @@ void update_euroradio()
         if (handing_over_rbc && handing_over_rbc->status == session_status::Establishing)
             handing_over_rbc->finalize();
     }
-    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position && !handover_report_min) {
+    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position.min && !handover_report_min) {
         position_report_reasons[4] = true;
         handover_report_min = true;
     }
@@ -396,7 +396,7 @@ void update_euroradio()
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         auto *tc = it->get();
         if (tc->condition == TrackConditions::RadioHole) {
-            if (tc->start < d_maxsafefront(tc->start) && tc->end > d_minsafefront(tc->start) - L_TRAIN)
+            if (tc->start.max < d_maxsafefront(tc->start) && tc->end.min > d_minsafefront(tc->start) - L_TRAIN)
                 radio_hole = true;
         }
     }
