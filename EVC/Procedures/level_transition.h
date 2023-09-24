@@ -24,7 +24,7 @@ struct level_information
 extern std::vector<level_information> priority_levels;
 struct target_level_information
 {
-    distance startack;
+    double acklength;
     Level level;
     int nid_ntc;
 };
@@ -32,11 +32,12 @@ struct level_transition_information
 {
     bool immediate;
     bool acknowledged = false;
-    distance start;
+    std::optional<distance> ref_loc;
+    double dist;
     target_level_information leveldata;
     std::vector<level_information> priority_table;
-    level_transition_information(LevelTransitionOrder o, distance ref);
-    level_transition_information(ConditionalLevelTransitionOrder o, distance ref);
+    level_transition_information(LevelTransitionOrder o);
+    level_transition_information(ConditionalLevelTransitionOrder o);
     void set_leveldata(std::vector<target_level_information> &priorities);
 };
 void update_level_status();

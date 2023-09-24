@@ -168,7 +168,8 @@ void update_SoM()
             break;
         case A24:
             position_valid = false;
-            lrbgs.clear();
+            orbgs.clear();
+            solr = {};
             som_status = S10;
             break;
         case A38:
@@ -178,7 +179,8 @@ void update_SoM()
             if (supervising_rbc)
                 supervising_rbc->close();
             position_valid = false;
-            lrbgs.clear();
+            orbgs.clear();
+            solr = {};
             som_status = A40;
             break;
         case A40:

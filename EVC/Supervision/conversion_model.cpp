@@ -16,10 +16,10 @@
 #include <map>
 #include <utility>
 #include <cmath>
-acceleration get_A_gradient(std::map<distance, double> gradient, double default_gradient)
+acceleration get_A_gradient(const std::map<dist_base, double> &gradient, double default_gradient)
 {
     acceleration A_gradient;
-    A_gradient.dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
+    A_gradient.dist_step.insert(dist_base(std::numeric_limits<double>::lowest(), 0));
     A_gradient.speed_step.insert(0);
     for (auto it=gradient.begin(); it!=gradient.end(); ++it) {
         A_gradient.dist_step.insert(it->first);
@@ -50,7 +50,7 @@ double T_brake_service_cm0;
 double T_brake_service_cmt;
 acceleration A_brake_emergency;
 acceleration A_brake_service;
-std::map<distance,std::pair<int,int>> active_combination;
+std::map<dist_base,std::pair<int,int>> active_combination;
 bool slippery_rail_driver;
 std::map<int,std::map<double, double>> A_brake_emergency_combination;
 std::map<int,std::map<double, double>> A_brake_service_combination;
@@ -127,19 +127,19 @@ acceleration get_A_brake_normal_service(acceleration service)
     }
     return ac;
 }
-double get_T_brake_emergency(distance d)
+double get_T_brake_emergency(dist_base d)
 {
     return T_brake_emergency_combination[(--active_combination.upper_bound(d))->second.second];
 }
-double get_T_brake_service(distance d)
+double get_T_brake_service(dist_base d)
 {
     return T_brake_service_combination[(--active_combination.upper_bound(d))->second.first];
 }
-double Kdry_rst(double V, double EBCL, distance d)
+double Kdry_rst(double V, double EBCL, dist_base d)
 {
     return (--((--Kdry_rst_combination[(--active_combination.upper_bound(d))->second.second].upper_bound(V))->second.upper_bound(EBCL)))->second;
 }
-double Kwet_rst(double V, distance d)
+double Kwet_rst(double V, dist_base d)
 {
     return (--Kwet_rst_combination[(--active_combination.upper_bound(d))->second.second].upper_bound(V))->second;
 }
@@ -306,7 +306,7 @@ void convmodel_basic_accel(int lambda, acceleration &A_brake_emergency, accelera
     A_ebmax=0;
 
     for (double spd : A_brake_emergency.speed_step) {
-        A_ebmax = std::max(A_ebmax, A_brake_emergency(spd, distance(0, 0, 0)));
+        A_ebmax = std::max(A_ebmax, A_brake_emergency(spd, dist_base(0, 0)));
     }
 }
 void convmodel_brake_build_up(brake_position_types brake_position, double L_TRAIN, double &T_brake_emergency_cm0, double &T_brake_emergency_cmt, double &T_brake_service_cm0, double &T_brake_service_cmt)
