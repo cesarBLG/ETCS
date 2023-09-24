@@ -15,37 +15,38 @@
 #include "../Time/clock.h"
 #include "../DMI/windows.h"
 bool overrideProcedure = false;
-distance override_start_distance;
+std::optional<distance> override_start_distance;
 int64_t override_start_time;
-optional<distance> formerEoA;
-optional<distance> formerSRdist;
+std::optional<distance> formerEoA;
+std::optional<distance> formerSRdist;
 void start_override()
 {
     if (V_est <= V_NVALLOWOVTRP && (((mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN || mode == Mode::PT || mode == Mode::SB || mode == Mode::SN) && train_data_valid) || mode == Mode::SH)) {
         if (som_active) {
-            lrbgs.clear();
+            orbgs.clear();
+            solr = {};
             position_valid = false;
         }
         overrideProcedure = true;
         formerSRdist = {};
-        override_start_distance = d_estfront_dir[odometer_orientation == -1];
-        override_speed = speed_restriction(V_NVSUPOVTRP, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+        override_start_distance = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
+        override_speed = speed_restriction(V_NVSUPOVTRP, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         override_start_time = get_milliseconds();
         if (mode == Mode::OS || mode == Mode::LS || mode == Mode::FS) {
             if (EoA)
-                formerEoA = EoA;
+                formerEoA = *EoA;
             else if (LoA)
                 formerEoA = LoA->first;
         } else if (mode == Mode::PT || mode == Mode::SB) {
-            formerEoA = d_estfront_dir[odometer_orientation == -1];
+            formerEoA = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
         } else if (mode == Mode::SR) {
             formerSRdist = SR_dist;
             if (std::isfinite(D_NVSTFF)) {
-                SR_dist = d_estfront_dir[odometer_orientation == -1]+D_NVSTFF;
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
+                SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]+D_NVSTFF);
+                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), *SR_dist, false);
             } else {
                 SR_dist = {};
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
             }
         }
         recalculate_MRSP();
@@ -57,17 +58,17 @@ bool stopsh_received=false;
 void update_override()
 {
     if (overrideProcedure) {
-        if (d_estfront - override_start_distance > D_NVOVTRP || get_milliseconds() - override_start_time >  T_NVOVTRP*1000)
+        if (d_estfront - override_start_distance->est > D_NVOVTRP || get_milliseconds() - override_start_time >  T_NVOVTRP*1000)
             overrideProcedure = false;
         if (mode != Mode::UN && mode != Mode::SN) {
             if (stopsr_received || stopsh_received ||
             (MA && MA->get_v_main() > 0) ||
-            (formerSRdist && *formerSRdist < d_estfront) || 
-            (formerEoA && *formerEoA<d_minsafefront(*formerEoA)-L_antenna_front))
+            (formerSRdist && formerSRdist->est < d_estfront) ||
+            (formerEoA && formerEoA->min < d_minsafefront(*formerEoA) - L_antenna_front))
                 overrideProcedure = false;
         }
         if (!overrideProcedure) {
-            if (formerEoA && *formerEoA<d_minsafefront(*formerEoA)-L_antenna_front)
+            if (formerEoA && formerEoA->min < d_minsafefront(*formerEoA) - L_antenna_front)
                 formerEoA = {};
             override_speed = {};
             recalculate_MRSP();

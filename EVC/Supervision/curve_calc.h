@@ -8,5 +8,5 @@
  */
 #pragma once
 #include "../Position/distance.h"
-distance distance_curve(const acceleration &a, const distance &dref, double vref, double vel);
-double speed_curve(const acceleration &a, const distance &dref, double vref, distance dist);
+dist_base distance_curve(const acceleration &a, const dist_base &dref, double vref, double vel);
+double speed_curve(const acceleration &a, const dist_base &dref, double vref, dist_base dist);

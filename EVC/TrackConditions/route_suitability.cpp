@@ -88,7 +88,7 @@ void load_route_suitability(RouteSuitabilityData &data, distance ref)
 }
 void update_route_suitability()
 {
-    if (restore_route_suitability && *restore_route_suitability<d_minsafefront(*restore_route_suitability)) {
+    if (restore_route_suitability && restore_route_suitability->min<d_minsafefront(*restore_route_suitability)) {
         restore_route_suitability = {};
         route_suitability.clear();
         calculate_SvL();
