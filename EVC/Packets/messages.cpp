@@ -560,10 +560,13 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
     bool relocated = false;
     for (auto it = ordered_info.begin(); ;)
     {
-        if (!relocated && (it == ordered_info.end() || (*it)->index_level != 1 || ((*it)->infill && !infill))) {
+        if (!relocated && (it == ordered_info.end() || ((*it)->index_level != 1 && (*it)->index_level != 8 && (*it)->index_level != 9) || ((*it)->infill && !infill))) {
             relocate();
             relocated = true;
             location = get_reference_location(infill ? *ordered_info.back()->infill : ordered_info.front()->nid_bg, true, !infill);
+            if (location && it != ordered_info.end() && !(*it)->fromRBC) {
+                platform->debug_print("Foo");
+            }
             // Distance part of level transition has to be handled after linking
             if (ongoing_transition && !ongoing_transition->ref_loc && !ongoing_transition->immediate) {
                 if (!location)

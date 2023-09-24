@@ -337,6 +337,7 @@ optional<distance> get_reference_location(bg_id bg, bool linked, bool check_pass
             d.max -= d_maxsafefront(it->first.position, it->first.locacc) - d_maxsafefront(solr->position, solr->locacc);
             d.est -= dist_base(0, 0) - it->first.position;
             d.min -= d_minsafefront(it->first.position, it->first.locacc) - d_minsafefront(solr->position, solr->locacc);
+            d.ref = dist_base(0, 0);
             d.relocated_c = true;
             if (!solr_ahead)
                 d.relocated_c_earlier = bg;
@@ -350,6 +351,8 @@ optional<distance> get_reference_location(bg_id bg, bool linked, bool check_pass
             d.min = d.max = d.est = it->first.position;
             if (!linked)
                 d.ref = d.est;
+            else
+                d.ref = dist_base(0, 0);
             return d;
         }
     }
