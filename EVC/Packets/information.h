@@ -50,7 +50,7 @@ struct issp_information : etcs_information
 };
 struct leveltr_order_information : etcs_information
 {
-    leveltr_order_information() : etcs_information(8, 10) {}
+    leveltr_order_information() : etcs_information(8, 10) {location_based=false;}
     void handle() override;
 };
 struct condleveltr_order_information : etcs_information
