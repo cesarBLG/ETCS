@@ -29,7 +29,7 @@ void log_message(std::shared_ptr<ETCS_message> msg, dist_base &dist, int64_t tim
     msg->write_to(b);
     std::string str = "Distance: " + std::to_string(dist.dist+odometer_reference) + "\t Time: " + std::to_string(time) + "\n";
     print_vars(str, b.log_entries);
-#if !SIMRAIL
+#ifdef DEBUG_TRACK_MESSAGES
     platform->debug_print(str);
 #endif
     logging_socket->broadcast(str);

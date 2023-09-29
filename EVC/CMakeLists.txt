@@ -19,6 +19,16 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 
 add_definitions(-DNO_THREADS)
 
+if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+    if (LINUX)
+    add_definitions(-D_GLIBCXX_DEBUG)
+    endif()
+    add_definitions(-DDEBUG_MSG_CONSISTENCY -DDEBUG_ODOMETER)
+    if (NOT SIMRAIL)
+        add_definitions(-DDEBUG_TRACK_MESSAGES)
+    endif()
+endif()
+
 if (RADIO_CFM)
     list (APPEND SOURCES Euroradio/tcp_cfm.cpp)
 endif()

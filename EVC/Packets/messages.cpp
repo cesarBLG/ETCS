@@ -143,14 +143,17 @@ void check_linking()
         bool c2 = (!isexpected || link_expected->max() < bg_referencemin.min) && link_expected->max() < d_minsafefront(confidence_data::basic())-L_antenna_front;
         bool c3 = linked && link_bg!=linking.end() && link_bg != link_expected;
         if (c1 || c2 || c3) {
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Balise read error: check_linking() c1=" + std::to_string(c1) + " c2=" + std::to_string(c2) + " c3=" + std::to_string(c3));
-        
+#endif
             if (c2 || c3)
                 rams_lost_count++;
             if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
                 trigger_reaction(1);
                 rams_lost_count = 0;
+#ifdef DEBUG_MSG_CONSISTENCY
                 platform->debug_print("RAMS supervision");
+#endif
             } else {
                 trigger_reaction(link_expected->reaction);
             }
@@ -188,7 +191,9 @@ void balise_group_passed()
         auto &l = *reading_bg_link;
         if (l.nid_bg == bg_id({reading_nid_c, reading_nid_bg})) {
             if (dir != -1 && dir != l.reverse_dir) {
+#ifdef DEBUG_MSG_CONSISTENCY
                 platform->debug_print("Balise error: group passed in wrong direction. Expected " + std::to_string(l.reverse_dir) + ", passed " + std::to_string(dir));
+#endif
                 trigger_condition(66);
             }
             rams_reposition_mitigation = {};
@@ -214,7 +219,9 @@ void balise_group_passed()
                 linking_rejected = false;
 #if BASELINE == 4
                 if (dir == -1 || dir == l.reverse_dir) {
+#ifdef DEBUG_MSG_CONSISTENCY
                     platform->debug_print("Linking error expecting repositioning information");
+#endif
                     trigger_reaction(l.reaction);
                 }
 #endif
@@ -492,7 +499,9 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
         if (reading_bg_link || (nid_bg >= 0 && link_expected != linking.end() && link_expected->min() < d_maxsafefront(confidence_data::basic()) - L_antenna_front && link_expected->max() > d_minsafefront(confidence_data::basic())-L_antenna_front)) {
             if (!reading_bg_link || (link_expected != linking.end() && reading_bg_link->nid_bg == link_expected->nid_bg))
                 expect_next_linking();
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Balise error. Linked BG not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2)+(reading_bg_link ? "" : ", unknown reference"));
+#endif
             trigger_reaction(reading_bg_link->reaction);
         } else {
             if (accepted2) {
@@ -509,7 +518,9 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
                     }
                 }
             }
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Balise error. Telegram not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2));
+#endif
             trigger_reaction(1);
         }
         return;
@@ -564,9 +575,6 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
             relocate();
             relocated = true;
             location = get_reference_location(infill ? *ordered_info.back()->infill : ordered_info.front()->nid_bg, true, !infill);
-            if (location && it != ordered_info.end() && !(*it)->fromRBC) {
-                platform->debug_print("Foo");
-            }
             // Distance part of level transition has to be handled after linking
             if (ongoing_transition && !ongoing_transition->ref_loc && !ongoing_transition->immediate) {
                 if (!location)
