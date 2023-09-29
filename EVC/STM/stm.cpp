@@ -206,6 +206,9 @@ void update_ntc_transitions()
                 continue;
             std::string type = t.happens(stm);
             if (type != "") {
+#ifdef DEBUG_STM
+                platform->debug_print("STM "+std::to_string(kvp.first)+": "+type)
+#endif
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
