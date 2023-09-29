@@ -285,8 +285,9 @@ void update_mode_status()
     for (mode_transition &t : available) {
         int i = t.happens();
         if (t.from == mode && i>=0 && t.priority < priority) {
-            if (t.to == Mode::TR)
-                platform->debug_print("TRIP " + std::to_string(i));
+#ifdef DEBUG_MODE
+            platform->debug_print("Mode transition: "+std::to_string(i));
+#endif
             transition = t.to;
             priority = t.priority;
             transition_index = i;

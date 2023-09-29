@@ -92,36 +92,6 @@ optional<std::pair<double, double>> get_linked_bg_location(bg_id nid_bg)
     }
     return {};
 }
-/*
-distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link)
-{
-    if (!linked) {
-        double offset = group_pos.get();
-        distance::update_unlinked_reference(offset);
-        return distance(0, group_pos.get_orientation(), offset);
-    } else if (link) {
-        double offset = link->dist.get();
-        reset_odometer(group_pos.get());
-        distance::update_distances(offset, group_pos.get());
-        group_pos = distance(0, group_pos.get_orientation(), 0);
-        lrbgs.push_back({nid_bg, link->reverse_dir, group_pos, link->locacc, false});
-        if (lrbgs.size() > 10) lrbgs.pop_front();
-        if (!pos_report_params || pos_report_params->LRBG)
-            position_report_reasons[9] = true;
-        save_train_position();
-        return group_pos;
-    } else {
-        double offset = group_pos.get();
-        reset_odometer(offset);
-        distance::update_distances(offset, offset);
-        lrbgs.push_back({nid_bg, dir, group_pos, Q_NVLOCACC, false});
-        if (lrbgs.size() > 10) lrbgs.pop_front();
-        if (!pos_report_params || pos_report_params->LRBG)
-            position_report_reasons[9] = true;
-        save_train_position();
-        return distance(0, group_pos.get_orientation(), 0);
-    }
-}*/
 void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir)
 {
 #if BASELINE < 4
@@ -234,22 +204,33 @@ void relocate()
         rbg.first.position -= offset;
     }
     reset_odometer(prev_dist.dist);
+    save_train_position();
     optional<std::pair<double,double>> link;
     if (prevsolr)
         link = get_linked_bg_location(prevsolr->nid_lrbg);
     if (link)
         link->first = -link->first;
-    std::string dbg = "Relocating at "+std::to_string(odometer_value)+"\n";
+#if DEBUG_ODOMETER
+    std::string dbg = "Relocating at "+std::to_string(odometer_value)+"\r\n";
     if (link)
-        dbg += "Linking: "+std::to_string(link->first)+"\n";
-    dbg += "Odo: "+std::to_string(offset);
-    platform->debug_print(dbg);
+        dbg += "Linking: "+std::to_string(link->first)+"\r\n";
+    dbg += "Odo: "+std::to_string(offset)+"\r\n";
+#endif
+    int reloc_odo=0;
+#if BASELINE == 4
+    int reloc_a=0;
+    int reloc_b=0;
+    int reloc_c=0;
+#else
+    int reloc_link=0;
+#endif
     for (distance *d = distance::begin; d != nullptr; d = d->next) {
         if (!d->balise_based) {
             d->min -= offset;
             d->est -= offset;
             d->max -= offset;
             d->ref -= offset;
+            ++reloc_odo;
             continue;
         }
 #if BASELINE == 4
@@ -259,6 +240,7 @@ void relocate()
             d->max -= link->first;
             d->relocated_c = false;
             d->relocated_c_earlier = {};
+            ++reloc_a;
         } else if (prevsolr) {
             bool rear = false;
             if (!d->relocated_c_earlier && link) {
@@ -267,6 +249,7 @@ void relocate()
                 d->max -= link->first + 2 * link->second;
                 d->relocated_c = false;
                 d->relocated_c_earlier = {};
+                ++reloc_b;
             } else {
                 d->max -= d_maxsafefront(prevsolr->position, prevsolr->locacc) - d_maxsafefront(solr->position, solr->locacc);
                 d->est -= offset;
@@ -282,6 +265,7 @@ void relocate()
                         }
                     }
                 }
+                ++reloc_c;
             }
         } else {
             abort();
@@ -291,15 +275,28 @@ void relocate()
             d->min -= link->first;
             d->est -= link->first;
             d->max -= link->first;
+            ++reloc_link;
         } else {
             d->min -= offset;
             d->est -= offset;
             d->max -= offset;
             if (d->ref.dist != 0)
                 d->ref -= offset;
+            ++reloc_odo;
         }
 #endif
     }
+#ifdef DEBUG_ODOMETER
+#if BASELINE == 4
+    debug += "Relocated a): "+reloc_a+"\r\n";
+    debug += "Relocated b): "+reloc_b+"\r\n";
+    debug += "Relocated c): "+reloc_c+"\r\n";
+#else
+    debug += "Relocated agains link: "+reloc_link+"\r\n";
+#endif
+    debug += "Relocated against odo: "+reloc_odo;
+    platform->debug_print(dbg);
+#endif
     relocate_linking();
     extern std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
     track_condition_targets.clear();

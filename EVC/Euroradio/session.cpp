@@ -83,13 +83,17 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
 {
     log_message(msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
+#ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Message rejected");
+#endif
         return;
     }
     int64_t timestamp = msg->T_TRAIN.get_value();
     if (timestamp <= last_valid_timestamp) {
         if (msg->NID_MESSAGE != 15 && msg->NID_MESSAGE != 16) {
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Message rejected: T_TRAIN < last_valid_timestamp");
+#endif
             return;
         }
     } else {

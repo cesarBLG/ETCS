@@ -41,6 +41,9 @@ void update_SoM()
             if (som_active) {
                 if (mode == Mode::SB && (cab_active[0]^cab_active[1]) && (!supervising_rbc || (supervising_rbc->status != session_status::Establishing && supervising_rbc->status != session_status::Established)))
                     som_status = S1;
+                for (auto *session : active_sessions) {
+                    session->close(); // Backported from baseline 4
+                }
                 active_dialog = dialog_sequence::StartUp;
                 active_dialog_step = "S0";
             }
