@@ -593,7 +593,10 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
         {
             if (from_buffer)
                 (*it)->reevaluated = true;
-            (*it)->ref = location;
+            if (location && !infill)
+                (*it)->ref = *location + (*it)->shift;
+            else
+                (*it)->ref = location;
             try_handle_information(*it, ordered_info);
             ++it;
             continue;
@@ -799,6 +802,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             info->dir = dir;
             info->fromRBC = session->isRBC ? session : nullptr;
             info->nid_bg = lrbg;
+            info->shift = shift;
             info->infill = {};
             info->timestamp = message->T_TRAIN.get_value();
             info->message = message;
@@ -845,6 +849,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             info[i]->dir = dir;
             info[i]->fromRBC = session->isRBC ? session : nullptr;
             info[i]->nid_bg = lrbg;
+            info[i]->shift = shift;
             info[i]->infill = infill;
             info[i]->timestamp = message->T_TRAIN.get_value()*10;
             info[i]->message = message;
