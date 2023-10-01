@@ -32,7 +32,7 @@ void update_lx()
     for (auto it=level_crossings.begin(); it!=level_crossings.end(); ) {
         if (!it->lx_protected) {
             if (it->svl_replaced && d_minsafefront(it->start) < it->start.min+it->length) inform_lx = true;
-            if (V_est == 0 && it->stop && d_estfront > it->start.est-it->stoplength) {
+            if (!it->svl_replaced && V_est == 0 && it->stop && d_estfront > it->start.est-it->stoplength) {
                 it->svl_replaced = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
                 calculate_SvL();
             }
