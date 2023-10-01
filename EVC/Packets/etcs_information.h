@@ -25,6 +25,7 @@ struct etcs_information
     communication_session *fromRBC;
     int dir;
     bg_id nid_bg;
+    double shift=0;
     int version;
     bool reevaluated = false;
     bool location_based = true;
