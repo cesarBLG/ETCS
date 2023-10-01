@@ -147,17 +147,11 @@ confidence_data confidence_data::basic()
 }
 dist_base d_maxsafe(const dist_base &d, const confidence_data &conf)
 {
-    if (d > conf.ref)
-        return conf.ref + (d-conf.ref)*1.01 + conf.locacc;
-    else
-        return conf.ref + (d-conf.ref)*0.99 + conf.locacc;
+    return d + std::abs(d-conf.ref)*0.01 + conf.locacc;
 }
 dist_base d_minsafe(const dist_base &d, const confidence_data &conf)
 {
-    if (d > conf.ref)
-        return conf.ref + (d-conf.ref)*0.99 - conf.locacc;
-    else
-        return conf.ref + (d-conf.ref)*1.01 - conf.locacc;
+    return d - std::abs(d-conf.ref)*0.01 + conf.locacc;
 }
 dist_base d_maxsafefront(const confidence_data &conf)
 {
