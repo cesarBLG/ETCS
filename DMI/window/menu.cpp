@@ -81,7 +81,7 @@ void menu::setLayout()
 {
     clearLayout();
     subwindow::setLayout();
-    for (int i=0; i<(softkeys ? (buttons.size() > 10 ? 8 : 9) : (buttons.size() > 14 ? 12 : 13)); i++)
+    for (int i=0; i<(softkeys ? (buttons.size() > 10 ? 9 : 10) : (buttons.size() > 14 ? 13 : 14)); i++)
     {
         int id = keypage*(softkeys ? 9 : 13)+i;
         if (id >= buttons.size()) break;
