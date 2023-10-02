@@ -79,7 +79,7 @@ distance distance::from_odometer(const dist_base &dist)
     distance d;
     d.balise_based = false;
     d.max = d.est = d.min = dist;
-    d.ref = d_estfront;
+    d.ref = dist.orientation == 0 ? d_estfront : d_estfront_dir[dist.orientation == -1];
     return d;
 }
 dist_base &dist_base::operator=(const dist_base &d)
@@ -147,11 +147,17 @@ confidence_data confidence_data::basic()
 }
 dist_base d_maxsafe(const dist_base &d, const confidence_data &conf)
 {
-    return d + std::abs(d-conf.ref)*0.01 + conf.locacc;
+    if (d > conf.ref)
+        return conf.ref + (d-conf.ref)*1.01 + conf.locacc;
+    else
+        return conf.ref + (d-conf.ref)*0.99 + conf.locacc;
 }
 dist_base d_minsafe(const dist_base &d, const confidence_data &conf)
 {
-    return d - std::abs(d-conf.ref)*0.01 + conf.locacc;
+    if (d > conf.ref)
+        return conf.ref + (d-conf.ref)*0.99 - conf.locacc;
+    else
+        return conf.ref + (d-conf.ref)*1.01 - conf.locacc;
 }
 dist_base d_maxsafefront(const confidence_data &conf)
 {
@@ -163,11 +169,11 @@ dist_base d_minsafefront(const confidence_data &conf)
 }
 dist_base d_maxsafefront(const distance&ref)
 {
-    return d_maxsafe(d_estfront, confidence_data::from_distance(ref));
+    return d_maxsafe(ref.est.orientation == 0 ? d_estfront : d_estfront_dir[ref.est.orientation == -1], confidence_data::from_distance(ref));
 }
 dist_base d_minsafefront(const distance&ref)
 {
-    return d_minsafe(d_estfront, confidence_data::from_distance(ref));
+    return d_minsafe(ref.est.orientation == 0 ? d_estfront : d_estfront_dir[ref.est.orientation == -1], confidence_data::from_distance(ref));
 }
 dist_base d_estfront(0,0);
 dist_base d_estfront_dir[2] = {dist_base(0,1),dist_base(0,-1)};
