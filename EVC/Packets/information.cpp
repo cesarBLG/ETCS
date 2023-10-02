@@ -276,6 +276,7 @@ void TSR_information::handle()
     TemporarySpeedRestriction t = *(TemporarySpeedRestriction*)linked_packets.front().get();
     distance start = *ref + t.D_TSR.get_value(t.Q_SCALE);
     speed_restriction p(t.V_TSR.get_value(), start, start+t.L_TSR.get_value(t.Q_SCALE), t.Q_FRONT==Q_FRONT_t::TrainLengthDelay);
+    p.is_tsr = true;
     TSR tsr = {(int)t.NID_TSR, t.NID_TSR != NID_TSR_t::NonRevocable, p};
     insert_TSR(tsr);
 }

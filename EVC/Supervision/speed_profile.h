@@ -16,6 +16,7 @@
 #include "../SSP/ssp.h"
 #include "fixed_values.h"
 #include "train_data.h"
+#include "../Version/version.h"
 void recalculate_MRSP();
 void recalculate_gradient();
 void delete_track_info();
@@ -48,18 +49,31 @@ public:
     distance start_distance;
     distance end_distance;
     bool compensate_train_length;
+    bool is_tsr=false;
     speed_restriction(double spd, distance start, distance end, bool compensate_trainlength) : speed(spd), start_distance(start), end_distance(end), compensate_train_length(compensate_trainlength) {}
     double get_speed() const { return speed; }
     confidenced_distance get_start() const
     {
+#if BASELINE == 4
+        if (VERSION_X(operated_version) < 3 && is_tsr)
+            return confidenced_distance(start_distance.est, confidence_data::from_distance(start_distance));
+#endif
         return confidenced_distance(start_distance.max, confidence_data::from_distance(start_distance));
     }
     confidenced_distance get_end() const
     {
+#if BASELINE == 4
+        if (VERSION_X(operated_version) < 3 && is_tsr)
+            return confidenced_distance(end_distance.est + compensate_train_length*L_TRAIN, confidence_data::from_distance(end_distance));
+#endif
         return confidenced_distance(end_distance.min + compensate_train_length*L_TRAIN, confidence_data::from_distance(end_distance));
     }
     confidenced_distance get_uncompensated_end() const
     {
+#if BASELINE == 4
+        if (VERSION_X(operated_version) < 3 && is_tsr)
+            return confidenced_distance(end_distance.est, confidence_data::from_distance(end_distance));
+#endif
         return confidenced_distance(end_distance.min, confidence_data::from_distance(end_distance));
     }
     bool is_compensated() const
