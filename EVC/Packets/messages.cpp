@@ -114,6 +114,7 @@ void check_linking()
     if (mode != Mode::FS && mode != Mode::OS && mode != Mode::LS && mode != Mode::AD && mode != Mode::SM) {
 #else
     if (mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) {
+#endif
         link_expected = linking.end();
         rams_lost_count = 0;
         rams_reposition_mitigation = {};
@@ -121,7 +122,6 @@ void check_linking()
         linking_available = false;
         return;
     }
-#endif
     if (!linking_available) {
         start_checking_linking();
         linking_available = true;
