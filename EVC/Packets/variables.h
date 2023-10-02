@@ -480,13 +480,14 @@ struct M_ERROR_t : ETCS_variable
         return rawdata < 9;
     }
 };
+#if BASELINE > 3
+namespace V2
+{
+#endif
 struct M_LEVEL_t : ETCS_variable
 {
     M_LEVEL_t() : ETCS_variable(3)
     {
-#if BASELINE == 4
-        invalid.insert(4);
-#endif
         invalid.insert(5);
         invalid.insert(6);
         invalid.insert(7);
@@ -502,8 +503,10 @@ struct M_LEVEL_t : ETCS_variable
                 return Level::N1;
             case 3:
                 return Level::N2;
-#if BASELINE < 4
             case 4:
+#if BASELINE == 4
+                return Level::N2;
+#else
                 return Level::N3;
 #endif
             default:
@@ -530,9 +533,6 @@ struct M_LEVEL_t : ETCS_variable
                 rawdata = 4;
                 break;
 #endif
-            default:
-                rawdata = 5;
-                break;
         }
     }
 };
@@ -542,17 +542,10 @@ struct M_LEVELTEXTDISPLAY_t : ETCS_variable
     static const uint32_t NTC=1;
     static const uint32_t N1=2;
     static const uint32_t N2=3;
-#if BASELINE < 4
     static const uint32_t N3=4;
     static const uint32_t NoLevelLimited=5;
-#else
-    static const uint32_t NoLevelLimited=4;
-#endif
     M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
     {
-#if BASELINE == 4
-        invalid.insert(5);
-#endif
         invalid.insert(6);
         invalid.insert(7);
     }
@@ -565,9 +558,11 @@ struct M_LEVELTEXTDISPLAY_t : ETCS_variable
                 return Level::N1;
             case N2:
                 return Level::N2;
-#if BASELINE < 4
             case N3:
+#if BASELINE < 4
                 return Level::N3;
+#else
+                return Level::N2;
 #endif
             case NTC:
                 return Level::NTC;
@@ -580,9 +575,6 @@ struct M_LEVELTR_t : ETCS_variable
 {
     M_LEVELTR_t() : ETCS_variable(3)
     {
-#if BASELINE == 4
-        invalid.insert(4);
-#endif
         invalid.insert(5);
         invalid.insert(6);
         invalid.insert(7);
@@ -598,15 +590,119 @@ struct M_LEVELTR_t : ETCS_variable
                 return Level::N1;
             case 3:
                 return Level::N2;
-#if BASELINE < 4
             case 4:
+#if BASELINE < 4
                 return Level::N3;
+#else
+                return Level::N2;
 #endif
             default:
                 return Level::N0;
         }
     }
 };
+#if BASELINE > 3
+}
+struct M_LEVEL_t : ETCS_variable
+{
+    M_LEVEL_t() : ETCS_variable(3)
+    {
+        invalid.insert(4);
+        invalid.insert(5);
+        invalid.insert(6);
+        invalid.insert(7);
+    }
+    Level get_level()
+    {
+        switch (rawdata) {
+            case 0:
+                return Level::N0;
+            case 1:
+                return Level::NTC;
+            case 2:
+                return Level::N1;
+            case 3:
+                return Level::N2;
+            default:
+                return Level::Unknown;
+        }
+    }
+    void set_value(Level lv)
+    {
+        switch(lv) {
+            case Level::N0:
+                rawdata = 0;
+                break;
+            case Level::NTC:
+                rawdata = 1;
+                break;
+            case Level::N1:
+                rawdata = 2;
+                break;
+            case Level::N2:
+                rawdata = 3;
+                break;
+            default:
+                rawdata = 5;
+                break;
+        }
+    }
+};
+struct M_LEVELTEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t N0=0;
+    static const uint32_t NTC=1;
+    static const uint32_t N1=2;
+    static const uint32_t N2=3;
+    static const uint32_t NoLevelLimited=4;
+    M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
+    {
+        invalid.insert(5);
+        invalid.insert(6);
+        invalid.insert(7);
+    }
+    Level get_value() const
+    {
+        switch (rawdata) {
+            case N0:
+                return Level::N0;
+            case N1:
+                return Level::N1;
+            case N2:
+                return Level::N2;
+            case NTC:
+                return Level::NTC;
+            default:
+                return Level::Unknown;
+        }
+    }
+};
+struct M_LEVELTR_t : ETCS_variable
+{
+    M_LEVELTR_t() : ETCS_variable(3)
+    {
+        invalid.insert(4);
+        invalid.insert(5);
+        invalid.insert(6);
+        invalid.insert(7);
+    }
+    Level get_level()
+    {
+        switch (rawdata) {
+            case 0:
+                return Level::N0;
+            case 1:
+                return Level::NTC;
+            case 2:
+                return Level::N1;
+            case 3:
+                return Level::N2;
+            default:
+                return Level::N0;
+        }
+    }
+};
+#endif
 struct M_LINEGAUGE_t : ETCS_variable
 {
     static const uint32_t BitG1 = 1;
@@ -658,6 +754,10 @@ struct M_MCOUNT_t : ETCS_variable
     static const uint32_t FitsAllTelegrams=255;
     M_MCOUNT_t() : ETCS_variable(8) {}
 };
+#if BASELINE > 3
+namespace V2
+{
+#endif
 struct M_MODE_t : ETCS_variable
 {
     static const uint32_t FS=0;
@@ -821,6 +921,188 @@ struct M_MODETEXTDISPLAY_t : ETCS_variable
         }
     }
 };
+#if BASELINE > 3
+}
+struct M_MODE_t : ETCS_variable
+{
+    static const uint32_t FS=0;
+    static const uint32_t OS=1;
+    static const uint32_t SR=2;
+    static const uint32_t SH=3;
+    static const uint32_t UN=4;
+    static const uint32_t SL=5;
+    static const uint32_t SB = 6;
+    static const uint32_t TR = 7;
+    static const uint32_t PT = 8;
+    static const uint32_t SF = 9;
+    static const uint32_t IS = 10;
+    static const uint32_t NL = 11;
+    static const uint32_t LS = 12;
+    static const uint32_t SN = 13;
+    static const uint32_t RV = 14;
+    static const uint32_t PS = 15;
+    static const uint32_t AD = 16;
+    static const uint32_t SM = 17;
+    M_MODE_t() : ETCS_variable(5) {}
+    void set_value(Mode m)
+    {
+        switch (m)
+        {
+            case Mode::FS:
+                rawdata = FS;
+                break;
+            case Mode::OS:
+                rawdata = OS;
+                break;
+            case Mode::SR:
+                rawdata = SR;
+                break;
+            case Mode::SH:
+                rawdata = SH;
+                break;
+            case Mode::UN:
+                rawdata = UN;
+                break;
+            case Mode::SL:
+                rawdata = SL;
+                break;
+            case Mode::SB:
+                rawdata = SB;
+                break;
+            case Mode::TR:
+                rawdata = TR;
+                break;
+            case Mode::PT:
+                rawdata = PT;
+                break;
+            case Mode::SF:
+                rawdata = SF;
+                break;
+            case Mode::IS:
+                rawdata = IS;
+                break;
+            case Mode::NL:
+                rawdata = NL;
+                break;
+            case Mode::LS:
+                rawdata = LS;
+                break;
+            case Mode::SN:
+                rawdata = SN;
+                break;
+            case Mode::RV:
+                rawdata = RV;
+                break;
+            case Mode::PS:
+                rawdata = PS;
+                break;
+            case Mode::AD:
+                rawdata = AD;
+                break;
+            case Mode::SM:
+                rawdata = SM;
+                break;
+            default:
+                rawdata = SF;
+                break;
+        } 
+    }
+    Mode get_value() const
+    {
+        switch (rawdata)
+        {
+            case FS:
+                return Mode::FS;
+            case OS:
+                return Mode::OS;
+            case SR:
+                return Mode::SR;
+            case SH:
+                return Mode::SH;
+            case UN:
+                return Mode::UN;
+            case SL:
+                return Mode::SL;
+            case SB:
+                return Mode::SB;
+            case TR:
+                return Mode::TR;
+            case PT:
+                return Mode::PT;
+            case SF:
+                return Mode::SF;
+            case IS:
+                return Mode::IS;
+            case NL:
+                return Mode::NL;
+            case LS:
+                return Mode::LS;
+            case SN:
+                return Mode::SN;
+            case RV:
+                return Mode::RV;
+            case PS:
+                return Mode::PS;
+            case AD:
+                return Mode::AD;
+            case SM:
+                return Mode::SM;
+            default:
+                return Mode::SF;
+        }
+    }
+};
+struct M_MODETEXTDISPLAY_t : ETCS_variable
+{
+    static const uint32_t FS=0;
+    static const uint32_t OS=1;
+    static const uint32_t SR=2;
+    static const uint32_t AD=3;
+    static const uint32_t UN=4;
+    static const uint32_t SM=5;
+    static const uint32_t SB = 6;
+    static const uint32_t TR = 7;
+    static const uint32_t PT = 8;
+    static const uint32_t LS = 12;
+    static const uint32_t RV = 14;
+    static const uint32_t NoModeLimited = 15;
+    M_MODETEXTDISPLAY_t() : ETCS_variable(4) 
+    {
+        invalid.insert(9);
+        invalid.insert(10);
+        invalid.insert(11);
+        invalid.insert(13);
+    }
+    Mode get_value() const
+    {
+        switch (rawdata)
+        {
+            case FS:
+                return Mode::FS;
+            case OS:
+                return Mode::OS;
+            case SR:
+                return Mode::SR;
+            case AD:
+                return Mode::AD;
+            case UN:
+                return Mode::UN;
+            case SM:
+                return Mode::SM;
+            case SB:
+                return Mode::SB;
+            case PT:
+                return Mode::PT;
+            case LS:
+                return Mode::LS;
+            case RV:
+                return Mode::RV;
+            default:
+                return Mode::TR;
+        }
+    }
+};
+#endif
 struct M_NVAVADH_t : ETCS_variable
 {
     M_NVAVADH_t() : ETCS_variable(5) {}
