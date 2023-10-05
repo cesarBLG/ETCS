@@ -23,6 +23,8 @@ void load_lx(LevelCrossingInformation lxi, distance ref)
             ++it;
         }
     }
+    if (lx.start.max < d_maxsafefront(lx.start))
+        lx.svl_replaced = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
     level_crossings.insert(lx);
     calculate_SvL();
 }
@@ -55,7 +57,7 @@ void update_lx()
                 bool c1 = tEoA->d_P < d_estfront;
                 bool c2 = tSvL->d_P < d_maxsafefront(tSvL->get_target_position());
                 if (c1 || c2) {
-                    it->svl_replaced = distance::from_odometer(c1 ? d_estfront : d_maxsafefront(tSvL->get_target_position()));
+                    it->svl_replaced = distance::from_odometer(c1 ? d_estfront_dir[odometer_orientation == -1] : d_maxsafefront(tSvL->get_target_position()));
                     calculate_SvL();
                 }
             }
