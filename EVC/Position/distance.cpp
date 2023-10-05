@@ -11,7 +11,6 @@
 #include "../Supervision/national_values.h"
 #include "linking.h"
 #include <limits>
-#define DISTANCE_COW
 distance *distance::begin = nullptr;
 distance *distance::end = nullptr;
 dist_base dist_base::max = dist_base(std::numeric_limits<double>::max(), 0);
