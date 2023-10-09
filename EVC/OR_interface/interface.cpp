@@ -24,6 +24,7 @@
 #include <orts/common.h>
 #include "platform_runtime.h"
 #include "orts_wrapper.h"
+#include "../language/language.h"
 
 //using namespace ORserver;
 
@@ -278,6 +279,12 @@ void SetParameters()
     p = new ORserver::Parameter("serie");
     p->SetValue = [](std::string val) {
         load_config(val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("language");
+    p->SetValue = [](std::string val) {
+        set_language(val);
     };
     manager.AddParameter(p);
 
