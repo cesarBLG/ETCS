@@ -59,7 +59,7 @@ float speedToAngle(float speed)
 void drawNeedle()
 {
     Color needleColor = Grey;
-    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT)
+    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT || mode == Mode::IS)
     {
         needleColor = Grey;
     }
