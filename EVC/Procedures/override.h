@@ -7,10 +7,10 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #pragma once
-#include "../optional.h"
+#include <optional>
 #include "../Position/distance.h"
 extern bool overrideProcedure;
-extern optional<distance> formerEoA;
+extern std::optional<distance> formerEoA;
 void start_override();
 void update_override();
 void override_stopsr();

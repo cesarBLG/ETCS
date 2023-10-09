@@ -206,6 +206,9 @@ void update_ntc_transitions()
                 continue;
             std::string type = t.happens(stm);
             if (type != "") {
+#ifdef DEBUG_STM
+                platform->debug_print("STM "+std::to_string(kvp.first)+": "+type)
+#endif
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
@@ -395,7 +398,7 @@ void send_failed_msg(stm_object *stm)
     text_message msg(get_ntc_name(stm->nid_stm) + get_text(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
     add_message(msg);
 }
-bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);
+bool mode_filter(std::shared_ptr<etcs_information> info, const std::list<std::shared_ptr<etcs_information>> &message);
 void request_STM_max_speed(stm_object *stm, double speed)
 {
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc != nid_ntc) {
@@ -405,7 +408,7 @@ void request_STM_max_speed(stm_object *stm, double speed)
                 if (speed == -1) {
                     STM_max_speed = {};
                 } else {
-                    STM_max_speed = speed_restriction(speed, ongoing_transition->start, distance(std::numeric_limits<double>::max(), 0, 0), false);
+                    STM_max_speed = speed_restriction(speed, ongoing_transition->ref_loc ? *ongoing_transition->ref_loc + ongoing_transition->dist : distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
                     STM_max_speed_ntc = ongoing_transition->leveldata.nid_ntc;
                 }
                 recalculate_MRSP();
@@ -420,12 +423,12 @@ void request_STM_max_speed(stm_object *stm, double speed)
 }
 void request_STM_system_speed(stm_object *stm, double speed, double dist)
 {
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && level != Level::NTC) {
+    if (ongoing_transition && !ongoing_transition->immediate && ongoing_transition->leveldata.level == Level::NTC && level != Level::NTC) {
         auto it = ntc_to_stm.find(ongoing_transition->leveldata.nid_ntc);
         if (stm->state == stm_state::HS && stm == get_stm(ongoing_transition->leveldata.nid_ntc)) {
             auto info = std::shared_ptr<etcs_information>(new etcs_information(9));
-            distance start = ongoing_transition->start - dist;
-            distance end = ongoing_transition->start;
+            distance start = *ongoing_transition->ref_loc + ongoing_transition->dist - dist;
+            distance end = *ongoing_transition->ref_loc + ongoing_transition->dist;
             info->handle_fun = [speed, start, end]() {
                 if (speed == -1)
                     STM_system_speed = {};

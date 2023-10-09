@@ -13,23 +13,18 @@
 #include "../monitor.h"
 #include "../control/control.h"
 #include "../state/acks.h"
-using namespace std;
-unordered_set<window*> active_windows;
-unordered_set<window*> old_windows;
+std::list<window*> active_windows;
 extern Mode mode;
 extern uint32_t evc_peer;
 void displayETCS()
 {
     updateAcks();
     if (!evc_peer) return;
-    for(auto it=active_windows.begin(); it!=active_windows.end(); ++it)
+    std::vector<std::vector<int>> alreadyDrawn;
+    for(auto it=active_windows.rbegin(); it!=active_windows.rend(); ++it)
     {
         window *w = *it;
-        if(w->active) w->display();
+        w->display(alreadyDrawn);
+        alreadyDrawn.insert(alreadyDrawn.end(), w->bounds.begin(), w->bounds.end());
     }
-    for(auto it=old_windows.begin(); it!=old_windows.end(); ++it)
-    {
-        delete *it;
-    }
-    old_windows.clear();
 }

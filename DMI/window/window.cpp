@@ -13,7 +13,7 @@
 #include "platform_runtime.h"
 bool isInside(Component *comp, float x, float y)
 {
-	if (componentAck != nullptr && comp != componentAck && comp != &ackButton) return false;
+	//if (componentAck != nullptr && comp != componentAck && comp != &ackButton) return false;
     return (comp->x-comp->touch_left)<x && (comp->x + comp->sx + comp->touch_right)>x
         && (comp->y-comp->touch_up)<y && (comp->y + comp->sy+comp->touch_down)>y;
 }
@@ -76,7 +76,7 @@ void window::event(int evNo, float x, float y)
         for(int i=0; i<el.size(); i++)
         {
             Component *comp = el[i].comp;
-			if (!comp->isSensitive())
+			if (!comp->isSensitive() || !comp->visible)
 				continue;
 			if (comp->isButton) ((Button*)comp)->pressed = false;
 			if (isInside(comp, x, y) && (!comp->isButton || ((Button*)comp)->enabled))
@@ -98,11 +98,15 @@ void window::event(int evNo, float x, float y)
 	}
 	if (validButtonPressed!=nullptr) validButtonPressed->setPressed();
 }
-void window::display()
+void window::display(std::vector<std::vector<int>> &alreadyDrawn)
 {
-    l->update();
+    l->update(alreadyDrawn);
 }
 window::~window()
 {
     delete l;
+}
+void window::updateLayout()
+{
+	l->updateLocations();
 }

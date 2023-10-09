@@ -30,11 +30,11 @@
 using std::string;
 extern double V_est;
 double V_set;
-extern distance d_estfront;
 extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
 double or_dist;
+int ack_button_light;
 int TimeOffset::offset;
 ORserver::ParameterManager manager;
 
@@ -120,7 +120,7 @@ void SetParameters()
         }
         bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,{distance(odometer_value-odometer_reference, odometer_orientation, 0), get_milliseconds()}});
+        pending_telegrams.push_back({t,{distance::from_odometer(dist_base(odometer_value-odometer_reference, odometer_orientation)), get_milliseconds()}});
     };
     manager.AddParameter(p);
 
@@ -163,26 +163,6 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::lower_pantographs");
     p->GetValue = []() {
         return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
-    };
-    manager.AddParameter(p);
-
-    p = new ORserver::Parameter("etcs::atf");
-    p->GetValue = []() {
-        if (mode != Mode::FS) return std::string("-1");
-        extern MonitoringStatus monitoring;
-        std::shared_ptr<target> t = (monitoring == CSM) ? indication_target : MRDT;
-        if (t != nullptr) {
-            //t->calculate_curves();
-            double speed = t->get_target_speed();
-            double dist;
-            if (t->type == target_class::EoA || t->type == target_class::SvL)
-                dist = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
-            else
-                dist = std::max(t->get_target_position()-d_maxsafefront(t->get_target_position()), 0.0);//std::max(t->d_P-d_maxsafefront(t->get_target_position()), 0.0);*/
-            float atf = std::max(speed, std::min(sqrt(2*0.4f*(dist-V_est*10-10) + speed * speed)-3/3.6, V_perm));
-            return std::to_string(atf);
-        }
-        else return std::to_string(V_perm);
     };
     manager.AddParameter(p);
 
@@ -280,6 +260,7 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    // TODO: directly connect to DMI instead of forwarding button state
     p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
@@ -289,6 +270,12 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::button::ack");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::button::ack::light");
+    p->GetValue = []() {
+        return std::to_string(ack_button_light);
     };
     manager.AddParameter(p);
 

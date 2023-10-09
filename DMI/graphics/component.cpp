@@ -81,7 +81,7 @@ void Component::drawLine(float x1, float y1, float x2, float y2, Color c)
 }
 void Component::paint()
 {
-    bool show = true;;
+    bool show = true;
     if (flash_style != 0)
     {
         bool fast = flash_style & 1;

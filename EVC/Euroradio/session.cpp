@@ -29,7 +29,7 @@ bool handover_report_min = false;
 bool handover_report_max = false;
 distance rbc_transition_position;
 safe_radio_status radio_status_driver;
-std::map<contact_info, communication_session*> active_sessions;
+std::set<communication_session*> active_sessions;
 bool radio_hole = false;
 void communication_session::open(int ntries)
 {
@@ -44,9 +44,9 @@ void communication_session::open(int ntries)
     status = session_status::Establishing;
     radio_status = safe_radio_status::Disconnected;
     connection = nullptr;
-    for (auto it : active_sessions) {
-        if (it.second != this && it.second != accepting_rbc && it.second != handing_over_rbc && it.second != supervising_rbc)
-            it.second->close();
+    for (auto *session : active_sessions) {
+        if (session != this && session != accepting_rbc && session != handing_over_rbc && session != supervising_rbc)
+            session->close();
     }
     last_active = get_milliseconds();
     connection_timer = true;
@@ -85,13 +85,17 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
 
     log_message(msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
+#ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Message rejected");
+#endif
         return;
     }
     int64_t timestamp = msg->T_TRAIN.get_value();
     if (timestamp <= last_valid_timestamp) {
         if (msg->NID_MESSAGE != 15 && msg->NID_MESSAGE != 16) {
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Message rejected: T_TRAIN < last_valid_timestamp");
+#endif
             return;
         }
     } else {
@@ -150,9 +154,7 @@ void communication_session::update_ack()
                 if (msg.message->NID_MESSAGE == 155 || msg.message->NID_MESSAGE == 156) {
                     finalize();
                 } else {
-#if !SIMRAIL
                     close();
-#endif
                 }
                 break;
             } else {
@@ -332,11 +334,11 @@ void update_euroradio()
 {
     update_cfm();
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {
-        if (it->second->status == session_status::Inactive && it->second != supervising_rbc && it->second != accepting_rbc && it->second != handing_over_rbc) {
-            delete it->second;
+        if ((*it)->status == session_status::Inactive && *it != supervising_rbc && *it != accepting_rbc && *it != handing_over_rbc) {
+            delete *it;
             it = active_sessions.erase(it);
         } else {
-            it->second->update();
+            (*it)->update();
             ++it;
         }
     }
@@ -346,7 +348,7 @@ void update_euroradio()
     }
     if (handing_over_rbc && handing_over_rbc->status == session_status::Inactive)
         handing_over_rbc = nullptr;
-    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position) {
+    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position.max) {
         if (!handover_report_accepting && accepting_rbc->status == session_status::Established) {
             handover_report_accepting = true;
             handover_report_max = true;
@@ -368,7 +370,7 @@ void update_euroradio()
         if (handing_over_rbc && handing_over_rbc->status == session_status::Establishing)
             handing_over_rbc->finalize();
     }
-    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position && !handover_report_min) {
+    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position.min && !handover_report_min) {
         position_report_reasons[4] = true;
         handover_report_min = true;
     }
@@ -398,7 +400,7 @@ void update_euroradio()
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         auto *tc = it->get();
         if (tc->condition == TrackConditions::RadioHole) {
-            if (tc->start < d_maxsafefront(tc->start) && tc->end > d_minsafefront(tc->start) - L_TRAIN)
+            if (tc->start.max < d_maxsafefront(tc->start) && tc->end.min > d_minsafefront(tc->start) - L_TRAIN)
                 radio_hole = true;
         }
     }
@@ -435,9 +437,9 @@ void update_euroradio()
         radio_reaction_reconnected = false;
     }
     if (prev_radio_hole && !radio_hole) {
-        for (auto &kvp : active_sessions) {
-            if (kvp.second->status == session_status::Inactive)
-                kvp.second->open(0);
+        for (auto *session : active_sessions) {
+            if (session->status == session_status::Inactive)
+                session->open(0);
         }
     }
     if (supervising_rbc && supervising_rbc->status == session_status::Established && (level == Level::N2 || level == Level::N3))
@@ -489,12 +491,14 @@ void set_supervising_rbc(contact_info info)
     if (supervising_rbc && supervising_rbc->contact == info)
         return;
     set_rbc_contact(info);
-    if (active_sessions.find(info) != active_sessions.end()) {
-        supervising_rbc = active_sessions[info];
-    } else {
-        supervising_rbc = new communication_session(info, true);
-        active_sessions[info] = supervising_rbc;
+    for (auto *session : active_sessions) {
+        if (session->contact.country == info.country && session->contact.id == info.id) {
+            supervising_rbc = session;
+            return;
+        }
     }
+    supervising_rbc = new communication_session(info, true);
+    active_sessions.insert(supervising_rbc);
 }
 void rbc_handover(distance d, contact_info newrbc)
 {
@@ -502,13 +506,17 @@ void rbc_handover(distance d, contact_info newrbc)
     handover_report_accepting = handover_report_max = handover_report_min = false;
     if (supervising_rbc && supervising_rbc->contact == newrbc)
         return;
+    if (accepting_rbc && accepting_rbc->contact == newrbc) {
+        accepting_rbc->open(0);
+        return;
+    }
     if (accepting_rbc && accepting_rbc->contact != newrbc)
         accepting_rbc->close();
     if (handing_over_rbc && handing_over_rbc != supervising_rbc)
         handing_over_rbc->close();
     handing_over_rbc = supervising_rbc;
     accepting_rbc = new communication_session(newrbc, true);
-    active_sessions[newrbc] = accepting_rbc;
+    active_sessions.insert(accepting_rbc);
     accepting_rbc->open(0);
 }
 void terminate_session(contact_info info)
@@ -519,18 +527,18 @@ void terminate_session(contact_info info)
         else
             return;
     }
-    for (auto &it : active_sessions) {
+    for (auto *session : active_sessions) {
 #if SIMRAIL
-        if ((it.first.country == info.country && it.first.id == info.id) || active_sessions.size() == 1) {
+        if ((session->contact.country == info.country && session->contact.id == info.id) || active_sessions.size() == 1) {
 #else
-        if (it.first.country == info.country && it.first.id == info.id) {
+        if (session->contact.country == info.country && session->contact.id == info.id) {
 #endif
-            it.second->close();
-            if (it.second == supervising_rbc)
+            session->close();
+            if (session == supervising_rbc)
                 supervising_rbc = nullptr;
-            if (it.second == handing_over_rbc)
+            if (session == handing_over_rbc)
                 handing_over_rbc = nullptr;
-            if (it.second == accepting_rbc)
+            if (session == accepting_rbc)
                 accepting_rbc = handing_over_rbc = nullptr;
         }
     }

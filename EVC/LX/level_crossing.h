@@ -37,7 +37,7 @@ class level_crossing
     }
     bool operator<(const level_crossing l) const
     {
-        return start<l.start;
+        return start.max<l.start.max;
     }
 };
 extern std::set<level_crossing> level_crossings;

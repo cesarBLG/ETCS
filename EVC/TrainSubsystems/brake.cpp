@@ -46,10 +46,11 @@ void trigger_brake_reason(int reason)
         extern bool rollaway_applied;
         extern bool rmp_applied;
         extern bool pt_applied;
-        text_message msg(get_text("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied;});
+        extern bool traindata_applied;
+        text_message msg(get_text("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
-            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied) {
+            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied) {
                 brake_acknowledgeable = false;
                 return true;
             }
@@ -127,7 +128,8 @@ void handle_brake_command()
             }
         }
     }
-    if ((prevEB || prevSB) && !EB_command && !SB_command) send_command("playSinfo","");
+    extern bool any_button_pressed;
+    if ((prevEB || prevSB) && !EB_command && !SB_command && !any_button_pressed) send_command("playSinfo","");
     prevEB = EB_command;
     prevSB = SB_command;
 }

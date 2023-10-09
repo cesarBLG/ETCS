@@ -17,11 +17,12 @@ class window
     Layout *l;
     std::function<void(window*)> constructfun;
     public:
-    bool active = true;
+    std::vector<std::vector<int>> bounds;
     Component *pressedButton = nullptr;
     window(std::function<void(window*)> constructfun = nullptr) : constructfun(constructfun)
     {
         l = new Layout();
+        bounds = {{0, 0, 640, 480}};
     }
     virtual ~window();
     std::vector<LayoutElement>& getLayoutElements()
@@ -38,7 +39,7 @@ class window
     }
     void bringFront(Component *comp)
     {
-        l->order.push_back(comp);
+        l->bringFront(comp);
     }
     void clearLayout()
     {
@@ -49,7 +50,8 @@ class window
         clearLayout();
         if(constructfun != nullptr) constructfun(this);
     }
-    void display();
+    void display(std::vector<std::vector<int>> &alreadyDrawn);
     void event(int evNo, float x, float y);
+    void updateLayout();
 };
 #endif

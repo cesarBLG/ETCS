@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "../graphics/component.h"
+#include "../graphics/flash.h"
 #include "../monitor.h"
 #include "../tcp/server.h"
 #include "../sound/sound.h"
@@ -27,11 +28,13 @@ Component ackButton(40, 82);
 extern Component c9;
 extern Component textArea;
 bool prevAck = false;
+bool ackAllowed;
 int prevlevel = 0;
 bool level_announce = false;
 AckType AllowedAck = AckType::None;
 Component *componentAck;
 list<pair<AckType, int>> pendingAcks;
+int ackButtonLight=0;
 void dispAcks()
 {
     if (modeAck == prevAck && prevlevel == levelAck) return;
@@ -95,9 +98,11 @@ void dispAcks()
             case Level::N2:
                 num=4;
                 break;
+#if BASELINE < 4
             case Level::N3:
                 num=5;
                 break;
+#endif
         }
         num = 4 + 2*num;
         if(levelAck == 2) num++;
@@ -118,7 +123,7 @@ int64_t get_milliseconds()
 int64_t lastAck;
 void updateAcks()
 {
-    if (AllowedAck == AckType::None && lastAck + 1000 < get_milliseconds() && !pendingAcks.empty())
+    if (AllowedAck == AckType::None && lastAck + 1000 < get_milliseconds() && !pendingAcks.empty() && ackAllowed)
     {
         AckType type = pendingAcks.front().first;
         switch (type)
@@ -153,6 +158,7 @@ void updateAcks()
             ackButton.addImage("symbols/Driver Request/DR_04.bmp");
         }
     }
+    if (!ackAllowed) AllowedAck = AckType::None;
     if (level_announce)
     {
         if (AllowedAck != AckType::Mode && AllowedAck != AckType::Level)
@@ -167,6 +173,13 @@ void updateAcks()
         ackButton.clear();
         ackButton.setAck(nullptr);
         componentAck = nullptr;
+    }
+    int light = 0;
+    if (AllowedAck != AckType::None) light = (flash_state & 2) ? 2 : 1;
+    if (light != ackButtonLight)
+    {
+        ackButtonLight = light;
+        write_command("ackButtonLight", std::to_string(ackButtonLight));
     }
 }
 void setAck(AckType type, int id, bool ack)

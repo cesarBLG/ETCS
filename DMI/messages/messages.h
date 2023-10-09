@@ -62,5 +62,6 @@ struct Message
 };
 void addMsg(Message m);
 void revokeMessage(unsigned int id);
+void revokeMessages();
 void displayMessages();
 void updateMessages();

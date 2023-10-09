@@ -53,11 +53,11 @@ class Layout
     std::vector<LayoutElement> elements;
     public:
     ~Layout();
-    std::vector<Component*> order;
     void add(Component *comp, ComponentAlignment *alignment);
+    void bringFront(Component *comp);
     void remove(Component *comp);
     void removeAll();
-    void update();
+    void update(std::vector<std::vector<int>> &alreadyDrawn);
     void updateLocations();
     std::vector<LayoutElement>& getElements();
 };

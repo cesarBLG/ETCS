@@ -51,7 +51,7 @@ void update_messages()
             continue;
         } else if (!it->shown && it->start_condition(*it)) {
             it->shown = true;
-            it->first_distance = d_estfront_dir[odometer_orientation == -1];
+            it->first_distance = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
             send(*it);
             it->first_displayed = get_milliseconds();
         }
@@ -65,7 +65,7 @@ void add_message(PlainTextMessage m, distance ref)
         bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
         std::vector<bool> conds;
         if (m.D_TEXTDISPLAY != D_TEXTDISPLAY_t::NotDistanceLimited)
-            conds.push_back(d_estfront>ref+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY1!=M_MODETEXTDISPLAY_t::NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
         if (m.M_LEVELTEXTDISPLAY1!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
@@ -83,7 +83,7 @@ void add_message(PlainTextMessage m, distance ref)
         bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
         std::vector<bool> conds;
         if (m.L_TEXTDISPLAY != L_TEXTDISPLAY_t::NotDistanceLimited)
-            conds.push_back(t.shown && d_estfront>t.first_distance+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(t.shown && d_estfront>t.first_distance.est+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY2!=M_MODETEXTDISPLAY_t::NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY2.get_value());
         if (m.M_LEVELTEXTDISPLAY2!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
@@ -121,7 +121,7 @@ void add_message(FixedTextMessage m, distance ref)
         bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
         std::vector<bool> conds;
         if (m.D_TEXTDISPLAY != D_TEXTDISPLAY_t::NotDistanceLimited)
-            conds.push_back(d_estfront>ref+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY1!=M_MODETEXTDISPLAY_t::NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
         if (m.M_LEVELTEXTDISPLAY1!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
@@ -139,7 +139,7 @@ void add_message(FixedTextMessage m, distance ref)
         bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
         std::vector<bool> conds;
         if (m.L_TEXTDISPLAY != L_TEXTDISPLAY_t::NotDistanceLimited)
-            conds.push_back(t.shown && d_estfront>t.first_distance+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(t.shown && d_estfront>t.first_distance.est+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY2!=M_MODETEXTDISPLAY_t::NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY2.get_value());
         if (m.M_LEVELTEXTDISPLAY2!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)

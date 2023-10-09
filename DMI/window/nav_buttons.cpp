@@ -46,7 +46,7 @@ void configbut_pressed()
     write_command("navButton","settings");
     //right_menu(new menu_settings());
 }
-void construct_nav(window *w)
+void construct_nav(window *w, bool custom)
 {
     main_button = TextButton(get_text_context("Navigation bar", "Main"), softkeys ? 64 : 60, 50, mainbut_pressed);
     override_button = TextButton(get_text_context("Navigation bar", "Over-\nride"), softkeys ? 64 : 60, 50, overridebut_pressed);
@@ -70,20 +70,24 @@ void construct_nav(window *w)
         w->addToLayout(&config_button, new ConsecutiveAlignment(&special_button,DOWN,0));
     }
     w->addToLayout(&time_hour, new RelativeAlignment(nullptr,517,softkeys ? 400 : 415));
-    w->addToLayout(&gps_pos, new ConsecutiveAlignment(&time_hour, LEFT));
-    if (softkeys)
+    if (!custom)
     {
-        w->addToLayout(&gpsButton, new RelativeAlignment(nullptr, 448, 430, 0));
-        extern IconButton softUpArrow;
-        extern IconButton softDownArrow;
-        extern Component ackButton;
-        extern IconButton softzoomin;
-        extern IconButton softzoomout;
-        w->addToLayout(&softzoomout, new ConsecutiveAlignment(&gpsButton, RIGHT, 0));
-        w->addToLayout(&softzoomin, new ConsecutiveAlignment(&softzoomout, RIGHT, 0));
-        w->addToLayout(&softUpArrow, new RelativeAlignment(nullptr, 600, 220, 0));
-        w->addToLayout(&softDownArrow, new ConsecutiveAlignment(&softUpArrow, DOWN, 0));
-        w->addToLayout(&ackButton, new ConsecutiveAlignment(&softDownArrow, DOWN, 0));
+        w->addToLayout(&gps_pos, new ConsecutiveAlignment(&time_hour, LEFT));
+        if (softkeys)
+        {
+            w->addToLayout(&gpsButton, new RelativeAlignment(nullptr, 448, 430, 0));
+            extern IconButton softUpArrow;
+            extern IconButton softDownArrow;
+            extern Component ackButton;
+            extern IconButton softzoomin;
+            extern IconButton softzoomout;
+            extern IconButton togglingButton;
+            w->addToLayout(&togglingButton, new ConsecutiveAlignment(&gpsButton, LEFT, 0));
+            w->addToLayout(&softzoomout, new ConsecutiveAlignment(&gpsButton, RIGHT, 0));
+            w->addToLayout(&softzoomin, new ConsecutiveAlignment(&softzoomout, RIGHT, 0));
+            w->addToLayout(&softUpArrow, new RelativeAlignment(nullptr, 600, 220, 0));
+            w->addToLayout(&softDownArrow, new ConsecutiveAlignment(&softUpArrow, DOWN, 0));
+            w->addToLayout(&ackButton, new ConsecutiveAlignment(&softDownArrow, DOWN, 0));
+        }
     }
 }
-window navigation_bar(construct_nav);

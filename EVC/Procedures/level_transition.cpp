@@ -109,7 +109,7 @@ void perform_transition()
     level_transition_information lti = *ongoing_transition;
     stm_level_change({lti.leveldata.level, lti.leveldata.nid_ntc}, false);
     if (level == Level::N2 || level == Level::N3)
-        transition_border = lti.start;
+        transition_border = lti.ref_loc ? *lti.ref_loc : distance::from_odometer(d_estfront);
     else
         transition_border = {};
     ongoing_transition = {};
@@ -123,11 +123,8 @@ void perform_transition()
         nid_ntc = lti.leveldata.nid_ntc;
     else
         nid_ntc = -1;
-    for (auto it=transition_buffer.begin(); it!=transition_buffer.end(); ++it) {
-        for (auto it2 = it->begin(); it2!=it->end(); ++it2) {
-            it2->get()->reevaluated = true;
-            try_handle_information(*it2, *it);
-        }
+    for (auto &msg : transition_buffer) {
+        handle_information_set(msg, true);
     }
     transition_buffer.clear();
     if (level_acknowledgeable && !level_acknowledged) {
@@ -152,9 +149,9 @@ void perform_transition()
             }
         }
         if (!supported) {
-            for (auto &kvp : active_sessions) {
-                if (kvp.second->status == session_status::Establishing)
-                    kvp.second->finalize();
+            for (auto *session : active_sessions) {
+                if (session->status == session_status::Establishing)
+                    session->finalize();
             }
         }
     }
@@ -170,7 +167,7 @@ void update_level_status()
             return false;
         }});
     }
-    if (transition_border && d_minsafefront(*transition_border)-L_TRAIN > *transition_border && (level != Level::N2 && level != Level::N3)) {
+    if (transition_border && d_minsafefront(*transition_border)-L_TRAIN > transition_border->min && (level != Level::N2 && level != Level::N3)) {
         position_report_reasons[5] = true;
         transition_border = {};
     }
@@ -182,11 +179,11 @@ void update_level_status()
         perform_transition();
     }
     if (!ongoing_transition) return;
-    if (ongoing_transition->immediate || ongoing_transition->start<=d_estfront)
+    if (ongoing_transition->immediate || (ongoing_transition->ref_loc->est + ongoing_transition->dist <= d_estfront))
         perform_transition();
     else if (mode != Mode::SB && 
     (level_to_ack == Level::NTC || level == Level::NTC || level_to_ack == Level::N0) && 
-    ongoing_transition->leveldata.startack < d_maxsafefront(ongoing_transition->leveldata.startack) && !level_acknowledged) {
+    (!ongoing_transition->ref_loc || ongoing_transition->ref_loc->max + ongoing_transition->dist - ongoing_transition->leveldata.acklength < d_maxsafefront(*ongoing_transition->ref_loc)) && !level_acknowledged) {
         level_acknowledgeable = true;
     }
 }
@@ -225,33 +222,31 @@ void level_transition_received(level_transition_information info)
     level_to_ack = ongoing_transition->leveldata.level;
     ntc_to_ack = ongoing_transition->leveldata.nid_ntc;
 }
-level_transition_information::level_transition_information(LevelTransitionOrder o, distance ref)
+level_transition_information::level_transition_information(LevelTransitionOrder o)
 {
     if (o.D_LEVELTR == D_LEVELTR_t::Now) {
         immediate = true;
-        start = ref;
     } else {
         immediate = false;
-        start = ref+o.D_LEVELTR.get_value(o.Q_SCALE);
+        dist = o.D_LEVELTR.get_value(o.Q_SCALE);
     }
     std::vector<target_level_information> priorities;
-    priorities.push_back({start-o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level(),(int)o.element.NID_NTC});
+    priorities.push_back({o.element.L_ACKLEVELTR.get_value(o.Q_SCALE), o.element.M_LEVELTR.get_level(),(int)o.element.NID_NTC});
     for (int i=0; i<o.elements.size(); i++) {
-        priorities.push_back({start-o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
+        priorities.push_back({o.elements[i].L_ACKLEVELTR.get_value(o.Q_SCALE), o.elements[i].M_LEVELTR.get_level(),  (int)o.elements[i].NID_NTC});
     }
     for (int i=0; i<priorities.size(); i++) {
         priority_table.push_back({priorities[i].level, priorities[i].nid_ntc});
     }
     set_leveldata(priorities);
 }
-level_transition_information::level_transition_information(ConditionalLevelTransitionOrder o, distance ref)
+level_transition_information::level_transition_information(ConditionalLevelTransitionOrder o)
 {
     immediate = true;
-    start = ref;
     std::vector<target_level_information> priorities;
-    priorities.push_back({start, o.element.M_LEVELTR.get_level(), (int)o.element.NID_NTC});
+    priorities.push_back({0, o.element.M_LEVELTR.get_level(), (int)o.element.NID_NTC});
     for (int i=0; i<o.elements.size(); i++) {
-        priorities.push_back({start, o.elements[i].M_LEVELTR.get_level(), (int)o.elements[i].NID_NTC});
+        priorities.push_back({0, o.elements[i].M_LEVELTR.get_level(), (int)o.elements[i].NID_NTC});
     }
     for (int i=0; i<priorities.size(); i++) {
         if (priorities[i].level == level && (level != Level::NTC || priorities[i].nid_ntc == nid_ntc)) {
