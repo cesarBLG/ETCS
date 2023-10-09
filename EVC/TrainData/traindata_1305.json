@@ -23,12 +23,12 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.73},
-						{"speed": 13.8889, "value": 0.72},
-						{"speed": 27.7778, "value": 0.71},
-						{"speed": 41.6667, "value": 0.63},
-						{"speed": 55.5556, "value": 0.55},
-						{"speed": 69.4444, "value": 0.45}
+                        {"speed": 0, "value": 0.83},
+						{"speed": 13.8889, "value": 0.82},
+						{"speed": 27.7778, "value": 0.81},
+						{"speed": 41.6667, "value": 0.73},
+						{"speed": 55.5556, "value": 0.65},
+						{"speed": 69.4444, "value": 0.55}
 
                     ],
                     "build_up_time": 0.5,
