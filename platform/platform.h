@@ -131,6 +131,7 @@ public:
 	virtual std::unique_ptr<Font> load_font(float size, bool bold) = 0;
 	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
+	virtual void clearFontCache() = 0;
 
 	virtual void set_volume(int vol) = 0;
 	virtual int get_volume() = 0;
