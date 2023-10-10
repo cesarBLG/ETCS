@@ -400,6 +400,7 @@ void start_or_iface()
     register_parameter("etcs::failed");
     register_parameter("gsmr::active");
     register_parameter("serie");
+    register_parameter("language");
 }
 
 void update_or_iface()
