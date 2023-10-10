@@ -143,7 +143,7 @@ SdlPlatform::~SdlPlatform() {
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
 	SDL_CloseAudioDevice(audio_device);
-	clearFontCache();
+	clear_font_cache();
 	TTF_Quit();
 	SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
@@ -445,7 +445,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 	return img;
 }
 
-void SdlPlatform::clearFontCache() {
+void SdlPlatform::clear_font_cache() {
 	loaded_fonts.clear();
 }
 

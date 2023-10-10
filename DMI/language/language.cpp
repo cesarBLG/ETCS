@@ -24,7 +24,7 @@ std::string get_text_context(std::string context, std::string id)
 }
 void set_language(std::string lang)
 {
-    platform->clearFontCache();
+    platform->clear_font_cache();
     if (lang == "en" || lang == "") {
         language = "en";
     } else {

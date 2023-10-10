@@ -105,6 +105,7 @@ public:
 	std::unique_ptr<Font> load_font(float size, bool bold) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
 	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
+	void clear_font_cache() override;
 
 	void set_volume(int vol) override;
 	int get_volume() override;
