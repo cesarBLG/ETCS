@@ -125,7 +125,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	desired.userdata = this;
 	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	audio_samplerate = obtained.freq;
-	audio_volume = 50;
+	audio_volume = 100;
 	SDL_PauseAudioDevice(audio_device, 0);
 
 	running = true;
