@@ -44,9 +44,8 @@ brightness_window::brightness_window() : input_window(get_text("Brightness"), 1,
     keys[0]->upType = false;
     keys[2]->upType = false;
     inputs[0]->keybd = k;
-    exit_button.setPressedAction([this, br_orig]
+    exit_button.setPressedAction([this]
     {
-        platform->set_brightness(br_orig);
         write_command("json",R"({"DriverSelection":"CloseWindow"})");
     });
     create();
