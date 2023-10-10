@@ -12,7 +12,6 @@
 #include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "../EVC/language/language.h"
 #include "../DMI/language/language.h"
 
 int main(int argc, char *argv[])
