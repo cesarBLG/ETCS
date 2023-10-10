@@ -228,6 +228,9 @@ std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_i
 	return nullptr;
 }
 
+void SimrailUiPlatform::clear_font_cache() {
+}
+
 void SimrailUiPlatform::set_volume(int vol) {
 }
 
