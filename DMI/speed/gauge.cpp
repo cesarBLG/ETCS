@@ -18,6 +18,8 @@
 #include "platform_runtime.h"
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
+#define MPH 0.621371192
+extern bool useImperialSystem;
 int etcsDialMaxSpeed = 400;
 int maxSpeed;
 const float ang00 = -239*PI/180.0;
@@ -31,6 +33,7 @@ Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
+texture * mphIndicator;
 
 #if SIMRAIL
 float speedToAngle(float speed)
@@ -102,7 +105,7 @@ void drawNeedle()
             //spd_nums[i]->load();
         }
     }
-    int spd = Vest;
+    int spd = useImperialSystem ? Vest * MPH : Vest;
     spd = Vest-spd > 0.01 ? spd + 1 : spd;
     int c[3] = {spd/100%10, spd/10%10, (spd%10)};
     bool firstPrint = false;
@@ -132,6 +135,24 @@ void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 void drawGauge(float minspeed, float maxspeed, Color color)
 {
     drawGauge(minspeed,maxspeed,color,128);
+}
+void drawImperialIndicator()
+{
+    if (!useImperialSystem)
+        return;
+
+    if (mphIndicator == NULL) {
+        string s = "MPH";
+        std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false);
+        std::pair<float, float> wh = mphFont->calc_size(s);
+        mphIndicator = new texture();
+        mphIndicator->x = 140;
+        mphIndicator->y = 230;
+        mphIndicator->width = wh.first;
+        mphIndicator->height = wh.second;
+        mphIndicator->tex = platform->make_text_image("MPH", *mphFont, White);
+    }
+    csg.add(mphIndicator);
 }
 void drawSetSpeed()
 {
@@ -326,6 +347,7 @@ void displayGauge()
     displayCSG();
     drawNeedle();
     drawSetSpeed();
+    drawImperialIndicator();
 }
 bool ttiShown = false;
 const float TdispTTI = 14;
