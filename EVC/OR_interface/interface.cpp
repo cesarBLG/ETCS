@@ -288,6 +288,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("imperial");
+    p->SetValue = [](std::string val) {
+        send_command("imperial", val);
+    };
+    manager.AddParameter(p);
+
     // TODO: directly connect to DMI instead of forwarding button state
     p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
@@ -401,6 +407,7 @@ void start_or_iface()
     register_parameter("gsmr::active");
     register_parameter("serie");
     register_parameter("language");
+    register_parameter("imperial");
 }
 
 void update_or_iface()
