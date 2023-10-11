@@ -25,6 +25,7 @@
 #include "../softkeys/softkey.h"
 #include "platform_runtime.h"
 
+extern bool useImperialSystem;
 void input_received(UiPlatform::InputEvent ev);
 
 template<class T>
@@ -222,6 +223,10 @@ void parseData(std::string str)
     else if (command == "ackButton")
     {
         externalAckButton.setPressed(stoi(value) > 0);
+    }
+    else if (command == "imperial")
+    {
+        useImperialSystem = value == "1";
     }
     else if (command.size() == 5 && command.substr(0, 3) == "key")
     {
