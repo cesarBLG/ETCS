@@ -18,6 +18,7 @@
 
 #define METERS_TO_MILES 0.000621371192
 #define METERS_TO_FEET 3.2808399
+#define KMH_TO_MPH 0.621371192
 const int posy[] = {283,250,206,182,164,150,107,64,21};
 const int divs[] = { 0, 25, 50, 75, 100, 125, 250, 500, 1000 };
 int planning_scale = 1;
@@ -225,12 +226,12 @@ void displaySpeed()
         if(im || prev.speed>cur.speed || cur.speed == 0)
         {
             planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7, 20, 20);
-            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
         }
         else if (prev.speed != cur.speed)
         {
             planning_speed.drawTexture(pl21, 14, a-7, 20, 20);
-            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
         }
         if (cur.speed == 0) return;
     }
