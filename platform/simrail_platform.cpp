@@ -216,7 +216,7 @@ std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const st
 	return nullptr;
 }
 
-std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold) {
+std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold, const std::string_view lang) {
 	return nullptr;
 }
 
@@ -226,9 +226,6 @@ std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(con
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
 	return nullptr;
-}
-
-void SimrailUiPlatform::clear_font_cache() {
 }
 
 void SimrailUiPlatform::set_volume(int vol) {

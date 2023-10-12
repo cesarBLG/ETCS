@@ -251,7 +251,7 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
 }
 std::shared_ptr<UiPlatform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
-    auto font = platform->load_font(size, (aspect & 1) != 0);
+    auto font = platform->load_font(size, (aspect & 1) != 0, get_language());
     return platform->make_wrapped_text_image(text, *font, align, col);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)

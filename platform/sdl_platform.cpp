@@ -12,7 +12,6 @@
 #include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "../DMI/language/language.h"
 
 int main(int argc, char *argv[])
 {
@@ -143,7 +142,6 @@ SdlPlatform::~SdlPlatform() {
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
 	SDL_CloseAudioDevice(audio_device);
-	clear_font_cache();
 	TTF_Quit();
 	SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
@@ -350,8 +348,9 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_vi
 	return img;
 }
 
-std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold) {
-	auto it = loaded_fonts.find({size, bold});
+std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold, const std::string_view lang) {
+	std::string lang_str(lang);
+	auto it = loaded_fonts.find({size, bold, lang_str});
 	std::shared_ptr<SdlFontWrapper> wrapper;
 	if (it != loaded_fonts.end())
 		wrapper = it->second;
@@ -363,12 +362,11 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold)
 		TTF_Font* font;
 
 #if SIMRAIL
-		std::string current_language = get_language();
-		if (current_language == "zh_Hans") {
+		if (lang == "zh_Hans") {
 			// Simplified Chinese
 			path = load_path + (!bold ? "fonts/NotoSansSC-Regular.ttf" : "fonts/NotoSansSC-Bold.ttf");
 		}
-		else if (current_language == "zh_Hant") {
+		else if (lang == "zh_Hant") {
 			// Traditional  Chinese
 			path = load_path + (!bold ? "fonts/NotoSansTC-Regular.ttf" : "fonts/NotoSansTC-Bold.ttf");
 		}
@@ -386,7 +384,7 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold)
 			return nullptr;
 
 		wrapper = std::make_shared<SdlFontWrapper>(font);
-		loaded_fonts.insert_or_assign({size, bold}, wrapper);
+		loaded_fonts.insert_or_assign({size, bold, lang_str}, wrapper);
 	}
 
 	return std::make_unique<SdlFont>(wrapper, scale);
@@ -443,10 +441,6 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, std::abs(s));
 	SDL_FreeSurface(surf);
 	return img;
-}
-
-void SdlPlatform::clear_font_cache() {
-	loaded_fonts.clear();
 }
 
 SdlPlatform::SdlImage::SdlImage(SDL_Texture *tex, float w, float h, float s) : tex(tex), w(w), h(h), scale(s) {

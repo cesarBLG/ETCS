@@ -147,7 +147,7 @@ void drawImperialIndicator()
 
 	if (mphIndicator == NULL) {
 		string s = "MPH";
-		std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false);
+		std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false, "");
 		mphIndicator = platform->make_text_image(s, *mphFont, White);
 	}
 	csg.drawTexture(mphIndicator, 140, 230, mphIndicator->width(), mphIndicator->height());
@@ -270,7 +270,7 @@ void displayLines()
 	std::unique_ptr<UiPlatform::Font> gaugeFont;
 	if (!inited) {
 		csg.clear();
-		gaugeFont = platform->load_font(16, false);
+		gaugeFont = platform->load_font(16, false, "");
 	}
 	platform->set_color(White);
 

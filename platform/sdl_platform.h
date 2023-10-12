@@ -56,7 +56,7 @@ private:
 	int audio_samplerate;
 	int audio_device;
 	int audio_volume;
-	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
+	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
 	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
 	PlatformUtil::FulfillerList<void> on_close_list;
@@ -154,10 +154,9 @@ public:
 	void clear() override;
 	PlatformUtil::Promise<void> present() override;
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
-	std::unique_ptr<Font> load_font(float size, bool bold) override;
+	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
 	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
-	void clear_font_cache() override;
 
 	void set_volume(int vol) override;
 	int get_volume() override;

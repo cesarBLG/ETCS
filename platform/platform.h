@@ -128,10 +128,9 @@ public:
 	virtual void clear() = 0;
 	virtual PlatformUtil::Promise<void> present() = 0;
 	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;
-	virtual std::unique_ptr<Font> load_font(float size, bool bold) = 0;
+	virtual std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) = 0;
 	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
-	virtual void clear_font_cache() = 0;
 
 	virtual void set_volume(int vol) = 0;
 	virtual int get_volume() = 0;
