@@ -125,15 +125,15 @@ void drawNeedle()
 }
 void drawHook(float speed)
 {
-	float ang1 = speedToAngle(speed);
+	float ang1 = speedToAngle(useImperialSystem ? speed * MPH : speed);
 	float ang0 = ang1 - 6 / 117.0;
 	csg.drawSolidArc(ang0, ang1, 117, 137, cx, cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 {
 	platform->set_color(color);
-	float ang0 = speedToAngle(minspeed);
-	float ang1 = speedToAngle(maxspeed);
+	float ang0 = speedToAngle(useImperialSystem ? minspeed * MPH : minspeed);
+	float ang1 = speedToAngle(useImperialSystem ? maxspeed * MPH : maxspeed);
 	csg.drawSolidArc(ang0, ang1, rmin, 137, cx, cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color)
@@ -155,7 +155,7 @@ void drawImperialIndicator()
 void drawSetSpeed()
 {
 	if (Vset == 0) return;
-	float an = speedToAngle(Vset);
+	float an = speedToAngle(useImperialSystem ? Vset * MPH : Vset);
 
 	platform->set_color(White);
 	csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);

@@ -19,6 +19,9 @@ Component a2(54,30, displayDistanceText);
 Component distanceBar(54,191, displayDistance);
 Component a23(54, 221, nullptr);
 extern bool showSpeeds;
+extern bool useImperialSystem;
+#define METERS_TO_MILES 0.000621371192
+#define METERS_TO_FEET 3.2808399
 static float prev_dist = 0;
 void displayDistanceText()
 {
@@ -47,7 +50,22 @@ void displayDistanceText()
     if(dist!=prev_dist)
     {
         a2.clear();
-        a2.addText(to_string(((((int)(dist))/10))*10), 10, 0, 10, Grey, RIGHT);
+        float displayDist = 0;
+        string unit = "";
+        if (useImperialSystem) {
+            if (dist >= 1609.344) {
+                displayDist = dist * METERS_TO_MILES;
+                unit = " mi";
+            }
+            else {
+                displayDist = dist * METERS_TO_FEET;
+                unit = " ft";
+            }
+        } else {
+            displayDist = dist;
+        }
+
+        a2.addText(to_string(((((int)(displayDist)) / 10)) * 10) + unit, 10, 0, 10, Grey, RIGHT);
         prev_dist = dist;
     }
 }
