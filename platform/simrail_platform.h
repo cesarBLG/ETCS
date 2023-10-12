@@ -7,6 +7,7 @@
 #pragma once
 
 #include "platform.h"
+#include "imgui.h"
 
 class SimrailBasePlatform final : public BasePlatform {
 private:
@@ -48,6 +49,7 @@ private:
 	SimrailBasePlatform base;
 
 	unsigned int current_color;
+	ImDrawList *drawlist;
 
 public:
 	class SimrailImage : public Image

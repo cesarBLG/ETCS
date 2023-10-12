@@ -6,7 +6,6 @@
 
 #include "simrail_platform.h"
 #include "platform_runtime.h"
-#include "imgui.h"
 
 using namespace PlatformUtil;
 
@@ -193,41 +192,56 @@ namespace api {
 	IMPORT_FUNC("simrail_ui_v1", "on_input_event") void on_input_event(void*, void*, void*);
 }
 
+static void callback_fulfill_input_event(Fulfiller<UiPlatform::InputEvent>* fulfiller, uint32_t action, float x, float y) {
+	fulfiller->fulfill(UiPlatform::InputEvent { (UiPlatform::InputEvent::Action)action, x, y }, false);
+	while (DeferredFulfillment::execute());
+	delete fulfiller;
+}
+
+static void callback_cancel_input_event(Fulfiller<UiPlatform::InputEvent>* fulfiller) {
+	delete fulfiller;
+}
+
 void SimrailUiPlatform::set_color(Color c) {
 	current_color = IM_COL32(c.R, c.G, c.B, 255);
 }
 
 void SimrailUiPlatform::draw_line(float x1, float y1, float x2, float y2) {
-	ImGui::GetForegroundDrawList()->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), current_color);
+	drawlist->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), current_color);
 }
 
 void SimrailUiPlatform::draw_rect(float x, float y, float w, float h) {
-	ImGui::GetForegroundDrawList()->AddRect(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
+	drawlist->AddRect(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
 }
 
 void SimrailUiPlatform::draw_rect_filled(float x, float y, float w, float h) {
-	ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
+	drawlist->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
 }
 
 void SimrailUiPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
 }
 
 void SimrailUiPlatform::draw_circle_filled(float x, float y, float rad) {
-	ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(x, y), rad, current_color);
+	drawlist->AddCircleFilled(ImVec2(x, y), rad, current_color);
 }
 
 void SimrailUiPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
-	ImDrawList *drawlist = ImGui::GetForegroundDrawList();
 	for (const auto &p : poly)
 		drawlist->PathLineTo(ImVec2(p.first, p.second));
 	drawlist->PathFillConvex(current_color);
 }
 
 Promise<void> SimrailUiPlatform::on_present_request() {
-	return {};
+	auto pair = PromiseFactory::create<void>();
+	api::on_present_request((void*)&callback_fulfill_void, (void*)&callback_cancel_void, new Fulfiller(std::move(pair.second)));
+	return std::move(pair.first);
 }
 
 void SimrailUiPlatform::present() {
+	ImGui::Render();
+	api::present(ImGui::GetDrawData());
+	ImGui::NewFrame();
+	drawlist = ImGui::GetForegroundDrawList();
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {
@@ -274,5 +288,7 @@ int SimrailUiPlatform::get_brightness() {
 }
 
 Promise<UiPlatform::InputEvent> SimrailUiPlatform::on_input_event() {
-	return {};
+	auto pair = PromiseFactory::create<UiPlatform::InputEvent>();
+	api::on_input_event((void*)&callback_fulfill_input_event, (void*)&callback_cancel_void, new Fulfiller(std::move(pair.second)));
+	return std::move(pair.first);
 }
