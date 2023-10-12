@@ -81,6 +81,9 @@ public:
 		void detach() override {};
 	};
 
+	SimrailUiPlatform(float virtual_w, float virtual_h);
+	~SimrailUiPlatform() override;
+
 	int64_t get_timer() override { return base.get_timer(); };
 	int64_t get_timestamp() override { return base.get_timestamp(); };
 	DateTime get_local_time() override { return base.get_local_time(); };
