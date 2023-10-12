@@ -53,7 +53,7 @@ EXPORT_FUNC void init() {
 #ifdef EVC
 	platform = std::make_unique<SimrailBasePlatform>();
 #else
-	platform = std::make_unique<SimrailUiPlatform>();
+	platform = std::make_unique<SimrailUiPlatform>(platform_size_w, platform_size_h);
 #endif
 	on_platform_ready();
 }
@@ -190,6 +190,24 @@ namespace api {
 	IMPORT_FUNC("simrail_ui_v1", "on_present_request") void on_present_request(void*, void*, void*);
 	IMPORT_FUNC("simrail_ui_v1", "present") void present(ImDrawData* draw_data);
 	IMPORT_FUNC("simrail_ui_v1", "on_input_event") void on_input_event(void*, void*, void*);
+}
+
+SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.DisplaySize = ImVec2(virtual_w, virtual_h);
+	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
+	io.DeltaTime = 0.1f;
+
+	ImGui::NewFrame();
+	drawlist = ImGui::GetForegroundDrawList();
+}
+
+SimrailUiPlatform::~SimrailUiPlatform() {
+	ImGui::EndFrame();
+	ImGui::DestroyContext();
 }
 
 static void callback_fulfill_input_event(Fulfiller<UiPlatform::InputEvent>* fulfiller, uint32_t action, float x, float y) {
