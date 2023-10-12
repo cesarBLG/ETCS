@@ -63,6 +63,7 @@ private:
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
+	int present_count;
 	bool running;
 	std::map<std::string, std::string, std::less<>> ini_items;
 	void load_config();
@@ -151,8 +152,8 @@ public:
 	void draw_image(const Image &img, float x, float y, float w, float h) override;
 	void draw_circle_filled(float x, float y, float rad) override;
 	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
-	void clear() override;
-	PlatformUtil::Promise<void> present() override;
+	PlatformUtil::Promise<void> on_present_request() override;
+	void present() override;
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
 	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;

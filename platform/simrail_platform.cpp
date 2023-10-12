@@ -223,11 +223,11 @@ void SimrailUiPlatform::draw_polygon_filled(const std::vector<std::pair<float, f
 	drawlist->PathFillConvex(current_color);
 }
 
-void SimrailUiPlatform::clear() {
+Promise<void> SimrailUiPlatform::on_present_request() {
+	return {};
 }
 
-Promise<void> SimrailUiPlatform::present() {
-	return {};
+void SimrailUiPlatform::present() {
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {

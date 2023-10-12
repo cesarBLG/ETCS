@@ -125,8 +125,8 @@ public:
 	virtual void draw_image(const Image &img, float x, float y, float w, float h) = 0;
 	virtual void draw_circle_filled(float x, float y, float rad) = 0;
 	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) = 0;
-	virtual void clear() = 0;
-	virtual PlatformUtil::Promise<void> present() = 0;
+	virtual PlatformUtil::Promise<void> on_present_request() = 0;
+	virtual void present() = 0;
 	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;
 	virtual std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) = 0;
 	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
