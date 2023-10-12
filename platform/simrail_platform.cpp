@@ -184,6 +184,14 @@ PlatformUtil::Promise<BasePlatform::BusSocket::ReceiveResult> SimrailBasePlatfor
 	return std::move(pair.first);
 }
 
+namespace api {
+	IMPORT_FUNC("simrail_ui_v1", "texture_create") uint32_t texture_create(uint32_t w, uint32_t h, void* data);
+	IMPORT_FUNC("simrail_ui_v1", "texture_destroy") void texture_destroy(uint32_t handle);
+	IMPORT_FUNC("simrail_ui_v1", "on_present_request") void on_present_request(void*, void*, void*);
+	IMPORT_FUNC("simrail_ui_v1", "present") void present(void* draw_data);
+	IMPORT_FUNC("simrail_ui_v1", "on_input_event") void on_input_event(void*, void*, void*);
+}
+
 void SimrailUiPlatform::set_color(Color c) {
 }
 
