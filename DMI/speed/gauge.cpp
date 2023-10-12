@@ -19,9 +19,9 @@
 #include "platform_runtime.h"
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
-#define MPH 0.621371192
-bool useImperialSystem;
-bool prevUseImperialSystem;
+#define KMH_TO_MPH 0.621371192
+extern bool useImperialSystem;
+extern bool prevUseImperialSystem;
 int etcsDialMaxSpeed = 400;
 int maxSpeed;
 const float ang00 = -239 * PI / 180.0;
@@ -92,7 +92,7 @@ void drawNeedle()
 		}
 	}
 	Color speedColor = needleColor == Red ? White : Black;
-	float an = speedToAngle(useImperialSystem ? Vest * MPH : Vest);
+	float an = speedToAngle(useImperialSystem ? Vest * KMH_TO_MPH : Vest);
 	platform->set_color(needleColor);
 	csg.drawCircle(25, cx, cy);
 	float px[] = { -4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5 };
@@ -109,7 +109,7 @@ void drawNeedle()
 			//spd_nums[i]->load();
 		}
 	}
-	int spd = useImperialSystem ? Vest * MPH : Vest;
+	int spd = useImperialSystem ? Vest * KMH_TO_MPH : Vest;
 	spd = Vest - spd > 0.01 ? spd + 1 : spd;
 	int c[3] = { spd / 100 % 10, spd / 10 % 10, (spd % 10) };
 	bool firstPrint = false;
@@ -125,15 +125,15 @@ void drawNeedle()
 }
 void drawHook(float speed)
 {
-	float ang1 = speedToAngle(useImperialSystem ? speed * MPH : speed);
+	float ang1 = speedToAngle(useImperialSystem ? speed * KMH_TO_MPH : speed);
 	float ang0 = ang1 - 6 / 117.0;
 	csg.drawSolidArc(ang0, ang1, 117, 137, cx, cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 {
 	platform->set_color(color);
-	float ang0 = speedToAngle(useImperialSystem ? minspeed * MPH : minspeed);
-	float ang1 = speedToAngle(useImperialSystem ? maxspeed * MPH : maxspeed);
+	float ang0 = speedToAngle(useImperialSystem ? minspeed * KMH_TO_MPH : minspeed);
+	float ang1 = speedToAngle(useImperialSystem ? maxspeed * KMH_TO_MPH : maxspeed);
 	csg.drawSolidArc(ang0, ang1, rmin, 137, cx, cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color)
@@ -155,7 +155,7 @@ void drawImperialIndicator()
 void drawSetSpeed()
 {
 	if (Vset == 0) return;
-	float an = speedToAngle(useImperialSystem ? Vset * MPH : Vset);
+	float an = speedToAngle(useImperialSystem ? Vset * KMH_TO_MPH : Vset);
 
 	platform->set_color(White);
 	csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
@@ -322,12 +322,16 @@ static float prevVrelease = 0;
 bool releaseSignShown = false;
 void displayVrelease()
 {
+	if (useImperialSystem != prevUseImperialSystem) {
+		prevVrelease = -1;
+	}
+
 	if (mode == Mode::SN && active_ntc_window != nullptr && active_ntc_window->monitoring_data.Vrelease_display & 1) {
 		if (prevVrelease != Vrelease || !releaseSignShown)
 		{
 			releaseSignShown = true;
 			releaseRegion.clear();
-			releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, active_ntc_window->monitoring_data.Vrelease_color, CENTER, 0);
+			releaseRegion.addText(to_string((int)std::round(useImperialSystem ? Vrelease * KMH_TO_MPH : Vrelease)).c_str(), 0, 0, 17, active_ntc_window->monitoring_data.Vrelease_color, CENTER, 0);
 			prevVrelease = Vrelease;
 		}
 	}
@@ -336,7 +340,7 @@ void displayVrelease()
 		{
 			releaseSignShown = true;
 			releaseRegion.clear();
-			releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
+			releaseRegion.addText(to_string((int)std::round(useImperialSystem ? Vrelease * KMH_TO_MPH : Vrelease)).c_str(), 0, 0, 17, MediumGrey, CENTER, 0);
 			prevVrelease = Vrelease;
 		}
 	}
@@ -348,8 +352,7 @@ void displayVrelease()
 void displayGauge()
 {
 	if (prevUseImperialSystem != useImperialSystem) {
-		maxSpeed = useImperialSystem ? (((int)(etcsDialMaxSpeed * MPH / 20) * 20) + 20) : etcsDialMaxSpeed;
-		prevUseImperialSystem = useImperialSystem;
+		maxSpeed = useImperialSystem ? (((int)(etcsDialMaxSpeed * KMH_TO_MPH / 20) * 20) + 20) : etcsDialMaxSpeed;
 		initSpeed = 0;
 		csg.clear();
 	}

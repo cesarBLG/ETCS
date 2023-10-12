@@ -20,6 +20,7 @@ Component distanceBar(54,191, displayDistance);
 Component a23(54, 221, nullptr);
 extern bool showSpeeds;
 extern bool useImperialSystem;
+extern bool prevUseImperialSystem;
 #define METERS_TO_MILES 0.000621371192
 #define METERS_TO_FEET 3.2808399
 static float prev_dist = 0;
@@ -46,6 +47,10 @@ void displayDistanceText()
         prev_dist = -1;
         return;
     }
+    if (prevUseImperialSystem != useImperialSystem) {
+        prev_dist = -1;
+    }
+
     float dist = Dtarg;
     if(dist!=prev_dist)
     {

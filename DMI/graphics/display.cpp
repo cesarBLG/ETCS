@@ -16,6 +16,8 @@
 std::list<window*> active_windows;
 extern Mode mode;
 extern uint32_t evc_peer;
+bool useImperialSystem;
+bool prevUseImperialSystem;
 void displayETCS()
 {
     updateAcks();
@@ -26,5 +28,8 @@ void displayETCS()
         window *w = *it;
         w->display(alreadyDrawn);
         alreadyDrawn.insert(alreadyDrawn.end(), w->bounds.begin(), w->bounds.end());
+    }
+    if (prevUseImperialSystem != useImperialSystem) {
+        prevUseImperialSystem = useImperialSystem;
     }
 }
