@@ -6,6 +6,7 @@
 
 #include "simrail_platform.h"
 #include "platform_runtime.h"
+#include "imgui.h"
 
 using namespace PlatformUtil;
 
@@ -188,29 +189,38 @@ namespace api {
 	IMPORT_FUNC("simrail_ui_v1", "texture_create") uint32_t texture_create(uint32_t w, uint32_t h, void* data);
 	IMPORT_FUNC("simrail_ui_v1", "texture_destroy") void texture_destroy(uint32_t handle);
 	IMPORT_FUNC("simrail_ui_v1", "on_present_request") void on_present_request(void*, void*, void*);
-	IMPORT_FUNC("simrail_ui_v1", "present") void present(void* draw_data);
+	IMPORT_FUNC("simrail_ui_v1", "present") void present(ImDrawData* draw_data);
 	IMPORT_FUNC("simrail_ui_v1", "on_input_event") void on_input_event(void*, void*, void*);
 }
 
 void SimrailUiPlatform::set_color(Color c) {
+	current_color = IM_COL32(c.R, c.G, c.B, 255);
 }
 
 void SimrailUiPlatform::draw_line(float x1, float y1, float x2, float y2) {
+	ImGui::GetForegroundDrawList()->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), current_color);
 }
 
 void SimrailUiPlatform::draw_rect(float x, float y, float w, float h) {
+	ImGui::GetForegroundDrawList()->AddRect(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
 }
 
 void SimrailUiPlatform::draw_rect_filled(float x, float y, float w, float h) {
+	ImGui::GetForegroundDrawList()->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
 }
 
 void SimrailUiPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
 }
 
 void SimrailUiPlatform::draw_circle_filled(float x, float y, float rad) {
+	ImGui::GetForegroundDrawList()->AddCircleFilled(ImVec2(x, y), rad, current_color);
 }
 
 void SimrailUiPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
+	ImDrawList *drawlist = ImGui::GetForegroundDrawList();
+	for (const auto &p : poly)
+		drawlist->PathLineTo(ImVec2(p.first, p.second));
+	drawlist->PathFillConvex(current_color);
 }
 
 void SimrailUiPlatform::clear() {
