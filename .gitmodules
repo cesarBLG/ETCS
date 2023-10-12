@@ -10,3 +10,6 @@
 [submodule "libs/c-ares"]
 	path = libs/c-ares
 	url = https://github.com/c-ares/c-ares/
+[submodule "libs/imgui"]
+	path = libs/imgui
+	url = https://github.com/ocornut/imgui
