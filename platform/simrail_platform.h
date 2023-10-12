@@ -47,6 +47,8 @@ class SimrailUiPlatform final : public UiPlatform {
 private:
 	SimrailBasePlatform base;
 
+	unsigned int current_color;
+
 public:
 	class SimrailImage : public Image
 	{
