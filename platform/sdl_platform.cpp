@@ -128,6 +128,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	SDL_PauseAudioDevice(audio_device, 0);
 
 	running = true;
+	present_count = 0;
 
 	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
@@ -247,10 +248,12 @@ void SdlPlatform::event_loop() {
 			else
 				break;
 
-		if (on_present_list.pending() > 0) {
+		on_present_list.fulfill_all(false);
+
+		if (present_count > 0) {
+			present_count--;
 			idle = false;
 			SDL_RenderPresent(sdlrend);
-			on_present_list.fulfill_one(false);
 		}
 
 		int64_t diff = -1;
@@ -263,7 +266,7 @@ void SdlPlatform::event_loop() {
 		poller.poll(idle ? diff : 0);
 	};
 
-	if (on_present_list.pending() > 0)
+	if (present_count > 0)
 		SDL_RenderPresent(sdlrend);
 
 	on_quit_list.fulfill_all(false);
@@ -322,12 +325,12 @@ void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>>
 	aapolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
 }
 
-void SdlPlatform::clear() {
-	SDL_RenderClear(sdlrend);
+PlatformUtil::Promise<void> SdlPlatform::on_present_request() {
+	return on_present_list.create_and_add();
 }
 
-PlatformUtil::Promise<void> SdlPlatform::present() {
-	return on_present_list.create_and_add();
+void SdlPlatform::present() {
+	present_count++;
 }
 
 std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_view p) {

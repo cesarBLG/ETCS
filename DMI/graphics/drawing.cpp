@@ -39,15 +39,16 @@ void update_window_input(UiPlatform::InputEvent ev)
         }
     }
 }
-void present_frame()
+void present_request()
 {
     if (last_event.action != UiPlatform::InputEvent::Action::Release)
         update_window_input(last_event);
     update_stm_windows();
     platform->set_color(DarkBlue);
-    platform->clear();
+    platform->draw_rect_filled(0, 0, 640, 480);
     displayETCS();
-    platform->present().then(present_frame).detach();
+    platform->present();
+    platform->on_present_request().then(present_request).detach();
 }
 void input_received(UiPlatform::InputEvent ev)
 {
@@ -59,9 +60,9 @@ void input_received(UiPlatform::InputEvent ev)
 void drawing_start()
 {
     platform->on_input_event().then(input_received).detach();
+    platform->on_present_request().then(present_request).detach();
 
     setupSoftKeys();
     loadBeeps();
     setupFlash();
-    present_frame();
 }
