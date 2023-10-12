@@ -14,8 +14,6 @@ extern int maxSpeed;
 extern int etcsDialMaxSpeed;
 extern bool softkeys;
 extern std::string stm_layout_file;
-bool useImperialSystem;
-#define MPH 0.621371192
 void startWindows();
 void load_config(std::string serie)
 {
@@ -42,10 +40,6 @@ void load_config(std::string serie)
         }
     } else {
         platform->debug_print("failed to load config.json");
-    }
-
-    if (useImperialSystem) {
-        etcsDialMaxSpeed = ((int)(etcsDialMaxSpeed * MPH / 20) * 20) + 20;
     }
     maxSpeed = etcsDialMaxSpeed;
 }
