@@ -288,13 +288,13 @@ void relocate()
     }
 #ifdef DEBUG_ODOMETER
 #if BASELINE == 4
-    debug += "Relocated a): "+reloc_a+"\r\n";
-    debug += "Relocated b): "+reloc_b+"\r\n";
-    debug += "Relocated c): "+reloc_c+"\r\n";
+    dbg += "Relocated a): "+reloc_a+"\r\n";
+    dbg += "Relocated b): "+reloc_b+"\r\n";
+    dbg += "Relocated c): "+reloc_c+"\r\n";
 #else
-    debug += "Relocated agains link: "+reloc_link+"\r\n";
+    dbg += "Relocated agains link: "+std::to_string(reloc_link)+"\r\n";
 #endif
-    debug += "Relocated against odo: "+reloc_odo;
+    dbg += "Relocated against odo: "+std::to_string(reloc_odo);
     platform->debug_print(dbg);
 #endif
     relocate_linking();
