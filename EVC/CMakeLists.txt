@@ -19,7 +19,7 @@ NationalFN/nationalfn.cpp NationalFN/asfa.cpp
 
 add_definitions(-DNO_THREADS)
 
-if (CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (LINUX)
     add_definitions(-D_GLIBCXX_DEBUG)
     endif()

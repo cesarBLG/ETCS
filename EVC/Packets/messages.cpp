@@ -640,8 +640,13 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
             ETCS_packet *p = t.packets[j].get();
             if (p->directional) {
                 auto *dp = (ETCS_directional_packet*)p;
-                if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+                if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0)) {
+#if DEBUG_MSG_CONSISTENCY
+                    if (dir == -1)
+                        platform->debug_print("Directional packet rejected due to unknown BG direction");
+#endif
                     continue;
+                }
             }
             if (p->NID_PACKET == 136) {
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
@@ -815,8 +820,13 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         ETCS_packet *p = message->packets[j].get();
         if (p->directional) {
             auto *dp = (ETCS_directional_packet*)p;
-            if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0))
+            if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0)) {
+#if DEBUG_MSG_CONSISTENCY
+                if (dir == -1)
+                    platform->debug_print("Directional packet rejected due to unknown LRBG direction");
+#endif
                 continue;
+            }
         }
         if (p->NID_PACKET == 136) {
             InfillLocationReference ilr = *((InfillLocationReference*)p);
