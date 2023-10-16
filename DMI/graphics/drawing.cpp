@@ -24,10 +24,19 @@ void update_stm_windows();
 UiPlatform::InputEvent last_event = {UiPlatform::InputEvent::Action::Release, 0, 0};
 void update_window_input(UiPlatform::InputEvent ev)
 {
-    for (auto *w : active_windows)
+    bool alreadyCovered=false;
+    for (auto it = active_windows.rbegin(); it != active_windows.rend(); ++it)
     {
-        if (w == active_windows.back()) w->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
-        else w->event(0, -100, -100);
+        if (!alreadyCovered) (*it)->event(ev.action != UiPlatform::InputEvent::Action::Release, ev.x, ev.y);
+        else (*it)->event(0, -100, -100);
+        for (auto &b : (*it)->bounds) {
+            bool outsideX = ev.x < b[0] || ev.x > b[0]+b[2];
+            bool outsideY = ev.y < b[1] || ev.y > b[1]+b[3];
+            if (!outsideX && !outsideY) {
+                alreadyCovered = true;
+                break;
+            }
+        }
     }
 }
 void present_request()

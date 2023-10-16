@@ -91,7 +91,7 @@ bool operator < (Message a, Message b)
 void displayMessages()
 {
     upArrow.enabled = current>0;
-    downArrow.enabled = line>5+current;
+    downArrow.enabled = line>nlines+current;
     softUpArrow.enabled = upArrow.enabled;
     softDownArrow.enabled = downArrow.enabled;
 }
@@ -133,23 +133,26 @@ void updateMessages()
     {
         Message &m = *displayMsg[i];
         std::string date = std::to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + std::to_string(m.minute);
-        std::string &text = m.text;
-        int last = text.size();
-        if(text.size()>25) last = text.find_last_of(' ', 25) + 1;
-        if(line<nlines+current && line>=current)
+        std::string text = m.text;
+        int last;
+        for (;;)
         {
-            if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
-            m.shown = true;
-            if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
-            textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
-            textArea.addText(text.substr(0, last), 48, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
-        }
-        line++;
-        if(last<text.size())
-        {
-            if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
-            if(line<5+current && line>=current) textArea.addText(text.substr(last), 48, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
-            line++;
+            if(text.size()>25) last = text.find_last_of(' ', 25);
+            else last = text.size();
+            if(line<nlines+current && line>=current)
+            {
+                if (text.size() == m.text.size())
+                {
+                    if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
+                    m.shown = true;
+                    textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
+                }
+                if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
+                textArea.addText(text.substr(0, last), 48, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
+            }
+            ++line;
+            if (last + 1 >= text.size()) break;
+            text = text.substr(last+1);
         }
     }
 }
