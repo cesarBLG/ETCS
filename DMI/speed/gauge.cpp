@@ -37,12 +37,13 @@ Component csg(2*cx, 2*cy, displayGauge);
 IconButton togglingButton("symbols/Driver Request/DR_01.bmp", 64, 50, []() {showSpeeds = !showSpeeds;});
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
+std::shared_ptr<UiPlatform::Image> mphIndicator;
 
 #if SIMRAIL
 float speedToAngle(float speed)
 {
     if (speed > maxSpeed) return ang1;
-    int halfEtcsDialMaxSpeed = etcsDialMaxSpeed / 2;
+    int halfEtcsDialMaxSpeed = maxSpeed / 2;
     {
         if (speed > halfEtcsDialMaxSpeed) return amed + (speed - halfEtcsDialMaxSpeed) / (maxSpeed - halfEtcsDialMaxSpeed) * (ang1 - amed);
         return ang0 + speed / halfEtcsDialMaxSpeed * (amed - ang0);
@@ -65,7 +66,7 @@ float speedToAngle(float speed)
 void drawNeedle()
 {
     Color needleColor = Grey;
-    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT)
+    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT || mode == Mode::IS)
     {
         needleColor = Grey;
     }
@@ -138,6 +139,18 @@ void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 void drawGauge(float minspeed, float maxspeed, Color color)
 {
     drawGauge(minspeed,maxspeed,color,128);
+}
+void drawImperialIndicator()
+{
+    if (!useImperialSystem)
+        return;
+
+    if (mphIndicator == NULL) {
+        string s = "MPH";
+        std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false, "");
+        mphIndicator = platform->make_text_image(s, *mphFont, White);
+    }
+    csg.drawTexture(mphIndicator, 140, 230, mphIndicator->width(), mphIndicator->height());
 }
 void drawSetSpeed()
 {
@@ -257,7 +270,7 @@ void displayLines()
     std::unique_ptr<UiPlatform::Font> gaugeFont;
     if (!inited) {
         csg.clear();
-        gaugeFont = platform->load_font(16, false);
+        gaugeFont = platform->load_font(16, false, "");
     }
     platform->set_color(White);
 
