@@ -308,6 +308,7 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
     track_condition *tc = new track_condition();
     tc->start = ref + cond.D_TRACTION.get_value(cond.Q_SCALE);
     tc->condition = TrackConditions::ChangeOfTractionSystem;
+    tc->profile = false;
     TractionSystem_DMI traction;
     switch (cond.M_VOLTAGE.rawdata) {
         case M_VOLTAGE_t::NonFitted: traction = TractionSystem_DMI::NonFitted; break;

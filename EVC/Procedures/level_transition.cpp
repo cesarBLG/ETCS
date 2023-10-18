@@ -194,13 +194,12 @@ void level_transition_received(level_transition_information info)
         level_acknowledged = false;
         STM_max_speed = {};
         STM_system_speed = {};
-    }
-    level_acknowledgeable = false;
-    level_timer_started = false;
-    if (!ongoing_transition || ongoing_transition->leveldata.level != info.leveldata.level || (info.leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc != info.leveldata.nid_ntc)) {
         transition_buffer.clear();
         transition_buffer.push_back({});
     }
+    level_acknowledgeable = false;
+    level_timer_started = false;
+
     priority_levels = info.priority_table;
     priority_levels_valid = true;
     if (info.leveldata.level == level && (level != Level::NTC || info.leveldata.nid_ntc == nid_ntc)) {

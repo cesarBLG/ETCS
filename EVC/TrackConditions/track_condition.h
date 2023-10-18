@@ -106,6 +106,7 @@ struct track_condition
     {
         active_symbol = announcement_symbol = end_active_symbol = -1;
         announce = order = display_end = end_displayed = false;
+        announce_distance = std::numeric_limits<double>::max();
     }
     virtual double get_distance_to_train()
     {
