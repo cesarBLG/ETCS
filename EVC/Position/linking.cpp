@@ -210,7 +210,7 @@ void relocate()
         link = get_linked_bg_location(prevsolr->nid_lrbg);
     if (link)
         link->first = -link->first;
-#if DEBUG_ODOMETER
+#ifdef DEBUG_ODOMETER
     std::string dbg = "Relocating at "+std::to_string(odometer_value)+"\r\n";
     if (link)
         dbg += "Linking: "+std::to_string(link->first)+"\r\n";
@@ -334,7 +334,7 @@ optional<distance> get_reference_location(bg_id bg, bool linked, bool check_pass
             d.max -= d_maxsafefront(it->first.position, it->first.locacc) - d_maxsafefront(solr->position, solr->locacc);
             d.est -= dist_base(0, 0) - it->first.position;
             d.min -= d_minsafefront(it->first.position, it->first.locacc) - d_minsafefront(solr->position, solr->locacc);
-            d.ref = dist_base(0, 0);
+            d.ref = dist_base(0, it->first.position.orientation);
             d.relocated_c = true;
             if (!solr_ahead)
                 d.relocated_c_earlier = bg;
@@ -349,7 +349,7 @@ optional<distance> get_reference_location(bg_id bg, bool linked, bool check_pass
             if (!linked)
                 d.ref = d.est;
             else
-                d.ref = dist_base(0, 0);
+                d.ref = dist_base(0, it->first.position.orientation);
             return d;
         }
     }

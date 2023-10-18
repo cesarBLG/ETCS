@@ -641,7 +641,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
             if (p->directional) {
                 auto *dp = (ETCS_directional_packet*)p;
                 if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0)) {
-#if DEBUG_MSG_CONSISTENCY
+#ifdef DEBUG_MSG_CONSISTENCY
                     if (dir == -1)
                         platform->debug_print("Directional packet rejected due to unknown BG direction");
 #endif
@@ -693,8 +693,12 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             break;
         }
     }
-    if (!pos && message->NID_LRBG!=NID_LRBG_t::Unknown)
+    if (!pos && message->NID_LRBG!=NID_LRBG_t::Unknown) {
+#ifdef DEBUG_MSG_CONSISTENCY
+        platform->debug_print("Radio message rejected: unknown LRBG");
+#endif
         return;
+    }
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
@@ -821,7 +825,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         if (p->directional) {
             auto *dp = (ETCS_directional_packet*)p;
             if ((dir == -1 && dp->Q_DIR != Q_DIR_t::Both) || (dp->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (dp->Q_DIR == Q_DIR_t::Reverse && dir == 0)) {
-#if DEBUG_MSG_CONSISTENCY
+#ifdef DEBUG_MSG_CONSISTENCY
                 if (dir == -1)
                     platform->debug_print("Directional packet rejected due to unknown LRBG direction");
 #endif
