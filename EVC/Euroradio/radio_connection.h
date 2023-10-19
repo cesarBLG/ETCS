@@ -37,7 +37,6 @@ struct called_address
 class radio_connection
 {
 protected:
-    PlatformUtil::FulfillerBufferedQueue<std::shared_ptr<euroradio_message>> rx_list;
     PlatformUtil::Promise<void> t_estab_timer;
     etcs_id own_id;
     called_address peer_address;

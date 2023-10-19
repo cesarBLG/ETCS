@@ -36,7 +36,6 @@ class communication_session
     bool initsent;
     int tried;
     int ntries;
-    PlatformUtil::Promise<std::shared_ptr<euroradio_message>> rx_promise;
     void message_received(std::shared_ptr<euroradio_message> msg);
     void update_ack();
     public:
@@ -51,6 +50,7 @@ class communication_session
     int64_t last_active;
     bool connection_timer;
     int64_t last_valid_timestamp = std::numeric_limits<int64_t>::lowest();
+    std::deque<std::shared_ptr<euroradio_message>> rx_list;
     std::list<msg_expecting_ack> pending_ack;
     int version;
     communication_session(contact_info contact, bool isRBC) : isRBC(isRBC), contact(contact), version(-1) {}

@@ -98,7 +98,7 @@ jobs:
     - name: Compile
       run: |
         cd ${{github.workspace}}/locales
-        ./compile_locales.sh
+        make
 
     - name: Publish
       uses: actions/upload-artifact@v3
