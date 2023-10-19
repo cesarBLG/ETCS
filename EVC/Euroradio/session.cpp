@@ -76,13 +76,11 @@ void communication_session::finalize()
         connection->release();
         connection = nullptr;
     }
+    rx_list.clear();
     closing = false;
 }
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
-    if (connection != nullptr)
-        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
-
     log_message(msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
         platform->debug_print("Message rejected");
@@ -279,6 +277,13 @@ void communication_session::update()
             }
         }
     }
+    if (!rx_list.empty()) {
+        auto tmp_list = std::move(rx_list);
+        rx_list.clear();
+        for (auto &msg : tmp_list) {
+            message_received(msg);
+        }
+    }
     update_ack();
 }
 
@@ -291,7 +296,6 @@ void communication_session::setup_connection()
     #endif
         connection->Sa_connect_request({{isRBC ? 1u : 0u, (contact.country<<14)|contact.id}, RadioNetworkId, contact.phone_number}, {2, 0});
         tried++;
-        rx_promise = connection->receive().then(std::bind(&communication_session::message_received, this, std::placeholders::_1));
 }
 
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)

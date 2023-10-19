@@ -26,7 +26,7 @@ void radio_connection::Sa_data_indication(std::vector<unsigned char>&& data)
     if (session == nullptr)
         return;
     bit_manipulator r(std::move(data));
-    rx_list.push_data(euroradio_message::build(r, session->version));
+    session->rx_list.push_back(euroradio_message::build(r, session->version));
 }
 void radio_connection::Sa_disconnect_indication(int reason, int subreason)
 {
@@ -64,9 +64,6 @@ void radio_connection::send(std::shared_ptr<euroradio_message_traintotrack> msg)
     bit_manipulator w;
     msg->write_to(w);
     Sa_data_request(std::move(w.bits));
-}
-PlatformUtil::Promise<std::shared_ptr<euroradio_message>> radio_connection::receive() {
-    return rx_list.create_and_add();
 }
 
 bus_radio_connection::bus_radio_connection(communication_session *session) : radio_connection(session)
