@@ -274,14 +274,14 @@ speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end
     double V_pbd=0;
     double V_test = 1;
     double V_max_appr = std::max(std::sqrt(2*2*d_PBD),600/3.6);
-    /*PBD_target pbd_ebd(distance(d_PBD), true, g);
+    PBD_target pbd_ebd(start, end, d_PBD, true, g);
     if (EB) {
         while (V_test<V_max_appr) {
             double dvebi = dV_ebi(V_test);
             double V_delta0PBD = Q_NVINHSMICPERM ? 0 : (V_test+dvebi)*0.008;
             double D_bec = (V_test+dvebi+V_delta0PBD)*(pbd_ebd.T_traction+pbd_ebd.T_berem);
             double d_offset=L_antenna_front+0.001*(V_test+dvebi+V_delta0PBD);
-            double V_ebd = pbd_ebd.get_speed_curve(distance(d_offset+D_bec));
+            double V_ebd = pbd_ebd.get_speed_curve(start.max+(d_offset+D_bec));
             if (std::abs((V_test+dvebi)-(V_ebd-V_delta0PBD))<=1.0/3.6 && d_offset+D_bec<d_PBD) {
                 V_pbd = V_test;
                 break;
@@ -290,8 +290,8 @@ speed_restriction get_PBD_restriction(double d_PBD, distance start, distance end
         }
     } else {
 
-    }*/
-    //return speed_restriction((((int)(V_pbd*3.6))/5)*5/3.6, start, end, false);
+    }
+    return speed_restriction((((int)(V_pbd*3.6))/5)*5/3.6, start, end, false);
 }
 void delete_PBD()
 {
