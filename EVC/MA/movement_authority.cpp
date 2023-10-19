@@ -12,8 +12,8 @@
 #include "../Procedures/stored_information.h"
 #include "../Supervision/emergency_stop.h"
 #include "../TrackConditions/route_suitability.h"
-optional<confidenced_distance> d_perturbation_eoa;
-optional<confidenced_distance> d_perturbation_svl;
+optional<relocable_dist_base> d_perturbation_eoa;
+optional<relocable_dist_base> d_perturbation_svl;
 movement_authority::movement_authority(distance start, Level1_MA ma, int64_t time) : start(start), time_stamp(time)
 {
     v_main = ma.V_MAIN.get_value();
@@ -242,20 +242,18 @@ void calculate_perturbation_location()
 {
     d_perturbation_eoa = {};
     d_perturbation_svl = {};
-    const std::map<confidenced_distance, double> &mrsp = get_MRSP();
+    auto &mrsp = get_MRSP();
     if (MA && MA->EoA_ma) {
-        confidenced_distance targ;
-        (dist_base&)targ = MA->EoA_ma->est;
-        (confidence_data&)targ = confidence_data::from_distance(*MA->EoA_ma);
+        relocable_dist_base targ = MA->EoA_ma->est;
         target eoa(targ, 0, target_class::EoA);
         for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_eoa; ++it) {
             auto next = it;
             ++next;
             eoa.calculate_curves(it->second, 0, 0);
-            confidenced_distance d_I_eoa = eoa.get_target_position();
+            relocable_dist_base d_I_eoa = eoa.get_target_position();
             (dist_base&)d_I_eoa = eoa.d_I;
-            confidenced_distance start = it->first;
-            confidenced_distance end;
+            relocable_dist_base start = it->first;
+            relocable_dist_base end;
             if (next == mrsp.end())
                 (dist_base&)end = dist_base::max;
             else
@@ -272,18 +270,16 @@ void calculate_perturbation_location()
         }
     }
     if (MA && (MA->SvL_ma || MA->LoA_ma)) {
-        confidenced_distance targ;
-        (dist_base&)targ = MA->LoA_ma ? MA->LoA_ma->first.max : MA->SvL_ma->max;
-        (confidence_data&)targ = confidence_data::from_distance(MA->LoA_ma ? MA->LoA_ma->first : *MA->SvL_ma);
+        relocable_dist_base targ = MA->LoA_ma ? MA->LoA_ma->first.max : MA->SvL_ma->max;
         target svl(targ, MA->LoA_ma ? MA->LoA_ma->second : 0, MA->LoA_ma ? target_class::LoA : target_class::SvL);
         for (auto it = mrsp.begin(); it != mrsp.end() && !d_perturbation_svl; ++it) {
             auto next = it;
             ++next;
             svl.calculate_curves(it->second, 0, 0);
-            confidenced_distance d_I_svl = svl.get_target_position();
+            relocable_dist_base d_I_svl = svl.get_target_position();
             (dist_base&)d_I_svl = svl.d_I;
-            confidenced_distance start = it->first;
-            confidenced_distance end;
+            relocable_dist_base start = it->first;
+            relocable_dist_base end;
             if (next == mrsp.end())
                 (dist_base&)end = dist_base::max;
             else

@@ -54,10 +54,10 @@ double T_bs2;
 double T_be;
 double calc_ceiling_limit()
 {
-    std::map<confidenced_distance,double> MRSP = get_MRSP();
+    auto &MRSP = get_MRSP();
     double V_MRSP = 1000;
     for (auto it = MRSP.begin(); it!=MRSP.end(); ++it) {
-        confidenced_distance d = it->first;
+        relocable_dist_base d = it->first;
         dist_base min = d_minsafefront(d);
         dist_base max = d_maxsafefront(d);
         auto next = it;
@@ -69,7 +69,7 @@ double calc_ceiling_limit()
 }
 double calc_ceiling_limit(dist_base min, dist_base max)
 {
-    std::map<confidenced_distance,double> MRSP = get_MRSP();
+    auto &MRSP = get_MRSP();
     auto it1 = --MRSP.upper_bound(min);
     auto it2 = MRSP.upper_bound(max);
     double V_MRSP = 1000;
@@ -91,8 +91,8 @@ dist_base get_d_startRSM(double V_release)
             tSvL = it;
     }
     int alpha = level==Level::N1;
-    auto conf = confidence_data::from_distance(d_EoA);
-    dist_base d_tripEoA = d_EoA.min+alpha*L_antenna_front + std::max(2*conf.locacc+10+(d_EoA.est - d_EoA.ref)/10,d_maxsafefront(d_EoA)-d_minsafefront(d_EoA));
+    auto conf = confidence_data::from_distance(d_EoA.est);
+    dist_base d_tripEoA = d_EoA.min+alpha*L_antenna_front + std::max(2*conf.locacc+10+(d_EoA.est - d_EoA.est.ref)/10,d_maxsafefront(d_EoA)-d_minsafefront(d_EoA));
     
     dist_base d_startRSM;
     
@@ -135,8 +135,8 @@ double calculate_V_release()
     distance d_EoA = *EoA;
     const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
     int alpha = level==Level::N1;
-    auto conf = confidence_data::from_distance(d_EoA);
-    dist_base d_tripEoA = d_EoA.min+alpha*L_antenna_front + std::max(2*conf.locacc+10+(d_EoA.est-d_EoA.ref)/10,d_maxsafefront(d_EoA)-d_minsafefront(d_EoA));
+    auto conf = confidence_data::from_distance(d_EoA.est);
+    dist_base d_tripEoA = d_EoA.min+alpha*L_antenna_front + std::max(2*conf.locacc+10+(d_EoA.est-d_EoA.est.ref)/10,d_maxsafefront(d_EoA)-d_minsafefront(d_EoA));
     double V_release = calc_ceiling_limit(d_EoA.est, d_SvL.max);
     std::list<std::shared_ptr<target>> candidates;
     std::shared_ptr<target> tSvL;
@@ -177,15 +177,16 @@ void update_monitor_transitions(bool suptargchang, const std::list<std::shared_p
     }
     MonitoringStatus nmonitor = monitoring;
     bool c1 = false;
-    bool mrdt = false;
+    auto prevMRDT = MRDT;
+    MRDT = nullptr;
     for (auto &t : supervised_targets) {
         bool ct = (t->get_target_speed()<=V_est) && ((t->is_EBD_based ? d_maxsafefront(t->get_target_position()) : d_estfront) >= t->d_I);
         c1 |= ct && (t->get_target_speed() > 0 || V_est>=V_release);
-        if (monitoring != CSM && MRDT && *MRDT == *t)
-            mrdt = true;
+        if (monitoring != CSM && prevMRDT && *prevMRDT == *t)
+            MRDT = t;
     }
     bool c2 = V_release>0 && RSMtarget && (RSMtarget->is_EBD_based ? d_maxsafefront(RSMtarget->get_target_position()) : d_estfront) > d_startRSM;
-    bool c3 = !c1 && !c2 && !mrdt;
+    bool c3 = !c1 && !c2 && !MRDT;
     bool c4 = c1 && suptargchang;
     bool c5 = c2 && suptargchang;
     if (c1 && monitoring == CSM) {
@@ -438,7 +439,7 @@ void update_supervision()
                     break;
             }
             std::shared_ptr<target> newMRDT = MRDT.back();
-            if (!::MRDT || ::MRDT->type != newMRDT->type || ::MRDT->get_target_speed() != newMRDT->get_target_speed()) {
+            if (!::MRDT || ::MRDT->get_target_speed() != newMRDT->get_target_speed()) {
                 send_command("playSinfo","");
                 prev_D_target = 1e9;
                 prev_V_perm = 1e9;

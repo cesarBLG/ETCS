@@ -9,6 +9,7 @@
 #include "linking.h"
 #include "distance.h"
 #include "../Supervision/national_values.h"
+#include "../Supervision/supervision_targets.h"
 #include "../Packets/messages.h"
 #include "../TrainSubsystems/cold_movement.h"
 #include "../Procedures/level_transition.h"
@@ -96,7 +97,7 @@ void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir)
 {
 #if BASELINE < 4
     if (!linked) {
-        for (distance *d = distance::begin; d != nullptr; d = d->next) {
+        for (relocable_dist_base *d = relocable_dist_base::begin; d != nullptr; d = d->next) {
             if (d->balise_based && d->ref.dist != 0)
                 d->ref = pos;
         }
@@ -224,36 +225,50 @@ void relocate()
 #else
     int reloc_link=0;
 #endif
-    for (distance *d = distance::begin; d != nullptr; d = d->next) {
+    for (relocable_dist_base *d = relocable_dist_base::begin; d != nullptr; d = d->next) {
         if (!d->balise_based) {
-            d->min -= offset;
-            d->est -= offset;
-            d->max -= offset;
+            *d -= offset;
             d->ref -= offset;
             ++reloc_odo;
             continue;
         }
 #if BASELINE == 4
         if (link && !d->relocated_c) {
-            d->min -= link->first;
-            d->est -= link->first;
-            d->max -= link->first;
+            *d -= link->first;
             d->relocated_c = false;
             d->relocated_c_earlier = {};
             ++reloc_a;
         } else if (prevsolr) {
             bool rear = false;
             if (!d->relocated_c_earlier && link) {
-                d->min -= link->first - 2 * link->second;
-                d->est -= link->first;
-                d->max -= link->first + 2 * link->second;
+                switch (d->type)
+                {
+                    case 1:
+                        *d -= link->first + 2 * link->second;
+                        break;
+                    case -1:
+                        *d -= link->first - 2 * link->second;
+                        break;
+                    default:
+                        *d -= link->first;
+                        break;
+                }
                 d->relocated_c = false;
                 d->relocated_c_earlier = {};
                 ++reloc_b;
             } else {
-                d->max -= d_maxsafefront(prevsolr->position, prevsolr->locacc) - d_maxsafefront(solr->position, solr->locacc);
-                d->est -= offset;
-                d->min -= d_minsafefront(prevsolr->position, prevsolr->locacc) - d_minsafefront(solr->position, solr->locacc);
+                switch (d->type)
+                {
+                    case 1:
+                        *d -= d_maxsafefront(prevsolr->position, prevsolr->locacc) - d_maxsafefront(solr->position, solr->locacc);
+                        break;
+                    case -1:
+                        *d -= d_minsafefront(prevsolr->position, prevsolr->locacc) - d_minsafefront(solr->position, solr->locacc);
+                        break;
+                    default:
+                        *d -= offset;
+                        break;
+                }
                 d->relocated_c = true;
                 if (d->relocated_c_earlier) {
                     for (auto it = orbgs.rbegin(); it != orbgs.rend(); ++it) {
@@ -272,14 +287,10 @@ void relocate()
         }
 #else
         if (link && d->ref.dist == 0) {
-            d->min -= link->first;
-            d->est -= link->first;
-            d->max -= link->first;
+            *d -= link->first;
             ++reloc_link;
         } else {
-            d->min -= offset;
-            d->est -= offset;
-            d->max -= offset;
+            *d -= offset;
             if (d->ref.dist != 0)
                 d->ref -= offset;
             ++reloc_odo;
@@ -298,8 +309,6 @@ void relocate()
     platform->debug_print(dbg);
 #endif
     relocate_linking();
-    extern std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
-    track_condition_targets.clear();
     recalculate_MRSP();
 }
 optional<distance> get_reference_location(bg_id bg, bool linked, bool check_passed)
@@ -344,12 +353,7 @@ optional<distance> get_reference_location(bg_id bg, bool linked, bool check_pass
 #else
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
         if (it->first.nid_lrbg == bg) {
-            distance d;
-            d.min = d.max = d.est = it->first.position;
-            if (!linked)
-                d.ref = d.est;
-            else
-                d.ref = dist_base(0, it->first.position.orientation);
+            distance d(it->first.position.dist, it->first.position.orientation, linked ? 0 : it->first.position.dist);
             return d;
         }
     }

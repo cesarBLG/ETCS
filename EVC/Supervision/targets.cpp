@@ -21,7 +21,7 @@
 #include "../TrainSubsystems/train_interface.h"
 #include <set>
 std::list<std::shared_ptr<PBD_target>> PBDs;
-target::target(confidenced_distance dist, double speed, target_class type, bool is_TSR) : basic_target(dist, speed, type, is_TSR)
+target::target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : basic_target(dist, speed, type, is_TSR)
 {
     if (is_TSR)
         default_gradient = default_gradient_tsr;
@@ -182,7 +182,7 @@ void set_supervised_targets()
     indication_target = nullptr;
     supervised_targets.clear();
     if (mode != Mode::SR && mode != Mode::UN && mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) return;
-    std::map<confidenced_distance, double> &MRSP = get_MRSP();
+    auto &MRSP = get_MRSP();
     if (!MRSP.empty()) {
         auto minMRSP = MRSP.begin();
         auto prev = minMRSP;
@@ -203,14 +203,14 @@ void set_supervised_targets()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         if (SvL)
-            supervised_targets.push_back(std::make_shared<target>(confidenced_distance(SvL->max, confidence_data::from_distance(*SvL)), 0, target_class::SvL));
+            supervised_targets.push_back(std::make_shared<target>(SvL->max, 0, target_class::SvL));
         if (EoA)
-            supervised_targets.push_back(std::make_shared<target>(confidenced_distance(EoA->est, confidence_data::from_distance(*EoA)), 0, target_class::EoA));
+            supervised_targets.push_back(std::make_shared<target>(EoA->est, 0, target_class::EoA));
         if (LoA)
             supervised_targets.push_back(std::make_shared<target>(LoA->first.max, LoA->second, target_class::LoA));
     }
     if (SR_dist && mode == Mode::SR)
-        supervised_targets.push_back(std::make_shared<target>(confidenced_distance(SR_dist->max, confidence_data::from_distance(*SR_dist)), 0, target_class::SR_distance));
+        supervised_targets.push_back(std::make_shared<target>(SR_dist->max, 0, target_class::SR_distance));
     target::recalculate_all_decelerations();
 }
 bool supervised_targets_changed()

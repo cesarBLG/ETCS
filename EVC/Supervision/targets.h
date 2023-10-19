@@ -28,19 +28,19 @@ enum struct target_class
 class basic_target
 {
 protected:
-    confidenced_distance d_target;
+    relocable_dist_base d_target;
     double V_target;
 public:
     target_class type;
     bool is_EBD_based;
     bool is_TSR = false;
     basic_target() {}
-    basic_target(confidenced_distance dist, double speed, target_class type, bool is_TSR) : d_target(dist), V_target(speed), type(type), is_TSR(is_TSR)
+    basic_target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : d_target(dist), V_target(speed), type(type), is_TSR(is_TSR)
     {
         is_EBD_based = type != target_class::EoA;
     }
     double get_target_speed() const { return V_target; }
-    confidenced_distance get_target_position() const { return d_target; }
+    relocable_dist_base get_target_position() const { return d_target; }
     bool operator== (const basic_target &t) const
     {
         return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
@@ -52,7 +52,7 @@ protected:
     bool use_brake_combination = true;
 public:
     double default_gradient=0;
-    target(confidenced_distance dist, double speed, target_class type, bool is_tsr=false);
+    target(relocable_dist_base dist, double speed, target_class type, bool is_tsr=false);
     virtual dist_base get_distance_curve (double velocity) const;
     double get_speed_curve(dist_base dist) const;
     dist_base get_distance_gui_curve(double velocity) const;
