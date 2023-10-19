@@ -120,8 +120,8 @@ public:
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
-extern optional<confidenced_distance> d_perturbation_eoa;
-extern optional<confidenced_distance> d_perturbation_svl;
+extern optional<relocable_dist_base> d_perturbation_eoa;
+extern optional<relocable_dist_base> d_perturbation_svl;
 void calculate_SvL();
 void calculate_perturbation_location();
 void replace_MA(movement_authority ma, bool cooperative_shortening=false);

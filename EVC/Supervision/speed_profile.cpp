@@ -17,7 +17,7 @@
 #include <vector>
 #include <map>
 #include <cmath>
-std::map<confidenced_distance,double> MRSP;
+std::map<relocable_dist_base,double,std::less<>> MRSP;
 std::list<speed_restriction> SSP;
 std::list<TSR> TSRs;
 optional<speed_restriction> train_speed;
@@ -156,7 +156,7 @@ void recalculate_MRSP()
         set_supervised_targets();
         return;
     }
-    std::set<confidenced_distance> critical_points;
+    std::set<relocable_dist_base> critical_points;
     for (auto it = restrictions.begin(); it != restrictions.end(); ++it) {
         critical_points.insert(it->get_start());
         critical_points.insert(it->get_end());
@@ -172,7 +172,7 @@ void recalculate_MRSP()
     }
     set_supervised_targets();
 }
-std::map<confidenced_distance,double> &get_MRSP()
+std::map<relocable_dist_base,double,std::less<>> &get_MRSP()
 {
     return MRSP;
 }
