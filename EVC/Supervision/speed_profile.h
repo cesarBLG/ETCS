@@ -29,7 +29,7 @@ void delete_TSR();
 void delete_TSR(const distance &from);
 void delete_PBD();
 void delete_PBD(const distance &from);
-std::map<confidenced_distance,double> &get_MRSP();
+std::map<relocable_dist_base,double,std::less<>> &get_MRSP();
 inline double dV_ebi(double vel)
 {
     return std::max(dV_ebi_min, std::min(dV_ebi_min*(dV_ebi_max - dV_ebi_min)/(V_ebi_max-V_ebi_min)*(vel-V_ebi_min), dV_ebi_max));
@@ -52,29 +52,29 @@ public:
     bool is_tsr=false;
     speed_restriction(double spd, distance start, distance end, bool compensate_trainlength) : speed(spd), start_distance(start), end_distance(end), compensate_train_length(compensate_trainlength) {}
     double get_speed() const { return speed; }
-    confidenced_distance get_start() const
+    relocable_dist_base get_start() const
     {
 #if BASELINE == 4
         if (VERSION_X(operated_version) < 3 && is_tsr)
-            return confidenced_distance(start_distance.est, confidence_data::from_distance(start_distance));
+            return start_distance.est;
 #endif
-        return confidenced_distance(start_distance.max, confidence_data::from_distance(start_distance));
+        return start_distance.max;
     }
-    confidenced_distance get_end() const
+    relocable_dist_base get_end() const
     {
 #if BASELINE == 4
         if (VERSION_X(operated_version) < 3 && is_tsr)
-            return confidenced_distance(end_distance.est + compensate_train_length*L_TRAIN, confidence_data::from_distance(end_distance));
+            return end_distance.est + compensate_train_length*L_TRAIN;
 #endif
-        return confidenced_distance(end_distance.min + compensate_train_length*L_TRAIN, confidence_data::from_distance(end_distance));
+        return end_distance.min + compensate_train_length*L_TRAIN;
     }
-    confidenced_distance get_uncompensated_end() const
+    relocable_dist_base get_uncompensated_end() const
     {
 #if BASELINE == 4
         if (VERSION_X(operated_version) < 3 && is_tsr)
-            return confidenced_distance(end_distance.est, confidence_data::from_distance(end_distance));
+            return end_distance.est;
 #endif
-        return confidenced_distance(end_distance.min, confidence_data::from_distance(end_distance));
+        return end_distance.min;
     }
     bool is_compensated() const
     {

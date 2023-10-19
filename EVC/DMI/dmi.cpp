@@ -227,13 +227,13 @@ void dmi_update_func()
         std::vector<speed_element> speeds;
         double v = calc_ceiling_limit();
         speeds.push_back({0,v});
-        std::map<confidenced_distance,double> MRSP = get_MRSP();
+        auto &MRSP = get_MRSP();
         extern double indication_distance;
         double last_distance = MA ? MA->get_abs_end().min-d_minsafefront(MA->get_abs_end()) : 0;
         const std::list<std::shared_ptr<target>> &targets = get_supervised_targets();
         for (auto &t : targets)
         {
-            confidenced_distance td = t->get_target_position();
+            relocable_dist_base td = t->get_target_position();
             double d = td - (t->is_EBD_based ? d_maxsafefront(td) : d_estfront);
             if (t->get_target_speed() == 0 && d<last_distance)
                 last_distance = d;
@@ -241,7 +241,7 @@ void dmi_update_func()
         j["IndicationMarkerTarget"] = nullptr;
         j["IndicationMarkerDistanceM"] = nullptr;
         for (auto it=MRSP.begin(); it!=MRSP.end(); ++it) {
-            confidenced_distance dist = it->first;
+            relocable_dist_base dist = it->first;
             float safedist = dist-d_maxsafefront(dist);
             if (safedist < 0)
                 continue;

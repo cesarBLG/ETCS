@@ -742,7 +742,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                 if (pos && !((emerg->Q_DIR == Q_DIR_t::Nominal && dir == 1) && (emerg->Q_DIR == Q_DIR_t::Reverse && dir == 0))) {
                     
                     distance d = distance::from_odometer(d_estfront);
-                    d.ref = *pos;
+                    d.est.ref = d.max.ref = d.min.ref = *pos;
                     info = new ces_information(d);
                 }
                 break;

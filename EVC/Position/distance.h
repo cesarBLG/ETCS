@@ -66,45 +66,56 @@ struct dist_base
     }
     double operator-(const dist_base &d) const;
 };
-struct distance;
+struct relocable_dist_base;
 struct confidence_data
 {
     dist_base ref;
     double locacc;
-    static confidence_data from_distance(const distance &d);
+    static confidence_data from_distance(const relocable_dist_base &d);
     static confidence_data basic();
 };
-struct confidenced_distance : dist_base, confidence_data
+struct relocable_dist_base : dist_base
 {
-    confidenced_distance() = default;
-    confidenced_distance(dist_base d)
+    static relocable_dist_base* begin;
+    static relocable_dist_base* end;
+    relocable_dist_base *prev=nullptr;
+    relocable_dist_base *next=nullptr;
+    dist_base ref;
+    int type;
+    bool balise_based=true;
+#if BASELINE == 4
+    bool relocated_c;
+    optional<bg_id> relocated_c_earlier;
+#endif
+    relocable_dist_base();
+    ~relocable_dist_base();
+    relocable_dist_base(dist_base d, dist_base ref, int type=0);
+    relocable_dist_base(const relocable_dist_base &d);
+    relocable_dist_base& operator=(const relocable_dist_base &d);
+    relocable_dist_base operator+(const double d) const
     {
-        (dist_base&)*this = d;
-        ref = dist_base(0, orientation);
-        locacc = 0;
+        relocable_dist_base dist=*this;
+        dist+=d;
+        return dist;
     }
-    confidenced_distance(dist_base d, confidence_data c)
+    relocable_dist_base operator-(const double d) const
     {
-        (dist_base&)*this = d;
-        (confidence_data&)*this = c;
+        relocable_dist_base dist=*this;
+        dist+=-d;
+        return dist;
+    }
+    double operator-(const dist_base &d) const
+    {
+        return dist_base::operator-(d);
     }
 };
 struct distance
 {
-    static distance* begin;
-    static distance* end;
-    distance *prev=nullptr;
-    distance *next=nullptr;
-    dist_base min;
-    dist_base est;
-    dist_base max;
-    dist_base ref;
-    bool balise_based=true;
-    distance();
-    ~distance();
+    relocable_dist_base min;
+    relocable_dist_base est;
+    relocable_dist_base max;
+    distance() = default;
     distance(double val, int orientation, double ref=0);
-    distance(const distance &d);
-    distance &operator = (const distance& d);
     distance &operator+=(double dist)
     {
         min += dist;
@@ -131,10 +142,6 @@ struct distance
         d -= dist;
         return d;
     }
-#if BASELINE == 4
-    bool relocated_c;
-    optional<bg_id> relocated_c_earlier;
-#endif
     static distance from_odometer(const dist_base &dist);
 };
 extern dist_base d_estfront;
@@ -145,5 +152,7 @@ dist_base d_maxsafefront(const confidence_data &conf);
 dist_base d_minsafefront(const confidence_data &conf);
 dist_base d_maxsafefront(const distance&ref);
 dist_base d_minsafefront(const distance&ref);
+dist_base d_maxsafefront(const relocable_dist_base&ref);
+dist_base d_minsafefront(const relocable_dist_base&ref);
 void update_odometer();
 void reset_odometer(double dist);

@@ -11,11 +11,11 @@
 #include "../Supervision/national_values.h"
 #include "linking.h"
 #include <limits>
-distance *distance::begin = nullptr;
-distance *distance::end = nullptr;
+relocable_dist_base *relocable_dist_base::begin = nullptr;
+relocable_dist_base *relocable_dist_base::end = nullptr;
 dist_base dist_base::max = dist_base(std::numeric_limits<double>::max(), 0);
 dist_base dist_base::min = dist_base(std::numeric_limits<double>::lowest(), 0);
-distance::distance()
+relocable_dist_base::relocable_dist_base()
 {
     if (begin == nullptr)
         begin = this;
@@ -25,7 +25,7 @@ distance::distance()
         end->next = this;
     end = this;
 }
-distance::distance(double val, int orientation, double ref) : min(val, orientation), est(val, orientation), max(val, orientation), ref(ref, orientation)
+relocable_dist_base::relocable_dist_base(dist_base d, dist_base ref, int type) : dist_base(d), ref(ref), type(type)
 {
     if (begin == nullptr)
         begin = this;
@@ -35,7 +35,7 @@ distance::distance(double val, int orientation, double ref) : min(val, orientati
         end->next = this;
     end = this;
 }
-distance::distance(const distance &d) : min(d.min), est(d.est), max(d.max), ref(d.ref), balise_based(d.balise_based)
+relocable_dist_base::relocable_dist_base(const relocable_dist_base &d) : dist_base(d), ref(d.ref), type(d.type), balise_based(d.balise_based)
 #if BASELINE == 4
 , relocated_c(d.relocated_c)
 , relocated_c_earlier(d.relocated_c_earlier)
@@ -49,7 +49,7 @@ distance::distance(const distance &d) : min(d.min), est(d.est), max(d.max), ref(
         end->next = this;
     end = this;
 }
-distance::~distance()
+relocable_dist_base::~relocable_dist_base()
 {
     if (prev == nullptr)
         begin = next;
@@ -60,7 +60,7 @@ distance::~distance()
     else
         next->prev = prev;
 }
-distance &distance::operator = (const distance& d)
+relocable_dist_base &relocable_dist_base::operator = (const relocable_dist_base& d)
 {
 #if BASELINE == 4
     relocated_c = d.relocated_c;
@@ -68,18 +68,27 @@ distance &distance::operator = (const distance& d)
 #endif
     balise_based = d.balise_based;
     ref = d.ref;
-    min = d.min;
-    est = d.est;
-    max = d.max;
+    dist_base::operator=(d);
     return *this;
 }
 distance distance::from_odometer(const dist_base &dist)
 {
     distance d;
-    d.balise_based = false;
-    d.max = d.est = d.min = dist;
-    d.ref = dist.orientation == 0 ? d_estfront : d_estfront_dir[dist.orientation == -1];
+    relocable_dist_base rd(dist, dist.orientation == 0 ? d_estfront : d_estfront_dir[dist.orientation == -1]);
+    rd.balise_based = false;
+    d.max = d.est = d.min = rd;
+    d.max.type = 1;
+    d.est.type = 0;
+    d.min.type = -1;
     return d;
+}
+distance::distance(double val, int orientation, double ref)
+{
+    relocable_dist_base rd(dist_base(val, orientation), dist_base(ref, orientation));
+    max = est = min = rd;
+    max.type = 1;
+    est.type = 0;
+    min.type = -1;
 }
 dist_base &dist_base::operator=(const dist_base &d)
 {
@@ -117,7 +126,7 @@ bool dist_base::operator<(const dist_base &d) const
     d.dist >= std::numeric_limits<double>::max()) dir = 1;
     return dir == -1 ? dist>d.dist : dist<d.dist;
 }
-confidence_data confidence_data::from_distance(const distance &d)
+confidence_data confidence_data::from_distance(const relocable_dist_base &d)
 {
     confidence_data c;
     c.ref = d.ref;
@@ -166,13 +175,21 @@ dist_base d_minsafefront(const confidence_data &conf)
 {
     return d_minsafe(d_estfront, conf);
 }
+dist_base d_maxsafefront(const relocable_dist_base&ref)
+{
+    return d_maxsafe(ref.orientation == 0 ? d_estfront : d_estfront_dir[ref.orientation == -1], confidence_data::from_distance(ref));
+}
+dist_base d_minsafefront(const relocable_dist_base&ref)
+{
+    return d_minsafe(ref.orientation == 0 ? d_estfront : d_estfront_dir[ref.orientation == -1], confidence_data::from_distance(ref));
+}
 dist_base d_maxsafefront(const distance&ref)
 {
-    return d_maxsafe(ref.est.orientation == 0 ? d_estfront : d_estfront_dir[ref.est.orientation == -1], confidence_data::from_distance(ref));
+    return d_maxsafefront(ref.est);
 }
 dist_base d_minsafefront(const distance&ref)
 {
-    return d_minsafe(ref.est.orientation == 0 ? d_estfront : d_estfront_dir[ref.est.orientation == -1], confidence_data::from_distance(ref));
+    return d_minsafefront(ref.est);
 }
 dist_base d_estfront(0,0);
 dist_base d_estfront_dir[2] = {dist_base(0,1),dist_base(0,-1)};

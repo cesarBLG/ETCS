@@ -116,8 +116,8 @@ void update_track_conditions()
             if (track_condition_targets.find(c) == track_condition_targets.end())
             {
                 std::vector<std::shared_ptr<target>> l;
-                l.push_back(std::make_shared<target>(confidenced_distance(c->start.max, confidence_data::from_distance(c->start)), 0, target_class::EoA));
-                l.push_back(std::make_shared<target>(confidenced_distance(c->end.min + L_TRAIN, confidence_data::from_distance(c->end)), 0, target_class::EoA));
+                l.push_back(std::make_shared<target>(c->start.max, 0, target_class::EoA));
+                l.push_back(std::make_shared<target>(c->end.min + L_TRAIN, 0, target_class::EoA));
                 track_condition_targets[c] = l;
             }
             std::vector<std::shared_ptr<target>> &l = track_condition_targets[c];
