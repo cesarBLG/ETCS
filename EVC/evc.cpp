@@ -201,9 +201,9 @@ void update()
     update_national_values();
     update_procedures();
     update_stm_control();
-    update_supervision();
     update_lx();
     update_track_conditions();
+    update_supervision();
     update_messages();
     update_national_functions();
     update_train_subsystems();
