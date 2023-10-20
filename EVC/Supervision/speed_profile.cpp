@@ -59,6 +59,9 @@ void delete_back_info()
     PBDs.remove_if([mindist](std::shared_ptr<PBD_target> &t) {
         return t->end.min < mindist;
     });
+    level_crossings.remove_if([mindist](const level_crossing &lx) {
+        return lx.start.min + lx.length < mindist;
+    });
 }
 void delete_SSP(const distance &start)
 {
