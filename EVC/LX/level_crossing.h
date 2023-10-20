@@ -10,7 +10,7 @@
 #include "../Position/distance.h"
 #include "../Packets/88.h"
 #include "../optional.h"
-#include <set>
+#include <list>
 class level_crossing
 {
     public:
@@ -21,7 +21,7 @@ class level_crossing
     double V_LX;
     bool stop;
     double stoplength;
-    mutable optional<distance> svl_replaced;
+    optional<distance> svl_replaced;
     level_crossing(LevelCrossingInformation lx, distance ref)
     {
         id = lx.NID_LX;
@@ -35,11 +35,7 @@ class level_crossing
             if (stop) stoplength = lx.L_STOPLX.get_value(lx.Q_SCALE);
         }
     }
-    bool operator<(const level_crossing l) const
-    {
-        return start.max<l.start.max;
-    }
 };
-extern std::set<level_crossing> level_crossings;
+extern std::list<level_crossing> level_crossings;
 void load_lx(LevelCrossingInformation lx, distance ref);
 void update_lx();
