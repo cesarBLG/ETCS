@@ -33,10 +33,10 @@ void start_override()
         override_speed = speed_restriction(V_NVSUPOVTRP, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         override_start_time = get_milliseconds();
         if (mode == Mode::OS || mode == Mode::LS || mode == Mode::FS) {
-            if (EoA)
-                formerEoA = *EoA;
-            else if (LoA)
-                formerEoA = LoA->first;
+            if (MA && MA->EoA_ma)
+                formerEoA = *MA->EoA_ma;
+            else if (MA && MA->LoA_ma)
+                formerEoA = MA->LoA_ma->first;
         } else if (mode == Mode::PT || mode == Mode::SB) {
             formerEoA = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
         } else if (mode == Mode::SR) {
