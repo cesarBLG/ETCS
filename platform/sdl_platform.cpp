@@ -384,8 +384,10 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold,
 		font = TTF_OpenFont(path.c_str(), size * 1.4 * scale);
 #endif
 
-		if (font == nullptr)
+		if (font == nullptr) {
+			debug_print("load_font failed: " + path);
 			return nullptr;
+		}
 
 		wrapper = std::make_shared<SdlFontWrapper>(font);
 		loaded_fonts.insert_or_assign({size, bold, lang_str}, wrapper);
