@@ -142,6 +142,7 @@ SdlPlatform::~SdlPlatform() {
 	while (PlatformUtil::DeferredFulfillment::execute());
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
+	loaded_fonts.clear();
 	SDL_CloseAudioDevice(audio_device);
 	TTF_Quit();
 	SDL_DestroyRenderer(sdlrend);
