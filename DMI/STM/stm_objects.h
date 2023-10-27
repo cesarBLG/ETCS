@@ -22,16 +22,16 @@
 using json = nlohmann::json;
 struct stm_monitoring_data
 {
-    Color needle_color;
-    int Vperm_display;
+    Color needle_color = Grey;
+    int Vperm_display = 0;
     Color Vperm_color;
-    int Vtarget_display;
+    int Vtarget_display = 0;
     Color Vtarget_color;
-    int Vsbi_display;
+    int Vsbi_display = 0;
     Color Vsbi_color;
-    int Vrelease_display;
+    int Vrelease_display = 0;
     Color Vrelease_color;
-    int Dtarget_display;
+    int Dtarget_display = 0;
     stm_monitoring_data() = default;
     stm_monitoring_data(const STMSupervisionInformation &info)
     {
