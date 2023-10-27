@@ -120,19 +120,18 @@
    "130":{
       "TrainData":"TrainData/traindata_130.json",
       "SpeedDial":400,
-      "STMLayout":"stm_bombardier.json",
-      "AvailableNTC":[
-         0
-      ]
+      "STMLayout":"stm_bombardier.json"
   },
   "1305":{
      "TrainData":"TrainData/traindata_1305.json",
      "SpeedDial":400,
-     "STMLayout":"stm_bombardier.json",
-     "AvailableNTC":[
-        0
-     ]
+     "STMLayout":"stm_bombardier.json"
  },
+ "1302":{
+    "TrainData":"TrainData/traindata_1302.json",
+    "SpeedDial":400,
+    "STMLayout":"stm_bombardier.json"
+},
   "112": {
        "TrainData": "TrainData/traindata_112.json",
        "SpeedDial": 400,
@@ -144,12 +143,6 @@
         "STMLayout": "stm_siemens.json",
         "SoftKeys": true
     },
-    "1127": {
-         "TrainData": "TrainData/traindata_1127.json",
-         "SpeedDial": 400,
-         "STMLayout": "stm_siemens.json",
-         "SoftKeys": true
-     },
   "102": {
        "TrainData": "TrainData/traindata_102.json",
        "SpeedDial": 400,

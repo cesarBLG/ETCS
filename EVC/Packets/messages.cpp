@@ -265,7 +265,7 @@ void update_track_comm()
     } else {
         eurobalise_telegram t = pending_telegrams.front().first;
         distance passed_dist = pending_telegrams.front().second.first-L_antenna_front;
-        log_message(std::shared_ptr<ETCS_message>(new eurobalise_telegram(t)), passed_dist.est, pending_telegrams.front().second.second);
+        log_message(t, passed_dist.est, pending_telegrams.front().second.second);
         pending_telegrams.pop_front();
         extern optional<distance> rmp_position;
         int rev = ((mode == Mode::PT || mode == Mode::RV) ? -1 : 1);
