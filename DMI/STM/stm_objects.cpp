@@ -66,6 +66,7 @@ void setup_areas()
 }
 ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
+    customized = nullptr;
     auto contents = platform->read_file(stm_layout_file);
     if (contents) {
         json j = json::parse(*contents);

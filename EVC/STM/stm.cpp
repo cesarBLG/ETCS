@@ -11,6 +11,7 @@
 #include "../Procedures/override.h"
 #include "../Packets/messages.h"
 #include "../Packets/etcs_information.h"
+#include "../Packets/logging.h"
 #include "../Supervision/train_data.h"
 #include "../Packets/STM/1.h"
 #include "../Packets/STM/5.h"
@@ -166,6 +167,12 @@ void fill_stm_transitions()
 {
     std::vector<stm_transition> stm_transitions;
     stm_transitions.push_back({stm_state::NP, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::CO, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::DE, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::CS, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::HS, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::DA, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::FA, stm_state::PO, {"A1"}});
     stm_transitions.push_back({stm_state::PO, stm_state::CO, {"A2"}});
     stm_transitions.push_back({stm_state::CO, stm_state::DE, {"A3"}});
     stm_transitions.push_back({stm_state::CO, stm_state::CS, {"A4a"}});
@@ -187,7 +194,6 @@ void fill_stm_transitions()
     stm_transitions.push_back({stm_state::HS, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::DA, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::FA, stm_state::NP, {"A15"}});
-    stm_transitions.push_back({stm_state::FA, stm_state::PO, {"A1"}});
     stm_transitions.push_back({stm_state::DA, stm_state::CCS, {"A4b","B4b"}});
     stm_transitions.push_back({stm_state::DA, stm_state::CS, {"B4a", "I4a", "E4a", "K4a", "L4a"}});
     stm_transitions.push_back({stm_state::HS, stm_state::CS, {"C4a", "E4b", "G4a", "H4b", "I4a", "J4a"}});
@@ -207,7 +213,7 @@ void update_ntc_transitions()
             std::string type = t.happens(stm);
             if (type != "") {
 #ifdef DEBUG_STM
-                platform->debug_print("STM "+std::to_string(kvp.first)+": "+type)
+                platform->debug_print("STM "+std::to_string(kvp.first)+": "+type);
 #endif
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
@@ -650,13 +656,14 @@ void setup_stm_control()
     ntc_names[50] = "TGMT";
     fill_stm_transitions();
 }
-void handle_stm_message(const stm_message &msg)
+void handle_stm_message(stm_message &msg)
 {
     int nid_stm = msg.NID_STM;
     if (installed_stms.find(nid_stm) == installed_stms.end()) {
         installed_stms[nid_stm] = new stm_object();
         installed_stms[nid_stm]->nid_stm = nid_stm;
     }
+    //log_message(msg, d_estfront, get_milliseconds());
     stm_object *stm = installed_stms[nid_stm];
     for (auto &pack : msg.packets) {
         switch((unsigned char)pack->NID_PACKET.rawdata) {

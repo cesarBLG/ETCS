@@ -81,7 +81,7 @@ void communication_session::finalize()
 }
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
-    log_message(msg, d_estfront, get_milliseconds());
+    log_message(*msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
 #ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Message rejected");
@@ -171,7 +171,7 @@ void communication_session::update_ack()
                             mode.rawdata = 3;
                     }
                 }
-                log_message(msg.message, d_estfront, get_milliseconds());
+                log_message(*msg.message, d_estfront, get_milliseconds());
                 if (connection != nullptr) {
                     connection->send(msg.message);
                 }
@@ -305,7 +305,7 @@ void communication_session::setup_connection()
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)
 {
     msg = translate_message(msg, version);
-    log_message(msg, d_estfront, get_milliseconds());
+    log_message(*msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
         return;
     std::set<int> ack;
