@@ -172,12 +172,12 @@ void update_radio()
             }
         }
         if (pos_report_params) {
-            if (std::abs(d_estfront-d_last_pos_rep) > pos_report_params->D_sendreport)
+            if (std::abs(d_estfront-d_last_pos_rep.est) > pos_report_params->D_sendreport)
                 rep = true;
             if (get_milliseconds()-t_last_pos_rep > pos_report_params->T_sendreport)
                 rep = true;
             for (auto it = pos_report_params->location_front.begin(); it != pos_report_params->location_front.end(); ) {
-                if (d_maxsafefront(*it)>*it) {
+                if (d_maxsafefront(*it)>it->max) {
                     rep = true;
                     it = pos_report_params->location_front.erase(it);
                 } else {
@@ -185,7 +185,7 @@ void update_radio()
                 }
             }
             for (auto it = pos_report_params->location_rear.begin(); it != pos_report_params->location_rear.end(); ) {
-                if (d_minsafefront(*it)-L_TRAIN>*it) {
+                if (d_minsafefront(*it)-L_TRAIN>it->min) {
                     rep = true;
                     it = pos_report_params->location_rear.erase(it);
                 } else {
@@ -208,7 +208,7 @@ void send_position_report(bool som)
         if (!supervising_rbc)
             return;
         auto *rep = new SoM_position_report();
-        if (lrbgs.empty())
+        if (!solr)
             rep->Q_STATUS.rawdata = Q_STATUS_t::Unknown;
         else
             rep->Q_STATUS.rawdata = position_valid ? Q_STATUS_t::Valid : Q_STATUS_t::Invalid; 
@@ -240,7 +240,7 @@ void send_position_report(bool som)
                 session->pending_ack.push_back({acks, msg, 1, get_milliseconds()});
         }
         t_last_pos_rep = get_milliseconds();
-        d_last_pos_rep = d_estfront;
+        d_last_pos_rep = distance::from_odometer(d_estfront);
     }
     for (auto &b : position_report_reasons)
         b = false;
@@ -277,11 +277,23 @@ void fill_message(euroradio_message_traintotrack *m)
 }
 ETCS_packet *get_position_report()
 {
-    if (lrbgs.empty() || lrbgs.back().dir != -1) {
+    std::optional<lrbg_info> lrbg;
+    std::optional<lrbg_info> prvlrbg;
+    for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
+        if ((it->second & 1) == 0) {
+            if (!lrbg)
+                lrbg = it->first;
+            else if (!prvlrbg) {
+                prvlrbg = it->first;
+                break;
+            }
+        }
+    }
+    if (!lrbg || lrbg->dir != -1) {
         PositionReport *r = new PositionReport();
         r->NID_PACKET = 0;
         r->Q_SCALE = Q_SCALE_t::m1;
-        if (lrbgs.empty()) {
+        if (!lrbg) {
             r->NID_LRBG = NID_LRBG_t::Unknown;
             r->D_LRBG = D_LRBG_t::Unknown;
             r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
@@ -290,15 +302,15 @@ ETCS_packet *get_position_report()
             r->L_DOUBTUNDER = L_DOUBTUNDER_t::Unknown;
             r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
         } else {
-            int dir = lrbgs.back().dir;
-            r->NID_LRBG.set_value(lrbgs.back().nid_lrbg);
-            double dist = d_estfront - lrbgs.back().position;
+            int dir = lrbg->dir;
+            r->NID_LRBG.set_value(lrbg->nid_lrbg);
+            double dist = d_estfront - lrbg->position;
             r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
-            r->Q_DIRLRBG.set_value(odometer_orientation * lrbgs.back().position.get_orientation() == 1 ? dir : 1-dir);
+            r->Q_DIRLRBG.set_value(odometer_orientation * lrbg->position.orientation == 1 ? dir : 1-dir);
             r->Q_DLRBG.set_value(dist > 0 ? dir : 1-dir);
-            r->Q_DIRTRAIN.set_value(odometer_direction * lrbgs.back().position.get_orientation() == 1 ? dir : 1-dir);
-            r->L_DOUBTOVER.set_value(d_maxsafefront(lrbgs.back().position)-d_estfront, r->Q_SCALE);
-            r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront(lrbgs.back().position), r->Q_SCALE);
+            r->Q_DIRTRAIN.set_value(odometer_direction * lrbg->position.orientation == 1 ? dir : 1-dir);
+            r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
+            r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront({lrbg->position, lrbg->locacc}), r->Q_SCALE);
         }
         r->Q_LENGTH = Q_LENGTH_t::NoTrainIntegrityAvailable;
         r->V_TRAIN.set_value(V_est);
@@ -309,21 +321,20 @@ ETCS_packet *get_position_report()
         PositionReportBasedOnTwoBaliseGroups *r = new PositionReportBasedOnTwoBaliseGroups();
         r->NID_PACKET = 1;
         r->Q_SCALE = Q_SCALE_t::m1;
-        r->NID_LRBG.set_value(lrbgs.back().nid_lrbg);
-        double dist = d_estfront - lrbgs.back().position;
+        r->NID_LRBG.set_value(lrbg->nid_lrbg);
+        double dist = d_estfront - lrbg->position;
         r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
-        if (lrbgs.size() > 1) {
-            lrbg_info &prevLRBG = *(----lrbgs.end());
-            if (prevLRBG.position.get_orientation() != lrbgs.back().position.get_orientation()) {
+        if (prvlrbg) {
+            if (prvlrbg->position.orientation != lrbg->position.orientation) {
                 r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
                 r->Q_DLRBG = Q_DLRBG_t::Unknown;
                 r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
                 r->NID_PRVLRBG = NID_PRVLRBG_t::Unknown;
             } else {
-                r->Q_DIRLRBG.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_orientation < 0);
+                r->Q_DIRLRBG.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_orientation < 0);
                 r->Q_DLRBG.set_value(dist < 0);
-                r->Q_DIRTRAIN.set_value((lrbgs.back().position.get()-prevLRBG.position.get())*odometer_direction < 0);
-                r->NID_PRVLRBG.set_value(prevLRBG.nid_lrbg);
+                r->Q_DIRTRAIN.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_direction < 0);
+                r->NID_PRVLRBG.set_value(prvlrbg->nid_lrbg);
             }
         } else {
             r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
@@ -331,8 +342,8 @@ ETCS_packet *get_position_report()
             r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
             r->NID_PRVLRBG = NID_PRVLRBG_t::Unknown;
         }
-        r->L_DOUBTOVER.set_value(d_maxsafefront(lrbgs.back().position)-d_estfront, r->Q_SCALE);
-        r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront(lrbgs.back().position), r->Q_SCALE);
+        r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
+        r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront({lrbg->position, lrbg->locacc}), r->Q_SCALE);
         r->Q_LENGTH = Q_LENGTH_t::NoTrainIntegrityAvailable;
         r->V_TRAIN.set_value(V_est);
         r->M_MODE.set_value(mode);

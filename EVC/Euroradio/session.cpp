@@ -81,15 +81,19 @@ void communication_session::finalize()
 }
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
-    log_message(msg, d_estfront, get_milliseconds());
+    log_message(*msg, d_estfront, get_milliseconds());
     if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
+#ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Message rejected");
+#endif
         return;
     }
     int64_t timestamp = msg->T_TRAIN.get_value();
     if (timestamp <= last_valid_timestamp) {
         if (msg->NID_MESSAGE != 15 && msg->NID_MESSAGE != 16) {
+#ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Message rejected: T_TRAIN < last_valid_timestamp");
+#endif
             return;
         }
     } else {
@@ -167,7 +171,7 @@ void communication_session::update_ack()
                             mode.rawdata = 3;
                     }
                 }
-                log_message(msg.message, d_estfront, get_milliseconds());
+                log_message(*msg.message, d_estfront, get_milliseconds());
                 if (connection != nullptr) {
                     connection->send(msg.message);
                 }
@@ -301,7 +305,7 @@ void communication_session::setup_connection()
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)
 {
     msg = translate_message(msg, version);
-    log_message(msg, d_estfront, get_milliseconds());
+    log_message(*msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
         return;
     std::set<int> ack;
@@ -348,7 +352,7 @@ void update_euroradio()
     }
     if (handing_over_rbc && handing_over_rbc->status == session_status::Inactive)
         handing_over_rbc = nullptr;
-    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position) {
+    if (accepting_rbc && d_maxsafefront(rbc_transition_position) < rbc_transition_position.max) {
         if (!handover_report_accepting && accepting_rbc->status == session_status::Established) {
             handover_report_accepting = true;
             handover_report_max = true;
@@ -370,7 +374,7 @@ void update_euroradio()
         if (handing_over_rbc && handing_over_rbc->status == session_status::Establishing)
             handing_over_rbc->finalize();
     }
-    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position && !handover_report_min) {
+    if (handing_over_rbc && d_minsafefront(rbc_transition_position) - L_TRAIN < rbc_transition_position.min && !handover_report_min) {
         position_report_reasons[4] = true;
         handover_report_min = true;
     }
@@ -400,7 +404,7 @@ void update_euroradio()
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         auto *tc = it->get();
         if (tc->condition == TrackConditions::RadioHole) {
-            if (tc->start < d_maxsafefront(tc->start) && tc->end > d_minsafefront(tc->start) - L_TRAIN)
+            if (tc->start.max < d_maxsafefront(tc->start) && tc->end.min > d_minsafefront(tc->start) - L_TRAIN)
                 radio_hole = true;
         }
     }
@@ -492,7 +496,7 @@ void set_supervising_rbc(contact_info info)
         return;
     set_rbc_contact(info);
     for (auto *session : active_sessions) {
-        if (session->contact == info) {
+        if (session->contact.country == info.country && session->contact.id == info.id) {
             supervising_rbc = session;
             return;
         }

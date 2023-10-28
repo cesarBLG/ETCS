@@ -62,8 +62,16 @@ void displayMode()
         case Mode::LS:
             num = 21;
             break;
-        case Mode::IS:
+#if BASELINE == 4
+        case Mode::AD:
             num = 23;
+            break;
+        case Mode::SM:
+            num = 24;
+            break;
+#endif
+        case Mode::IS:
+            num = 25;
             break;
     }
     if(num<10) path+="0";

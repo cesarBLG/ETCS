@@ -21,11 +21,13 @@
 #include "../TrainSubsystems/train_interface.h"
 #include <set>
 std::list<std::shared_ptr<PBD_target>> PBDs;
-target::target(distance dist, double speed, target_class type) : basic_target(dist, speed, type)
+target::target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : basic_target(dist, speed, type, is_TSR)
 {
+    if (is_TSR)
+        default_gradient = default_gradient_tsr;
     calculate_decelerations();
 }
-distance target::get_distance_curve(double velocity) const
+dist_base target::get_distance_curve(double velocity) const
 {
     /*if (type == target_class::MRSP) {
         distance a = distance_curve(A_safe, d_target, V_target+dV_ebi(V_target), velocity).get();
@@ -52,7 +54,7 @@ distance target::get_distance_curve(double velocity) const
         return distance_curve(A_expected, d_target, 0, velocity);
     }
 }
-double target::get_speed_curve(distance dist) const
+double target::get_speed_curve(dist_base dist) const
 {
     if (is_EBD_based) {
         if (type == target_class::SvL || type == target_class::SR_distance || type == target_class::PBD)
@@ -63,26 +65,26 @@ double target::get_speed_curve(distance dist) const
         return speed_curve(A_expected, d_target, 0, dist);
     }
 }
-distance target::get_distance_gui_curve(double velocity) const
+dist_base target::get_distance_gui_curve(double velocity) const
 {
-    distance guifoot;
+    dist_base guifoot;
     if (type == target_class::EoA || type == target_class::SvL) {
         guifoot = d_target;
     } else {
         double V_delta0t = 0;
-        distance debi = get_distance_curve(V_target+V_delta0t)-(V_target+V_delta0t)*(T_berem+T_traction);
+        dist_base debi = get_distance_curve(V_target+V_delta0t)-(V_target+V_delta0t)*(T_berem+T_traction);
         guifoot = debi-V_target*(T_driver+T_bs2);
     }
     return distance_curve(A_normal_service, guifoot, V_target, velocity);
 }
-double target::get_speed_gui_curve(distance dist) const
+double target::get_speed_gui_curve(dist_base dist) const
 {
-    distance guifoot;
+    dist_base guifoot;
     if (type == target_class::EoA || type == target_class::SvL) {
         guifoot = d_target;
     } else {
         double V_delta0t = 0.007*V_target;
-        distance debi = get_distance_curve(V_target+V_delta0t)-(V_target+V_delta0t)*(T_berem+T_traction);
+        dist_base debi = get_distance_curve(V_target+V_delta0t)-(V_target+V_delta0t)*(T_berem+T_traction);
         guifoot = debi-V_target*(T_driver+T_bs2);
     }
     return speed_curve(A_normal_service, guifoot, V_target, dist);
@@ -132,10 +134,10 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         d_I = d_P - T_indication*V_est;
         
         double D_be_display = (V_est+V_delta0+V_delta1/2)*T_traction + (V_est + V_delta0 + V_delta1 + V_delta2/2)*T_berem;
-        distance v_sbi_dappr = d_maxsafefront(d_target) + V_est*T_bs2 + D_be_display;
+        dist_base v_sbi_dappr = d_maxsafefront(d_target) + V_est*T_bs2 + D_be_display;
         V_SBI2 = v_sbi_dappr < get_distance_curve(V_target) ? std::max(get_speed_curve(v_sbi_dappr)-(V_delta0+V_delta1+V_delta2),V_target + dV_sbi(V_target)) : (V_target + dV_sbi(V_target));
         
-        distance v_p_dappr = d_maxsafefront(d_target) + V_est*(T_driver+T_bs2) + D_be_display;
+        dist_base v_p_dappr = d_maxsafefront(d_target) + V_est*(T_driver+T_bs2) + D_be_display;
         if (v_p_dappr < get_distance_curve(V_target) || (Q_NVGUIPERM && d_maxsafefront(d_target) < get_distance_gui_curve(V_target))) {
             V_P = get_speed_curve(v_p_dappr) - (V_delta0+V_delta1+V_delta2);
             if (Q_NVGUIPERM)
@@ -151,10 +153,10 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
         double T_indication = std::max(0.8*T_bs, 5.0) + T_driver;
         d_I = d_P - T_indication*V_est;
         
-        distance v_sbi_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*T_bs1;
+        dist_base v_sbi_dappr = d_estfront_dir[d_target.orientation == -1] + V_est*T_bs1;
         V_SBI1 = v_sbi_dappr < d_target ? get_speed_curve(v_sbi_dappr) : 0;
             
-        distance v_p_dappr = d_estfront_dir[d_target.get_orientation() == -1] + V_est*(T_driver + T_bs1);
+        dist_base v_p_dappr = d_estfront_dir[d_target.orientation == -1] + V_est*(T_driver + T_bs1);
         if (v_p_dappr < d_target) {
             V_P = get_speed_curve(v_p_dappr);
             if (Q_NVGUIPERM)
@@ -172,25 +174,28 @@ optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
 static std::list<std::shared_ptr<target>> supervised_targets;
 bool changed = false;
+void recalculate_all_decelerations();
 void set_supervised_targets()
 {
+    update_brake_contributions();
     changed = true;
     indication_target = nullptr;
     supervised_targets.clear();
     if (mode != Mode::SR && mode != Mode::UN && mode != Mode::FS && mode != Mode::OS && mode != Mode::LS) return;
-    std::map<distance, double> MRSP = get_MRSP();
+    auto &MRSP = get_MRSP();
     if (!MRSP.empty()) {
         auto minMRSP = MRSP.begin();
         auto prev = minMRSP;
         for (auto it=++minMRSP; it!=MRSP.end(); ++it) {
             if (it->second < prev->second && d_maxsafefront(it->first)<it->first) {
-                auto t = std::make_shared<target>(it->first, it->second, target_class::MRSP);
+                bool is_TSR = false;
                 for (auto &tsr : TSRs) {
                     if (it->first == tsr.restriction.get_start() && it->second == tsr.restriction.get_speed()) {
-                        t->is_TSR = true;
+                        is_TSR = true;
                         break;
                     }
                 }
+                auto t = std::make_shared<target>(it->first, it->second, target_class::MRSP, is_TSR);
                 supervised_targets.push_back(t);
             }
             prev = it;
@@ -198,15 +203,15 @@ void set_supervised_targets()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         if (SvL)
-            supervised_targets.push_back(std::make_shared<target>(*SvL, 0, target_class::SvL));
+            supervised_targets.push_back(std::make_shared<target>(SvL->max, 0, target_class::SvL));
         if (EoA)
-            supervised_targets.push_back(std::make_shared<target>(*EoA, 0, target_class::EoA));
+            supervised_targets.push_back(std::make_shared<target>(EoA->est, 0, target_class::EoA));
         if (LoA)
-            supervised_targets.push_back(std::make_shared<target>(LoA->first, LoA->second, target_class::LoA));
+            supervised_targets.push_back(std::make_shared<target>(LoA->first.max, LoA->second, target_class::LoA));
     }
-    if (SR_dist && mode == Mode::SR) {
-        supervised_targets.push_back(std::make_shared<target>(*SR_dist, 0, target_class::SR_distance));
-    }
+    if (SR_dist && mode == Mode::SR)
+        supervised_targets.push_back(std::make_shared<target>(SR_dist->max, 0, target_class::SR_distance));
+    target::recalculate_all_decelerations();
 }
 bool supervised_targets_changed()
 {
@@ -233,10 +238,10 @@ void target::calculate_decelerations()
 {
     calculate_decelerations(get_gradient());
 }
-void target::calculate_decelerations(const std::map<distance,double> &gradient)
+void target::calculate_decelerations(const std::map<dist_base,double> &gradient)
 {
-    std::map<distance,bool> redadh;
-    redadh[distance(std::numeric_limits<double>::lowest(), 0, 0)] = false;
+    std::map<dist_base,bool> redadh;
+    redadh[dist_base(std::numeric_limits<double>::lowest(), 0)] = false;
     acceleration A_gradient = get_A_gradient(gradient, default_gradient);
     acceleration A_brake_emergency = get_A_brake_emergency(use_brake_combination);
     acceleration A_brake_service = get_A_brake_service(use_brake_combination);
@@ -295,18 +300,10 @@ void target::calculate_decelerations(const std::map<distance,double> &gradient)
 void target::recalculate_all_decelerations()
 {
     std::vector<std::shared_ptr<target>> targets;
-    for (auto &t : supervised_targets) {
-        targets.push_back(t);
-    }
     extern std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
     for (auto &kvp : track_condition_targets) {
         for (auto &t : kvp.second)
-            targets.push_back(t);
-    }
-    for (auto &t : targets) {
-        if (t->is_TSR)
-            t->default_gradient = default_gradient_tsr;
-        t->calculate_decelerations();
+            t->calculate_decelerations();
     }
     calculate_perturbation_location();
 }
@@ -314,12 +311,12 @@ void PBD_target::calculate_restriction()
 {
     calculate_times();
     float V_PBD = 0;
-    distance doffset = start + L_antenna_front;
+    dist_base doffset = (is_EBD_based ? start.max : start.est) + L_antenna_front;
     for (double v_pbd = 0; v_pbd<500/3.6; v_pbd+=0.8/3.6) {
         if (is_EBD_based) {
             float V_delta0PBD = Q_NVINHSMICPERM ? 0 : 0;
             float Dbec = (v_pbd + dV_ebi(v_pbd) + V_delta0PBD)*(T_traction + T_berem);
-            distance d1 = doffset + Dbec;
+            dist_base d1 = doffset + Dbec;
             if (d1 <= d_target && abs(v_pbd+dV_ebi(v_pbd)-(speed_curve(A_safe, d_target, 0, d1)-V_delta0PBD))<=1/3.6) {
                 V_PBD = v_pbd;
                 break;
@@ -327,7 +324,7 @@ void PBD_target::calculate_restriction()
         } else {
             float V_delta0PBD = Q_NVINHSMICPERM ? 0 : 0;
             float Dbec = (v_pbd + dV_sbi(v_pbd) + V_delta0PBD)*(T_traction + T_berem);
-            distance d1 = doffset + Dbec + (v_pbd + dV_sbi(v_pbd))*T_bs2;
+            dist_base d1 = doffset + Dbec + (v_pbd + dV_sbi(v_pbd))*T_bs2;
             if (d1 <= d_target && abs(v_pbd+dV_sbi(v_pbd)-(speed_curve(A_safe, d_target, 0, d1)-V_delta0PBD))<=1/3.6) {
                 V_PBD = v_pbd;
                 break;
@@ -337,7 +334,7 @@ void PBD_target::calculate_restriction()
     if (!is_EBD_based) {
         float V_PBD_SB = 0;
         for (double v_pbd = 0; v_pbd<500/3.6; v_pbd+=0.8/3.6) {
-            distance d1 = doffset + (v_pbd + dV_sbi(v_pbd))*T_bs1;
+            dist_base d1 = doffset + (v_pbd + dV_sbi(v_pbd))*T_bs1;
             if (d1 <= d_target && abs(v_pbd+dV_sbi(v_pbd)-(speed_curve(A_expected, d_target, 0, d1)))<=1/3.6) {
                 V_PBD_SB = v_pbd;
                 break;
@@ -357,7 +354,7 @@ void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
     }
     reset_pbd = {};
     distance start = ref+pbd.element.D_PBDSR.get_value(pbd.Q_SCALE);
-    PBDs.remove_if([start](std::shared_ptr<PBD_target> &t) {return t->start < start;});
+    PBDs.remove_if([start](std::shared_ptr<PBD_target> &t) {return t->start.min < start.max;});
     std::vector<PBD_element> elements;
     elements.push_back(pbd.element);
     elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());
@@ -366,5 +363,4 @@ void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
         double grad = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_PBDSR;
         PBDs.push_back(std::make_shared<PBD_target>(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == Q_PBDSR_t::EBIntervention, grad));
     }
-    recalculate_MRSP();
 }

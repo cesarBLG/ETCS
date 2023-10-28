@@ -33,7 +33,7 @@ void update_mode_profile()
         return;
     }
     mode_profile first = mode_profiles.front();
-    if (first.mode != Mode::SH && first.length < std::numeric_limits<float>::max() && first.start + first.length < d_minsafefront(first.start)) {
+    if (first.mode != Mode::SH && first.length < std::numeric_limits<float>::max() && first.start.min + first.length < d_minsafefront(first.start)) {
         mode_profiles.pop_front();
         update_mode_profile();
         calculate_SvL();
@@ -41,7 +41,7 @@ void update_mode_profile()
     }
     if (mode_profiles.size() > 1) {
         mode_profile second = *(++mode_profiles.begin());
-        if (second.start < d_maxsafefront(second.start)) {
+        if (second.start.max < d_maxsafefront(second.start)) {
             mode_profiles.pop_front();
             update_mode_profile();
             calculate_SvL();
@@ -50,7 +50,7 @@ void update_mode_profile()
     }
     for (auto it = mode_profiles.begin(); it != mode_profiles.end(); ++it) {
         mode_profile &p = *it;
-        if (d_estfront > p.start-p.acklength) {
+        if (d_estfront > p.start.est-p.acklength) {
             if (mode_acknowledged && mode_to_ack == p.mode) {
                 if (it != mode_profiles.begin()) {
                     mode_profiles.erase(mode_profiles.begin(), it);
@@ -68,7 +68,7 @@ void update_mode_profile()
             }
         }
     }
-    if (d_maxsafefront(first.start) > first.start) {
+    if (d_maxsafefront(first.start) > first.start.max) {
         requested_mode_profile = first;
         if (mode != first.mode) {
             mode_timer_started = true;
@@ -100,7 +100,7 @@ void reset_mode_profile(distance ref, bool infill)
 {
     if (infill) {
         for (auto it = mode_profiles.begin(); it != mode_profiles.end(); ++it) {
-            if (it->start >= ref) {
+            if (it->start.max >= ref.max) {
                 mode_profiles.erase(it, mode_profiles.end());
                 break;
             }

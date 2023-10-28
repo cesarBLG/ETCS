@@ -44,25 +44,25 @@ void initialize_mode_transitions()
     c[4] = [](){return true;};
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
-    c[10] = [](){return train_data_valid && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
-    c[12] = [](){return level == Level::N1 && EoA && *EoA<(d_minsafefront(*EoA)-L_antenna_front);};
+    c[10] = [](){return train_data_valid && MA && SSP_begin() < dist_base::max && !get_gradient().empty() && !requested_mode_profile;};
+    c[12] = [](){return level == Level::N1 && MA && ((MA->EoA_ma && MA->EoA_ma->min<(d_minsafefront(*MA->EoA_ma)-L_antenna_front) || (MA->LoA_ma && MA->LoA_ma->first.min<(d_minsafefront(MA->LoA_ma->first)-L_antenna_front))));};
     c[14] = [](){return !cab_active[0] && !cab_active[1] && V_est == 0 && sl_signal;};
     c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
-    c[16] = [](){return (level == Level::N2 || level==Level::N3) && EoA && *EoA<d_minsafefront(*EoA);};
+    c[16] = [](){return (level == Level::N2 || level==Level::N3) && MA && ((MA->EoA_ma && MA->EoA_ma->min<d_minsafefront(*MA->EoA_ma)) || (MA->LoA_ma && MA->LoA_ma->first.min<d_minsafefront(MA->LoA_ma->first)));};
     c[21] = [](){return level == Level::N0;};
-    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && !get_SSP().empty() && !get_gradient().empty() && !requested_mode_profile;};
+    c[25] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && MA && SSP_begin() < dist_base::max && !get_gradient().empty() && !requested_mode_profile;};
     c[27] = [](){return !cab_active[0] && !cab_active[1];};
     c[28] = [](){return !cab_active[0] && !cab_active[1];};
     c[29] = [](){return false;};
     c[30] = [](){return !cab_active[0] && !cab_active[1] && !ps_signal;};
-    c[31] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
-    c[32] = [](){return MA && !get_SSP().empty() && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
-    c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
+    c[31] = [](){return MA && SSP_begin() < dist_base::max && !get_gradient().empty() && (level == Level::N2 || level==Level::N3) && !requested_mode_profile;};
+    c[32] = [](){return MA && SSP_begin() < dist_base::max && !get_gradient().empty() && level == Level::N1 && MA->get_v_main() > 0 && !requested_mode_profile;};
+    c[34] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
     c[37] = [](){return false;};
     c[39] = [](){return (level == Level::N1 || level == Level::N2 || level==Level::N3) && !MA;};
-    c[40] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
-    c[42] = [](){return SR_dist && *SR_dist < d_estfront && !overrideProcedure;};
-    c[43] = [](){return !overrideProcedure && formerEoA && *formerEoA<d_minsafefront(*formerEoA)-L_antenna_front;};
+    c[40] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start);};
+    c[42] = [](){return SR_dist && SR_dist->est < d_estfront && !overrideProcedure;};
+    c[43] = [](){return !overrideProcedure && formerEoA && formerEoA->min<d_minsafefront(*formerEoA)-L_antenna_front;};
     c[44] = [](){return overrideProcedure && level == Level::N1;};
     c[45] = [](){
         if (overrideProcedure && (level == Level::N2 || level == Level::N3)) {
@@ -75,21 +75,21 @@ void initialize_mode_transitions()
         return false;
     };
     c[50] = [](){return mode_to_ack==Mode::SH && mode_acknowledged;};
-    c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    c[51] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start);};
     c[56] = [](){return level==Level::NTC;};
     c[58] = [](){return level==Level::NTC && mode_to_ack == Mode::SN && mode_acknowledged;};
     c[59] = [](){return V_est == 0 && mode_to_ack == Mode::RV && mode_acknowledged;};
     c[60] = [](){return mode_to_ack==Mode::UN && mode_acknowledged;};
-    c[61] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start) && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
+    c[61] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::SH && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start) && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
     c[62] = [](){return level==Level::N0 && V_est==0 && train_data_valid && mode_acknowledged;};
     c[63] = [](){return level==Level::NTC && V_est==0 && train_data_valid && mode_acknowledged;};
     c[68] = [](){return (level==Level::N0 || level==Level::NTC) && V_est==0 && !train_data_valid && mode_acknowledged;};
-    c[69] = [](){return get_SSP().empty() || get_SSP().begin()->get_start()>d_estfront || get_gradient().empty() || get_gradient().begin()->first>d_estfront;};
+    c[69] = [](){return SSP_begin() > d_estfront || get_gradient().empty() || get_gradient().begin()->first>d_estfront;};
     c[70] = [](){return mode_to_ack==Mode::LS && mode_acknowledged;};
-    c[71] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
-    c[72] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
-    c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
-    c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start < d_maxsafefront(mode_profiles.front().start);};
+    c[71] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start)  && (level == Level::N1 || level == Level::N2 || level==Level::N3);};
+    c[72] = [](){return !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start);};
+    c[73] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::LS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::OS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start);};
+    c[74] = [](){return !(in_mode_ack_area && mode_to_ack == Mode::OS) && !mode_profiles.empty() && mode_profiles.front().mode == Mode::LS && mode_profiles.front().start.max < d_maxsafefront(mode_profiles.front().start);};
     
     // Out of SRS conditions
     c[75] = [](){return !isolated;};
@@ -263,10 +263,15 @@ void update_mode_status()
 {
     if (!prev_desk_open && (cab_active[0] ^ cab_active[1])) {
         odometer_orientation = cab_active[0] ? 1 : -1;
-        for (auto &lrbg : lrbgs) {
-            if (lrbg.dir != -1 && lrbg.position.get_orientation() != odometer_orientation)
-                lrbg.dir = 1-lrbg.dir;
-            lrbg.position = distance(lrbg.position.get(), odometer_orientation, 0);
+        if (solr) {
+            if (solr->dir != -1 && solr->position.orientation != odometer_orientation)
+                solr->dir = 1-solr->dir;
+            solr->position.orientation = odometer_orientation;
+        }
+        for (auto &it : orbgs) {
+            if (it.first.dir != -1 && it.first.position.orientation != odometer_orientation)
+                it.first.dir = 1-it.first.dir;
+            it.first.position.orientation = odometer_orientation;
         }
         void reset_eurobalise_data();
         reset_eurobalise_data();
@@ -280,8 +285,9 @@ void update_mode_status()
     for (mode_transition &t : available) {
         int i = t.happens();
         if (t.from == mode && i>=0 && t.priority < priority) {
-            if (t.to == Mode::TR)
-                platform->debug_print("TRIP " + std::to_string(i));
+#ifdef DEBUG_MODE
+            platform->debug_print("Mode transition: "+std::to_string(i));
+#endif
             transition = t.to;
             priority = t.priority;
             transition_index = i;
@@ -300,11 +306,11 @@ void update_mode_status()
             if (D_STFF_rbc)
                 D_STFF = *D_STFF_rbc;
             if (std::isfinite(D_STFF)) {
-                SR_dist = d_estfront_dir[odometer_orientation == -1]+D_STFF;
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
+                SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]+D_STFF);
+                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), *SR_dist, false);
             } else {
                 SR_dist = {};
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
             }
         } else {
             D_STFF_rbc = {};
@@ -313,25 +319,25 @@ void update_mode_status()
             formerEoA = {};
         }
         if (mode == Mode::UN)
-            UN_speed = speed_restriction(V_NVUNFIT, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+            UN_speed = speed_restriction(V_NVUNFIT, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         else
             UN_speed = {};
         if (mode == Mode::SH)
-            SH_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVSHUNT, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+            SH_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVSHUNT, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         else
             SH_speed = {};
         
         if (mode == Mode::FS) {
             add_message(text_message(get_text("Entering FS"), true, false, false, [](text_message &t){
-                distance back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
-                return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
+                dist_base back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
+                return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin()<back && get_gradient().begin()->first<back);
             }));
         }
         if (mode == Mode::OS) {
             OS_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVONSIGHT, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
             add_message(text_message(get_text("Entering OS"), true, false, false, [](text_message &t){
-                distance back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
-                return get_gradient().empty() || get_SSP().empty() || (get_SSP().begin()->get_start()<back && get_gradient().begin()->first<back);
+                dist_base back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
+                return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin()<back && get_gradient().begin()->first<back);
             }));
         } else {
             OS_speed = {};

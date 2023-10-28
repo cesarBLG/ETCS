@@ -114,7 +114,7 @@ void send_failed_msg(stm_object *stm);
 void assign_stm(int nid_ntc, bool driver);
 void setup_stm_control();
 void update_stm_control();
-void handle_stm_message(const stm_message &msg);
+void handle_stm_message(stm_message &msg);
 void stm_send_train_data();
 stm_object *get_stm(int nid_ntc);
 std::string get_ntc_name(int nid_ntc);

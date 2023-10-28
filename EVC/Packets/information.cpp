@@ -47,6 +47,7 @@
 #include "141.h"
 #include "180.h"
 #include "TrainToTrack/9.h"
+#include "../Supervision/emergency_stop.h"
 #include "../Supervision/national_values.h"
 #include "../Supervision/track_pbd.h"
 #include "../Position/geographical.h"
@@ -61,16 +62,17 @@
 #include "../TrackConditions/route_suitability.h"
 #include "../DMI/text_message.h"
 #include "../DMI/windows.h"
+#include "../DMI/track_ahead_free.h"
 #include "../Version/version.h"
 void national_values_information::handle()
 {
     NationalValues nv = *(NationalValues*)linked_packets.front().get();
-    national_values_received(nv, ref);
+    national_values_received(nv, *ref);
 }
 void linking_information::handle()
 {
     Linking l = *(Linking*)linked_packets.front().get();
-    update_linking(ref, l, infill.has_value(), nid_bg);
+    update_linking(l, infill.has_value(), infill ? *infill : nid_bg);
 }
 void signalling_information::handle()
 {
@@ -81,14 +83,14 @@ void signalling_information::handle()
             trigger_condition(67);
         }
     } else {
-        movement_authority newMA = movement_authority(ref, ma, timestamp);
+        movement_authority newMA = movement_authority(*ref, ma, timestamp);
         set_signalling_restriction(newMA, infill.has_value());
     }
 }
 void ma_information::handle()
 {
     Level1_MA ma = *(Level1_MA*)linked_packets.front().get();
-    movement_authority MA = movement_authority(ref, ma, timestamp);
+    movement_authority MA = movement_authority(*ref, ma, timestamp);
     if (infill)
         MA_infill(MA);
     else
@@ -106,18 +108,18 @@ void ma_information::handle()
                 sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
-            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
+            set_mode_profile(*(ModeProfile*)(it->get()), *ref, infill.has_value());
             mp = true;
         }
     }
-    if (!mp) reset_mode_profile(ref, infill.has_value());
+    if (!mp) reset_mode_profile(*ref, infill.has_value());
 }
 void ma_information_lv2::handle()
 {
     if (active_dialog == dialog_sequence::Main && active_dialog_step == "S7")
         active_dialog = dialog_sequence::None;
     Level2_3_MA ma = *(Level2_3_MA*)linked_packets.front().get();
-    movement_authority MA = movement_authority(ref, ma, timestamp);
+    movement_authority MA = movement_authority(*ref, ma, timestamp);
     for (int i=0; i<5; i++) {
         ma_rq_reasons[i] = false;
     }
@@ -139,51 +141,55 @@ void ma_information_lv2::handle()
                 sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
             }
         } else if (it->get()->NID_PACKET == 80) {
-            set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
+            set_mode_profile(*(ModeProfile*)(it->get()), *ref, infill.has_value());
             mp = true;
         } else if (it->get()->NID_PACKET == 181) {
             glsmk = true;
         }
     }
     if (!glsmk) ls_function_marker = false;
-    if (!mp) reset_mode_profile(ref, infill.has_value());
+    if (!mp) reset_mode_profile(*ref, infill.has_value());
 }
 void repositioning_information::handle()
 {
     RepositioningInformation ri = *(RepositioningInformation*)linked_packets.front().get();
     if (MA)
-        MA->reposition(ref, ri.L_SECTION.get_value(ri.Q_SCALE));
+        MA->reposition(*ref, ri.L_SECTION.get_value(ri.Q_SCALE));
 }
 void gradient_information::handle()
 {
     GradientProfile grad = *(GradientProfile*)linked_packets.front().get();
-    std::map<distance, double> gradient;
+    std::vector<std::pair<distance,double>> gradient;
     std::vector<GradientElement> elements;
     elements.push_back(grad.element);
     elements.insert(elements.end(), grad.elements.begin(), grad.elements.end());
-    distance d = ref;
-    for (auto e : elements) {
+    distance d = *ref;
+    for (auto &e : elements) {
         d += e.D_GRADIENT.get_value(grad.Q_SCALE);
-        gradient[d] = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_A;
+        if (e.G_A == G_A_t::EndOfGradient) {
+            gradient.push_back({d, 1000});
+            update_gradient(gradient);
+            return;
+        }
+        gradient.push_back({d, (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_A});
     }
-    if (elements.back().G_A != G_A_t::EndOfGradient)
-        gradient[distance(std::numeric_limits<double>::max(), ref.get_orientation(), ref.get_reference())] = 0;
+    gradient.push_back({distance::from_odometer(dist_base::max), 1000});
     update_gradient(gradient);
 }
 void issp_information::handle()
 {
     InternationalSSP issp = *(InternationalSSP*)linked_packets.front().get();
-    update_SSP(get_SSP(ref, issp));
+    update_SSP(get_SSP(*ref, issp));
 }
 void leveltr_order_information::handle()
 {
     LevelTransitionOrder LTO = *(LevelTransitionOrder*)linked_packets.front().get();
-    level_transition_received(level_transition_information(LTO, ref));
+    level_transition_received(level_transition_information(LTO));
 }
 void condleveltr_order_information::handle()
 {
     ConditionalLevelTransitionOrder CLTO = *(ConditionalLevelTransitionOrder*)linked_packets.front().get();
-    level_transition_received(level_transition_information(CLTO, ref));
+    level_transition_received(level_transition_information(CLTO));
 }
 void session_management_information::handle()
 {
@@ -211,7 +217,7 @@ void position_report_params_info::handle()
     p.D_sendreport = params->D_CYCLOC.get_value(params->Q_SCALE);
     p.T_sendreport = params->T_CYCLOC * 1000;
     p.LRBG = params->M_LOC != M_LOC_t::NotEveryLRBG;
-    distance pos = ref;
+    distance pos = *ref;
     for (auto &e : params->elements) {
         pos += e.D_LOC.get_value(params->Q_SCALE);
         if (e.Q_LGTLOC == Q_LGTLOC_t::MaxSafeFrontEnd) p.location_front.push_back(pos);
@@ -224,13 +230,12 @@ void SR_authorisation_info::handle()
     auto *sr = (SR_authorisation*)message->get();
     if (mode == Mode::SR) {
         if (sr->D_SR != D_SR_t::Infinity) {
-            SR_dist = ref+sr->D_SR.get_value(sr->Q_SCALE);
-            SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
+            SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1] + sr->D_SR.get_value(sr->Q_SCALE));
+            SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), *SR_dist, false);
         } else {
             SR_dist = {};
-            SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+            SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         }
-        recalculate_MRSP();
     } else {
         mode_to_ack = Mode::SR;
         mode_acknowledgeable = true;
@@ -269,8 +274,9 @@ void stop_if_in_SR_information::handle()
 void TSR_information::handle()
 {
     TemporarySpeedRestriction t = *(TemporarySpeedRestriction*)linked_packets.front().get();
-    distance start = ref + t.D_TSR.get_value(t.Q_SCALE);
+    distance start = *ref + t.D_TSR.get_value(t.Q_SCALE);
     speed_restriction p(t.V_TSR.get_value(), start, start+t.L_TSR.get_value(t.Q_SCALE), t.Q_FRONT==Q_FRONT_t::TrainLengthDelay);
+    p.is_tsr = true;
     TSR tsr = {(int)t.NID_TSR, t.NID_TSR != NID_TSR_t::NonRevocable, p};
     insert_TSR(tsr);
 }
@@ -292,17 +298,17 @@ void TSR_gradient_information::handle()
 void route_suitability_information::handle()
 {
     auto &rs = *(RouteSuitabilityData*)linked_packets.front().get();
-    load_route_suitability(rs, ref);
+    load_route_suitability(rs, *ref);
 }
 void plain_text_information::handle()
 {
     PlainTextMessage m = *(PlainTextMessage*)linked_packets.front().get();
-    add_message(m, ref);
+    add_message(m, *ref);
 }
 void fixed_text_information::handle()
 {
     FixedTextMessage m = *(FixedTextMessage*)linked_packets.front().get();
-    add_message(m, ref);
+    add_message(m, *ref);
 }
 void geographical_position_information::handle()
 {
@@ -314,7 +320,7 @@ void rbc_transition_information::handle()
     RBCTransitionOrder o = *(RBCTransitionOrder*)linked_packets.front().get();
     if (mode != Mode::SL || o.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
         contact_info info = {o.NID_C, o.NID_RBC, o.NID_RADIO};
-        rbc_handover(ref + o.D_RBCTR.get_value(o.Q_SCALE), info);
+        rbc_handover(*ref + o.D_RBCTR.get_value(o.Q_SCALE), info);
     }
 }
 void danger_for_SH_information::handle()
@@ -330,9 +336,9 @@ void danger_for_SH_information::handle()
 void coordinate_system_information::handle()
 {
     auto &msg = *(coordinate_system_assignment*)message->get();
-    for (auto it = lrbgs.begin(); it != lrbgs.end(); ++it) {
-        if (it->nid_lrbg == msg.NID_LRBG.get_value()) {
-            it->dir = msg.Q_ORIENTATION == Q_ORIENTATION_t::Reverse;
+    for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
+        if ((it->second & 1) == 0 && it->first.nid_lrbg == msg.NID_LRBG.get_value()) {
+            it->first.dir = msg.Q_ORIENTATION == Q_ORIENTATION_t::Reverse;
         }
     }
 }
@@ -341,13 +347,13 @@ void track_condition_information::handle()
     int nid = linked_packets.front()->NID_PACKET;
     if (nid == 68) {
         TrackCondition &tc = *(TrackCondition*)linked_packets.front().get();
-        load_track_condition_various(tc, ref, false);
+        load_track_condition_various(tc, *ref, false);
     } else if (nid == 69) {
         TrackConditionStationPlatforms &tc = *(TrackConditionStationPlatforms*)linked_packets.front().get();
-        load_track_condition_platforms(tc, ref);
+        load_track_condition_platforms(tc, *ref);
     } else if (nid == 39) {
         TrackConditionChangeTractionSystem &tc = *(TrackConditionChangeTractionSystem*)linked_packets.front().get();
-        load_track_condition_traction(tc, ref);
+        load_track_condition_traction(tc, *ref);
     } else if (nid == 40) {
         TrackConditionChangeCurrentConsumption &tc = *(TrackConditionChangeCurrentConsumption*)linked_packets.front().get();
     }
@@ -355,12 +361,12 @@ void track_condition_information::handle()
 void track_condition_information2::handle()
 {
     TrackCondition &tc = *(TrackCondition*)linked_packets.front().get();
-    load_track_condition_various(tc, ref, true);
+    load_track_condition_various(tc, *ref, true);
 }
 void track_condition_big_metal_information::handle()
 {
     TrackConditionBigMetalMasses tc = *(TrackConditionBigMetalMasses*)linked_packets.front().get();
-    load_track_condition_bigmetal(tc, ref);
+    load_track_condition_bigmetal(tc, *ref);
 }
 void trip_exit_acknowledge_information::handle()
 {
@@ -370,17 +376,17 @@ void trip_exit_acknowledge_information::handle()
 void ma_shortening_information::handle()
 {
     Level2_3_MA ma = *(Level2_3_MA*)linked_packets.front().get();
-    movement_authority MA = movement_authority(ref, ma, timestamp);
+    movement_authority MA = movement_authority(*ref, ma, timestamp);
     MA.calculate_distances();
     bool accept = true;
     if (MA.LoA_ma || MA.SvL_ma) {
-        target svl(MA.LoA_ma ? MA.LoA_ma->first : *MA.SvL_ma, MA.LoA_ma ? MA.LoA_ma->second : 0, MA.LoA_ma ? target_class::LoA : target_class::SvL);
+        target svl(MA.LoA_ma ? MA.LoA_ma->first.max : MA.SvL_ma->max, MA.LoA_ma ? MA.LoA_ma->second : 0, MA.LoA_ma ? target_class::LoA : target_class::SvL);
         svl.calculate_curves();
-        if (svl.d_I < d_maxsafefront(svl.d_I))
+        if (svl.d_I < d_maxsafefront(svl.get_target_position()))
             accept = false;
     }
     if (MA.EoA_ma) {
-        target eoa(*MA.EoA_ma, 0, target_class::EoA);
+        target eoa(MA.EoA_ma->est, 0, target_class::EoA);
         eoa.calculate_curves();
         if (eoa.d_I < d_estfront)
             accept = false;
@@ -400,11 +406,11 @@ void ma_shortening_information::handle()
                     sh_balises->insert({NID_C, (int)balises.elements[i].NID_BG});
                 }
             } else if (it->get()->NID_PACKET == 80) {
-                set_mode_profile(*(ModeProfile*)(it->get()), ref, infill.has_value());
+                set_mode_profile(*(ModeProfile*)(it->get()), *ref, infill.has_value());
                 mp = true;
             }
         }
-        if (!mp) reset_mode_profile(ref, infill.has_value());
+        if (!mp) reset_mode_profile(*ref, infill.has_value());
         svl_shorten('f');
         if (supervising_rbc) {
             auto *msg = new ma_shorten_granted();
@@ -418,6 +424,16 @@ void ma_shortening_information::handle()
         fill_message(msg);
         supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
     }
+}
+void ces_information::handle()
+{
+    auto *emerg = (conditional_emergency_stop*)message->get();
+    int result = handle_conditional_emergency_stop(emerg->NID_EM, *ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE), d_minsafe(orig_position.est, confidence_data::from_distance(orig_position.est)));
+    emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
+    ack->NID_EM = emerg->NID_EM;
+    ack->Q_EMERGENCYSTOP.rawdata = result;
+    fill_message(ack);
+    supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
 }
 void SH_authorisation_info::handle()
 {
@@ -440,6 +456,13 @@ void version_order_information::handle()
 {
     auto &v = *(SystemVersionOrder*)linked_packets.front().get();
     operate_version(v.M_VERSION, false);
+}
+void taf_request_information::handle()
+{
+    auto *taf = (taf_request_message*)message->get();
+    distance dist = *ref + taf->D_TAFDISPLAY.get_value(taf->Q_SCALE);
+    double length = taf->L_TAFDISPLAY.get_value(taf->Q_SCALE);
+    request_track_ahead_free(dist, length);
 }
 void train_running_number_information::handle()
 {
@@ -469,12 +492,12 @@ void taf_level23_information::handle()
 void pbd_information::handle()
 {
     auto &pbd = *(PermittedBrakingDistanceInformation*)linked_packets.front().get();
-    load_PBD(pbd, ref);
+    load_PBD(pbd, *ref);
 }
 void level_crossing_information::handle()
 {
     auto &lx = *(LevelCrossingInformation*)linked_packets.front().get();
-    load_lx(lx, ref);
+    load_lx(lx, *ref);
 }
 void vbc_order::handle()
 {
