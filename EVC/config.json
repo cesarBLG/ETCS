@@ -120,7 +120,14 @@
    "130":{
       "TrainData":"TrainData/traindata_130.json",
       "SpeedDial":400,
-      "STMLayout":"stm_bombardier.json"
+      "STMLayout":"stm_bombardier.json",
+      "InstalledSTM": [0,10,19],
+      "STMPriorityTable": [
+        {
+          "nid_ntc": 0,
+          "nid_stms": [0, 19]
+        }
+      ]
   },
   "1305":{
      "TrainData":"TrainData/traindata_1305.json",

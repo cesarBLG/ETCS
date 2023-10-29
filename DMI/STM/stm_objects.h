@@ -180,6 +180,7 @@ class ntc_window : public window
     ntc_window(int nid_stm);
     void display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton);
     void display_text(int id, bool ack, std::string text, int properties);
+    void event(int evNo, float x, float y);
     ~ntc_window()
     {
         for (auto &it : indicators)
