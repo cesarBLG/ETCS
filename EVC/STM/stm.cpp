@@ -36,7 +36,7 @@
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
-std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
+std::map<int, std::vector<int>> ntc_to_stm_lookup_table;
 bool stm_control_EB = false;
 bool ntc_unavailable_msg = false;
 int STM_max_speed_ntc;
@@ -241,49 +241,52 @@ void assign_stm(int nid_ntc, bool driver)
         int nid_stm = -1;
         if (driver) {
             auto it = ntc_to_stm_lookup_table.find(nid_ntc);
-            std::vector<stm_object*> table;
+            std::vector<int> table;
             if (it != ntc_to_stm_lookup_table.end())
                 table = it->second;
             if (table.empty()) {
                 nid_stm = nid_ntc;
             } else {
-                for (auto *stm : table) {
-                    if (stm->available()) {
-                        nid_stm = stm->nid_stm;
+                for (auto nid : table) {
+                    auto it = installed_stms.find(nid);
+                    if (it != installed_stms.end() && it->second->available()) {
+                        nid_stm = it->second->nid_stm;
                         break;
                     }
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
             }
         } else {
             auto it = ntc_to_stm_lookup_table.find(nid_ntc);
-            std::vector<stm_object*> table;
+            std::vector<int> table;
             if (it != ntc_to_stm_lookup_table.end())
                 table = it->second;
             if (table.empty()) {
                 nid_stm = nid_ntc;
             } else {
-                for (auto *stm : table) {
-                    if (stm->available()) {
-                        nid_stm = stm->nid_stm;
+                for (auto nid : table) {
+                    auto it = installed_stms.find(nid);
+                    if (it != installed_stms.end() && it->second->available()) {
+                        nid_stm = nid;
                         break;
                     }
                 }
                 if (nid_stm < 0) {
-                    for (auto *stm : table) {
-                        if (stm->state != stm_state::FA && !stm->isolated) {
-                            nid_stm = stm->nid_stm;
+                    for (auto nid : table) {
+                        auto it = installed_stms.find(nid);
+                        if (it != installed_stms.end() && it->second->state != stm_state::FA && !it->second->isolated) {
+                            nid_stm = nid;
                             break;
                         }
                     }
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
             }
         }
@@ -398,6 +401,7 @@ void stm_object::send_message(stm_message *msg)
     bit_manipulator w;
     msg->write_to(w);
     sim_write_line("noretain(stm::command_etcs="+w.to_base64()+")");
+    //log_message(*msg, d_estfront, get_milliseconds());
 }
 void send_failed_msg(stm_object *stm)
 {
@@ -654,6 +658,7 @@ void setup_stm_control()
     ntc_names[45] = "CTCS-2";
     ntc_names[46] = "EBICAB 700";
     ntc_names[50] = "TGMT";
+    ntc_to_stm_lookup_table[0] = {0, 19};
     fill_stm_transitions();
 }
 void handle_stm_message(stm_message &msg)

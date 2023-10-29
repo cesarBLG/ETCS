@@ -120,5 +120,5 @@ stm_object *get_stm(int nid_ntc);
 std::string get_ntc_name(int nid_ntc);
 extern std::map<int, stm_object*> installed_stms;
 extern std::map<int, int> ntc_to_stm;
-extern std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
+extern std::map<int, std::vector<int>> ntc_to_stm_lookup_table;
 extern bool stm_control_EB;

@@ -115,11 +115,19 @@ json level_window()
                 case Level::N3:
                     levels[2] = get_text("Level 3");
                     break;
-                case Level::NTC:
-                    if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end() || ntc_available_no_stm.find(lti.nid_ntc) != ntc_available_no_stm.end()) {
-                        levels.push_back(get_ntc_name(lti.nid_ntc));
+                case Level::NTC: {
+                    std::vector<int> stms;
+                    if (ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end())
+                        stms = ntc_to_stm_lookup_table[lti.nid_ntc];
+                    stms.push_back(lti.nid_ntc);
+                    for (int nid : stms) {
+                        if (installed_stms.find(nid) != installed_stms.end() || ntc_available_no_stm.find(lti.nid_ntc) != ntc_available_no_stm.end()) {
+                            levels.push_back(get_ntc_name(lti.nid_ntc));
+                            break;
+                        }
                     }
                     break;
+                }
             }
         }
     } else {

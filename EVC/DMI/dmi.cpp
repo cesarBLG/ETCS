@@ -42,6 +42,7 @@ void dmi_receive(BasePlatform::BusSocket::JoinNotification &&msg);
 void dmi_receive(BasePlatform::BusSocket::LeaveNotification &&msg);
 void dmi_receive(BasePlatform::BusSocket::Message &&msg);
 void dmi_update_func();
+void sim_write_line(const std::string &str);
 void dmi_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
 {
     dmi_socket->receive().then(dmi_receive_handler).detach();
@@ -98,8 +99,10 @@ void parse_command(string str)
             }
         }
     }
-    if (command == "ackButtonLight")
-    {
+    if (command == "stmData") {
+        sim_write_line("noretain(stm::command_etcs="+value+")");
+    }
+    if (command == "ackButtonLight") {
         extern int ack_button_light;
         ack_button_light = stoi(value);
     }
@@ -122,7 +125,6 @@ void dmi_receive(BasePlatform::BusSocket::Message &&msg)
 {
     parse_command(std::move(msg.data));
 }
-void sim_write_line(const std::string &str);
 bool sendtoor=false;
 int64_t lastor;
 void set_persistent_command(string command, string value)

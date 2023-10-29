@@ -9,6 +9,7 @@
 #include "config.h"
 #include "../DMI/dmi.h"
 #include "../Procedures/level_transition.h"
+#include "../STM/stm.h"
 #include <nlohmann/json.hpp>
 #include "platform_runtime.h"
 using json = nlohmann::json;
@@ -36,6 +37,30 @@ void load_config(std::string serie)
             for (int ntc : ntcs)
             {
                 ntc_available_no_stm.insert(ntc);
+            }
+        }
+        if (cfg.contains("InstalledSTM")) {
+            std::set<int> stms = cfg["InstalledSTM"].get<std::set<int>>();
+            for (auto it = installed_stms.begin(); it != installed_stms.end(); ) {
+                if (stms.find(it->second->nid_stm) == stms.end()) {
+                    delete it->second;
+                    it = installed_stms.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            for (int nid_stm : stms) {
+                if (installed_stms.find(nid_stm) == installed_stms.end()) {
+                    installed_stms[nid_stm] = new stm_object();
+                    installed_stms[nid_stm]->nid_stm = nid_stm;
+                }
+            }
+        }
+        if (cfg.contains("STMPriorityTable")) {
+            ntc_to_stm_lookup_table.clear();
+            for (json &j : cfg["STMPriorityTable"])
+            {
+                ntc_to_stm_lookup_table[j["nid_ntc"].get<int>()] = j["nid_stms"].get<std::vector<int>>();
             }
         }
     }
