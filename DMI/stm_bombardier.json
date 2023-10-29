@@ -276,6 +276,12 @@
                     "font_size": 9,
                     "halign": "center",
                     "valign": "center"
+                },
+                {
+                    "id": 5,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
                 }
                 
             ],
@@ -304,6 +310,13 @@
                 {
                     "id": 4,
                     "x": 484,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 5,
+                    "x": 584,
                     "y": 365,
                     "width": 50,
                     "height": 50
