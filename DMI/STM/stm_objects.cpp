@@ -88,7 +88,9 @@ ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 void ntc_window::display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton)
 {
     auto it = indicators.find((isButton ? 256 : 0) + id);
+    bool wasPressed = false;
     if (it != indicators.end()) {
+        if (it->second->isButton && ((Button*)it->second)->pressed) wasPressed = true;
         remove(it->second);
         delete it->second;
         indicators.erase(it);
@@ -150,7 +152,11 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
         pos = areas[area];
     }
     Component *c;
-    if (isButton) c = new Button(pos[2], pos[3]);
+    if (isButton)
+    {
+        c = new Button(pos[2], pos[3]);
+        ((Button*)c)->pressed = wasPressed;
+    }
     else c = new Component(pos[2],pos[3]);
     Color bg = get_color((properties>>3)&7, true);
     Color fg = get_color(properties&7, false);
