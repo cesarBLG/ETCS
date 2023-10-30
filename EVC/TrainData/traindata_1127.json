@@ -1,13 +1,12 @@
 {
 	"Simple" : {
         "length": 200,
-        "speed": 330,
+        "speed": 300,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0},
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
@@ -22,12 +21,12 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.88},
-						{"speed": 13.8889, "value": 0.86},
-						{"speed": 27.7778, "value": 0.85},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.7},
-						{"speed": 69.4444, "value": 0.6},
+                        {"speed": 0, "value": 0.75},
+						{"speed": 13.8889, "value": 0.8},
+						{"speed": 27.7778, "value": 0.8},
+						{"speed": 41.6667, "value": 0.7},
+						{"speed": 55.5556, "value": 0.6},
+						{"speed": 69.4444, "value": 0.57},
 						{"speed": 83.3333, "value": 0.6}
                     ],
                     "build_up_time": 0.5,
@@ -77,13 +76,12 @@
     },
     "Doble" : {
         "length": 400,
-        "speed": 330,
+        "speed": 300,
         "cant_deficiency": 206,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0},
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
@@ -98,12 +96,12 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.88},
-						{"speed": 13.8889, "value": 0.86},
-						{"speed": 27.7778, "value": 0.85},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.7},
-						{"speed": 69.4444, "value": 0.6},
+                        {"speed": 0, "value": 0.75},
+						{"speed": 13.8889, "value": 0.8},
+						{"speed": 27.7778, "value": 0.8},
+						{"speed": 41.6667, "value": 0.7},
+						{"speed": 55.5556, "value": 0.6},
+						{"speed": 69.4444, "value": 0.57},
 						{"speed": 83.3333, "value": 0.6}
                     ],
                     "build_up_time": 0.5,
@@ -150,6 +148,5 @@
             }
             
         }
-
     }
 }
