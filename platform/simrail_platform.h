@@ -51,21 +51,25 @@ private:
 	unsigned int current_color;
 	ImDrawList *drawlist;
 
+	std::vector<InputEvent> pending_events;
+	PlatformUtil::Promise<InputEvent> input_promise;
+	void handle_event(InputEvent ev);
+
 public:
 	class SimrailImage : public Image
 	{
 	public:
 		SimrailImage() = default;
-		float width() const override { return 0.0f; };
-		float height() const override { return 0.0f; };
+		float width() const override { return 10.0f; };
+		float height() const override { return 10.0f; };
 	};
 
 	class SimrailFont : public Font
 	{
 	public:
 		SimrailFont() = default;
-		float ascent() const override { return 0.0f; }
-		std::pair<float, float> calc_size(const std::string_view str) const override { return std::make_pair(0.0f, 0.0f); }
+		float ascent() const override { return 3.0f; }
+		std::pair<float, float> calc_size(const std::string_view str) const override { return std::make_pair(10.0f, 10.0f); }
 	};
 
 	class SimrailSoundData : public SoundData

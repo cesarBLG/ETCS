@@ -40,6 +40,9 @@ extern "C" int64_t __lseek(int fd, int64_t off, int whence) {
 extern "C" int close(int fd) {
     return 0;
 }
+extern "C" int __isatty(int fd) {
+    return 0;
+}
 
 EXPORT_FUNC void* alloc_mem(int size) {
     return malloc(size);
@@ -211,7 +214,9 @@ SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
 	io.Fonts->SetTexID((ImTextureID)tex_id);
 
 	ImGui::NewFrame();
-	drawlist = ImGui::GetForegroundDrawList();
+	drawlist = ImGui::GetBackgroundDrawList();
+
+	input_promise = on_input_event().then(std::bind(&SimrailUiPlatform::handle_event, this, std::placeholders::_1));
 }
 
 SimrailUiPlatform::~SimrailUiPlatform() {
@@ -219,8 +224,13 @@ SimrailUiPlatform::~SimrailUiPlatform() {
 	ImGui::DestroyContext();
 }
 
+void SimrailUiPlatform::handle_event(UiPlatform::InputEvent ev) {
+	input_promise = on_input_event().then(std::bind(&SimrailUiPlatform::handle_event, this, std::placeholders::_1));
+	pending_events.push_back(ev);
+}
+
 static void callback_fulfill_input_event(Fulfiller<UiPlatform::InputEvent>* fulfiller, uint32_t action, float x, float y) {
-	fulfiller->fulfill(UiPlatform::InputEvent { (UiPlatform::InputEvent::Action)action, x, y }, false);
+	fulfiller->fulfill(UiPlatform::InputEvent { (UiPlatform::InputEvent::Action)action, x * platform_size_w, y * platform_size_h }, false);
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
@@ -267,24 +277,33 @@ Promise<void> SimrailUiPlatform::on_present_request() {
 void SimrailUiPlatform::present() {
 	ImGui::Render();
 	api::present(ImGui::GetDrawData());
+
+	ImGuiIO& io = ImGui::GetIO();
+	for (InputEvent &ev : pending_events) {
+		io.AddMousePosEvent(ev.x, ev.y);
+		io.AddMouseButtonEvent(0, ev.action != InputEvent::Action::Release);
+	}
+	pending_events.clear();
+
 	ImGui::NewFrame();
-	drawlist = ImGui::GetForegroundDrawList();
+	drawlist = ImGui::GetBackgroundDrawList();
+	ImGui::ShowDemoWindow();
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {
-	return nullptr;
+	return std::make_unique<SimrailImage>();
 }
 
 std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold, const std::string_view lang) {
-	return nullptr;
+	return std::make_unique<SimrailFont>();
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
-	return nullptr;
+	return std::make_unique<SimrailImage>();
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
-	return nullptr;
+	return std::make_unique<SimrailImage>();
 }
 
 void SimrailUiPlatform::set_volume(int vol) {
@@ -295,15 +314,15 @@ int SimrailUiPlatform::get_volume() {
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::string_view path) {
-	return nullptr;
+	return std::make_unique<SimrailSoundData>();
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
-	return nullptr;
+	return std::make_unique<SimrailSoundData>();
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundSource> SimrailUiPlatform::play_sound(const SoundData &base, bool looping) {
-	return nullptr;
+	return std::make_unique<SimrailSoundSource>();
 }
 
 void SimrailUiPlatform::set_brightness(int vol) {
