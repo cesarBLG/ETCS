@@ -200,6 +200,15 @@ SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
 	io.DisplaySize = ImVec2(virtual_w, virtual_h);
 	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 	io.DeltaTime = 0.1f;
+	io.BackendFlags = ImGuiBackendFlags_RendererHasVtxOffset;
+
+	unsigned char *atlas_data;
+	int atlas_x, atlas_y;
+	io.Fonts->Flags = ImFontAtlasFlags_NoPowerOfTwoHeight;
+	io.Fonts->GetTexDataAsRGBA32(&atlas_data, &atlas_x, &atlas_y);
+	uint32_t tex_id = api::texture_create(atlas_x, atlas_y, atlas_data);
+	io.Fonts->ClearTexData();
+	io.Fonts->SetTexID((ImTextureID)tex_id);
 
 	ImGui::NewFrame();
 	drawlist = ImGui::GetForegroundDrawList();
