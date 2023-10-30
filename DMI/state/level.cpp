@@ -15,10 +15,12 @@ extern Component distanceBar;
 Component a4(54, 25, nullptr);
 Component levelRegion(54, 25, displayLevel);
 static Level prevlevel;
+static int prevNTC;
 void displayLevel()
 {
-    if(prevlevel==level) return;
+    if(prevlevel==level && (level != Level::NTC || prevNTC == nid_ntc)) return;
     prevlevel = level;
+    prevNTC = nid_ntc;
     levelRegion.clear();
     string path = "symbols/Level/LE_";
     int num = 0;
@@ -45,7 +47,11 @@ void displayLevel()
     if (num == 0) return;
     if(num<10) path+="0";
     path+=to_string(num);
-    if (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10 || nid_ntc == 26)) path += "_" + to_string(nid_ntc);
+    if (level == Level::NTC)
+    {
+        std::string testpath = path + "_" + to_string(nid_ntc) + ".bmp";
+        if (levelRegion.getImageGraphic(testpath) != nullptr) path += "_" + to_string(nid_ntc);
+    }
     path+=".bmp";
     levelRegion.addImage(path);
 }
