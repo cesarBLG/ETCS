@@ -133,14 +133,6 @@
         0
      ]
  },
- "1302":{
-    "TrainData":"TrainData/traindata_1302.json",
-    "SpeedDial":400,
-    "STMLayout":"stm_bombardier.json",
-    "AvailableNTC":[
-       0
-    ]
-},
   "112": {
        "TrainData": "TrainData/traindata_112.json",
        "SpeedDial": 400,
@@ -152,6 +144,12 @@
         "STMLayout": "stm_siemens.json",
         "SoftKeys": true
     },
+    "1127": {
+         "TrainData": "TrainData/traindata_1127.json",
+         "SpeedDial": 400,
+         "STMLayout": "stm_siemens.json",
+         "SoftKeys": true
+     },
   "102": {
        "TrainData": "TrainData/traindata_102.json",
        "SpeedDial": 400,
