@@ -46,19 +46,18 @@ void to_json(json &j, const level_information &l)
 }
 void load_level()
 {
-    bool valid = cold_movement_status == NoColdMovement && position_valid;
     json j = load_cold_data("Level");
     if (!j.is_null()) {
         level = (Level)j["Level"].get<int>();
         if (level == Level::NTC)
             nid_ntc = j["NID_NTC"];
-        level_valid = valid;
+        level_valid = cold_movement_status == NoColdMovement;
     } else {
         level_valid = false;
         level = Level::Unknown;
     }
     j = load_cold_data("TracksideLevels");
-    if (!j.is_null() && valid) {
+    if (!j.is_null() && cold_movement_status == NoColdMovement) {
         priority_levels = j;
         priority_levels_valid = true;
     } else {
