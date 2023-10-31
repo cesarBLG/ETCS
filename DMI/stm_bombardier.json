@@ -337,6 +337,14 @@
                     "file": "ASFA_REC.wav"
                 }
 			]
+        },
+        {
+            "nid_stm": 0,
+            "etcs_supervision": true,
+            "etcs_dial_range": 250,
+            "flash_fast": 4,
+            "flash_slow": 2,
+            "flash_style": "area"
         }
     ]
 }
