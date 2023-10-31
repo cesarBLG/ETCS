@@ -319,6 +319,7 @@ void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
         auto &leave = std::get<BasePlatform::BusSocket::LeaveNotification>(result);
         if (leave.peer.uid == evc_peer) {
             evc_peer = 0;
+            load_config({});
             revokeMessages();
         }
     }
