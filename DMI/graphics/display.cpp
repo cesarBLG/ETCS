@@ -16,12 +16,17 @@
 std::list<window*> active_windows;
 extern Mode mode;
 extern uint32_t evc_peer;
+bool serieSelected;
 bool useImperialSystem;
 bool prevUseImperialSystem;
 void displayETCS()
 {
     updateAcks();
+#if SIMRAIL
+    if (!evc_peer || !serieSelected) return;
+#else
     if (!evc_peer) return;
+#endif
     std::vector<std::vector<int>> alreadyDrawn;
     for(auto it=active_windows.rbegin(); it!=active_windows.rend(); ++it)
     {
