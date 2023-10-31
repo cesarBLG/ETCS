@@ -51,7 +51,7 @@ class window
         if(constructfun != nullptr) constructfun(this);
     }
     void display(std::vector<std::vector<int>> &alreadyDrawn);
-    void event(int evNo, float x, float y);
+    virtual void event(int evNo, float x, float y);
     void updateLayout();
 };
 #endif

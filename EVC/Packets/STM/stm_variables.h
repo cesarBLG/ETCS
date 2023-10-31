@@ -217,6 +217,10 @@ struct N_VERMINOR_t : ETCS_variable
 {
     N_VERMINOR_t() : ETCS_variable(8) {}
 };
+struct T_BUTTONEVENT_t : ETCS_variable
+{
+    T_BUTTONEVENT_t() : ETCS_variable(32) {}
+};
 struct T_SOUND_t : ETCS_variable
 {
     T_SOUND_t() : ETCS_variable(8) {}
@@ -247,6 +251,12 @@ struct Q_ACK_t : ETCS_variable
     static const uint32_t NoAcknowledgement=0;
     static const uint32_t AcknowledgementRequired=1;
     Q_ACK_t() : ETCS_variable(1) {}
+};
+struct Q_BUTTON_t : ETCS_variable
+{
+    static const uint32_t NotPressed=0;
+    static const uint32_t Pressed=1;
+    Q_BUTTON_t() : ETCS_variable(1) {}
 };
 struct Q_DATAENTRY_t : ETCS_variable
 {

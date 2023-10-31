@@ -70,7 +70,8 @@ text_message &send_msg()
 }
 void update_asfa()
 {
-    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || !level_valid || (installed_stms.find(0) != installed_stms.end()) || ntc_to_stm_lookup_table.find(0) != ntc_to_stm_lookup_table.end()) {
+    bool stm = installed_stms.find(0) != installed_stms.end() || installed_stms.find(2) != installed_stms.end() || installed_stms.find(19) != installed_stms.end();
+    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || !level_valid || stm) {
         AKT = false;
         CON = true;
         active = false;
