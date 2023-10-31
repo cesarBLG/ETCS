@@ -230,7 +230,7 @@ void SimrailUiPlatform::handle_event(UiPlatform::InputEvent ev) {
 }
 
 static void callback_fulfill_input_event(Fulfiller<UiPlatform::InputEvent>* fulfiller, uint32_t action, float x, float y) {
-	fulfiller->fulfill(UiPlatform::InputEvent { (UiPlatform::InputEvent::Action)action, x * platform_size_w, y * platform_size_h }, false);
+	fulfiller->fulfill(UiPlatform::InputEvent { (UiPlatform::InputEvent::Action)action, x * platform_size_w, (1.0f - y) * platform_size_h }, false);
 	while (DeferredFulfillment::execute());
 	delete fulfiller;
 }
@@ -287,7 +287,6 @@ void SimrailUiPlatform::present() {
 
 	ImGui::NewFrame();
 	drawlist = ImGui::GetBackgroundDrawList();
-	ImGui::ShowDemoWindow();
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {
