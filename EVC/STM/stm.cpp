@@ -158,7 +158,7 @@ stm_object::stm_object()
         }
         return false;
     };
-    conditions["A15"] = [this] {return isolated;};
+    conditions["A15"] = [this] {return false;};
     conditions["C16"] = [this] {return last_order && *last_order != stm_state::DA && *last_order != stm_state::CCS && get_milliseconds() - last_order_time > 10000;};
     conditions["D16"] = [this] {return last_order && *last_order == stm_state::DA && get_milliseconds() - last_order_time > 5000;};
     conditions["E16"] = [this] {return last_order && *last_order == stm_state::CCS && !national_trip && get_milliseconds() - last_order_time > 5000;};
