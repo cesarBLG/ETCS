@@ -256,6 +256,10 @@ void SimrailUiPlatform::draw_rect_filled(float x, float y, float w, float h) {
 }
 
 void SimrailUiPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
+	const SimrailImage &img = dynamic_cast<const SimrailImage&>(base);
+	if (img.text.empty())
+		return;
+	drawlist->AddText(ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size());
 }
 
 void SimrailUiPlatform::draw_circle_filled(float x, float y, float rad) {
@@ -290,7 +294,10 @@ void SimrailUiPlatform::present() {
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::load_image(const std::string_view p) {
-	return std::make_unique<SimrailImage>();
+	auto image = std::make_unique<SimrailImage>();
+	image->w = 5.0f;
+	image->h = 5.0f;
+	return image;
 }
 
 std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold, const std::string_view lang) {
@@ -298,11 +305,17 @@ std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
-	return std::make_unique<SimrailImage>();
+	auto image = std::make_unique<SimrailImage>();
+	ImVec2 size = ImGui::CalcTextSize(text.begin(), text.end());
+	image->text = text;
+	image->w = size.x;
+	image->h = size.y;
+	image->color = IM_COL32(c.R, c.G, c.B, 255);
+	return image;
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
-	return std::make_unique<SimrailImage>();
+	return make_text_image(text, base, c);
 }
 
 void SimrailUiPlatform::set_volume(int vol) {

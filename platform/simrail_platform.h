@@ -60,16 +60,20 @@ public:
 	{
 	public:
 		SimrailImage() = default;
-		float width() const override { return 10.0f; };
-		float height() const override { return 10.0f; };
+		float width() const override { return w; };
+		float height() const override { return h; };
+
+		std::string text;
+		unsigned int color;
+		float w, h;
 	};
 
 	class SimrailFont : public Font
 	{
 	public:
 		SimrailFont() = default;
-		float ascent() const override { return 3.0f; }
-		std::pair<float, float> calc_size(const std::string_view str) const override { return std::make_pair(10.0f, 10.0f); }
+		float ascent() const override { return 5.0f; }
+		std::pair<float, float> calc_size(const std::string_view str) const override { ImVec2 size = ImGui::CalcTextSize(str.begin(), str.end()); return std::make_pair(size.x, size.y); }
 	};
 
 	class SimrailSoundData : public SoundData
