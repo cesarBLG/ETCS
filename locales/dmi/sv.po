@@ -1,179 +1,211 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: ETCS DMI\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-10 13:53+0200\n"
+"Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
-"Project-Id-Version: ETCS DMI\n"
-"Language: sv\n"
 
-#: window/menu_main.cpp:31
-msgid "Main"
-msgstr "Rektor"
-
-#: window/data_entry.cpp:25 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:82
-#: window/keyboard.cpp:186 window/keyboard.cpp:193
-#: window/track_ahead_free.cpp:15
-msgid "Yes"
-msgstr "Ja"
-
-#: window/data_entry.cpp:54
-msgid " entry complete?"
-msgstr " fullständigt inträde?"
-
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
-msgid "No"
-msgstr "Nej"
-
-#: window/driver_id.cpp:26
-msgid "TRN"
-msgstr "NTRÅG"
-
-#: window/fixed_train_data.cpp:26
-msgid "Enter\n"
-"data"
-msgstr "Int.\n"
-"data"
-
-#: window/keyboard.cpp:29
-msgid "DEL"
-msgstr "AV"
-
-#: window/menu_main.cpp:33
-msgid "Start"
-msgstr "Start"
-
-#: window/menu_main.cpp:34
-msgid "Driver ID"
-msgstr "Förar-ID"
-
-#: window/menu_main.cpp:35
-msgid "Train Data"
-msgstr "Förardata"
-
-#: window/menu_main.cpp:36
-msgid "Level"
-msgstr "Nivå"
-
-#: window/menu_main.cpp:37
-msgid "Train running number"
-msgstr "Tågnummer"
-
-#: window/menu_main.cpp:38
-msgid "Exit Shunting"
-msgstr "Avsluta manövrar"
-
-#: window/menu_main.cpp:38
-msgid "Shunting"
-msgstr "Manövrar"
-
-#: window/menu_main.cpp:39
-msgid "Non-Leading"
-msgstr "Dubbel dragkraft"
-
-#: window/menu_main.cpp:40
-msgid "Maintain shunting"
-msgstr "Hålla manöver"
-
-#: window/menu_main.cpp:41
-msgid "Radio data"
-msgstr "Radiodata"
-
-#: window/menu_override.cpp:22
-msgid "Override"
-msgstr "Överskridande"
-
-#: window/menu_override.cpp:24
-msgid "EoA"
-msgstr "EoA"
-
-#: window/menu_radio.cpp:31
-msgid "Contact last RBC"
-msgstr "Kontakta senaste RBC"
-
-#: window/menu_radio.cpp:32
-msgid "Use short number"
-msgstr "Använd kort nummer"
-
-#: window/menu_radio.cpp:33
-msgid "Enter RBC data"
-msgstr "Ange RBC-data"
-
-#: window/menu_radio.cpp:34
-msgid "Radio Network ID"
-msgstr "Radionätverks-ID"
-
-#: window/menu_settings.cpp:21
-msgid "Settings"
-msgstr "Inställningar"
-
-#: window/menu_settings.cpp:26
-msgid "System version"
-msgstr "Systemversion"
-
-#: window/menu_settings.cpp:27
-msgid "Set VBC"
-msgstr "Lägg till VBC"
-
-#: window/menu_settings.cpp:28
-msgid "Remove VBC"
-msgstr "Ta bort VBC"
-
-#: window/menu_spec.cpp:21
-msgid "Special"
-msgstr "Särskild"
-
-#: window/menu_spec.cpp:23
-msgid "Adhesion"
-msgstr "Efterlevnad"
-
-#: window/menu_spec.cpp:24
-msgid "SR Speed/Distance"
-msgstr "SR Hastighet/Avstånd"
-
-#: window/menu_spec.cpp:25
-msgid "Train integrity"
-msgstr "Träna integritet"
-
-#: window/train_data.cpp:24
-msgid "Select\n"
-"type"
-msgstr "Sel.\n"
-"kille"
-
-#: language/language.cpp:36 window/nav_buttons.cpp:29
+#: c:\etcs\src\dmi\language\language.cpp:43
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:51
 msgctxt "Navigation bar"
 msgid "Main"
 msgstr "Main"
 
-#: language/language.cpp:37 window/nav_buttons.cpp:35
+#: c:\etcs\src\dmi\language\language.cpp:44
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:52
 msgctxt "Navigation bar"
-msgid "Over-\n"
+msgid ""
+"Over-\n"
 "ride"
-msgstr "Åsido-\n"
+msgstr ""
+"Åsido-\n"
 "sätta"
 
-#: language/language.cpp:38 window/nav_buttons.cpp:41
+#: c:\etcs\src\dmi\language\language.cpp:45
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:53
 msgctxt "Navigation bar"
-msgid "Data\n"
+msgid ""
+"Data\n"
 "view"
 msgstr "Data"
 
-#: language/language.cpp:39 window/nav_buttons.cpp:47
+#: c:\etcs\src\dmi\language\language.cpp:46
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:54
 msgctxt "Navigation bar"
 msgid "Spec"
 msgstr "Särskild"
 
-#: window/menu_ntc.cpp:21
+#: c:\etcs\src\dmi\window\brightness.cpp:13
+#: c:\etcs\src\dmi\window\menu_settings.cpp:21
+msgid "Brightness"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:16
+#: c:\etcs\src\dmi\window\data_entry.cpp:17
+#: c:\etcs\src\dmi\window\data_validation.cpp:19
+#: c:\etcs\src\dmi\window\keyboard.cpp:245
+#: c:\etcs\src\dmi\window\keyboard.cpp:252
+#: c:\etcs\src\dmi\window\track_ahead_free.cpp:27
+msgid "Yes"
+msgstr "Ja"
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:62
+msgid " entry complete?"
+msgstr " fullständigt inträde?"
+
+#: c:\etcs\src\dmi\window\driver_id.cpp:16
+msgid "TRN"
+msgstr "NTRÅG"
+
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:15
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:19
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:25
+msgid ""
+"Enter\n"
+"data"
+msgstr ""
+"Int.\n"
+"data"
+
+#: c:\etcs\src\dmi\window\keyboard.cpp:244
+#: c:\etcs\src\dmi\window\keyboard.cpp:248
+msgid "No"
+msgstr "Nej"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:20
+msgid "Main"
+msgstr "Rektor"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:22
+msgid "Start"
+msgstr "Start"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:26
+msgid "Driver ID"
+msgstr "Förar-ID"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:30
+msgid "Train Data"
+msgstr "Förardata"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:34
+msgid "Level"
+msgstr "Nivå"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:38
+msgid "Train running number"
+msgstr "Tågnummer"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Exit Shunting"
+msgstr "Avsluta manövrar"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Shunting"
+msgstr "Manövrar"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:46
+msgid "Non-Leading"
+msgstr "Dubbel dragkraft"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:47
+msgid "Maintain shunting"
+msgstr "Hålla manöver"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:48
+msgid "Radio data"
+msgstr "Radiodata"
+
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:11
 msgid "NTC data entry"
 msgstr "NTC-datainmatning"
 
-#: window/menu_ntc.cpp:31
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:20
 msgid "End of data entry"
 msgstr "Slut på datainmatning"
 
-#: window/menu_radio.cpp:29
+#: c:\etcs\src\dmi\window\menu_override.cpp:12
+msgid "Override"
+msgstr "Överskridande"
+
+#: c:\etcs\src\dmi\window\menu_override.cpp:14
+msgid "EoA"
+msgstr "EoA"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:18
 msgid "RBC data"
 msgstr "RBC data"
 
+#: c:\etcs\src\dmi\window\menu_radio.cpp:20
+msgid "Contact last RBC"
+msgstr "Kontakta senaste RBC"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:24
+msgid "Use short number"
+msgstr "Använd kort nummer"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:28
+msgid "Enter RBC data"
+msgstr "Ange RBC-data"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:32
+msgid "Radio Network ID"
+msgstr "Radionätverks-ID"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:11
+msgid "Settings"
+msgstr "Inställningar"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:13
+msgid "Language"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:17
+#: c:\etcs\src\dmi\window\volume.cpp:13
+msgid "Volume"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:25
+msgid "System version"
+msgstr "Systemversion"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:29
+msgid "Set VBC"
+msgstr "Lägg till VBC"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:33
+msgid "Remove VBC"
+msgstr "Ta bort VBC"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:11
+msgid "Special"
+msgstr "Särskild"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:13
+msgid "Adhesion"
+msgstr "Efterlevnad"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:17
+msgid "SR Speed/Distance"
+msgstr "SR Hastighet/Avstånd"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:21
+msgid "Train integrity"
+msgstr "Träna integritet"
+
+#: c:\etcs\src\dmi\window\train_data.cpp:14
+#: c:\etcs\src\dmi\window\train_data.cpp:18
+#: c:\etcs\src\dmi\window\train_data.cpp:24
+msgid ""
+"Select\n"
+"type"
+msgstr ""
+"Sel.\n"
+"kille"
+
+#~ msgid "DEL"
+#~ msgstr "AV"
