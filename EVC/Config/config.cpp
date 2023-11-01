@@ -10,9 +10,11 @@
 #include "../DMI/dmi.h"
 #include "../Procedures/level_transition.h"
 #include "../STM/stm.h"
+#include <orts/common.h>
 #include <nlohmann/json.hpp>
 #include "platform_runtime.h"
 using json = nlohmann::json;
+extern ORserver::ParameterManager manager;
 extern std::string traindata_file;
 extern int data_entry_type;
 void load_config(std::string serie)
@@ -43,6 +45,14 @@ void load_config(std::string serie)
             std::set<int> stms = cfg["InstalledSTM"].get<std::set<int>>();
             for (auto it = installed_stms.begin(); it != installed_stms.end(); ) {
                 if (stms.find(it->second->nid_stm) == stms.end()) {
+                    std::string name = "stm::"+std::to_string(it->second->nid_stm)+"::isolated";
+                    for (auto *p : manager.parameters) {
+                        if (p->name == name) {
+                            manager.RemoveParameter(p);
+                            delete p;
+                            break;
+                        }
+                    }
                     delete it->second;
                     it = installed_stms.erase(it);
                 } else {
@@ -53,6 +63,14 @@ void load_config(std::string serie)
                 if (installed_stms.find(nid_stm) == installed_stms.end()) {
                     installed_stms[nid_stm] = new stm_object();
                     installed_stms[nid_stm]->nid_stm = nid_stm;
+
+                    auto *p = new ORserver::Parameter("stm::"+std::to_string(nid_stm)+"::isolated");
+                    p->SetValue = [nid_stm](std::string val) {
+                        auto it = installed_stms.find(nid_stm);
+                        if (it != installed_stms.end())
+                            it->second->isolated = val == "1";
+                    };
+                    manager.AddParameter(p);
                 }
             }
         }

@@ -234,14 +234,6 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("stm::lzb::isolated");
-    p->SetValue = [](std::string val) {
-        auto it = installed_stms.find(10);
-        if (it != installed_stms.end())
-            it->second->isolated = val == "1";
-    };
-    manager.AddParameter(p);
-
     p = new ORserver::Parameter("etcs::isolated");
     p->SetValue = [](std::string val) {
         isolated = val == "1";
