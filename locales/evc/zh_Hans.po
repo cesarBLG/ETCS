@@ -1,0 +1,413 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-10 13:53+0200\n"
+"PO-Revision-Date: 2023-10-24 12:03+0000\n"
+"Last-Translator: Asstioc <johnyushrc@gmail.com>\n"
+"Language-Team: Chinese (Simplified) <https://sts.simkol.pl:18443/projects/"
+"simrail/etcs-evc/zh_Hans/>\n"
+"Language: zh_Hans\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 4.14.2\n"
+"X-Poedit-Basepath: ../../EVC\n"
+"X-Poedit-KeywordsList: get_text;get_text_context:c1,2\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: c:\etcs\src\evc\dmi\text_messages.cpp:117
+msgid "Level crossing not protected"
+msgstr "道口无防护"
+
+#: c:\etcs\src\evc\dmi\text_messages.cpp:118
+msgid "Acknowledgement"
+msgstr "确认"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:77 c:\etcs\src\evc\dmi\windows.cpp:287
+#: c:\etcs\src\evc\dmi\windows.cpp:1072
+msgid "Driver ID"
+msgstr "司机号"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:86 c:\etcs\src\evc\dmi\windows.cpp:107
+#: c:\etcs\src\evc\dmi\windows.cpp:920
+msgid "Level 0"
+msgstr "等级 0"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:89 c:\etcs\src\evc\dmi\windows.cpp:110
+#: c:\etcs\src\evc\dmi\windows.cpp:922
+msgid "Level 1"
+msgstr "等级 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:92 c:\etcs\src\evc\dmi\windows.cpp:113
+#: c:\etcs\src\evc\dmi\windows.cpp:924
+msgid "Level 2"
+msgstr "等级 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:95 c:\etcs\src\evc\dmi\windows.cpp:116
+#: c:\etcs\src\evc\dmi\windows.cpp:926
+msgid "Level 3"
+msgstr "等级 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:131
+msgid "Level "
+msgstr "等级 "
+
+#: c:\etcs\src\evc\dmi\windows.cpp:140 c:\etcs\src\evc\dmi\windows.cpp:916
+msgid "Level"
+msgstr "等级"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:146 c:\etcs\src\evc\dmi\windows.cpp:289
+#: c:\etcs\src\evc\dmi\windows.cpp:944
+msgid "Train running number"
+msgstr "车次号"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:153 c:\etcs\src\evc\dmi\windows.cpp:299
+#: c:\etcs\src\evc\dmi\windows.cpp:1082 c:\etcs\src\evc\dmi\windows.cpp:1245
+msgid "RBC ID"
+msgstr "RBC编号"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:154 c:\etcs\src\evc\dmi\windows.cpp:300
+#: c:\etcs\src\evc\dmi\windows.cpp:1083
+msgid "RBC phone number"
+msgstr "RBC电话号码"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:158 c:\etcs\src\evc\dmi\windows.cpp:1081
+#: c:\etcs\src\evc\dmi\windows.cpp:1244
+msgid "RBC data"
+msgstr "RBC数据"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:168 c:\etcs\src\evc\dmi\windows.cpp:297
+#: c:\etcs\src\evc\dmi\windows.cpp:1092
+msgid "Radio network ID"
+msgstr "无线网络识别码"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:200
+#: c:\etcs\src\evc\dmi\windows.cpp:965 c:\etcs\src\evc\dmi\windows.cpp:1229
+msgid "Train data"
+msgstr "列车数据"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:291
+#: c:\etcs\src\evc\dmi\windows.cpp:1060
+msgid "Train type"
+msgstr "列车数据组"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:192 c:\etcs\src\evc\dmi\windows.cpp:292
+#: c:\etcs\src\evc\dmi\windows.cpp:991 c:\etcs\src\evc\dmi\windows.cpp:1230
+msgid "Length (m)"
+msgstr "长度"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:193 c:\etcs\src\evc\dmi\windows.cpp:996
+#: c:\etcs\src\evc\dmi\windows.cpp:1234
+msgid "Brake percentage"
+msgstr "制动比"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:194 c:\etcs\src\evc\dmi\windows.cpp:995
+#: c:\etcs\src\evc\dmi\windows.cpp:1238
+msgid "Max speed (km/h)"
+msgstr "最大速度"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:195 c:\etcs\src\evc\dmi\windows.cpp:992
+msgid "Loading gauge"
+msgstr "限界"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:195
+msgid "Out of GC"
+msgstr "超限"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:994
+#: c:\etcs\src\evc\dmi\windows.cpp:997
+msgid "Train category"
+msgstr "列车种类"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1000
+msgid "PASS 1"
+msgstr "客1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1003
+msgid "PASS 2"
+msgstr "客2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1006
+msgid "PASS 3"
+msgstr "客3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1009
+msgid "TILT 1"
+msgstr "摆1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1012
+msgid "TILT 2"
+msgstr "摆2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1015
+msgid "TILT 3"
+msgstr "摆3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1018
+msgid "TILT 4"
+msgstr "摆4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1021
+msgid "TILT 5"
+msgstr "摆5"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1024
+msgid "TILT 6"
+msgstr "摆6"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1027
+msgid "TILT 7"
+msgstr "摆7"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1030
+msgid "FP 1"
+msgstr "货1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198
+msgid "FP2"
+msgstr "货2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1036
+msgid "FP 3"
+msgstr "货3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1039
+msgid "FP 4"
+msgstr "货4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1042
+msgid "FG 1"
+msgstr "缓1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1045
+msgid "FG 2"
+msgstr "缓2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1048
+msgid "FG 3"
+msgstr "缓3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1051
+msgid "FG 4"
+msgstr "缓4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:199 c:\etcs\src\evc\dmi\windows.cpp:993
+msgid "Axle load category"
+msgstr "轴重等级"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:227 c:\etcs\src\evc\dmi\windows.cpp:1192
+#: c:\etcs\src\evc\dmi\windows.cpp:1198 c:\etcs\src\evc\dmi\windows.cpp:1202
+msgid " data"
+msgstr " 数据"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1130
+msgid "Adhesion"
+msgstr "黏着调节"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:236
+msgid "Non slippery rail"
+msgstr "正常黏着"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1131
+msgid "Slippery rail"
+msgstr "低黏着"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:243 c:\etcs\src\evc\dmi\windows.cpp:1123
+#: c:\etcs\src\evc\dmi\windows.cpp:1253
+msgid "SR speed (km/h)"
+msgstr "引导限速"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:244 c:\etcs\src\evc\dmi\windows.cpp:1124
+#: c:\etcs\src\evc\dmi\windows.cpp:1250
+msgid "SR distance (m)"
+msgstr "警惕距离"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:246 c:\etcs\src\evc\dmi\windows.cpp:1121
+#: c:\etcs\src\evc\dmi\windows.cpp:1249
+msgid "SR speed/distance"
+msgstr "引导模式警惕设置"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:252 c:\etcs\src\evc\dmi\windows.cpp:1117
+msgid "Language"
+msgstr "语言"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:1133
+msgid "Set VBC"
+msgstr "设置VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:264
+#: c:\etcs\src\evc\dmi\windows.cpp:1163 c:\etcs\src\evc\dmi\windows.cpp:1164
+#: c:\etcs\src\evc\dmi\windows.cpp:1180
+msgid "VBC code"
+msgstr "VBC编号"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:264 c:\etcs\src\evc\dmi\windows.cpp:1142
+msgid "Remove VBC"
+msgstr "清除VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:293
+msgid "Brake percentaje"
+msgstr "制动比"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:294
+msgid "Maximum speed (km/h)"
+msgstr "最大速度"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "Airtight"
+msgstr "气密"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "Yes"
+msgstr "确定"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "No"
+msgstr "取消"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:309
+msgid "Data view"
+msgstr "数据总览"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:315
+msgid "System version"
+msgstr "系统版本"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:315
+msgid "Operated system version"
+msgstr "操作系统版本"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:406 c:\etcs\src\evc\dmi\windows.cpp:514
+msgid "Radio network registration failed"
+msgstr "无线网络注册失败"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:417
+msgid "Train is rejected"
+msgstr "车次号注册失败"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:679
+msgid "Shunting request failed"
+msgstr "调车请求超时"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:970 c:\etcs\src\evc\dmi\windows.cpp:974
+msgid "Validate train data"
+msgstr "使用列车数据"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1033
+msgid "FP 2"
+msgstr "货2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
+msgid "Validate set VBC"
+msgstr "确认设置VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1147 c:\etcs\src\evc\dmi\windows.cpp:1168
+msgid "Validate remove VBC"
+msgstr "确认清除VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1184
+msgid "Brightness"
+msgstr "亮度"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1186
+msgid "Volume"
+msgstr "音量"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1198 c:\etcs\src\evc\dmi\windows.cpp:1202
+msgid "Validate "
+msgstr "确认 "
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1395
+#: c:\etcs\src\evc\procedures\train_trip.cpp:40
+msgid "SH refused"
+msgstr "拒绝调车"
+
+#: c:\etcs\src\evc\euroradio\session.cpp:126
+#: c:\etcs\src\evc\procedures\train_trip.cpp:43
+msgid "Trackside not compatible"
+msgstr "轨旁通信不兼容"
+
+#: c:\etcs\src\evc\procedures\mode_transition.cpp:325
+msgid "Entering FS"
+msgstr "进入完全监控模式"
+
+#: c:\etcs\src\evc\procedures\mode_transition.cpp:332
+msgid "Entering OS"
+msgstr "进入目视行车模式"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:26
+msgid "Unauthorized passing of EoA/LoA"
+msgstr "非法越过行车许可终点"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:30
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:30
+msgid "Balise read error"
+msgstr "应答器报文错误"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:34
+msgid "No MA received at level transition"
+msgstr "应答器信息缺失"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:37
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:64
+msgid "Communication error"
+msgstr "无线超时制动"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:46
+msgid "SR distance exceeded"
+msgstr "警惕确认"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:50
+msgid "SH stop order"
+msgstr "禁止调车"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:54
+msgid "SR stop order"
+msgstr "绝对停车"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:57
+msgid "Emergency stop"
+msgstr "紧急停车"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:60
+msgid "No track description"
+msgstr "线路信息缺失"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:71
+msgid " brake demand"
+msgstr " 制动"
+
+#: c:\etcs\src\evc\stm\stm.cpp:395
+msgid " failed"
+msgstr " 故障"
+
+#: c:\etcs\src\evc\stm\stm.cpp:516
+msgid " not available"
+msgstr " 不可用"
+
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:43
+msgid "Route suitability - loading gauge"
+msgstr "进路适合性 - 装载限界"
+
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:46
+msgid "Route suitability - axle load category"
+msgstr "进路适合性 - 轴重类别"
+
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:49
+msgid "Route suitability - traction system"
+msgstr "进路适合性 - 牵引系统"
+
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:50
+msgid "Runaway movement"
+msgstr "溜逸防护制动"
+
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:86
+msgid "Train data changed"
+msgstr "列车数据变更"

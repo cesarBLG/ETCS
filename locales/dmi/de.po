@@ -1,8 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ETCS DMI\n"
-"PO-Revision-Date: 2023-08-11 09:35+0000\n"
-"Last-Translator: Moooritz (German Team) <mo.henning02@gmail.com>\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-10 13:53+0200\n"
+"PO-Revision-Date: 2023-10-24 12:03+0000\n"
+"Last-Translator: RealMiko (German Team) <realmikolp@gmail.com>\n"
 "Language-Team: German <https://sts.simkol.pl:18443/projects/simrail/etcs-dmi/"
 "de/>\n"
 "Language: de\n"
@@ -12,188 +14,217 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.14.2\n"
 
-#: window/menu_main.cpp:31
-msgid "Main"
-msgstr "Hauptmenü"
-
-#: window/data_entry.cpp:25 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:82
-#: window/keyboard.cpp:186 window/keyboard.cpp:193
-#: window/track_ahead_free.cpp:15
-msgid "Yes"
-msgstr "Ja"
-
-#: window/data_entry.cpp:54
-msgid " entry complete?"
-msgstr " bestätigen?"
-
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
-msgid "No"
-msgstr "Nein"
-
-#: window/driver_id.cpp:26
-msgid "TRN"
-msgstr "ZUGNR"
-
-#: window/fixed_train_data.cpp:26
-#, fuzzy
-msgid "Enter\n"
-"data"
-msgstr ""
-"Daten-\n"
-"eingabe"
-
-#: window/keyboard.cpp:29
-msgid "DEL"
-msgstr "DEL"
-
-#: window/menu_main.cpp:33
-msgid "Start"
-msgstr "Start"
-
-#: window/menu_main.cpp:34
-msgid "Driver ID"
-msgstr "Tf-Nummer"
-
-#: window/menu_main.cpp:35
-msgid "Train Data"
-msgstr "Zugbesy"
-
-#: window/menu_main.cpp:36
-msgid "Level"
-msgstr "Level"
-
-#: window/menu_main.cpp:37
-msgid "Train running number"
-msgstr "Zugnummer"
-
-#: window/menu_main.cpp:38
-msgid "Exit Shunting"
-msgstr "Shunting beenden"
-
-#: window/menu_main.cpp:38
-msgid "Shunting"
-msgstr "Shunting"
-
-#: window/menu_main.cpp:39
-msgid "Non-Leading"
-msgstr "Non-Leading"
-
-#: window/menu_main.cpp:40
-msgid "Maintain shunting"
-msgstr "Passive Shunting"
-
-#: window/menu_main.cpp:41
-msgid "Radio data"
-msgstr "Funkdaten"
-
-#: window/menu_override.cpp:22
-msgid "Override"
-msgstr "Override"
-
-#: window/menu_override.cpp:24
-msgid "EoA"
-msgstr "EoA"
-
-#: window/menu_radio.cpp:31
-msgid "Contact last RBC"
-msgstr ""
-"Letztes RBC\n"
-"kontaktieren"
-
-#: window/menu_radio.cpp:32
-msgid "Use short number"
-msgstr "Kurznummer \n"
-"verwenden"
-
-#: window/menu_radio.cpp:33
-msgid "Enter RBC data"
-msgstr ""
-"RBC-Daten\n"
-"eingeben"
-
-#: window/menu_radio.cpp:34
-msgid "Radio Network ID"
-msgstr "Funknetzwerk-ID"
-
-#: window/menu_settings.cpp:21
-msgid "Settings"
-msgstr "Einstellungen"
-
-#: window/menu_settings.cpp:26
-msgid "System version"
-msgstr "Systemversion"
-
-#: window/menu_settings.cpp:27
-msgid "Set VBC"
-msgstr "VBC hinzufügen"
-
-#: window/menu_settings.cpp:28
-msgid "Remove VBC"
-msgstr "VBC entfernen"
-
-#: window/menu_spec.cpp:21
-msgid "Special"
-msgstr "Spezial"
-
-#: window/menu_spec.cpp:23
-msgid "Adhesion"
-msgstr "Adhäsion"
-
-#: window/menu_spec.cpp:24
-msgid "SR Speed/Distance"
-msgstr ""
-"SR Geschwindigkeit/\n"
-"Distanz"
-
-#: window/menu_spec.cpp:25
-msgid "Train integrity"
-msgstr "Zugintegrität"
-
-#: window/train_data.cpp:24
-#, fuzzy
-msgid "Select\n"
-"type"
-msgstr ""
-"Zugtyp\n"
-"ausw."
-
-#: language/language.cpp:36 window/nav_buttons.cpp:29
+#: c:\etcs\src\dmi\language\language.cpp:43
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:51
 msgctxt "Navigation bar"
 msgid "Main"
 msgstr ""
 "Haupt-\n"
 "menü"
 
-#: language/language.cpp:37 window/nav_buttons.cpp:35
+#: c:\etcs\src\dmi\language\language.cpp:44
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:52
 msgctxt "Navigation bar"
-msgid "Over-\n"
+msgid ""
+"Over-\n"
 "ride"
 msgstr ""
 "Over-\n"
 "ride"
 
-#: language/language.cpp:38 window/nav_buttons.cpp:41
+#: c:\etcs\src\dmi\language\language.cpp:45
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:53
 msgctxt "Navigation bar"
-msgid "Data\n"
+msgid ""
+"Data\n"
 "view"
 msgstr ""
 "Daten\n"
 "ansehen"
 
-#: language/language.cpp:39 window/nav_buttons.cpp:47
+#: c:\etcs\src\dmi\language\language.cpp:46
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:54
 msgctxt "Navigation bar"
 msgid "Spec"
 msgstr "Spezial"
 
-#: window/menu_ntc.cpp:21
+#: c:\etcs\src\dmi\window\brightness.cpp:13
+#: c:\etcs\src\dmi\window\menu_settings.cpp:21
+msgid "Brightness"
+msgstr "Helligkeit"
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:16
+#: c:\etcs\src\dmi\window\data_entry.cpp:17
+#: c:\etcs\src\dmi\window\data_validation.cpp:19
+#: c:\etcs\src\dmi\window\keyboard.cpp:245
+#: c:\etcs\src\dmi\window\keyboard.cpp:252
+#: c:\etcs\src\dmi\window\track_ahead_free.cpp:27
+msgid "Yes"
+msgstr "Ja"
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:62
+msgid " entry complete?"
+msgstr " bestätigen?"
+
+#: c:\etcs\src\dmi\window\driver_id.cpp:16
+msgid "TRN"
+msgstr "ZUGNR"
+
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:15
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:19
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:25
+#, fuzzy
+msgid ""
+"Enter\n"
+"data"
+msgstr ""
+"Daten-\n"
+"eingabe"
+
+#: c:\etcs\src\dmi\window\keyboard.cpp:244
+#: c:\etcs\src\dmi\window\keyboard.cpp:248
+msgid "No"
+msgstr "Nein"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:20
+msgid "Main"
+msgstr "Hauptmenü"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:22
+msgid "Start"
+msgstr "Start"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:26
+msgid "Driver ID"
+msgstr "Tf-Nummer"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:30
+msgid "Train Data"
+msgstr "Zugbesy"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:34
+msgid "Level"
+msgstr "Level"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:38
+msgid "Train running number"
+msgstr "Zugnummer"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Exit Shunting"
+msgstr "Shunting beenden"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Shunting"
+msgstr "Shunting"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:46
+msgid "Non-Leading"
+msgstr "Non-Leading"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:47
+msgid "Maintain shunting"
+msgstr "Passive Shunting"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:48
+msgid "Radio data"
+msgstr "Funkdaten"
+
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:11
 msgid "NTC data entry"
 msgstr "NTC-Dateneingabe"
 
-#: window/menu_ntc.cpp:31
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:20
 msgid "End of data entry"
 msgstr "Ende der Dateneingabe"
 
-#: window/menu_radio.cpp:29
+#: c:\etcs\src\dmi\window\menu_override.cpp:12
+msgid "Override"
+msgstr "Override"
+
+#: c:\etcs\src\dmi\window\menu_override.cpp:14
+msgid "EoA"
+msgstr "EoA"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:18
 msgid "RBC data"
 msgstr "RBC-Daten"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:20
+msgid "Contact last RBC"
+msgstr ""
+"Letztes RBC\n"
+"kontaktieren"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:24
+msgid "Use short number"
+msgstr ""
+"Kurznummer \n"
+"verwenden"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:28
+msgid "Enter RBC data"
+msgstr ""
+"RBC-Daten\n"
+"eingeben"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:32
+msgid "Radio Network ID"
+msgstr "Funknetzwerk-ID"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:11
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:13
+msgid "Language"
+msgstr "Sprache"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:17
+#: c:\etcs\src\dmi\window\volume.cpp:13
+msgid "Volume"
+msgstr "Lautstärke"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:25
+msgid "System version"
+msgstr "Systemversion"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:29
+msgid "Set VBC"
+msgstr "VBC hinzufügen"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:33
+msgid "Remove VBC"
+msgstr "VBC entfernen"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:11
+msgid "Special"
+msgstr "Spezial"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:13
+msgid "Adhesion"
+msgstr "Adhäsion"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:17
+msgid "SR Speed/Distance"
+msgstr ""
+"SR Geschwindigkeit/\n"
+"Distanz"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:21
+msgid "Train integrity"
+msgstr "Zugintegrität"
+
+#: c:\etcs\src\dmi\window\train_data.cpp:14
+#: c:\etcs\src\dmi\window\train_data.cpp:18
+#: c:\etcs\src\dmi\window\train_data.cpp:24
+#, fuzzy
+msgid ""
+"Select\n"
+"type"
+msgstr ""
+"Zugtyp\n"
+"ausw."
+
+#~ msgid "DEL"
+#~ msgstr "DEL"
