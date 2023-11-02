@@ -67,12 +67,11 @@ class Component
         void setSize(float sx, float sy);
         void setLocation(float x, float y);
         virtual void paint();
-        void drawArc(float ang0, float ang1, float r, float cx, float cy);
         void rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle);
         void draw(graphic *g);
         void drawLine(float x1, float y1, float x2, float y2);
         void drawLine(float x1, float y1, float x2, float y2, Color c);
-        void drawPolygon(float *x, float *y, int n);
+        void drawConvexPolygon(float *x, float *y, int n);
         void drawCircle(float radius, float cx, float cy);
         void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
         void drawRadius(float cx, float cy, float rmin, float rmax, float ang);

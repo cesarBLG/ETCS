@@ -307,10 +307,27 @@ void SdlPlatform::draw_image(const Image &base, float x, float y, float w, float
 	}
 }
 
-void SdlPlatform::draw_circle_filled(float x, float y, float rad) {
+void SdlPlatform::draw_circle_filled(float x, float y, float r) {
 	Color c = current_color;
-	filledCircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
-	aacircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
+	filledCircleRGBA(sdlrend, x * s + ox, y * s + oy, r * s, c.R, c.G, c.B, 255);
+	aacircleRGBA(sdlrend, x * s + ox, y * s + oy, r * s, c.R, c.G, c.B, 255);
+}
+
+void SdlPlatform::draw_arc_filled(float cx, float cy, float rmin, float rmax, float ang0, float ang1) {
+    const int n = 51;
+    std::vector<std::pair<float, float>> poly;
+    poly.resize(2 * n);
+    for(int i = 0; i < n; i++)
+    {
+        float an = ang0 + (ang1 - ang0) * i / (n - 1);
+        float c = std::cos(an);
+        float s = std::sin(an);
+        poly[i].first = rmin * c + cx;
+        poly[i].second = rmin * s + cy;
+        poly[2 * n - 1 - i].first = rmax * c + cx;
+        poly[2 * n - 1 - i].second = rmax * s + cy;
+    }
+    draw_polygon_filled(poly);
 }
 
 void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
@@ -324,6 +341,10 @@ void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>>
 	Color c = current_color;
 	filledPolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
 	aapolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
+}
+
+void SdlPlatform::draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
+	draw_polygon_filled(poly);
 }
 
 PlatformUtil::Promise<void> SdlPlatform::on_present_request() {

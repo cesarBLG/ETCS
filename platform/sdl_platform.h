@@ -78,6 +78,7 @@ private:
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
 	void mixer_func(int16_t *buffer, size_t len);
 	bool poll_sdl();
+	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly);
 
 public:
 	class SdlImage final : public Image
@@ -150,8 +151,9 @@ public:
 	void draw_rect(float x, float y, float w, float h) override;
 	void draw_rect_filled(float x, float y, float w, float h) override;
 	void draw_image(const Image &img, float x, float y, float w, float h) override;
-	void draw_circle_filled(float x, float y, float rad) override;
-	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
+	void draw_arc_filled(float x, float y, float r_min, float r_max, float a_min, float a_max) override;
+	void draw_circle_filled(float x, float y, float r) override;
+	void draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
 	PlatformUtil::Promise<void> on_present_request() override;
 	void present() override;
 	std::unique_ptr<Image> load_image(const std::string_view path) override;

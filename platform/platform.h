@@ -123,8 +123,9 @@ public:
 	virtual void draw_rect(float x, float y, float w, float h) = 0;
 	virtual void draw_rect_filled(float x, float y, float w, float h) = 0;
 	virtual void draw_image(const Image &img, float x, float y, float w, float h) = 0;
-	virtual void draw_circle_filled(float x, float y, float rad) = 0;
-	virtual void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) = 0;
+	virtual void draw_arc_filled(float x, float y, float r_min, float r_max, float a_min, float a_max) = 0;
+	virtual void draw_circle_filled(float x, float y, float r) = 0;
+	virtual void draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) = 0;
 	virtual PlatformUtil::Promise<void> on_present_request() = 0;
 	virtual void present() = 0;
 	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;

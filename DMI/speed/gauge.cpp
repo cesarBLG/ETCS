@@ -95,10 +95,14 @@ void drawNeedle()
     float an = speedToAngle(useImperialSystem ? Vest * KMH_TO_MPH : Vest);
     platform->set_color(needleColor);
     csg.drawCircle(25,cx,cy);
-    float px[] = {-4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5};
-    float py[] = {-15,-15,-82,-90,-105,-105,-90,-82};
-    csg.rotateVertex(px, py, 8, cx, cy, an);
-    csg.drawPolygon(px, py, 8);
+    float pax[] = { 1.5f, 1.5f, -1.5f, -1.5f };
+    float pay[] = { -90.0f, -105.0f, -105.0f, -90.0f };
+    float pbx[] = { -4.5f, 4.5f, 4.5f, 1.5f, -1.5f, -4.5f };
+    float pby[] = { -15.0f, -15.0f, -82.0f, -90.0f, -90.0f, -82.0f };
+    csg.rotateVertex(pax, pay, 4, cx, cy, an);
+    csg.rotateVertex(pbx, pby, 6, cx, cy, an);
+    csg.drawConvexPolygon(pax, pay, 4);
+    csg.drawConvexPolygon(pbx, pby, 6);
 
     if(spd_nums[0]==nullptr || spd_nums[0]->color!=speedColor)
     {

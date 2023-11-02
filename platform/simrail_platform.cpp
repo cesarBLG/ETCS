@@ -262,11 +262,30 @@ void SimrailUiPlatform::draw_image(const Image &base, float x, float y, float w,
 	drawlist->AddText(ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size());
 }
 
-void SimrailUiPlatform::draw_circle_filled(float x, float y, float rad) {
-	drawlist->AddCircleFilled(ImVec2(x, y), rad, current_color);
+void SimrailUiPlatform::draw_circle_filled(float x, float y, float r) {
+	drawlist->AddCircleFilled(ImVec2(x, y), r, current_color);
 }
 
-void SimrailUiPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
+void SimrailUiPlatform::draw_arc_filled(float x, float y, float r_min, float r_max, float a_min, float a_max) {
+	float arc_angle = a_max - a_min;
+
+	int circle_segments = drawlist->_CalcCircleAutoSegmentCount(r_max);
+	int arc_segments = std::max((int)std::ceil(circle_segments * arc_angle / (M_PI * 2.0f)), (int)(2.0f * M_PI / arc_angle));
+
+	for (int i = 0; i < arc_segments; i++) {
+		float a1 = a_min + ((float)i / arc_segments) * arc_angle;
+		float a2 = a_min + ((float)(i + 1) / arc_segments) * arc_angle;
+
+		drawlist->AddQuadFilled(
+			ImVec2(x + r_max * std::cos(a1), y + r_max * std::sin(a1)),
+			ImVec2(x + r_min * std::cos(a1), y + r_min * std::sin(a1)),
+			ImVec2(x + r_min * std::cos(a2), y + r_min * std::sin(a2)),
+			ImVec2(x + r_max * std::cos(a2), y + r_max * std::sin(a2)),
+			current_color);
+	}
+}
+
+void SimrailUiPlatform::draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
 	for (const auto &p : poly)
 		drawlist->PathLineTo(ImVec2(p.first, p.second));
 	drawlist->PathFillConvex(current_color);
