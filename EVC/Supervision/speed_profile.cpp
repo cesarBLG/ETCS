@@ -99,7 +99,7 @@ void delete_gradient()
 }
 void delete_TSR(const distance &d)
 {
-    std::remove_if(TSRs.begin(), TSRs.end(), [d](const TSR& t) {return d.min < t.restriction.get_start();});
+    TSRs.remove_if([d](const TSR& t) {return d.min < t.restriction.get_start();});
 }
 void delete_TSR()
 {
