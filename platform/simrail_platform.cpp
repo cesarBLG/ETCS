@@ -573,7 +573,7 @@ namespace api {
 	IMPORT_FUNC("simrail_ui_v1", "sound_destroy") void sound_destroy(uint32_t handle);
 	IMPORT_FUNC("simrail_ui_v1", "source_create") uint32_t source_create(uint32_t sound, int32_t looping);
 	IMPORT_FUNC("simrail_ui_v1", "source_destroy") void source_destroy(uint32_t handle, int32_t keep_playing);
-	IMPORT_FUNC("simrail_ui_v1", "set_volume") void set_volume(int32_t volume);
+	IMPORT_FUNC("simrail_ui_v1", "set_volume") void set_volume(float volume);
 }
 
 SimrailUiPlatform::SimrailSoundData::SimrailSoundData(uint32_t h) : handle(h) {
@@ -605,7 +605,7 @@ void SimrailUiPlatform::SimrailSoundSource::detach() {
 }
 
 void SimrailUiPlatform::set_volume(int vol) {
-	api::set_volume(vol);
+	api::set_volume(vol / 100.0f);
 	last_volume = vol;
 }
 
