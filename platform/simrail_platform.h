@@ -91,6 +91,8 @@ private:
 	PlatformUtil::Promise<InputEvent> input_promise;
 	void handle_event(InputEvent ev);
 
+	int last_volume;
+
 public:
 	class SimrailFont : public Font
 	{
@@ -122,15 +124,22 @@ public:
 
 	class SimrailSoundData : public SoundData
 	{
+		uint32_t handle;
+
 	public:
-		SimrailSoundData() = default;
+		SimrailSoundData(uint32_t h);
+		~SimrailSoundData();
+		uint32_t get() const;
 	};
 
 	class SimrailSoundSource : public SoundSource
 	{
+		std::optional<uint32_t> handle;
+
 	public:
-		SimrailSoundSource() = default;
-		void detach() override {};
+		SimrailSoundSource(uint32_t h);
+		~SimrailSoundSource();
+		void detach() override;
 	};
 
 	SimrailUiPlatform(float virtual_w, float virtual_h);

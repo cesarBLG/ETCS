@@ -216,6 +216,8 @@ SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
 	drawlist = ImGui::GetBackgroundDrawList();
 
 	input_promise = on_input_event().then(std::bind(&SimrailUiPlatform::handle_event, this, std::placeholders::_1));
+
+	set_volume(50);
 }
 
 SimrailUiPlatform::~SimrailUiPlatform() {
@@ -577,23 +579,72 @@ std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_i
 	return make_text_image(text, base, c);
 }
 
+namespace api {
+	IMPORT_FUNC("simrail_ui_v1", "sound_create") uint32_t sound_create(const char* path, size_t len);
+	IMPORT_FUNC("simrail_ui_v1", "sound_destroy") void sound_destroy(uint32_t handle);
+	IMPORT_FUNC("simrail_ui_v1", "source_create") uint32_t source_create(uint32_t sound, int32_t looping);
+	IMPORT_FUNC("simrail_ui_v1", "source_destroy") void source_destroy(uint32_t handle, int32_t keep_playing);
+	IMPORT_FUNC("simrail_ui_v1", "set_volume") void set_volume(int32_t volume);
+}
+
+SimrailUiPlatform::SimrailSoundData::SimrailSoundData(uint32_t h) : handle(h) {
+
+}
+
+SimrailUiPlatform::SimrailSoundData::~SimrailSoundData() {
+	api::sound_destroy(handle);
+}
+
+uint32_t SimrailUiPlatform::SimrailSoundData::get() const {
+	return handle;
+}
+
+SimrailUiPlatform::SimrailSoundSource::SimrailSoundSource(uint32_t h) : handle(h) {
+
+}
+
+SimrailUiPlatform::SimrailSoundSource::~SimrailSoundSource() {
+	if (handle)
+		api::source_destroy(*handle, 0);
+}
+
+void SimrailUiPlatform::SimrailSoundSource::detach() {
+	if (handle) {
+		api::source_destroy(*handle, 1);
+		handle.reset();
+	}
+}
+
 void SimrailUiPlatform::set_volume(int vol) {
+	api::set_volume(vol);
+	last_volume = vol;
 }
 
 int SimrailUiPlatform::get_volume() {
-	return 50;
+	return last_volume;
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::string_view path) {
-	return std::make_unique<SimrailSoundData>();
+	uint32_t handle = api::sound_create(path.data(), path.size());
+	if (handle == 0)
+		return nullptr;
+
+	return std::make_unique<SimrailSoundData>(handle);
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundData> SimrailUiPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
-	return std::make_unique<SimrailSoundData>();
+	std::string desc = "=";
+	for (const auto &tone : melody)
+		desc += "," + std::to_string(tone.first) + "/" + std::to_string(tone.second);
+
+	return load_sound(desc);
 }
 
 std::unique_ptr<SimrailUiPlatform::SoundSource> SimrailUiPlatform::play_sound(const SoundData &base, bool looping) {
-	return std::make_unique<SimrailSoundSource>();
+	const SimrailSoundData &data = dynamic_cast<const SimrailSoundData&>(base);
+
+	uint32_t handle = api::source_create(data.get(), looping ? 1 : 0);
+	return std::make_unique<SimrailSoundSource>(handle);
 }
 
 void SimrailUiPlatform::set_brightness(int vol) {
