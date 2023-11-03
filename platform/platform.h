@@ -78,8 +78,7 @@ public:
 	{
 	public:
 		virtual ~Image() = default;
-		virtual float width() const = 0;
-		virtual float height() const = 0;
+		virtual std::pair<float, float> size() const = 0;
 	};
 
 	class Font : private PlatformUtil::NoCopy

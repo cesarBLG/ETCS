@@ -485,20 +485,12 @@ void SimrailUiPlatform::stbi_deleter::operator()(uint8_t *ptr) {
 	stbi_image_free(ptr);
 }
 
-float SimrailUiPlatform::SimrailImage::width() const {
+std::pair<float, float> SimrailUiPlatform::SimrailImage::size() const {
 	if (image)
-		return image->width;
+		return std::make_pair(image->width, image->height);
 	else if (font)
-		return text_size ? text_size->first : (text_size = font->calc_size(text))->first;
-	return 0.0f;
-}
-
-float SimrailUiPlatform::SimrailImage::height() const {
-	if (image)
-		return image->height;
-	else if (font)
-		return text_size ? text_size->second : (text_size = font->calc_size(text))->second;
-	return 0.0f;
+		return text_size;
+	return {};
 }
 
 std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold, const std::string_view lang) {
@@ -563,13 +555,10 @@ std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
 	const SimrailFont &font = dynamic_cast<const SimrailFont&>(base);
 
-	bool dirty = glyph_ranges_add(font.font->ranges_builder, text.begin(), text.end());
-	if (dirty || !font.font->pending)
-		build_atlas();
-
 	auto image = std::make_unique<SimrailImage>();
 	image->font.emplace(font.font, font.size, font.platform);
 	image->text = text;
+	image->text_size = font.calc_size(text);
 	image->color = IM_COL32(c.R, c.G, c.B, 255);
 
 	return image;

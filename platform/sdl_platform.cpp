@@ -483,12 +483,8 @@ SDL_Texture* SdlPlatform::SdlImage::get() const {
 	return tex;
 }
 
-float SdlPlatform::SdlImage::width() const {
-	return w / scale;
-}
-
-float SdlPlatform::SdlImage::height() const {
-	return h / scale;
+std::pair<float, float> SdlPlatform::SdlImage::size() const {
+	return std::make_pair(w / scale, h / scale);
 }
 
 SdlPlatform::SdlFontWrapper::SdlFontWrapper(TTF_Font *f) : font(f) {

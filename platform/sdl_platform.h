@@ -91,8 +91,7 @@ public:
 		SdlImage(SDL_Texture *tex, float w, float h, float s);
 		SDL_Texture* get() const;
 		~SdlImage() override;
-		float width() const override;
-		float height() const override;
+		std::pair<float, float> size() const override;
 	};
 
 	class SdlFont final : public Font

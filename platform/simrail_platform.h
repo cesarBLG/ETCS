@@ -111,11 +111,10 @@ public:
 	{
 	public:
 		SimrailImage() = default;
-		float width() const override;
-		float height() const override;
+		std::pair<float, float> size() const override;
 
 		std::optional<SimrailFont> font;
-		mutable std::optional<std::pair<float, float>> text_size;
+		std::pair<float, float> text_size;
 		std::string text;
 		unsigned int color;
 

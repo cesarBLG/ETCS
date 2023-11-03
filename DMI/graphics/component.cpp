@@ -185,7 +185,8 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
 }
 void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy)
 {
-    platform->draw_image(*tex, getX(cx - tex->width() / 2), getY(cy - tex->height() / 2));
+    auto size = tex->size();
+    platform->draw_image(*tex, getX(cx - size.first / 2), getY(cy - size.second / 2));
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
@@ -208,8 +209,8 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->aspect = aspect;
     int v = text.find('\n');
     t->tex = getTextGraphic(text, size, col, aspect, align);
-    float sx = t->tex == nullptr ? 0 : t->tex->width();
-    float sy = t->tex == nullptr ? 0 : t->tex->height();
+    float sx = t->tex == nullptr ? 0 : t->tex->size().first;
+    float sy = t->tex == nullptr ? 0 : t->tex->size().second;
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
@@ -245,8 +246,8 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     }
     else
     {
-        ig->width = ig->tex->width();
-        ig->height = ig->tex->height();
+        ig->width = ig->tex->size().first;
+        ig->height = ig->tex->size().second;
         ig->x = this->sx/2;
         ig->y = this->sy/2;
     }
