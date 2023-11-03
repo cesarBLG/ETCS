@@ -136,7 +136,7 @@ void Component::draw(graphic *graph)
         case TEXTURE:{
             texture *t = (texture*)graph;
             if(t->tex == nullptr) return;
-            drawTexture(t->tex, t->x, t->y, t->width, t->height);
+            drawTexture(t->tex, t->x, t->y);
             break;}
         case RECTANGLE:{
             rectangle *r = (rectangle*)graph;
@@ -183,9 +183,9 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy)
 {
-    platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), sx, sy);
+    platform->draw_image(*tex, getX(cx - tex->width() / 2), getY(cy - tex->height() / 2));
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {

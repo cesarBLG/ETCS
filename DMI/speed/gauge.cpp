@@ -154,7 +154,7 @@ void drawImperialIndicator()
         std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false, "");
         mphIndicator = platform->make_text_image(s, *mphFont, White);
     }
-    csg.drawTexture(mphIndicator, 140, 230, mphIndicator->width(), mphIndicator->height());
+    csg.drawTexture(mphIndicator, 140, 230);
 }
 void drawSetSpeed()
 {

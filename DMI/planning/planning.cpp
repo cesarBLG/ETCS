@@ -93,7 +93,7 @@ void displayObjects()
             std::string name = std::string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + std::to_string(p.condition)+".bmp";
             object_textures[p.condition] = Component::getImageGraphic(name);
         }
-        planning_distance.drawTexture(object_textures[p.condition],object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
+        planning_distance.drawTexture(object_textures[p.condition],object_pos[i%3],getPlanningHeight(p.distance)-5);
     }
 }
 std::vector<gradient_element> gradient_elements;
@@ -225,12 +225,12 @@ void displaySpeed()
         float a = getPlanningHeight(cur.distance)-15;
         if(im || prev.speed>cur.speed || cur.speed == 0)
         {
-            planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7, 20, 20);
+            planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7);
             planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
         }
         else if (prev.speed != cur.speed)
         {
-            planning_speed.drawTexture(pl21, 14, a-7, 20, 20);
+            planning_speed.drawTexture(pl21, 14, a-7);
             planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
         }
         if (cur.speed == 0) return;

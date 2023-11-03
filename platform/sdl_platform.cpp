@@ -296,13 +296,14 @@ void SdlPlatform::draw_rect_filled(float x, float y, float w, float h) {
 	SDL_RenderFillRectF(sdlrend, &rect);
 }
 
-void SdlPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
+void SdlPlatform::draw_image(const Image &base, float x, float y) {
 	const SdlImage &img = dynamic_cast<const SdlImage&>(base);
+	auto size = img.size();
 	if (s > 0.0f) {
-		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), w * s, h * s };
+		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), size.first * s, size.second * s };
 		SDL_RenderCopyF(sdlrend, img.get(), nullptr, &rect);
 	} else {
-		SDL_FRect rect { std::floor((x + w) * s + ox), std::floor((y + h) * s + oy), w * -s, h * -s };
+		SDL_FRect rect { std::floor((x + size.first) * s + ox), std::floor((y + size.second) * s + oy), size.first * -s, size.second * -s };
 		SDL_RenderCopyExF(sdlrend, img.get(), nullptr, &rect, 180.0, nullptr, SDL_FLIP_NONE);
 	}
 }

@@ -256,7 +256,7 @@ void SimrailUiPlatform::draw_rect_filled(float x, float y, float w, float h) {
 	drawlist->AddRectFilled(ImVec2(x, y), ImVec2(x + w, y + h), current_color);
 }
 
-void SimrailUiPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
+void SimrailUiPlatform::draw_image(const Image &base, float x, float y) {
 	const SimrailImage &img = dynamic_cast<const SimrailImage&>(base);
 	if (img.image) {
 		if (!img.image->pending)

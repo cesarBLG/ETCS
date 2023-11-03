@@ -77,7 +77,7 @@ class Component
         void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
         void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
         void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
-        void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy);
+        void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy);
         void add(graphic* g) { graphics.push_back(g); }
         void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
         text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
