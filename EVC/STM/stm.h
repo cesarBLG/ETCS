@@ -106,7 +106,7 @@ struct stm_object
     void trigger_condition(std::string change);
     void request_state(stm_state req);
     void send_specific_data(json &result);
-    void send_message(stm_message *msg);
+    void send_message(stm_message &msg);
 };
 void stm_level_change(level_information newlevel, bool driver);
 void stm_level_transition_received(level_transition_information info);
@@ -116,6 +116,7 @@ void setup_stm_control();
 void update_stm_control();
 void handle_stm_message(stm_message &msg);
 void stm_send_train_data();
+void stm_send_message(stm_message &msg, int nid_stm=255);
 stm_object *get_stm(int nid_ntc);
 std::string get_ntc_name(int nid_ntc);
 extern std::map<int, stm_object*> installed_stms;
