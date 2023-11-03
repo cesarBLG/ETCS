@@ -8,6 +8,7 @@
 
 #include "platform.h"
 #include "imgui.h"
+#include <map>
 
 class SimrailBasePlatform final : public BasePlatform {
 private:
@@ -46,34 +47,77 @@ public:
 
 class SimrailUiPlatform final : public UiPlatform {
 private:
+	friend class SimrailFont;
+
+	struct stbi_deleter { void operator()(uint8_t *ptr); };
+
+	struct SimrailFontWrapper {
+		std::vector<std::shared_ptr<std::string>> font_data;
+		float size;
+		ImFontGlyphRangesBuilder ranges_builder;
+		ImFont *current;
+		ImFont *pending;
+	};
+
+	struct AtlasRect {
+		int x, y;
+		float uv0x, uv0y, uv1x, uv1y;
+	};
+
+	struct SimrailImageWrapper {
+		std::unique_ptr<uint8_t[], stbi_deleter> data;
+		int width;
+		int height;
+
+		std::optional<AtlasRect> current;
+		std::optional<AtlasRect> pending;
+	};
+
 	SimrailBasePlatform base;
 
-	unsigned int current_color;
+	ImU32 current_color;
 	ImDrawList *drawlist;
+
+	std::map<std::string, std::shared_ptr<SimrailImageWrapper>, std::less<>> loaded_images;
+	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SimrailFontWrapper>> loaded_fonts;
+	std::map<std::string, std::shared_ptr<std::string>> font_files;
+	uint32_t atlas_id;
+	std::unique_ptr<ImFontAtlas> current_atlas;
+	std::unique_ptr<ImFontAtlas> pending_atlas;
+	void build_atlas();
+	void upload_atlas();
 
 	std::vector<InputEvent> pending_events;
 	PlatformUtil::Promise<InputEvent> input_promise;
 	void handle_event(InputEvent ev);
 
 public:
+	class SimrailFont : public Font
+	{
+	public:
+		SimrailUiPlatform &platform;
+		std::shared_ptr<SimrailFontWrapper> font;
+		float size;
+
+	public:
+		SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p);
+		float ascent() const override;
+		std::pair<float, float> calc_size(const std::string_view str) const override;
+	};
+
 	class SimrailImage : public Image
 	{
 	public:
 		SimrailImage() = default;
-		float width() const override { return w; };
-		float height() const override { return h; };
+		float width() const override;
+		float height() const override;
 
+		std::optional<SimrailFont> font;
+		mutable std::optional<std::pair<float, float>> text_size;
 		std::string text;
 		unsigned int color;
-		float w, h;
-	};
 
-	class SimrailFont : public Font
-	{
-	public:
-		SimrailFont() = default;
-		float ascent() const override { return 5.0f; }
-		std::pair<float, float> calc_size(const std::string_view str) const override { ImVec2 size = ImGui::CalcTextSize(str.begin(), str.end()); return std::make_pair(size.x, size.y); }
+		std::shared_ptr<SimrailImageWrapper> image;
 	};
 
 	class SimrailSoundData : public SoundData
