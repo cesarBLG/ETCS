@@ -540,7 +540,7 @@ void update_stm_control()
         auto *stm2 = kvp.second;
         if (stm2->state == stm_state::DA || level == Level::N0 || level == Level::N1 || level == Level::N2 || level == Level::N3 || stm != stm2 || mode != Mode::SN || stm->isolated)
             stm2->control_request_EB = false;
-        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
+        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->national_trip && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
             stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
