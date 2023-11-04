@@ -310,7 +310,7 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
     else if (msg->NID_MESSAGE == 130)
         ack = {27, 28};
     else if (msg->NID_MESSAGE == 132 && ((((MA_request*)msg.get())->Q_MARQSTREASON>>Q_MARQSTREASON_t::StartSelectedByDriverBit) & 1) == 1)
-        ack = {2, 3};
+        ack = {2, 3, 33};
     else if (msg->NID_MESSAGE == 150)
         ack = {-1};
     else if (msg->NID_MESSAGE == 155)
