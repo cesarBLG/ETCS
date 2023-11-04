@@ -36,6 +36,7 @@ struct level_transition_information
     double dist;
     target_level_information leveldata;
     std::vector<level_information> priority_table;
+    level_transition_information() = default;
     level_transition_information(LevelTransitionOrder o);
     level_transition_information(ConditionalLevelTransitionOrder o);
     void set_leveldata(std::vector<target_level_information> &priorities);

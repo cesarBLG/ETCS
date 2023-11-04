@@ -19,6 +19,7 @@ using std::string;
 extern ParameterManager manager;
 bool AKT=false;
 bool CON=true;
+bool CON_LZB=false;
 bool detected = false;
 bool connected = false;
 bool active = false;
@@ -46,7 +47,14 @@ void initialize_asfa()
     };
     manager.AddParameter(p);
 
+    p = new Parameter("asfa::con::lzb");
+    p->SetValue = [](string val) {
+        CON_LZB = val == "1";
+    };
+    manager.AddParameter(p);
+
     register_parameter("asfa::conectado");
+    register_parameter("asfa::con::lzb");
 }
 extern double V_NVUNFIT;
 #include "../Position/distance.h"
@@ -68,10 +76,47 @@ text_message &send_msg()
         return !brake_commanded && (time+30000<get_milliseconds() || con != CON);
     }));
 }
+void update_stm_asfa()
+{
+    if (installed_stms.find(10) == installed_stms.end()) return;
+    if (level == Level::NTC && nid_ntc == 10 && installed_stms[10]->state == stm_state::DA && CON_LZB) {
+        level_information lv = {Level::NTC, 0};
+        stm_level_change(lv, true);
+        nid_ntc = 0;
+        if (!ongoing_transition) {
+            ongoing_transition = level_transition_information();
+            ongoing_transition->immediate = false;
+            ongoing_transition->dist = 0;
+            ongoing_transition->acknowledged = true;
+            ongoing_transition->leveldata = {0.0, Level::NTC, 10};
+            ongoing_transition->ref_loc = distance::from_odometer(dist_base::max);
+            level_acknowledgeable = false;
+            level_acknowledged = true;
+            level_to_ack = Level::NTC;
+            ntc_to_ack = 10;
+            assign_stm(10, false);
+        }
+    }
+    if (level != Level::NTC || nid_ntc != 0) return;
+    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 10 && installed_stms[10]->state == stm_state::HS && !CON_LZB) {
+        ongoing_transition = {};
+        level_information lv = {Level::NTC, 10};
+        stm_level_change(lv, false);
+        nid_ntc = 10;
+    }
+}
 void update_asfa()
 {
     bool stm = installed_stms.find(0) != installed_stms.end() || installed_stms.find(2) != installed_stms.end() || installed_stms.find(19) != installed_stms.end();
-    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || !level_valid || stm) {
+    if (stm) {
+        AKT = false;
+        CON = true;
+        active = false;
+        brake_commanded = false;
+        update_stm_asfa();
+        return;
+    }
+    if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || !level_valid) {
         AKT = false;
         CON = true;
         active = false;
