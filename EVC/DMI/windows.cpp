@@ -989,8 +989,44 @@ void validate_data_entry(std::string name, json &result)
             if (flexible_data_entry) {
                 train_data_valid = false;
                 L_TRAIN = stoi(result[get_text("Length (m)")].get<std::string>());
-                loading_gauge = result[get_text("Loading gauge")].get<std::string>();
-                axle_load_category = result[get_text("Axle load category")].get<std::string>();
+                std::string gauge = result[get_text("Loading gauge")].get<std::string>();
+                if (gauge == get_text("G1"))
+                    loading_gauge = loading_gauges::G1;
+                else if (gauge == get_text("GA"))
+                    loading_gauge = loading_gauges::GA;
+                else if (gauge == get_text("GB"))
+                    loading_gauge = loading_gauges::GB;
+                else if (gauge == get_text("GC"))
+                    loading_gauge = loading_gauges::GC;
+                else
+                    loading_gauge = loading_gauges::OutGC;
+                std::string axlecat = result[get_text("Axle load category")].get<std::string>();
+                if (axlecat == get_text("A"))
+                    axle_load_category = axle_load_categories::A;
+                else if (axlecat == get_text("HS17"))
+                    axle_load_category = axle_load_categories::HS17;
+                else if (axlecat == get_text("B1"))
+                    axle_load_category = axle_load_categories::B1;
+                else if (axlecat == get_text("B2"))
+                    axle_load_category = axle_load_categories::B2;
+                else if (axlecat == get_text("C2"))
+                    axle_load_category = axle_load_categories::C2;
+                else if (axlecat == get_text("C3"))
+                    axle_load_category = axle_load_categories::C3;
+                else if (axlecat == get_text("C4"))
+                    axle_load_category = axle_load_categories::C4;
+                else if (axlecat == get_text("D2"))
+                    axle_load_category = axle_load_categories::D2;
+                else if (axlecat == get_text("D3"))
+                    axle_load_category = axle_load_categories::D3;
+                else if (axlecat == get_text("D4"))
+                    axle_load_category = axle_load_categories::D4;
+                else if (axlecat == get_text("D4XL"))
+                    axle_load_category = axle_load_categories::D4XL;
+                else if (axlecat == get_text("E4"))
+                    axle_load_category = axle_load_categories::E4;
+                else if (axlecat == get_text("E5"))
+                    axle_load_category = axle_load_categories::E5;
                 train_category = result[get_text("Train category")].get<std::string>();
                 set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
                 brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
