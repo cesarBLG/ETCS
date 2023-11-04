@@ -28,11 +28,42 @@ void load_route_suitability(RouteSuitabilityData &data, distance ref)
         ref += el.D_SUITABILITY.get_value(data.Q_SCALE);
         switch (el.Q_SUITABILITY.rawdata) {
             case Q_SUITABILITY_t::LoadingGauge:
+            {
+                bool supported = false;
+                supported |= ((el.M_LINEGAUGE.rawdata>>M_LINEGAUGE_t::BitG1)&1) && loading_gauge == loading_gauges::G1;
+                supported |= ((el.M_LINEGAUGE.rawdata>>M_LINEGAUGE_t::BitGA)&1) && loading_gauge == loading_gauges::GA;
+                supported |= ((el.M_LINEGAUGE.rawdata>>M_LINEGAUGE_t::BitGB)&1) && loading_gauge == loading_gauges::GB;
+                supported |= ((el.M_LINEGAUGE.rawdata>>M_LINEGAUGE_t::BitGC)&1) && loading_gauge == loading_gauges::GC;
+                if (supported)
+                    route_suitability.erase(0);
+                else
+                    route_suitability[0] = ref;
                 break;
+            }
             case Q_SUITABILITY_t::MaxAxleLoad:
+            {
+                bool supported = el.M_AXLELOADCAT.rawdata >= (int)axle_load_category;
+                if (supported)
+                    route_suitability.erase(1);
+                else
+                    route_suitability[1] = ref;
                 break;
+            }
             case Q_SUITABILITY_t::TractionSystem:
+            {
+                bool supported = false;
+                for (auto &t : traction_systems) {
+                    if (t.electrification == el.M_VOLTAGE.rawdata && (el.M_VOLTAGE.rawdata == 0 || t.nid_ctraction == el.NID_CTRACTION)) {
+                        supported = true;
+                        break;
+                    }
+                }
+                if (supported)
+                    route_suitability.erase(2);
+                else
+                    route_suitability[2] = ref;
                 break;
+            }
         }
     }
     for (auto &rs : route_suitability) {

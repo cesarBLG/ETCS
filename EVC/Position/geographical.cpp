@@ -46,7 +46,7 @@ void update_geographical_position()
                 valid_geo_reference = {};
             else
                 valid_geo_reference = *it;
-            std::remove_if(geo_references.begin(), geo_references.end(), 
+            geo_references.remove_if(
                 [](geographical_position p){return p.bg_ref && p.bg_ref->est+p.start_offset<d_estfront;});
             break;
         }

@@ -33,6 +33,7 @@
 #include "../language/language.h"
 #include "../DMI/windows.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "platform_runtime.h"
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
@@ -158,7 +159,7 @@ stm_object::stm_object()
         }
         return false;
     };
-    conditions["A15"] = [this] {return isolated;};
+    conditions["A15"] = [this] {return false;};
     conditions["C16"] = [this] {return last_order && *last_order != stm_state::DA && *last_order != stm_state::CCS && get_milliseconds() - last_order_time > 10000;};
     conditions["D16"] = [this] {return last_order && *last_order == stm_state::DA && get_milliseconds() - last_order_time > 5000;};
     conditions["E16"] = [this] {return last_order && *last_order == stm_state::CCS && !national_trip && get_milliseconds() - last_order_time > 5000;};
@@ -222,7 +223,7 @@ void update_ntc_transitions()
                     auto *order = new STMStateOrder();
                     order->NID_STMSTATEORDER.rawdata = (int)t.to;
                     msg.packets.push_back(std::shared_ptr<ETCS_packet>(order));
-                    stm->send_message(&msg);
+                    stm->send_message(msg);
                     if (t.to == stm_state::FA) {
                         stm->state = stm_state::FA;
                         send_failed_msg(stm);
@@ -331,9 +332,7 @@ void stm_level_change(level_information newlevel, bool driver)
     stat->NID_NTC.rawdata = nid_ntc;
     stat->M_MODESTM.set_value(mode);
     msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-    for (auto kvp : installed_stms) {
-        kvp.second->send_message(&msg);
-    }
+    stm_send_message(msg);
 }
 void stm_level_transition_received(level_transition_information info)
 {
@@ -395,13 +394,17 @@ void stm_object::report_received(stm_state newstate)
     if (ordered)
         last_order = {};
 }
-void stm_object::send_message(stm_message *msg)
+void stm_send_message(stm_message &msg, int nid_stm)
 {
-    msg->NID_STM.rawdata = nid_stm;
+    msg.NID_STM.rawdata = nid_stm;
     bit_manipulator w;
-    msg->write_to(w);
+    msg.write_to(w);
     sim_write_line("noretain(stm::command_etcs="+w.to_base64()+")");
     //log_message(*msg, d_estfront, get_milliseconds());
+}
+void stm_object::send_message(stm_message &msg)
+{
+    stm_send_message(msg, nid_stm);
 }
 void send_failed_msg(stm_object *stm)
 {
@@ -483,20 +486,15 @@ void update_stm_control()
         stat->NID_NTC.rawdata = nid_ntc;
         stat->M_MODESTM.set_value(mode);
         msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-        for (auto kvp : installed_stms) {
-            kvp.second->send_message(&msg);
-        }
+        stm_send_message(msg);
     }
     prev_mode = mode;
     if (prev_override != overrideProcedure) {
-        for (auto kvp : installed_stms) {
-            auto *stm = kvp.second;
-            stm_message msg;
-            auto *ov = new STMOverrideStatus();
-            ov->Q_OVR_STATUS.rawdata = overrideProcedure;
-			msg.packets.push_back(std::shared_ptr<ETCS_packet>(ov));
-			stm->send_message(&msg);
-        }
+        stm_message msg;
+        auto *ov = new STMOverrideStatus();
+        ov->Q_OVR_STATUS.rawdata = overrideProcedure;
+        msg.packets.push_back(std::shared_ptr<ETCS_packet>(ov));
+        stm_send_message(msg);
     }
     prev_override = overrideProcedure;
 
@@ -513,7 +511,7 @@ void update_stm_control()
 			auto *flag = new STMDataEntryFlag();
 			msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
 			flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-			stm->send_message(&msg);
+			stm->send_message(msg);
 		}
 	}
 
@@ -542,7 +540,7 @@ void update_stm_control()
         auto *stm2 = kvp.second;
         if (stm2->state == stm_state::DA || level == Level::N0 || level == Level::N1 || level == Level::N2 || level == Level::N3 || stm != stm2 || mode != Mode::SN || stm->isolated)
             stm2->control_request_EB = false;
-        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
+        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->national_trip && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
             stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
@@ -583,7 +581,7 @@ void stm_send_train_data()
             td->V_MAXTRAIN.set_value(V_train);
             td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
             msg.packets.push_back(std::shared_ptr<ETCS_packet>(td));
-            stm->send_message(&msg);
+            stm->send_message(msg);
         }
     }
 }
@@ -613,7 +611,7 @@ void stm_object::send_specific_data(json &result)
         res->results.push_back(dfr);
     }
     msg.packets.push_back(std::shared_ptr<ETCS_packet>(res));
-    send_message(&msg);
+    send_message(msg);
     specific_data.clear();
 }
 void setup_stm_control()
@@ -686,7 +684,7 @@ void handle_stm_message(stm_message &msg)
                 stat->NID_NTC.rawdata = nid_ntc;
                 stat->M_MODESTM.set_value(mode);
                 msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-                stm->send_message(&msg);
+                stm->send_message(msg);
                 break;
             }
             case 6:
@@ -792,7 +790,7 @@ void handle_stm_message(stm_message &msg)
                     auto *flag = new STMDataEntryFlag();
                     msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
                     flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-                    stm->send_message(&msg);
+                    stm->send_message(msg);
                 }
                 break;
             }
