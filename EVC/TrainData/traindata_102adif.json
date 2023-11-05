@@ -1,0 +1,77 @@
+{
+    "A330" : {
+        "length": 80,
+        "speed": 330,
+        "cant_deficiency": 206,
+        "t_traction_cutoff": 0.3,
+        "airtight": 1,
+        "traction_systems": [
+            {"name": "AC25kV", "nid_ctraction": 0}
+        ],
+        "brakes": {
+            "emergency": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "...."
+                }
+            },
+            "service": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 0.80},
+						{"speed": 13.8889, "value": 0.80},
+						{"speed": 27.7778, "value": 0.80},
+						{"speed": 41.6667, "value": 0.82},
+						{"speed": 55.5556, "value": 0.63},
+						{"speed": 69.4444, "value": 0.62},
+						{"speed": 83.3333, "value": 0.61}
+                    ],
+                    "build_up_time": 0.5,
+                    "validity": "1..."
+                },
+                "no_dynamic": {
+                    "curves": [
+                        {"speed": 0, "value": 0.78},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.8},
+						{"speed": 55.5556, "value": 0.61},
+						{"speed": 69.4444, "value": 0.6},
+						{"speed": 83.3333, "value": 0.59}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "0..."
+                }
+            },
+            "normal_service": {
+                "passenger": {
+                    "0": {
+                        "curves": [
+                            {"speed": 0, "value": 0.4}
+                        ]
+                    },
+                    "0.5": {
+                        "curves": [
+                            {"speed": 0, "value": 0.6}
+                        ]
+                    },
+                    "0.7": {
+                        "curves": [
+                            {"speed": 0, "value": 0.7}
+                        ]
+                    }
+                },
+                "kn+": [
+                    {"speed": 0, "value": 1}
+                ],
+                "kn-": [
+                    {"speed": 0, "value": 1}
+                ]
+            }
+            
+        }
+    }
+}

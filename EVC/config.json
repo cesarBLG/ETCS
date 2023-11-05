@@ -209,6 +209,11 @@
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
+   "102adif": {
+        "TrainData": "TrainData/traindata_102adif.json",
+        "SpeedDial": 350,
+        "STMLayout": "stm_siemens.json"
+    },
   "103": {
        "TrainData": "TrainData/traindata_103.json",
        "SpeedDial": 400,
