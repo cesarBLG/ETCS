@@ -14,20 +14,6 @@
 #include <list>
 #include "platform_runtime.h"
 using json = nlohmann::json;
-enum Electrifications
-{
-    NonElectrical,
-    DC600_750V,
-    DC1500V,
-    DC3KV,
-    AC15KV,
-    AC25KV
-};
-struct traction_type
-{
-    Electrifications electrification;
-    int additional_info;
-};
 double A_ebmax;
 double L_TRAIN=0;
 double T_traction_cutoff = 0.1;
@@ -40,8 +26,8 @@ int cant_deficiency=0;
 std::set<int> other_train_categories;
 brake_position_types brake_position = PassengerP;
 bool train_data_valid = false;
-std::string axle_load_category;
-std::string loading_gauge;
+axle_load_categories axle_load_category;
+loading_gauges loading_gauge;
 std::string train_category;
 std::string special_train_data;
 std::list<traction_type> traction_systems;
@@ -67,6 +53,44 @@ void set_train_data(std::string spec)
             cant_deficiency = (int)traindata["cant_deficiency"].get<double>();
             T_traction_cutoff = traindata["t_traction_cutoff"].get<double>();
             Q_airtight = traindata["airtight"].get<int>();
+            std::string gauge = traindata.contains("loading_gauge") ? traindata["loading_gauge"].get<std::string>() : "";
+            if (gauge == "G1")
+                loading_gauge = loading_gauges::G1;
+            else if (gauge == "GA")
+                loading_gauge = loading_gauges::GA;
+            else if (gauge == "GB")
+                loading_gauge = loading_gauges::GB;
+            else if (gauge == "GC")
+                loading_gauge = loading_gauges::GC;
+            else 
+                loading_gauge = loading_gauges::OutGC;
+            std::string axleload = traindata.contains("axle_load_category") ? traindata["axle_load_category"].get<std::string>() : "";
+            if (axleload == "A")
+                axle_load_category = axle_load_categories::A;
+            else if (axleload == "HS17")
+                axle_load_category = axle_load_categories::HS17;
+            else if (axleload == "B1")
+                axle_load_category = axle_load_categories::B2;
+            else if (axleload == "B2")
+                axle_load_category = axle_load_categories::B2;
+            else if (axleload == "C2")
+                axle_load_category = axle_load_categories::C2;
+            else if (axleload == "C3")
+                axle_load_category = axle_load_categories::C3;
+            else if (axleload == "C4")
+                axle_load_category = axle_load_categories::C4;
+            else if (axleload == "D2")
+                axle_load_category = axle_load_categories::D2;
+            else if (axleload == "D3")
+                axle_load_category = axle_load_categories::D3;
+            else if (axleload == "D4")
+                axle_load_category = axle_load_categories::D4;
+            else if (axleload == "D4XL")
+                axle_load_category = axle_load_categories::D4XL;
+            else if (axleload == "E4")
+                axle_load_category = axle_load_categories::E4;
+            else
+                axle_load_category = axle_load_categories::E5;
             json &tracts = traindata["traction_systems"];
             traction_systems.clear();
             for (auto it = tracts.begin(); it != tracts.end(); ++it) {
