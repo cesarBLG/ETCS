@@ -271,7 +271,8 @@ void SimrailUiPlatform::draw_image(const Image &base, float x, float y) {
 	} else if (img.font) {
 		if (!img.font->font->current)
 			return;
-		drawlist->AddText(img.font->font->current, img.font->size, ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size());
+		float adjusted_size = img.font->font->size * (img.font->ascent / img.font->font->current->Ascent);
+		drawlist->AddText(img.font->font->current, adjusted_size, ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size());
 	}
 }
 
@@ -463,21 +464,16 @@ static bool glyph_ranges_add(ImFontGlyphRangesBuilder &builder, const char *text
 	return ret;
 }
 
-SimrailUiPlatform::SimrailFont::SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p) : font(std::move(wrapper)), size(s), platform(p) {
+SimrailUiPlatform::SimrailFont::SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p) : font(std::move(wrapper)), ascent(s), platform(p) {
 
 }
 
-float SimrailUiPlatform::SimrailFont::SimrailFont::ascent() const {
-	if (!font->pending)
-		platform.build_atlas();
-	return font->pending->Ascent * (size / font->size);
-}
-
-std::pair<float, float> SimrailUiPlatform::SimrailFont::SimrailFont::calc_size(const std::string_view str) const {
+std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::string_view str) const {
 	bool dirty = glyph_ranges_add(font->ranges_builder, str.begin(), str.end());
 	if (dirty || !font->pending)
 		platform.build_atlas();
-	ImVec2 ret = font->pending->CalcTextSizeA(size, FLT_MAX, 0.0f, str.begin(), str.end());
+	float adjusted_size = font->size * (ascent / font->pending->Ascent);
+	ImVec2 ret = font->pending->CalcTextSizeA(adjusted_size, FLT_MAX, 0.0f, str.begin(), str.end());
 	return std::make_pair(ret.x, ret.y);
 }
 
@@ -493,16 +489,18 @@ std::pair<float, float> SimrailUiPlatform::SimrailImage::size() const {
 	return {};
 }
 
-std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size, bool bold, const std::string_view lang) {
+std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float ascent, bool bold, const std::string_view lang) {
+#ifdef SIMRAIL
+	ascent *= 1.1f;
+#endif
+
 	std::string lang_str(lang);
 	std::shared_ptr<SimrailFontWrapper> wrapper;
-
-	size *= 1.3f;
 
 	if (lang_str != "zh_Hans" && lang_str != "zh_Hant")
 		lang_str = "default";
 
-	float coarse_size = std::ceil(size / 5.0f) * 5.0f;
+	float coarse_size = std::ceil(ascent / 5.0f) * 10.0f;
 
 	{
 		auto it = loaded_fonts.find({ coarse_size, bold, lang_str });
@@ -549,14 +547,14 @@ std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float size
 		loaded_fonts.insert_or_assign({ coarse_size, bold, lang_str }, wrapper);
 	}
 
-	return std::make_unique<SimrailFont>(std::move(wrapper), size, *this);
+	return std::make_unique<SimrailFont>(std::move(wrapper), ascent, *this);
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
 	const SimrailFont &font = dynamic_cast<const SimrailFont&>(base);
 
 	auto image = std::make_unique<SimrailImage>();
-	image->font.emplace(font.font, font.size, font.platform);
+	image->font.emplace(font.font, font.ascent, font.platform);
 	image->text = text;
 	image->text_size = font.calc_size(text);
 	image->color = IM_COL32(c.R, c.G, c.B, 255);

@@ -145,7 +145,7 @@ SdlPlatform::~SdlPlatform() {
 	loaded_fonts.clear();
 	SDL_CloseAudioDevice(audio_device);
 	TTF_Quit();
-	SDL_DestroyRenderer(sdlrend);
+	//SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
 	SDL_Quit();
 }
@@ -255,6 +255,8 @@ void SdlPlatform::event_loop() {
 			present_count--;
 			idle = false;
 			SDL_RenderPresent(sdlrend);
+			SDL_SetRenderDrawColor(sdlrend, 0, 0, 0, 255);
+			SDL_RenderClear(sdlrend);
 		}
 
 		int64_t diff = -1;
@@ -266,9 +268,6 @@ void SdlPlatform::event_loop() {
 
 		poller.poll(idle ? diff : 0);
 	};
-
-	if (present_count > 0)
-		SDL_RenderPresent(sdlrend);
 
 	on_quit_list.fulfill_all(false);
 }
@@ -374,14 +373,17 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_vi
 	return img;
 }
 
-std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold, const std::string_view lang) {
+std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bold, const std::string_view lang) {
+#ifdef SIMRAIL
+	ascent *= 1.1f;
+#endif
+	float scale = std::abs(s);
+
 	std::string lang_str(lang);
-	auto it = loaded_fonts.find({size, bold, lang_str});
+	auto it = loaded_fonts.find({ascent, bold, lang_str});
 	std::shared_ptr<SdlFontWrapper> wrapper;
 	if (it != loaded_fonts.end())
 		wrapper = it->second;
-
-	float scale = std::abs(s);
 
 	if (!wrapper) {
 		std::string path;
@@ -400,19 +402,28 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold,
 			// Other languages
 			path = load_path + (!bold ? "fonts/Play-Regular.ttf" : "fonts/Play-Bold.ttf");
 		}
-		font = TTF_OpenFont(path.c_str(), size * 1.3 * scale);
 #else
 		path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
-		font = TTF_OpenFont(path.c_str(), size * 1.4 * scale);
 #endif
 
+		float size_probe = ascent * 2.0f * scale;
+		font = TTF_OpenFont(path.c_str(), size_probe);
+		if (font == nullptr) {
+			debug_print("load_font failed: " + path);
+			return nullptr;
+		}
+
+		float adjust = (ascent * scale) / TTF_FontAscent(font);
+		TTF_CloseFont(font);
+
+		font = TTF_OpenFont(path.c_str(), size_probe * adjust);
 		if (font == nullptr) {
 			debug_print("load_font failed: " + path);
 			return nullptr;
 		}
 
 		wrapper = std::make_shared<SdlFontWrapper>(font);
-		loaded_fonts.insert_or_assign({size, bold, lang_str}, wrapper);
+		loaded_fonts.insert_or_assign({ascent, bold, lang_str}, wrapper);
 	}
 
 	return std::make_unique<SdlFont>(wrapper, scale);
@@ -497,10 +508,6 @@ SdlPlatform::SdlFontWrapper::~SdlFontWrapper() {
 
 SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float s) : font(wrapper), scale(s) {
 
-}
-
-float SdlPlatform::SdlFont::ascent() const {
-	return TTF_FontAscent(font->font) / scale;
 }
 
 std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str) const {

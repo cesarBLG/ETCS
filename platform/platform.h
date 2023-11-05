@@ -85,7 +85,6 @@ public:
 	{
 	public:
 		virtual ~Font() = default;
-		virtual float ascent() const = 0;
 		virtual std::pair<float, float> calc_size(const std::string_view str) const = 0;
 	};
 
@@ -128,7 +127,7 @@ public:
 	virtual PlatformUtil::Promise<void> on_present_request() = 0;
 	virtual void present() = 0;
 	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;
-	virtual std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) = 0;
+	virtual std::unique_ptr<Font> load_font(float ascent, bool bold, const std::string_view lang) = 0;
 	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
 	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
 

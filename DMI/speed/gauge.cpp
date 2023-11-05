@@ -103,14 +103,12 @@ void drawNeedle()
     csg.rotateVertex(pbx, pby, 6, cx, cy, an);
     csg.drawConvexPolygon(pax, pay, 4);
     csg.drawConvexPolygon(pbx, pby, 6);
-
     if(spd_nums[0]==nullptr || spd_nums[0]->color!=speedColor)
     {
         for(int i=0; i<10; i++)
         {
             if(spd_nums[i]!=nullptr) delete spd_nums[i];
             spd_nums[i] = csg.getText(to_string(i), 0, 0, 18, speedColor, RIGHT);
-            //spd_nums[i]->load();
         }
     }
     int spd = useImperialSystem ? Vest * KMH_TO_MPH : Vest;
@@ -150,8 +148,8 @@ void drawImperialIndicator()
         return;
 
     if (mphIndicator == NULL) {
-        string s = "MPH";
-        std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(13, false, "");
+        string s = "mph";
+        std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(12, false, "");
         mphIndicator = platform->make_text_image(s, *mphFont, White);
     }
     csg.drawTexture(mphIndicator, 140, 230);
@@ -162,11 +160,7 @@ void drawSetSpeed()
     float an = speedToAngle(useImperialSystem ? Vset * KMH_TO_MPH : Vset);
 
     platform->set_color(White);
-    csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
-
-    platform->set_color(Magenta);
-    csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
-
+    csg.drawCircle(5, 111 * cos(an) + cx, 111 * sin(an) + cy);
 }
 static Mode prevmode;
 void displayCSG()
@@ -296,20 +290,13 @@ void displayLines()
         if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
-            float hx = 0;
-            float hy = 12/2.0;
-
             std::pair<float, float> wh = gaugeFont->calc_size(s);
-            hx = wh.first/2 + 1;
-            hy = gaugeFont->ascent()/2 - 2;
+            float hx = wh.first/2 + 1;
+            float hy = wh.second/2 + 1;
             float maxan = atanf(hy/hx);
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
-#if SIMRAIL
-            float val = size + adjust + 10;
-#else
-            float val = size + adjust;
-#endif
+            float val = size + adjust + 5;
             texture *t = new texture();
             t->x = cx-val*cosf(an);
             t->y = cy-val*sinf(an);
@@ -358,6 +345,7 @@ void displayGauge()
     displayLines();
     displayCSG();
     drawNeedle();
+    drawImperialIndicator();
     drawSetSpeed();
 }
 bool ttiShown = false;

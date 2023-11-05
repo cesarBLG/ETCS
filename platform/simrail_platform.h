@@ -99,11 +99,10 @@ public:
 	public:
 		SimrailUiPlatform &platform;
 		std::shared_ptr<SimrailFontWrapper> font;
-		float size;
+		float ascent;
 
 	public:
 		SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p);
-		float ascent() const override;
 		std::pair<float, float> calc_size(const std::string_view str) const override;
 	};
 

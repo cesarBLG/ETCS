@@ -102,7 +102,6 @@ public:
 	public:
 		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
-		float ascent() const override;
 		std::pair<float, float> calc_size(const std::string_view str) const override;
 	};
 
