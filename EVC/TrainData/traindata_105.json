@@ -35,11 +35,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -109,11 +111,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -183,11 +187,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -257,11 +263,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -331,11 +339,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -405,11 +415,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.5},
-						{"speed": 13.8889, "value": 1.33},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.73}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

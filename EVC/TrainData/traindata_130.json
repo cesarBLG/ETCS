@@ -13,7 +13,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -33,10 +34,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.23},
-						{"speed": 41.6667, "value": 0.94}
+                        {"speed": 0, "value": 0.61},
+						{"speed": 13.8889, "value": 0.6},
+						{"speed": 27.7778, "value": 0.59},
+						{"speed": 41.6667, "value": 0.51},
+						{"speed": 55.5556, "value": 0.43}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -84,7 +86,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -104,10 +107,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.23},
-						{"speed": 41.6667, "value": 0.94}
+                        {"speed": 0, "value": 0.61},
+						{"speed": 13.8889, "value": 0.6},
+						{"speed": 27.7778, "value": 0.59},
+						{"speed": 41.6667, "value": 0.51},
+						{"speed": 55.5556, "value": 0.43}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -155,7 +159,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -175,11 +180,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.61},
+						{"speed": 13.8889, "value": 0.6},
+						{"speed": 27.7778, "value": 0.59},
+						{"speed": 41.6667, "value": 0.51},
+						{"speed": 55.5556, "value": 0.43}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -227,7 +232,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -247,11 +253,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.61},
+						{"speed": 13.8889, "value": 0.6},
+						{"speed": 27.7778, "value": 0.59},
+						{"speed": 41.6667, "value": 0.51},
+						{"speed": 55.5556, "value": 0.43}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

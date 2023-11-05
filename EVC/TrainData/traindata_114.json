@@ -12,7 +12,7 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.8, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -32,11 +32,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.47},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.03},
-						{"speed": 41.6667, "value": 0.93},
-						{"speed": 55.5556, "value": 0.83}
+                        {"speed": 0, "value": 1.25},
+						{"speed": 13.8889, "value": 0.99},
+						{"speed": 27.7778, "value": 0.84},
+						{"speed": 41.6667, "value": 0.74},
+						{"speed": 55.5556, "value": 0.64}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -83,7 +83,7 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.8, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -103,11 +103,11 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.47},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.03},
-						{"speed": 41.6667, "value": 0.93},
-						{"speed": 55.5556, "value": 0.83}
+                        {"speed": 0, "value": 1.25},
+						{"speed": 13.8889, "value": 0.99},
+						{"speed": 27.7778, "value": 0.84},
+						{"speed": 41.6667, "value": 0.74},
+						{"speed": 55.5556, "value": 0.64}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

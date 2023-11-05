@@ -31,9 +31,9 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.02},
-						{"speed": 33.3333, "value": 0.70},
-						{"speed": 55.5556, "value": 0.60}
+                        {"speed": 0, "value": 1.1},
+						{"speed": 33.3333, "value": 0.83},
+						{"speed": 55.5556, "value": 0.78}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -99,9 +99,9 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.02},
-						{"speed": 33.3333, "value": 0.70},
-						{"speed": 55.5556, "value": 0.60}
+                        {"speed": 0, "value": 1.1},
+						{"speed": 33.3333, "value": 0.83},
+						{"speed": 55.5556, "value": 0.78}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

@@ -36,11 +36,12 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.81},
+						{"speed": 13.8889, "value": 0.8},
+						{"speed": 27.7778, "value": 0.79},
+						{"speed": 41.6667, "value": 0.71},
+						{"speed": 55.5556, "value": 0.63},
+						{"speed": 69.4444, "value": 0.53}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

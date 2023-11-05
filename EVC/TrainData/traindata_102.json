@@ -34,13 +34,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.75},
-						{"speed": 13.8889, "value": 0.82},
-						{"speed": 27.7778, "value": 0.82},
-						{"speed": 41.6667, "value": 0.72},
-						{"speed": 55.5556, "value": 0.62},
-						{"speed": 69.4444, "value": 0.56},
-						{"speed": 83.3333, "value": 0.62}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -109,13 +109,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.75},
-						{"speed": 13.8889, "value": 0.82},
-						{"speed": 27.7778, "value": 0.82},
-						{"speed": 41.6667, "value": 0.72},
-						{"speed": 55.5556, "value": 0.62},
-						{"speed": 69.4444, "value": 0.56},
-						{"speed": 83.3333, "value": 0.62}
+                        {"speed": 0, "value": 0.71},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.68},
+						{"speed": 55.5556, "value": 0.58},
+						{"speed": 69.4444, "value": 0.52},
+						{"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -184,13 +184,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.72},
-						{"speed": 27.7778, "value": 0.72},
-						{"speed": 41.6667, "value": 0.62},
-						{"speed": 55.5556, "value": 0.52},
-						{"speed": 69.4444, "value": 0.46},
-						{"speed": 83.3333, "value": 0.72}
+                        {"speed": 0, "value": 0.61},
+						{"speed": 13.8889, "value": 0.68},
+						{"speed": 27.7778, "value": 0.68},
+						{"speed": 41.6667, "value": 0.58},
+						{"speed": 55.5556, "value": 0.48},
+						{"speed": 69.4444, "value": 0.42},
+						{"speed": 83.3333, "value": 0.48}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -259,13 +259,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.10},
-						{"speed": 13.8889, "value": 1.00},
-						{"speed": 27.7778, "value": 1.00},
-						{"speed": 41.6667, "value": 1.02},
-						{"speed": 55.5556, "value": 0.83},
-						{"speed": 69.4444, "value": 0.82},
-						{"speed": 83.3333, "value": 0.81}
+                        {"speed": 0, "value": 0.78},
+						{"speed": 13.8889, "value": 0.78},
+						{"speed": 27.7778, "value": 0.78},
+						{"speed": 41.6667, "value": 0.8},
+						{"speed": 55.5556, "value": 0.61},
+						{"speed": 69.4444, "value": 0.6},
+						{"speed": 83.3333, "value": 0.59}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -334,13 +334,13 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                       {"speed": 0, "value": 1.03},
-						{"speed": 13.8889, "value": 1.03},
-						{"speed": 27.7778, "value": 1.03},
-						{"speed": 41.6667, "value": 1.03},
-						{"speed": 55.5556, "value": 0.93},
-						{"speed": 69.4444, "value": 0.9},
-						{"speed": 83.3333, "value": 0.92}
+                        {"speed": 0, "value": 0.81},
+                         {"speed": 13.8889, "value": 0.81},
+                         {"speed": 27.7778, "value": 0.81},
+                         {"speed": 41.6667, "value": 0.81},
+                         {"speed": 55.5556, "value": 0.71},
+                         {"speed": 69.4444, "value": 0.68},
+                         {"speed": 83.3333, "value": 0.7}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
