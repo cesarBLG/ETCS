@@ -207,6 +207,7 @@ SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
 	input_promise = on_input_event().then(std::bind(&SimrailUiPlatform::handle_event, this, std::placeholders::_1));
 
 	set_volume(50);
+	set_brightness(50);
 }
 
 SimrailUiPlatform::~SimrailUiPlatform() {

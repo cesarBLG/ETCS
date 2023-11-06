@@ -394,7 +394,7 @@ void start_or_iface()
 
     SetParameters();
 
-    register_parameter("time_offset");
+    register_parameter("wall_clock_time");
     register_parameter("ackButton");
     register_parameter("etcs::button::*");
     register_parameter("speed");
