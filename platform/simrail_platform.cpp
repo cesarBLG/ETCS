@@ -333,8 +333,8 @@ void SimrailUiPlatform::build_atlas() {
 	int max_width = 0;
 	int rect_it = pending_atlas->CustomRects.size();
 	for (auto const &entry : loaded_images) {
-		max_width = std::max(max_width, entry.second->width);
-		pending_atlas->AddCustomRectRegular(entry.second->width, entry.second->height);
+		max_width = std::max(max_width, entry.second->width + 2);
+		pending_atlas->AddCustomRectRegular(entry.second->width + 2, entry.second->height + 2);
 	}
 
 	ImFontConfig config;
@@ -364,7 +364,11 @@ void SimrailUiPlatform::build_atlas() {
 	pending_atlas->Build();
 
 	for (auto const &entry : loaded_images) {
-		ImFontAtlasCustomRect &rect = pending_atlas->CustomRects[rect_it++];
+		ImFontAtlasCustomRect rect = pending_atlas->CustomRects[rect_it++];
+		rect.Width -= 2;
+		rect.Height -= 2;
+		rect.X += 1;
+		rect.Y += 1;
 		ImVec2 uv0, uv1;
 		pending_atlas->CalcCustomRectUV(&rect, &uv0, &uv1);
 		entry.second->pending.emplace(AtlasRect { rect.X, rect.Y, uv0.x, uv0.y, uv1.x, uv1.y });
