@@ -151,10 +151,13 @@ void check_linking()
             if (rams_lost_count > 1 && link_expected->reaction == 2 && (c2 || c3)) {
                 trigger_reaction(1);
                 rams_lost_count = 0;
+                if (supervising_rbc)
+                    supervising_rbc->report_error(7);
 #ifdef DEBUG_MSG_CONSISTENCY
                 platform->debug_print("RAMS supervision");
 #endif
             } else {
+                supervising_rbc->report_error(0);
                 trigger_reaction(link_expected->reaction);
             }
             if (rams_lost_count > 1)
@@ -194,6 +197,8 @@ void balise_group_passed()
 #ifdef DEBUG_MSG_CONSISTENCY
                 platform->debug_print("Balise error: group passed in wrong direction. Expected " + std::to_string(l.reverse_dir) + ", passed " + std::to_string(dir));
 #endif
+                if (supervising_rbc)
+                    supervising_rbc->report_error(0);
                 trigger_condition(66);
             }
             rams_reposition_mitigation = {};
@@ -222,6 +227,8 @@ void balise_group_passed()
 #ifdef DEBUG_MSG_CONSISTENCY
                     platform->debug_print("Linking error expecting repositioning information");
 #endif
+                    if (supervising_rbc)
+                        supervising_rbc->report_error(0);
                     trigger_reaction(l.reaction);
                 }
 #endif
@@ -245,6 +252,11 @@ void balise_group_passed()
             if (dir != -1 && dir == rams_reposition_mitigation->reverse_dir && repositioning && rams_reposition_mitigation->max() >= bg_referencemin.min) {
                 linking_rejected = true;
                 rams_reposition_mitigation = {};
+#ifdef DEBUG_MSG_CONSISTENCY
+                platform->debug_print("RAMS reposition mitigation");
+#endif
+                if (supervising_rbc)
+                    supervising_rbc->report_error(8);
                 trigger_reaction(1);
             }
         }
@@ -502,6 +514,8 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
 #ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Balise error. Linked BG not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2)+(reading_bg_link ? "" : ", unknown reference"));
 #endif
+            if (supervising_rbc)
+                supervising_rbc->report_error(1);
             trigger_reaction(reading_bg_link->reaction);
         } else {
             if (accepted2) {
@@ -521,6 +535,8 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
 #ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Balise error. Telegram not accepted. accepted1="+std::to_string(accepted1)+", accepted2="+std::to_string(accepted2));
 #endif
+            if (supervising_rbc)
+                supervising_rbc->report_error(2);
             trigger_reaction(1);
         }
         return;
@@ -697,6 +713,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
 #ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Radio message rejected: unknown LRBG");
 #endif
+        session->report_error(3);
         return;
     }
     switch (message->NID_MESSAGE) {
@@ -1376,6 +1393,10 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
         info.push_back(new danger_for_SH_information());
     } else if (packet_num == 137) {
         info.push_back(new stop_if_in_SR_information());
+    } else if (packet_num == 138) {
+        info.push_back(new reversing_area_information());
+    } else if (packet_num == 139) {
+        info.push_back(new reversing_supervision_information());
     } else if (packet_num == 140) {
         info.push_back(new train_running_number_information());
     } else if (packet_num == 141) {

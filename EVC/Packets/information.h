@@ -189,6 +189,16 @@ struct train_running_number_information : etcs_information
     train_running_number_information() : etcs_information(48,50) {location_based=false;}
     void handle() override;
 };
+struct reversing_area_information : etcs_information
+{
+    reversing_area_information() : etcs_information(49,51) {}
+    void handle() override;
+};
+struct reversing_supervision_information : etcs_information
+{
+    reversing_supervision_information() : etcs_information(50,52) {location_based=false;}
+    void handle() override;
+};
 struct taf_level23_information : etcs_information
 {
     taf_level23_information() : etcs_information(56,58) {location_based=false;}

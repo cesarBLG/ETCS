@@ -137,6 +137,9 @@ struct D_t : ETCS_variable
 struct D_ADHESION_t : D_t
 {
 };
+struct D_AXLELOAD_t : D_t
+{
+};
 struct D_CURRENT_t : D_t
 {
 };
@@ -240,12 +243,19 @@ struct D_REF_t : ETCS_variable
             return rawdata*fact;
     }
 };
+struct D_REVERSE_t : D_t
+{
+    static const uint32_t Infinity=32767;
+};
 struct D_SECTIONTIMERSTOPLOC_t : D_t
 {
 };
 struct D_SR_t : D_t
 {
     static const uint32_t Infinity=32767;
+};
+struct D_STARTREVERSEAREA_t : D_t
+{
 };
 struct D_STATIC_t : D_t
 {
@@ -356,6 +366,9 @@ struct L_PACKET_t : ETCS_variable
     L_PACKET_t() : ETCS_variable(13) {}
 };
 struct L_PBDSR_t : D_t
+{
+};
+struct L_REVERSEAREA_t : D_t
 {
 };
 struct L_SECTION_t : D_t
@@ -2093,6 +2106,9 @@ struct V_t : ETCS_variable
         return rawdata < 121;
     }
 };
+struct V_AXLELOAD_t : V_t
+{
+};
 struct V_DIFF_t : V_t
 {
 };
@@ -2156,6 +2172,9 @@ struct V_RELEASEDP_t : V_release_t
 {
 };
 struct V_RELEASEOL_t : V_release_t
+{
+};
+struct V_REVERSE_t : V_t
 {
 };
 struct V_STATIC_t : V_t

@@ -9,6 +9,7 @@
 #include "session.h"
 #include "../Packets/messages.h"
 #include "../Packets/logging.h"
+#include "../Packets/TrainToTrack/4.h"
 #include "../Packets/TrainToTrack/5.h"
 #include "../Supervision/train_data.h"
 #include "../Procedures/start.h"
@@ -82,7 +83,14 @@ void communication_session::finalize()
 void communication_session::message_received(std::shared_ptr<euroradio_message> msg)
 {
     log_message(*msg, d_estfront, get_milliseconds());
-    if (!msg->valid || msg->readerror || (closing && msg->NID_MESSAGE != 39)) {
+    if (!msg->valid || msg->readerror) {
+        report_error(3);
+#ifdef DEBUG_MSG_CONSISTENCY
+        platform->debug_print("Message rejected: consistency error");
+#endif
+        return;
+    }
+    if (closing && msg->NID_MESSAGE != 39) {
 #ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Message rejected");
 #endif
@@ -91,6 +99,7 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
     int64_t timestamp = msg->T_TRAIN.get_value();
     if (timestamp <= last_valid_timestamp) {
         if (msg->NID_MESSAGE != 15 && msg->NID_MESSAGE != 16) {
+            report_error(4);
 #ifdef DEBUG_MSG_CONSISTENCY
             platform->debug_print("Message rejected: T_TRAIN < last_valid_timestamp");
 #endif
@@ -142,6 +151,20 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
     }
     handle_radio_message(msg, this);
     update_ack();
+}
+void communication_session::report_error(int error)
+{
+    if (!isRBC) return;
+    auto err = std::make_shared<ErrorReporting>();
+    err->M_ERROR.rawdata = error;
+    auto *rep = new position_report();
+    fill_message(rep);
+    auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
+    msg->optional_packets.push_back(err);
+    // TODO: sending has to be deferred
+    // Reason 1: provide consistent position reports. Send message after performing mode and level transitions
+    // Reason 2: Safe radio connection error has to be sent when connection is recovered
+    send(msg);
 }
 void communication_session::update_ack()
 {

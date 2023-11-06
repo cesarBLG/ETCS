@@ -473,6 +473,14 @@ void train_running_number_information::handle()
     }
     train_running_number_valid = true;
 }
+void reversing_area_information::handle()
+{
+
+}
+void reversing_supervision_information::handle()
+{
+    
+}
 void taf_level23_information::handle()
 {
     if (supervising_rbc && supervising_rbc->status == session_status::Established) {

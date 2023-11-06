@@ -69,6 +69,7 @@ class communication_session
         }
     }
     void setup_connection();
+    void report_error(int num);
 };
 extern communication_session *supervising_rbc;
 extern communication_session *accepting_rbc;
