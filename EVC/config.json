@@ -162,7 +162,7 @@
      "TrainData":"TrainData/traindata_1305.json",
      "SpeedDial":400,
      "STMLayout":"stm_bombardier.json",
-     "InstalledSTM": [0,10,19],
+     "InstalledSTM": [0,10],
      "STMPriorityTable": [
        {
          "nid_ntc": 0,
