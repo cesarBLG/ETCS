@@ -37,8 +37,10 @@ extern bool SB_command;
 extern bool desk_open;
 double or_dist;
 int ack_button_light;
-int TimeOffset::offset;
 ORserver::ParameterManager manager;
+int WallClockTime::hour;
+int WallClockTime::minute;
+int WallClockTime::second;
 
 //std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str);
@@ -70,10 +72,14 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("time_offset");
+    p = new ORserver::Parameter("wall_clock_time");
     p->SetValue = [](string val) {
-        TimeOffset::offset = atoi(val.c_str());
-        set_persistent_command("timeOffset", val);
+        set_persistent_command("wallClockTime", val);
+        WallClockTime::hour = std::stoi(val);
+        val = val.substr(val.find(':') + 1);
+        WallClockTime::minute = std::stoi(val);
+        val = val.substr(val.find(':') + 1);
+        WallClockTime::second = std::stoi(val);
     };
     manager.AddParameter(p);
 

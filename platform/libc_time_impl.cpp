@@ -10,16 +10,3 @@
 int64_t LibcTimeImpl::get_timer() {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
-
-int64_t LibcTimeImpl::get_timestamp() {
-	return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-}
-
-BasePlatform::DateTime LibcTimeImpl::get_local_time() {
-	time_t now = time(nullptr);
-	tm *datetime = localtime(&now);
-	return BasePlatform::DateTime { 
-		datetime->tm_year + 1900, datetime->tm_mon, datetime->tm_mday - 1,
-		datetime->tm_hour, datetime->tm_min, datetime->tm_sec
-	};
-}

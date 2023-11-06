@@ -44,20 +44,7 @@ public:
 		virtual PlatformUtil::Promise<ReceiveResult> receive() = 0;
 	};
 
-	struct DateTime
-	{
-		int year;
-		int month;
-		int day;
-
-		int hour;
-		int minute;
-		int second;
-	};
-
 	virtual int64_t get_timer() = 0;
-	virtual int64_t get_timestamp() = 0;
-	virtual DateTime get_local_time() = 0;
 
 	virtual std::unique_ptr<BusSocket> open_socket(const std::string_view bus, uint32_t tid) = 0;
 	virtual std::optional<std::string> read_file(const std::string_view path) = 0;

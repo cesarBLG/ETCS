@@ -16,9 +16,8 @@ unsigned char idcount=0;
 text_message::text_message(std::string text, bool fg, bool ack, int reason, std::function<bool(text_message&)> end_condition) 
     : text(text), firstGroup(fg), ack(ack), reason(reason), end_condition(end_condition)
 {
-    auto datetime = offset_time();
-    hour = datetime.hour;
-    minute = datetime.minute;
+    hour = WallClockTime::hour;
+    minute = WallClockTime::minute;
     start_condition = [](text_message &t){return true;};
     id = idcount++;
     acknowledged = false;

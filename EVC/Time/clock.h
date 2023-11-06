@@ -9,4 +9,8 @@
 #pragma once
 #include "platform.h"
 int64_t get_milliseconds();
-BasePlatform::DateTime offset_time();
+struct WallClockTime {
+    static int hour;
+    static int minute;
+    static int second;
+};

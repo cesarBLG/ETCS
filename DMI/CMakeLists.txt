@@ -1,4 +1,4 @@
-set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp 
+set (SOURCES init.cpp monitor.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp
             graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp 
             speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp 
             state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp 

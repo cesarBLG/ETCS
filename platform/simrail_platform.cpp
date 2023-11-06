@@ -15,8 +15,6 @@ using namespace PlatformUtil;
 
 namespace api {
 	IMPORT_FUNC("simrail_base_v1", "get_timer") int64_t get_timer();
-	IMPORT_FUNC("simrail_base_v1", "get_timestamp") int64_t get_timestamp();
-	IMPORT_FUNC("simrail_base_v1", "get_local_time") void get_local_time(int32_t* y, int32_t* m, int32_t* d, int32_t* hr, int32_t* min, int32_t* sec);
 	IMPORT_FUNC("simrail_base_v1", "read_file") char* read_file(const char* t, size_t tlen, size_t* len);
 	IMPORT_FUNC("simrail_base_v1", "write_file") uint32_t write_file(const char* t, size_t tlen, const char* c, size_t len);
 	IMPORT_FUNC("simrail_base_v1", "debug_print") void debug_print(const char* t, size_t len);
@@ -78,16 +76,6 @@ SimrailBasePlatform::SimrailBasePlatform() {
 
 int64_t SimrailBasePlatform::get_timer() {
 	return api::get_timer();
-}
-
-int64_t SimrailBasePlatform::get_timestamp() {
-	return api::get_timestamp();
-}
-
-BasePlatform::DateTime SimrailBasePlatform::get_local_time() {
-	BasePlatform::DateTime datetime;
-	api::get_local_time(&datetime.year, &datetime.month, &datetime.day, &datetime.hour, &datetime.minute, &datetime.second);
-	return datetime;
 }
 
 std::optional<std::string> SimrailBasePlatform::read_file(const std::string_view path) {
@@ -194,6 +182,7 @@ namespace api {
 	IMPORT_FUNC("simrail_ui_v1", "on_present_request") void on_present_request(void*, void*, void*);
 	IMPORT_FUNC("simrail_ui_v1", "present") void present(ImDrawData* draw_data);
 	IMPORT_FUNC("simrail_ui_v1", "on_input_event") void on_input_event(void*, void*, void*);
+	IMPORT_FUNC("simrail_ui_v1", "set_brightness") void set_brightness(float br);
 }
 
 SimrailUiPlatform::SimrailUiPlatform(float virtual_w, float virtual_h) {
@@ -634,12 +623,13 @@ std::unique_ptr<SimrailUiPlatform::SoundSource> SimrailUiPlatform::play_sound(co
 	return std::make_unique<SimrailSoundSource>(handle);
 }
 
-void SimrailUiPlatform::set_brightness(int vol) {
-
+void SimrailUiPlatform::set_brightness(int br) {
+	api::set_brightness(br / 100.0f);
+	last_brightness = br;
 }
 
 int SimrailUiPlatform::get_brightness() {
-	return 50;
+	return last_brightness;
 }
 
 Promise<UiPlatform::InputEvent> SimrailUiPlatform::on_input_event() {

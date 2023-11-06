@@ -16,10 +16,10 @@ void setupTimeHour()
 }
 void timeHour()
 {
-    if (lastsec == getSecond()) return;
-    lastsec = getSecond();
+    if (lastsec == WallClockTime::second) return;
+    lastsec = WallClockTime::second;
     time_hour.clear();
     char time[9];
-    snprintf(time,9,"%02d:%02d:%02d",getHour(),getMinute(),getSecond());
+    snprintf(time,9,"%02d:%02d:%02d",WallClockTime::hour,WallClockTime::minute,WallClockTime::second);
     time_hour.addText(time,0,0,10,White);
 }

@@ -13,14 +13,3 @@ int64_t get_milliseconds()
 {
     return platform->get_timer();
 }
-BasePlatform::DateTime offset_time() {
-    BasePlatform::DateTime clock = platform->get_local_time();
-    int secs = clock.hour * 3600 + clock.minute * 60 + clock.second + TimeOffset::offset;
-    while (secs < 0)
-        secs += 86400;
-    secs %= 86400;
-    clock.hour = secs / 3600;
-    clock.minute = (secs - clock.hour * 3600) / 60;
-    clock.second = secs - clock.hour * 3600 - clock.minute * 60;
-    return clock;
-}
