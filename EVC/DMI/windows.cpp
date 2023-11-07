@@ -1340,8 +1340,8 @@ void update_dialog_step(std::string step, std::string step2)
     } else if (active_dialog == dialog_sequence::Main) {
         if (step == "Start") {
             start_pressed();
-            if ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established) {
-                active_dialog_step = "S7";
+            if (level == Level::N2 || level == Level::N3) {
+                active_dialog_step = "D7";
             } else {
                 active_dialog = dialog_sequence::None;
             }

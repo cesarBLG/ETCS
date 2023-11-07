@@ -222,6 +222,7 @@ void position_report_params_info::handle()
 void SR_authorisation_info::handle()
 {
     auto *sr = (SR_authorisation*)message->get();
+    ma_rq_reasons[0] = false;
     if (mode == Mode::SR) {
         if (sr->D_SR != D_SR_t::Infinity) {
             SR_dist = ref+sr->D_SR.get_value(sr->Q_SCALE);
