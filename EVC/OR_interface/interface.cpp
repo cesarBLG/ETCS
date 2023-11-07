@@ -296,7 +296,7 @@ void SetParameters()
 
     p = new ORserver::Parameter("imperial");
     p->SetValue = [](std::string val) {
-        send_command("imperial", val);
+        set_persistent_command("imperial", val);
     };
     manager.AddParameter(p);
 
