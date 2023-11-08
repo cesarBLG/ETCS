@@ -32,6 +32,7 @@ using std::string;
 extern double V_est;
 double V_set;
 extern distance d_estfront;
+extern int data_entry_type;
 extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
@@ -307,6 +308,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("etcs::data_entry_type");
+    p->SetValue = [](std::string val) {
+        data_entry_type = stoi(val);
+    };
+    manager.AddParameter(p);
+    
     p = new ORserver::Parameter("etcs::button::ack");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
