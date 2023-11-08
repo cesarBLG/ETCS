@@ -407,6 +407,7 @@ void start_or_iface()
     register_parameter("speed");
     register_parameter("distance");
     register_parameter("acceleration");
+    register_parameter("etcs::data_entry_type");
     register_parameter("etcs::telegram");
     register_parameter("cruise_speed");
     register_parameter("etcs::dmi::feedback");
