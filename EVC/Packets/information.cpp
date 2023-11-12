@@ -413,14 +413,12 @@ void ma_shortening_information::handle()
         if (supervising_rbc) {
             auto *msg = new ma_shorten_granted();
             msg->T_TRAINreq.rawdata = message->get()->T_TRAIN.rawdata;
-            fill_message(msg);
-            supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
+            supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(msg));
         }
     } else if (supervising_rbc) {
         auto *msg = new ma_shorten_rejected();
         msg->T_TRAINreq.rawdata = message->get()->T_TRAIN.rawdata;
-        fill_message(msg);
-        supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
+        supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(msg));
     }
 }
 void ces_information::handle()
@@ -430,8 +428,7 @@ void ces_information::handle()
     emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
     ack->NID_EM = emerg->NID_EM;
     ack->Q_EMERGENCYSTOP.rawdata = result;
-    fill_message(ack);
-    supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
+    supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(ack));
 }
 void SH_authorisation_info::handle()
 {
@@ -489,10 +486,9 @@ void taf_level23_information::handle()
         lti->NID_LTRBG.set_value(bg_id({taf.Q_NEWCOUNTRY ? (int)taf.NID_C : (int)nid_bg.NID_C, (int)taf.NID_BG}));
         auto pack = std::shared_ptr<ETCS_packet>(lti);
         auto *req = new MA_request();
-        fill_message(req);
         req->Q_MARQSTREASON.rawdata = Q_MARQSTREASON_t::TrackAheadFreeBit;
         req->optional_packets.push_back(pack);
-        supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(req));
+        supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(req));
     }
 }
 void pbd_information::handle()

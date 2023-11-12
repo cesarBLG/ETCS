@@ -177,10 +177,14 @@ dist_base d_minsafefront(const confidence_data &conf)
 }
 dist_base d_maxsafefront(const relocable_dist_base&ref)
 {
+    if (ref.dist <= std::numeric_limits<double>::lowest() || ref.dist >= std::numeric_limits<double>::max())
+        return d_estfront;
     return d_maxsafe(ref.orientation == 0 ? d_estfront : d_estfront_dir[ref.orientation == -1], confidence_data::from_distance(ref));
 }
 dist_base d_minsafefront(const relocable_dist_base&ref)
 {
+    if (ref.dist <= std::numeric_limits<double>::lowest() || ref.dist >= std::numeric_limits<double>::max())
+        return d_estfront;
     return d_minsafe(ref.orientation == 0 ? d_estfront : d_estfront_dir[ref.orientation == -1], confidence_data::from_distance(ref));
 }
 dist_base d_maxsafefront(const distance&ref)

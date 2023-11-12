@@ -176,7 +176,7 @@ void message_acked(int id)
                 auto *ack = new text_message_ack_message();
                 ack->NID_TEXTMESSAGE.rawdata = msg.trackid;
                 fill_message(ack);
-                supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
+                supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(ack));
             }
         }
     }

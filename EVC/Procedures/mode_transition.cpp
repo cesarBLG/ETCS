@@ -362,8 +362,7 @@ void update_mode_status()
             }
             if (supervising_rbc) {
                 auto *msg = new end_mission_message();
-                fill_message(msg);
-                supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(msg));
+                supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(msg));
             }
         }
         delete_information(prevmode);

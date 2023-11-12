@@ -1393,7 +1393,7 @@ void update_dialog_step(std::string step, std::string step2)
                 if (supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()) {
                     SH_request *req = new SH_request();
                     fill_message(req);
-                    supervising_rbc->send(std::shared_ptr<SH_request>(req));
+                    supervising_rbc->queue(std::shared_ptr<SH_request>(req));
                 }
             }
             if (mode == Mode::SH) {

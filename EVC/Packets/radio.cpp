@@ -211,9 +211,8 @@ void send_position_report(bool som)
         if (!solr)
             rep->Q_STATUS.rawdata = Q_STATUS_t::Unknown;
         else
-            rep->Q_STATUS.rawdata = position_valid ? Q_STATUS_t::Valid : Q_STATUS_t::Invalid; 
-        fill_message(rep);
-        supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(rep));
+            rep->Q_STATUS.rawdata = position_valid ? Q_STATUS_t::Valid : Q_STATUS_t::Invalid;
+        supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(rep));
     } else {
         std::set<communication_session*> rbcs;
         if (supervising_rbc != nullptr)
@@ -228,9 +227,8 @@ void send_position_report(bool som)
             if (session->status != session_status::Established)
                 continue;
             auto *rep = new position_report();
-            fill_message(rep);
             auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
-            session->send(msg);
+            session->queue(msg);
             std::set<int> acks;
             if ((position_report_reasons[4] && session == handing_over_rbc) || (position_report_reasons[1] && mode == Mode::SH) || position_report_reasons[5] || position_report_reasons[6] == 2)
                 acks.insert(-1);
@@ -248,14 +246,13 @@ void send_position_report(bool som)
 void ma_request(bool driver, bool perturb, bool timer, bool trackdel, bool taf)
 {
     auto req = new MA_request();
-    fill_message(req);
     req->Q_MARQSTREASON.rawdata = 0;
     req->Q_MARQSTREASON.rawdata |= (driver<<Q_MARQSTREASON_t::StartSelectedByDriverBit);
     req->Q_MARQSTREASON.rawdata |= (perturb<<Q_MARQSTREASON_t::TimeBeforePerturbationBit);
     req->Q_MARQSTREASON.rawdata |= (timer<<Q_MARQSTREASON_t::TimeBeforeTimerBit);
     req->Q_MARQSTREASON.rawdata |= (trackdel<<Q_MARQSTREASON_t::TrackDescriptionDeletedBit);
     req->Q_MARQSTREASON.rawdata |= (taf<<Q_MARQSTREASON_t::TrackAheadFreeBit);
-    supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(req));
+    supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(req));
 }
 int64_t last_sent_timestamp;
 void fill_message(euroradio_message_traintotrack *m)

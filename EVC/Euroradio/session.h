@@ -38,6 +38,7 @@ class communication_session
     int ntries;
     void message_received(std::shared_ptr<euroradio_message> msg);
     void update_ack();
+    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
     public:
     bool isRBC;
     contact_info contact;
@@ -51,13 +52,16 @@ class communication_session
     bool connection_timer;
     int64_t last_valid_timestamp = std::numeric_limits<int64_t>::lowest();
     std::deque<std::shared_ptr<euroradio_message>> rx_list;
+    std::deque<std::shared_ptr<euroradio_message_traintotrack>> tx_list;
     std::list<msg_expecting_ack> pending_ack;
+    std::set<int> pending_errors;
     int version;
     communication_session(contact_info contact, bool isRBC) : isRBC(isRBC), contact(contact), version(-1) {}
     void open(int ntries);
     void finalize();
     void close();
-    void send(std::shared_ptr<euroradio_message_traintotrack> msg);
+    void queue(std::shared_ptr<euroradio_message_traintotrack> msg);
+    void send_pending();
     void update();
     void reset_radio()
     {

@@ -65,7 +65,6 @@ void communication_session::close()
     closing = true;
     pending_ack.clear();
     auto terminate = std::shared_ptr<euroradio_message_traintotrack>(new terminate_communication_session());
-    fill_message(terminate.get());
     send(terminate);
 }
 void communication_session::finalize()
@@ -77,6 +76,7 @@ void communication_session::finalize()
         connection->release();
         connection = nullptr;
     }
+    pending_errors.clear();
     rx_list.clear();
     closing = false;
 }
@@ -126,11 +126,9 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
                     ver->M_VERSIONs.push_back(M_VERSION);
             }
             ver->N_ITER.rawdata = supported_versions.size() - 1;
-            fill_message(established.get());
             send(established);
         } else {
             auto nover = std::shared_ptr<no_compatible_session_supported>(new no_compatible_session_supported());
-            fill_message(nover.get());
             send(nover);
             close();
             int64_t time = get_milliseconds();
@@ -146,7 +144,6 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
     if (msg->M_ACK == M_ACK_t::AcknowledgementRequired) {
         auto ack = std::shared_ptr<acknowledgement_message>(new acknowledgement_message());
         ack->T_TRAINack = msg->T_TRAIN;
-        fill_message(ack.get());
         send(ack);
     }
     handle_radio_message(msg, this);
@@ -155,16 +152,7 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
 void communication_session::report_error(int error)
 {
     if (!isRBC) return;
-    auto err = std::make_shared<ErrorReporting>();
-    err->M_ERROR.rawdata = error;
-    auto *rep = new position_report();
-    fill_message(rep);
-    auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
-    msg->optional_packets.push_back(err);
-    // TODO: sending has to be deferred
-    // Reason 1: provide consistent position reports. Send message after performing mode and level transitions
-    // Reason 2: Safe radio connection error has to be sent when connection is recovered
-    send(msg);
+    pending_errors.insert(error);
 }
 void communication_session::update_ack()
 {
@@ -240,7 +228,6 @@ void communication_session::update()
         }
         if (radio_status == safe_radio_status::Connected && !initsent) {
             auto init = std::shared_ptr<euroradio_message_traintotrack>(new init_communication_session());
-            fill_message(init.get());
             send(init);
             initsent = true;
         }
@@ -264,7 +251,6 @@ void communication_session::update()
                 train_data_ack_sent = true;
                 train_running_number_sent = true;
                 auto *tdm = new validated_train_data_message();
-                fill_message(tdm);
                 auto *td = new TrainDataPacket();
                 td->NC_CDTRAIN.set_value(cant_deficiency);
                 td->NC_TRAIN.rawdata = 0;
@@ -286,12 +272,11 @@ void communication_session::update()
                     }
                     tdm->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
                 }
-                send(std::shared_ptr<validated_train_data_message>(tdm));
+                queue(std::shared_ptr<validated_train_data_message>(tdm));
             }
             if (!train_running_number_sent && train_running_number_valid) {
                 train_running_number_sent = true;
                 auto *rep = new position_report();
-                fill_message(rep);
                 auto *trn = new TrainRunningNumber();
                 trn->NID_OPERATIONAL.rawdata = 0;
                 int tmp = train_running_number;
@@ -300,7 +285,18 @@ void communication_session::update()
                     tmp /= 10;
                 }
                 rep->optional_packets.push_back(std::shared_ptr<TrainRunningNumber>(trn));
-                send(std::shared_ptr<euroradio_message_traintotrack>(rep));
+                queue(std::shared_ptr<euroradio_message_traintotrack>(rep));
+            }
+            if (!pending_errors.empty()) {
+                auto *rep = new position_report();
+                auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
+                for (int error : pending_errors) {
+                    auto err = std::make_shared<ErrorReporting>();
+                    err->M_ERROR.rawdata = error;
+                    msg->optional_packets.push_back(err);
+                }
+                pending_errors.clear();
+                queue(msg);
             }
         }
     }
@@ -325,8 +321,23 @@ void communication_session::setup_connection()
         tried++;
 }
 
+void communication_session::queue(std::shared_ptr<euroradio_message_traintotrack> msg)
+{
+    if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
+        return;
+    if (msg->NID_MESSAGE == 136) {
+        for (auto &msg2 : tx_list) {
+            if (msg2->NID_MESSAGE == 136) {
+                msg2->optional_packets.insert(msg2->optional_packets.end(), msg->optional_packets.begin(), msg->optional_packets.end());
+                return;
+            }
+        }
+    }
+    tx_list.push_back(msg);
+}
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)
 {
+    fill_message(msg.get());
     msg = translate_message(msg, version);
     log_message(*msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))
@@ -353,6 +364,13 @@ void communication_session::send(std::shared_ptr<euroradio_message_traintotrack>
     if (radio_status == safe_radio_status::Connected && connection != nullptr) {
         connection->send(msg);
     }
+}
+void communication_session::send_pending()
+{
+    for (auto &msg : tx_list) {
+        send(msg);
+    }
+    tx_list.clear();
 }
 int64_t first_supervised_timestamp;
 bool radio_reaction_applied = false;
@@ -447,6 +465,8 @@ void update_euroradio()
                     trigger_condition(41);
                     break;
             }
+            if (supervising_rbc)
+                supervising_rbc->report_error(5);
         }
         if (supervising_rbc && get_milliseconds() < supervising_rbc->last_valid_timestamp + T_NVCONTACT*1000) {
             radio_reaction_applied = false;

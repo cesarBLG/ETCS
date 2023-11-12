@@ -209,5 +209,8 @@ void update()
     update_train_subsystems();
     update_dmi_windows();
     update_track_ahead_free_request();
+    for (auto *session : active_sessions) {
+        session->send_pending();
+    }
     platform->delay(50).then(update).detach();
 }

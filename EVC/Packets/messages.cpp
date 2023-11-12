@@ -771,8 +771,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                     emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
                     ack->NID_EM = emerg->NID_EM;
                     ack->Q_EMERGENCYSTOP.rawdata = 2;
-                    fill_message(ack);
-                    supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(ack));
+                    supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(ack));
                 });
                 info->location_based = false;
                 break;

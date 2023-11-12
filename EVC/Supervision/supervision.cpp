@@ -57,7 +57,7 @@ double calc_ceiling_limit()
     auto &MRSP = get_MRSP();
     double V_MRSP = 1000;
     for (auto it = MRSP.begin(); it!=MRSP.end(); ++it) {
-        relocable_dist_base d = it->first;
+        auto &d = it->first;
         dist_base min = d_minsafefront(d);
         dist_base max = d_maxsafefront(d);
         auto next = it;
