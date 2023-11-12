@@ -295,10 +295,13 @@ void parse_stm_message(stm_message &message)
         if (pack->NID_PACKET == 43)
         {
             STMSupervisionInformation &info = *((STMSupervisionInformation*)pack.get());
-            Vperm = info.V_PERMIT.rawdata;
-            Vtarget = info.V_TARGET.rawdata*5;
-            Vrelease = info.V_RELEASE.rawdata;
-            Vsbi = info.V_INTERV.rawdata;
+            if (state == stm_state::DA)
+            {
+                Vperm = info.V_PERMIT.rawdata;
+                Vtarget = info.V_TARGET.rawdata*5;
+                Vrelease = info.V_RELEASE.rawdata;
+                Vsbi = info.V_INTERV.rawdata;
+            }
             Dtarg = (int)info.D_TARGET.get_value(info.Q_SCALE);
             window->monitoring_data = stm_monitoring_data(info);
         }
