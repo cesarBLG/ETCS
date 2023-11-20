@@ -32,12 +32,10 @@ void load_config(std::string serie)
             if (cfg.contains("STMLayout")) {
                 stm_layout_file = cfg["STMLayout"];
             }
-            if (cfg.contains("SoftKeys")) {
-                bool v = cfg["SoftKeys"];
-                if (softkeys != v) {
-                    softkeys = v;
-                    startWindows();
-                }
+            bool sk = cfg.contains("SoftKeys") && cfg["SoftKeys"];
+            if (softkeys != sk) {
+                softkeys = sk;
+                startWindows();
             }
             serieSelected = true;
         }
