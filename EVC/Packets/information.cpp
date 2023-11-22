@@ -224,13 +224,10 @@ void SR_authorisation_info::handle()
     auto *sr = (SR_authorisation*)message->get();
     ma_rq_reasons[0] = false;
     if (mode == Mode::SR) {
-        if (sr->D_SR != D_SR_t::Infinity) {
+        if (sr->D_SR != D_SR_t::Infinity)
             SR_dist = ref+sr->D_SR.get_value(sr->Q_SCALE);
-            SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
-        } else {
+        else
             SR_dist = {};
-            SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
-        }
         recalculate_MRSP();
     } else {
         mode_to_ack = Mode::SR;
