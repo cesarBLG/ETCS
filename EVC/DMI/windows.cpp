@@ -295,26 +295,27 @@ json data_view_window()
     json j = R"({"active":"data_view_window"})"_json;
     std::vector<json> fields;
     {
-        fields.push_back(build_field(get_text("Driver ID"), driver_id));
+        fields.push_back(build_alphanumeric_field(get_text("Driver ID"), driver_id));
         fields.push_back(build_field("", ""));
-        fields.push_back(build_field(get_text("Train running number"), std::to_string(train_running_number)));
+        fields.push_back(build_numeric_field(get_text("Train running number"), std::to_string(train_running_number)));
         fields.push_back(build_field("", ""));
         if (special_train_data != "") fields.push_back(build_field(get_text("Train type"), special_train_data));
-        fields.push_back(build_field(get_text("Length (m)"), std::to_string((int)L_TRAIN)));
-        fields.push_back(build_field(get_text("Brake percentaje"), std::to_string(brake_percentage)));
-        fields.push_back(build_field(get_text("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
+        if (train_category != "") fields.push_back(build_field(get_text("Train category"), get_text(train_category)));
+        fields.push_back(build_numeric_field(get_text("Length (m)"), std::to_string((int)L_TRAIN)));
+        fields.push_back(build_numeric_field(get_text("Brake percentaje"), std::to_string(brake_percentage)));
+        fields.push_back(build_numeric_field(get_text("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
         fields.push_back(build_field(get_text("Airtight"), Q_airtight ? get_text("Yes") : get_text("No")));
         fields.push_back(build_field("", ""));
         fields.push_back(build_field(get_text("Radio network ID"), radio_network_name(RadioNetworkId)));
         if (rbc_contact) {
-            fields.push_back(build_field(get_text("RBC ID"), std::to_string(rbc_contact->id)));
-            fields.push_back(build_field(get_text("RBC phone number"), from_bcd(rbc_contact->phone_number)));
+            fields.push_back(build_numeric_field(get_text("RBC ID"), std::to_string(rbc_contact->id)));
+            fields.push_back(build_numeric_field(get_text("RBC phone number"), from_bcd(rbc_contact->phone_number)));
             
         }
         fields.push_back(build_field("", ""));
         int i = 1;
         for (auto &vbc : vbcs) {
-            fields.push_back(build_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK)));
+            fields.push_back(build_numeric_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK)));
         }
     }
     j["WindowDefinition"] = build_data_view_window(get_text("Data view"), fields);

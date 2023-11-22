@@ -42,6 +42,7 @@ void set_train_data(std::string spec)
     train_data_valid = false;
     special_train_data = spec;
     conversion_model_used = false;
+    train_category = "";
     if (!special_train_data.empty()) {
         json j;
         auto contents = platform->read_file(traindata_file);

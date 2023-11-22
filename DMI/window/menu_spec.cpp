@@ -18,12 +18,12 @@ menu_spec::menu_spec() : menu(get_text("Special"))
     {
         write_command("SRspeed","");
     }, false};
-    entries[2] = {get_text("BMM reaction inhibition"), "", []
+    entries[2] = {get_text("Train integrity"), "", []
     {
         write_command("TrainIntegrity","");
-    }, false};
+    }, true};
 #if BASELINE == 4
-    entries[3] = {get_text("Train integrity"), "", []
+    entries[3] = {get_text("BMM reaction inhibition"), "", []
     {
         write_command("BTMReaction","");
     }, false};
