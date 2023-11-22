@@ -51,12 +51,14 @@ void shorten(bool include_ma, distance d)
 void svl_shorten(char condition)
 {
     if (!MA || !MA->SvL_ma) return;
+    platform->debug_print("MA shortening "+std::string(1,condition));
     shorten(false, *MA->SvL_ma);
     if (condition != 'a' && condition != 'b' && condition != 'f' && (level == Level::N2 || level == Level::N3))
         ma_rq_reasons[3] = true;
 }
 void train_shorten(char condition)
 {
+    platform->debug_print("Shortening to front "+std::string(1,condition));
     shorten(true, distance::from_odometer(d_maxsafefront(confidence_data::basic())));
     if (level == Level::N2 || level == Level::N3)
         ma_rq_reasons[3] = true;
