@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: ETCS EVC\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-10-10 13:53+0200\n"
-"PO-Revision-Date: 2023-10-12 10:20+0000\n"
+"PO-Revision-Date: 2023-11-22 11:17+0000\n"
 "Last-Translator: Bartłomiej Skwara <bartek@skwara.me>\n"
 "Language-Team: Polish <https://sts.simkol.pl:18443/projects/simrail/etcs-evc/"
 "pl/>\n"
@@ -359,11 +359,11 @@ msgstr "Przekroczono odległość SR"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:50
 msgid "SH stop order"
-msgstr "Odebrano polecenie zatrzymania"
+msgstr "Otrzymano polecenie zatrzymania jazdy manewrowej"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:54
 msgid "SR stop order"
-msgstr "Odebrano polecenie zatrzymania"
+msgstr "Otrzymano polecenie zatrzymania"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:57
 msgid "Emergency stop"
