@@ -198,14 +198,16 @@ json train_data_window()
 {
     json j = R"({"active":"train_data_window"})"_json;
     std::vector<json> inputs;
-    inputs.push_back(build_numeric_field(get_text("Length (m)"), L_TRAIN > 0 ? std::to_string((int)L_TRAIN) : ""));
-    inputs.push_back(build_numeric_field(get_text("Brake percentage"), brake_percentage > 0 ? std::to_string(brake_percentage) : ""));
-    inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), V_train > 0 ? std::to_string((int)(V_train*3.6)) : ""));
-    inputs.push_back(build_input_field(get_text("Loading gauge"), "", {"G1", "GA", "GB", "GC", get_text("Out of GC")}));
-    inputs.push_back(build_input_field(get_text("Train category"), "", {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
+    inputs.push_back(build_numeric_field(get_text("Length (m)"), train_data_known ? std::to_string((int)L_TRAIN) : ""));
+    inputs.push_back(build_numeric_field(get_text("Brake percentage"), train_data_known ? std::to_string(brake_percentage) : ""));
+    inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), train_data_known ? std::to_string((int)(V_train*3.6)) : ""));
+    std::vector<std::string> gauges = {"G1", "GA", "GB", "GC", get_text("Out of GC")};
+    inputs.push_back(build_input_field(get_text("Loading gauge"), train_data_known ? gauges[(int)loading_gauge] : "", gauges));
+    inputs.push_back(build_input_field(get_text("Train category"), train_data_known ? train_category : "", {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
         get_text("TILT 1"),get_text("TILT 2"),get_text("TILT 3"),get_text("TILT 4"),get_text("TILT 5"),get_text("TILT 6"),get_text("TILT 7"),
         get_text("FP 1"),get_text("FP2"),get_text("FP 3"),get_text("FP 4"),get_text("FG 1"),get_text("FG 2"),get_text("FG 3"),get_text("FG 4")}));
-    inputs.push_back(build_input_field(get_text("Axle load category"), "", {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"}));
+    std::vector<std::string> categories = {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"};
+    inputs.push_back(build_input_field(get_text("Axle load category"), train_data_known ? categories[(int)axle_load_category] : "", categories));
     j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
     j["Switchable"] = data_entry_type == 2;
     return j;
@@ -242,15 +244,15 @@ json ntc_data_window()
 json adhesion_window()
 {
     json j = R"({"active":"adhesion_window"})"_json;
-    j["WindowDefinition"] = build_input_window(get_text("Adhesion"), {build_input_field("", "", {get_text("Non slippery rail"), get_text("Slippery rail")})});
+    j["WindowDefinition"] = build_input_window(get_text("Adhesion"), {build_input_field("", slippery_rail_driver ? get_text("Slippery rail") : get_text("Non slippery rail"), {get_text("Non slippery rail"), get_text("Slippery rail")})});
     return j;
 }
 json sr_data_window()
 {
     json j = R"({"active":"sr_data_window"})"_json;
     std::vector<json> inputs = {
-        build_numeric_field(get_text("SR speed (km/h)"), SR_speed ? std::to_string((int)(SR_speed->get_speed()*3.6)): ""),
-        build_numeric_field(get_text("SR distance (m)"), std::to_string(SR_dist ? std::max(std::min((int)(*SR_dist-d_estfront), 100000), 0) : 100000))
+        build_numeric_field(get_text("SR speed (km/h)"), std::to_string(SR_dist ? std::min(std::max((int)(SR_dist->est-d_estfront), 0), 100000) : 100000)),
+        build_numeric_field(get_text("SR distance (m)"), SR_speed ? std::to_string((int)(SR_speed->speed*3.6)) : "")
     };
     j["WindowDefinition"] = build_input_window(get_text("SR speed/distance"), inputs);
     return j;
@@ -1036,7 +1038,6 @@ void validate_data_entry(std::string name, json &result)
                     axle_load_category = axle_load_categories::E4;
                 else if (axlecat == get_text("E5"))
                     axle_load_category = axle_load_categories::E5;
-                train_category = result[get_text("Train category")].get<std::string>();
                 set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
                 brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
                 std::string str = result[get_text("Train category")].get<std::string>();
@@ -1045,58 +1046,77 @@ void validate_data_entry(std::string name, json &result)
                 if (str == get_text("PASS 1")) {
                     cant = 80;
                     cat = 2;
+                    train_category = "PASS 1";
                 } else if (str == get_text("PASS 2")) {
                     cant = 130;
                     cat = 2;
+                    train_category = "PASS 2";
                 } else if (str == get_text("PASS 3")) {
                     cant = 150;
                     cat = 2;
+                    train_category = "PASS 3";
                 } else if (str == get_text("TILT 1")) {
                     cant = 165;
                     cat = 2;
+                    train_category = "TILT 1";
                 } else if (str == get_text("TILT 2")) {
                     cant = 180;
                     cat = 2;
+                    train_category = "TILT 2";
                 } else if (str == get_text("TILT 3")) {
                     cant = 210;
                     cat = 2;
+                    train_category = "TILT 3";
                 } else if (str == get_text("TILT 4")) {
                     cant = 225;
                     cat = 2;
+                    train_category = "TILT 4";
                 } else if (str == get_text("TILT 5")) {
                     cant = 245;
                     cat = 2;
+                    train_category = "TILT 5";
                 } else if (str == get_text("TILT 6")) {
                     cant = 275;
                     cat = 2;
+                    train_category = "TILT 6";
                 } else if (str == get_text("TILT 7")) {
                     cant = 300;
                     cat = 2;
+                    train_category = "TILT 7";
                 } else if (str == get_text("FP 1")) {
                     cant = 80;
                     cat = 0;
+                    train_category = "FP 1";
                 } else if (str == get_text("FP 2")) {
                     cant = 100;
                     cat = 0;
+                    train_category = "FP 2";
                 } else if (str == get_text("FP 3")) {
                     cant = 130;
                     cat = 0;
+                    train_category = "FP 3";
                 } else if (str == get_text("FP 4")) {
                     cant = 150;
                     cat = 0;
+                    train_category = "FP 4";
                 } else if (str == get_text("FG 1")) {
                     cant = 80;
                     cat = 1;
+                    train_category = "FG 1";
                 } else if (str == get_text("FG 2")) {
                     cant = 100;
                     cat = 1;
+                    train_category = "FG 2";
                 } else if (str == get_text("FG 3")) {
                     cant = 130;
                     cat = 1;
+                    train_category = "FG 3";
                 } else if (str == get_text("FG 4")) {
                     cant = 150;
                     cat = 1;
+                    train_category = "FG 4";
                 }
+                train_data_known = true;
                 cant_deficiency = cant;
                 brake_position = (brake_position_types)cat;
                 set_conversion_model();
@@ -1294,7 +1314,7 @@ void validate_entry_field(std::string window, json &result)
     } else if (window == get_text("SR speed/distance")) {
         if (label == get_text("SR distance (m)")) {
             int val = atoi(data.c_str());
-            techrang = val > 0 && val <= 10000;
+            techrang = val > 0 && val <= 100000;
         } else if (label == get_text("SR speed (km/h)")) {
             int val = atoi(data.c_str());
             techrang = val > 0 && val <= 600;
