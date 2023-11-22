@@ -299,13 +299,11 @@ void update_mode_status()
             double D_STFF = D_NVSTFF;
             if (D_STFF_rbc)
                 D_STFF = *D_STFF_rbc;
-            if (std::isfinite(D_STFF)) {
+            if (std::isfinite(D_STFF))
                 SR_dist = d_estfront_dir[odometer_orientation == -1]+D_STFF;
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), *SR_dist, false);
-            } else {
+            else
                 SR_dist = {};
-                SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
-            }
+            SR_speed = speed_restriction(V_NVSTFF, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
         } else {
             D_STFF_rbc = {};
             SR_dist = {};
