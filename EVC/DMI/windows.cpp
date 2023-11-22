@@ -240,8 +240,8 @@ json sr_data_window()
 {
     json j = R"({"active":"sr_data_window"})"_json;
     std::vector<json> inputs = {
-        build_numeric_field(get_text("SR speed (km/h)"), ""),
-        build_numeric_field(get_text("SR distance (m)"), "")
+        build_numeric_field(get_text("SR speed (km/h)"), SR_speed ? std::to_string((int)(SR_speed->get_speed()*3.6)): ""),
+        build_numeric_field(get_text("SR distance (m)"), std::to_string(SR_dist ? std::max(std::min((int)(*SR_dist-d_estfront), 100000), 0) : 100000))
     };
     j["WindowDefinition"] = build_input_window(get_text("SR speed/distance"), inputs);
     return j;
