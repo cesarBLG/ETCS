@@ -367,7 +367,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_vi
 
 std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bold, const std::string_view lang) {
 #ifdef SIMRAIL
-	ascent *= 1.1f;
+	ascent *= 1.25f;
 #endif
 	float scale = std::abs(s);
 
