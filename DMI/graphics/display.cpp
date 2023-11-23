@@ -13,17 +13,46 @@
 #include "../monitor.h"
 #include "../control/control.h"
 #include "../state/acks.h"
+#include "platform_runtime.h"
 std::list<window*> active_windows;
 extern Mode mode;
 extern uint32_t evc_peer;
 bool serieSelected;
 bool useImperialSystem;
 bool prevUseImperialSystem;
+
+#if SIMRAIL
+std::shared_ptr<UiPlatform::Image> invalidEvcIndicator;
+std::shared_ptr<UiPlatform::Image> invalidSerieIndicator;
+std::unique_ptr<UiPlatform::Font> indicatorFont;
+#endif
+
 void displayETCS()
 {
     updateAcks();
 #if SIMRAIL
-    if (!evc_peer || !serieSelected) return;
+
+    if (indicatorFont == NULL)
+        indicatorFont = platform->load_font(10, false, "");
+    
+    if (!evc_peer)
+    {
+        if (invalidEvcIndicator == NULL)
+            invalidEvcIndicator = platform->make_text_image("EVC not connected!", *indicatorFont, White);
+        else
+            platform->draw_image(*invalidEvcIndicator, 0, 0);
+        return;
+    }
+
+    if (!serieSelected)
+    {
+        if (invalidSerieIndicator == NULL)
+            invalidSerieIndicator = platform->make_text_image("Train serie not selected!", *indicatorFont, White);
+        else
+            platform->draw_image(*invalidSerieIndicator, 0, 20);
+        return;
+    }
+
 #else
     if (!evc_peer) return;
 #endif
