@@ -213,6 +213,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("etcs::dtarget");
+    p->GetValue = []() {
+        return std::to_string(D_target);
+    };
+    manager.AddParameter(p);
+
     p = new ORserver::Parameter("etcs::vsbi");
     p->GetValue = []() {
         return std::to_string(V_sbi*3.6);
