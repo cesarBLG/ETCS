@@ -99,37 +99,38 @@ json level_window()
             break;
         }
     }
-    std::vector<std::string> levels;
+    std::vector<std::string> levels(4);
     if (priority_levels_valid) {
         for (auto lti : priority_levels) {
             switch(lti.level) {
                 case Level::N0:
-                    levels.push_back(get_text("Level 0"));
+                    levels[3] = get_text("Level 0");
                     break;
                 case Level::N1:
-                    levels.push_back(get_text("Level 1"));
+                    levels[0] = get_text("Level 1");
                     break;
                 case Level::N2:
-                    levels.push_back(get_text("Level 2"));
+                    levels[1] = get_text("Level 2");
                     break;
                 case Level::N3:
-                    levels.push_back(get_text("Level 3"));
+                    levels[2] = get_text("Level 3");
                     break;
-                case Level::NTC: {
+                case Level::NTC:
                     if (installed_stms.find(lti.nid_ntc) != installed_stms.end() || ntc_to_stm_lookup_table.find(lti.nid_ntc) != ntc_to_stm_lookup_table.end() || ntc_available_no_stm.find(lti.nid_ntc) != ntc_available_no_stm.end()) {
                         levels.push_back(get_ntc_name(lti.nid_ntc));
                     }
                     break;
-                }
             }
         }
     } else {
-        for (int i = 0; i < 3; i++)
-        {
-            if (unsupported_levels.count(i))
-                continue;
-            levels.push_back(get_text("Level " + std::to_string(i)));
-        }
+        if (!unsupported_levels.count(0))
+            levels[3] = get_text("Level 0");
+        if (!unsupported_levels.count(1))
+            levels[0] = get_text("Level 1");
+        if (!unsupported_levels.count(2))
+            levels[1] = get_text("Level 2");
+        if (!unsupported_levels.count(3))
+            levels[2] = get_text("Level 3");
         for (auto &kvp : installed_stms) {
             levels.push_back(get_ntc_name(kvp.first));
         }
