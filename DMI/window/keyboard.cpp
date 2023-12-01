@@ -219,7 +219,7 @@ keyboard getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_da
     {
         if (softkeys)
         {
-            std::string id = std::to_string(posibilities.size() > 10 ? ((i%9)+1) : i);
+            std::string id = std::to_string(posibilities.size() > 10 ? ((i%9)+1) : i+1);
             Component *label = new Component(266, 24);
             label->addText(id + " - " + posibilities[i], 15, 0, 12, White, LEFT);
             k.labels.push_back(label);
