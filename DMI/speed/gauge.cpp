@@ -19,6 +19,9 @@
 #include "platform_runtime.h"
 using namespace std;
 #define PI 3.14159265358979323846264338327950288419716939937510
+#define KMH_TO_MPH 0.621371192
+extern bool useImperialSystem;
+extern bool prevUseImperialSystem;
 int etcsDialMaxSpeed = 400;
 int maxSpeed;
 const float ang00 = -239*PI/180.0;
@@ -37,12 +40,13 @@ Component b8(36,36);
 IconButton togglingButton("symbols/Driver Request/DR_01.bmp", 64, 50, []() {showSpeeds = !showSpeeds;});
 #include "../graphics/text_graphic.h"
 text_graphic *spd_nums[10] = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr};
+std::shared_ptr<UiPlatform::Image> mphIndicator;
 
 #if SIMRAIL
 float speedToAngle(float speed)
 {
     if (speed > maxSpeed) return ang1;
-    int halfEtcsDialMaxSpeed = etcsDialMaxSpeed / 2;
+    int halfEtcsDialMaxSpeed = maxSpeed / 2;
     {
         if (speed > halfEtcsDialMaxSpeed) return amed + (speed - halfEtcsDialMaxSpeed) / (maxSpeed - halfEtcsDialMaxSpeed) * (ang1 - amed);
         return ang0 + speed / halfEtcsDialMaxSpeed * (amed - ang0);
@@ -65,7 +69,7 @@ float speedToAngle(float speed)
 void drawNeedle()
 {
     Color needleColor = Grey;
-    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT)
+    if(mode == Mode::SB || mode == Mode::NL || mode == Mode::PT || mode == Mode::IS)
     {
         needleColor = Grey;
     }
@@ -97,24 +101,26 @@ void drawNeedle()
         }
     }
     Color speedColor = needleColor == Red ? White : Black;
-    float an = speedToAngle(Vest);
+    float an = speedToAngle(useImperialSystem ? Vest * KMH_TO_MPH : Vest);
     platform->set_color(needleColor);
     csg.drawCircle(25,cx,cy);
-    float px[] = {-4.5, 4.5, 4.5, 1.5, 1.5, -1.5, -1.5, -4.5};
-    float py[] = {-15,-15,-82,-90,-105,-105,-90,-82};
-    csg.rotateVertex(px, py, 8, cx, cy, an);
-    csg.drawPolygon(px, py, 8);
-
+    float pax[] = { 1.5f, 1.5f, -1.5f, -1.5f };
+    float pay[] = { -90.0f, -105.0f, -105.0f, -90.0f };
+    float pbx[] = { -4.5f, 4.5f, 4.5f, 1.5f, -1.5f, -4.5f };
+    float pby[] = { -15.0f, -15.0f, -82.0f, -90.0f, -90.0f, -82.0f };
+    csg.rotateVertex(pax, pay, 4, cx, cy, an);
+    csg.rotateVertex(pbx, pby, 6, cx, cy, an);
+    csg.drawConvexPolygon(pax, pay, 4);
+    csg.drawConvexPolygon(pbx, pby, 6);
     if(spd_nums[0]==nullptr || spd_nums[0]->color!=speedColor)
     {
         for(int i=0; i<10; i++)
         {
             if(spd_nums[i]!=nullptr) delete spd_nums[i];
             spd_nums[i] = csg.getText(to_string(i), 0, 0, 18, speedColor, RIGHT);
-            //spd_nums[i]->load();
         }
     }
-    int spd = Vest;
+    int spd = useImperialSystem ? Vest * KMH_TO_MPH : Vest;
     spd = Vest-spd > 0.01 ? spd + 1 : spd;
     int c[3] = {spd/100%10, spd/10%10, (spd%10)};
     bool firstPrint = false;
@@ -130,32 +136,40 @@ void drawNeedle()
 }
 void drawHook(float speed)
 {
-    float ang1 = speedToAngle(speed);
+    float ang1 = speedToAngle(useImperialSystem ? speed * KMH_TO_MPH : speed);
     float ang0 = ang1-6/117.0;
     csg.drawSolidArc(ang0,ang1,117,137,cx,cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color, float rmin)
 {
     platform->set_color(color);
-    float ang0 = speedToAngle(minspeed);
-    float ang1 = speedToAngle(maxspeed);
+    float ang0 = speedToAngle(useImperialSystem ? minspeed * KMH_TO_MPH : minspeed);
+	float ang1 = speedToAngle(useImperialSystem ? maxspeed * KMH_TO_MPH : maxspeed);
     csg.drawSolidArc(ang0,ang1,rmin,137,cx,cy);
 }
 void drawGauge(float minspeed, float maxspeed, Color color)
 {
     drawGauge(minspeed,maxspeed,color,128);
 }
+void drawImperialIndicator()
+{
+    if (!useImperialSystem)
+        return;
+
+    if (mphIndicator == NULL) {
+        string s = "mph";
+        std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(12, false, "");
+        mphIndicator = platform->make_text_image(s, *mphFont, White);
+    }
+    csg.drawTexture(mphIndicator, 140, 230);
+}
 void drawSetSpeed()
 {
     if (Vset == 0) return;
-    float an = speedToAngle(Vset);
+    float an = speedToAngle(useImperialSystem ? Vset * KMH_TO_MPH : Vset);
 
     platform->set_color(White);
-    csg.drawCircle(4, 121 * cos(an) + cx, 121 * sin(an) + cy);
-
-    platform->set_color(Magenta);
-    csg.drawCircle(3, 121 * cos(an) + cx, 121 * sin(an) + cy);
-
+    csg.drawCircle(5, 111 * cos(an) + cx, 111 * sin(an) + cy);
 }
 static Mode prevmode;
 void displayCSG()
@@ -297,7 +311,7 @@ void displayLines()
     std::unique_ptr<UiPlatform::Font> gaugeFont;
     if (!inited) {
         csg.clear();
-        gaugeFont = platform->load_font(16, false);
+        gaugeFont = platform->load_font(16, false, "");
     }
     platform->set_color(White);
 
@@ -319,20 +333,13 @@ void displayLines()
         if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
-            float hx = 0;
-            float hy = 12/2.0;
-
             std::pair<float, float> wh = gaugeFont->calc_size(s);
-            hx = wh.first/2 + 1;
-            hy = gaugeFont->ascent()/2 - 2;
+            float hx = wh.first/2 + 1;
+            float hy = wh.second/2 + 1;
             float maxan = atanf(hy/hx);
             float cuadran = abs(-an-PI/2);
             float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
-#if SIMRAIL
-            float val = size + adjust + 10;
-#else
-            float val = size + adjust;
-#endif
+            float val = size + adjust + 5;
             texture *t = new texture();
             t->x = cx-val*cosf(an);
             t->y = cy-val*sinf(an);
@@ -378,9 +385,16 @@ void displayVrelease()
 }
 void displayGauge()
 {
+	if (prevUseImperialSystem != useImperialSystem) {
+		maxSpeed = useImperialSystem ? (((int)(etcsDialMaxSpeed * KMH_TO_MPH / 20) * 20) + 20) : etcsDialMaxSpeed;
+		initSpeed = 0;
+		csg.clear();
+	}
+	
     displayLines();
     displayCSG();
     drawNeedle();
+    drawImperialIndicator();
     drawSetSpeed();
 }
 bool ttiShown = false;

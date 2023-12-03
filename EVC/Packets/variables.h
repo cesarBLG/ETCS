@@ -2203,12 +2203,19 @@ struct X_TEXT_t : ETCS_variable
         std::string text;
         for (int i=0; i<chars.size(); i++) {
             unsigned char c = chars[i];
+
+#if SIMRAIL
+            // UTF-8, due to multi-language and non-latin support
+            text += c;
+#else
+            // ISO-8859-1, according to S.R.S 7.5.1.174
             if (chars[i] < 0x80) {
                 text += c;
             } else {
                 text += 0xc2+(c>0xbf);
                 text += (c&0x3f)+0x80;
             }
+#endif
         }
         return text;
     }

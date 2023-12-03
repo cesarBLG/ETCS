@@ -67,18 +67,17 @@ class Component
         void setSize(float sx, float sy);
         void setLocation(float x, float y);
         virtual void paint();
-        void drawArc(float ang0, float ang1, float r, float cx, float cy);
         void rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle);
         void draw(graphic *g);
         void drawLine(float x1, float y1, float x2, float y2);
         void drawLine(float x1, float y1, float x2, float y2, Color c);
-        void drawPolygon(float *x, float *y, int n);
+        void drawConvexPolygon(float *x, float *y, int n);
         void drawCircle(float radius, float cx, float cy);
         void drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy);
         void drawRadius(float cx, float cy, float rmin, float rmax, float ang);
         void drawRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
         void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
-        void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy);
+        void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy);
         void add(graphic* g) { graphics.push_back(g); }
         void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
         text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);

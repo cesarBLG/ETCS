@@ -1,7 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ETCS EVC\n"
-"PO-Revision-Date: 2023-08-08 09:55+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-10 13:53+0200\n"
+"PO-Revision-Date: 2023-10-12 10:20+0000\n"
 "Last-Translator: alegalga98 (Italian team) <alessandro.galgano98@gmail.com>\n"
 "Language-Team: Italian <https://sts.simkol.pl:18443/projects/simrail/"
 "etcs-evc/it/>\n"
@@ -12,354 +14,392 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 4.14.2\n"
 
-#: DMI/windows.cpp:68 DMI/windows.cpp:260 DMI/windows.cpp:890
-msgid "Driver ID"
-msgstr "ID Macchinista"
-
-#: DMI/windows.cpp:77 DMI/windows.cpp:98 DMI/windows.cpp:118
-#: DMI/windows.cpp:741
-msgid "Level 0"
-msgstr "Livello 0"
-
-#: DMI/windows.cpp:80 DMI/windows.cpp:101 DMI/windows.cpp:118
-#: DMI/windows.cpp:743
-msgid "Level 1"
-msgstr "Livello 1"
-
-#: DMI/windows.cpp:83 DMI/windows.cpp:104 DMI/windows.cpp:118
-#: DMI/windows.cpp:745
-msgid "Level 2"
-msgstr "Livello 2"
-
-#: DMI/windows.cpp:86 DMI/windows.cpp:107 DMI/windows.cpp:747
-msgid "Level 3"
-msgstr "Livello 3"
-
-#: DMI/windows.cpp:123 DMI/windows.cpp:737
-msgid "Level"
-msgstr "Livello"
-
-#: DMI/windows.cpp:129 DMI/windows.cpp:262 DMI/windows.cpp:765
-msgid "Train running number"
-msgstr "Numero treno"
-
-#: DMI/windows.cpp:136 DMI/windows.cpp:271 DMI/windows.cpp:900
-#: DMI/windows.cpp:1033
-msgid "RBC ID"
-msgstr "ID RBC"
-
-#: DMI/windows.cpp:137 DMI/windows.cpp:272 DMI/windows.cpp:901
-msgid "RBC phone number"
-msgstr "Numero di telefono RBC"
-
-#: DMI/windows.cpp:139 DMI/windows.cpp:899 DMI/windows.cpp:1032
-msgid "RBC data"
-msgstr "Dati RBC"
-
-#: DMI/windows.cpp:159 DMI/windows.cpp:175 DMI/windows.cpp:786
-#: DMI/windows.cpp:1017
-msgid "Train data"
-msgstr "Dati treno"
-
-#: DMI/windows.cpp:216 DMI/windows.cpp:916 DMI/windows.cpp:1041
-msgid "SR speed (km/h)"
-msgstr "Velocità SR (km/h)"
-
-#: DMI/windows.cpp:217 DMI/windows.cpp:917 DMI/windows.cpp:1038
-msgid "SR distance (m)"
-msgstr "Distanza SR (m)"
-
-#: DMI/windows.cpp:219 DMI/windows.cpp:914 DMI/windows.cpp:1037
-msgid "SR speed/distance"
-msgstr "SR velocità/distanza"
-
-#: DMI/windows.cpp:225 DMI/windows.cpp:910
-msgid "Language"
-msgstr "Lingua"
-
-#: DMI/windows.cpp:167 DMI/windows.cpp:265 DMI/windows.cpp:812
-#: DMI/windows.cpp:1018
-msgid "Length (m)"
-msgstr "Lunghezza (m)"
-
-#: DMI/windows.cpp:266
-msgid "Brake percentaje"
-msgstr "Percentuale freno"
-
-#: DMI/windows.cpp:267
-msgid "Maximum speed (km/h)"
-msgstr "Velocità massima (km/h)"
-
-#: DMI/windows.cpp:268
-msgid "Airtight"
-msgstr "Ermetico"
-
-#: DMI/windows.cpp:268
-msgid "Yes"
-msgstr "SÌ"
-
-#: DMI/windows.cpp:268
-msgid "No"
-msgstr "NO"
-
-#: DMI/windows.cpp:280
-msgid "Data view"
-msgstr "Vista dati"
-
-#: DMI/windows.cpp:359
-msgid "Train is rejected"
-msgstr "Il treno è rifiutato"
-
-#: DMI/windows.cpp:589
-msgid "Shunting request failed"
-msgstr "Richiesta di shunting fallita"
-
-#: DMI/windows.cpp:791 DMI/windows.cpp:795
-msgid "Validate train data"
-msgstr "Convalida i dati del treno"
-
-#: DMI/windows.cpp:159 DMI/windows.cpp:264 DMI/windows.cpp:878
-msgid "Train type"
-msgstr "Tipo di treno"
-
-#: DMI/windows.cpp:169 DMI/windows.cpp:813 DMI/windows.cpp:1026
-msgid "Max speed (km/h)"
-msgstr "Velocità max. (km/h)"
-
-#: DMI/windows.cpp:168 DMI/windows.cpp:814 DMI/windows.cpp:1022
-msgid "Brake percentage"
-msgstr "Percentuale freno"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:815
-msgid "Train category"
-msgstr "Categoria treno"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:818
-msgid "PASS 1"
-msgstr "PASS 1"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:821
-msgid "PASS 2"
-msgstr "PASS 2"
-
-#: DMI/windows.cpp:171 DMI/windows.cpp:824
-msgid "PASS 3"
-msgstr "PASS 3"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:827
-msgid "TILT 1"
-msgstr "TILT 1"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:830
-msgid "TILT 2"
-msgstr "TILT 2"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:833
-msgid "TILT 3"
-msgstr "TILT 3"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:836
-msgid "TILT 4"
-msgstr "TILT 4"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:839
-msgid "TILT 5"
-msgstr "TILT 5"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:842
-msgid "TILT 6"
-msgstr "TILT 6"
-
-#: DMI/windows.cpp:172 DMI/windows.cpp:845
-msgid "TILT 7"
-msgstr "TILT 7"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:848
-msgid "FP 1"
-msgstr "FP 1"
-
-#: DMI/windows.cpp:851
-msgid "FP 2"
-msgstr "FP 2"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:854
-msgid "FP 3"
-msgstr "FP 3"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:857
-msgid "FP 4"
-msgstr "FP 4"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:860
-msgid "FG 1"
-msgstr "FG 1"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:863
-msgid "FG 2"
-msgstr "FG 2"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:866
-msgid "FG 3"
-msgstr "FG 3"
-
-#: DMI/windows.cpp:173 DMI/windows.cpp:869
-msgid "FG 4"
-msgstr "FG 4"
-
-#: DMI/windows.cpp:231 DMI/windows.cpp:926
-msgid "Set VBC"
-msgstr "Imposta VBC"
-
-#: DMI/windows.cpp:931 DMI/windows.cpp:944
-msgid "Validate set VBC"
-msgstr "Convalida set VBC"
-
-#: DMI/windows.cpp:237 DMI/windows.cpp:935
-msgid "Remove VBC"
-msgstr "Rimuovi VBC"
-
-#: DMI/windows.cpp:940 DMI/windows.cpp:961
-msgid "Validate remove VBC"
-msgstr "Conferma eliminazione VBC"
-
-#: DMI/windows.cpp:231 DMI/windows.cpp:237 DMI/windows.cpp:956
-#: DMI/windows.cpp:957 DMI/windows.cpp:973
-msgid "VBC code"
-msgstr "Codice VBC"
-
-#: DMI/windows.cpp:1171 Procedures/train_trip.cpp:48
-msgid "SH refused"
-msgstr "SH rifiutato"
-
-#: Procedures/mode_transition.cpp:308
-msgid "Entering FS"
-msgstr "Ingresso nel modo Full Supervision"
-
-#: Procedures/mode_transition.cpp:315
-msgid "Entering OS"
-msgstr "Ingresso nel modo On-Sight"
-
-#: Procedures/train_trip.cpp:34
-msgid "Unauthorized passing of EoA/LoA"
-msgstr "Superamento indebito EoA"
-
-#: Procedures/train_trip.cpp:38 TrainSubsystems/brake.cpp:39
-msgid "Balise read error"
-msgstr "Errore di lettura Balise"
-
-#: Procedures/train_trip.cpp:42
-msgid "No MA received at level transition"
-msgstr "Nessun MA ricevuto al passaggio di livello"
-
-#: Procedures/train_trip.cpp:45 TrainSubsystems/brake.cpp:72
-msgid "Communication error"
-msgstr "Errore di comunicazione"
-
-#: Euroradio/session.cpp:213 Procedures/train_trip.cpp:51
-msgid "Trackside not compatible"
-msgstr "A terra non compatibile"
-
-#: Procedures/train_trip.cpp:54
-msgid "SR distance exceeded"
-msgstr "Superata Boa Stop nel modo SR"
-
-#: Procedures/train_trip.cpp:58
-msgid "SH stop order"
-msgstr "Ordine di arresto SH"
-
-#: Procedures/train_trip.cpp:62
-msgid "SR stop order"
-msgstr "Ordine di arresto SR"
-
-#: Procedures/train_trip.cpp:65
-msgid "Emergency stop"
-msgstr "Arresto emergenza incondizionata"
-
-#: Procedures/train_trip.cpp:68
-msgid "No track description"
-msgstr "A terra non compatibile"
-
-#: Procedures/train_trip.cpp:79
-msgid " brake demand"
-msgstr " richiesta frenatura"
-
-#: STM/stm.cpp:362
-msgid " failed"
-msgstr " fallito"
-
-#: STM/stm.cpp:460
-msgid " not available"
-msgstr " non disponibile"
-
-#: TrainSubsystems/brake.cpp:58
-msgid "Runaway movement"
-msgstr "Movimento in fuga"
-
-#: DMI/text_messages.cpp:126
+#: c:\etcs\src\evc\dmi\text_messages.cpp:117
 msgid "Level crossing not protected"
 msgstr "Passaggio a livello non protetto"
 
-#: DMI/text_messages.cpp:127
+#: c:\etcs\src\evc\dmi\text_messages.cpp:118
 msgid "Acknowledgement"
 msgstr "Riconoscimento"
 
-#: DMI/windows.cpp:170
+#: c:\etcs\src\evc\dmi\windows.cpp:77 c:\etcs\src\evc\dmi\windows.cpp:287
+#: c:\etcs\src\evc\dmi\windows.cpp:1072
+msgid "Driver ID"
+msgstr "ID Macchinista"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:86 c:\etcs\src\evc\dmi\windows.cpp:107
+#: c:\etcs\src\evc\dmi\windows.cpp:920
+msgid "Level 0"
+msgstr "Livello 0"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:89 c:\etcs\src\evc\dmi\windows.cpp:110
+#: c:\etcs\src\evc\dmi\windows.cpp:922
+msgid "Level 1"
+msgstr "Livello 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:92 c:\etcs\src\evc\dmi\windows.cpp:113
+#: c:\etcs\src\evc\dmi\windows.cpp:924
+msgid "Level 2"
+msgstr "Livello 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:95 c:\etcs\src\evc\dmi\windows.cpp:116
+#: c:\etcs\src\evc\dmi\windows.cpp:926
+msgid "Level 3"
+msgstr "Livello 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:131
+msgid "Level "
+msgstr "Livello "
+
+#: c:\etcs\src\evc\dmi\windows.cpp:140 c:\etcs\src\evc\dmi\windows.cpp:916
+msgid "Level"
+msgstr "Livello"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:146 c:\etcs\src\evc\dmi\windows.cpp:289
+#: c:\etcs\src\evc\dmi\windows.cpp:944
+msgid "Train running number"
+msgstr "Numero treno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:153 c:\etcs\src\evc\dmi\windows.cpp:299
+#: c:\etcs\src\evc\dmi\windows.cpp:1082 c:\etcs\src\evc\dmi\windows.cpp:1245
+msgid "RBC ID"
+msgstr "ID RBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:154 c:\etcs\src\evc\dmi\windows.cpp:300
+#: c:\etcs\src\evc\dmi\windows.cpp:1083
+msgid "RBC phone number"
+msgstr "Numero di telefono RBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:158 c:\etcs\src\evc\dmi\windows.cpp:1081
+#: c:\etcs\src\evc\dmi\windows.cpp:1244
+msgid "RBC data"
+msgstr "Dati RBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:168 c:\etcs\src\evc\dmi\windows.cpp:297
+#: c:\etcs\src\evc\dmi\windows.cpp:1092
+msgid "Radio network ID"
+msgstr "ID rete radio"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:200
+#: c:\etcs\src\evc\dmi\windows.cpp:965 c:\etcs\src\evc\dmi\windows.cpp:1229
+msgid "Train data"
+msgstr "Dati treno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:291
+#: c:\etcs\src\evc\dmi\windows.cpp:1060
+msgid "Train type"
+msgstr "Tipo di treno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:192 c:\etcs\src\evc\dmi\windows.cpp:292
+#: c:\etcs\src\evc\dmi\windows.cpp:991 c:\etcs\src\evc\dmi\windows.cpp:1230
+msgid "Length (m)"
+msgstr "Lunghezza (m)"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:193 c:\etcs\src\evc\dmi\windows.cpp:996
+#: c:\etcs\src\evc\dmi\windows.cpp:1234
+msgid "Brake percentage"
+msgstr "Percentuale freno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:194 c:\etcs\src\evc\dmi\windows.cpp:995
+#: c:\etcs\src\evc\dmi\windows.cpp:1238
+msgid "Max speed (km/h)"
+msgstr "Velocità max. (km/h)"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:195 c:\etcs\src\evc\dmi\windows.cpp:992
 msgid "Loading gauge"
 msgstr "Sagoma limite"
 
-#: DMI/windows.cpp:170
+#: c:\etcs\src\evc\dmi\windows.cpp:195
 msgid "Out of GC"
 msgstr "Fuori dal GC"
 
-#: DMI/windows.cpp:173
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:994
+#: c:\etcs\src\evc\dmi\windows.cpp:997
+msgid "Train category"
+msgstr "Categoria treno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1000
+msgid "PASS 1"
+msgstr "PASS 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1003
+msgid "PASS 2"
+msgstr "PASS 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1006
+msgid "PASS 3"
+msgstr "PASS 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1009
+msgid "TILT 1"
+msgstr "TILT 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1012
+msgid "TILT 2"
+msgstr "TILT 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1015
+msgid "TILT 3"
+msgstr "TILT 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1018
+msgid "TILT 4"
+msgstr "TILT 4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1021
+msgid "TILT 5"
+msgstr "TILT 5"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1024
+msgid "TILT 6"
+msgstr "TILT 6"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1027
+msgid "TILT 7"
+msgstr "TILT 7"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1030
+msgid "FP 1"
+msgstr "FP 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198
 msgid "FP2"
 msgstr "FP2"
 
-#: DMI/windows.cpp:174
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1036
+msgid "FP 3"
+msgstr "FP 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1039
+msgid "FP 4"
+msgstr "FP 4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1042
+msgid "FG 1"
+msgstr "FG 1"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1045
+msgid "FG 2"
+msgstr "FG 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1048
+msgid "FG 3"
+msgstr "FG 3"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1051
+msgid "FG 4"
+msgstr "FG 4"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:199 c:\etcs\src\evc\dmi\windows.cpp:993
 msgid "Axle load category"
 msgstr "Categoria di carico per asse"
 
-#: DMI/windows.cpp:201 DMI/windows.cpp:981 DMI/windows.cpp:986
-#: DMI/windows.cpp:990
+#: c:\etcs\src\evc\dmi\windows.cpp:227 c:\etcs\src\evc\dmi\windows.cpp:1192
+#: c:\etcs\src\evc\dmi\windows.cpp:1198 c:\etcs\src\evc\dmi\windows.cpp:1202
 msgid " data"
 msgstr " dati"
 
-#: DMI/windows.cpp:209 DMI/windows.cpp:923
+#: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1130
 msgid "Adhesion"
 msgstr "Aderenza"
 
-#: DMI/windows.cpp:209
+#: c:\etcs\src\evc\dmi\windows.cpp:236
 msgid "Non slippery rail"
 msgstr "Binario non scivoloso"
 
-#: DMI/windows.cpp:209 DMI/windows.cpp:924
+#: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1131
 msgid "Slippery rail"
 msgstr "Binario scivoloso"
 
-#: DMI/windows.cpp:286
+#: c:\etcs\src\evc\dmi\windows.cpp:243 c:\etcs\src\evc\dmi\windows.cpp:1123
+#: c:\etcs\src\evc\dmi\windows.cpp:1253
+msgid "SR speed (km/h)"
+msgstr "Velocità SR (km/h)"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:244 c:\etcs\src\evc\dmi\windows.cpp:1124
+#: c:\etcs\src\evc\dmi\windows.cpp:1250
+msgid "SR distance (m)"
+msgstr "Distanza SR (m)"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:246 c:\etcs\src\evc\dmi\windows.cpp:1121
+#: c:\etcs\src\evc\dmi\windows.cpp:1249
+msgid "SR speed/distance"
+msgstr "SR velocità/distanza"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:252 c:\etcs\src\evc\dmi\windows.cpp:1117
+msgid "Language"
+msgstr "Lingua"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:1133
+msgid "Set VBC"
+msgstr "Imposta VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:264
+#: c:\etcs\src\evc\dmi\windows.cpp:1163 c:\etcs\src\evc\dmi\windows.cpp:1164
+#: c:\etcs\src\evc\dmi\windows.cpp:1180
+msgid "VBC code"
+msgstr "Codice VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:264 c:\etcs\src\evc\dmi\windows.cpp:1142
+msgid "Remove VBC"
+msgstr "Rimuovi VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:293
+msgid "Brake percentaje"
+msgstr "Percentuale freno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:294
+msgid "Maximum speed (km/h)"
+msgstr "Velocità massima (km/h)"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "Airtight"
+msgstr "Ermetico"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "Yes"
+msgstr "SÌ"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:295
+msgid "No"
+msgstr "NO"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:309
+msgid "Data view"
+msgstr "Vista dati"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:315
 msgid "System version"
 msgstr "Info Versione"
 
-#: DMI/windows.cpp:286
+#: c:\etcs\src\evc\dmi\windows.cpp:315
 msgid "Operated system version"
 msgstr "Versione del sistema operativo"
 
-#: DMI/windows.cpp:986 DMI/windows.cpp:990
+#: c:\etcs\src\evc\dmi\windows.cpp:406 c:\etcs\src\evc\dmi\windows.cpp:514
+msgid "Radio network registration failed"
+msgstr "Registrazione rete radio non riuscita"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:417
+msgid "Train is rejected"
+msgstr "Il treno è rifiutato"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:679
+msgid "Shunting request failed"
+msgstr "Richiesta di shunting fallita"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:970 c:\etcs\src\evc\dmi\windows.cpp:974
+msgid "Validate train data"
+msgstr "Convalida i dati del treno"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1033
+msgid "FP 2"
+msgstr "FP 2"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
+msgid "Validate set VBC"
+msgstr "Convalida set VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1147 c:\etcs\src\evc\dmi\windows.cpp:1168
+msgid "Validate remove VBC"
+msgstr "Conferma eliminazione VBC"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1184
+msgid "Brightness"
+msgstr "Luminosità"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1186
+msgid "Volume"
+msgstr "Volume"
+
+#: c:\etcs\src\evc\dmi\windows.cpp:1198 c:\etcs\src\evc\dmi\windows.cpp:1202
 msgid "Validate "
 msgstr "Convalida "
 
-#: TrackConditions/route_suitability.cpp:53
+#: c:\etcs\src\evc\dmi\windows.cpp:1395
+#: c:\etcs\src\evc\procedures\train_trip.cpp:40
+msgid "SH refused"
+msgstr "SH rifiutato"
+
+#: c:\etcs\src\evc\euroradio\session.cpp:126
+#: c:\etcs\src\evc\procedures\train_trip.cpp:43
+msgid "Trackside not compatible"
+msgstr "A terra non compatibile"
+
+#: c:\etcs\src\evc\procedures\mode_transition.cpp:325
+msgid "Entering FS"
+msgstr "Ingresso nel modo Full Supervision"
+
+#: c:\etcs\src\evc\procedures\mode_transition.cpp:332
+msgid "Entering OS"
+msgstr "Ingresso nel modo On-Sight"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:26
+msgid "Unauthorized passing of EoA/LoA"
+msgstr "Superamento indebito EoA"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:30
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:30
+msgid "Balise read error"
+msgstr "Errore di lettura Balise"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:34
+msgid "No MA received at level transition"
+msgstr "Nessun MA ricevuto al passaggio di livello"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:37
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:64
+msgid "Communication error"
+msgstr "Errore di comunicazione"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:46
+msgid "SR distance exceeded"
+msgstr "Superata Boa Stop nel modo SR"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:50
+msgid "SH stop order"
+msgstr "Ordine di arresto SH"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:54
+msgid "SR stop order"
+msgstr "Ordine di arresto SR"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:57
+msgid "Emergency stop"
+msgstr "Arresto emergenza incondizionata"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:60
+msgid "No track description"
+msgstr "A terra non compatibile"
+
+#: c:\etcs\src\evc\procedures\train_trip.cpp:71
+msgid " brake demand"
+msgstr " richiesta frenatura"
+
+#: c:\etcs\src\evc\stm\stm.cpp:395
+msgid " failed"
+msgstr " fallito"
+
+#: c:\etcs\src\evc\stm\stm.cpp:516
+msgid " not available"
+msgstr " non disponibile"
+
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:43
 msgid "Route suitability - loading gauge"
 msgstr "Idoneità al percorso - sagoma limite"
 
-#: TrackConditions/route_suitability.cpp:56
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:46
 msgid "Route suitability - axle load category"
 msgstr "Idoneità al percorso - categoria di carico per asse"
 
-#: TrackConditions/route_suitability.cpp:59
+#: c:\etcs\src\evc\trackconditions\route_suitability.cpp:49
 msgid "Route suitability - traction system"
 msgstr "Idoneità al percorso - sistema di trazione"
 
-#: TrainSubsystems/brake.cpp:94
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:50
+msgid "Runaway movement"
+msgstr "Movimento in fuga"
+
+#: c:\etcs\src\evc\trainsubsystems\brake.cpp:86
 msgid "Train data changed"
 msgstr "Dati del treno modificati"

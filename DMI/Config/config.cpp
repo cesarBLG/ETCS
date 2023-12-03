@@ -13,10 +13,12 @@ using json = nlohmann::json;
 extern int maxSpeed;
 extern int etcsDialMaxSpeed;
 extern bool softkeys;
+extern bool serieSelected;
 extern std::string stm_layout_file;
 void startWindows();
 void load_config(std::string serie)
 {
+    serieSelected = false;
     etcsDialMaxSpeed = 400;
     stm_layout_file = "stm_windows.json";
     auto contents = platform->read_file("config.json");
@@ -30,13 +32,12 @@ void load_config(std::string serie)
             if (cfg.contains("STMLayout")) {
                 stm_layout_file = cfg["STMLayout"];
             }
-            if (cfg.contains("SoftKeys")) {
-                bool v = cfg["SoftKeys"];
-                if (softkeys != v) {
-                    softkeys = v;
-                    startWindows();
-                }
+            bool sk = cfg.contains("SoftKeys") && cfg["SoftKeys"];
+            if (softkeys != sk) {
+                softkeys = sk;
+                startWindows();
             }
+            serieSelected = true;
         }
     } else {
         platform->debug_print("failed to load config.json");

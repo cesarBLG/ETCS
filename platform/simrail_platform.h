@@ -7,6 +7,8 @@
 #pragma once
 
 #include "platform.h"
+#include "imgui.h"
+#include <map>
 
 class SimrailBasePlatform final : public BasePlatform {
 private:
@@ -28,8 +30,6 @@ public:
 	SimrailBasePlatform();
 
 	int64_t get_timer() override;
-	int64_t get_timestamp() override;
-	DateTime get_local_time() override;
 
 	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
 	std::optional<std::string> read_file(const std::string_view path) override;
@@ -45,41 +45,104 @@ public:
 
 class SimrailUiPlatform final : public UiPlatform {
 private:
+	friend class SimrailFont;
+
+	struct stbi_deleter { void operator()(uint8_t *ptr); };
+
+	struct SimrailFontWrapper {
+		std::vector<std::shared_ptr<std::string>> font_data;
+		float size;
+		ImFontGlyphRangesBuilder ranges_builder;
+		ImFont *current;
+		ImFont *pending;
+	};
+
+	struct AtlasRect {
+		int x, y;
+		float uv0x, uv0y, uv1x, uv1y;
+	};
+
+	struct SimrailImageWrapper {
+		std::unique_ptr<uint8_t[], stbi_deleter> data;
+		int width;
+		int height;
+
+		std::optional<AtlasRect> current;
+		std::optional<AtlasRect> pending;
+	};
+
 	SimrailBasePlatform base;
 
+	ImU32 current_color;
+	ImDrawList *drawlist;
+
+	std::map<std::string, std::shared_ptr<SimrailImageWrapper>, std::less<>> loaded_images;
+	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SimrailFontWrapper>> loaded_fonts;
+	std::map<std::string, std::shared_ptr<std::string>> font_files;
+	uint32_t atlas_id;
+	std::unique_ptr<ImFontAtlas> current_atlas;
+	std::unique_ptr<ImFontAtlas> pending_atlas;
+	void build_atlas();
+	void upload_atlas();
+
+	std::vector<InputEvent> pending_events;
+	PlatformUtil::Promise<InputEvent> input_promise;
+	void handle_event(InputEvent ev);
+
+	int last_volume;
+	int last_brightness;
+
 public:
+	class SimrailFont : public Font
+	{
+	public:
+		SimrailUiPlatform &platform;
+		std::shared_ptr<SimrailFontWrapper> font;
+		float ascent;
+
+	public:
+		SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p);
+		std::pair<float, float> calc_size(const std::string_view str) const override;
+	};
+
 	class SimrailImage : public Image
 	{
 	public:
 		SimrailImage() = default;
-		float width() const override { return 0.0f; };
-		float height() const override { return 0.0f; };
-	};
+		std::pair<float, float> size() const override;
 
-	class SimrailFont : public Font
-	{
-	public:
-		SimrailFont() = default;
-		float ascent() const override { return 0.0f; }
-		std::pair<float, float> calc_size(const std::string_view str) const override { return std::make_pair(0.0f, 0.0f); }
+		std::optional<SimrailFont> font;
+		std::pair<float, float> text_size;
+		std::string text;
+		unsigned int color;
+
+		std::shared_ptr<SimrailImageWrapper> image;
 	};
 
 	class SimrailSoundData : public SoundData
 	{
+		uint32_t handle;
+
 	public:
-		SimrailSoundData() = default;
+		SimrailSoundData(uint32_t h);
+		~SimrailSoundData();
+		uint32_t get() const;
 	};
 
 	class SimrailSoundSource : public SoundSource
 	{
+		std::optional<uint32_t> handle;
+
 	public:
-		SimrailSoundSource() = default;
-		void detach() override {};
+		SimrailSoundSource(uint32_t h);
+		~SimrailSoundSource();
+		void detach() override;
 	};
 
+	SimrailUiPlatform(float virtual_w, float virtual_h);
+	~SimrailUiPlatform() override;
+
 	int64_t get_timer() override { return base.get_timer(); };
-	int64_t get_timestamp() override { return base.get_timestamp(); };
-	DateTime get_local_time() override { return base.get_local_time(); };
 
 	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override { return base.open_socket(channel, tid); };
 	std::optional<std::string> read_file(const std::string_view path) override { return base.read_file(path); };
@@ -96,13 +159,14 @@ public:
 	void draw_line(float x1, float y1, float x2, float y2) override;
 	void draw_rect(float x, float y, float w, float h) override;
 	void draw_rect_filled(float x, float y, float w, float h) override;
-	void draw_image(const Image &img, float x, float y, float w, float h) override;
-	void draw_circle_filled(float x, float y, float rad) override;
-	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
-	void clear() override;
-	PlatformUtil::Promise<void> present() override;
+	void draw_image(const Image &img, float x, float y) override;
+	void draw_circle_filled(float x, float y, float r) override;
+	void draw_arc_filled(float x, float y, float r_min, float r_max, float a_min, float a_max) override;
+	void draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
+	PlatformUtil::Promise<void> on_present_request() override;
+	void present() override;
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
-	std::unique_ptr<Font> load_font(float size, bool bold) override;
+	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
 	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
 

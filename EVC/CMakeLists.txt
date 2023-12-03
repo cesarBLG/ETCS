@@ -62,6 +62,7 @@ target_compile_definitions(evc PRIVATE NOMINMAX)
 target_include_directories(evc PRIVATE ../include)
 target_include_directories(evc PRIVATE ../platform)
 target_include_directories(evc PRIVATE ../libs/liborts/include)
+target_include_directories(evc PRIVATE ../libs/imgui)
 
 add_definitions(-DEVC)
 

@@ -44,9 +44,8 @@ volume_window::volume_window() : input_window(get_text("Volume"), 1, false)
     keys[0]->upType = false;
     keys[2]->upType = false;
     inputs[0]->keybd = k;
-    exit_button.setPressedAction([this, vol_orig]
+    exit_button.setPressedAction([this]
     {
-        platform->set_volume(vol_orig);
         write_command("json",R"({"DriverSelection":"CloseWindow"})");
     });
     create();

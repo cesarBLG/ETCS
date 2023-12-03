@@ -25,6 +25,10 @@
 #include "../softkeys/softkey.h"
 #include "platform_runtime.h"
 
+int WallClockTime::hour;
+int WallClockTime::minute;
+int WallClockTime::second;
+extern bool useImperialSystem;
 void input_received(UiPlatform::InputEvent ev);
 
 template<class T>
@@ -215,13 +219,21 @@ void parseData(std::string str)
     {
         Vset = stof(value);
     }
-    else if (command == "timeOffset")
+    else if (command == "wallClockTime")
     {
-        TimeOffset::offset = stoi(value);
+        WallClockTime::hour = std::stoi(value);
+        value = value.substr(value.find(':') + 1);
+        WallClockTime::minute = std::stoi(value);
+        value = value.substr(value.find(':') + 1);
+        WallClockTime::second = std::stoi(value);
     }
     else if (command == "ackButton")
     {
         externalAckButton.setPressed(stoi(value) > 0);
+    }
+    else if (command == "imperial")
+    {
+        useImperialSystem = value == "1";
     }
     else if (command.size() == 5 && command.substr(0, 3) == "key")
     {
@@ -314,6 +326,7 @@ void data_received(BasePlatform::BusSocket::ReceiveResult &&result)
         auto &leave = std::get<BasePlatform::BusSocket::LeaveNotification>(result);
         if (leave.peer.uid == evc_peer) {
             evc_peer = 0;
+            load_config({});
             revokeMessages();
         }
     }

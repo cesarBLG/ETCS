@@ -24,19 +24,23 @@
 #include <orts/common.h>
 #include "platform_runtime.h"
 #include "orts_wrapper.h"
+#include "../language/language.h"
 
 //using namespace ORserver;
 
 using std::string;
 extern double V_est;
 double V_set;
+extern int data_entry_type;
 extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
 double or_dist;
 int ack_button_light;
-int TimeOffset::offset;
 ORserver::ParameterManager manager;
+int WallClockTime::hour;
+int WallClockTime::minute;
+int WallClockTime::second;
 
 //std::list<euroradio_message_traintotrack> pendingmessages;
 void parse_command(string str);
@@ -68,10 +72,14 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("time_offset");
+    p = new ORserver::Parameter("wall_clock_time");
     p->SetValue = [](string val) {
-        TimeOffset::offset = atoi(val.c_str());
-        set_persistent_command("timeOffset", val);
+        set_persistent_command("wallClockTime", val);
+        WallClockTime::hour = std::stoi(val);
+        val = val.substr(val.find(':') + 1);
+        WallClockTime::minute = std::stoi(val);
+        val = val.substr(val.find(':') + 1);
+        WallClockTime::second = std::stoi(val);
     };
     manager.AddParameter(p);
 
@@ -184,6 +192,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("etcs::dtarget");
+    p->GetValue = []() {
+        return std::to_string(D_target);
+    };
+    manager.AddParameter(p);
+
     p = new ORserver::Parameter("etcs::vsbi");
     p->GetValue = []() {
         return std::to_string(V_sbi*3.6);
@@ -252,6 +266,18 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("language");
+    p->SetValue = [](std::string val) {
+        set_language(val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("imperial");
+    p->SetValue = [](std::string val) {
+        set_persistent_command("imperial", val);
+    };
+    manager.AddParameter(p);
+
     // TODO: directly connect to DMI instead of forwarding button state
     p = new ORserver::Parameter("ackButton");
     p->SetValue = [](std::string val) {
@@ -259,6 +285,12 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("etcs::data_entry_type");
+    p->SetValue = [](std::string val) {
+        data_entry_type = stoi(val);
+    };
+    manager.AddParameter(p);
+    
     p = new ORserver::Parameter("etcs::button::ack");
     p->SetValue = [](std::string val) {
         send_command("ackButton", val);
@@ -346,12 +378,13 @@ void start_or_iface()
 
     SetParameters();
 
-    register_parameter("time_offset");
+    register_parameter("wall_clock_time");
     register_parameter("ackButton");
     register_parameter("etcs::button::*");
     register_parameter("speed");
     register_parameter("distance");
     register_parameter("acceleration");
+    register_parameter("etcs::data_entry_type");
     register_parameter("etcs::telegram");
     register_parameter("cruise_speed");
     register_parameter("etcs::dmi::feedback");
@@ -364,6 +397,8 @@ void start_or_iface()
     register_parameter("etcs::failed");
     register_parameter("gsmr::active");
     register_parameter("serie");
+    register_parameter("language");
+    register_parameter("imperial");
 }
 
 void update_or_iface()

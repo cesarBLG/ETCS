@@ -124,10 +124,11 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	desired.userdata = this;
 	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	audio_samplerate = obtained.freq;
-	audio_volume = 50;
+	audio_volume = 100;
 	SDL_PauseAudioDevice(audio_device, 0);
 
 	running = true;
+	present_count = 0;
 
 	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
@@ -141,10 +142,10 @@ SdlPlatform::~SdlPlatform() {
 	while (PlatformUtil::DeferredFulfillment::execute());
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
-	SDL_CloseAudioDevice(audio_device);
 	loaded_fonts.clear();
+	SDL_CloseAudioDevice(audio_device);
 	TTF_Quit();
-	SDL_DestroyRenderer(sdlrend);
+	//SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
 	SDL_Quit();
 }
@@ -155,14 +156,6 @@ std::unique_ptr<SdlPlatform::BusSocket> SdlPlatform::open_socket(const std::stri
 
 int64_t SdlPlatform::get_timer() {
 	return libc_time_impl.get_timer();
-}
-
-int64_t SdlPlatform::get_timestamp() {
-	return libc_time_impl.get_timestamp();
-}
-
-SdlPlatform::DateTime SdlPlatform::get_local_time() {
-	return libc_time_impl.get_local_time();
 }
 
 std::optional<std::string> SdlPlatform::read_file(const std::string_view path) {
@@ -248,10 +241,14 @@ void SdlPlatform::event_loop() {
 			else
 				break;
 
-		if (on_present_list.pending() > 0) {
+		on_present_list.fulfill_all(false);
+
+		if (present_count > 0) {
+			present_count--;
 			idle = false;
 			SDL_RenderPresent(sdlrend);
-			on_present_list.fulfill_one(false);
+			SDL_SetRenderDrawColor(sdlrend, 0, 0, 0, 255);
+			SDL_RenderClear(sdlrend);
 		}
 
 		int64_t diff = -1;
@@ -263,9 +260,6 @@ void SdlPlatform::event_loop() {
 
 		poller.poll(idle ? diff : 0);
 	};
-
-	if (on_present_list.pending() > 0)
-		SDL_RenderPresent(sdlrend);
 
 	on_quit_list.fulfill_all(false);
 }
@@ -293,21 +287,39 @@ void SdlPlatform::draw_rect_filled(float x, float y, float w, float h) {
 	SDL_RenderFillRectF(sdlrend, &rect);
 }
 
-void SdlPlatform::draw_image(const Image &base, float x, float y, float w, float h) {
+void SdlPlatform::draw_image(const Image &base, float x, float y) {
 	const SdlImage &img = dynamic_cast<const SdlImage&>(base);
+	auto size = img.size();
 	if (s > 0.0f) {
-		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), w * s, h * s };
+		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), size.first * s, size.second * s };
 		SDL_RenderCopyF(sdlrend, img.get(), nullptr, &rect);
 	} else {
-		SDL_FRect rect { std::floor((x + w) * s + ox), std::floor((y + h) * s + oy), w * -s, h * -s };
+		SDL_FRect rect { std::floor((x + size.first) * s + ox), std::floor((y + size.second) * s + oy), size.first * -s, size.second * -s };
 		SDL_RenderCopyExF(sdlrend, img.get(), nullptr, &rect, 180.0, nullptr, SDL_FLIP_NONE);
 	}
 }
 
-void SdlPlatform::draw_circle_filled(float x, float y, float rad) {
+void SdlPlatform::draw_circle_filled(float x, float y, float r) {
 	Color c = current_color;
-	filledCircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
-	aacircleRGBA(sdlrend, x * s + ox, y * s + oy, rad * s, c.R, c.G, c.B, 255);
+	filledCircleRGBA(sdlrend, x * s + ox, y * s + oy, r * s, c.R, c.G, c.B, 255);
+	aacircleRGBA(sdlrend, x * s + ox, y * s + oy, r * s, c.R, c.G, c.B, 255);
+}
+
+void SdlPlatform::draw_arc_filled(float cx, float cy, float rmin, float rmax, float ang0, float ang1) {
+    const int n = 51;
+    std::vector<std::pair<float, float>> poly;
+    poly.resize(2 * n);
+    for(int i = 0; i < n; i++)
+    {
+        float an = ang0 + (ang1 - ang0) * i / (n - 1);
+        float c = std::cos(an);
+        float s = std::sin(an);
+        poly[i].first = rmin * c + cx;
+        poly[i].second = rmin * s + cy;
+        poly[2 * n - 1 - i].first = rmax * c + cx;
+        poly[2 * n - 1 - i].second = rmax * s + cy;
+    }
+    draw_polygon_filled(poly);
 }
 
 void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
@@ -323,12 +335,16 @@ void SdlPlatform::draw_polygon_filled(const std::vector<std::pair<float, float>>
 	aapolygonRGBA(sdlrend, sx.data(), sy.data(), poly.size(), c.R, c.G, c.B, 255);
 }
 
-void SdlPlatform::clear() {
-	SDL_RenderClear(sdlrend);
+void SdlPlatform::draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) {
+	draw_polygon_filled(poly);
 }
 
-PlatformUtil::Promise<void> SdlPlatform::present() {
+PlatformUtil::Promise<void> SdlPlatform::on_present_request() {
 	return on_present_list.create_and_add();
+}
+
+void SdlPlatform::present() {
+	present_count++;
 }
 
 std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_view p) {
@@ -349,26 +365,57 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_vi
 	return img;
 }
 
-std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float size, bool bold) {
-	auto it = loaded_fonts.find({size, bold});
+std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bold, const std::string_view lang) {
+#ifdef SIMRAIL
+	ascent *= 1.25f;
+#endif
+	float scale = std::abs(s);
+
+	std::string lang_str(lang);
+	auto it = loaded_fonts.find({ascent, bold, lang_str});
 	std::shared_ptr<SdlFontWrapper> wrapper;
 	if (it != loaded_fonts.end())
 		wrapper = it->second;
 
-	float scale = std::abs(s);
-
 	if (!wrapper) {
+		std::string path;
+		TTF_Font* font;
+
 #if SIMRAIL
-		std::string path = load_path + (!bold ? "fonts/verdana.ttf" : "fonts/verdanab.ttf");
-		TTF_Font* font = TTF_OpenFont(path.c_str(), size * 1.25 * scale);
+		if (lang == "zh_Hans") {
+			// Simplified Chinese
+			path = load_path + (!bold ? "fonts/NotoSansSC-Regular.ttf" : "fonts/NotoSansSC-Bold.ttf");
+		}
+		else if (lang == "zh_Hant") {
+			// Traditional  Chinese
+			path = load_path + (!bold ? "fonts/NotoSansTC-Regular.ttf" : "fonts/NotoSansTC-Bold.ttf");
+		}
+		else {
+			// Other languages
+			path = load_path + (!bold ? "fonts/Play-Regular.ttf" : "fonts/Play-Bold.ttf");
+		}
 #else
-		std::string path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
-		TTF_Font* font = TTF_OpenFont(path.c_str(), size * 1.4 * scale);
+		path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
 #endif
-		if (font == nullptr)
+
+		float size_probe = ascent * 2.0f * scale;
+		font = TTF_OpenFont(path.c_str(), size_probe);
+		if (font == nullptr) {
+			debug_print("load_font failed: " + path);
 			return nullptr;
+		}
+
+		float adjust = (ascent * scale) / TTF_FontAscent(font);
+		TTF_CloseFont(font);
+
+		font = TTF_OpenFont(path.c_str(), size_probe * adjust);
+		if (font == nullptr) {
+			debug_print("load_font failed: " + path);
+			return nullptr;
+		}
+
 		wrapper = std::make_shared<SdlFontWrapper>(font);
-		loaded_fonts.insert_or_assign({size, bold}, wrapper);
+		loaded_fonts.insert_or_assign({ascent, bold, lang_str}, wrapper);
 	}
 
 	return std::make_unique<SdlFont>(wrapper, scale);
@@ -439,12 +486,8 @@ SDL_Texture* SdlPlatform::SdlImage::get() const {
 	return tex;
 }
 
-float SdlPlatform::SdlImage::width() const {
-	return w / scale;
-}
-
-float SdlPlatform::SdlImage::height() const {
-	return h / scale;
+std::pair<float, float> SdlPlatform::SdlImage::size() const {
+	return std::make_pair(w / scale, h / scale);
 }
 
 SdlPlatform::SdlFontWrapper::SdlFontWrapper(TTF_Font *f) : font(f) {
@@ -457,10 +500,6 @@ SdlPlatform::SdlFontWrapper::~SdlFontWrapper() {
 
 SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float s) : font(wrapper), scale(s) {
 
-}
-
-float SdlPlatform::SdlFont::ascent() const {
-	return TTF_FontAscent(font->font) / scale;
 }
 
 std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str) const {

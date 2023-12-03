@@ -10,13 +10,17 @@
 #include "../graphics/component.h"
 #include "../monitor.h"
 #include <string>
+#include <cmath>
 #include "../graphics/icon_button.h"
 #include "../window/window.h"
 #include "../graphics/display.h"
 #include "../graphics/rectangle.h"
 
+#define METERS_TO_MILES 0.000621371192
+#define METERS_TO_FEET 3.2808399
+#define KMH_TO_MPH 0.621371192
 const int posy[] = {283,250,206,182,164,150,107,64,21};
-const int divs[] = {0, 25, 50, 75, 100, 125, 250, 500, 1000};
+const int divs[] = { 0, 25, 50, 75, 100, 125, 250, 500, 1000 };
 int planning_scale = 1;
 const int object_pos[] = {55,80,105};
 Component planning_distance(246,300, displayPlanning);
@@ -31,6 +35,8 @@ IconButton zoomout("symbols/Navigation/NA_04.bmp",40,15,zoomoutp);
 IconButton softzoomin("symbols/Navigation/NA_07.bmp",64,50,zoominp,"symbols/Navigation/NA_09.bmp");
 IconButton softzoomout("symbols/Navigation/NA_08.bmp",64,50,zoomoutp,"symbols/Navigation/NA_10.bmp");
 extern bool showSpeeds;
+extern bool useImperialSystem;
+extern bool prevUseImperialSystem;
 void displayScaleUp();
 void displayScaleDown();
 void speedLines();
@@ -75,6 +81,10 @@ void displayPlanning()
 std::map<int,std::shared_ptr<UiPlatform::Image>> object_textures;
 void displayObjects()
 {
+    if (prevUseImperialSystem != useImperialSystem) {
+        speedLines();
+    }
+
     for(int i = 0; i < planning_elements.size(); i++)
     {
         planning_element p = planning_elements[i];
@@ -83,7 +93,7 @@ void displayObjects()
             std::string name = std::string("symbols/Planning/PL_") + (p.condition < 10 ? "0" : "") + std::to_string(p.condition)+".bmp";
             object_textures[p.condition] = Component::getImageGraphic(name);
         }
-        planning_distance.drawTexture(object_textures[p.condition],object_pos[i%3],getPlanningHeight(p.distance)-5,20,20);
+        planning_distance.drawTexture(object_textures[p.condition],object_pos[i%3],getPlanningHeight(p.distance)-5);
     }
 }
 std::vector<gradient_element> gradient_elements;
@@ -215,13 +225,13 @@ void displaySpeed()
         float a = getPlanningHeight(cur.distance)-15;
         if(im || prev.speed>cur.speed || cur.speed == 0)
         {
-            planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7, 20, 20);
-            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
+            planning_speed.drawTexture(im ? pl23 : pl22, 14, a+7);
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, a-2, 10, im ? Yellow : Grey, UP | LEFT).get());
         }
         else if (prev.speed != cur.speed)
         {
-            planning_speed.drawTexture(pl21, 14, a-7, 20, 20);
-            planning_speed.draw(planning_speed.getTextUnique(std::to_string(cur.speed), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
+            planning_speed.drawTexture(pl21, 14, a-7);
+            planning_speed.draw(planning_speed.getTextUnique(std::to_string((int)(useImperialSystem ? cur.speed * KMH_TO_MPH : cur.speed)), 25, 270-a-2, 10, Grey, DOWN | LEFT).get());
         }
         if (cur.speed == 0) return;
     }
@@ -233,7 +243,21 @@ void speedLines()
     {
         if(i==0||i>4)
         {
-            planning_distance.addText(std::to_string(divs[i]*planning_scale), 208, posy[i]-150, 9, White, RIGHT);
+            int dist = divs[i] * planning_scale;
+            if (useImperialSystem) {
+                std::string unit = "";
+                if(dist >= 1609.344) {
+                    dist = round(dist * METERS_TO_MILES);
+                    unit = " mi";
+                } else {
+                    dist = (((int)(round(dist * METERS_TO_FEET))) / 100) * 100;
+                    unit = " ft";
+                }
+                planning_distance.addText(std::to_string(dist) + unit, 208, posy[i] - 150, 9, White, RIGHT);
+            }
+            else {
+                planning_distance.addText(std::to_string(dist), 208, posy[i] - 150, 9, White, RIGHT);
+            }
         }
     }
 }

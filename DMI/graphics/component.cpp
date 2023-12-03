@@ -112,36 +112,9 @@ void Component::paint()
         drawRectangle(0, sy - 1, sx - 1, 1, Shadow);
     }
 }
-void Component::drawArc(float ang0, float ang1, float r, float cx, float cy)
-{
-    float xprev = r * cosf(ang0) + cx;
-    float yprev = r * sinf(ang0) + cy;
-    for(int i = 1; i < 101; i++)
-    {
-        float an = ang0 + (ang1 - ang0) * i / 100;
-        float x = r * cosf(an) + cx;
-        float y = r * sinf(an) + cy;
-        drawLine(xprev, yprev, x, y);
-        xprev = x;
-        yprev = y;
-    }
-}
 void Component::drawSolidArc(float ang0, float ang1, float rmin, float rmax, float cx, float cy)
 {
-    const int n = 51;
-    float x[2 * n];
-    float y[2 * n];
-    for(int i = 0; i < n; i++)
-    {
-        float an = ang0 + (ang1 - ang0) * i / (n - 1);
-        float c = cosf(an);
-        float s = sinf(an);
-        x[i] = rmin * c + cx;
-        y[i] = rmin * s + cy;
-        x[2 * n - 1 - i] = rmax * c + cx;
-        y[2 * n - 1 - i] = rmax * s + cy;
-    }
-    drawPolygon(x, y, 2 * n);
+    platform->draw_arc_filled(getX(cx), getY(cy), rmin, rmax, ang0, ang1);
 }
 void Component::rotateVertex(float *vx, float *vy, int pcount, float cx, float cy, float angle)
 {
@@ -163,7 +136,7 @@ void Component::draw(graphic *graph)
         case TEXTURE:{
             texture *t = (texture*)graph;
             if(t->tex == nullptr) return;
-            drawTexture(t->tex, t->x, t->y, t->width, t->height);
+            drawTexture(t->tex, t->x, t->y);
             break;}
         case RECTANGLE:{
             rectangle *r = (rectangle*)graph;
@@ -181,13 +154,13 @@ void Component::draw(graphic *graph)
             break;
     }
 }
-void Component::drawPolygon(float* x, float* y, int n)
+void Component::drawConvexPolygon(float* x, float* y, int n)
 {
     std::vector<std::pair<float, float>> poly;
     poly.reserve(n);
     for (int i = 0; i < n; i++)
         poly.push_back(std::make_pair(getX(x[i]), getY(y[i])));
-    platform->draw_polygon_filled(poly);
+    platform->draw_convex_polygon_filled(poly);
 }
 void Component::drawCircle(float radius, float cx, float cy)
 {
@@ -210,9 +183,10 @@ void Component::drawRadius(float cx, float cy, float rmin, float rmax, float ang
     float s = sinf(ang);
     drawLine(cx - rmin * c, cy - rmin * s, cx - rmax * c, cy - rmax * s);
 }
-void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy, float sx, float sy)
+void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy)
 {
-    platform->draw_image(*tex, getX(cx - sx / 2), getY(cy - sy / 2), sx, sy);
+    auto size = tex->size();
+    platform->draw_image(*tex, getX(cx - size.first / 2), getY(cy - size.second / 2));
 }
 void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
 {
@@ -235,8 +209,8 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->aspect = aspect;
     int v = text.find('\n');
     t->tex = getTextGraphic(text, size, col, aspect, align);
-    float sx = t->tex == nullptr ? 0 : t->tex->width();
-    float sy = t->tex == nullptr ? 0 : t->tex->height();
+    float sx = t->tex == nullptr ? 0 : t->tex->size().first;
+    float sy = t->tex == nullptr ? 0 : t->tex->size().second;
     if (align & UP) y = y + sy / 2;
     else if (align & DOWN) y = (this->sy - y) - sy / 2;
     else y = y + this->sy / 2;
@@ -251,7 +225,7 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
 }
 std::shared_ptr<UiPlatform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
 {
-    auto font = platform->load_font(size, (aspect & 1) != 0);
+    auto font = platform->load_font(size, (aspect & 1) != 0, get_language());
     return platform->make_wrapped_text_image(text, *font, align, col);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
@@ -272,8 +246,8 @@ image_graphic *Component::getImage(string path, float cx, float cy, float sx, fl
     }
     else
     {
-        ig->width = ig->tex->width();
-        ig->height = ig->tex->height();
+        ig->width = ig->tex->size().first;
+        ig->height = ig->tex->size().second;
         ig->x = this->sx/2;
         ig->y = this->sy/2;
     }

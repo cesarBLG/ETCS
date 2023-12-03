@@ -28,6 +28,7 @@ void set_language(std::string lang)
         language = "en";
     } else {
         auto contents = platform->read_file("locales/dmi/" + lang + ".mo");
+        reader.ClearTable();
         if (!contents || reader.ParseData(*contents) != moFileLib::moFileReader::EC_SUCCESS) {
             platform->debug_print(reader.GetErrorDescription());
             language = "en";
@@ -43,4 +44,9 @@ void set_language(std::string lang)
     override_button.rename(get_text_context("Navigation bar", "Over-\nride"));
     dataview_button.rename(get_text_context("Navigation bar", "Data\nview"));
     special_button.rename(get_text_context("Navigation bar", "Spec"));
+}
+
+std::string get_language()
+{
+    return language;
 }

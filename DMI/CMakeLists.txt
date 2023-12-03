@@ -1,4 +1,4 @@
-set (SOURCES init.cpp monitor.cpp time.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp 
+set (SOURCES init.cpp monitor.cpp graphics/drawing.cpp graphics/component.cpp graphics/button.cpp
             graphics/display.cpp window/window.cpp graphics/layout.cpp graphics/text_button.cpp graphics/icon_button.cpp 
             speed/gauge.cpp sound/sound.cpp distance/distance.cpp tcp/server.cpp state/level.cpp state/mode.cpp 
             state/brake.cpp state/conditions.cpp state/acks.cpp state/override.cpp state/radio.cpp 
@@ -27,8 +27,10 @@ if (NOT WASM)
     list(APPEND SOURCES ../platform/tcp_socket.cpp ../platform/console_fd_poller.cpp ../platform/bus_socket_impl.cpp ../platform/libc_time_impl.cpp ../platform/fstream_file_impl.cpp)
 else()
     set(WITH_SDL FALSE)
-    list(APPEND SOURCES ../platform/simrail_platform.cpp)
+    list(APPEND SOURCES ../platform/simrail_platform.cpp ../platform/stb/stb.c)
+    list(APPEND SOURCES ../libs/imgui/imgui.cpp ../libs/imgui/imgui_demo.cpp ../libs/imgui/imgui_draw.cpp ../libs/imgui/imgui_tables.cpp ../libs/imgui/imgui_widgets.cpp)
     add_definitions(-DJSON_TEST_KEEP_MACROS=1 -DJSON_HAS_FILESYSTEM=0 -DJSON_HAS_EXPERIMENTAL_FILESYSTEM=0)
+    add_definitions(-DIMGUI_DISABLE_FILE_FUNCTIONS)
     add_definitions(-DNO_EXCEPTIONS)
     add_compile_options(-fno-exceptions)
     add_link_options(-mexec-model=reactor)
@@ -65,6 +67,7 @@ if (WITH_SDL)
     target_link_libraries(dmi PRIVATE SDL2::SDL2 SDL2_ttf::SDL2_ttf)
 endif()
 
+target_include_directories(dmi PRIVATE ../libs/imgui)
 target_include_directories(dmi PRIVATE ../include)
 target_include_directories(dmi PRIVATE ../platform)
 

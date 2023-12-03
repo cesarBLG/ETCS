@@ -56,13 +56,14 @@ private:
 	int audio_samplerate;
 	int audio_device;
 	int audio_volume;
-	std::map<std::pair<float, bool>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
+	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
-	std::multimap<int, PlatformUtil::Fulfiller<void>> timer_queue;
+	std::multimap<int64_t, PlatformUtil::Fulfiller<void>> timer_queue;
 	PlatformUtil::FulfillerList<void> on_close_list;
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
+	int present_count;
 	bool running;
 	std::map<std::string, std::string, std::less<>> ini_items;
 	void load_config();
@@ -77,6 +78,7 @@ private:
 	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
 	void mixer_func(int16_t *buffer, size_t len);
 	bool poll_sdl();
+	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly);
 
 public:
 	class SdlImage final : public Image
@@ -89,8 +91,7 @@ public:
 		SdlImage(SDL_Texture *tex, float w, float h, float s);
 		SDL_Texture* get() const;
 		~SdlImage() override;
-		float width() const override;
-		float height() const override;
+		std::pair<float, float> size() const override;
 	};
 
 	class SdlFont final : public Font
@@ -101,7 +102,6 @@ public:
 	public:
 		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
-		float ascent() const override;
 		std::pair<float, float> calc_size(const std::string_view str) const override;
 	};
 
@@ -130,8 +130,6 @@ public:
 	~SdlPlatform() override;
 
 	int64_t get_timer() override;
-	int64_t get_timestamp() override;
-	DateTime get_local_time() override;
 
 	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
 	std::optional<std::string> read_file(const std::string_view path) override;
@@ -148,13 +146,14 @@ public:
 	void draw_line(float x1, float y1, float x2, float y2) override;
 	void draw_rect(float x, float y, float w, float h) override;
 	void draw_rect_filled(float x, float y, float w, float h) override;
-	void draw_image(const Image &img, float x, float y, float w, float h) override;
-	void draw_circle_filled(float x, float y, float rad) override;
-	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
-	void clear() override;
-	PlatformUtil::Promise<void> present() override;
+	void draw_image(const Image &img, float x, float y) override;
+	void draw_arc_filled(float x, float y, float r_min, float r_max, float a_min, float a_max) override;
+	void draw_circle_filled(float x, float y, float r) override;
+	void draw_convex_polygon_filled(const std::vector<std::pair<float, float>> &poly) override;
+	PlatformUtil::Promise<void> on_present_request() override;
+	void present() override;
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
-	std::unique_ptr<Font> load_font(float size, bool bold) override;
+	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
 	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
 

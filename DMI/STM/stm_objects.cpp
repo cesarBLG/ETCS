@@ -212,7 +212,7 @@ void ntc_window::display_text(int id, bool ack, std::string text, int properties
     bool counter = (properties>>8) & 1;
     Color bg = get_color((properties>>3)&7, true);
     Color fg = get_color(properties&7, false);
-    Message m(id|0xff00, text, getHour(), getMinute(), firstGroup, ack, 0, fg, bg);
+    Message m(id|0xff00, text, WallClockTime::hour, WallClockTime::minute, firstGroup, ack, 0, fg, bg);
     messages[id] = m;
     if (active_ntc_window == this) addMsg(m);
 }

@@ -1,180 +1,213 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: ETCS DMI\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-10-10 13:53+0200\n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
-"Project-Id-Version: ETCS DMI\n"
-"Language: nl\n"
 
-#: window/menu_main.cpp:31
-msgid "Main"
-msgstr "Belangrijk"
-
-#: window/data_entry.cpp:25 window/data_validation.cpp:11
-#: window/data_validation.h:28 window/data_validation.h:82
-#: window/keyboard.cpp:186 window/keyboard.cpp:193
-#: window/track_ahead_free.cpp:15
-msgid "Yes"
-msgstr "Ja"
-
-#: window/data_entry.cpp:54
-msgid " entry complete?"
-msgstr " volledige invoer?"
-
-#: window/keyboard.cpp:185 window/keyboard.cpp:189
-msgid "No"
-msgstr "Nee"
-
-#: window/driver_id.cpp:26
-msgid "TRN"
-msgstr "NTRAIN"
-
-#: window/fixed_train_data.cpp:26
-msgid "Enter\n"
-"data"
-msgstr "Int.\n"
-"gegevens"
-
-#: window/keyboard.cpp:29
-msgid "DEL"
-msgstr "VAN DE"
-
-#: window/menu_main.cpp:33
-msgid "Start"
-msgstr "Begin"
-
-#: window/menu_main.cpp:34
-msgid "Driver ID"
-msgstr "Chauffeur Gegevens"
-
-#: window/menu_main.cpp:35
-msgid "Train Data"
-msgstr "Trein Gegevens"
-
-#: window/menu_main.cpp:36
-msgid "Level"
-msgstr "Niveau"
-
-#: window/menu_main.cpp:37
-msgid "Train running number"
-msgstr "Trein nummer"
-
-#: window/menu_main.cpp:38
-msgid "Exit Shunting"
-msgstr "Einde manoeuvres"
-
-#: window/menu_main.cpp:38
-msgid "Shunting"
-msgstr "Manoeuvres"
-
-#: window/menu_main.cpp:39
-msgid "Non-Leading"
-msgstr "Dubbele tractie"
-
-#: window/menu_main.cpp:40
-msgid "Maintain shunting"
-msgstr "Manoeuvre vasthouden"
-
-#: window/menu_main.cpp:41
-msgid "Radio data"
-msgstr "Radiogegevens"
-
-#: window/menu_override.cpp:22
-msgid "Override"
-msgstr "Overlopen"
-
-#: window/menu_override.cpp:24
-msgid "EoA"
-msgstr "EoA"
-
-#: window/menu_radio.cpp:31
-msgid "Contact last RBC"
-msgstr "Laatste RBC"
-
-#: window/menu_radio.cpp:32
-msgid "Use short number"
-msgstr "Gebruik kort nummer"
-
-#: window/menu_radio.cpp:33
-msgid "Enter RBC data"
-msgstr "Voer RBC-gegevens"
-
-#: window/menu_radio.cpp:34
-msgid "Radio Network ID"
-msgstr "Radionetwerk-ID"
-
-#: window/menu_settings.cpp:21
-msgid "Settings"
-msgstr "Instellingen"
-
-#: window/menu_settings.cpp:26
-msgid "System version"
-msgstr "Systeem versie"
-
-#: window/menu_settings.cpp:27
-msgid "Set VBC"
-msgstr "VBC toevoegen"
-
-#: window/menu_settings.cpp:28
-msgid "Remove VBC"
-msgstr "VBC verwijderen"
-
-#: window/menu_spec.cpp:21
-msgid "Special"
-msgstr "Speciaal"
-
-#: window/menu_spec.cpp:23
-msgid "Adhesion"
-msgstr "Aanhankelijkheid"
-
-#: window/menu_spec.cpp:24
-msgid "SR Speed/Distance"
-msgstr "SR Snelheid/Afstand"
-
-#: window/menu_spec.cpp:25
-msgid "Train integrity"
-msgstr "Train integriteit"
-
-#: window/train_data.cpp:24
-msgid "Select\n"
-"type"
-msgstr "Sel.\n"
-"jongen"
-
-#: language/language.cpp:36 window/nav_buttons.cpp:29
+#: c:\etcs\src\dmi\language\language.cpp:43
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:51
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Voor-\n"
+msgstr ""
+"Voor-\n"
 "naamst"
 
-#: language/language.cpp:37 window/nav_buttons.cpp:35
+#: c:\etcs\src\dmi\language\language.cpp:44
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:52
 msgctxt "Navigation bar"
-msgid "Over-\n"
+msgid ""
+"Over-\n"
 "ride"
-msgstr "Over-\n"
+msgstr ""
+"Over-\n"
 "schrijven"
 
-#: language/language.cpp:38 window/nav_buttons.cpp:41
+#: c:\etcs\src\dmi\language\language.cpp:45
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:53
 msgctxt "Navigation bar"
-msgid "Data\n"
+msgid ""
+"Data\n"
 "view"
 msgstr "Gegevens"
 
-#: language/language.cpp:39 window/nav_buttons.cpp:47
+#: c:\etcs\src\dmi\language\language.cpp:46
+#: c:\etcs\src\dmi\window\nav_buttons.cpp:54
 msgctxt "Navigation bar"
 msgid "Spec"
 msgstr "Speciaal"
 
-#: window/menu_ntc.cpp:21
+#: c:\etcs\src\dmi\window\brightness.cpp:13
+#: c:\etcs\src\dmi\window\menu_settings.cpp:21
+msgid "Brightness"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:16
+#: c:\etcs\src\dmi\window\data_entry.cpp:17
+#: c:\etcs\src\dmi\window\data_validation.cpp:19
+#: c:\etcs\src\dmi\window\keyboard.cpp:245
+#: c:\etcs\src\dmi\window\keyboard.cpp:252
+#: c:\etcs\src\dmi\window\track_ahead_free.cpp:27
+msgid "Yes"
+msgstr "Ja"
+
+#: c:\etcs\src\dmi\window\data_entry.cpp:62
+msgid " entry complete?"
+msgstr " volledige invoer?"
+
+#: c:\etcs\src\dmi\window\driver_id.cpp:16
+msgid "TRN"
+msgstr "NTRAIN"
+
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:15
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:19
+#: c:\etcs\src\dmi\window\fixed_train_data.cpp:25
+msgid ""
+"Enter\n"
+"data"
+msgstr ""
+"Int.\n"
+"gegevens"
+
+#: c:\etcs\src\dmi\window\keyboard.cpp:244
+#: c:\etcs\src\dmi\window\keyboard.cpp:248
+msgid "No"
+msgstr "Nee"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:20
+msgid "Main"
+msgstr "Belangrijk"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:22
+msgid "Start"
+msgstr "Begin"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:26
+msgid "Driver ID"
+msgstr "Chauffeur Gegevens"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:30
+msgid "Train Data"
+msgstr "Trein Gegevens"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:34
+msgid "Level"
+msgstr "Niveau"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:38
+msgid "Train running number"
+msgstr "Trein nummer"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Exit Shunting"
+msgstr "Einde manoeuvres"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:42
+msgid "Shunting"
+msgstr "Manoeuvres"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:46
+msgid "Non-Leading"
+msgstr "Dubbele tractie"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:47
+msgid "Maintain shunting"
+msgstr "Manoeuvre vasthouden"
+
+#: c:\etcs\src\dmi\window\menu_main.cpp:48
+msgid "Radio data"
+msgstr "Radiogegevens"
+
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:11
 msgid "NTC data entry"
 msgstr "NTC-gegevensinvoer"
 
-#: window/menu_ntc.cpp:31
+#: c:\etcs\src\dmi\window\menu_ntc.cpp:20
 msgid "End of data entry"
 msgstr "Einde van gegevensinvoer"
 
-#: window/menu_radio.cpp:29
+#: c:\etcs\src\dmi\window\menu_override.cpp:12
+msgid "Override"
+msgstr "Overlopen"
+
+#: c:\etcs\src\dmi\window\menu_override.cpp:14
+msgid "EoA"
+msgstr "EoA"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:18
 msgid "RBC data"
 msgstr "RBC-gegevens"
 
+#: c:\etcs\src\dmi\window\menu_radio.cpp:20
+msgid "Contact last RBC"
+msgstr "Laatste RBC"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:24
+msgid "Use short number"
+msgstr "Gebruik kort nummer"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:28
+msgid "Enter RBC data"
+msgstr "Voer RBC-gegevens"
+
+#: c:\etcs\src\dmi\window\menu_radio.cpp:32
+msgid "Radio Network ID"
+msgstr "Radionetwerk-ID"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:11
+msgid "Settings"
+msgstr "Instellingen"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:13
+msgid "Language"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:17
+#: c:\etcs\src\dmi\window\volume.cpp:13
+msgid "Volume"
+msgstr ""
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:25
+msgid "System version"
+msgstr "Systeem versie"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:29
+msgid "Set VBC"
+msgstr "VBC toevoegen"
+
+#: c:\etcs\src\dmi\window\menu_settings.cpp:33
+msgid "Remove VBC"
+msgstr "VBC verwijderen"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:11
+msgid "Special"
+msgstr "Speciaal"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:13
+msgid "Adhesion"
+msgstr "Aanhankelijkheid"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:17
+msgid "SR Speed/Distance"
+msgstr "SR Snelheid/Afstand"
+
+#: c:\etcs\src\dmi\window\menu_spec.cpp:21
+msgid "Train integrity"
+msgstr "Train integriteit"
+
+#: c:\etcs\src\dmi\window\train_data.cpp:14
+#: c:\etcs\src\dmi\window\train_data.cpp:18
+#: c:\etcs\src\dmi\window\train_data.cpp:24
+msgid ""
+"Select\n"
+"type"
+msgstr ""
+"Sel.\n"
+"jongen"
+
+#~ msgid "DEL"
+#~ msgstr "VAN DE"
