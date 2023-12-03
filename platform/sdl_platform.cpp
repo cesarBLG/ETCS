@@ -405,7 +405,14 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bol
 			return nullptr;
 		}
 
+#if SIMRAIL
 		float adjust = (ascent * scale) / TTF_FontAscent(font);
+#else
+		int minx, maxx, miny, maxy, advance;
+		TTF_GlyphMetrics32(font, 'R', &minx, &maxx, &miny, &maxy, &advance);
+
+		float adjust = (ascent * scale) / maxy;
+#endif
 		TTF_CloseFont(font);
 
 		font = TTF_OpenFont(path.c_str(), size_probe * adjust);
