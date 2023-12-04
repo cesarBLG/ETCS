@@ -157,7 +157,8 @@ void check_linking()
                 platform->debug_print("RAMS supervision");
 #endif
             } else {
-                supervising_rbc->report_error(0);
+                if (supervising_rbc)
+                    supervising_rbc->report_error(0);
                 trigger_reaction(link_expected->reaction);
             }
             if (rams_lost_count > 1)
