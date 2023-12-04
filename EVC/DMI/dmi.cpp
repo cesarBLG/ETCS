@@ -223,6 +223,11 @@ void dmi_update_func()
     j["TextMessages"] = messages;
     j["DisplayTAF"] = start_display_taf && !stop_display_taf;
     j["AllowedAck"] = ack_allowed;
+    json clock;
+    clock["Hour"] = WallClockTime::hour;
+    clock["Minute"] = WallClockTime::minute;
+    clock["Second"] = WallClockTime::second;
+    j["WallClockTime"] = clock;
     if (display_lssma) j["LSSMA"] = lssma;
     if (mode == Mode::FS || mode == Mode::OS)
     {

@@ -74,7 +74,7 @@ void SetParameters()
 
     p = new ORserver::Parameter("wall_clock_time");
     p->SetValue = [](string val) {
-        set_persistent_command("wallClockTime", val);
+        external_wall_clock = true;
         WallClockTime::hour = std::stoi(val);
         val = val.substr(val.find(':') + 1);
         WallClockTime::minute = std::stoi(val);
@@ -85,14 +85,18 @@ void SetParameters()
 
     p = new ORserver::Parameter("simulator_time");
     p->SetValue = [](string val) {
-        int t = (int)stod(val);
-        int h = (t/3600)%24;
-        int m = (t/60)%60;
-        int s = t%60;
-        set_persistent_command("wallClockTime", std::to_string(h)+":"+std::to_string(m)+":"+std::to_string(s));
-        WallClockTime::hour = h;
-        WallClockTime::minute = m;
-        WallClockTime::second = s;
+        if (val == "") {
+            external_wall_clock = false;
+        } else {
+            external_wall_clock = true;
+            int t = (int)stod(val);
+            int h = (t/3600)%24;
+            int m = (t/60)%60;
+            int s = t%60;
+            WallClockTime::hour = h;
+            WallClockTime::minute = m;
+            WallClockTime::second = s;
+        }
     };
     manager.AddParameter(p);
 

@@ -11,4 +11,5 @@
 class LibcTimeImpl {
 public:
 	int64_t get_timer();
+	BasePlatform::DateTime get_local_time();
 };

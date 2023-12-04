@@ -85,6 +85,10 @@ int64_t ConsolePlatform::get_timer() {
 	return libc_time_impl.get_timer();
 }
 
+ConsolePlatform::DateTime ConsolePlatform::get_local_time() {
+	return libc_time_impl.get_local_time();
+}
+
 std::optional<std::string> ConsolePlatform::read_file(const std::string_view path) {
 	return fstream_file_impl.read_file(path);
 }

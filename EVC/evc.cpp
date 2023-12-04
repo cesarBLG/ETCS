@@ -195,6 +195,7 @@ void on_platform_ready()
 void update()
 {
     update_or_iface();
+    update_clock();
     update_odometer();
     update_geographical_position();
     update_track_comm();

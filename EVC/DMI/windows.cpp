@@ -137,7 +137,7 @@ json level_window()
             levels[0] = get_text("Level 1");
         if (!unsupported_levels.count(2))
             levels[1] = get_text("Level 2");
-        if (!unsupported_levels.count(3))
+        if (!unsupported_levels.count(3) && false)
             levels[2] = get_text("Level 3");
         for (auto &kvp : installed_stms) {
             levels.push_back(get_ntc_name(kvp.first));

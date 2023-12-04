@@ -8,6 +8,8 @@
  */
 #pragma once
 #include "platform.h"
+extern bool external_wall_clock;
+void update_clock();
 int64_t get_milliseconds();
 struct WallClockTime {
     static int hour;
