@@ -1,13 +1,11 @@
 {
-
-    "Simple" : {
-        "length": 189,
-        "speed": 300,
-        "cant_deficiency": 174,
+    "A330" : {
+        "length": 80,
+        "speed": 330,
+        "cant_deficiency": 115,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
         ],
         "brakes": {
@@ -23,25 +21,26 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.93},
-						{"speed": 13.8889, "value": 0.92},
-						{"speed": 27.7778, "value": 0.91},
-						{"speed": 41.6667, "value": 0.83},
-						{"speed": 55.5556, "value": 0.75},
-						{"speed": 69.4444, "value": 0.65}
-
+                        {"speed": 0, "value": 0.9},
+						{"speed": 13.8889, "value": 0.9},
+						{"speed": 27.7778, "value": 0.9},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.73},
+						{"speed": 69.4444, "value": 0.72},
+						{"speed": 83.3333, "value": 0.71}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.91},
-						{"speed": 13.8889, "value": 0.9},
-						{"speed": 27.7778, "value": 0.8},
-						{"speed": 41.6667, "value": 0.81},
-						{"speed": 55.5556, "value": 0.73},
-						{"speed": 69.4444, "value": 0.63}
+                        {"speed": 0, "value": 0.88},
+						{"speed": 13.8889, "value": 0.88},
+						{"speed": 27.7778, "value": 0.88},
+						{"speed": 41.6667, "value": 0.9},
+						{"speed": 55.5556, "value": 0.71},
+						{"speed": 69.4444, "value": 0.7},
+						{"speed": 83.3333, "value": 0.69}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

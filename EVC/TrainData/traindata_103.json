@@ -2,7 +2,7 @@
 	"1UT" : {
         "length": 200,
         "speed": 350,
-        "cant_deficiency": 206,
+        "cant_deficiency": 115,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -12,7 +12,7 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 0, "value": 1.1, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
 						 {"speed": 55.5556, "value": 0.95, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
@@ -22,26 +22,26 @@
             "service": {
                 "normal": {
                     "curves": [
-                       {"speed": 0, "value": 0.8},
-						{"speed": 13.8889, "value": 0.8},
-						{"speed": 27.7778, "value": 0.77},
-						{"speed": 41.6667, "value": 0.75},
-						{"speed": 55.5556, "value": 0.7},
-						{"speed": 69.4444, "value": 0.62},
-						{"speed": 83.3333, "value": 0.5}
+                       {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
+						{"speed": 27.7778, "value": 0.91},
+						{"speed": 41.6667, "value": 0.89},
+						{"speed": 55.5556, "value": 0.88},
+						{"speed": 69.4444, "value": 0.79},
+						{"speed": 83.3333, "value": 0.7}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                       {"speed": 0, "value": 0.9},
-						{"speed": 13.8889, "value": 0.87},
-						{"speed": 27.7778, "value": 0.86},
-						{"speed": 41.6667, "value": 0.84},
-						{"speed": 55.5556, "value": 0.82},
-						{"speed": 69.4444, "value": 0.77},
-						{"speed": 83.3333, "value": 0.65}
+                        {"speed": 0, "value": 0.88},
+                         {"speed": 13.8889, "value": 0.88},
+                         {"speed": 27.7778, "value": 0.85},
+                         {"speed": 41.6667, "value": 0.83},
+                         {"speed": 55.5556, "value": 0.78},
+                         {"speed": 69.4444, "value": 0.7},
+                         {"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -78,7 +78,7 @@
     "2UT" : {
         "length": 400,
         "speed": 350,
-        "cant_deficiency": 206,
+        "cant_deficiency": 115,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -98,26 +98,26 @@
             "service": {
                 "normal": {
                     "curves": [
-                       {"speed": 0, "value": 0.8},
-						{"speed": 13.8889, "value": 0.8},
-						{"speed": 27.7778, "value": 0.77},
-						{"speed": 41.6667, "value": 0.75},
-						{"speed": 55.5556, "value": 0.7},
-						{"speed": 69.4444, "value": 0.62},
-						{"speed": 83.3333, "value": 0.5}
-                    ],
-                    "build_up_time": 0.5,
-                    "validity": "1..."
-                },
-                "no_dynamic": {
-                    "curves": [
-                       {"speed": 0, "value": 0.9},
-						{"speed": 13.8889, "value": 0.87},
-						{"speed": 27.7778, "value": 0.86},
-						{"speed": 41.6667, "value": 0.84},
-						{"speed": 55.5556, "value": 0.82},
-						{"speed": 69.4444, "value": 0.77},
-						{"speed": 83.3333, "value": 0.65}
+                        {"speed": 0, "value": 0.93},
+                         {"speed": 13.8889, "value": 0.92},
+                         {"speed": 27.7778, "value": 0.91},
+                         {"speed": 41.6667, "value": 0.89},
+                         {"speed": 55.5556, "value": 0.88},
+                         {"speed": 69.4444, "value": 0.79},
+                         {"speed": 83.3333, "value": 0.7}
+                     ],
+                     "build_up_time": 0.5,
+                     "validity": "1..."
+                 },
+                 "no_dynamic": {
+                     "curves": [
+                         {"speed": 0, "value": 0.88},
+                          {"speed": 13.8889, "value": 0.88},
+                          {"speed": 27.7778, "value": 0.85},
+                          {"speed": 41.6667, "value": 0.83},
+                          {"speed": 55.5556, "value": 0.78},
+                          {"speed": 69.4444, "value": 0.7},
+                          {"speed": 83.3333, "value": 0.58}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
