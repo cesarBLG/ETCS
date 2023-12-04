@@ -2,7 +2,7 @@
 "1UT" : {
         "length": 107,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -23,17 +23,17 @@
                 "normal": {
                     "curves": [
                         {"speed": 0, "value": 1.12},
-						{"speed": 33.3333, "value": 0.85},
-						{"speed": 55.5556, "value": 0.80}
+						{"speed": 33.3333, "value": 0.95},
+						{"speed": 55.5556, "value": 0.90}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.02},
-						{"speed": 33.3333, "value": 0.70},
-						{"speed": 55.5556, "value": 0.60}
+                        {"speed": 0, "value": 1.1},
+						{"speed": 33.3333, "value": 0.93},
+						{"speed": 55.5556, "value": 0.88}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -70,7 +70,7 @@
 	"2UT" : {
         "length": 214,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -91,17 +91,17 @@
                 "normal": {
                     "curves": [
                         {"speed": 0, "value": 1.12},
-						{"speed": 33.3333, "value": 0.85},
-						{"speed": 55.5556, "value": 0.80}
+						{"speed": 33.3333, "value": 0.95},
+						{"speed": 55.5556, "value": 0.90}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.02},
-						{"speed": 33.3333, "value": 0.70},
-						{"speed": 55.5556, "value": 0.60}
+                        {"speed": 0, "value": 1.1},
+						{"speed": 33.3333, "value": 0.93},
+						{"speed": 55.5556, "value": 0.88}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

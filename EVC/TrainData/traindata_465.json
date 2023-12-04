@@ -2,7 +2,7 @@
 	"1UT_463" : {
         "length": 62,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -65,7 +65,7 @@
 	"2UT_463" : {
         "length": 125,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -128,7 +128,7 @@
 		"1UT_464" : {
         "length": 80,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -191,7 +191,7 @@
 	"2UT_464" : {
         "length": 160,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -254,7 +254,7 @@
 		"1UT_465" : {
         "length": 98,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -317,7 +317,7 @@
 	"2UT_465" : {
         "length": 196,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -380,7 +380,7 @@
 	"465_463" : {
         "length": 161,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -443,7 +443,7 @@
 	"465_464" : {
         "length": 180,
         "speed": 120,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
