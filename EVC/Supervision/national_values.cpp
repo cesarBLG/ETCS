@@ -234,7 +234,7 @@ void setup_national_values()
 }
 void update_national_values()
 {
-    if (not_yet_applicable_nv && not_yet_applicable_nv->first_applicable < d_estfront) {
+    if (not_yet_applicable_nv && not_yet_applicable_nv->first_applicable.est < d_estfront) {
         load_national_values(not_yet_applicable_nv->nv);
         not_yet_applicable_nv = {};
     }

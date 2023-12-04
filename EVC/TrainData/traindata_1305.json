@@ -3,7 +3,7 @@
     "Simple" : {
         "length": 189,
         "speed": 300,
-        "cant_deficiency": 206,
+        "cant_deficiency": 174,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -23,12 +23,12 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.83},
-						{"speed": 13.8889, "value": 0.82},
-						{"speed": 27.7778, "value": 0.81},
-						{"speed": 41.6667, "value": 0.73},
-						{"speed": 55.5556, "value": 0.65},
-						{"speed": 69.4444, "value": 0.55}
+                        {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
+						{"speed": 27.7778, "value": 0.91},
+						{"speed": 41.6667, "value": 0.83},
+						{"speed": 55.5556, "value": 0.75},
+						{"speed": 69.4444, "value": 0.65}
 
                     ],
                     "build_up_time": 0.5,
@@ -36,11 +36,12 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.91},
+						{"speed": 13.8889, "value": 0.9},
+						{"speed": 27.7778, "value": 0.8},
+						{"speed": 41.6667, "value": 0.81},
+						{"speed": 55.5556, "value": 0.73},
+						{"speed": 69.4444, "value": 0.63}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

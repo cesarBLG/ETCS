@@ -31,10 +31,10 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.56},
-						{"speed": 13.8889, "value": 1.82},
-						{"speed": 27.7778, "value": 1.78},
-						{"speed": 41.6667, "value": 0.96}
+                        {"speed": 0, "value": 1.34},
+						{"speed": 13.8889, "value": 1.6},
+						{"speed": 27.7778, "value": 1.56},
+						{"speed": 41.6667, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -100,10 +100,10 @@
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.56},
-						{"speed": 13.8889, "value": 1.82},
-						{"speed": 27.7778, "value": 1.78},
-						{"speed": 41.6667, "value": 0.96}
+                        {"speed": 0, "value": 1.34},
+						{"speed": 13.8889, "value": 1.6},
+						{"speed": 27.7778, "value": 1.56},
+						{"speed": 41.6667, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

@@ -26,6 +26,7 @@ int cant_deficiency=0;
 std::set<int> other_train_categories;
 brake_position_types brake_position = PassengerP;
 bool train_data_valid = false;
+bool train_data_known = false;
 axle_load_categories axle_load_category;
 loading_gauges loading_gauge;
 std::string train_category;
@@ -37,9 +38,11 @@ void set_train_data(std::string spec)
     if (special_train_data != spec) {
         //trigger_brake_reason(3);
     }
+    train_data_known = true;
     train_data_valid = false;
     special_train_data = spec;
     conversion_model_used = false;
+    train_category = "";
     if (!special_train_data.empty()) {
         json j;
         auto contents = platform->read_file(traindata_file);
@@ -47,6 +50,7 @@ void set_train_data(std::string spec)
             j = json::parse(*contents);
         if (j.contains(special_train_data)) {
             json &traindata = j[special_train_data];
+            if (traindata.contains("brake_percentage")) brake_percentage = (int)traindata["brake_percentage"].get<double>();
             set_brake_model(traindata);
             L_TRAIN = traindata["length"].get<double>();
             V_train = traindata["speed"].get<double>()/3.6;

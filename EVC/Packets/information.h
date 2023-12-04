@@ -15,7 +15,7 @@ struct national_values_information : etcs_information
 };
 struct linking_information : etcs_information
 {
-    linking_information() : etcs_information(1) {}
+    linking_information() : etcs_information(1) {location_based=false;}
     void handle() override;
 };
 struct signalling_information : etcs_information
@@ -50,22 +50,22 @@ struct issp_information : etcs_information
 };
 struct leveltr_order_information : etcs_information
 {
-    leveltr_order_information() : etcs_information(8, 10) {}
+    leveltr_order_information() : etcs_information(8, 10) {location_based=false;}
     void handle() override;
 };
 struct condleveltr_order_information : etcs_information
 {
-    condleveltr_order_information() : etcs_information(9, 10) {}
+    condleveltr_order_information() : etcs_information(9, 10) {location_based=false;}
     void handle() override;
 };
 struct session_management_information : etcs_information
 {
-    session_management_information() : etcs_information(10, 11) {}
+    session_management_information() : etcs_information(10, 11) {location_based=false;}
     void handle() override;
 };
 struct ma_request_params_info : etcs_information
 {
-    ma_request_params_info() : etcs_information(12, 13) {}
+    ma_request_params_info() : etcs_information(12, 13) {location_based=false;}
     void handle() override;
 };
 struct position_report_params_info : etcs_information
@@ -75,12 +75,12 @@ struct position_report_params_info : etcs_information
 };
 struct SR_authorisation_info : etcs_information
 {
-    SR_authorisation_info() : etcs_information(14,15) {}
+    SR_authorisation_info() : etcs_information(14,15) {location_based=false;}
     void handle() override;
 };
 struct stop_if_in_SR_information : etcs_information
 {
-    stop_if_in_SR_information() : etcs_information(15,16) {}
+    stop_if_in_SR_information() : etcs_information(15,16) {location_based=false;}
     void handle() override;
 };
 struct TSR_information : etcs_information
@@ -90,17 +90,17 @@ struct TSR_information : etcs_information
 };
 struct TSR_revocation_information : etcs_information
 {
-    TSR_revocation_information() : etcs_information(18,19) {}
+    TSR_revocation_information() : etcs_information(18,19) {location_based=false;}
     void handle() override;
 };
 struct TSR_revocable_inhibition_information : etcs_information
 {
-    TSR_revocable_inhibition_information() : etcs_information(19,20) {}
+    TSR_revocable_inhibition_information() : etcs_information(19,20) {location_based=false;}
     void handle() override;
 };
 struct TSR_gradient_information : etcs_information
 {
-    TSR_gradient_information() : etcs_information(20,21) {}
+    TSR_gradient_information() : etcs_information(20,21) {location_based=false;}
     void handle() override;
 };
 struct route_suitability_information : etcs_information
@@ -130,12 +130,12 @@ struct rbc_transition_information : etcs_information
 };
 struct danger_for_SH_information : etcs_information
 {
-    danger_for_SH_information() : etcs_information(27,28) {}
+    danger_for_SH_information() : etcs_information(27,28) {location_based=false;}
     void handle() override;
 };
 struct coordinate_system_information : etcs_information
 {
-    coordinate_system_information() : etcs_information(32, 33) {}
+    coordinate_system_information() : etcs_information(32, 33) {location_based=false;}
     void handle() override;
 };
 struct track_condition_information : etcs_information
@@ -155,7 +155,7 @@ struct track_condition_big_metal_information : etcs_information
 };
 struct trip_exit_acknowledge_information : etcs_information
 {
-    trip_exit_acknowledge_information() : etcs_information(37,39) {}
+    trip_exit_acknowledge_information() : etcs_information(37,39) {location_based=false;}
     void handle() override;
 };
 struct ma_shortening_information : etcs_information
@@ -163,24 +163,45 @@ struct ma_shortening_information : etcs_information
     ma_shortening_information() : etcs_information(39,41) {}
     void handle() override;
 };
+struct ces_information : etcs_information
+{
+    distance orig_position;
+    ces_information(distance pos) : etcs_information(41,43), orig_position(pos) {}
+    void handle() override;
+};
 struct SH_authorisation_info : etcs_information
 {
-    SH_authorisation_info() : etcs_information(44,46) {}
+    SH_authorisation_info() : etcs_information(44,46) {location_based=false;}
     void handle() override;
 };
 struct version_order_information : etcs_information
 {
-    version_order_information() : etcs_information(46,48) {}
+    version_order_information() : etcs_information(46,48) {location_based=false;}
+    void handle() override;
+};
+struct taf_request_information : etcs_information
+{
+    taf_request_information() : etcs_information(47,49) {}
     void handle() override;
 };
 struct train_running_number_information : etcs_information
 {
-    train_running_number_information() : etcs_information(48,50) {}
+    train_running_number_information() : etcs_information(48,50) {location_based=false;}
+    void handle() override;
+};
+struct reversing_area_information : etcs_information
+{
+    reversing_area_information() : etcs_information(49,51) {}
+    void handle() override;
+};
+struct reversing_supervision_information : etcs_information
+{
+    reversing_supervision_information() : etcs_information(50,52) {location_based=false;}
     void handle() override;
 };
 struct taf_level23_information : etcs_information
 {
-    taf_level23_information() : etcs_information(56,58) {}
+    taf_level23_information() : etcs_information(56,58) {location_based=false;}
     void handle() override;
 };
 struct pbd_information : etcs_information
@@ -195,21 +216,21 @@ struct level_crossing_information : etcs_information
 };
 struct vbc_order : etcs_information
 {
-    vbc_order() : etcs_information(59,61) {}
+    vbc_order() : etcs_information(59,61) {location_based=false;}
     void handle() override;
 };
 struct generic_ls_marker_information : etcs_information
 {
-    generic_ls_marker_information() : etcs_information(60,62) {}
+    generic_ls_marker_information() : etcs_information(60,62) {location_based=false;}
     void handle() override;
 };
 struct lssma_display_on_information : etcs_information
 {
-    lssma_display_on_information() : etcs_information(61,63) {}
+    lssma_display_on_information() : etcs_information(61,63) {location_based=false;}
     void handle() override;
 };
 struct lssma_display_off_information : etcs_information
 {
-    lssma_display_off_information() : etcs_information(62,64) {}
+    lssma_display_off_information() : etcs_information(62,64) {location_based=false;}
     void handle() override;
 };

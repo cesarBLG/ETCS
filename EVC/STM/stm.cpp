@@ -11,6 +11,7 @@
 #include "../Procedures/override.h"
 #include "../Packets/messages.h"
 #include "../Packets/etcs_information.h"
+#include "../Packets/logging.h"
 #include "../Supervision/train_data.h"
 #include "../Packets/STM/1.h"
 #include "../Packets/STM/5.h"
@@ -32,10 +33,11 @@
 #include "../language/language.h"
 #include "../DMI/windows.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "platform_runtime.h"
 #include <orts/client.h>
 std::map<int, stm_object*> installed_stms;
 std::map<int, int> ntc_to_stm;
-std::map<int, std::vector<stm_object*>> ntc_to_stm_lookup_table;
+std::map<int, std::vector<int>> ntc_to_stm_lookup_table;
 bool stm_control_EB = false;
 bool ntc_unavailable_msg = false;
 int STM_max_speed_ntc;
@@ -157,7 +159,7 @@ stm_object::stm_object()
         }
         return false;
     };
-    conditions["A15"] = [this] {return isolated;};
+    conditions["A15"] = [this] {return false;};
     conditions["C16"] = [this] {return last_order && *last_order != stm_state::DA && *last_order != stm_state::CCS && get_milliseconds() - last_order_time > 10000;};
     conditions["D16"] = [this] {return last_order && *last_order == stm_state::DA && get_milliseconds() - last_order_time > 5000;};
     conditions["E16"] = [this] {return last_order && *last_order == stm_state::CCS && !national_trip && get_milliseconds() - last_order_time > 5000;};
@@ -166,6 +168,12 @@ void fill_stm_transitions()
 {
     std::vector<stm_transition> stm_transitions;
     stm_transitions.push_back({stm_state::NP, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::CO, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::DE, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::CS, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::HS, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::DA, stm_state::PO, {"A1"}});
+    stm_transitions.push_back({stm_state::FA, stm_state::PO, {"A1"}});
     stm_transitions.push_back({stm_state::PO, stm_state::CO, {"A2"}});
     stm_transitions.push_back({stm_state::CO, stm_state::DE, {"A3"}});
     stm_transitions.push_back({stm_state::CO, stm_state::CS, {"A4a"}});
@@ -187,7 +195,6 @@ void fill_stm_transitions()
     stm_transitions.push_back({stm_state::HS, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::DA, stm_state::NP, {"A15"}});
     stm_transitions.push_back({stm_state::FA, stm_state::NP, {"A15"}});
-    stm_transitions.push_back({stm_state::FA, stm_state::PO, {"A1"}});
     stm_transitions.push_back({stm_state::DA, stm_state::CCS, {"A4b","B4b"}});
     stm_transitions.push_back({stm_state::DA, stm_state::CS, {"B4a", "I4a", "E4a", "K4a", "L4a"}});
     stm_transitions.push_back({stm_state::HS, stm_state::CS, {"C4a", "E4b", "G4a", "H4b", "I4a", "J4a"}});
@@ -206,6 +213,9 @@ void update_ntc_transitions()
                 continue;
             std::string type = t.happens(stm);
             if (type != "") {
+#ifdef DEBUG_STM
+                platform->debug_print("STM "+std::to_string(kvp.first)+": "+type);
+#endif
                 if (t.to != stm_state::NP && t.to != stm_state::PO && type != "A17") {
                     stm->last_order = t.to;
                     stm->last_order_time = get_milliseconds();
@@ -213,7 +223,7 @@ void update_ntc_transitions()
                     auto *order = new STMStateOrder();
                     order->NID_STMSTATEORDER.rawdata = (int)t.to;
                     msg.packets.push_back(std::shared_ptr<ETCS_packet>(order));
-                    stm->send_message(&msg);
+                    stm->send_message(msg);
                     if (t.to == stm_state::FA) {
                         stm->state = stm_state::FA;
                         send_failed_msg(stm);
@@ -232,49 +242,52 @@ void assign_stm(int nid_ntc, bool driver)
         int nid_stm = -1;
         if (driver) {
             auto it = ntc_to_stm_lookup_table.find(nid_ntc);
-            std::vector<stm_object*> table;
+            std::vector<int> table;
             if (it != ntc_to_stm_lookup_table.end())
                 table = it->second;
             if (table.empty()) {
                 nid_stm = nid_ntc;
             } else {
-                for (auto *stm : table) {
-                    if (stm->available()) {
-                        nid_stm = stm->nid_stm;
+                for (auto nid : table) {
+                    auto it = installed_stms.find(nid);
+                    if (it != installed_stms.end() && it->second->available()) {
+                        nid_stm = it->second->nid_stm;
                         break;
                     }
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
             }
         } else {
             auto it = ntc_to_stm_lookup_table.find(nid_ntc);
-            std::vector<stm_object*> table;
+            std::vector<int> table;
             if (it != ntc_to_stm_lookup_table.end())
                 table = it->second;
             if (table.empty()) {
                 nid_stm = nid_ntc;
             } else {
-                for (auto *stm : table) {
-                    if (stm->available()) {
-                        nid_stm = stm->nid_stm;
+                for (auto nid : table) {
+                    auto it = installed_stms.find(nid);
+                    if (it != installed_stms.end() && it->second->available()) {
+                        nid_stm = nid;
                         break;
                     }
                 }
                 if (nid_stm < 0) {
-                    for (auto *stm : table) {
-                        if (stm->state != stm_state::FA && !stm->isolated) {
-                            nid_stm = stm->nid_stm;
+                    for (auto nid : table) {
+                        auto it = installed_stms.find(nid);
+                        if (it != installed_stms.end() && it->second->state != stm_state::FA && !it->second->isolated) {
+                            nid_stm = nid;
                             break;
                         }
                     }
                 }
                 if (nid_stm < 0) {
-                    nid_stm = (*table.begin())->nid_stm;
+                    nid_stm = table[0];
                 }
             }
         }
@@ -319,9 +332,7 @@ void stm_level_change(level_information newlevel, bool driver)
     stat->NID_NTC.rawdata = nid_ntc;
     stat->M_MODESTM.set_value(mode);
     msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-    for (auto kvp : installed_stms) {
-        kvp.second->send_message(&msg);
-    }
+    stm_send_message(msg);
 }
 void stm_level_transition_received(level_transition_information info)
 {
@@ -383,19 +394,24 @@ void stm_object::report_received(stm_state newstate)
     if (ordered)
         last_order = {};
 }
-void stm_object::send_message(stm_message *msg)
+void stm_send_message(stm_message &msg, int nid_stm)
 {
-    msg->NID_STM.rawdata = nid_stm;
+    msg.NID_STM.rawdata = nid_stm;
     bit_manipulator w;
-    msg->write_to(w);
+    msg.write_to(w);
     sim_write_line("noretain(stm::command_etcs="+w.to_base64()+")");
+    //log_message(*msg, d_estfront, get_milliseconds());
+}
+void stm_object::send_message(stm_message &msg)
+{
+    stm_send_message(msg, nid_stm);
 }
 void send_failed_msg(stm_object *stm)
 {
     text_message msg(get_ntc_name(stm->nid_stm) + get_text(" failed"), true, true, 2, [stm](text_message &msg){return msg.acknowledged;});
     add_message(msg);
 }
-bool mode_filter(std::shared_ptr<etcs_information> info, std::list<std::shared_ptr<etcs_information>> message);
+bool mode_filter(std::shared_ptr<etcs_information> info, const std::list<std::shared_ptr<etcs_information>> &message);
 void request_STM_max_speed(stm_object *stm, double speed)
 {
     if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc != nid_ntc) {
@@ -405,7 +421,7 @@ void request_STM_max_speed(stm_object *stm, double speed)
                 if (speed == -1) {
                     STM_max_speed = {};
                 } else {
-                    STM_max_speed = speed_restriction(speed, ongoing_transition->start, distance(std::numeric_limits<double>::max(), 0, 0), false);
+                    STM_max_speed = speed_restriction(speed, ongoing_transition->ref_loc ? *ongoing_transition->ref_loc + ongoing_transition->dist : distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
                     STM_max_speed_ntc = ongoing_transition->leveldata.nid_ntc;
                 }
                 recalculate_MRSP();
@@ -420,12 +436,12 @@ void request_STM_max_speed(stm_object *stm, double speed)
 }
 void request_STM_system_speed(stm_object *stm, double speed, double dist)
 {
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && level != Level::NTC) {
+    if (ongoing_transition && !ongoing_transition->immediate && ongoing_transition->leveldata.level == Level::NTC && level != Level::NTC) {
         auto it = ntc_to_stm.find(ongoing_transition->leveldata.nid_ntc);
         if (stm->state == stm_state::HS && stm == get_stm(ongoing_transition->leveldata.nid_ntc)) {
             auto info = std::shared_ptr<etcs_information>(new etcs_information(9));
-            distance start = ongoing_transition->start - dist;
-            distance end = ongoing_transition->start;
+            distance start = *ongoing_transition->ref_loc + ongoing_transition->dist - dist;
+            distance end = *ongoing_transition->ref_loc + ongoing_transition->dist;
             info->handle_fun = [speed, start, end]() {
                 if (speed == -1)
                     STM_system_speed = {};
@@ -470,20 +486,15 @@ void update_stm_control()
         stat->NID_NTC.rawdata = nid_ntc;
         stat->M_MODESTM.set_value(mode);
         msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-        for (auto kvp : installed_stms) {
-            kvp.second->send_message(&msg);
-        }
+        stm_send_message(msg);
     }
     prev_mode = mode;
     if (prev_override != overrideProcedure) {
-        for (auto kvp : installed_stms) {
-            auto *stm = kvp.second;
-            stm_message msg;
-            auto *ov = new STMOverrideStatus();
-            ov->Q_OVR_STATUS.rawdata = overrideProcedure;
-			msg.packets.push_back(std::shared_ptr<ETCS_packet>(ov));
-			stm->send_message(&msg);
-        }
+        stm_message msg;
+        auto *ov = new STMOverrideStatus();
+        ov->Q_OVR_STATUS.rawdata = overrideProcedure;
+        msg.packets.push_back(std::shared_ptr<ETCS_packet>(ov));
+        stm_send_message(msg);
     }
     prev_override = overrideProcedure;
 
@@ -500,7 +511,7 @@ void update_stm_control()
 			auto *flag = new STMDataEntryFlag();
 			msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
 			flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-			stm->send_message(&msg);
+			stm->send_message(msg);
 		}
 	}
 
@@ -529,7 +540,7 @@ void update_stm_control()
         auto *stm2 = kvp.second;
         if (stm2->state == stm_state::DA || level == Level::N0 || level == Level::N1 || level == Level::N2 || level == Level::N3 || stm != stm2 || mode != Mode::SN || stm->isolated)
             stm2->control_request_EB = false;
-        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
+        if (stm2->last_order && *stm2->last_order == stm_state::CCS && stm2->national_trip && stm2->state != stm_state::CS && (stm2->state != stm_state::FA || V_est > 0))
             stm2->control_request_EB = true;
         stm_control_EB |= stm2->control_request_EB;
     }
@@ -570,7 +581,7 @@ void stm_send_train_data()
             td->V_MAXTRAIN.set_value(V_train);
             td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
             msg.packets.push_back(std::shared_ptr<ETCS_packet>(td));
-            stm->send_message(&msg);
+            stm->send_message(msg);
         }
     }
 }
@@ -600,7 +611,7 @@ void stm_object::send_specific_data(json &result)
         res->results.push_back(dfr);
     }
     msg.packets.push_back(std::shared_ptr<ETCS_packet>(res));
-    send_message(&msg);
+    send_message(msg);
     specific_data.clear();
 }
 void setup_stm_control()
@@ -645,15 +656,17 @@ void setup_stm_control()
     ntc_names[45] = "CTCS-2";
     ntc_names[46] = "EBICAB 700";
     ntc_names[50] = "TGMT";
+    ntc_to_stm_lookup_table[0] = {0, 19};
     fill_stm_transitions();
 }
-void handle_stm_message(const stm_message &msg)
+void handle_stm_message(stm_message &msg)
 {
     int nid_stm = msg.NID_STM;
     if (installed_stms.find(nid_stm) == installed_stms.end()) {
         installed_stms[nid_stm] = new stm_object();
         installed_stms[nid_stm]->nid_stm = nid_stm;
     }
+    //log_message(msg, d_estfront, get_milliseconds());
     stm_object *stm = installed_stms[nid_stm];
     for (auto &pack : msg.packets) {
         switch((unsigned char)pack->NID_PACKET.rawdata) {
@@ -671,7 +684,7 @@ void handle_stm_message(const stm_message &msg)
                 stat->NID_NTC.rawdata = nid_ntc;
                 stat->M_MODESTM.set_value(mode);
                 msg.packets.push_back(std::shared_ptr<ETCS_packet>(stat));
-                stm->send_message(&msg);
+                stm->send_message(msg);
                 break;
             }
             case 6:
@@ -777,7 +790,7 @@ void handle_stm_message(const stm_message &msg)
                     auto *flag = new STMDataEntryFlag();
                     msg.packets.push_back(std::shared_ptr<ETCS_packet>(flag));
                     flag->M_DATAENTRYFLAG.rawdata = M_DATAENTRYFLAG_t::Stop;
-                    stm->send_message(&msg);
+                    stm->send_message(msg);
                 }
                 break;
             }

@@ -73,6 +73,7 @@ extern loading_gauges loading_gauge;
 extern std::string train_category;
 extern std::string special_train_data;
 extern bool train_data_valid;
+extern bool train_data_known;
 extern std::string traindata_file;
 extern std::list<traction_type> traction_systems;
 void set_train_data(std::string spec);

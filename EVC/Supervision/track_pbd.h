@@ -17,7 +17,7 @@ class PBD_target : public target
     double d_PBD;
     bool emergency;
     speed_restriction restriction;
-    PBD_target(distance start, distance end, double d_PBD, bool emergency, double grad) : start(start), end(end), d_PBD(d_PBD), restriction(0, start, end, false), target(start+d_PBD, 0, target_class::PBD)
+    PBD_target(distance start, distance end, double d_PBD, bool emergency, double grad) : start(start), end(end), d_PBD(d_PBD), restriction(0, start, end, false), target(start.max+d_PBD, 0, target_class::PBD)
     {
         default_gradient = grad;
         is_EBD_based = emergency;
@@ -26,7 +26,7 @@ class PBD_target : public target
     }
     void calculate_decelerations() override
     {
-        std::map<distance,double> gradient;
+        std::map<dist_base,double> gradient;
         target::calculate_decelerations(gradient);
         calculate_restriction();
     }

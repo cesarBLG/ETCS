@@ -21,7 +21,13 @@ menu_spec::menu_spec() : menu(get_text("Special"))
     entries[2] = {get_text("Train integrity"), "", []
     {
         write_command("TrainIntegrity","");
+    }, true};
+#if BASELINE == 4
+    entries[3] = {get_text("BMM reaction inhibition"), "", []
+    {
+        write_command("BTMReaction","");
     }, false};
+#endif
     buildMenu();
 }
 void menu_spec::setEnabled(bool adhesion, bool sr, bool integrity)
@@ -34,5 +40,8 @@ void menu_spec::setEnabled(bool adhesion, bool sr, bool integrity)
     buttons[0]->setEnabled(adhesion);
     buttons[1]->setEnabled(sr);
     buttons[2]->setEnabled(integrity);
+#endif
+#if BASELINE == 4
+    buttons[3]->setEnabled(false);
 #endif
 }

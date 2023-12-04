@@ -8,19 +8,19 @@
  */
 #include "menu.h"
 #include "platform_runtime.h"
-menu::menu(std::string title) : subwindow(title)
+menu::menu(std::string title) : subwindow(title), more("symbols/Navigation/NA_23.bmp", softkeys ? 64 : 153, 50)
 {
     hourGlass = new Component(264, 20);
 }
 menu::~menu()
 {
-    for(int i=0; i<10; i++)
+    for(auto *button : buttons)
     {
-        if (buttons[i] != nullptr) delete buttons[i];
+        if (button != nullptr) delete button;
     }
-    for(int i=0; i<10; i++)
+    for(auto *label : labels)
     {
-        if (labels[i] != nullptr) delete labels[i];
+        if (label != nullptr) delete label;
     }
     delete hourGlass;
 }
@@ -45,66 +45,65 @@ void menu::setHourGlass(bool show)
 }
 void menu::buildMenu()
 {
-    for (int i=0; i<10; i++)
+    buttons.resize(entries.rbegin()->first+1);
+    labels.resize(entries.rbegin()->first+1);
+    for (auto it = entries.begin(); it != entries.end(); ++it)
     {
-        labels[i] = nullptr;
-        auto it = entries.find(i);
-        if (it != entries.end())
+        if (softkeys)
         {
-            if (softkeys)
-            {
-                std::string id = std::to_string(i+1);
-                buttons[i] = new TextButton(id, 64, 50, it->second.pressed, 16);
-                labels[i] = new Component(266, 24);
-                labels[i]->addText(id + " - " + it->second.label, 15, 0, 12, White, LEFT);
-            }
-            else if (it->second.icon == "")
-            {
-                buttons[i] = new TextButton(it->second.label, 153, 50, it->second.pressed);
-            }
-            else
-            {
-                buttons[i] = new IconButton(it->second.icon, 153, 50, it->second.pressed);
-            }
-            buttons[i]->delayType = it->second.delay;
+            std::string id = std::to_string(it->first+1);
+            buttons[it->first] = new TextButton(id, 64, 50, it->second.pressed, 16);
+            labels[it->first] = new Component(266, 24);
+            labels[it->first]->addText(id + " - " + it->second.label, 15, 0, 12, White, LEFT);
+        }
+        else if (it->second.icon == "")
+        {
+            buttons[it->first] = new TextButton(it->second.label, 153, 50, it->second.pressed);
         }
         else
         {
-            buttons[i] = new Button(softkeys ? 64 : 153,50);
-            buttons[i]->showBorder = false;
+            buttons[it->first] = new IconButton(it->second.icon, 153, 50, it->second.pressed);
         }
+        buttons[it->first]->delayType = it->second.delay;
+    }
+    if (buttons.size() > softkeys ? 10 : 14)
+    {
+        more.setPressedAction([this]()
+        {
+            ++keypage;
+            if (keypage * (softkeys ? 9 : 13) > buttons.size()) keypage = 0;
+            setLayout();
+        });
     }
     setLayout();
 }
 void menu::setLayout()
 {
+    clearLayout();
     subwindow::setLayout();
+    for (int i=0; i<(softkeys ? (buttons.size() > 10 ? 9 : 10) : (buttons.size() > 14 ? 13 : 14)); i++)
+    {
+        int id = keypage*(softkeys ? 9 : 13)+i;
+        if (id >= buttons.size()) break;
+        if (softkeys)
+        {
+            if (buttons[id] != nullptr) addToLayout(buttons[id], new RelativeAlignment(nullptr, 64*i, 430, 0));
+            if (labels[id] != nullptr) addToLayout(labels[id], new RelativeAlignment(nullptr, 334, 100+24*i, 0));
+        }
+        else
+        {
+            if (buttons[id] != nullptr) addToLayout(buttons[id], new RelativeAlignment(nullptr, 334 + 153 * (i%2), 45 + 50 * (i/2)));
+        }
+    }
     if (softkeys)
     {
-        addToLayout(buttons[0], new RelativeAlignment(nullptr, 0, 430, 0));
-        for (int i=1; i<10; i++)
-        {
-            addToLayout(buttons[i], new ConsecutiveAlignment(buttons[i-1], RIGHT, 0));
-        }
-        for (int i=0; i<10; i++)
-        {
-            if (labels[i] != nullptr) addToLayout(labels[i], new RelativeAlignment(nullptr, 334, 100+24*i, 0));
-        }
         extern Component ackButton;
         addToLayout(&ackButton, new RelativeAlignment(nullptr, 600, 348, 0));
+        if (buttons.size() > 10) addToLayout(&more, new RelativeAlignment(nullptr, 576, 430));
     }
     else
     {
-        addToLayout(buttons[0], new RelativeAlignment(nullptr, 334, 45,0));
-        addToLayout(buttons[1], new ConsecutiveAlignment(buttons[0],RIGHT,0));
-        addToLayout(buttons[2], new ConsecutiveAlignment(buttons[0],DOWN,0));
-        addToLayout(buttons[3], new ConsecutiveAlignment(buttons[2],RIGHT,0));
-        addToLayout(buttons[4], new ConsecutiveAlignment(buttons[2],DOWN,0));
-        addToLayout(buttons[5], new ConsecutiveAlignment(buttons[4],RIGHT,0));
-        addToLayout(buttons[6], new ConsecutiveAlignment(buttons[4],DOWN,0));
-        addToLayout(buttons[7], new ConsecutiveAlignment(buttons[6],RIGHT,0));
-        addToLayout(buttons[8], new ConsecutiveAlignment(buttons[6],DOWN,0));
-        addToLayout(buttons[9], new ConsecutiveAlignment(buttons[8],RIGHT,0));
+        if (buttons.size() > 14) addToLayout(&more, new RelativeAlignment(nullptr, 487, 245));
     }
     addToLayout(hourGlass, new RelativeAlignment(&title_bar, 10+42, 10, 0));
 }

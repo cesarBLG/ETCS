@@ -22,21 +22,21 @@ void add_condition();
 bool ep_available = true;
 void update_brake_contributions()
 {
-    std::map<distance, std::pair<int,int>> active;
+    std::map<dist_base, std::pair<int,int>> active;
     std::pair<int,int> def = {1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE, 1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE | 1<<MAGNETIC_AVAILABLE};
-    active[distance(std::numeric_limits<double>::lowest(), 0, 0)] = def;
+    active[dist_base::min] = def;
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
-        active[(*it)->start]=def;
-        if ((*it)->profile) active[(*it)->end]=def;
+        active[(*it)->start.max]=def;
+        if ((*it)->profile) active[(*it)->end.min]=def;
     }
     for (auto it = active.begin(); it != active.end(); ++it) {
-        distance d = it->first;
+        dist_base d = it->first;
         bool reg=true;
         bool shoe=true;
         bool eddyemerg=true;
         bool eddyserv=true;
         for (auto it2 = track_conditions.begin(); it2 != track_conditions.end(); ++it2) {
-            if ((*it2)->start <= d && (*it2)->end > d) {
+            if ((*it2)->start.max <= d && (*it2)->end.min > d) {
                 switch((*it2)->condition) {
                     case TrackConditions::PowerLessSectionLowerPantograph:
                     case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
@@ -64,7 +64,7 @@ void update_brake_contributions()
 }
 void update_track_conditions()
 {
-    if (restore_initial_states_various && *restore_initial_states_various<d_minsafefront(*restore_initial_states_various)) {
+    if (restore_initial_states_various && restore_initial_states_various->min<d_minsafefront(*restore_initial_states_various)) {
         for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
             if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
@@ -81,7 +81,7 @@ void update_track_conditions()
         restore_initial_states_various = {};
         update_brake_contributions();
     }
-    if (restore_initial_states_platforms && *restore_initial_states_platforms<d_minsafefront(*restore_initial_states_platforms)) {
+    if (restore_initial_states_platforms && restore_initial_states_platforms->min<d_minsafefront(*restore_initial_states_platforms)) {
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
             TrackConditions c = it->get()->condition;
             if (c == TrackConditions::StationPlatform) {
@@ -116,8 +116,8 @@ void update_track_conditions()
             if (track_condition_targets.find(c) == track_condition_targets.end())
             {
                 std::vector<std::shared_ptr<target>> l;
-                l.push_back(std::make_shared<target>(c->start, 0, target_class::EoA));
-                l.push_back(std::make_shared<target>(c->end + L_TRAIN, 0, target_class::EoA));
+                l.push_back(std::make_shared<target>(c->start.max, 0, target_class::EoA));
+                l.push_back(std::make_shared<target>(c->end.min + L_TRAIN, 0, target_class::EoA));
                 track_condition_targets[c] = l;
             }
             std::vector<std::shared_ptr<target>> &l = track_condition_targets[c];
@@ -125,14 +125,14 @@ void update_track_conditions()
             auto &SBIg = *l[1];
             SBId.calculate_curves();
             SBIg.calculate_curves();
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start);
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start);
             if (max<SBId.d_SBI1 || min > SBIg.d_SBI1) {
                 c->order = c->announce = false;
             }
             c->announce_distance = SBId.d_SBI1 - max;
             if (max > SBId.d_SBI1 && min < SBIg.d_SBI1) {
-                if (max < c->start) {
+                if (max < c->start.max) {
                     c->announce = true;
                     c->order = false;
                 } else {
@@ -142,129 +142,129 @@ void update_track_conditions()
             }
         } else if (c->condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch) {
             distance pointC = c->start - V_est * 10;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start);
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC-max < 0) {
+            if (pointC.max-max < 0) {
                 track_condition_profile_external info = {{},{}};
-                if (pointD-max > -L_TRAIN)
-                    info.start = pointD-max;
-                if (pointE-min > -L_TRAIN)
-                    info.end = pointE-min;
+                if (pointD.max-max > -L_TRAIN)
+                    info.start = pointD.max-max;
+                if (pointE.min-min > -L_TRAIN)
+                    info.end = pointE.min-min;
                 if (!neutral_section_info.start && !neutral_section_info.end) neutral_section_info = info;
             }
-            c->announce_distance = pointC-max;
-            if (min > c->end) {
+            c->announce_distance = pointC.max-max;
+            if (min > c->end.min) {
                 c->announce = false;
                 c->order = false;
-            } else if (max>c->start) {
+            } else if (max>c->start.max) {
                 c->announce = false;
                 c->order = true;
-            } else if (max > pointC) {
+            } else if (max > pointC.max) {
                 c->announce = true;
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::PowerLessSectionLowerPantograph) {
             distance pointC = c->start - V_est * 20;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start);
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC-max < 0) {
+            if (pointC.max-max < 0) {
                 track_condition_profile_external info = {{},{}};
-                if (pointD-max > -L_TRAIN)
-                    info.start = pointD-max;
-                if (pointE-min > -L_TRAIN)
-                    info.end = pointE-min;
+                if (pointD.max-max > -L_TRAIN)
+                    info.start = pointD.max-max;
+                if (pointE.min-min > -L_TRAIN)
+                    info.end = pointE.min-min;
                 if (!lower_pantograph_info.start && !lower_pantograph_info.end) lower_pantograph_info = info;
             }
-            c->announce_distance = pointC-max;
-            if (min > c->end) {
+            c->announce_distance = pointC.max-max;
+            if (min > c->end.min) {
                 c->announce = false;
                 c->order = false;
-            } else if (max>c->start) {
+            } else if (max>c->start.max) {
                 c->announce = false;
                 c->order = true;
-            } else if (max > pointC) {
+            } else if (max > pointC.max) {
                 c->announce = true;
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::SoundHorn) {
             distance pointC = c->start - V_est * T_horn;
             distance &pointE = c->end;
-            c->announce_distance = pointC-d_estfront;
-            c->order = d_estfront > pointC && d_estfront < pointE;
+            c->announce_distance = pointC.est-d_estfront;
+            c->order = d_estfront > pointC.est && d_estfront < pointE.est;
         } else if (c->condition == TrackConditions::AirTightness) {
             distance pointC = c->start - V_est * 10;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start);
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC-max < 0) {
+            if (pointC.max-max < 0) {
                 track_condition_profile_external info = {{},{}};
-                if (pointD-max > 0)
-                    info.start = pointD-max;
-                if (pointE-min > -L_TRAIN)
-                    info.end = pointE-min;
+                if (pointD.max-max > 0)
+                    info.start = pointD.max-max;
+                if (pointE.min-min > -L_TRAIN)
+                    info.end = pointE.min-min;
                 if (!air_tightness_info.start && !air_tightness_info.end) air_tightness_info = info;
             }
-            c->announce_distance = pointC-max;
-            if (min + L_TRAIN > c->end) {
+            c->announce_distance = pointC.max-max;
+            if (min + L_TRAIN > c->end.min) {
                 c->announce = false;
                 c->order = false;
-            } else if (max>c->start) {
+            } else if (max>c->start.max) {
                 c->announce = false;
                 c->order = true;
-            } else if (max > pointC) {
+            } else if (max > pointC.max) {
                 c->announce = true;
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::ChangeOfTractionSystem) {
             distance pointC = c->start - V_est * 20;
-            distance max = d_maxsafefront(c->start);
+            dist_base max = d_maxsafefront(c->start);
             distance &pointF = c->start;
-            c->announce_distance = pointC-max;
+            c->announce_distance = pointC.max-max;
             if (c->end_displayed) {
                 c->announce = false;
                 c->order = false;
-            } else if (max>pointF) {
+            } else if (max>pointF.max) {
                 c->announce = false;
                 c->order = true;
-            } else if (max > pointC) {
+            } else if (max > pointC.max) {
                 c->announce = false;
                 c->order = true;
             }
         } else if (c->condition == TrackConditions::ChangeOfAllowedCurrentConsumption) {
             distance pointC = c->start - V_est * 20;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start) - L_TRAIN;
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointF = c->start;
-            if (min < pointF) {
+            if (min < pointF.min) {
                 
             }
         } else if (c->condition == TrackConditions::RadioHole) {
             distance &pointD = c->start;
             distance &pointE = c->end;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start) - L_TRAIN;
-            c->announce_distance = pointD-max;
-            c->order = max > pointD && min < pointE;
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start) - L_TRAIN;
+            c->announce_distance = pointD.max-max;
+            c->order = max > pointD.max && min < pointE.min;
         } else if (c->condition == TrackConditions::SwitchOffEddyCurrentEmergencyBrake ||
             c->condition == TrackConditions::SwitchOffEddyCurrentServiceBrake ||
             c->condition == TrackConditions::SwitchOffMagneticShoe ||
             c->condition == TrackConditions::SwitchOffRegenerativeBrake) {
             distance pointC = c->start - V_est * 20;
-            distance max = d_maxsafefront(c->start);
-            distance min = d_minsafefront(c->start) - L_TRAIN;
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC-max < 0) {
+            if (pointC.max-max < 0) {
                 track_condition_profile_external info = {{},{}};
-                if (pointD-max > -L_TRAIN)
-                    info.start = pointD-max;
-                if (pointE-min > -L_TRAIN)
-                    info.end = pointE-min;
+                if (pointD.max-max > -L_TRAIN)
+                    info.start = pointD.max-max;
+                if (pointE.min-min > -L_TRAIN)
+                    info.end = pointE.min-min;
                 track_condition_profile_external *info2 = nullptr;
                 switch (c->condition) {
                     case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
@@ -282,14 +282,14 @@ void update_track_conditions()
                 }
                 if (info2 != nullptr && !info2->start && !info2->end) *info2 = info;
             }
-            c->announce_distance = pointC-max;
-            if (min > c->end) {
+            c->announce_distance = pointC.max-max;
+            if (min > c->end.min) {
                 c->announce = false;
                 c->order = false;
-            } else if (max>c->start) {
+            } else if (max>c->start.max) {
                 c->announce = false;
                 c->order = true;
-            } else if (max > pointC) {
+            } else if (max > pointC.max) {
                 c->announce = true;
                 c->order = false;
             }
@@ -308,6 +308,7 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
     track_condition *tc = new track_condition();
     tc->start = ref + cond.D_TRACTION.get_value(cond.Q_SCALE);
     tc->condition = TrackConditions::ChangeOfTractionSystem;
+    tc->profile = false;
     TractionSystem_DMI traction;
     switch (cond.M_VOLTAGE.rawdata) {
         case M_VOLTAGE_t::NonFitted: traction = TractionSystem_DMI::NonFitted; break;
@@ -327,9 +328,13 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
 {
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
-        if (it->get()->condition == TrackConditions::BigMetalMasses && it->get()->start >= first) {
-            it = track_conditions.erase(it);
-            continue;
+        if (it->get()->condition == TrackConditions::BigMetalMasses) {
+            if (it->get()->start.max >= first.min) {
+                it = track_conditions.erase(it);
+                continue;
+            }
+            if (it->get()->end.min > first.max)
+                it->get()->end = first;
         }
         ++it;
     }
@@ -357,14 +362,17 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         TrackConditions c = it->get()->condition;
-        if ((((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea) && special) ||
+        if (((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea) && special) ||
             ((c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
             c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
-            c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) && !special))
-            && it->get()->start >= first) {
-            track_condition_targets.erase(it->get());    
-            it = track_conditions.erase(it);
-            continue;
+            c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) && !special)) {
+            
+            if (it->get()->start.max >= first.min) {
+                it = track_conditions.erase(it);
+                continue;
+            }
+            if (it->get()->end.min > first.max)
+                it->get()->end = first;
         }
         ++it;
     }
@@ -458,27 +466,18 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
             track_condition *tc2 = it->get();
             if (tc2->condition == tc->condition) {
-                if (tc->start >= tc2->start && tc->start <= tc2->end) {
+                if (tc->start.max <= tc2->end.min) {
                     exists = true;
                     track_condition_targets.erase(tc2);
-                }
-                if (tc->start <= tc2->start && tc->end >= tc2->start) {
-                    tc2->start = tc->start;
-                    exists = true;
-                    track_condition_targets.erase(tc2);
-                }
-                if (tc->end >= tc2->end && tc->start <= tc2->end) {
                     tc2->end = tc->end;
-                    exists = true;
-                    track_condition_targets.erase(tc2);
                 }
             } 
         }
-        if (!exists) {
-            track_conditions.push_back(std::shared_ptr<track_condition>(tc));
-        } else {
+        if (exists)
             delete tc;
-        }
+        else
+            track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+        
     }
     update_brake_contributions();
 }
@@ -490,9 +489,13 @@ void load_track_condition_platforms(TrackConditionStationPlatforms cond, distanc
     }
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
-        if (it->get()->condition == TrackConditions::StationPlatform && it->get()->start >= first) {
-            it = track_conditions.erase(it);
-            continue;
+        if (it->get()->condition == TrackConditions::StationPlatform) {
+            if (it->get()->start.max >= first.min) {
+                it = track_conditions.erase(it);
+                continue;
+            }
+            if (it->get()->end.min > first.max)
+                it->get()->end = first;
         }
         ++it;
     }

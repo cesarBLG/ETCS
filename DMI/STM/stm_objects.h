@@ -22,16 +22,16 @@
 using json = nlohmann::json;
 struct stm_monitoring_data
 {
-    Color needle_color;
-    int Vperm_display;
+    Color needle_color = Grey;
+    int Vperm_display = 0;
     Color Vperm_color;
-    int Vtarget_display;
+    int Vtarget_display = 0;
     Color Vtarget_color;
-    int Vsbi_display;
+    int Vsbi_display = 0;
     Color Vsbi_color;
-    int Vrelease_display;
+    int Vrelease_display = 0;
     Color Vrelease_color;
-    int Dtarget_display;
+    int Dtarget_display = 0;
     stm_monitoring_data() = default;
     stm_monitoring_data(const STMSupervisionInformation &info)
     {
@@ -180,6 +180,7 @@ class ntc_window : public window
     ntc_window(int nid_stm);
     void display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton);
     void display_text(int id, bool ack, std::string text, int properties);
+    void event(int evNo, float x, float y);
     ~ntc_window()
     {
         for (auto &it : indicators)

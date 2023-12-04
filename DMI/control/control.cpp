@@ -180,13 +180,7 @@ void setWindow(json &data)
                 }
                 else if (type == "DataView")
                 {
-                    std::vector<std::pair<std::string,std::string>> data;
-                    json &fields = def["Fields"];
-                    for (json &j : fields)
-                    {
-                        data.push_back({j["Label"], j["Value"]});
-                    }
-                    w = new data_view_window(def["WindowTitle"], data);
+                    w = new data_view_window(def["WindowTitle"], def["Fields"]);
                 }
                 /*else if (type == "Menu") w = new menu(j["WindowDefinitionW"]);*/
             }

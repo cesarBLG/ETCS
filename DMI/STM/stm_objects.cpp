@@ -8,6 +8,7 @@
  */
 #include "stm_objects.h"
 #include "../monitor.h"
+#include "../tcp/server.h"
 #include "../graphics/display.h"
 #include "../graphics/text_button.h"
 #include "../graphics/icon_button.h"
@@ -15,6 +16,7 @@
 #include "../time_etcs.h"
 #include "../../EVC/Packets/STM/15.h"
 #include "../../EVC/Packets/STM/32.h"
+#include "../../EVC/Packets/STM/34.h"
 #include "../../EVC/Packets/STM/35.h"
 #include "../../EVC/Packets/STM/38.h"
 #include "../../EVC/Packets/STM/39.h"
@@ -66,6 +68,7 @@ void setup_areas()
 }
 ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 {
+    customized = nullptr;
     auto contents = platform->read_file(stm_layout_file);
     if (contents) {
         json j = json::parse(*contents);
@@ -85,7 +88,9 @@ ntc_window::ntc_window(int nid_stm) : nid_stm(nid_stm)
 void ntc_window::display_indicator(int id, int position, int icon, std::string text, int properties, bool isButton)
 {
     auto it = indicators.find((isButton ? 256 : 0) + id);
+    bool wasPressed = false;
     if (it != indicators.end()) {
+        if (it->second->isButton && ((Button*)it->second)->pressed) wasPressed = true;
         remove(it->second);
         delete it->second;
         indicators.erase(it);
@@ -147,12 +152,21 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
         pos = areas[area];
     }
     Component *c;
-    if (isButton) c = new Button(pos[2], pos[3]);
+    if (isButton)
+    {
+        c = new Button(pos[2], pos[3]);
+        ((Button*)c)->pressed = wasPressed;
+    }
     else c = new Component(pos[2],pos[3]);
     Color bg = get_color((properties>>3)&7, true);
     Color fg = get_color(properties&7, false);
     c->setBackgroundColor(bg);
     c->setForegroundColor(fg);
+    if (bg != DarkBlue)
+    {
+        //c->dispBorder = false;
+        if (isButton) ((Button*)c)->showBorder = false;
+    }
     bool text_also;
     if (customized != nullptr)
     {
@@ -188,7 +202,7 @@ void ntc_window::display_indicator(int id, int position, int icon, std::string t
         c->flash_style = (flash-1) | (counterflash<<1);
         if (customized != nullptr && customized->flash_style == 1) c->flash_style |= 4;
     }
-    indicators[id] = c;
+    indicators[(isButton ? 256 : 0) + id] = c;
     addToLayout(c, new RelativeAlignment(nullptr, pos[0], pos[1]));
 }
 void ntc_window::display_text(int id, bool ack, std::string text, int properties)
@@ -201,6 +215,48 @@ void ntc_window::display_text(int id, bool ack, std::string text, int properties
     Message m(id|0xff00, text, WallClockTime::hour, WallClockTime::minute, firstGroup, ack, 0, fg, bg);
     messages[id] = m;
     if (active_ntc_window == this) addMsg(m);
+}
+void ntc_window::event(int evNo, float x, float y)
+{
+	int64_t CurrentTime = platform->get_timer();
+    bool pressed = evNo == 1;
+    std::map<int, bool> changed;
+    for (auto &kvp : indicators) {
+        if (kvp.second->isButton) {
+            Button *b = (Button*)kvp.second;
+            bool inside = b->x < x && b->x + b->sx > x && b->y < y && b->y + b->sy > y;
+            bool p = inside && pressed;
+            if (p != b->pressed) {
+                b->pressed = p;
+                changed[kvp.first - 256] = p;
+            }
+        }
+    }
+    if (changed.size() > 0) {
+        stm_message msg;
+        msg.NID_STM.rawdata = nid_stm;
+        auto stmevent = std::make_shared<STMButtonEvent>();
+        stmevent->N_ITER.rawdata = changed.size();
+        for (auto &kvp : changed) {
+            STMButtonEventElement e;
+            e.NID_BUTTON.rawdata = kvp.first;
+            e.Q_BUTTON.rawdata = kvp.second;
+            e.T_BUTTONEVENT.rawdata = CurrentTime & 0xFFFFFFFF;
+            stmevent->elements.push_back(e);
+        }
+        msg.packets.push_back(stmevent);
+        bit_manipulator w;
+        msg.write_to(w);
+        std::string str;
+        for (auto &var : w.log_entries)
+        {
+            str += var.first + '\t' + var.second + '\n';
+        }
+        platform->debug_print(str);
+        std::string s = w.to_base64();
+        write_command("stmData", s);
+    }
+    window::event(evNo, x, y);
 }
 void initialize_stm_windows()
 {
@@ -239,10 +295,13 @@ void parse_stm_message(stm_message &message)
         if (pack->NID_PACKET == 43)
         {
             STMSupervisionInformation &info = *((STMSupervisionInformation*)pack.get());
-            Vperm = info.V_PERMIT.rawdata;
-            Vtarget = info.V_TARGET.rawdata*5;
-            Vrelease = info.V_RELEASE.rawdata;
-            Vsbi = info.V_INTERV.rawdata;
+            if (state == stm_state::DA)
+            {
+                Vperm = info.V_PERMIT.rawdata;
+                Vtarget = info.V_TARGET.rawdata*5;
+                Vrelease = info.V_RELEASE.rawdata;
+                Vsbi = info.V_INTERV.rawdata;
+            }
             Dtarg = (int)info.D_TARGET.get_value(info.Q_SCALE);
             window->monitoring_data = stm_monitoring_data(info);
         }

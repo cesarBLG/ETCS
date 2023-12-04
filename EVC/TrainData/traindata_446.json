@@ -2,7 +2,7 @@
 "1UT" : {
         "length": 75,
         "speed": 100,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -21,14 +21,14 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0}
+                        {"speed": 0, "value": 1.1}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.0}
+                        {"speed": 0, "value": 1.2}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -65,7 +65,7 @@
 	"2UT" : {
         "length": 150,
         "speed": 100,
-        "cant_deficiency": 165,
+        "cant_deficiency": 140,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -84,14 +84,14 @@
             "service": {
                 "normal": {
                     "curves": [
-                       {"speed": 0, "value": 1.0}
+                       {"speed": 0, "value": 1.1}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.0}
+                        {"speed": 0, "value": 1.2}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

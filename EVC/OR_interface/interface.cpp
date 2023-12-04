@@ -31,7 +31,6 @@
 using std::string;
 extern double V_est;
 double V_set;
-extern distance d_estfront;
 extern int data_entry_type;
 extern bool EB_command;
 extern bool SB_command;
@@ -75,12 +74,29 @@ void SetParameters()
 
     p = new ORserver::Parameter("wall_clock_time");
     p->SetValue = [](string val) {
-        set_persistent_command("wallClockTime", val);
+        external_wall_clock = true;
         WallClockTime::hour = std::stoi(val);
         val = val.substr(val.find(':') + 1);
         WallClockTime::minute = std::stoi(val);
         val = val.substr(val.find(':') + 1);
         WallClockTime::second = std::stoi(val);
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("simulator_time");
+    p->SetValue = [](string val) {
+        if (val == "") {
+            external_wall_clock = false;
+        } else {
+            external_wall_clock = true;
+            int t = (int)stod(val);
+            int h = (t/3600)%24;
+            int m = (t/60)%60;
+            int s = t%60;
+            WallClockTime::hour = h;
+            WallClockTime::minute = m;
+            WallClockTime::second = s;
+        }
     };
     manager.AddParameter(p);
 
@@ -129,7 +145,7 @@ void SetParameters()
         }
         bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,{distance(odometer_value-odometer_reference, odometer_orientation, 0), get_milliseconds()}});
+        pending_telegrams.push_back({t,{distance::from_odometer(dist_base(odometer_value-odometer_reference, odometer_orientation)), get_milliseconds()}});
     };
     manager.AddParameter(p);
 
@@ -172,26 +188,6 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::lower_pantographs");
     p->GetValue = []() {
         return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
-    };
-    manager.AddParameter(p);
-
-    p = new ORserver::Parameter("etcs::atf");
-    p->GetValue = []() {
-        if (mode != Mode::FS) return std::string("-1");
-        extern MonitoringStatus monitoring;
-        std::shared_ptr<target> t = (monitoring == CSM) ? indication_target : MRDT;
-        if (t != nullptr) {
-            //t->calculate_curves();
-            double speed = t->get_target_speed();
-            double dist;
-            if (t->type == target_class::EoA || t->type == target_class::SvL)
-                dist = std::max(std::min(*EoA-d_estfront, *SvL-d_maxsafefront(*SvL)), 0.0);
-            else
-                dist = std::max(t->get_target_position()-d_maxsafefront(t->get_target_position()), 0.0);//std::max(t->d_P-d_maxsafefront(t->get_target_position()), 0.0);*/
-            float atf = std::max(speed, std::min(sqrt(2*0.4f*(dist-V_est*10-10) + speed * speed)-3/3.6, V_perm));
-            return std::to_string(atf);
-        }
-        else return std::to_string(V_perm);
     };
     manager.AddParameter(p);
 
@@ -266,14 +262,6 @@ void SetParameters()
             std::cout<<var.first<<"\t"<<var.second<<"\n";
         }*/
         send_command("stmData", val);
-    };
-    manager.AddParameter(p);
-
-    p = new ORserver::Parameter("stm::lzb::isolated");
-    p->SetValue = [](std::string val) {
-        auto it = installed_stms.find(10);
-        if (it != installed_stms.end())
-            it->second->isolated = val == "1";
     };
     manager.AddParameter(p);
 
@@ -408,6 +396,7 @@ void start_or_iface()
     SetParameters();
 
     register_parameter("wall_clock_time");
+    register_parameter("simulator_time");
     register_parameter("ackButton");
     register_parameter("etcs::button::*");
     register_parameter("speed");

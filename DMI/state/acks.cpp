@@ -98,9 +98,11 @@ void dispAcks()
             case Level::N2:
                 num=4;
                 break;
+#if BASELINE < 4
             case Level::N3:
                 num=5;
                 break;
+#endif
         }
         num = 4 + 2*num;
         if(levelAck == 2) num++;
