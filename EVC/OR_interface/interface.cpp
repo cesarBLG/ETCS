@@ -83,6 +83,19 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("simulator_time");
+    p->SetValue = [](string val) {
+        int t = (int)stod(val);
+        int h = (t/3600)%24;
+        int m = (t/60)%60;
+        int s = t%60;
+        set_persistent_command("wallClockTime", std::to_string(h)+":"+std::to_string(m)+":"+std::to_string(s));
+        WallClockTime::hour = h;
+        WallClockTime::minute = m;
+        WallClockTime::second = s;
+    };
+    manager.AddParameter(p);
+
     p = new ORserver::Parameter("acceleration");
     p->SetValue = [](string val) {
         A_est = stod(val);
@@ -379,6 +392,7 @@ void start_or_iface()
     SetParameters();
 
     register_parameter("wall_clock_time");
+    register_parameter("simulator_time");
     register_parameter("ackButton");
     register_parameter("etcs::button::*");
     register_parameter("speed");
