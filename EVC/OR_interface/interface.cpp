@@ -299,6 +299,9 @@ void SetParameters()
     p->SetValue = [](std::string val) {
         set_language(val);
     };
+    p->GetValue = []() {
+        return language;
+    };
     manager.AddParameter(p);
 
     p = new ORserver::Parameter("imperial");
