@@ -219,6 +219,7 @@ keyboard getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_da
     {
         if (posibilities[i] == "") {
             k.keys.push_back(nullptr);
+            if (softkeys) k.labels.push_back(nullptr);
             continue;
         }
         if (softkeys)
