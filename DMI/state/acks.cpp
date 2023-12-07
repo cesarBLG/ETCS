@@ -151,7 +151,6 @@ void updateAcks()
         if (AllowedAck == AckType::Message) updateMessages();
         if (componentAck != nullptr)
         {
-            ackButton.delayType = componentAck->delayType;
             ackButton.setAck([] {
                 if (componentAck != nullptr) componentAck->setPressed();
             });
@@ -173,6 +172,10 @@ void updateAcks()
         ackButton.clear();
         ackButton.setAck(nullptr);
         componentAck = nullptr;
+    }
+    if (componentAck != nullptr)
+    {
+        ackButton.delayType = componentAck->delayType;
     }
     int light = 0;
     if (AllowedAck != AckType::None) light = (flash_state & 2) ? 2 : 1;
