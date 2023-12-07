@@ -224,6 +224,11 @@ void update_supervision()
         V_perm = V_target = V_release = V_sbi = 0;
         supervision = IntS;
         MRDT = nullptr;
+        standstill_applied = rollaway_applied = rmp_applied = pt_applied = false;
+        standstill_position = {};
+        rollaway_position = {};
+        rmp_position = {};
+        pt_position = {};
         return;
     }
     if (mode == Mode::SB) {
