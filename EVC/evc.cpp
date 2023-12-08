@@ -195,19 +195,23 @@ void on_platform_ready()
 void update()
 {
     update_or_iface();
+    update_clock();
     update_odometer();
     update_geographical_position();
     update_track_comm();
     update_national_values();
     update_procedures();
     update_stm_control();
-    update_supervision();
     update_lx();
     update_track_conditions();
+    update_supervision();
     update_messages();
     update_national_functions();
     update_train_subsystems();
     update_dmi_windows();
     update_track_ahead_free_request();
+    for (auto *session : active_sessions) {
+        session->send_pending();
+    }
     platform->delay(50).then(update).detach();
 }

@@ -10,5 +10,5 @@
 #include "targets.h"
 extern std::shared_ptr<target> MRDT;
 extern std::shared_ptr<target> RSMtarget;
-extern distance d_startRSM;
+extern dist_base d_startRSM;
 extern std::shared_ptr<target> indication_target;

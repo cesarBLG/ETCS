@@ -14,32 +14,38 @@
 struct link_data
 {
     bg_id nid_bg;
-    distance dist;
+    dist_base dist;
     double locacc;
     bool reverse_dir;
     int reaction;
-    distance max()
+    dist_base max()
     {
-        return dist+locacc;
+        return dist + locacc;
+        //return dist.min+locacc;
     }
-    distance min()
+    dist_base min()
     {
-        return dist-locacc;
+        return dist - locacc;
+        //return dist.max-locacc;
     }
 };
 struct lrbg_info
 {
     bg_id nid_lrbg;
     int dir;
-    distance position;
+    dist_base position;
     double locacc;
 };
 extern std::list<link_data> linking;
-extern std::list<lrbg_info> lrbgs;
+extern std::list<std::pair<lrbg_info, int>> orbgs;
+extern std::optional<lrbg_info> solr;
 extern bool position_valid;
-distance update_location_reference(bg_id nid_bg, int dir, distance group_pos, bool linked, optional<link_data> link);
-void update_linking(distance start, Linking link, bool infill, bg_id this_bg);
+void relocate();
+void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir);
+void update_linking(Linking link, bool infill, bg_id ref_bg);
+optional<distance> get_reference_location(bg_id bg, bool linked, bool check_passed);
+void start_checking_linking();
 void delete_linking();
-void delete_linking(distance from);
+void delete_linking(const distance &from);
 void load_train_position();
 void save_train_position();

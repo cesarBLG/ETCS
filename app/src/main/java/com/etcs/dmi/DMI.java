@@ -5,6 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,6 +32,7 @@ public class DMI extends SDLActivity implements ServiceConnection
     native void DMIstop();
 
     EVC evc;
+    boolean forceReplaceFiles=false;
 
     @Override
     protected void onDestroy() {
@@ -56,6 +60,17 @@ public class DMI extends SDLActivity implements ServiceConnection
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }*/
+        try {
+            SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+            int oldver = pref.getInt("ver", 0);
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            int versionCode = packageInfo.versionCode;
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putInt("ver", versionCode);
+            editor.apply();
+            if (oldver != versionCode) forceReplaceFiles = true;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
         copyFileOrDir("");
         super.onCreate(savedInstanceState);
 
@@ -94,7 +109,7 @@ public class DMI extends SDLActivity implements ServiceConnection
         OutputStream out = null;
         try {
             String newFileName = getExternalFilesDir(null) + "/" + filename;
-            if (new File(newFileName).exists()) return;
+            if (new File(newFileName).exists() && !forceReplaceFiles) return;
             in = assetManager.open(filename);
             out = new FileOutputStream(newFileName);
 

@@ -52,6 +52,8 @@
 #include "132.h"
 #include "136.h"
 #include "137.h"
+#include "138.h"
+#include "139.h"
 #include "140.h"
 #include "141.h"
 #include "180.h"
@@ -69,7 +71,7 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 0: p = new VirtualBaliseCoverMarker(); break;
         case 2: p = new SystemVersionOrder(); break;
         case 3:
-            if (VERSION_X(m_version == 1)) p = new V1::NationalValues();
+            if (VERSION_X(m_version) == 1) p = new V1::NationalValues();
             else p = new NationalValues();
             break;
         case 5: p = new Linking(); break;
@@ -78,11 +80,11 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 16: p = new RepositioningInformation(); break;
         case 21: p = new GradientProfile(); break;
         case 27:
-            if (VERSION_X(m_version == 1)) p = new V1::InternationalSSP();
+            if (VERSION_X(m_version) == 1) p = new V1::InternationalSSP();
             else p = new InternationalSSP();
             break;
         case 39:
-            if (VERSION_X(m_version == 1)) p = new V1::TrackConditionChangeTractionSystem();
+            if (VERSION_X(m_version) == 1) p = new V1::TrackConditionChangeTractionSystem();
             else p = new TrackConditionChangeTractionSystem();
             break;
         case 40: p = new TrackConditionChangeCurrentConsumption(); break;
@@ -104,16 +106,16 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 70: p = new RouteSuitabilityData(); break;
         case 71: p = new AdhesionFactor(); break;
         case 72:
-            if (VERSION_X(m_version == 1)) p = new V1::PlainTextMessage();
+            if (VERSION_X(m_version) == 1) p = new V1::PlainTextMessage();
             else p = new PlainTextMessage();
             break;
         case 76: p = new FixedTextMessage(); break;
         case 79:
-            if (VERSION_X(m_version == 1)) p = new V1::GeographicalPosition();
+            if (VERSION_X(m_version) == 1) p = new V1::GeographicalPosition();
             else p = new GeographicalPosition();
             break;
         case 80:
-            if (VERSION_X(m_version == 1)) p = new V1::ModeProfile();
+            if (VERSION_X(m_version) == 1) p = new V1::ModeProfile();
             else p = new ModeProfile();
             break;
         case 88: p = new LevelCrossingInformation(); break;
@@ -122,6 +124,8 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 132: p = new DangerForShunting(); break;
         case 136: p = new InfillLocationReference(); break;
         case 137: p = new StopIfInSR(); break;
+        case 138: p = new ReversingAreaInformation(); break;
+        case 139: p = new ReversingSupervisionInformation(); break;
         case 140: p = new TrainRunningNumberRBC(); break;
         case 141: p = new DefaultGradientTSR(); break;
         case 180: p = new LSSMAToggleOrder(); break;

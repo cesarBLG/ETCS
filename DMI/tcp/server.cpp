@@ -219,14 +219,6 @@ void parseData(std::string str)
     {
         Vset = stof(value);
     }
-    else if (command == "wallClockTime")
-    {
-        WallClockTime::hour = std::stoi(value);
-        value = value.substr(value.find(':') + 1);
-        WallClockTime::minute = std::stoi(value);
-        value = value.substr(value.find(':') + 1);
-        WallClockTime::second = std::stoi(value);
-    }
     else if (command == "ackButton")
     {
         externalAckButton.setPressed(stoi(value) > 0);
@@ -267,6 +259,10 @@ void parseData(std::string str)
     if (level == Level::NTC) nid_ntc = j["CurrentNTC"].get<int>();
     if (j["GeographicalPositionKM"].is_null()) pk = -1;
     else pk = j["GeographicalPositionKM"].get<double>();
+    json &clock = j["WallClockTime"];
+    WallClockTime::hour = clock["Hour"];
+    WallClockTime::minute = clock["Minute"];
+    WallClockTime::second = clock["Second"];
     if (!j["ModeAcknowledgement"].is_null())
     {
         ackMode = (Mode)j["ModeAcknowledgement"].get<int>();

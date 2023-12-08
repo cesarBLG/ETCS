@@ -41,6 +41,9 @@ void update_SoM()
             if (som_active) {
                 if (mode == Mode::SB && (cab_active[0]^cab_active[1]) && (!supervising_rbc || (supervising_rbc->status != session_status::Establishing && supervising_rbc->status != session_status::Established)))
                     som_status = S1;
+                for (auto *session : active_sessions) {
+                    session->close(); // Backported from baseline 4
+                }
                 active_dialog = dialog_sequence::StartUp;
                 active_dialog_step = "S0";
             }
@@ -168,7 +171,8 @@ void update_SoM()
             break;
         case A24:
             position_valid = false;
-            lrbgs.clear();
+            orbgs.clear();
+            solr = {};
             som_status = S10;
             break;
         case A38:
@@ -178,7 +182,8 @@ void update_SoM()
             if (supervising_rbc)
                 supervising_rbc->close();
             position_valid = false;
-            lrbgs.clear();
+            orbgs.clear();
+            solr = {};
             som_status = A40;
             break;
         case A40:

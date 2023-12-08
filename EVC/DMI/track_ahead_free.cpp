@@ -20,12 +20,12 @@ void request_track_ahead_free(distance start, double length)
 }
 void update_track_ahead_free_request()
 {
-    if (taf_request && taf_request->second + D_keep_information < d_estfront)
+    if (taf_request && taf_request->second.est + D_keep_information < d_estfront)
         taf_request = {};
     if (taf_request) {
-        if (taf_request->first <= d_estfront)
+        if (taf_request->first.est <= d_estfront)
             start_display_taf = true;
-        if (taf_request->second < d_estfront)
+        if (taf_request->second.est < d_estfront)
             stop_display_taf = true;
     } else {
         start_display_taf = false;
@@ -38,6 +38,6 @@ void track_ahead_free_granted()
     if (supervising_rbc) {
         auto *taf = new taf_granted();
         fill_message(taf);
-        supervising_rbc->send(std::shared_ptr<euroradio_message_traintotrack>(taf));
+        supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(taf));
     }
 }

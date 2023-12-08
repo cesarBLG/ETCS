@@ -39,13 +39,11 @@ void set_language(std::string lang)
             language = lang;
         }
     }
-    for (auto it : installed_stms) {
-        stm_message msg;
-        auto *pack = new STMLanguage();
-        pack->NID_DRV_LANGUAGE.rawdata = ((language[0]&0xFF)<<8)|(language[1]&0xFF);
-        msg.packets.push_back(std::shared_ptr<ETCS_packet>(pack));
-        it.second->send_message(&msg);
-    }
+    stm_message msg;
+    auto *pack = new STMLanguage();
+    pack->NID_DRV_LANGUAGE.rawdata = ((language[0]&0xFF)<<8)|(language[1]&0xFF);
+    msg.packets.push_back(std::shared_ptr<ETCS_packet>(pack));
+    stm_send_message(msg);
     set_persistent_command("language", lang);
     json j = json::parse("\""+lang+"\"");
     save_cold_data("Language", j);

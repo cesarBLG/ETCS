@@ -2,7 +2,7 @@
 	"730 Simple" : {
         "length": 189,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 174,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -13,7 +13,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -22,21 +23,22 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.63},
-						{"speed": 13.8889, "value": 0.62},
-						{"speed": 27.7778, "value": 0.61},
-						{"speed": 41.6667, "value": 0.53},
-						{"speed": 55.5556, "value": 0.45}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.95},
+						{"speed": 41.6667, "value": 0.94},
+						{"speed": 55.5556, "value": 0.76}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.23},
-						{"speed": 41.6667, "value": 0.94}
+                        {"speed": 0, "value": 0.98},
+						{"speed": 13.8889, "value": 0.96},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -73,7 +75,7 @@
     "730 Doble" : {
         "length": 375,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 174,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -84,7 +86,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -93,21 +96,22 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.63},
-						{"speed": 13.8889, "value": 0.62},
-						{"speed": 27.7778, "value": 0.61},
-						{"speed": 41.6667, "value": 0.53},
-						{"speed": 55.5556, "value": 0.45}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.95},
+						{"speed": 41.6667, "value": 0.94},
+						{"speed": 55.5556, "value": 0.76}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.34},
-						{"speed": 27.7778, "value": 1.23},
-						{"speed": 41.6667, "value": 0.94}
+                        {"speed": 0, "value": 0.98},
+						{"speed": 13.8889, "value": 0.96},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -144,7 +148,7 @@
     "130 Simple" : {
         "length": 189,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 174,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -155,7 +159,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -164,22 +169,22 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.63},
-						{"speed": 13.8889, "value": 0.62},
-						{"speed": 27.7778, "value": 0.61},
-						{"speed": 41.6667, "value": 0.53},
-						{"speed": 55.5556, "value": 0.45}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.95},
+						{"speed": 41.6667, "value": 0.94},
+						{"speed": 55.5556, "value": 0.76}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.98},
+						{"speed": 13.8889, "value": 0.96},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -216,7 +221,7 @@
     "130 Doble" : {
         "length": 375,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 174,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -227,7 +232,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -236,22 +242,22 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.63},
-						{"speed": 13.8889, "value": 0.62},
-						{"speed": 27.7778, "value": 0.61},
-						{"speed": 41.6667, "value": 0.53},
-						{"speed": 55.5556, "value": 0.45}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.95},
+						{"speed": 41.6667, "value": 0.94},
+						{"speed": 55.5556, "value": 0.76}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.65},
-						{"speed": 13.8889, "value": 0.64},
-						{"speed": 27.7778, "value": 0.63},
-						{"speed": 41.6667, "value": 0.55},
-						{"speed": 55.5556, "value": 0.47}
+                        {"speed": 0, "value": 0.98},
+						{"speed": 13.8889, "value": 0.96},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

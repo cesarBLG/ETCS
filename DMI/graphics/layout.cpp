@@ -11,7 +11,11 @@
 using namespace std;
 void Layout::add(Component *comp, ComponentAlignment *alignment)
 {
-    if(comp == nullptr || alignment == nullptr) return;
+    if(comp == nullptr || alignment == nullptr)
+    {
+        if (alignment != nullptr) delete alignment;
+        return;
+    }
     elements.push_back({comp, alignment});
     if(alignment->layer==0) comp->dispBorder = false;
     updateLocations();

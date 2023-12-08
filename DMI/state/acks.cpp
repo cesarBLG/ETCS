@@ -98,9 +98,11 @@ void dispAcks()
             case Level::N2:
                 num=4;
                 break;
+#if BASELINE < 4
             case Level::N3:
                 num=5;
                 break;
+#endif
         }
         num = 4 + 2*num;
         if(levelAck == 2) num++;
@@ -149,7 +151,6 @@ void updateAcks()
         if (AllowedAck == AckType::Message) updateMessages();
         if (componentAck != nullptr)
         {
-            ackButton.delayType = componentAck->delayType;
             ackButton.setAck([] {
                 if (componentAck != nullptr) componentAck->setPressed();
             });
@@ -171,6 +172,10 @@ void updateAcks()
         ackButton.clear();
         ackButton.setAck(nullptr);
         componentAck = nullptr;
+    }
+    if (componentAck != nullptr)
+    {
+        ackButton.delayType = componentAck->delayType;
     }
     int light = 0;
     if (AllowedAck != AckType::None) light = (flash_state & 2) ? 2 : 1;

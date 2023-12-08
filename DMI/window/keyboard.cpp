@@ -217,7 +217,11 @@ keyboard getSingleChoiceKeyboard(std::vector<std::string> posibilities, input_da
     keyboard k;
     for(int i=0; i<posibilities.size(); i++)
     {
-        if (posibilities[i] == "") continue;
+        if (posibilities[i] == "") {
+            k.keys.push_back(nullptr);
+            if (softkeys) k.labels.push_back(nullptr);
+            continue;
+        }
         if (softkeys)
         {
             std::string id = std::to_string(posibilities.size() > 10 ? ((i%9)+1) : (i+1));

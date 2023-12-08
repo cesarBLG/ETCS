@@ -10,6 +10,7 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <variant>
 #include "../optional.h"
 #include "acceleration.h"
 #include "../Position/distance.h"
@@ -27,19 +28,19 @@ enum struct target_class
 class basic_target
 {
 protected:
-    distance d_target;
+    relocable_dist_base d_target;
     double V_target;
 public:
     target_class type;
     bool is_EBD_based;
     bool is_TSR = false;
     basic_target() {}
-    basic_target(distance dist, double speed, target_class type) : d_target(dist), V_target(speed), type(type)
+    basic_target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : d_target(dist), V_target(speed), type(type), is_TSR(is_TSR)
     {
         is_EBD_based = type != target_class::EoA;
     }
     double get_target_speed() const { return V_target; }
-    distance get_target_position() const { return d_target; }
+    relocable_dist_base get_target_position() const { return d_target; }
     bool operator== (const basic_target &t) const
     {
         return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
@@ -51,17 +52,17 @@ protected:
     bool use_brake_combination = true;
 public:
     double default_gradient=0;
-    target(distance dist, double speed, target_class type);
-    virtual distance get_distance_curve (double velocity) const;
-    double get_speed_curve(distance dist) const;
-    distance get_distance_gui_curve(double velocity) const;
-    double get_speed_gui_curve(distance dist) const;
-    mutable distance d_EBI;
-    mutable distance d_SBI2;
-    mutable distance d_SBI1;
-    mutable distance d_W;
-    mutable distance d_P;
-    mutable distance d_I;
+    target(relocable_dist_base dist, double speed, target_class type, bool is_tsr=false);
+    virtual dist_base get_distance_curve (double velocity) const;
+    double get_speed_curve(dist_base dist) const;
+    dist_base get_distance_gui_curve(double velocity) const;
+    double get_speed_gui_curve(dist_base dist) const;
+    mutable dist_base d_EBI;
+    mutable dist_base d_SBI2;
+    mutable dist_base d_SBI1;
+    mutable dist_base d_W;
+    mutable dist_base d_P;
+    mutable dist_base d_I;
     mutable double V_SBI2;
     mutable double V_SBI1;
     mutable double V_P;
@@ -81,7 +82,7 @@ public:
     void calculate_times() const;
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     virtual void calculate_decelerations();
-    void calculate_decelerations(const std::map<distance,double> &gradient);
+    void calculate_decelerations(const std::map<dist_base,double> &gradient);
     static void recalculate_all_decelerations();
 };
 extern optional<distance> EoA;

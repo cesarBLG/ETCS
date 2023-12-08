@@ -10,7 +10,7 @@
 #include "../MA/movement_authority.h"
 #include "../Supervision/targets.h"
 #include "../Supervision/supervision_targets.h"
-std::set<level_crossing> level_crossings;
+std::list<level_crossing> level_crossings;
 bool inform_lx = false;
 void load_lx(LevelCrossingInformation lxi, distance ref)
 {
@@ -23,20 +23,21 @@ void load_lx(LevelCrossingInformation lxi, distance ref)
             ++it;
         }
     }
-    level_crossings.insert(lx);
+    if (lx.start.max < d_maxsafefront(lx.start))
+        lx.svl_replaced = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
     calculate_SvL();
 }
 void update_lx()
 {
     inform_lx = false;
-    for (auto it=level_crossings.begin(); it!=level_crossings.end(); ) {
+    for (auto it=level_crossings.begin(); it!=level_crossings.end(); ++it) {
         if (!it->lx_protected) {
-            if (it->svl_replaced && d_minsafefront(it->start) < it->start+it->length) inform_lx = true;
-            if (V_est == 0 && it->stop && d_estfront > it->start-it->stoplength) {
-                it->svl_replaced = d_estfront_dir[odometer_orientation == -1];
+            if (it->svl_replaced && d_minsafefront(it->start) < it->start.min+it->length) inform_lx = true;
+            if (!it->svl_replaced && V_est == 0 && it->stop && d_estfront > it->start.est-it->stoplength) {
+                it->svl_replaced = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
                 calculate_SvL();
             }
-            if (EoA && *EoA == it->start && !it->svl_replaced) {
+            if (EoA && EoA->est == it->start.est && !it->svl_replaced) {
                 const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
                 std::shared_ptr<target> tEoA, tSvL;
                 for (auto &it : supervised_targets) {
@@ -46,23 +47,17 @@ void update_lx()
                         tSvL = it;
                 }
                 if (MRDT && (*MRDT == *tEoA || *MRDT == *tSvL)) inform_lx = true;
-                if (it->stop) {
-                    ++it;
+                if (it->stop)
                     continue;
-                }
                 tEoA->calculate_curves(it->V_LX);
                 tSvL->calculate_curves(it->V_LX);
                 bool c1 = tEoA->d_P < d_estfront;
-                bool c2 = tSvL->d_P < d_maxsafefront(tSvL->d_P);
+                bool c2 = tSvL->d_P < d_maxsafefront(tSvL->get_target_position());
                 if (c1 || c2) {
-                    it->svl_replaced = c1 ? d_estfront : d_maxsafefront(tSvL->d_P);
+                    it->svl_replaced = distance::from_odometer(c1 ? d_estfront_dir[odometer_orientation == -1] : d_maxsafefront(tSvL->get_target_position()));
                     calculate_SvL();
                 }
             }
         }
-        if (d_minsafefront(it->start) > it->start+it->length)
-            it = level_crossings.erase(it);
-        else
-            ++it;
     }
 }

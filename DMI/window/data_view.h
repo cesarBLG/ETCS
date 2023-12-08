@@ -14,7 +14,6 @@
 class data_view_window : public subwindow
 {
     protected:
-    std::vector<std::pair<std::string, std::string>> data;
     std::vector<Component*> components;
     void setLayout() override
     {
@@ -22,25 +21,43 @@ class data_view_window : public subwindow
         int offset = softkeys ? 0 : 15;
         for (int i=(current_page-1)*10; i<components.size()/2 && i<current_page*10; i++)
         {
-            if (components[2*i] == nullptr) continue;
-            addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*16, 0));
-            addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*16, 0));
+            if (components[2*i] != nullptr) addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*16, 0));
+            if (components[2*i+1] != nullptr) addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*16, 0));
         }
         subwindow::setLayout();
     }
     public:
-    data_view_window(std::string title, std::vector<std::pair<std::string, std::string>> data) : subwindow(title, false, (data.size()-1)/10 + 1), data(data)
+    data_view_window(std::string title, json &fields) : subwindow(title, false, 2)
     {
-        for (int i=0; i<data.size(); i++)
+        for (json &j : fields)
         {
-            int rows = data[i].first.find('\n') != std::string::npos ? 2 : 1;
-            Component *c1 = new Component(softkeys ? 176 : 204, 16*rows);
-            Component *c2 = new Component(softkeys ? 104 : 116, 16);
-            c1->addText(data[i].first, 5, 0, 12, White, RIGHT);
-            c2->addText(data[i].second, 5, 0, 12, White, LEFT);
-            components.push_back(c1);
-            components.push_back(c2);
-            for (int j=0; j<(rows-2)*2; j++) components.push_back(nullptr);
+            std::string label = j["Label"];
+            std::string value = j["Value"];
+            if (j.contains("Keyboard") && j["Keyboard"]["Type"] != "Dedicated");
+            {
+                std::string format = "";
+                for (int i=0; i<value.size(); i++)
+                {
+                    if (i>0 && i%8 == 0) format += "\n";
+                    else if (i>0 && i%4 == 0 && i != value.size() - 1) format += " ";
+                    format += value[i];
+                }
+                value = format;
+            }
+            for (int i=0; ; i++)
+            {
+                int break1 = label.find('\n');
+                int break2 = value.find('\n');
+                Component *c1 = new Component(softkeys ? 176 : 204, 16);
+                Component *c2 = new Component(softkeys ? 104 : 116, 16);
+                c1->addText(label.substr(0, break1), 5, 0, 12, White, RIGHT);
+                c2->addText(value.substr(0, break2), 5, 0, 12, White, LEFT);
+                components.push_back(c1);
+                components.push_back(c2);
+                if (break1 == std::string::npos && break2 == std::string::npos) break;
+                label = break1 >= label.size()-1 ? "" : label.substr(break1+1);
+                value = break2 >= value.size()-1 ? "" : value.substr(break2+1);
+            }
         }
         page_count = (components.size()/2-1)/10 + 1;
         next_button.enabled = page_count > 1;

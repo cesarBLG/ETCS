@@ -20,9 +20,11 @@ class menu : public subwindow
 {
     protected:
     Component *hourGlass=nullptr;
-    Button* buttons[10];
-    Component* labels[10];
+    std::vector<Button*> buttons;
+    std::vector<Component*> labels;
     std::map<int,text_menu_entry> entries;
+    IconButton more;
+    int keypage=0;
     public:
     menu(std::string title);
     ~menu();

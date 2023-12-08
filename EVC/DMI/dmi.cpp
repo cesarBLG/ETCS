@@ -42,6 +42,7 @@ void dmi_receive(BasePlatform::BusSocket::JoinNotification &&msg);
 void dmi_receive(BasePlatform::BusSocket::LeaveNotification &&msg);
 void dmi_receive(BasePlatform::BusSocket::Message &&msg);
 void dmi_update_func();
+void sim_write_line(const std::string &str);
 void dmi_receive_handler(BasePlatform::BusSocket::ReceiveResult &&result)
 {
     dmi_socket->receive().then(dmi_receive_handler).detach();
@@ -98,8 +99,10 @@ void parse_command(string str)
             }
         }
     }
-    if (command == "ackButtonLight")
-    {
+    if (command == "stmData") {
+        sim_write_line("noretain(stm::command_etcs="+value+")");
+    }
+    if (command == "ackButtonLight") {
         extern int ack_button_light;
         ack_button_light = stoi(value);
     }
@@ -122,7 +125,6 @@ void dmi_receive(BasePlatform::BusSocket::Message &&msg)
 {
     parse_command(std::move(msg.data));
 }
-void sim_write_line(const std::string &str);
 bool sendtoor=false;
 int64_t lastor;
 void set_persistent_command(string command, string value)
@@ -221,19 +223,24 @@ void dmi_update_func()
     j["TextMessages"] = messages;
     j["DisplayTAF"] = start_display_taf && !stop_display_taf;
     j["AllowedAck"] = ack_allowed;
+    json clock;
+    clock["Hour"] = WallClockTime::hour;
+    clock["Minute"] = WallClockTime::minute;
+    clock["Second"] = WallClockTime::second;
+    j["WallClockTime"] = clock;
     if (display_lssma) j["LSSMA"] = lssma;
     if (mode == Mode::FS || mode == Mode::OS)
     {
         std::vector<speed_element> speeds;
         double v = calc_ceiling_limit();
         speeds.push_back({0,v});
-        std::map<::distance,double> MRSP = get_MRSP();
+        auto &MRSP = get_MRSP();
         extern double indication_distance;
-        double last_distance = MA ? MA->get_abs_end()-d_minsafefront(MA->get_abs_end()) : 0;
+        double last_distance = MA ? MA->get_abs_end().min-d_minsafefront(MA->get_abs_end()) : 0;
         const std::list<std::shared_ptr<target>> &targets = get_supervised_targets();
         for (auto &t : targets)
         {
-            distance td = t->get_target_position();
+            relocable_dist_base td = t->get_target_position();
             double d = td - (t->is_EBD_based ? d_maxsafefront(td) : d_estfront);
             if (t->get_target_speed() == 0 && d<last_distance)
                 last_distance = d;
@@ -241,7 +248,7 @@ void dmi_update_func()
         j["IndicationMarkerTarget"] = nullptr;
         j["IndicationMarkerDistanceM"] = nullptr;
         for (auto it=MRSP.begin(); it!=MRSP.end(); ++it) {
-            distance dist = it->first;
+            relocable_dist_base dist = it->first;
             float safedist = dist-d_maxsafefront(dist);
             if (safedist < 0)
                 continue;
@@ -254,35 +261,35 @@ void dmi_update_func()
             }
             speeds.push_back({safedist, it->second});
         }
-        if (SvL && *SvL-d_maxsafefront(*SvL) <= last_distance + 1) {
+        if (SvL && SvL->max-d_maxsafefront(*SvL) <= last_distance + 1) {
             if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::SvL || indication_target->type == target_class::EoA)){
                 j["IndicationMarkerTarget"]["TargetSpeedMpS"] = 0;
-                j["IndicationMarkerTarget"]["DistanceToTrainM"] = *SvL-d_maxsafefront(*SvL);
+                j["IndicationMarkerTarget"]["DistanceToTrainM"] = SvL->max-d_maxsafefront(*SvL);
                 j["IndicationMarkerDistanceM"] = indication_distance;
             }
-            speeds.push_back({*SvL-d_maxsafefront(*SvL), 0});
-            last_distance = *SvL-d_maxsafefront(*SvL);
+            speeds.push_back({SvL->max-d_maxsafefront(*SvL), 0});
+            last_distance = SvL->max-d_maxsafefront(*SvL);
         }
-        else if (EoA && *EoA-d_estfront <= last_distance + 1) {
+        else if (EoA && EoA->est-d_estfront <= last_distance + 1) {
             if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::SvL || indication_target->type == target_class::EoA)) {
                 j["IndicationMarkerTarget"]["TargetSpeedMpS"] = 0;
-                j["IndicationMarkerTarget"]["DistanceToTrainM"] = *EoA-d_estfront;
+                j["IndicationMarkerTarget"]["DistanceToTrainM"] = EoA->est-d_estfront;
                 j["IndicationMarkerDistanceM"] = indication_distance;
             }
-            speeds.push_back({*EoA-d_estfront, 0});
-            last_distance = *EoA-d_estfront;
+            speeds.push_back({EoA->est-d_estfront, 0});
+            last_distance = EoA->est-d_estfront;
         }
-        if (LoA && LoA->first-d_maxsafefront(LoA->first) <= last_distance + 1) {
+        if (LoA && LoA->first.max-d_maxsafefront(LoA->first) <= last_distance + 1) {
             if (monitoring == CSM && indication_target != nullptr && (indication_target->type == target_class::LoA)) {
                 j["IndicationMarkerTarget"]["TargetSpeedMpS"] = LoA->second;
-                j["IndicationMarkerTarget"]["DistanceToTrainM"] = LoA->first-d_maxsafefront(LoA->first);
+                j["IndicationMarkerTarget"]["DistanceToTrainM"] = LoA->first.max-d_maxsafefront(LoA->first);
                 j["IndicationMarkerDistanceM"] = indication_distance;
             }
-            speeds.push_back({LoA->first-d_maxsafefront(LoA->first), LoA->second});
-            last_distance = LoA->first-d_maxsafefront(LoA->first);
+            speeds.push_back({LoA->first.max-d_maxsafefront(LoA->first), LoA->second});
+            last_distance = LoA->first.max-d_maxsafefront(LoA->first);
         }
         j["SpeedTargets"] = speeds;
-        std::map<::distance,double> gradient = get_gradient();
+        std::map<dist_base,double> gradient = get_gradient();
         std::vector<gradient_element> grad;
         grad.push_back({0, (int)((--gradient.upper_bound(d_estfront))->second*1000)});
         for (auto it=gradient.upper_bound(d_estfront); it!=gradient.end(); ++it) {

@@ -26,7 +26,9 @@ enum struct Level
     N0,
     N1,
     N2,
+#if BASELINE < 4
     N3,
+#endif
     NTC,
     Unknown
 };
@@ -48,5 +50,9 @@ enum struct Mode
     NP,
     NL,
     SN,
-    RV
+    RV,
+#if BASELINE == 4
+    AD,
+    SM,
+#endif
 };

@@ -69,7 +69,7 @@ struct overlap
     double distance;
     double vrelease;
 };
-extern std::set<speed_restriction> signal_speeds;
+extern std::list<speed_restriction> signal_speeds;
 class movement_authority
 {
     double v_main;
@@ -120,8 +120,8 @@ public:
     friend void set_signalling_restriction(movement_authority ma, bool infill);
 };
 extern optional<movement_authority> MA;
-extern optional<distance> d_perturbation_eoa;
-extern optional<distance> d_perturbation_svl;
+extern optional<relocable_dist_base> d_perturbation_eoa;
+extern optional<relocable_dist_base> d_perturbation_svl;
 void calculate_SvL();
 void calculate_perturbation_location();
 void replace_MA(movement_authority ma, bool cooperative_shortening=false);

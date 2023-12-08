@@ -13,16 +13,16 @@
 #include "../Position/distance.h"
 struct acceleration
 {
-    std::map<distance, std::map<double, double>> accelerations;
-    std::set<distance> dist_step;
+    std::map<dist_base, std::map<double, double>> accelerations;
+    std::set<dist_base> dist_step;
     std::set<double> speed_step;
     acceleration()
     {
-        accelerations[distance(std::numeric_limits<double>::lowest(), 0, 0)][0] = 0;
-        dist_step.insert(distance(std::numeric_limits<double>::lowest(), 0, 0));
+        accelerations[dist_base(std::numeric_limits<double>::lowest(), 0)][0] = 0;
+        dist_step.insert(dist_base(std::numeric_limits<double>::lowest(), 0));
         speed_step.insert(0);
     }
-    double operator()(const double V, const distance &d) const
+    double operator()(const double V, const dist_base &d) const
     {
         return (--(--accelerations.upper_bound(d))->second.upper_bound(V))->second;
     }
