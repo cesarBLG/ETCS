@@ -21,8 +21,8 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.83},
-						{"speed": 13.8889, "value": 0.9},
+                        {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
 						{"speed": 27.7778, "value": 0.9},
 						{"speed": 41.6667, "value": 0.8},
 						{"speed": 55.5556, "value": 0.7},
@@ -96,8 +96,8 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.83},
-						{"speed": 13.8889, "value": 0.9},
+                        {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
 						{"speed": 27.7778, "value": 0.9},
 						{"speed": 41.6667, "value": 0.8},
 						{"speed": 55.5556, "value": 0.7},
@@ -149,7 +149,7 @@
             
         }
     },
-		"Simple 1BA" : {
+		"Simple_1B_A" : {
         "length": 200,
         "speed": 330,
         "cant_deficiency": 115,
@@ -171,8 +171,8 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.73},
-						{"speed": 13.8889, "value": 0.8},
+                        {"speed": 0, "value": 0.83},
+						{"speed": 13.8889, "value": 0.82},
 						{"speed": 27.7778, "value": 0.8},
 						{"speed": 41.6667, "value": 0.7},
 						{"speed": 55.5556, "value": 0.6},

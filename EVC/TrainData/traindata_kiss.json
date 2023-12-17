@@ -1,18 +1,18 @@
 {
-	"Simple" : {
-        "length": 55,
-        "speed": 200,
-        "cant_deficiency": 174,
+	"1UT" : {
+        "length": 150,
+        "speed": 160,
+        "cant_deficiency": 165,
         "t_traction_cutoff": 0.3,
-        "airtight": 1,
+        "airtight": 0,
         "traction_systems": [
-            {"name": "DIESEL", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.2, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -21,20 +21,20 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.96},
-						{"speed": 13.8889, "value": 0.94},
-						{"speed": 27.7778, "value": 0.92},
-						{"speed": 41.6667, "value": 0.85}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.97},
+						{"speed": 41.6667, "value": 0.95}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.81},
-						{"speed": 13.8889, "value": 0.88},
-						{"speed": 27.7778, "value": 0.88},
-						{"speed": 41.6667, "value": 0.78}
+                        {"speed": 0, "value": 1.34},
+						{"speed": 13.8889, "value": 1.6},
+						{"speed": 27.7778, "value": 1.56},
+						{"speed": 41.6667, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -68,20 +68,20 @@
             
         }
     },
-    "Doble" : {
-        "length": 110,
-        "speed": 200,
-        "cant_deficiency": 174,
+	"2UT" : {
+        "length": 298,
+        "speed": 160,
+        "cant_deficiency": 165,
         "t_traction_cutoff": 0.3,
-        "airtight": 1,
+        "airtight": 0,
         "traction_systems": [
-            {"name": "DIESEL", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 0}
         ],
         "brakes": {
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.00, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.2, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -90,20 +90,20 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.96},
-						{"speed": 13.8889, "value": 0.94},
-						{"speed": 27.7778, "value": 0.92},
-						{"speed": 41.6667, "value": 0.85}
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.97},
+						{"speed": 41.6667, "value": 0.95}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.81},
-						{"speed": 13.8889, "value": 0.88},
-						{"speed": 27.7778, "value": 0.88},
-						{"speed": 41.6667, "value": 0.78}
+                        {"speed": 0, "value": 1.34},
+						{"speed": 13.8889, "value": 1.6},
+						{"speed": 27.7778, "value": 1.56},
+						{"speed": 41.6667, "value": 0.74}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
