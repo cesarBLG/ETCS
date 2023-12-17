@@ -141,13 +141,13 @@ void updateMessages()
             else last = text.size();
             if(line<nlines+current && line>=current)
             {
+                if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
                 if (text.size() == m.text.size())
                 {
                     if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
                     m.shown = true;
                     textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
                 }
-                if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
                 textArea.addText(text.substr(0, last), 48, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
             }
             ++line;
