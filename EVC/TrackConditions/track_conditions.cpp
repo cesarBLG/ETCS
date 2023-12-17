@@ -210,7 +210,7 @@ void update_track_conditions()
                 if (!air_tightness_info.start && !air_tightness_info.end) air_tightness_info = info;
             }
             c->announce_distance = pointC.max-max;
-            if (min + L_TRAIN > c->end.min) {
+            if (min - L_TRAIN > c->end.min) {
                 c->announce = false;
                 c->order = false;
             } else if (max>c->start.max) {
