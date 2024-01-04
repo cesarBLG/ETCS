@@ -33,7 +33,7 @@ void update_mode_profile()
         return;
     }
     mode_profile first = mode_profiles.front();
-    if (first.mode != Mode::SH && first.length < std::numeric_limits<float>::max() && first.start.min + first.length < d_minsafefront(first.start)) {
+    if (first.length < std::numeric_limits<float>::max() && first.start.min + first.length < d_minsafefront(first.start)) {
         mode_profiles.pop_front();
         update_mode_profile();
         calculate_SvL();
@@ -70,7 +70,15 @@ void update_mode_profile()
     }
     if (d_maxsafefront(first.start) > first.start.max) {
         requested_mode_profile = first;
-        if (mode != first.mode) {
+        if (mode == first.mode) {
+            if (mode == Mode::OS && (!OS_speed || OS_speed->speed != requested_mode_profile->speed)) {
+                OS_speed = speed_restriction(requested_mode_profile->speed, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
+                recalculate_MRSP();
+            } else if (mode == Mode::SH && (!SH_speed || SH_speed->speed != requested_mode_profile->speed)) {
+                SH_speed = speed_restriction(requested_mode_profile->speed, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+                recalculate_MRSP();
+            }
+        } else {
             mode_timer_started = true;
             mode_timer = get_milliseconds();
             mode_acknowledgeable = true;
