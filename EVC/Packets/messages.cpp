@@ -62,7 +62,7 @@ static bool linking_available;
 std::deque<std::pair<eurobalise_telegram, std::pair<distance,int64_t>>> pending_telegrams;
 optional<link_data> rams_reposition_mitigation;
 void trigger_reaction(int reaction);
-void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, int dir, int64_t timestamp, bg_id nid_bg, int m_version);
+void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, int dir, int64_t timestamp, bg_id nid_bg, bool linked, int m_version);
 void handle_radio_message(std::shared_ptr<euroradio_message> message);
 void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_reference, bool linked, int64_t timestamp);
 void update_track_comm();
@@ -550,7 +550,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
     
     position_update_bg_passed({nid_c, nid_bg}, linked, bg_reference, dir);
 
-    handle_telegrams(message, bg_reference, dir, timestamp, {nid_c, nid_bg}, m_version);
+    handle_telegrams(message, bg_reference, dir, timestamp, {nid_c, nid_bg}, linked, m_version);
     if (dir != -1)
         geographical_position_handle_bg_passed({nid_c, nid_bg}, bg_reference, dir == 1);
 }
@@ -591,7 +591,7 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
         if (!relocated && (it == ordered_info.end() || ((*it)->index_level != 1 && (*it)->index_level != 8 && (*it)->index_level != 9) || ((*it)->infill && !infill))) {
             relocate();
             relocated = true;
-            location = get_reference_location(infill ? *ordered_info.back()->infill : ordered_info.front()->nid_bg, true, !infill);
+            location = get_reference_location(infill ? *ordered_info.back()->infill : ordered_info.front()->nid_bg, infill || ordered_info.front()->is_linked_bg, !infill);
             // Distance part of level transition has to be handled after linking
             if (ongoing_transition && !ongoing_transition->ref_loc && !ongoing_transition->immediate) {
                 if (!location)
@@ -635,7 +635,7 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
     if (transition_buffer.size() > 3)
         transition_buffer.pop_front();
 }
-void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, int dir, int64_t timestamp, bg_id nid_bg, int m_version)
+void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, int dir, int64_t timestamp, bg_id nid_bg, bool linked, int m_version)
 {
     if (NV_NID_Cs.find(nid_bg.NID_C) == NV_NID_Cs.end()) {
         reset_national_values();
@@ -684,6 +684,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
                 info[i]->fromRBC = nullptr;
                 info[i]->timestamp = timestamp;
                 info[i]->nid_bg = nid_bg;
+                info[i]->is_linked_bg = linked;
                 info[i]->version = m_version;
                 ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
             }

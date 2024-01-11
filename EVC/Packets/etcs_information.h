@@ -25,6 +25,7 @@ struct etcs_information
     communication_session *fromRBC;
     int dir;
     bg_id nid_bg;
+    bool is_linked_bg=true;
     double shift=0;
     int version;
     bool reevaluated = false;
