@@ -711,13 +711,15 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             break;
         }
     }
-    if (!pos && message->NID_LRBG!=NID_LRBG_t::Unknown) {
+    if (!pos && (message->NID_LRBG!=NID_LRBG_t::Unknown || !session->accept_unknown_position)) {
 #ifdef DEBUG_MSG_CONSISTENCY
         platform->debug_print("Radio message rejected: unknown LRBG");
 #endif
         session->report_error(3);
         return;
     }
+    if (pos)
+        session->accept_unknown_position = false;
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
