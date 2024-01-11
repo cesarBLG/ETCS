@@ -212,6 +212,8 @@ void send_position_report(bool som)
             rep->Q_STATUS.rawdata = Q_STATUS_t::Unknown;
         else
             rep->Q_STATUS.rawdata = position_valid ? Q_STATUS_t::Valid : Q_STATUS_t::Invalid;
+        if (rep->Q_STATUS != Q_STATUS_t::Valid)
+            supervising_rbc->accept_unknown_position = true;
         supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(rep));
     } else {
         std::set<communication_session*> rbcs;
@@ -227,6 +229,10 @@ void send_position_report(bool som)
             if (session->status != session_status::Established)
                 continue;
             auto *rep = new position_report();
+            if (rep->PositionReport1BG && rep->PositionReport1BG->get()->NID_LRBG == NID_LRBG_t::Unknown)
+                supervising_rbc->accept_unknown_position = true;
+            else if (rep->PositionReport2BG && rep->PositionReport2BG->get()->NID_LRBG == NID_LRBG_t::Unknown)
+                supervising_rbc->accept_unknown_position = true;
             auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
             session->queue(msg);
             std::set<int> acks;
