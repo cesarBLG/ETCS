@@ -25,6 +25,7 @@ void load_lx(LevelCrossingInformation lxi, distance ref)
     }
     if (lx.start.max < d_maxsafefront(lx.start))
         lx.svl_replaced = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
+    level_crossings.push_back(lx);
     calculate_SvL();
 }
 void update_lx()

@@ -66,6 +66,7 @@ relocable_dist_base &relocable_dist_base::operator = (const relocable_dist_base&
     relocated_c = d.relocated_c;
     relocated_c_earlier = d.relocated_c_earlier;
 #endif
+    type = d.type;
     balise_based = d.balise_based;
     ref = d.ref;
     dist_base::operator=(d);
