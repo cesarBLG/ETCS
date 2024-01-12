@@ -319,6 +319,7 @@ ETCS_packet *get_position_report()
         r->V_TRAIN.set_value(V_est);
         r->M_MODE.set_value(mode);
         r->M_LEVEL.set_value(level);
+        r->NID_NTC.rawdata = nid_ntc;
         return r;
     } else {
         PositionReportBasedOnTwoBaliseGroups *r = new PositionReportBasedOnTwoBaliseGroups();
@@ -351,6 +352,7 @@ ETCS_packet *get_position_report()
         r->V_TRAIN.set_value(V_est);
         r->M_MODE.set_value(mode);
         r->M_LEVEL.set_value(level);
+        r->NID_NTC.rawdata = nid_ntc;
         return r;
     }
     return nullptr;
