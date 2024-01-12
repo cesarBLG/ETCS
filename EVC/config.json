@@ -56,95 +56,106 @@
         26
      ]
   },
+  "406": {
+      "TrainData":"TrainData/DB/traindata_406.json",
+      "SpeedDial": 400,
+      "STMLayout": "stm_siemens.json"
+  },
+  "403": {
+    
+      "TrainData":"TrainData/DB/traindata_403.json",
+      "SpeedDial": 400,
+      "STMLayout": "stm_siemens.json"
+  },
    "465": {
-       "TrainData": "TrainData/traindata_465.json",
+       "TrainData": "TrainData/Spain/traindata_465.json",
        "SpeedDial": 150,
        "STMLayout": "stm_siemens.json"
    },
    "465caf": {
-       "TrainData": "TrainData/traindata_465.json",
+       "TrainData": "TrainData/Spain/traindata_465.json",
        "SpeedDial": 150,
        "STMLayout": "stm_siemens.json",
        "SoftKeys": true
    },
   "450": {
-       "TrainData": "TrainData/traindata_450.json",
+       "TrainData": "TrainData/Spain/traindata_450.json",
        "SpeedDial": 160,
        "STMLayout": "stm_siemens.json"
    },
   "447": {
-       "TrainData": "TrainData/traindata_447.json",
+       "TrainData": "TrainData/Spain/traindata_447.json",
        "SpeedDial": 140,
        "STMLayout": "stm_siemens.json"
    },
   "446": {
-       "TrainData": "TrainData/traindata_446.json",
+       "TrainData": "TrainData/Spain/traindata_446.json",
        "SpeedDial": 120,
        "STMLayout": "stm_siemens.json"
    },
   "449": {
-       "TrainData": "TrainData/traindata_449.json",
+       "TrainData": "TrainData/Spain/traindata_449.json",
        "SpeedDial": 180,
        "STMLayout": "stm_siemens.json"
    },
   "490": {
-       "TrainData": "TrainData/traindata_490.json",
+       "TrainData": "TrainData/Spain/traindata_490.json",
        "SpeedDial": 180,
        "STMLayout": "stm_siemens.json"
    },
   "104": {
-       "TrainData": "TrainData/traindata_104.json",
+       "TrainData": "TrainData/Spain/traindata_104.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "105": {
-       "TrainData": "TrainData/traindata_105.json",
+       "TrainData": "TrainData/Spain/traindata_105.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "106": {
-       "TrainData": "TrainData/traindata_106.json",
+       "TrainData": "TrainData/Spain/traindata_106.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "107": {
-       "TrainData": "TrainData/traindata_107.json",
+       "TrainData": "TrainData/Spain/traindata_107.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "1621": {
-       "TrainData": "TrainData/traindata_162.json",
+       "TrainData": "TrainData/Spain/traindata_162.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "120": {
-       "TrainData": "TrainData/traindata_120.json",
+       "TrainData": "TrainData/Spain/traindata_120.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "121": {
-       "TrainData": "TrainData/traindata_121.json",
+       "TrainData": "TrainData/Spain/traindata_121.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "355": {
-       "TrainData": "TrainData/traindata_355.json",
+       "TrainData": "TrainData/Spain/traindata_355.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "355cab": {
-       "TrainData": "TrainData/traindata_355c.json",
+       "TrainData": "TrainData/Spain/traindata_355c.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
   "114": {
-       "TrainData": "TrainData/traindata_114.json",
+       "TrainData": "TrainData/Spain/traindata_114.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json",
        "SoftKeys": true
    },
    "130":{
-      "TrainData":"TrainData/traindata_130.json",
+      "TrainData":"TrainData/Spain/traindata_130.json",
       "SpeedDial":400,
       "STMLayout":"stm_bombardier.json",
       "InstalledSTM": [0,10],
@@ -156,7 +167,7 @@
       ]
   },
   "130ebicab":{
-     "TrainData":"TrainData/traindata_130.json",
+     "TrainData":"TrainData/Spain/traindata_130.json",
      "SpeedDial":400,
      "STMLayout":"stm_bombardier.json",
      "InstalledSTM": [10,19],
@@ -168,7 +179,7 @@
      ]
  },
   "130an":{
-     "TrainData":"TrainData/traindata_130.json",
+     "TrainData":"TrainData/Spain/traindata_130.json",
      "SpeedDial":400,
      "STMLayout":"stm_bombardier.json",
      "InstalledSTM": [10,19],
@@ -180,7 +191,7 @@
      ]
  },
    "1305":{
-     "TrainData":"TrainData/traindata_1305.json",
+     "TrainData":"TrainData/Spain/traindata_1305.json",
      "SpeedDial":400,
      "STMLayout":"stm_bombardier.json",
      "InstalledSTM": [0,10],
@@ -209,60 +220,66 @@
        "UnsupportedLevels": [2]
      },
     "112": {
-       "TrainData": "TrainData/traindata_112.json",
+       "TrainData": "TrainData/Spain/traindata_112.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "1126": {
-        "TrainData": "TrainData/traindata_1126.json",
+        "TrainData": "TrainData/Spain/traindata_1126.json",
         "SpeedDial": 400,
         "STMLayout": "stm_siemens.json",
         "SoftKeys": true
     },
     "1127": {
-         "TrainData": "TrainData/traindata_1127.json",
+         "TrainData": "TrainData/Spain/traindata_1127.json",
          "SpeedDial": 400,
          "STMLayout": "stm_siemens.json",
          "SoftKeys": true
      },
+     "11271": {
+          "TrainData": "TrainData/Spain/traindata_1127.json",
+          "SpeedDial": 400,
+          "STMLayout": "stm_siemens.json",
+          "SoftKeys": true
+      },
   "102": {
-       "TrainData": "TrainData/traindata_102.json",
+       "TrainData": "TrainData/Spain/traindata_102.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
    "102adif": {
-        "TrainData": "TrainData/traindata_102adif.json",
-        "SpeedDial": 350,
+        "TrainData": "TrainData/Spain/traindata_102adif.json",
+        "SpeedDial": 400,
         "STMLayout": "stm_siemens.json"
     },
   "103": {
-       "TrainData": "TrainData/traindata_103.json",
+       "TrainData": "TrainData/Spain/traindata_103.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
   "108": {
-       "TrainData": "TrainData/traindata_108.json",
+       "TrainData": "TrainData/Spain/traindata_108.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
   "1081": {
-    "TrainData": "TrainData/traindata_108.json",
+    "TrainData": "TrainData/Spain/traindata_108.json",
     "SpeedDial": 400,
     "STMLayout": "stm_siemens.json",
     "UnsupportedLevels": [2]
 },
   "109": {
-       "TrainData": "TrainData/traindata_109.json",
+       "TrainData": "TrainData/Spain/traindata_109.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json"
    },
-  "454": {
-       "TrainData": "TrainData/traindata_454.json",
+  "456": {
+       "TrainData": "TrainData/Spain/traindata_kiss.json",
        "SpeedDial": 180,
        "STMLayout": "stm_siemens.json"
    },
   "100": {
-       "TrainData": "TrainData/traindata_100.json",
+       "TrainData": "TrainData/Spain/traindata_100.json",
        "SpeedDial": 400,
        "STMLayout": "stm_siemens.json",
        "SoftKeys": true
