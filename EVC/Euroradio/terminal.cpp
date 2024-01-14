@@ -48,8 +48,10 @@ void mobile_terminal::update()
     if (registered && last_register_order)
         last_register_order = {};
     
-    if (!powered)
+    if (!powered) {
         registered = false;
+        network_id = -1;
+    }
 
     csd_available = mobile_data_available = registered;
         
