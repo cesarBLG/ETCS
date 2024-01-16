@@ -40,6 +40,7 @@ void communication_session::open(int ntries)
     train_data_ack_pending = train_data_valid;
     train_data_ack_sent = false;
     train_running_number_sent = false;
+    accept_unknown_position = true;
     closing = false;
     initsent = false;
     status = session_status::Establishing;
