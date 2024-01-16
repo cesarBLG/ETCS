@@ -45,7 +45,7 @@ class communication_session
     bool train_data_ack_pending;
     bool train_data_ack_sent;
     bool train_running_number_sent;
-    bool accept_unknown_position=false;
+    bool accept_unknown_position=true;
     bool closing;
     session_status status = session_status::Inactive;
     safe_radio_status radio_status = safe_radio_status::Disconnected;
