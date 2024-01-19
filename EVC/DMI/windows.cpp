@@ -16,6 +16,7 @@
 #include "../Procedures/override.h"
 #include "../Procedures/train_trip.h"
 #include "../Procedures/level_transition.h"
+#include "../Procedures/stored_information.h"
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
 #include "../Version/version.h"
@@ -1125,8 +1126,7 @@ void validate_data_entry(std::string name, json &result)
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
             }
-            target::recalculate_all_decelerations();
-            recalculate_MRSP();
+            train_shorten('j');
             if (train_data_valid) {
                 active_dialog = dialog_sequence::NTCData;
                 active_dialog_step = "D1";

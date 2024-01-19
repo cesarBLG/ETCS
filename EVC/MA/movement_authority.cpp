@@ -166,7 +166,6 @@ void movement_authority::update_timers()
 				LoA_ma = {};
                 V_releaseSvL_ma = 0;
                 sections.erase(sections.begin()+i, sections.end());
-				calculate_SvL();
                 svl_shorten('c');
                 break;
 			}
@@ -236,7 +235,6 @@ void calculate_SvL()
     recalculate_MRSP();
     if (EoA && SvL) V_release = calculate_V_release();
     else V_release = 0;
-    set_supervised_targets();
 }
 void calculate_perturbation_location()
 {
@@ -299,7 +297,6 @@ std::list<speed_restriction> signal_speeds;
 void set_data()
 {
     MA->calculate_distances();
-    calculate_SvL();
 }
 void replace_MA(movement_authority ma, bool coop)
 {

@@ -22,12 +22,10 @@ int handle_conditional_emergency_stop(int id, distance location, dist_base minsa
     emergency_stops[id] = location;
     bool used = !SvL || SvL->max > location.max;
     delete_MA(location, location);
-    calculate_SvL();
     svl_shorten('a');
     return used ? 0 : 1;
 }
 void revoke_emergency_stop(int id)
 {
     emergency_stops.erase(id);
-    calculate_SvL();
 }

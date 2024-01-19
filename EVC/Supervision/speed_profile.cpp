@@ -117,7 +117,7 @@ void recalculate_MRSP()
     delete_back_info();
     recalculate_gradient();
     MRSP.clear();
-    std::list<speed_restriction> restrictions;
+    std::list<std::reference_wrapper<speed_restriction>> restrictions;
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)
         restrictions.insert(restrictions.end(), SSP.begin(), SSP.end());
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN) {
@@ -126,7 +126,7 @@ void recalculate_MRSP()
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
         for (auto it=level_crossings.begin(); it!=level_crossings.end(); ++it) {
-            if (!it->lx_protected && it->svl_replaced) restrictions.push_back(speed_restriction(it->V_LX, *it->svl_replaced, it->start+it->length, false));
+            if (!it->lx_protected && it->svl_replaced) restrictions.push_back(*it->svl_replaced);
         }
     }
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS) {
@@ -161,14 +161,14 @@ void recalculate_MRSP()
     }
     std::set<relocable_dist_base> critical_points;
     for (auto it = restrictions.begin(); it != restrictions.end(); ++it) {
-        critical_points.insert(it->get_start());
-        critical_points.insert(it->get_end());
+        critical_points.insert(it->get().get_start());
+        critical_points.insert(it->get().get_end());
     }
     for (auto it = critical_points.begin(); it != --critical_points.end(); ++it) {
         double spd=400;
         for (auto it2 = restrictions.begin(); it2 != restrictions.end(); ++it2) {
-            if (it2->get_start()<=*it && it2->get_end()>*it && it2->get_speed()<spd)
-                spd = it2->get_speed();
+            if (it2->get().get_start()<=*it && it2->get().get_end()>*it && it2->get().get_speed()<spd)
+                spd = it2->get().get_speed();
         }
         if (MRSP.size()==0 || (--MRSP.upper_bound(*it))->second!=spd)
             MRSP[*it] = spd;
