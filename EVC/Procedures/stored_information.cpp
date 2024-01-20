@@ -47,6 +47,7 @@ void shorten(bool include_ma, distance d)
             ++it;
     }
     delete_PBD(d);
+    calculate_SvL();
 }
 void svl_shorten(char condition)
 {

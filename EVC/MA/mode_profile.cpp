@@ -119,7 +119,6 @@ void reset_mode_profile(distance ref, bool infill)
     if ((mode_to_ack == Mode::OS || mode_to_ack == Mode::LS || mode_to_ack == Mode::SH) && mode_to_ack != mode) {
         mode_acknowledgeable = mode_acknowledged = false;
     }
-    calculate_SvL();
 }
 void set_mode_profile(ModeProfile profile, distance ref, bool infill)
 {
@@ -154,5 +153,4 @@ void set_mode_profile(ModeProfile profile, distance ref, bool infill)
             p.speed = it->V_MAMODE.get_value();
         mode_profiles.push_back(p);
     }
-    calculate_SvL();
 }

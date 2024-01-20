@@ -10,6 +10,7 @@
 #include "../Position/distance.h"
 #include "../Packets/88.h"
 #include "../optional.h"
+#include "../Supervision/speed_profile.h"
 #include <list>
 class level_crossing
 {
@@ -21,7 +22,7 @@ class level_crossing
     double V_LX;
     bool stop;
     double stoplength;
-    optional<distance> svl_replaced;
+    optional<speed_restriction> svl_replaced;
     level_crossing(LevelCrossingInformation lx, distance ref)
     {
         id = lx.NID_LX;

@@ -84,7 +84,6 @@ void load_route_suitability(RouteSuitabilityData &data, distance ref)
             return route_suitability.find(type) == route_suitability.end();
         }));
     }
-    calculate_SvL();
 }
 void update_route_suitability()
 {

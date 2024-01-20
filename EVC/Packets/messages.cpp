@@ -621,7 +621,7 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
         if (it == ordered_info.end())
             break;
     }
-    recalculate_MRSP();
+    calculate_SvL();
     if (!transition_buffer.empty()) {
         if (transition_buffer.back().empty()) {
             transition_buffer.pop_back();
