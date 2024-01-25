@@ -534,7 +534,7 @@ size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float w
 	count = std::max(count, 1);
 	if (count > str.size())
 		return str.size();
-	const char *pos = str.begin();
+	const char *pos = str.data();
 	for (int i = 0; i < count; i++)  {
 		char c = *pos;
 		if ((c & 0b11111000) == 0b11110000)
@@ -546,7 +546,7 @@ size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float w
 		else
 			pos += 1;
 	}
-	return pos - str.begin();
+	return pos - str.data();
 }
 
 TTF_Font* SdlPlatform::SdlFont::get() const {
