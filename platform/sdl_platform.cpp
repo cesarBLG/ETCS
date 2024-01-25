@@ -509,10 +509,44 @@ SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float s) 
 
 }
 
-std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str) const {
-	int w, h;
-	TTF_SizeUTF8(font->font, std::string(str).c_str(), &w, &h);
-	return std::make_pair(w / scale, h / scale);
+std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str, float wrap_width) const {
+	if (wrap_width == 0.0f) {
+		int w, h;
+		TTF_SizeUTF8(font->font, std::string(str).c_str(), &w, &h);
+		return std::make_pair(w / scale, h / scale);
+	} else {
+		std::pair<float, float> out(0.0f, 0.0f);
+		size_t pos = 0;
+		while (pos != str.size()) {
+			size_t p = calc_wrap_point(str.substr(pos), wrap_width);
+			std::pair<float, float> line = calc_size(str.substr(pos, p));
+			out.first = std::max(out.first, line.first);
+			out.second += line.second;
+			pos += p;
+		}
+		return out;
+	}
+}
+
+size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float wrap_width) const {
+	int extent, count;
+	TTF_MeasureUTF8(font->font, std::string(str).c_str(), wrap_width * scale, &extent, &count);
+	count = std::max(count, 1);
+	if (count > str.size())
+		return str.size();
+	const char *pos = str.begin();
+	for (int i = 0; i < count; i++)  {
+		char c = *pos;
+		if ((c & 0b11111000) == 0b11110000)
+			pos += 4;
+		else if ((c & 0b11110000) == 0b11100000)
+			pos += 3;
+		else if ((c & 0b11100000) == 0b11000000)
+			pos += 2;
+		else
+			pos += 1;
+	}
+	return pos - str.begin();
 }
 
 TTF_Font* SdlPlatform::SdlFont::get() const {

@@ -102,7 +102,8 @@ public:
 	public:
 		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
-		std::pair<float, float> calc_size(const std::string_view str) const override;
+		std::pair<float, float> calc_size(const std::string_view str, float wrap_width = 0.0f) const override;
+		size_t calc_wrap_point(const std::string_view str, float wrap_width) const override;
 	};
 
 	class SdlSoundData final : public SoundData

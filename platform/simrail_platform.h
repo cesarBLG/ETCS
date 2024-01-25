@@ -102,8 +102,8 @@ public:
 
 	public:
 		SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p);
-		std::pair<float, float> calc_size(const std::string_view str) const override;
-		std::pair<float, float> calc_size(const std::string_view str, float wrap_width) const;
+		std::pair<float, float> calc_size(const std::string_view str, float wrap_width = 0.0f) const override;
+		size_t calc_wrap_point(const std::string_view str, float wrap_width) const override;
 	};
 
 	class SimrailImage : public Image

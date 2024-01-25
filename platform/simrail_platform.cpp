@@ -462,10 +462,6 @@ SimrailUiPlatform::SimrailFont::SimrailFont(std::shared_ptr<SimrailFontWrapper> 
 
 }
 
-std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::string_view str) const {
-	return calc_size(str, 0.0f);
-}
-
 std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::string_view str, float wrap_width) const {
 	bool dirty = glyph_ranges_add(font->ranges_builder, str.begin(), str.end());
 	if (dirty || !font->pending)
@@ -473,6 +469,15 @@ std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::str
 	float adjusted_size = font->size * (ascent / font->pending->Ascent);
 	ImVec2 ret = font->pending->CalcTextSizeA(adjusted_size, FLT_MAX, wrap_width, str.begin(), str.end());
 	return std::make_pair(ret.x, ret.y);
+}
+
+size_t SimrailUiPlatform::SimrailFont::calc_wrap_point(const std::string_view str, float wrap_width) const {
+	bool dirty = glyph_ranges_add(font->ranges_builder, str.begin(), str.end());
+	if (dirty || !font->pending)
+		platform.build_atlas();
+	float adjusted_size = font->size * (ascent / font->pending->Ascent);
+	const char* pos = font->pending->CalcWordWrapPositionA(adjusted_size / font->pending->FontSize, str.begin(), str.end(), wrap_width);
+	return pos - str.begin();
 }
 
 void SimrailUiPlatform::stbi_deleter::operator()(uint8_t *ptr) {

@@ -87,7 +87,8 @@ public:
 	{
 	public:
 		virtual ~Font() = default;
-		virtual std::pair<float, float> calc_size(const std::string_view str) const = 0;
+		virtual std::pair<float, float> calc_size(const std::string_view str, float wrap_width = 0.0f) const = 0;
+		virtual size_t calc_wrap_point(const std::string_view str, float wrap_width) const = 0;
 	};
 
 	class SoundData : private PlatformUtil::NoCopy
