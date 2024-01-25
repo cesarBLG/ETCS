@@ -453,7 +453,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::stri
 	return img;
 }
 
-std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
+std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, float width, int align, Color c) {
 	if (text.empty())
 		return nullptr;
 
@@ -463,7 +463,7 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 
 	//if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), std::string(text).c_str(), color, 0);
+	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), std::string(text).c_str(), color, width * std::abs(s));
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;

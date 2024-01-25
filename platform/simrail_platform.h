@@ -103,6 +103,7 @@ public:
 	public:
 		SimrailFont(std::shared_ptr<SimrailFontWrapper> wrapper, float s, SimrailUiPlatform &p);
 		std::pair<float, float> calc_size(const std::string_view str) const override;
+		std::pair<float, float> calc_size(const std::string_view str, float wrap_width) const;
 	};
 
 	class SimrailImage : public Image
@@ -115,6 +116,7 @@ public:
 		std::pair<float, float> text_size;
 		std::string text;
 		unsigned int color;
+		float wrap_width;
 
 		std::shared_ptr<SimrailImageWrapper> image;
 	};
@@ -168,7 +170,7 @@ public:
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
 	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
-	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
+	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, float width, int align, Color c) override;
 
 	void set_volume(int vol) override;
 	int get_volume() override;
