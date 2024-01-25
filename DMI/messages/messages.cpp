@@ -131,12 +131,12 @@ void updateMessages()
     else textArea.setAck(nullptr);
     textArea.clear();
     line = 0;
-    auto font_clock = platform->load_font(10, 0, get_language());
-    auto font_msg = platform->load_font(12, 0, get_language());
-    auto clock_size = font_clock->calc_size("88:88:_");
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
+        auto font_clock = platform->load_font(10, m.firstGroup, get_language());
+        auto font_msg = platform->load_font(12, m.firstGroup, get_language());
+        auto clock_size = font_clock->calc_size("88:88:_");
         std::string date = std::to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + std::to_string(m.minute);
         std::string text = m.text;
         for (;;)
