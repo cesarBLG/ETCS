@@ -530,13 +530,7 @@ std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view s
 
 size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float wrap_width) const {
 	int extent, count;
-
-#ifdef SIMRAIL
-	TTF_MeasureUTF8(font->font, std::string(str).c_str(), wrap_width * scale / 1.25f, &extent, &count);
-#else
 	TTF_MeasureUTF8(font->font, std::string(str).c_str(), wrap_width * scale, &extent, &count);
-#endif
-
 	count = std::max(count, 1);
 	if (count > str.size())
 		return str.size();

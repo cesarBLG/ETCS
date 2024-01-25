@@ -132,6 +132,7 @@ void updateMessages()
     textArea.clear();
     line = 0;
     auto font = platform->load_font(12, 0, get_language());
+    auto clock_size = font->calc_size("88:88:_");
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
@@ -139,7 +140,7 @@ void updateMessages()
         std::string text = m.text;
         for (;;)
         {
-            size_t wrap = font->calc_wrap_point(text, 230);
+            size_t wrap = font->calc_wrap_point(text, 230.0f - clock_size.first);
             int last = text.find_last_of(' ', wrap);
             if (last == string::npos)
                 last = wrap;
@@ -152,7 +153,7 @@ void updateMessages()
                     m.shown = true;
                     textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
                 }
-                textArea.addText(text.substr(0, last), 45, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
+                textArea.addText(text.substr(0, last), 2 + clock_size.first, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
             }
             ++line;
             if (last + 1 >= text.size()) break;
