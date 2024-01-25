@@ -139,9 +139,10 @@ void updateMessages()
         std::string text = m.text;
         for (;;)
         {
-            int last = text.find_last_of(' ', font->calc_wrap_point(text, 234.0f));
+            size_t wrap = font->calc_wrap_point(text, 234.0f);
+            int last = text.find_last_of(' ', wrap);
             if (last == string::npos)
-                last = text.size();
+                last = wrap;
             if(line<nlines+current && line>=current)
             {
                 if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
