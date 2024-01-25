@@ -14,6 +14,8 @@
 #include "../graphics/icon_button.h"
 #include "../tcp/server.h"
 #include "../state/acks.h"
+#include "../language/language.h"
+#include "platform_runtime.h"
 #include "text_strings.h"
 #include <string>
 #include <deque>
@@ -129,16 +131,17 @@ void updateMessages()
     else textArea.setAck(nullptr);
     textArea.clear();
     line = 0;
+    auto font = platform->load_font(12, 0, get_language());
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
         std::string date = std::to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + std::to_string(m.minute);
         std::string text = m.text;
-        int last;
         for (;;)
         {
-            if(text.size()>25) last = text.find_last_of(' ', 25);
-            else last = text.size();
+            int last = text.find_last_of(' ', font->calc_wrap_point(text, 234.0f));
+            if (last == string::npos)
+                last = text.size();
             if(line<nlines+current && line>=current)
             {
                 if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
