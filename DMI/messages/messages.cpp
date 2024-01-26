@@ -132,7 +132,7 @@ void updateMessages()
     textArea.clear();
     line = 0;
     auto font_clock = platform->load_font(10, true, get_language());
-    auto clock_size = font_clock->calc_size("88:88:_");
+    auto clock_size = font_clock->calc_size("88:88::");
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
@@ -142,7 +142,7 @@ void updateMessages()
         for (;;)
         {
             size_t wrap = font_msg->calc_wrap_point(text, 230.0f - clock_size.first);
-            int last = text.find_last_of(' ', wrap);
+            int last = wrap != text.size() ? text.find_last_of(' ', wrap - 1) : text.size();
             if (last == string::npos)
                 last = wrap;
             if(line<nlines+current && line>=current)
