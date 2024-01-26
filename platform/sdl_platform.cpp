@@ -546,6 +546,8 @@ size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float w
 		else
 			pos += 1;
 	}
+	while (pos != str.data() + str.size() && *pos == ' ')
+		pos++;
 	return pos - str.data();
 }
 
