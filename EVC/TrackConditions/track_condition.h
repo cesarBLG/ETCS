@@ -9,6 +9,7 @@
 #pragma once
 #include "../Position/distance.h"
 #include "../Supervision/train_data.h"
+#include "../Supervision/targets.h"
 #include "../Packets/39.h"
 #include "../Packets/40.h"
 #include "../Packets/67.h"
@@ -102,6 +103,7 @@ struct track_condition
     bool display_end;
     bool end_displayed;
     int64_t end_time;
+    std::vector<std::shared_ptr<target>> targets;
     track_condition() : start_symbol(TrackConditionType_DMI::None, false), end_symbol(TrackConditionType_DMI::None, false)
     {
         active_symbol = announcement_symbol = end_active_symbol = -1;

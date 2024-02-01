@@ -299,11 +299,11 @@ void target::calculate_decelerations(const std::map<dist_base,double> &gradient)
 }
 void target::recalculate_all_decelerations()
 {
-    std::vector<std::shared_ptr<target>> targets;
-    extern std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
-    for (auto &kvp : track_condition_targets) {
-        for (auto &t : kvp.second)
+    std::vector<std::shared_ptr<target>> targets; 
+    for (auto &tc : track_conditions) {
+        for (auto &t : tc->targets) {
             t->calculate_decelerations();
+        }
     }
     calculate_perturbation_location();
 }

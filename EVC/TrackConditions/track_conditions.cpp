@@ -7,7 +7,6 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "track_condition.h"
-#include "../Supervision/targets.h"
 #include "../Supervision/fixed_values.h"
 #include "../Time/clock.h"
 #include "../TrainSubsystems/power.h"
@@ -17,7 +16,7 @@ std::list<std::shared_ptr<track_condition>> track_conditions;
 optional<distance> restore_initial_states_various;
 optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
-std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
+//std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
 void add_condition();
 bool ep_available = true;
 void update_brake_contributions()
@@ -71,8 +70,6 @@ void update_track_conditions()
                 c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
                 c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
                 c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) {
-
-                track_condition_targets.erase(it->get());
                 it = track_conditions.erase(it);
                 continue;
             }
@@ -107,20 +104,16 @@ void update_track_conditions()
             c->display_end = false;
         }
         if (end < -L_TRAIN - D_keep_information && c->end_displayed && !c->display_end) {
-
-            track_condition_targets.erase(it->get());
             it = track_conditions.erase(it);
             continue;
         }
         if (c->condition == TrackConditions::NonStoppingArea) {
-            if (track_condition_targets.find(c) == track_condition_targets.end())
+            if (c->targets.empty())
             {
-                std::vector<std::shared_ptr<target>> l;
-                l.push_back(std::make_shared<target>(c->start.max, 0, target_class::EoA));
-                l.push_back(std::make_shared<target>(c->end.min + L_TRAIN, 0, target_class::EoA));
-                track_condition_targets[c] = l;
+                c->targets.push_back(std::make_shared<target>(c->start.max, 0, target_class::EoA));
+                c->targets.push_back(std::make_shared<target>(c->end.min + L_TRAIN, 0, target_class::EoA));
             }
-            std::vector<std::shared_ptr<target>> &l = track_condition_targets[c];
+            std::vector<std::shared_ptr<target>> &l = c->targets;
             auto &SBId = *l[0];
             auto &SBIg = *l[1];
             SBId.calculate_curves();
@@ -468,7 +461,7 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
             if (tc2->condition == tc->condition) {
                 if (tc->start.max <= tc2->end.min) {
                     exists = true;
-                    track_condition_targets.erase(tc2);
+                    tc->targets.clear();
                     tc2->end = tc->end;
                 }
             } 
