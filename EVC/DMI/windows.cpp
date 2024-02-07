@@ -30,7 +30,10 @@ const json radio_window_radio_wait = R"({"active":"menu_radio","hour_glass":true
 bool pending_train_data_send = false;
 bool any_button_pressed_async = false;
 bool any_button_pressed = false;
+
 bool flexible_data_entry = false;
+bool messasge_when_driver_id_entered = false;
+
 int data_entry_type = 0;
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
@@ -947,6 +950,10 @@ void validate_data_entry(std::string name, json &result)
         }
         if (lv == Level::Unknown) return;
         driver_set_level({lv, nid_ntc});
+        if (true) {
+            int64_t time = get_milliseconds();
+            add_message(text_message(get_text("Level selected"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+        }
         if (active_dialog == dialog_sequence::Main) {
             if (level == Level::N2 || level == Level::N3) {
                 active_dialog_step = "D5";
@@ -962,6 +969,10 @@ void validate_data_entry(std::string name, json &result)
         train_running_number = stoi(res);
         if (train_running_number > 0) {
             train_running_number_valid = true;
+            if (true) {
+                int64_t time = get_milliseconds();
+                add_message(text_message(get_text("Train running number entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+            }
         } else {
             return;
         }
@@ -1126,6 +1137,12 @@ void validate_data_entry(std::string name, json &result)
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
             }
+
+            if (true) {
+                int64_t time = get_milliseconds();
+                add_message(text_message(get_text("Train running number entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+            }
+
             train_shorten('j');
             if (train_data_valid) {
                 active_dialog = dialog_sequence::NTCData;
@@ -1144,6 +1161,10 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "D2";
         else if (active_dialog == dialog_sequence::Main)
             active_dialog_step = "S1";
+        if (true) {
+            int64_t time = get_milliseconds();
+            add_message(text_message(get_text("Driver ID entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+        }
     } else if (name == get_text("RBC data")) {
         uint32_t id = atoll(result[get_text("RBC ID")].get<std::string>().c_str());
         uint64_t number = to_bcd(result[get_text("RBC phone number")].get<std::string>().c_str());
