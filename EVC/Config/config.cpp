@@ -17,6 +17,10 @@ using json = nlohmann::json;
 extern ORserver::ParameterManager manager;
 extern std::string traindata_file;
 extern int data_entry_type;
+extern bool messasge_when_driver_id_entered;
+extern bool messasge_when_running_number_entered;
+extern bool messasge_when_train_data_entered;
+extern bool messasge_when_level_selected;
 void load_config(std::string serie)
 {
     traindata_file = "traindata.json";
@@ -33,6 +37,22 @@ void load_config(std::string serie)
         }
         if (cfg.contains("UnsupportedLevels")) {
             unsupported_levels = cfg["UnsupportedLevels"].get<std::set<int>>();
+        }
+        if (cfg.contains("MessasgeWhenDriverIdEntered"))
+        {
+            messasge_when_driver_id_entered = cfg["MessasgeWhenDriverIdEntered"];
+        }
+        if (cfg.contains("MessasgeWhenLevelSelected"))
+        {
+            messasge_when_level_selected = cfg["MessasgeWhenLevelSelected"];
+        }
+        if (cfg.contains("MessasgeWhenRunningNumberEntered"))
+        {
+            messasge_when_running_number_entered = cfg["MessasgeWhenRunningNumberEntered"];
+        }
+        if (cfg.contains("MessasgeWhenTrainDataEntered"))
+        {
+            messasge_when_train_data_entered = cfg["MessasgeWhenTrainDataEntered"];
         }
         if (cfg.contains("AvailableNTC")) {
             std::set<int> ntcs = cfg["AvailableNTC"].get<std::set<int>>();

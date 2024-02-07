@@ -27,6 +27,6 @@ void displayRadio()
     else if(radioStatus == 2)
         e1.addImage("symbols/Status/ST_03.bmp");
 
-    if (true)
+    if (playSoundOnRadioStatusChange)
         playSinfo();
 }
