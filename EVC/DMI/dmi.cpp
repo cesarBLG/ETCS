@@ -12,6 +12,7 @@
 #include <list>
 #include <algorithm>
 #include <map>
+#include "../language/language.h"
 #include "../Supervision/supervision.h"
 #include "../Supervision/supervision_targets.h"
 #include "../Supervision/targets.h"
@@ -25,6 +26,7 @@
 #include "../Procedures/level_transition.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../STM/stm.h"
 #include "track_ahead_free.h"
 #include "text_message.h"
 #include "windows.h"
@@ -59,7 +61,8 @@ extern bool EB_command;
 extern bool SB_command;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
-
+bool messasge_when_driver_ack_level = false;
+bool messasge_when_driver_ack_mode = false;
 void parse_command(string str)
 {
     int index = str.find_first_of('(');
@@ -74,9 +77,104 @@ void parse_command(string str)
             if (selection == "ModeAcknowledge") {
                 mode_acknowledgeable = false;
                 mode_acknowledged = true;
+                if (messasge_when_driver_ack_mode) {
+                    string targetMode = "";
+                    switch (mode_to_ack) {
+                        case Mode::FS:
+                            targetMode = "FS";
+                            break;
+                        case Mode::LS:
+                            targetMode = "LS";
+                            break;
+                        case Mode::OS:
+                            targetMode = "OS";
+                            break;
+                        case Mode::SR:
+                            targetMode = "SR";
+                            break;
+                        case Mode::SH:
+                            targetMode = "SH";
+                            break;
+                        case Mode::UN:
+                            targetMode = "UN";
+                            break;
+                        case Mode::PS:
+                            targetMode = "PS";
+                            break;
+                        case Mode::SL:
+                            targetMode = "SL";
+                            break;
+                        case Mode::SB:
+                            targetMode = "SB";
+                            break;
+                        case Mode::TR:
+                            targetMode = "TR";
+                            break;
+                        case Mode::PT:
+                            targetMode = "PT";
+                            break;
+                        case Mode::SF:
+                            targetMode = "SF";
+                            break;
+                        case Mode::IS:
+                            targetMode = "IS";
+                            break;
+                        case Mode::NP:
+                            targetMode = "NP";
+                            break;
+                        case Mode::NL:
+                            targetMode = "NL";
+                            break;
+                        case Mode::SN:
+                            targetMode = "SN";
+                            break;
+                        case Mode::RV:
+                            targetMode = "RV";
+                            break;
+#if BASELINE == 4
+                        case Mode::AD:
+                            targetMode = "AD";
+                            break;
+                        case Mode::SM:
+                            targetMode = "SM";
+                            break;
+#endif
+                        default:
+                            break;
+                    }
+                    int64_t time = get_milliseconds();
+                    add_message(text_message(targetMode + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                }
             } else if (selection == "LevelAcknowledge") {
                 level_acknowledgeable = false;
                 level_acknowledged = true;
+                if (messasge_when_driver_ack_level) {
+                    string targetLevel = "";
+                    switch (level_to_ack) {
+                        case Level::N0:
+                            targetLevel = get_text("Level 0");
+                            break;
+                        case Level::N1:
+                            targetLevel = get_text("Level 1");
+                            break;
+                        case Level::N2:
+                            targetLevel = get_text("Level 2");
+                            break;
+#if BASELINE < 4
+                        case Level::N3:
+                            targetLevel = get_text("Level 3");
+                            break;
+#endif
+                        case Level::NTC: break;
+                            targetLevel = get_ntc_name(ntc_to_ack);
+
+                        default:
+                        case Level::Unknown:
+                            break;
+                    }
+                    int64_t time = get_milliseconds();
+                    add_message(text_message(targetLevel + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                }
             } else if (selection == "BrakeAcknowledge") {
                 brake_acknowledgeable = false;
                 brake_acknowledged = true;
