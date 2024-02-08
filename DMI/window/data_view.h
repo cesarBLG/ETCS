@@ -32,7 +32,7 @@ class data_view_window : public subwindow
         for (json &j : fields)
         {
             std::string label = j["Label"];
-            std::string value = j["Value"];
+            std::string value = j.contains("Value") ? j["Value"] : "";
             if (j.contains("Keyboard") && j["Keyboard"]["Type"] != "Dedicated");
             {
                 std::string format = "";
