@@ -36,6 +36,8 @@ bool messasge_when_running_number_entered = false;
 bool messasge_when_train_data_entered = false;
 bool messasge_when_level_selected = false;
 int data_entry_type = 0;
+std::map<std::string, std::string> const_train_data;
+
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
     json j;
@@ -206,13 +208,29 @@ json train_data_window()
     inputs.push_back(build_numeric_field(get_text("Length (m)"), train_data_known ? std::to_string((int)L_TRAIN) : ""));
     inputs.push_back(build_numeric_field(get_text("Brake percentage"), train_data_known ? std::to_string(brake_percentage) : ""));
     inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), train_data_known ? std::to_string((int)(V_train*3.6)) : ""));
-    std::vector<std::string> gauges = {"G1", "GA", "GB", "GC", get_text("Out of GC")};
-    inputs.push_back(build_input_field(get_text("Loading gauge"), train_data_known ? gauges[(int)loading_gauge] : "", gauges));
-    inputs.push_back(build_input_field(get_text("Train category"), train_data_known ? train_category : "", {get_text("PASS 1"),get_text("PASS 2"),get_text("PASS 3"),
-        get_text("TILT 1"),get_text("TILT 2"),get_text("TILT 3"),get_text("TILT 4"),get_text("TILT 5"),get_text("TILT 6"),get_text("TILT 7"),
-        get_text("FP 1"),get_text("FP2"),get_text("FP 3"),get_text("FP 4"),get_text("FG 1"),get_text("FG 2"),get_text("FG 3"),get_text("FG 4")}));
-    std::vector<std::string> categories = {"A","HS17","B1","B2","C2","C3","C4","D2","D3","D4","D4XL","E4","E5"};
-    inputs.push_back(build_input_field(get_text("Axle load category"), train_data_known ? categories[(int)axle_load_category] : "", categories));
+    
+    if (!const_train_data.count("LoadingGauge")) {
+        std::vector<std::string> gauges = { "G1", "GA", "GB", "GC", get_text("Out of GC") };
+        inputs.push_back(build_input_field(get_text("Loading gauge"), train_data_known ? gauges[(int)loading_gauge] : "", gauges));
+    }
+    
+    if (!const_train_data.count("TrainCategory")) {
+        std::vector<std::string> categories = {
+            get_text("PASS 1"), get_text("PASS 2"), get_text("PASS 3"),
+            get_text("TILT 1"), get_text("TILT 2"), get_text("TILT 3"),
+            get_text("TILT 4"), get_text("TILT 5"), get_text("TILT 6"),
+            get_text("TILT 7"), get_text("FP 1"), get_text("FP2"),
+            get_text("FP 3"), get_text("FP 4"), get_text("FG 1"),
+            get_text("FG 2"), get_text("FG 3"), get_text("FG 4")
+        };
+        inputs.push_back(build_input_field(get_text("Train category"), train_data_known ? train_category : "", categories));
+    }
+
+    if (!const_train_data.count("AxleLoadCategory")) {
+        std::vector<std::string> categories = { "A", "HS17", "B1", "B2", "C2", "C3", "C4", "D2", "D3", "D4", "D4XL", "E4", "E5" };
+        inputs.push_back(build_input_field(get_text("Axle load category"), train_data_known ? categories[(int)axle_load_category] : "", categories));
+    }
+
     j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
     j["Switchable"] = data_entry_type == 2;
     return j;
@@ -1013,8 +1031,10 @@ void validate_data_entry(std::string name, json &result)
         } else {
             if (flexible_data_entry) {
                 train_data_valid = false;
+
                 L_TRAIN = stoi(result[get_text("Length (m)")].get<std::string>());
-                std::string gauge = result[get_text("Loading gauge")].get<std::string>();
+
+                std::string gauge = const_train_data.count("LoadingGauge") ? const_train_data["LoadingGauge"] : result[get_text("Loading gauge")].get<std::string>();
                 if (gauge == get_text("G1"))
                     loading_gauge = loading_gauges::G1;
                 else if (gauge == get_text("GA"))
@@ -1025,7 +1045,8 @@ void validate_data_entry(std::string name, json &result)
                     loading_gauge = loading_gauges::GC;
                 else
                     loading_gauge = loading_gauges::OutGC;
-                std::string axlecat = result[get_text("Axle load category")].get<std::string>();
+
+                std::string axlecat = const_train_data.count("AxleLoadCategory") ? const_train_data["AxleLoadCategory"] : result[get_text("Axle load category")].get<std::string>();
                 if (axlecat == get_text("A"))
                     axle_load_category = axle_load_categories::A;
                 else if (axlecat == get_text("HS17"))
@@ -1052,9 +1073,12 @@ void validate_data_entry(std::string name, json &result)
                     axle_load_category = axle_load_categories::E4;
                 else if (axlecat == get_text("E5"))
                     axle_load_category = axle_load_categories::E5;
+
                 set_train_max_speed(stoi(result[get_text("Max speed (km/h)")].get<std::string>())/3.6);
+
                 brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
-                std::string str = result[get_text("Train category")].get<std::string>();
+
+                std::string str = const_train_data.count("TrainCategory") ? const_train_data["TrainCategory"] :  result[get_text("Train category")].get<std::string>();
                 int cant;
                 int cat;
                 if (str == get_text("PASS 1")) {
