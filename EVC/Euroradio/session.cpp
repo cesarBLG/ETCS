@@ -542,6 +542,7 @@ void set_supervising_rbc(contact_info info)
     for (auto *session : active_sessions) {
         if (session->contact.country == info.country && session->contact.id == info.id) {
             supervising_rbc = session;
+            supervising_rbc->contact.phone_number = info.phone_number;
             return;
         }
     }
