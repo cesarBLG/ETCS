@@ -953,7 +953,7 @@ void validate_data_entry(std::string name, json &result)
         driver_set_level({lv, nid_ntc});
         if (messasge_when_level_selected) {
             int64_t time = get_milliseconds();
-            add_message(text_message(get_text("Level selected"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+            add_message(text_message(get_text("Level selected"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
         }
         if (active_dialog == dialog_sequence::Main) {
             if (level == Level::N2 || level == Level::N3) {
@@ -972,7 +972,7 @@ void validate_data_entry(std::string name, json &result)
             train_running_number_valid = true;
             if (messasge_when_running_number_entered) {
                 int64_t time = get_milliseconds();
-                add_message(text_message(get_text("Train running number entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                add_message(text_message(get_text("Train running number entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
             }
         } else {
             return;
@@ -1140,7 +1140,7 @@ void validate_data_entry(std::string name, json &result)
             }
             if (messasge_when_train_data_entered) {
                 int64_t time = get_milliseconds();
-                add_message(text_message(get_text("Train data entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                add_message(text_message(get_text("Train data entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
             }
             train_shorten('j');
             if (train_data_valid) {
@@ -1162,7 +1162,7 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "S1";
         if (messasge_when_driver_id_entered) {
             int64_t time = get_milliseconds();
-            add_message(text_message(get_text("Driver ID entered"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+            add_message(text_message(get_text("Driver ID entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
         }
     } else if (name == get_text("RBC data")) {
         uint32_t id = atoll(result[get_text("RBC ID")].get<std::string>().c_str());

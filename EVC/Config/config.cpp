@@ -23,6 +23,8 @@ extern bool messasge_when_train_data_entered;
 extern bool messasge_when_level_selected;
 extern bool messasge_when_driver_ack_level;
 extern bool messasge_when_driver_ack_mode;
+extern bool messasge_when_driver_ack_mode;
+extern bool entering_mode_message_is_time_dependent;
 void load_config(std::string serie)
 {
     traindata_file = "traindata.json";
@@ -63,6 +65,10 @@ void load_config(std::string serie)
         if (cfg.contains("MessasgeWhenLevelAck"))
         {
             messasge_when_driver_ack_level = cfg["MessasgeWhenLevelAck"];
+        }
+        if (cfg.contains("EnteringModeMessageIsTimeDependent"))
+        {
+            entering_mode_message_is_time_dependent = cfg["EnteringModeMessageIsTimeDependent"];
         }
         if (cfg.contains("AvailableNTC")) {
             std::set<int> ntcs = cfg["AvailableNTC"].get<std::set<int>>();

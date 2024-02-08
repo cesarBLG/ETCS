@@ -143,7 +143,7 @@ void parse_command(string str)
                             break;
                     }
                     int64_t time = get_milliseconds();
-                    add_message(text_message(targetMode + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                    add_message(text_message(targetMode + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
                 }
             } else if (selection == "LevelAcknowledge") {
                 level_acknowledgeable = false;
@@ -173,7 +173,7 @@ void parse_command(string str)
                             break;
                     }
                     int64_t time = get_milliseconds();
-                    add_message(text_message(targetLevel + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
+                    add_message(text_message(targetLevel + get_text(" confirmed"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
                 }
             } else if (selection == "BrakeAcknowledge") {
                 brake_acknowledgeable = false;
