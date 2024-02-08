@@ -165,9 +165,9 @@ void parse_command(string str)
                             targetLevel = get_text("Level 3");
                             break;
 #endif
-                        case Level::NTC: break;
+                        case Level::NTC:
                             targetLevel = get_ntc_name(ntc_to_ack);
-
+                            break;
                         default:
                         case Level::Unknown:
                             break;
