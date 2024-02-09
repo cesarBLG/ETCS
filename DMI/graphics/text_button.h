@@ -11,8 +11,8 @@
 #include "button.h"
 class TextButton : public Button
 {
-    text_graphic *enabled_text=nullptr;
-    text_graphic *disabled_text=nullptr;
+    std::shared_ptr<UiPlatform::Image> enabled_text=nullptr;
+    std::shared_ptr<UiPlatform::Image> disabled_text=nullptr;
     int size;
     public:
     std::string caption;
