@@ -61,8 +61,8 @@ extern bool EB_command;
 extern bool SB_command;
 extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
-bool messasge_when_driver_ack_level = false;
-bool messasge_when_driver_ack_mode = false;
+bool message_when_driver_ack_level = false;
+bool message_when_driver_ack_mode = false;
 void parse_command(string str)
 {
     int index = str.find_first_of('(');
@@ -77,7 +77,7 @@ void parse_command(string str)
             if (selection == "ModeAcknowledge") {
                 mode_acknowledgeable = false;
                 mode_acknowledged = true;
-                if (messasge_when_driver_ack_mode) {
+                if (message_when_driver_ack_mode) {
                     string targetMode = "";
                     switch (mode_to_ack) {
                         case Mode::FS:
@@ -148,7 +148,7 @@ void parse_command(string str)
             } else if (selection == "LevelAcknowledge") {
                 level_acknowledgeable = false;
                 level_acknowledged = true;
-                if (messasge_when_driver_ack_level) {
+                if (message_when_driver_ack_level) {
                     string targetLevel = "";
                     switch (level_to_ack) {
                         case Level::N0:

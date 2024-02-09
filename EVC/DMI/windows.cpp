@@ -31,10 +31,10 @@ bool pending_train_data_send = false;
 bool any_button_pressed_async = false;
 bool any_button_pressed = false;
 bool flexible_data_entry = false;
-bool messasge_when_driver_id_entered = false;
-bool messasge_when_running_number_entered = false;
-bool messasge_when_train_data_entered = false;
-bool messasge_when_level_selected = false;
+bool message_when_driver_id_entered = false;
+bool message_when_running_number_entered = false;
+bool message_when_train_data_entered = false;
+bool message_when_level_selected = false;
 int data_entry_type = 0;
 std::map<std::string, std::string> const_train_data;
 std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
@@ -976,7 +976,7 @@ void validate_data_entry(std::string name, json &result)
         }
         if (lv == Level::Unknown) return;
         driver_set_level({lv, nid_ntc});
-        if (messasge_when_level_selected) {
+        if (message_when_level_selected) {
             int64_t time = get_milliseconds();
             add_message(text_message(get_text("Level selected"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
         }
@@ -995,7 +995,7 @@ void validate_data_entry(std::string name, json &result)
         train_running_number = stoi(res);
         if (train_running_number > 0) {
             train_running_number_valid = true;
-            if (messasge_when_running_number_entered) {
+            if (message_when_running_number_entered) {
                 int64_t time = get_milliseconds();
                 add_message(text_message(get_text("Train running number entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
             }
@@ -1169,7 +1169,7 @@ void validate_data_entry(std::string name, json &result)
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
             }
-            if (messasge_when_train_data_entered) {
+            if (message_when_train_data_entered) {
                 int64_t time = get_milliseconds();
                 add_message(text_message(get_text("Train data entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
             }
@@ -1191,7 +1191,7 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "D2";
         else if (active_dialog == dialog_sequence::Main)
             active_dialog_step = "S1";
-        if (messasge_when_driver_id_entered) {
+        if (message_when_driver_id_entered) {
             int64_t time = get_milliseconds();
             add_message(text_message(get_text("Driver ID entered"), true, false, false, [time](text_message& t) { return time + 60000 < get_milliseconds(); }));
         }

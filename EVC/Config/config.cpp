@@ -17,13 +17,13 @@ using json = nlohmann::json;
 extern ORserver::ParameterManager manager;
 extern std::string traindata_file;
 extern int data_entry_type;
-extern bool messasge_when_driver_id_entered;
-extern bool messasge_when_running_number_entered;
-extern bool messasge_when_train_data_entered;
-extern bool messasge_when_level_selected;
-extern bool messasge_when_driver_ack_level;
-extern bool messasge_when_driver_ack_mode;
-extern bool messasge_when_driver_ack_mode;
+extern bool message_when_driver_id_entered;
+extern bool message_when_running_number_entered;
+extern bool message_when_train_data_entered;
+extern bool message_when_level_selected;
+extern bool message_when_driver_ack_level;
+extern bool message_when_driver_ack_mode;
+extern bool message_when_driver_ack_mode;
 extern bool entering_mode_message_is_time_dependent;
 extern std::map<std::string, std::string> const_train_data;
 extern std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
@@ -45,29 +45,29 @@ void load_config(std::string serie)
 		if (cfg.contains("UnsupportedLevels")) {
 			unsupported_levels = cfg["UnsupportedLevels"].get<std::set<int>>();
 		}
-		if (cfg.contains("MessasgeWhenDriverIdEntered"))
+		if (cfg.contains("MessageWhenDriverIdEntered"))
 		{
-			messasge_when_driver_id_entered = cfg["MessasgeWhenDriverIdEntered"];
+			message_when_driver_id_entered = cfg["MessageWhenDriverIdEntered"];
 		}
-		if (cfg.contains("MessasgeWhenLevelSelected"))
+		if (cfg.contains("MessageWhenLevelSelected"))
 		{
-			messasge_when_level_selected = cfg["MessasgeWhenLevelSelected"];
+			message_when_level_selected = cfg["MessageWhenLevelSelected"];
 		}
-		if (cfg.contains("MessasgeWhenRunningNumberEntered"))
+		if (cfg.contains("MessageWhenRunningNumberEntered"))
 		{
-			messasge_when_running_number_entered = cfg["MessasgeWhenRunningNumberEntered"];
+			message_when_running_number_entered = cfg["MessageWhenRunningNumberEntered"];
 		}
-		if (cfg.contains("MessasgeWhenTrainDataEntered"))
+		if (cfg.contains("MessageWhenTrainDataEntered"))
 		{
-			messasge_when_train_data_entered = cfg["MessasgeWhenTrainDataEntered"];
+			message_when_train_data_entered = cfg["MessageWhenTrainDataEntered"];
 		}
-		if (cfg.contains("MessasgeWhenModeAck"))
+		if (cfg.contains("MessageWhenModeAck"))
 		{
-			messasge_when_driver_ack_mode = cfg["MessasgeWhenModeAck"];
+			message_when_driver_ack_mode = cfg["MessageWhenModeAck"];
 		}
-		if (cfg.contains("MessasgeWhenLevelAck"))
+		if (cfg.contains("MessageWhenLevelAck"))
 		{
-			messasge_when_driver_ack_level = cfg["MessasgeWhenLevelAck"];
+			message_when_driver_ack_level = cfg["MessageWhenLevelAck"];
 		}
 		if (cfg.contains("EnteringModeMessageIsTimeDependent"))
 		{
