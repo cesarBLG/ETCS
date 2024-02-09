@@ -14,6 +14,7 @@ extern int maxSpeed;
 extern int etcsDialMaxSpeed;
 extern bool softkeys;
 extern bool serieSelected;
+extern bool playSoundOnRadioStatusChange;
 extern std::string stm_layout_file;
 void startWindows();
 void load_config(std::string serie)
@@ -31,6 +32,10 @@ void load_config(std::string serie)
             }
             if (cfg.contains("STMLayout")) {
                 stm_layout_file = cfg["STMLayout"];
+            }
+            if (cfg.contains("PlaySoundOnRadioStatusChange"))
+            {
+                playSoundOnRadioStatusChange = cfg["PlaySoundOnRadioStatusChange"];
             }
             bool sk = cfg.contains("SoftKeys") && cfg["SoftKeys"];
             if (softkeys != sk) {

@@ -1,0 +1,4 @@
+find ../EVC -name '*.cpp' | xargs xgettext -k --keyword=get_text -o evc/evc.pot
+find ../DMI -name '*.cpp' | xargs xgettext -k --keyword=get_text -o dmi/dmi.pot
+sed -i 's/charset=CHARSET/charset=UTF-8/g' evc/evc.pot
+sed -i 's/charset=CHARSET/charset=UTF-8/g' dmi/dmi.pot
