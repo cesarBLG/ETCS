@@ -37,6 +37,7 @@ bool messasge_when_train_data_entered = false;
 bool messasge_when_level_selected = false;
 int data_entry_type = 0;
 std::map<std::string, std::string> const_train_data;
+std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
 
 json build_input_field(std::string label, std::string value, std::vector<std::string> values)
 {
@@ -211,6 +212,8 @@ json train_data_window()
     
     if (!const_train_data.count("LoadingGauge")) {
         std::vector<std::string> gauges = { "G1", "GA", "GB", "GC", get_text("Out of GC") };
+        if (custom_train_data_inputs.count("LoadingGauge"))
+            gauges = custom_train_data_inputs["LoadingGauge"];
         inputs.push_back(build_input_field(get_text("Loading gauge"), train_data_known ? gauges[(int)loading_gauge] : "", gauges));
     }
     
@@ -223,11 +226,15 @@ json train_data_window()
             get_text("FP 3"), get_text("FP 4"), get_text("FG 1"),
             get_text("FG 2"), get_text("FG 3"), get_text("FG 4")
         };
+        if (custom_train_data_inputs.count("TrainCategory"))
+            categories = custom_train_data_inputs["TrainCategory"];
         inputs.push_back(build_input_field(get_text("Train category"), train_data_known ? train_category : "", categories));
     }
 
     if (!const_train_data.count("AxleLoadCategory")) {
         std::vector<std::string> categories = { "A", "HS17", "B1", "B2", "C2", "C3", "C4", "D2", "D3", "D4", "D4XL", "E4", "E5" };
+        if (custom_train_data_inputs.count("AxleLoadCategory"))
+            categories = custom_train_data_inputs["AxleLoadCategory"];
         inputs.push_back(build_input_field(get_text("Axle load category"), train_data_known ? categories[(int)axle_load_category] : "", categories));
     }
 

@@ -26,6 +26,7 @@ extern bool messasge_when_driver_ack_mode;
 extern bool messasge_when_driver_ack_mode;
 extern bool entering_mode_message_is_time_dependent;
 extern std::map<std::string, std::string> const_train_data;
+extern std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
 
 void load_config(std::string serie)
 {
@@ -78,6 +79,14 @@ void load_config(std::string serie)
 			for (json& j : cfg["ConstTrainDataValues"])
 			{
 				const_train_data[j["Field"].get<std::string>()] = j["Value"].get<std::string>();
+			}
+		}
+		if (cfg.contains("CustomTrainDataInputs"))
+		{
+			custom_train_data_inputs.clear();
+			for (json& j : cfg["CustomTrainDataInputs"])
+			{
+				custom_train_data_inputs[j["Field"].get<std::string>()] = j["Value"].get<std::vector<std::string>>();
 			}
 		}
 		if (cfg.contains("AvailableNTC")) {
