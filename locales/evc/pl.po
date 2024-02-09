@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: ETCS EVC\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-09 11:03+0100\n"
-"PO-Revision-Date: 2024-02-09 13:05+0100\n"
+"PO-Revision-Date: 2024-02-09 14:11+0000\n"
 "Last-Translator: Bartłomiej Skwara <bartek@skwara.me>\n"
 "Language-Team: Polish <https://sts.simkol.pl:18443/projects/simrail/etcs-evc/"
 "pl/>\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Weblate 4.18.2\n"
 
 #: ../EVC/DMI/dmi.cpp:146 ../EVC/DMI/dmi.cpp:176
 msgid " confirmed"
@@ -99,7 +99,7 @@ msgstr "Długość (m)"
 #: ../EVC/DMI/windows.cpp:210 ../EVC/DMI/windows.cpp:1086
 #: ../EVC/DMI/windows.cpp:1351
 msgid "Brake percentage"
-msgstr "Proc. masy ham."
+msgstr "Rz. % masy hamuj."
 
 #: ../EVC/DMI/windows.cpp:211 ../EVC/DMI/windows.cpp:1084
 #: ../EVC/DMI/windows.cpp:1355
@@ -247,7 +247,7 @@ msgstr "Usuń VBC"
 
 #: ../EVC/DMI/windows.cpp:335
 msgid "Brake percentaje"
-msgstr "Proc. masy ham."
+msgstr "Rz. % masy hamuj."
 
 #: ../EVC/DMI/windows.cpp:336
 msgid "Maximum speed (km/h)"
@@ -255,7 +255,7 @@ msgstr "Prędkość max. (km/h)"
 
 #: ../EVC/DMI/windows.cpp:337
 msgid "Airtight"
-msgstr "Zwiększanie ciśnienia"
+msgstr "Zamknięty obieg powietrza"
 
 #: ../EVC/DMI/windows.cpp:337
 msgid "Yes"
