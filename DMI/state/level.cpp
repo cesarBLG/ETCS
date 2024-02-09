@@ -12,10 +12,12 @@
 #include <string>
 using namespace std;
 extern Component distanceBar;
-Component a4(54, 25, nullptr);
+Component a4(54, 25, displaySlipperyRail);
 Component levelRegion(54, 25, displayLevel);
 static Level prevlevel;
 static int prevNTC;
+static bool prevSlipperyRail;
+
 void displayLevel()
 {
     if(prevlevel==level && (level != Level::NTC || prevNTC == nid_ntc)) return;
@@ -54,4 +56,13 @@ void displayLevel()
     }
     path+=".bmp";
     levelRegion.addImage(path);
+}
+
+void displaySlipperyRail()
+{
+    if (slippery_rail == prevSlipperyRail) return;
+    prevSlipperyRail = slippery_rail;
+    a4.clear();
+    if (slippery_rail)
+        a4.addImage("symbols/status/ST_02.bmp");
 }

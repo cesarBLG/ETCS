@@ -288,6 +288,7 @@ void dmi_update_func()
     sendtoor = get_milliseconds() - lastor > 250;
     if (sendtoor) lastor = get_milliseconds();
     json j;
+    j["SlipperyRail"] = slippery_rail_driver;
     j["AllowedSpeedMpS"] = V_perm;
     j["InterventionSpeedMpS"] = V_sbi;
     j["TargetSpeedMpS"] = V_target;

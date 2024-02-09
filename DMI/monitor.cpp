@@ -41,6 +41,7 @@ bool driverid_valid;
 bool ovEOA;
 bool train_data_valid;
 int L_train;
+bool slippery_rail;
 
 void updateSupervision();
 void update()
