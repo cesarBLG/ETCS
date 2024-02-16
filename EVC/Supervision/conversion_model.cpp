@@ -363,7 +363,7 @@ void set_conversion_correction_values()
 bool conversion_model_used = false;
 void set_conversion_model()
 {
-    if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6 && L_TRAIN < (brake_position == PassengerP ? 900 : 1500)) {
+    if (brake_percentage >= 30 && brake_percentage <= 250 && V_train <= 200/3.6 && L_TRAIN <= (brake_position == PassengerP ? 900 : 1500)) {
         conversion_model_used = true;
         reset();
         convmodel_basic_accel(brake_percentage, A_brake_emergency, A_brake_service);
