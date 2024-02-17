@@ -21,41 +21,45 @@ bool serieSelected;
 bool useImperialSystem;
 bool prevUseImperialSystem;
 
-#if SIMRAIL
 std::shared_ptr<UiPlatform::Image> invalidEvcIndicator;
-std::shared_ptr<UiPlatform::Image> invalidSerieIndicator;
 std::unique_ptr<UiPlatform::Font> indicatorFont;
+#if SIMRAIL
+std::shared_ptr<UiPlatform::Image> invalidSerieIndicator;
 #endif
 
 void displayETCS()
 {
     updateAcks();
-#if SIMRAIL
 
-    if (indicatorFont == NULL)
+    if (!indicatorFont) {
         indicatorFont = platform->load_font(10, false, "");
-    
+        platform->on_quit().then([]() {
+            indicatorFont = nullptr;
+        }).detach();
+    }
+
     if (!evc_peer)
     {
-        if (invalidEvcIndicator == NULL)
-            invalidEvcIndicator = platform->make_text_image("EVC not connected!", *indicatorFont, White);
+        if (!invalidEvcIndicator)
+            invalidEvcIndicator = platform->make_text_image(get_text("EVC not connected!"), *indicatorFont, White);
         else
             platform->draw_image(*invalidEvcIndicator, 0, 0);
         return;
     }
 
+#if SIMRAIL
+
     if (!serieSelected)
     {
         if (invalidSerieIndicator == NULL)
-            invalidSerieIndicator = platform->make_text_image("Train serie not selected!", *indicatorFont, White);
+            invalidSerieIndicator = platform->make_text_image(get_text("Train serie not selected!"), *indicatorFont, White);
         else
             platform->draw_image(*invalidSerieIndicator, 0, 20);
         return;
     }
 
-#else
-    if (!evc_peer) return;
 #endif
+
     std::vector<std::vector<int>> alreadyDrawn;
     for(auto it=active_windows.rbegin(); it!=active_windows.rend(); ++it)
     {
