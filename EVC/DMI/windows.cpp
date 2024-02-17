@@ -1013,50 +1013,52 @@ void validate_data_entry(std::string name, json &result)
                 active_dialog_step = "S1";
         }
     } else if (name == get_text("Train data")) {
-        int length = stoi(result[get_text("Length (m)")].get<std::string>());
-        std::string str = result[get_text("Train category")].get<std::string>();
-        int cat;
-        if (str == get_text("PASS 1"))
-            cat = 2;
-        else if (str == get_text("PASS 2"))
-            cat = 2;
-        else if (str == get_text("PASS 3"))
-            cat = 2;
-        else if (str == get_text("TILT 1"))
-            cat = 2;
-        else if (str == get_text("TILT 2"))
-            cat = 2;
-        else if (str == get_text("TILT 3"))
-            cat = 2;
-        else if (str == get_text("TILT 4"))
-            cat = 2;
-        else if (str == get_text("TILT 5"))
-            cat = 2;
-        else if (str == get_text("TILT 6"))
-            cat = 2;
-        else if (str == get_text("TILT 7"))
-            cat = 2;
-        else if (str == get_text("FP 1"))
-            cat = 0;
-        else if (str == get_text("FP 2"))
-            cat = 0;
-        else if (str == get_text("FP 3"))
-            cat = 0;
-        else if (str == get_text("FP 4"))
-            cat = 0;
-        else if (str == get_text("FG 1"))
-            cat = 1;
-        else if (str == get_text("FG 2"))
-            cat = 1;
-        else if (str == get_text("FG 3"))
-            cat = 1;
-        else if (str == get_text("FG 4")) 
-            cat = 1;
-        // TODO: implement cross check
-        if (length > 900 && cat == 2)
-            return;
-        if (length > 1500)
-            return;
+        if (flexible_data_entry) {
+            int length = stoi(result[get_text("Length (m)")].get<std::string>());
+            std::string str = result[get_text("Train category")].get<std::string>();
+            int cat;
+            if (str == get_text("PASS 1"))
+                cat = 2;
+            else if (str == get_text("PASS 2"))
+                cat = 2;
+            else if (str == get_text("PASS 3"))
+                cat = 2;
+            else if (str == get_text("TILT 1"))
+                cat = 2;
+            else if (str == get_text("TILT 2"))
+                cat = 2;
+            else if (str == get_text("TILT 3"))
+                cat = 2;
+            else if (str == get_text("TILT 4"))
+                cat = 2;
+            else if (str == get_text("TILT 5"))
+                cat = 2;
+            else if (str == get_text("TILT 6"))
+                cat = 2;
+            else if (str == get_text("TILT 7"))
+                cat = 2;
+            else if (str == get_text("FP 1"))
+                cat = 0;
+            else if (str == get_text("FP 2"))
+                cat = 0;
+            else if (str == get_text("FP 3"))
+                cat = 0;
+            else if (str == get_text("FP 4"))
+                cat = 0;
+            else if (str == get_text("FG 1"))
+                cat = 1;
+            else if (str == get_text("FG 2"))
+                cat = 1;
+            else if (str == get_text("FG 3"))
+                cat = 1;
+            else if (str == get_text("FG 4")) 
+                cat = 1;
+            // TODO: implement cross check
+            if (length > 900 && cat == 2)
+                return;
+            if (length > 1500)
+                return;
+        }
 
         active_dialog_step = "S3-2";
         json j = R"({"active":"train_data_validation_window"})"_json;
