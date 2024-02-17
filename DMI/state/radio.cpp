@@ -8,14 +8,25 @@
  */
 #include "../graphics/component.h"
 #include "../monitor.h"
+#include "../sound/sound.h"
+
+extern bool playSoundOnRadioStatusChange;
 void displayRadio();
 Component e1(54, 25, displayRadio);
 static int prevRadio;
 void displayRadio()
 {
-    if(prevRadio == radioStatus) return;
+    if(prevRadio == radioStatus)
+        return;
+
     prevRadio = radioStatus;
     e1.clear();
-    if(radioStatus == 1) e1.addImage("symbols/Status/ST_04.bmp");
-    else if(radioStatus == 2) e1.addImage("symbols/Status/ST_03.bmp");
+
+    if(radioStatus == 1)
+        e1.addImage("symbols/Status/ST_04.bmp");
+    else if(radioStatus == 2)
+        e1.addImage("symbols/Status/ST_03.bmp");
+
+    if (playSoundOnRadioStatusChange)
+        playSinfo();
 }

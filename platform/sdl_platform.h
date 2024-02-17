@@ -102,7 +102,8 @@ public:
 	public:
 		SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float scale);
 		TTF_Font* get() const;
-		std::pair<float, float> calc_size(const std::string_view str) const override;
+		std::pair<float, float> calc_size(const std::string_view str, float wrap_width = 0.0f) const override;
+		size_t calc_wrap_point(const std::string_view str, float wrap_width) const override;
 	};
 
 	class SdlSoundData final : public SoundData
@@ -155,7 +156,7 @@ public:
 	std::unique_ptr<Image> load_image(const std::string_view path) override;
 	std::unique_ptr<Font> load_font(float size, bool bold, const std::string_view lang) override;
 	std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) override;
-	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) override;
+	std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, float width, int align, Color c) override;
 
 	void set_volume(int vol) override;
 	int get_volume() override;

@@ -11,7 +11,7 @@
 #include "keyboard.h"
 #include "../monitor.h"
 #include "../tcp/server.h"
-train_data_window::train_data_window(std::string title, bool switchable) : input_window(title, 6, true), SelectType(softkeys ? 64 : 60,50), softSelectType(get_text("Select\ntype"), 64, 50), switchable(switchable)
+train_data_window::train_data_window(std::string title, bool switchable, int nfields) : input_window(title, nfields, true), SelectType(softkeys ? 64 : 60,50), softSelectType(get_text("Select\ntype"), 64, 50), switchable(switchable)
 {
     if (softkeys)
     {

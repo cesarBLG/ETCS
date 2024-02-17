@@ -14,6 +14,8 @@
 #include "../graphics/icon_button.h"
 #include "../tcp/server.h"
 #include "../state/acks.h"
+#include "../language/language.h"
+#include "platform_runtime.h"
 #include "text_strings.h"
 #include <string>
 #include <deque>
@@ -129,16 +131,20 @@ void updateMessages()
     else textArea.setAck(nullptr);
     textArea.clear();
     line = 0;
+    auto font_clock = platform->load_font(10, true, get_language());
+    auto clock_size = font_clock->calc_size("88:88::");
     for(int i=0; i<displayMsg.size(); i++)
     {
         Message &m = *displayMsg[i];
+        auto font_msg = platform->load_font(12, m.firstGroup, get_language());
         std::string date = std::to_string(m.hour) + ":"+ (m.minute<10 ? "0" : "") + std::to_string(m.minute);
         std::string text = m.text;
-        int last;
         for (;;)
         {
-            if(text.size()>25) last = text.find_last_of(' ', 25);
-            else last = text.size();
+            size_t wrap = font_msg->calc_wrap_point(text, 230.0f - clock_size.first);
+            int last = wrap != text.size() ? text.find_last_of(' ', wrap - 1) : text.size();
+            if (last == string::npos)
+                last = wrap;
             if(line<nlines+current && line>=current)
             {
                 if (m.bgColor != DarkBlue) textArea.addRectangle(2, (line-current)*20, 234, 20, m.bgColor);
@@ -148,11 +154,12 @@ void updateMessages()
                     m.shown = true;
                     textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
                 }
-                textArea.addText(text.substr(0, last), 48, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
+                textArea.addText(text.substr(0, last), 2 + clock_size.first, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
             }
             ++line;
-            if (last + 1 >= text.size()) break;
-            text = text.substr(last+1);
+            while (last != text.size() && text[last] == ' ') last++;
+            if (last == text.size()) break;
+            text = text.substr(last);
         }
     }
 }

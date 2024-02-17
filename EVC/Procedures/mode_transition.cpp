@@ -29,6 +29,7 @@ cond mode_conditions[78];
 static std::vector<mode_transition> ordered_transitions[20];
 Mode mode=Mode::NP;
 int64_t last_mode_change;
+bool entering_mode_message_is_time_dependent = false;
 bool mode_acknowledgeable=false;
 bool mode_acknowledged=false;
 Mode mode_to_ack;
@@ -326,16 +327,26 @@ void update_mode_status()
             SH_speed = {};
         
         if (mode == Mode::FS) {
-            add_message(text_message(get_text("Entering FS"), true, false, false, [](text_message &t){
-                dist_base back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
-                return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin()<back && get_gradient().begin()->first<back);
+            int64_t time = get_milliseconds();
+            add_message(text_message(get_text("Entering FS"), true, false, false, [time](text_message &t){
+                if (entering_mode_message_is_time_dependent) {
+                    return time + 60000 < get_milliseconds();
+                } else {
+                    dist_base back = d_estfront_dir[odometer_orientation == -1] - L_TRAIN;
+                    return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin() < back && get_gradient().begin()->first < back);
+                }
             }));
         }
         if (mode == Mode::OS) {
             OS_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVONSIGHT, distance(std::numeric_limits<double>::lowest(), 0, 0), distance(std::numeric_limits<double>::max(), 0, 0), false);
-            add_message(text_message(get_text("Entering OS"), true, false, false, [](text_message &t){
-                dist_base back = d_estfront_dir[odometer_orientation == -1]-L_TRAIN;
-                return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin()<back && get_gradient().begin()->first<back);
+            int64_t time = get_milliseconds();
+            add_message(text_message(get_text("Entering OS"), true, false, false, [time](text_message &t){
+                if (entering_mode_message_is_time_dependent) {
+                    return time + 60000 < get_milliseconds();
+                } else {
+                    dist_base back = d_estfront_dir[odometer_orientation == -1] - L_TRAIN;
+                    return get_gradient().empty() || SSP_begin() == dist_base::max || (SSP_begin() < back && get_gradient().begin()->first < back);
+                }
             }));
         } else {
             OS_speed = {};

@@ -256,6 +256,7 @@ void parseData(std::string str)
     setSupervision((SupervisionStatus)j["CurrentSupervisionStatus"].get<int>());
     mode = (Mode)j["CurrentMode"].get<int>();
     level = (Level)j["CurrentLevel"].get<int>();
+    slippery_rail = j["SlipperyRail"].get<bool>();
     if (level == Level::NTC) nid_ntc = j["CurrentNTC"].get<int>();
     if (j["GeographicalPositionKM"].is_null()) pk = -1;
     else pk = j["GeographicalPositionKM"].get<double>();

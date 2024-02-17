@@ -13,27 +13,20 @@ TextButton::TextButton(string text, float sx, float sy, function<void()> pressed
     setSize(sx, sy);
     setPressedAction(pressed);
 }
+
 void TextButton::paint()
 {
     if (enabled_text == nullptr)
     {
-        enabled_text = getText(caption, 0, 0, size, fgColor);
-        disabled_text = getText(caption, 0, 0, size, disabledColor);
+        enabled_text = getTextGraphic(caption, size, fgColor, 0, 0, sx);
+        disabled_text = getTextGraphic(caption, size, disabledColor, 0, 0, sx);
     }
     Button::paint();
-    if(enabled)
-    {
-        if(enabled_text->color != fgColor)
-        {
-            delete enabled_text;
-            enabled_text = getText(caption, 0, 0, size, fgColor);
-        }
-        draw(enabled_text);
-    }
-    else draw(disabled_text);
+    drawTexture(enabled ? enabled_text : disabled_text, sx / 2, sy / 2);
 }
+
 TextButton::~TextButton()
 {
-    if(enabled_text!=nullptr) delete enabled_text;
-    if(disabled_text!=nullptr) delete disabled_text;
+    enabled_text = nullptr;
+    disabled_text = nullptr;
 }

@@ -79,10 +79,10 @@ class Component
         void addRectangle(float x, float y, float w, float h, Color c, int align = LEFT | UP);
         void drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, float cy);
         void add(graphic* g) { graphics.push_back(g); }
-        void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-        text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0);
-        std::unique_ptr<text_graphic> getTextUnique(const std::string &text, float x = 0, float y = 0, float size = 12, Color col = White, int align = CENTER, int aspect = 0);
-        static std::shared_ptr<UiPlatform::Image> getTextGraphic(std::string text, float size, Color col, int aspect, int align=CENTER);
+        void addText(std::string text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0, float width=0);
+        text_graphic *getText(const std::string &text, float x=0, float y=0, float size=12, Color col=White, int align=CENTER, int aspect=0, float width=0);
+        std::unique_ptr<text_graphic> getTextUnique(const std::string &text, float x = 0, float y = 0, float size = 12, Color col = White, int align = CENTER, int aspect = 0, float width = 0);
+        static std::shared_ptr<UiPlatform::Image> getTextGraphic(std::string text, float size, Color col, int aspect, int align=CENTER, float width=0);
         void addImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
         image_graphic *getImage(std::string path, float cx=0, float cy=0, float sx=0, float sy=0);
         static std::shared_ptr<UiPlatform::Image> getImageGraphic(std::string path);

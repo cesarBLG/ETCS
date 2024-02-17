@@ -188,16 +188,16 @@ void Component::drawTexture(std::shared_ptr<UiPlatform::Image> tex, float cx, fl
     auto size = tex->size();
     platform->draw_image(*tex, getX(cx - size.first / 2), getY(cy - size.second / 2));
 }
-void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect)
+void Component::addText(string text, float x, float y, float size, Color col, int align, int aspect, float width)
 {
     if(text=="") return;
-    add(getText(text, x, y, size, col, align, aspect));
+    add(getText(text, x, y, size, col, align, aspect, width));
 }
-text_graphic* Component::getText(const string &text, float x, float y, float size, Color col, int align, int aspect)
+text_graphic* Component::getText(const string &text, float x, float y, float size, Color col, int align, int aspect, float width)
 {
-    return getTextUnique(text, x, y, size, col, align, aspect).release();
+    return getTextUnique(text, x, y, size, col, align, aspect, width).release();
 }
-std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float x, float y, float size, Color col, int align, int aspect)
+std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float x, float y, float size, Color col, int align, int aspect, float width)
 {
     std::unique_ptr<text_graphic> t = std::make_unique<text_graphic>();
     t->text = text;
@@ -208,7 +208,7 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->alignment = align;
     t->aspect = aspect;
     int v = text.find('\n');
-    t->tex = getTextGraphic(text, size, col, aspect, align);
+    t->tex = getTextGraphic(text, size, col, aspect, align, width);
     float sx = t->tex == nullptr ? 0 : t->tex->size().first;
     float sy = t->tex == nullptr ? 0 : t->tex->size().second;
     if (align & UP) y = y + sy / 2;
@@ -223,10 +223,10 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->height = sy;
     return t;
 }
-std::shared_ptr<UiPlatform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align)
+std::shared_ptr<UiPlatform::Image> Component::getTextGraphic(string text, float size, Color col, int aspect, int align, float width)
 {
     auto font = platform->load_font(size, (aspect & 1) != 0, get_language());
-    return platform->make_wrapped_text_image(text, *font, align, col);
+    return platform->make_wrapped_text_image(text, *font, width, align, col);
 }
 void Component::addImage(string path, float cx, float cy, float sx, float sy)
 {

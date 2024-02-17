@@ -12,6 +12,8 @@
 #include <string>
 #include "platform_runtime.h"
 
+bool playSoundOnRadioStatusChange;
+
 StmSound::StmSound(std::unique_ptr<UiPlatform::SoundData> &&in) : data(std::move(in)) {
 
 }

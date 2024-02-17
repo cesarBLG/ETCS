@@ -33,7 +33,7 @@ menu_spec::menu_spec() : menu(get_text("Special"))
 void menu_spec::setEnabled(bool adhesion, bool sr, bool integrity)
 {
 #if SIMRAIL
-    buttons[0]->setEnabled(false);
+    buttons[0]->setEnabled(adhesion);
     buttons[1]->setEnabled(sr);
     buttons[2]->setEnabled(false);
 #else

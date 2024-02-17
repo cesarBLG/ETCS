@@ -262,7 +262,7 @@ void SimrailUiPlatform::draw_image(const Image &base, float x, float y) {
 		if (!img.font->font->current)
 			return;
 		float adjusted_size = img.font->font->size * (img.font->ascent / img.font->font->current->Ascent);
-		drawlist->AddText(img.font->font->current, adjusted_size, ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size());
+		drawlist->AddText(img.font->font->current, adjusted_size, ImVec2(x, y), img.color, img.text.data(), img.text.data() + img.text.size(), img.wrap_width);
 	}
 }
 
@@ -462,13 +462,22 @@ SimrailUiPlatform::SimrailFont::SimrailFont(std::shared_ptr<SimrailFontWrapper> 
 
 }
 
-std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::string_view str) const {
+std::pair<float, float> SimrailUiPlatform::SimrailFont::calc_size(const std::string_view str, float wrap_width) const {
 	bool dirty = glyph_ranges_add(font->ranges_builder, str.begin(), str.end());
 	if (dirty || !font->pending)
 		platform.build_atlas();
 	float adjusted_size = font->size * (ascent / font->pending->Ascent);
-	ImVec2 ret = font->pending->CalcTextSizeA(adjusted_size, FLT_MAX, 0.0f, str.begin(), str.end());
+	ImVec2 ret = font->pending->CalcTextSizeA(adjusted_size, FLT_MAX, wrap_width, str.begin(), str.end());
 	return std::make_pair(ret.x, ret.y);
+}
+
+size_t SimrailUiPlatform::SimrailFont::calc_wrap_point(const std::string_view str, float wrap_width) const {
+	bool dirty = glyph_ranges_add(font->ranges_builder, str.begin(), str.end());
+	if (dirty || !font->pending)
+		platform.build_atlas();
+	float adjusted_size = font->size * (ascent / font->pending->Ascent);
+	const char* pos = font->pending->CalcWordWrapPositionA(adjusted_size / font->pending->FontSize, str.begin(), str.end(), wrap_width);
+	return pos - str.begin();
 }
 
 void SimrailUiPlatform::stbi_deleter::operator()(uint8_t *ptr) {
@@ -545,19 +554,20 @@ std::unique_ptr<SimrailUiPlatform::Font> SimrailUiPlatform::load_font(float asce
 }
 
 std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_text_image(const std::string_view text, const Font &base, Color c) {
+	return make_wrapped_text_image(text, base, 0.0f, 0, c);
+}
+
+std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, float width, int align, Color c) {
 	const SimrailFont &font = dynamic_cast<const SimrailFont&>(base);
 
 	auto image = std::make_unique<SimrailImage>();
 	image->font.emplace(font.font, font.ascent, font.platform);
 	image->text = text;
-	image->text_size = font.calc_size(text);
+	image->text_size = font.calc_size(text, width);
 	image->color = IM_COL32(c.R, c.G, c.B, 255);
+	image->wrap_width = width;
 
 	return image;
-}
-
-std::unique_ptr<SimrailUiPlatform::Image> SimrailUiPlatform::make_wrapped_text_image(const std::string_view text, const Font &base, int align, Color c) {
-	return make_text_image(text, base, c);
 }
 
 namespace api {

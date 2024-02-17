@@ -87,7 +87,8 @@ public:
 	{
 	public:
 		virtual ~Font() = default;
-		virtual std::pair<float, float> calc_size(const std::string_view str) const = 0;
+		virtual std::pair<float, float> calc_size(const std::string_view str, float wrap_width = 0.0f) const = 0;
+		virtual size_t calc_wrap_point(const std::string_view str, float wrap_width) const = 0;
 	};
 
 	class SoundData : private PlatformUtil::NoCopy
@@ -131,7 +132,7 @@ public:
 	virtual std::unique_ptr<Image> load_image(const std::string_view path) = 0;
 	virtual std::unique_ptr<Font> load_font(float ascent, bool bold, const std::string_view lang) = 0;
 	virtual std::unique_ptr<Image> make_text_image(const std::string_view text, const Font &font, Color c) = 0;
-	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, int align, Color c) = 0;
+	virtual std::unique_ptr<Image> make_wrapped_text_image(const std::string_view text, const Font &font, float width, int align, Color c) = 0;
 
 	virtual void set_volume(int vol) = 0;
 	virtual int get_volume() = 0;
