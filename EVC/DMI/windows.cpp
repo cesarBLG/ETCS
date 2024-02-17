@@ -211,10 +211,15 @@ json train_data_window()
     inputs.push_back(build_numeric_field(get_text("Max speed (km/h)"), train_data_known ? std::to_string((int)(V_train*3.6)) : ""));
     
     if (!const_train_data.count("LoadingGauge")) {
-        std::vector<std::string> gauges = { "G1", "GA", "GB", "GC", get_text("Out of GC") };
-        if (custom_train_data_inputs.count("LoadingGauge"))
-            gauges = custom_train_data_inputs["LoadingGauge"];
-        inputs.push_back(build_input_field(get_text("Loading gauge"), train_data_known ? gauges[(int)loading_gauge] : "", gauges));
+        std::vector<std::string> gauges = { get_text("G1"), get_text("GA"), get_text("GB"), get_text("GC"), get_text("Out of GC") };
+        std::string gauge = train_data_known ? gauges[(int)loading_gauge] : "";
+        if (custom_train_data_inputs.count("LoadingGauge")) {
+            gauges.clear();
+            for (auto g : custom_train_data_inputs["LoadingGauge"]) {
+                gauges.push_back(get_text(g));
+            }
+        }
+        inputs.push_back(build_input_field(get_text("Loading gauge"), gauge, gauges));
     }
     
     if (!const_train_data.count("TrainCategory")) {
@@ -226,16 +231,25 @@ json train_data_window()
             get_text("FP 3"), get_text("FP 4"), get_text("FG 1"),
             get_text("FG 2"), get_text("FG 3"), get_text("FG 4")
         };
-        if (custom_train_data_inputs.count("TrainCategory"))
-            categories = custom_train_data_inputs["TrainCategory"];
+        if (custom_train_data_inputs.count("TrainCategory")) {
+            categories.clear();
+            for (auto cat : custom_train_data_inputs["TrainCategory"]) {
+                categories.push_back(get_text(cat));
+            }
+        }
         inputs.push_back(build_input_field(get_text("Train category"), train_data_known ? train_category : "", categories));
     }
 
     if (!const_train_data.count("AxleLoadCategory")) {
-        std::vector<std::string> categories = { "A", "HS17", "B1", "B2", "C2", "C3", "C4", "D2", "D3", "D4", "D4XL", "E4", "E5" };
-        if (custom_train_data_inputs.count("AxleLoadCategory"))
-            categories = custom_train_data_inputs["AxleLoadCategory"];
-        inputs.push_back(build_input_field(get_text("Axle load category"), train_data_known ? categories[(int)axle_load_category] : "", categories));
+        std::vector<std::string> categories = { get_text("G1"), get_text("GA"), get_text("GB"), get_text("GC"), get_text("Out of GC") };
+        std::string cat = train_data_known ? categories[(int)axle_load_category] : "";
+        if (custom_train_data_inputs.count("AxleLoadCategory")) {
+            categories.clear();
+            for (auto cat : custom_train_data_inputs["AxleLoadCategory"]) {
+                categories.push_back(get_text(cat));
+            }
+        }
+        inputs.push_back(build_input_field(get_text("Axle load category"), cat, categories));
     }
 
     j["WindowDefinition"] = build_input_window(get_text("Train data"), inputs);
