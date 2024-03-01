@@ -66,7 +66,7 @@ private:
 	int present_count;
 	bool running;
 	std::map<std::string, std::string, std::less<>> ini_items;
-	void load_config();
+	void load_config(const std::vector<std::string>& args);
 	std::string get_config(const std::string_view key);
 	std::string get_config(const std::string_view key, const std::string_view def);
 	BusSocketImpl bus_socket_impl;

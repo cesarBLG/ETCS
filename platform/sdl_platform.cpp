@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-void SdlPlatform::SdlPlatform::load_config()
+void SdlPlatform::SdlPlatform::load_config(const std::vector<std::string>& args)
 {
 	std::ifstream file(load_path + "settings.ini", std::ios::binary);
 	std::string line;
@@ -35,7 +35,16 @@ void SdlPlatform::SdlPlatform::load_config()
 		int pos = line.find('=');
 		if (pos == -1)
 			continue;
-		ini_items.insert(std::pair<std::string, std::string>(line.substr(0, pos), line.substr(pos+1)));
+		ini_items[line.substr(0, pos)] = line.substr(pos + 1);
+	}
+
+	for (std::string line : args) {
+		while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+			line.pop_back();
+		int pos = line.find('=');
+		if (pos == -1)
+			continue;
+		ini_items[line.substr(0, pos)] = line.substr(pos + 1);
 	}
 }
 
@@ -61,7 +70,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	load_config();
+	load_config(args);
 	bool fullscreen = get_config("fullScreen") == "true";
 	int display = std::stoi(get_config("display", "0"));
 	int width = std::stoi(get_config("width", "800"));
@@ -72,6 +81,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	bool rotate = get_config("rotateScreen") == "true";
 	bool ontop = get_config("alwaysOnTop") == "true";
 	bool hidecursor = get_config("hideCursor") == "true";
+	std::string title = get_config("title") == "" ? "SdlPlatform" : get_config("title");
 
 	int flags = 0;
 	if (borderless)
@@ -83,7 +93,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	int y = borderless ? ypos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
 
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-	sdlwindow = SDL_CreateWindow("SdlPlatform", x, y, width, height, flags);
+	sdlwindow = SDL_CreateWindow(title.c_str(), x, y, width, height, flags);
 
 	if (ontop)
 		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
