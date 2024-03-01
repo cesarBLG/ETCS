@@ -379,7 +379,7 @@ void update_mode_status()
         delete_information(prevmode);
         if (mode != Mode::NP && mode != Mode::PS && (mode != Mode::SH || prevmode != Mode::PS)) {
             if ((level == Level::N2 || level == Level::N3) && !end_mission
-            && mode != Mode::SB // Out of SRS condition: do not start session to report mode change to SB
+            //&& mode != Mode::SB // Out of SRS condition: do not start session to report mode change to SB
             && (!supervising_rbc || supervising_rbc->status == session_status::Inactive) && rbc_contact_valid) {
                 set_supervising_rbc(*rbc_contact);
                     if (supervising_rbc)
