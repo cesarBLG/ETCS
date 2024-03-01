@@ -287,9 +287,11 @@ void SetParameters()
     p->SetValue = [](std::string val) {
         set_language(val);
     };
+#if SIMRAIL
     p->GetValue = []() {
         return language;
     };
+#endif
     manager.AddParameter(p);
 
     p = new ORserver::Parameter("imperial");

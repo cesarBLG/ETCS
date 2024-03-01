@@ -9,7 +9,7 @@ msgstr ""
 
 #: DMI/windows.cpp:76 DMI/windows.cpp:281 DMI/windows.cpp:981
 msgid "Driver ID"
-msgstr "ID Maquinista"
+msgstr "Identificador Maquinista"
 
 #: DMI/windows.cpp:85 DMI/windows.cpp:106 DMI/windows.cpp:829
 msgid "Level 0"
@@ -29,7 +29,7 @@ msgstr "Nivel 3"
 
 #: DMI/windows.cpp:139 DMI/windows.cpp:825
 msgid "Level"
-msgstr "Nivel"
+msgstr "Nivel ERTMS/ETCS"
 
 #: DMI/windows.cpp:145 DMI/windows.cpp:283 DMI/windows.cpp:853
 msgid "Train running number"
@@ -38,15 +38,15 @@ msgstr "Número de tren"
 #: DMI/windows.cpp:152 DMI/windows.cpp:293 DMI/windows.cpp:991
 #: DMI/windows.cpp:1147
 msgid "RBC ID"
-msgstr "ID RBC"
+msgstr "Identificador RBC"
 
 #: DMI/windows.cpp:153 DMI/windows.cpp:294 DMI/windows.cpp:992
 msgid "RBC phone number"
-msgstr "Teléfono RBC"
+msgstr "Número de teléfono RBC"
 
 #: DMI/windows.cpp:157 DMI/windows.cpp:990 DMI/windows.cpp:1146
 msgid "RBC data"
-msgstr "Conexión RBC"
+msgstr "Datos del RBC"
 
 #: DMI/windows.cpp:179 DMI/windows.cpp:195 DMI/windows.cpp:874
 #: DMI/windows.cpp:1131
@@ -63,7 +63,8 @@ msgstr "Max. distancia SR [m]"
 
 #: DMI/windows.cpp:240 DMI/windows.cpp:1024 DMI/windows.cpp:1151
 msgid "SR speed/distance"
-msgstr "Datos SR Velocidad / Distancia"
+msgstr "Datos SR \n"
+"velocidad/distancia"
 
 #: DMI/windows.cpp:246 DMI/windows.cpp:1020
 msgid "Language"
@@ -72,23 +73,24 @@ msgstr "Idioma"
 #: DMI/windows.cpp:187 DMI/windows.cpp:286 DMI/windows.cpp:900
 #: DMI/windows.cpp:1132
 msgid "Length (m)"
-msgstr "Longitud [m]"
+msgstr "Longitud del tren [m]"
 
 #: DMI/windows.cpp:287
 msgid "Brake percentaje"
-msgstr "Porcentaje freno"
+msgstr "Porcentaje freno [%]"
 
 #: DMI/windows.cpp:288
 msgid "Maximum speed (km/h)"
-msgstr "Max. velocidad [km/h]"
+msgstr "Velocidad máxima del tren\n"
+"[km/h]"
 
 #: DMI/windows.cpp:289
 msgid "Airtight"
-msgstr "Presurización"
+msgstr "Estanqueidad"
 
 #: DMI/windows.cpp:289
 msgid "Yes"
-msgstr "Sí"
+msgstr "Si"
 
 #: DMI/windows.cpp:289
 msgid "No"
@@ -116,59 +118,60 @@ msgstr "Datos de Tren"
 
 #: DMI/windows.cpp:189 DMI/windows.cpp:904 DMI/windows.cpp:1140
 msgid "Max speed (km/h)"
-msgstr "Max. velocidad [km/h]"
+msgstr "Velocidad máxima del tren\n"
+"[km/h]"
 
 #: DMI/windows.cpp:188 DMI/windows.cpp:905 DMI/windows.cpp:1136
 msgid "Brake percentage"
-msgstr "Porcentaje de freno"
+msgstr "Porcentaje de freno [%]"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:903 DMI/windows.cpp:906
 msgid "Train category"
-msgstr "Tipo tren"
+msgstr "Categoría de tren"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:909
 msgid "PASS 1"
-msgstr "VIAJ N"
+msgstr "PASS 1"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:912
 msgid "PASS 2"
-msgstr "PASO 2"
+msgstr "PASS 2"
 
 #: DMI/windows.cpp:191 DMI/windows.cpp:915
 msgid "PASS 3"
-msgstr "VIAJ A"
+msgstr "PASS 3"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:918
 msgid "TILT 1"
-msgstr "PEND 1"
+msgstr "TILT 1"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:921
 msgid "TILT 2"
-msgstr "VIAJ B"
+msgstr "TILT 2"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:924
 msgid "TILT 3"
-msgstr "PEND 3"
+msgstr "TILT 3"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:927
 msgid "TILT 4"
-msgstr "VIAJ C"
+msgstr "TILT 4"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:930
 msgid "TILT 5"
-msgstr "PEND 5"
+msgstr "TILT 5"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:933
 msgid "TILT 6"
-msgstr "VIAJ D"
+msgstr "TILT 6"
 
 #: DMI/windows.cpp:192 DMI/windows.cpp:936
 msgid "TILT 7"
-msgstr "PEND 7"
+msgstr "TILT 7"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:939
 msgid "FP 1"
-msgstr "MERC P/V"
+msgstr "FP 1"
 
 #: DMI/windows.cpp:942
 msgid "FP 2"
@@ -184,7 +187,7 @@ msgstr "FP 4"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:951
 msgid "FG 1"
-msgstr "MERC F/G"
+msgstr "FG 1"
 
 #: DMI/windows.cpp:193 DMI/windows.cpp:954
 msgid "FG 2"
@@ -200,7 +203,8 @@ msgstr "FG 4"
 
 #: DMI/windows.cpp:252 DMI/windows.cpp:1036
 msgid "Set VBC"
-msgstr "Establecimiento VBC"
+msgstr "Establecimiento\n"
+"VBC"
 
 #: DMI/windows.cpp:1041 DMI/windows.cpp:1054
 msgid "Validate set VBC"
@@ -208,7 +212,7 @@ msgstr "Validar VBC añadido"
 
 #: DMI/windows.cpp:258 DMI/windows.cpp:1045
 msgid "Remove VBC"
-msgstr "Eliminar VBC"
+msgstr "Suprimir VBC"
 
 #: DMI/windows.cpp:1050 DMI/windows.cpp:1071
 msgid "Validate remove VBC"
@@ -297,7 +301,7 @@ msgstr "Reconocimiento"
 
 #: DMI/windows.cpp:190 DMI/windows.cpp:901
 msgid "Loading gauge"
-msgstr "Indicador de carga"
+msgstr "Gálibo de la carga"
 
 #: DMI/windows.cpp:190
 msgid "Out of GC"
@@ -309,7 +313,7 @@ msgstr "FP2"
 
 #: DMI/windows.cpp:194 DMI/windows.cpp:902
 msgid "Axle load category"
-msgstr "Categoría de carga por eje"
+msgstr "Carga por eje [T]"
 
 #: DMI/windows.cpp:221 DMI/windows.cpp:1095 DMI/windows.cpp:1100
 #: DMI/windows.cpp:1104
