@@ -112,7 +112,8 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
     pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.nid_ack.find(msg->NID_MESSAGE) != mack.nid_ack.end();});
     if (msg->NID_MESSAGE == 32) {
         status = session_status::Established;
-        position_report_reasons[7] = true;
+        if (!som_active)
+            position_report_reasons[7] = true;
         auto rbc_ver = (RBC_version*)msg.get();
         version = rbc_ver->M_VERSION;
         if (is_version_supported(version)) {
