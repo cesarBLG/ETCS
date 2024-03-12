@@ -28,6 +28,7 @@ void update_SoM()
         for (auto *session : active_sessions) {
             session->close();
         }
+        mode_acknowledgeable = mode_acknowledged = false;
         desk_closed_som();
     }
     if (mode != Mode::SB || (!cab_active[0] && !cab_active[1])) {
