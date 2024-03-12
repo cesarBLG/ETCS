@@ -59,7 +59,7 @@ class validation_window : public subwindow
         }
         for(int i=0; i<validation_data.size(); i++)
         {
-            addToLayout(validation_data[i]->data_echo, new RelativeAlignment(nullptr, 204, 100+i*16, 0));
+            addToLayout(validation_data[i]->data_echo, new RelativeAlignment(nullptr, 204, 100+i*24, 0));
             addToLayout(validation_data[i]->label_echo, new ConsecutiveAlignment(validation_data[i]->data_echo, LEFT, 0));
         }
     }
