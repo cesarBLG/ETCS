@@ -17,6 +17,7 @@
 #include "27.h"
 #include "41.h"
 #include "42.h"
+#include "58.h"
 #include "65.h"
 #include "131.h"
 #include "136.h"
@@ -1366,7 +1367,9 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
     } else if (packet_num == 57) {
         info.push_back(new ma_request_params_info());
     } else if (packet_num == 58) {
-        info.push_back(new position_report_params_info());
+        auto *prp = new position_report_params_info();
+        prp->location_based = ((PositionReportParameters*)packet)->N_ITER > 0;
+        info.push_back(prp);
     } else if (packet_num == 65) {
         info.push_back(new TSR_information());
     } else if (packet_num == 66) {
