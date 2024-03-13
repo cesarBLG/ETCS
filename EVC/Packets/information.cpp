@@ -424,7 +424,7 @@ void ma_shortening_information::handle()
 void ces_information::handle()
 {
     auto *emerg = (conditional_emergency_stop*)message->get();
-    int result = handle_conditional_emergency_stop(emerg->NID_EM, *ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE), d_minsafe(orig_position.est, confidence_data::from_distance(orig_position.est)));
+    int result = handle_conditional_emergency_stop(emerg->NID_EM, *ref+emerg->D_EMERGENCYSTOP.get_value(emerg->Q_SCALE), d_minsafe(orig_position.est, confidence_data::from_distance(ref->est)));
     emergency_acknowledgement_message *ack = new emergency_acknowledgement_message();
     ack->NID_EM = emerg->NID_EM;
     ack->Q_EMERGENCYSTOP.rawdata = result;
