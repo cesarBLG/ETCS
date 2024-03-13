@@ -21,8 +21,8 @@ class data_view_window : public subwindow
         int offset = softkeys ? 0 : 15;
         for (int i=(current_page-1)*10; i<components.size()/2 && i<current_page*10; i++)
         {
-            if (components[2*i] != nullptr) addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*16, 0));
-            if (components[2*i+1] != nullptr) addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*16, 0));
+            if (components[2*i] != nullptr) addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*24, 0));
+            if (components[2*i+1] != nullptr) addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*24, 0));
         }
         subwindow::setLayout();
     }
