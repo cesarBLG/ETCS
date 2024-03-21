@@ -364,23 +364,34 @@ void relocate_linking()
 {
     if (!solr || linking.empty())
         return;
-    bool found=false;
-    for (auto it = linking.begin(); it != linking.end(); ++it) {
+    auto solr_it = linking.end();
+    for (auto it = linking.begin(); it != linking.end();) {
         if (it->nid_bg == solr->nid_lrbg) {
-            found = true;
-            linking.erase(linking.begin(), it);
+            solr_it = it;
             break;
         }
         if (it == link_expected)
             ++link_expected;
+        bool keep = false;
+        for (auto it2 = orbgs.begin(); it2 != orbgs.end(); ++it2) {
+            if (it->nid_bg == it2->first.nid_lrbg) {
+                keep = true;
+                break;
+            }
+        }
+        if (keep) {
+            ++it;
+        } else {
+            it = linking.erase(linking.begin(), it);
+        }
     }
-    if (!found) {
+    if (solr_it == linking.end()) {
         linking.clear();
         link_expected = linking.end();
     }
     if (linking.empty())
         return;
-    dist_base ref = linking.front().dist;
+    dist_base ref = solr_it->dist;
     dist_base newref = dist_base(0, ref.orientation);
     double offset = ref-newref;
     for (auto it = linking.begin(); it != linking.end(); ++it) {
