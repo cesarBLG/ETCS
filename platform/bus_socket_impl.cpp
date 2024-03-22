@@ -41,7 +41,13 @@ BusSocketImpl::BusSocketImpl(const std::string_view load_path, FdPoller &p, cons
 		std::string delim3, delim4, delim5;
 		std::getline(key, delim3, ':');
 		std::getline(key, delim4, ':');
-		socket_config.push_back(SocketConfig{entry.first, delim3, std::stoi(delim4)});
+
+		try {
+			socket_config.push_back(SocketConfig{ entry.first, delim3, std::stoi(delim4) });
+		}
+		catch(...){
+
+		}
 	}
 }
 
