@@ -201,10 +201,12 @@ void calculate_SvL()
 
     for (auto it = mode_profiles.begin(); it != mode_profiles.end(); ++it) {
         if (it->start_SvL && mode != it->mode && ((LoA && LoA->first.min > it->start.max) || (SvL && SvL->max > it->start.max)) && it->start.max > d_maxsafefront(it->start)) {
-            EoA = SvL = it->start;
+            SvL = it->start;
             LoA = {};
             V_releaseSvL = 0;
         }
+        if (mode != it->mode && (!EoA || EoA->est > it->start.est) && it->start.max > d_maxsafefront(it->start))
+            EoA = it->start;
     }
 
     for (auto it = level_crossings.begin(); it != level_crossings.end(); ++it) {
