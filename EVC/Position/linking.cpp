@@ -379,18 +379,17 @@ void relocate_linking()
                 break;
             }
         }
-        if (keep) {
-            ++it;
-        } else {
+        ++it;
+        if (!keep) {
             it = linking.erase(linking.begin(), it);
+            solr_it = linking.end();
         }
     }
     if (solr_it == linking.end()) {
         linking.clear();
         link_expected = linking.end();
-    }
-    if (linking.empty())
         return;
+    }
     dist_base ref = solr_it->dist;
     dist_base newref = dist_base(0, ref.orientation);
     double offset = ref-newref;
