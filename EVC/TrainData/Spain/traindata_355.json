@@ -2,7 +2,7 @@
 	"Simple" : {
         "length": 55,
         "speed": 200,
-        "cant_deficiency": 174,
+        "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -71,7 +71,7 @@
     "Doble" : {
         "length": 110,
         "speed": 200,
-        "cant_deficiency": 174,
+        "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [

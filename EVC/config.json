@@ -80,12 +80,12 @@
       "STMLayout": "stm_siemens.json"
   },
    "465": {
-       "TrainData": "TrainData/Spain/traindata_465.json",
-       "SpeedDial": 130,
+       "TrainData": "TrainData/Spain/traindata_CiviaA.json",
+       "SpeedDial": 250,
        "STMLayout": "stm_siemens.json"
    },
    "465caf": {
-       "TrainData": "TrainData/Spain/traindata_465.json",
+       "TrainData": "TrainData/Spain/traindata_CiviaC.json",
        "SpeedDial": 150,
        "STMLayout": "stm_siemens.json",
        "SoftKeys": true
@@ -241,6 +241,16 @@
        "STMLayout":"stm_bombardier.json",
        "UnsupportedLevels": [2]
      },
+     "336":{
+        "SpeedDial":180,
+        "STMLayout":"stm_siemens.json",
+        "CustomTrainDataInputs": [
+            {
+              "Field": "AxleLoadCategory",
+              "Value": ["D2", "D3", "D4", "D4XL"]
+            }
+        ]
+      },
     "112": {
        "TrainData": "TrainData/Spain/traindata_112.json",
        "SpeedDial": 400,

@@ -2,7 +2,7 @@
 	"1UT" : {
         "length": 75,
         "speed": 120,
-        "cant_deficiency": 140,
+        "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -65,7 +65,7 @@
 	"2UT" : {
         "length": 150,
         "speed": 120,
-        "cant_deficiency": 140,
+        "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [

@@ -3,7 +3,7 @@
     "Simple" : {
         "length": 189,
         "speed": 300,
-        "cant_deficiency": 174,
+        "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
