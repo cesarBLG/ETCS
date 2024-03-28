@@ -2,7 +2,7 @@
     "A330" : {
         "length": 80,
         "speed": 330,
-        "cant_deficiency": 115,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [

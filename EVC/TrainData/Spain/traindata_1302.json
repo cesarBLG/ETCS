@@ -2,7 +2,7 @@
     "Oddiy" : {
         "length": 162,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [
@@ -73,7 +73,7 @@
     "Ikki marta" : {
         "length": 325,
         "speed": 250,
-        "cant_deficiency": 206,
+        "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "traction_systems": [

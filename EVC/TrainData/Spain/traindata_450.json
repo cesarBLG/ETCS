@@ -2,7 +2,7 @@
 	"1UT_450" : {
         "length": 160,
         "speed": 140,
-        "cant_deficiency": 165,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -65,7 +65,7 @@
 	"2UT_450" : {
         "length": 320,
         "speed": 140,
-        "cant_deficiency": 165,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -128,7 +128,7 @@
 		"1UT_451" : {
         "length": 80,
         "speed": 140,
-        "cant_deficiency": 165,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -191,7 +191,7 @@
 		"2UT_451" : {
         "length": 160,
         "speed": 140,
-        "cant_deficiency": 165,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
@@ -254,7 +254,7 @@
 		"3UT_451" : {
         "length": 240,
         "speed": 140,
-        "cant_deficiency": 165,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
         "traction_systems": [
