@@ -502,7 +502,12 @@ void load_contact_info()
     json j = load_cold_data("RBCData");
     if (!j.is_null()) {
         rbc_contact = {j["NID_C"].get<unsigned int>(), j["NID_RBC"].get<unsigned int>(), j["PhoneNumber"]};
+#if SIMRAIL
+        // During takeover the train in SimRail multiplayer, the odometer is Unknown (due to spawning a copy of train, but the train is in move, so prepared RBC data hase to be always valid here)
+        rbc_contact_valid = rbc_contact.has_value() && rbc_contact.value().id != 0x3FFF;
+#else
         rbc_contact_valid = cold_movement_status == NoColdMovement;
+#endif
     } else {
         rbc_contact_valid = false;
         rbc_contact = {};
