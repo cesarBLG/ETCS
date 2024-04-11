@@ -316,7 +316,7 @@ void displayLines()
     platform->set_color(White);
 
 #if SIMRAIL
-    int step = 5;
+    int step = maxSpeed < 160 ? 5 : 10;;
 #else
     int step = maxSpeed == 150 ? 5 : 10;
 #endif
