@@ -52,10 +52,6 @@ void zoominp()
         planning_scale/=2;
         speedLines();
     }
-    zoomin.setEnabled(planning_scale > 1);
-    softzoomin.setEnabled(planning_scale > 1);
-    zoomout.setEnabled(planning_scale < MAX_SCALE);
-    softzoomout.setEnabled(planning_scale < MAX_SCALE);
 }
 void zoomoutp()
 {
@@ -64,10 +60,6 @@ void zoomoutp()
         planning_scale*=2;
         speedLines();
     }
-    zoomin.setEnabled(planning_scale > 1);
-    softzoomin.setEnabled(planning_scale > 1);
-    zoomout.setEnabled(planning_scale < MAX_SCALE);
-    softzoomout.setEnabled(planning_scale < MAX_SCALE);
 }
 std::vector<planning_element> planning_elements;
 void displayPlanning()
@@ -299,4 +291,8 @@ void setPlanning(bool visible)
     planning_speed.visible = visible;
     zoomin.visible = visible;
     zoomout.visible = visible;
+    zoomin.setEnabled(visible && planning_scale > 1);
+    softzoomin.setEnabled(visible && planning_scale > 1);
+    zoomout.setEnabled(visible && planning_scale < MAX_SCALE);
+    softzoomout.setEnabled(visible &&planning_scale < MAX_SCALE);
 }
