@@ -42,6 +42,7 @@ bool ovEOA;
 bool train_data_valid;
 int L_train;
 bool slippery_rail;
+bool bot_driver;
 
 void updateSupervision();
 void update()

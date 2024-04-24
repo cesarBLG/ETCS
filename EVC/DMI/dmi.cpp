@@ -63,6 +63,7 @@ extern MonitoringStatus monitoring;
 extern SupervisionStatus supervision;
 bool message_when_driver_ack_level = false;
 bool message_when_driver_ack_mode = false;
+bool bot_driver = false;
 void parse_command(string str)
 {
     int index = str.find_first_of('(');
@@ -288,6 +289,7 @@ void dmi_update_func()
     sendtoor = get_milliseconds() - lastor > 250;
     if (sendtoor) lastor = get_milliseconds();
     json j;
+    j["BotDriver"] = bot_driver;
     j["SlipperyRail"] = slippery_rail_driver;
     j["AllowedSpeedMpS"] = V_perm;
     j["InterventionSpeedMpS"] = V_sbi;
