@@ -43,6 +43,7 @@ extern bool ovEOA;
 extern bool train_data_valid;
 extern int L_train;
 extern bool slippery_rail;
+extern bool bot_driver;
 extern bool ovEOA;
 void update();
 void setSpeeds(float vtarg, float vperm, float vsbi, float vrelease, float vest, float dist);

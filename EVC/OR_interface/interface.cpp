@@ -32,6 +32,7 @@ using std::string;
 extern double V_est;
 double V_set;
 extern int data_entry_type;
+extern bool bot_driver;
 extern bool EB_command;
 extern bool SB_command;
 extern bool desk_open;
@@ -294,6 +295,12 @@ void SetParameters()
 #endif
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("bot_driver");
+    p->SetValue = [](std::string val) {
+        bot_driver = val == "1";
+    };
+    manager.AddParameter(p);
+
     p = new ORserver::Parameter("imperial");
     p->SetValue = [](std::string val) {
         set_persistent_command("imperial", val);
@@ -421,6 +428,7 @@ void start_or_iface()
     register_parameter("gsmr::active");
     register_parameter("serie");
     register_parameter("language");
+    register_parameter("bot_driver");
     register_parameter("imperial");
 }
 
