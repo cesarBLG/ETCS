@@ -390,8 +390,7 @@ void update_supervision()
                 }
             }
         }
-        bool slip = slippery_rail_driver;
-        double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;      
+        double A_MAXREDADH = (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1));      
         if (indication_target && A_MAXREDADH == -1) {
             V_target = indication_target->get_target_speed();
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {
