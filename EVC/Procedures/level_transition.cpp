@@ -159,6 +159,10 @@ void perform_transition()
 }
 void update_level_status()
 {
+    if (mode == Mode::IS && level != Level::Unknown) {
+        driver_set_level({ Level::Unknown, -1 });
+        return;
+    }
     if (level_timer_started && level_timer + T_ACK*1000 < get_milliseconds()) {
         level_timer_started = false;
         brake_conditions.push_back({-1, nullptr, [](brake_command_information &i) {

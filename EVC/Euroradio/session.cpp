@@ -379,6 +379,9 @@ bool radio_reaction_applied = false;
 bool radio_reaction_reconnected = false;
 void update_euroradio()
 {
+    if (supervising_rbc && supervising_rbc->status == session_status::Established && mode == Mode::IS)
+        supervising_rbc->close();
+
     update_cfm();
     for (auto it = active_sessions.begin(); it != active_sessions.end(); ) {
         if ((*it)->status == session_status::Inactive && *it != supervising_rbc && *it != accepting_rbc && *it != handing_over_rbc) {
