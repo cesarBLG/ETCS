@@ -11,6 +11,7 @@
 #include "../sound/sound.h"
 #include "../state/acks.h"
 #include "platform_runtime.h"
+#include "../monitor.h"
 bool isInside(Component *comp, float x, float y)
 {
 	//if (componentAck != nullptr && comp != componentAck && comp != &ackButton) return false;
@@ -34,7 +35,7 @@ void window::event(int evNo, float x, float y)
 		{
 			if (pressedButton->upType)
 			{
-				if (pressedButton->delayType && pressedButton->firstPressedTime + 2000 > CurrentTime)
+				if (!bot_driver && pressedButton->delayType && pressedButton->firstPressedTime + 2000 > CurrentTime)
 				{
 					if (pressedButton->isButton) ((Button*)pressedButton)->pressed = ((int)((CurrentTime - pressedButton->firstPressedTime) * 4 / 1000)) % 2 == 0;
 				}
