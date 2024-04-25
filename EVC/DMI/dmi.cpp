@@ -78,7 +78,7 @@ void parse_command(string str)
             if (selection == "ModeAcknowledge") {
                 mode_acknowledgeable = false;
                 mode_acknowledged = true;
-                if (message_when_driver_ack_mode) {
+                if (message_when_driver_ack_mode && !bot_driver) {
                     string targetMode = "";
                     switch (mode_to_ack) {
                         case Mode::FS:
@@ -149,7 +149,7 @@ void parse_command(string str)
             } else if (selection == "LevelAcknowledge") {
                 level_acknowledgeable = false;
                 level_acknowledged = true;
-                if (message_when_driver_ack_level) {
+                if (message_when_driver_ack_level && !bot_driver) {
                     string targetLevel = "";
                     switch (level_to_ack) {
                         case Level::N0:
