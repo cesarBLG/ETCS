@@ -13,16 +13,17 @@
 #include <vector>
 class data_view_window : public subwindow
 {
+    int page_fields=14;
     protected:
     std::vector<Component*> components;
     void setLayout() override
     {
         clearLayout();
         int offset = softkeys ? 0 : 15;
-        for (int i=(current_page-1)*10; i<components.size()/2 && i<current_page*10; i++)
+        for (int i=(current_page-1)*page_fields; i<components.size()/2 && i<current_page*page_fields; i++)
         {
-            if (components[2*i] != nullptr) addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%10)*24, 0));
-            if (components[2*i+1] != nullptr) addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%10)*24, 0));
+            if (components[2*i] != nullptr) addToLayout(components[2*i], new RelativeAlignment(nullptr, 320, offset+62+(i%page_fields)*24, 0));
+            if (components[2*i+1] != nullptr) addToLayout(components[2*i+1], new RelativeAlignment(nullptr, 320+(softkeys ? 176 : 204), offset+62+(i%page_fields)*24, 0));
         }
         subwindow::setLayout();
     }
@@ -59,7 +60,7 @@ class data_view_window : public subwindow
                 value = break2 >= value.size()-1 ? "" : value.substr(break2+1);
             }
         }
-        page_count = (components.size()/2-1)/10 + 1;
+        page_count = (components.size()/2-1)/page_fields + 1;
         next_button.enabled = page_count > 1;
         updateTitle();
         setLayout();
