@@ -693,7 +693,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
     }
     handle_information_set(ordered_info);
 }
-void handle_radio_message(std::shared_ptr<euroradio_message> message, communication_session *session)
+bool handle_radio_message(std::shared_ptr<euroradio_message> message, communication_session *session)
 {
     message = translate_message(message, session->version);
     std::list<std::shared_ptr<etcs_information>> ordered_info;
@@ -717,7 +717,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         platform->debug_print("Radio message rejected: unknown LRBG");
 #endif
         session->report_error(3);
-        return;
+        return false;
     }
     if (pos)
         session->accept_unknown_position = false;
@@ -725,7 +725,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
             if ((dir == -1 && emerg->Q_DIR != Q_DIR_t::Both) || (emerg->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (emerg->Q_DIR == Q_DIR_t::Reverse && dir == 0))
-                return;
+                return false;
             shift = emerg->D_REF.get_value(emerg->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -737,7 +737,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         case 34: {
             auto *taf = (taf_request_message*)message.get();
             if ((dir == -1 && taf->Q_DIR != Q_DIR_t::Both) || (taf->Q_DIR == Q_DIR_t::Nominal && dir == 1) || (taf->Q_DIR == Q_DIR_t::Reverse && dir == 0))
-                return;
+                return false;
             shift = taf->D_REF.get_value(taf->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -892,6 +892,7 @@ void handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         }
     }
     handle_information_set(ordered_info);
+    return true;
 }
 struct level_filter_data
 {

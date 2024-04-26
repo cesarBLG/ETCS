@@ -80,5 +80,5 @@ struct eurobalise_telegram : public ETCS_message
 extern std::deque<std::pair<eurobalise_telegram, std::pair<distance,int64_t>>> pending_telegrams;
 extern std::list<link_data>::iterator link_expected;
 void update_track_comm();
-void handle_radio_message(std::shared_ptr<euroradio_message> msg, communication_session *session);
+bool handle_radio_message(std::shared_ptr<euroradio_message> msg, communication_session *session);
 void set_message_filters();
