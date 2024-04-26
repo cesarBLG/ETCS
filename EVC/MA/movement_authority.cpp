@@ -109,23 +109,23 @@ movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t t
 void set_data();
 void movement_authority::calculate_distances()
 {
-	distance end = MA->get_end();
-	if (MA->v_ema == 0) {
+	distance end = get_end();
+	if (v_ema == 0) {
 		LoA_ma = {};
 		EoA_ma = distance(end);
-		if (MA->ol) {
-			SvL_ma = distance(end + MA->ol->distance);
-			V_releaseSvL_ma = MA->ol->vrelease;
-		} else if (MA->dp) {
-			SvL_ma = distance(end + MA->dp->distance);
-			V_releaseSvL_ma = MA->dp->vrelease;
+		if (ol) {
+			SvL_ma = distance(end + ol->distance);
+			V_releaseSvL_ma = ol->vrelease;
+		} else if (dp) {
+			SvL_ma = distance(end + dp->distance);
+			V_releaseSvL_ma = dp->vrelease;
 		} else {
 			SvL_ma = distance(end);
 			V_releaseSvL_ma = 0;
 		}
 	} else {
 		EoA_ma = SvL_ma = {};
-		LoA_ma = {end, MA->v_ema};
+		LoA_ma = {end, v_ema};
 	}
 }
 void movement_authority::update_timers()

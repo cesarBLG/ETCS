@@ -109,7 +109,8 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
     } else {
         last_valid_timestamp = timestamp;
     }
-    pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.nid_ack.find(msg->NID_MESSAGE) != mack.nid_ack.end();});
+    if (msg->NID_MESSAGE == 32 || msg->NID_MESSAGE == 39)
+        pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.nid_ack.find(msg->NID_MESSAGE) != mack.nid_ack.end();});
     if (msg->NID_MESSAGE == 32) {
         status = session_status::Established;
         if (!som_active)
@@ -141,14 +142,15 @@ void communication_session::message_received(std::shared_ptr<euroradio_message> 
         }
     } else if (msg->NID_MESSAGE == 39) {
         finalize();
-        return;
     }
     if (msg->M_ACK == M_ACK_t::AcknowledgementRequired) {
         auto ack = std::shared_ptr<acknowledgement_message>(new acknowledgement_message());
         ack->T_TRAINack = msg->T_TRAIN;
         send(ack);
     }
-    handle_radio_message(msg, this);
+    bool success = handle_radio_message(msg, this);
+    if (success && msg->NID_MESSAGE != 32 && msg->NID_MESSAGE != 39)
+        pending_ack.remove_if([msg](const msg_expecting_ack &mack){return mack.nid_ack.find(msg->NID_MESSAGE) != mack.nid_ack.end();});
     update_ack();
 }
 void communication_session::report_error(int error)
