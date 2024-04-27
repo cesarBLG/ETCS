@@ -970,7 +970,7 @@ bool level_filter(std::shared_ptr<etcs_information> info, const std::list<std::s
             bg_id prvlrbg = {-1,-1};
             bg_id memorized_lrbg = prvlrbg;
             for (auto &it : orbgs) {
-                if (it.second&1 == 0) {
+                if ((it.second&1) == 0) {
                     if (it.first.nid_lrbg == msg.NID_LRBG.get_value() && prvlrbg.NID_BG >= 0) {
                         if (memorized_lrbg.NID_BG >= 0 && memorized_lrbg != prvlrbg)
                             return false;
