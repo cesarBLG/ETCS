@@ -22,7 +22,6 @@ import java.io.OutputStream;
 
 public class DMI extends SDLActivity
 {
-    native void DMIstop();
     public static DMI singleton;
     EVC evc;
     Thread evcthread;
@@ -30,8 +29,6 @@ public class DMI extends SDLActivity
 
     @Override
     protected void onDestroy() {
-        DMIstop();
-
         if (evc != null)
         {
             evc.evcStop();

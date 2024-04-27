@@ -134,14 +134,6 @@ void crash_handler(int sig)
     return;
 }
 #endif
-#ifdef __ANDROID__
-#include <jni.h>
-extern "C" void Java_com_etcs_dmi_DMI_DMIstop(JNIEnv *env, jobject thiz)
-{
-    if (platform)
-        platform->quit();
-}
-#endif
 
 void startWindows();
 void initialize_stm_windows();

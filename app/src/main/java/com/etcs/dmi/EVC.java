@@ -10,7 +10,6 @@ public class EVC implements Runnable {
         if (DMI.singleton != null && !DMI.singleton.isFinishing()) {
             DMI.singleton.evc = null;
             DMI.singleton.evcthread = null;
-            DMI.singleton.DMIstop();
             DMI.singleton.finish();
         }
     }
