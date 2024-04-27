@@ -37,14 +37,6 @@
          Example of setting SDL hints from AndroidManifest.xml:
         <meta-data android:name="SDL_ENV.SDL_ACCELEROMETER_AS_JOYSTICK" android:value="0"/>
         -->
-        <service
-            android:name=".EVC"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="specialUse">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="European Vital Computer"/>
-        </service>
     </application> <!-- Touchscreen support -->
     <uses-feature android:glEsVersion="0x00020000" /> <!-- Game controller support -->
     <uses-feature
@@ -72,9 +64,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
 </manifest>
