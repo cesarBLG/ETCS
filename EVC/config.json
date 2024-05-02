@@ -1,5 +1,5 @@
 {
-  "SimRail/traxx3":{
+   "SimRail/F160":{
      "SpeedDial":240,
      "STMLayout":"stm_bombardier.json",
      "UnsupportedLevels":[
@@ -9,18 +9,9 @@
         26
      ]
   },
-  "SimRail/traxx3-ca":{
-     "SpeedDial":240,
-     "STMLayout":"stm_bombardier.json",
-     "UnsupportedLevels":[
-        0
-     ],
-     "AvailableNTC":[
-        26
-     ]
-  },
-  "SimRail/traxx":{
+   "SimRail/E186":{
      "SpeedDial":180,
+      "SoftKeys":true,
      "STMLayout":"stm_bombardier.json",
      "UnsupportedLevels":[
         0
@@ -29,16 +20,61 @@
         26
      ]
   },
-  "SimRail/pendolino":{
-     "TrainData":"TrainData/SimRail/pendolino.json",
-     "SpeedDial":300,
+   "SimRail/ED250":{
+      "TrainData":"TrainData/SimRail/ED250.json",
+      "SpeedDial":400,
      "SoftKeys":true,
      "STMLayout":"stm_bombardier.json",
+	  "PlaySoundOnRadioStatusChange": true,
+	  "EnteringModeMessageIsTimeDependent": true,
      "AvailableNTC":[
         26
+      ],
+	  "ConstTrainDataValues": [
+		  {
+			  "Field": "LoadingGauge",
+			  "Value": "GC"
+		  },
+		  {
+			"Field": "AxleLoadCategory",
+			"Value": "A"
+		  },
+		  {
+			"Field": "Airtight",
+			"Value": "No"
+		  }
      ]
   },
-  "SimRail/e6act":{
+   "SimRail/E6ACTad":{
+	  "TrainData":"TrainData/SimRail/E6ACTad.json",
+      "PlaySoundOnRadioStatusChange": true,
+      "MessageWhenDriverIdEntered": true,
+      "MessageWhenLevelSelected": true,
+      "MessageWhenRunningNumberEntered": true,
+      "MessageWhenTrainDataEntered": true,
+	  "MessageWhenModeAck": true,
+	  "MessageWhenLevelAck": true,
+	  "EnteringModeMessageIsTimeDependent": true,
+      "ConstTrainDataValues": [
+		  {
+			  "Field": "LoadingGauge",
+			  "Value": "GC"
+		  },
+		  {
+			"Field": "AxleLoadCategory",
+			"Value": "A"
+		  },
+		  {
+			"Field": "Airtight",
+			"Value": "No"
+		  }
+	  ],
+	  "CustomTrainDataInputs": [
+		  {
+			  "Field": "TrainCategory",
+			  "Value": ["PASS 3", "FP 4", "FG 4"]
+		  }
+	  ],
      "SpeedDial":160,
      "STMLayout":"stm_bombardier.json",
      "UnsupportedLevels":[
@@ -48,8 +84,8 @@
         26
      ]
   },
-  "SimRail/36wed-lka":{
-     "TrainData":"TrainData/SimRail/36wed.json",
+   "SimRail/36WEd":{
+      "TrainData":"TrainData/SimRail/36WEd.json",
      "SpeedDial":240,
      "STMLayout":"stm_bombardier.json",
      "AvailableNTC":[

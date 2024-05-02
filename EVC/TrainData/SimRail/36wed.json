@@ -12,25 +12,36 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.3, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                            {"speed": 0, "value": 0.85, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
+                            {"speed": 50, "value": 0.86, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
+                            {"speed": 100, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
+                            {"speed": 150, "value": 0.94, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 }
                     ],
-                    "build_up_time": 5,
+                    "build_up_time": 2,
                     "validity": "...."
                 }
             },
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.1}
+                            {"speed": 0, "value": 0.95},
+                            {"speed": 20, "value": 1.00},
+                            {"speed": 50, "value": 1.05},
+                            {"speed": 70, "value": 1.00},
+                            {"speed": 120, "value": 0.97},
+                            {"speed": 160, "value": 0.92}
                     ],
-                    "build_up_time": 0.5,
+                    "build_up_time": 2,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.1}
+                            {"speed": 0, "value": 0.79},
+                            {"speed": 50, "value": 0.80},
+                            {"speed": 100, "value": 0.83},
+                            {"speed": 150, "value": 0.87}
                     ],
-                    "build_up_time": 5,
+                    "build_up_time": 2,
                     "validity": "0..."
                 }
             },
