@@ -365,7 +365,7 @@ json data_view_window()
             if (special_train_data != "") fields.push_back(build_field(get_text("Train type"), special_train_data));
             if (train_category != "" && !const_train_data.count("TrainCategory")) fields.push_back(build_field(get_text("Train category"), get_text(train_category)));
             if (L_TRAIN > 0 && !const_train_data.count("Length")) fields.push_back(build_numeric_field(get_text("Length (m)"), std::to_string((int)L_TRAIN)));
-            if (brake_percentage > 0 && !const_train_data.count("BrakePercentage")) fields.push_back(build_numeric_field(get_text("Brake percentaje"), std::to_string(brake_percentage)));
+            if (brake_percentage > 0 && !const_train_data.count("BrakePercentage")) fields.push_back(build_numeric_field(get_text("Brake percentage"), std::to_string(brake_percentage)));
             if (V_train > 0 && !const_train_data.count("MaxSpeed")) fields.push_back(build_numeric_field(get_text("Maximum speed (km/h)"), std::to_string((int)(V_train*3.6))));
             if (!const_train_data.count("AxleLoadCategory")) {
                 std::vector<std::string> categories = { get_text("A"), get_text("HS17"), get_text("B1"), get_text("B2"), get_text("C2"), get_text("C3"), get_text("C4"), get_text("D2"), get_text("D3"), get_text("D4"), get_text("D4XL"), get_text("E4"), get_text("E5") };
