@@ -83,6 +83,10 @@ void save_level()
 }
 void driver_set_level(level_information li)
 {
+    if (ongoing_transition && ongoing_transition->leveldata.level == li.level && (li.level != Level::NTC || ongoing_transition->leveldata.nid_ntc == li.nid_ntc)) {
+        ongoing_transition = {};
+        level_acknowledgeable = false;
+    }
     stm_level_change(li, true);
     level_valid = li.level != Level::Unknown;
     position_report_reasons[6] = (li.level != Level::N2 && li.level != Level::N3 && (level == Level::N2 || level == Level::N3)) ? 2 : 1;

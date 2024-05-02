@@ -1,19 +1,12 @@
 package com.etcs.dmi;
 
-import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
-import android.os.IBinder;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
+import android.util.Log;
 
 import org.libsdl.app.SDLActivity;
 
@@ -27,25 +20,26 @@ import java.io.OutputStream;
  * A sample wrapper class that just calls SDLActivity
  */
 
-public class DMI extends SDLActivity implements ServiceConnection
+public class DMI extends SDLActivity
 {
-    native void DMIstop();
-
+    public static DMI singleton;
     EVC evc;
+    Thread evcthread;
     boolean forceReplaceFiles=false;
 
     @Override
     protected void onDestroy() {
-        DMIstop();
-
         if (evc != null)
         {
-            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).cancel(1234);
-            evc.callBack = null;
             evc.evcStop();
-            evc.stopSelf();
+            try {
+                evcthread.join();
+            } catch(Exception e) {
+                Log.v("EVC", "Problem stopping EVCThread: " + e);
+            }
+            evc = null;
+            evcthread = null;
         }
-        unbindService(this);
 
         super.onDestroy();
 
@@ -74,10 +68,10 @@ public class DMI extends SDLActivity implements ServiceConnection
         copyFileOrDir("");
         super.onCreate(savedInstanceState);
 
-        Intent serviceIntent = new Intent(this, EVC.class);
-        startService(serviceIntent);
-        if (!bindService(serviceIntent, this, 0))
-            throw new RuntimeException("Error binding service");
+        singleton = this;
+        evc = new EVC();
+        evcthread = new Thread(evc, "EVCThread");
+        evcthread.start();
     }
 
     private void copyFileOrDir(String path) {
@@ -127,20 +121,5 @@ public class DMI extends SDLActivity implements ServiceConnection
             e.printStackTrace();
         }
 
-    }
-
-    @Override
-    public void onServiceConnected(ComponentName componentName, IBinder service) {
-        evc = ((EVC.EVCBinder)service).evc;
-        evc.callBack = new EVC.EVCCallBack() {
-            @Override
-            public void onEVCstopped() {
-                finish();
-            }
-        };
-    }
-
-    @Override
-    public void onServiceDisconnected(ComponentName componentName) {
     }
 }

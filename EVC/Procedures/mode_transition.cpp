@@ -46,7 +46,7 @@ void initialize_mode_transitions()
     c[7] = [](){return level!=Level::N0 && level!=Level::NTC && V_est==0 && mode_to_ack==Mode::TR && mode_acknowledged;};
     c[8] = [](){return mode_to_ack==Mode::SR && mode_acknowledged;};
     c[10] = [](){return train_data_valid && MA && SSP_begin() < dist_base::max && !get_gradient().empty() && !requested_mode_profile;};
-    c[12] = [](){return level == Level::N1 && MA && ((MA->EoA_ma && MA->EoA_ma->min<(d_minsafefront(*MA->EoA_ma)-L_antenna_front) || (MA->LoA_ma && MA->LoA_ma->first.min<(d_minsafefront(MA->LoA_ma->first)-L_antenna_front))));};
+    c[12] = [](){return level == Level::N1 && MA && ((MA->EoA_ma && MA->EoA_ma->min<(d_minsafefront(*MA->EoA_ma)-L_antenna_front)) || (MA->LoA_ma && MA->LoA_ma->first.min<(d_minsafefront(MA->LoA_ma->first)-L_antenna_front)));};
     c[14] = [](){return !cab_active[0] && !cab_active[1] && V_est == 0 && sl_signal;};
     c[15] = [](){return mode_to_ack==Mode::OS && mode_acknowledged;};
     c[16] = [](){return (level == Level::N2 || level==Level::N3) && MA && ((MA->EoA_ma && MA->EoA_ma->min<d_minsafefront(*MA->EoA_ma)) || (MA->LoA_ma && MA->LoA_ma->first.min<d_minsafefront(MA->LoA_ma->first)));};

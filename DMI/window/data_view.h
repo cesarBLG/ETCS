@@ -34,7 +34,7 @@ class data_view_window : public subwindow
         {
             std::string label = j["Label"];
             std::string value = j.contains("Value") ? j["Value"] : "";
-            if (j.contains("Keyboard") && j["Keyboard"]["Type"] != "Dedicated");
+            if (j.contains("Keyboard") && j["Keyboard"]["Type"] != "Dedicated")
             {
                 std::string format = "";
                 for (int i=0; i<value.size(); i++)
