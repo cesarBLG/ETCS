@@ -1294,7 +1294,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, const std::list<std::sh
         if (s.exceptions.find(9) != s.exceptions.end()) {
             bool inside_ls = false;
             for (auto i : message) {
-                if (i->index_mode == 3) {
+                if (i->index_mode == 3 && i->ref) {
                     for (auto it = ++i->linked_packets.begin(); it != i->linked_packets.end(); ++it) {
                         if (it->get()->NID_PACKET == 80) {
                             ModeProfile &profile = *(ModeProfile*)(it->get());
