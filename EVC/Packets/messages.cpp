@@ -719,8 +719,6 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         session->report_error(3);
         return false;
     }
-    if (pos)
-        session->accept_unknown_position = false;
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
@@ -889,6 +887,19 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             info[i]->message = message;
             info[i]->version = session->version;
             ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
+        }
+    }
+    if (pos) {
+        session->accept_unknown_position = false;
+    } else {
+        for (auto &i : ordered_info) {
+            if (i->location_based || i->index_level == 1) {
+#ifdef DEBUG_MSG_CONSISTENCY
+                platform->debug_print("Radio message rejected: location-based information sent with unknown LRBG");
+#endif
+                session->report_error(3);
+                return false;
+            }
         }
     }
     handle_information_set(ordered_info);
