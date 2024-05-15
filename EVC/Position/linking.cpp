@@ -412,6 +412,8 @@ void update_linking(Linking link, bool infill, bg_id ref_bg)
         }
     }
     if (!found) {
+        if (infill)
+            return;
         linking.clear();
         link_data d;
         if (stored_locacc.find(ref_bg) == stored_locacc.end())
