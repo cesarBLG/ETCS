@@ -276,13 +276,25 @@
       "nid_ntc": 0,
       "nid_stms": [0, 19]
     }
-  ]
+  ],
+  "CustomTrainDataInputs": [
+    {
+      "Field": "AxleLoadCategory",
+      "Value": ["D2", "D3", "D4", "D4XL"]
+    }
+]
 },
   "252":{
      "SpeedDial":250,
      "STMLayout":"stm_bombardier.json",
-     "UnsupportedLevels": [2]
-   },
+     "UnsupportedLevels": [2],
+     "CustomTrainDataInputs": [
+      {
+        "Field": "AxleLoadCategory",
+        "Value": ["D2", "D3", "D4", "D4XL"]
+      }
+  ]
+},
    "336":{
       "SpeedDial":180,
       "STMLayout":"stm_siemens.json",
@@ -342,6 +354,11 @@
   "STMLayout": "stm_siemens.json",
   "UnsupportedLevels": [2]
 },
+"108tgv": {
+  "TrainData": "TrainData/Spain/traindata_tgv.json",
+  "SpeedDial": 400,
+  "STMLayout": "stm_siemens.json"
+},
 "109": {
      "TrainData": "TrainData/Spain/traindata_109.json",
      "SpeedDial": 400,
@@ -354,6 +371,8 @@
  },
 "100": {
      "TrainData": "TrainData/Spain/traindata_100.json",
+     "AutomaticCloseMainPowerSwitch": false,
+     "AutomaticOpenMainPowerSwitch": true,
      "SpeedDial": 400,
      "STMLayout": "stm_siemens.json",
      "SoftKeys": true
