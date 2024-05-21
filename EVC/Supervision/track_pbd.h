@@ -24,6 +24,26 @@ class PBD_target : public target
         use_brake_combination = false;
         calculate_decelerations();
     }
+    void calculate_times() const override
+    {
+        if (conversion_model_used) {
+            if (V_target > 0) {
+                T_brake_emergency = T_brake_emergency_cmt;
+                T_brake_service = T_brake_service_cmt;
+            } else {
+                T_brake_emergency = T_brake_emergency_cm0;
+                T_brake_service = T_brake_service_cm0;
+            }
+        } else {
+            T_brake_service = get_T_brake_service(d_estfront);
+            T_brake_emergency = get_T_brake_emergency(d_estfront);
+        }
+        T_be = (conversion_model_used ? Kt_int : 1)*T_brake_emergency;
+        T_bs = T_brake_service;
+        T_bs1 = T_bs2 = T_bs;
+        T_traction = T_traction_cutoff;
+        T_berem = std::max(0.0, T_be-T_traction);
+    }
     void calculate_decelerations() override
     {
         std::map<dist_base,double> gradient;

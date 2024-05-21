@@ -19,6 +19,7 @@
 #include "../TrackConditions/track_condition.h"
 #include "../MA/movement_authority.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../TrainSubsystems/power.h"
 #include <set>
 std::list<std::shared_ptr<PBD_target>> PBDs;
 target::target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : basic_target(dist, speed, type, is_TSR)
@@ -111,7 +112,10 @@ void target::calculate_times() const
     } else {
         T_bs1 = T_bs2 = T_bs;
     }
-    T_traction = T_traction_cutoff;
+    if (traction_cutoff_available)
+        T_traction = std::max(0.0, T_traction_cutoff-(T_warning+T_bs2));
+    else
+        T_traction = T_traction_cutoff;
     T_berem = std::max(0.0, T_be-T_traction);
 }
 void target::calculate_curves(double V_est, double A_est, double V_delta) const
