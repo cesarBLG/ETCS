@@ -18,11 +18,10 @@ optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
 //std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
 void add_condition();
-bool ep_available = true;
 void update_brake_contributions()
 {
     std::map<dist_base, std::pair<int,int>> active;
-    std::pair<int,int> def = {1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE, 1<<REGENERATIVE_AVAILABLE | 1<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE | 1<<MAGNETIC_AVAILABLE};
+    std::pair<int,int> def = {regenerative_brake_available<<REGENERATIVE_AVAILABLE | eddy_brake_available<<EDDY_AVAILABLE | ep_brake_available<<EP_AVAILABLE, regenerative_brake_available<<REGENERATIVE_AVAILABLE | eddy_brake_available<<EDDY_AVAILABLE | ep_brake_available<<EP_AVAILABLE | magnetic_brake_available<<MAGNETIC_AVAILABLE};
     active[dist_base::min] = def;
     for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
         active[(*it)->start.max]=def;
@@ -30,10 +29,10 @@ void update_brake_contributions()
     }
     for (auto it = active.begin(); it != active.end(); ++it) {
         dist_base d = it->first;
-        bool reg=true;
-        bool shoe=true;
-        bool eddyemerg=true;
-        bool eddyserv=true;
+        bool reg=regenerative_brake_available;
+        bool shoe=magnetic_brake_available;
+        bool eddyemerg=eddy_brake_available;
+        bool eddyserv=eddy_brake_available;
         for (auto it2 = track_conditions.begin(); it2 != track_conditions.end(); ++it2) {
             if ((*it2)->start.max <= d && (*it2)->end.min > d) {
                 switch((*it2)->condition) {
@@ -56,7 +55,7 @@ void update_brake_contributions()
                 }
             }
         }
-        it->second = {reg<<REGENERATIVE_AVAILABLE | eddyserv<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE, reg<<REGENERATIVE_AVAILABLE | eddyemerg<<EDDY_AVAILABLE | ep_available<<EP_AVAILABLE | shoe<<MAGNETIC_AVAILABLE};
+        it->second = {reg<<REGENERATIVE_AVAILABLE | eddyserv<<EDDY_AVAILABLE | ep_brake_available<<EP_AVAILABLE, reg<<REGENERATIVE_AVAILABLE | eddyemerg<<EDDY_AVAILABLE | ep_brake_available<<EP_AVAILABLE | shoe<<MAGNETIC_AVAILABLE};
     }
     active_combination = active;
     target::recalculate_all_decelerations();
@@ -376,6 +375,11 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
     for (auto it = elements.begin(); it != elements.end(); ++it) {
         bool s = it->M_TRACKCOND == M_TRACKCOND_t::NonStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::TunnelStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::SoundHorn;
         if (s != special) {
+            curr += it->D_TRACKCOND.get_value(cond.Q_SCALE);
+            continue;
+        }
+        if ((traction_systems.empty() || (traction_systems.size() == 1 && traction_systems.front().electrification == NonElectrical)) &&
+        (it->M_TRACKCOND == M_TRACKCOND_t::PowerlessLowerPantograph || it->M_TRACKCOND == M_TRACKCOND_t::PowerlessSwitchOffPower || it->M_TRACKCOND == M_TRACKCOND_t::SwitchOffRegenerative)) {
             curr += it->D_TRACKCOND.get_value(cond.Q_SCALE);
             continue;
         }

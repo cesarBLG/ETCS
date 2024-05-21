@@ -100,9 +100,7 @@ void set_train_data(std::string spec)
             for (auto it = tracts.begin(); it != tracts.end(); ++it) {
                 std::string name = (*it)["name"].get<std::string>();
                 Electrifications elec;
-                if (name == "none")
-                    elec = NonElectrical;
-                else if (name == "DC600/750V")
+                if (name == "DC600/750V")
                     elec = DC600_750V;
                 else if (name == "DC1.5kV")
                     elec = DC1500V;
@@ -112,7 +110,11 @@ void set_train_data(std::string spec)
                     elec = AC15KV;
                 else if (name == "AC25kV")
                     elec = AC25KV;
-                int info = (*it)["nid_ctraction"].get<int>();
+                else
+                    elec = NonElectrical;
+                int info = 0;
+                if (elec != NonElectrical)
+                    info = (*it)["nid_ctraction"].get<int>();
                 traction_systems.push_back({elec,info});
             }
             train_data_valid = true;

@@ -390,7 +390,7 @@ void update_supervision()
                 }
             }
         }
-        double A_MAXREDADH = (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1));      
+        double A_MAXREDADH = (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_available ? A_NVMAXREDADH2 : A_NVMAXREDADH1));      
         if (indication_target && A_MAXREDADH == -1) {
             V_target = indication_target->get_target_speed();
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {

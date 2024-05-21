@@ -176,7 +176,7 @@ void SetParameters()
 
     p = new ORserver::Parameter("etcs::tractioncutoff");
     p->GetValue = []() {
-        return traction_cutoff_status ? "false" : "true";
+        return traction_cutoff_active ? "true" : "false";
     };
     manager.AddParameter(p);
 

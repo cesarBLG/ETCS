@@ -34,17 +34,21 @@ bool eddy_sb_inhibition_stm;
 bool neutral_section_stm;
 bool lower_pantograph_stm;
 bool air_tightness_stm;
-bool traction_cutoff_status;
-bool additional_brake_active;
+bool traction_cutoff_active;
+bool ep_brake_available=true;
+bool eddy_brake_available=true;
+bool regenerative_brake_available=true;
+bool magnetic_brake_available=true;
+bool additional_brake_available;
 extern bool TCO;
 void update_train_interface()
 {
-    traction_cutoff_status = !TCO;
+    traction_cutoff_active = TCO;
     if (mode == Mode::SL || mode == Mode::NL || mode == Mode::SN) {
         for (auto kvp : installed_stms) {
             auto *stm = kvp.second;
             if (stm->active()) {
-                traction_cutoff_status &= !stm->tiu_function.TCO;
+                traction_cutoff_active |= stm->tiu_function.TCO;
                 neutral_section_stm = stm->tiu_function.open_circuit_breaker;
                 lower_pantograph_stm = stm->tiu_function.lower_pantograph;
                 air_tightness_stm = stm->tiu_function.close_air_intake;
