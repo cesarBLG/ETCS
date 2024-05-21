@@ -112,7 +112,7 @@ void target::calculate_times() const
     } else {
         T_bs1 = T_bs2 = T_bs;
     }
-    if (traction_cutoff_available)
+    if (traction_cutoff_implemented)
         T_traction = std::max(0.0, T_traction_cutoff-(T_warning+T_bs2));
     else
         T_traction = T_traction_cutoff;

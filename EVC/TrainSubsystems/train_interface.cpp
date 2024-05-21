@@ -40,6 +40,11 @@ bool eddy_brake_available=true;
 bool regenerative_brake_available=true;
 bool magnetic_brake_available=true;
 bool additional_brake_available;
+bool automatic_close_air_intake;
+bool automatic_open_air_intake;
+bool automatic_eddy_inhibition;
+bool automatic_magnetic_inhibition;
+bool automatic_regenerative_inhibition;
 extern bool TCO;
 void update_train_interface()
 {

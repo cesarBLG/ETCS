@@ -311,8 +311,8 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
         case M_VOLTAGE_t::AC25kV50Hz: traction = TractionSystem_DMI::AC25kV; break;
     }
     tc->start_symbol = PlanningTrackCondition(traction, true);
-    tc->announcement_symbol = 25 + cond.M_VOLTAGE.rawdata*2 + 1;
-    tc->active_symbol = 25 + cond.M_VOLTAGE.rawdata*2;
+    tc->announcement_symbol = 25 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
+    tc->active_symbol = 23 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
     tc->end_active_symbol = tc->active_symbol;
     track_conditions.push_back(std::shared_ptr<track_condition>(tc));
 }
@@ -392,11 +392,11 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
             case M_TRACKCOND_t::AirTightness:
                 tc->condition = TrackConditions::AirTightness;
                 if (Q_airtight) {
-                    tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::CloseAirIntake, false);
-                    tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::OpenAirIntake, false);
-                    tc->announcement_symbol = 21;
+                    tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::CloseAirIntake, !automatic_close_air_intake);
+                    tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::OpenAirIntake, !automatic_open_air_intake);
+                    tc->announcement_symbol = automatic_open_air_intake ? 19 : 21;
                     tc->active_symbol = 19;
-                    tc->end_active_symbol = 22;
+                    tc->end_active_symbol = automatic_close_air_intake ? 20 : 22;
                 }
                 break;
             case M_TRACKCOND_t::TunnelStoppingArea:
@@ -415,19 +415,19 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
                 break;
             case M_TRACKCOND_t::PowerlessLowerPantograph:
                 tc->condition = TrackConditions::PowerLessSectionLowerPantograph;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::LowerPantograph, !lower_pantograph_available);
-                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::RaisePantograph, !raise_pantograph_available);
-                tc->announcement_symbol = raise_pantograph_available ? 2 : 3;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::LowerPantograph, !automatic_lower_pantograph);
+                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::RaisePantograph, !automatic_raise_pantograph);
+                tc->announcement_symbol = automatic_lower_pantograph ? 2 : 3;
                 tc->active_symbol = 1;
-                tc->end_active_symbol = raise_pantograph_available ? 4 : 5;
+                tc->end_active_symbol = automatic_raise_pantograph ? 4 : 5;
                 break;
             case M_TRACKCOND_t::PowerlessSwitchOffPower:
                 tc->condition = TrackConditions::PowerLessSectionSwitchMainPowerSwitch;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NeutralSectionAnnouncement, !main_power_off_available);
-                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::EndOfNeutralSection, !main_power_on_available);
-                tc->announcement_symbol = main_power_off_available ? 6 : 7;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NeutralSectionAnnouncement, !automatic_open_power_switch);
+                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::EndOfNeutralSection, !automatic_close_power_switch);
+                tc->announcement_symbol = automatic_open_power_switch ? 6 : 7;
                 tc->active_symbol = 6;
-                tc->end_active_symbol = main_power_on_available ? 8 : 9;
+                tc->end_active_symbol = automatic_close_power_switch ? 8 : 9;
                 break;
             case M_TRACKCOND_t::RadioHole:
                 tc->condition = TrackConditions::RadioHole;
@@ -436,26 +436,26 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
                 break;
             case M_TRACKCOND_t::SwitchOffRegenerative:
                 tc->condition = TrackConditions::SwitchOffRegenerativeBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, true);
-                tc->announcement_symbol = 18;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, !automatic_regenerative_inhibition);
+                tc->announcement_symbol = automatic_regenerative_inhibition ? 17 : 18;
                 tc->active_symbol = 17;
                 break;
             case M_TRACKCOND_t::SwitchOffShoe:
                 tc->condition = TrackConditions::SwitchOffMagneticShoe;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, true);
-                tc->announcement_symbol = 14;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, !automatic_magnetic_inhibition);
+                tc->announcement_symbol = automatic_magnetic_inhibition ? 13 : 14;
                 tc->active_symbol = 13;
                 break;
             case M_TRACKCOND_t::SwitchOffEddyService:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentServiceBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, true);
-                tc->announcement_symbol = 16;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
+                tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
                 tc->active_symbol = 15;
                 break;
             case M_TRACKCOND_t::SwitchOffEddyEmergency:
                 tc->condition = TrackConditions::SwitchOffEddyCurrentEmergencyBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, true);
-                tc->announcement_symbol = 16;
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
+                tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
                 tc->active_symbol = 15;
                 break;
         }

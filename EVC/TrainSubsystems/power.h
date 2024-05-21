@@ -8,9 +8,10 @@
  */
 #include "../Position/distance.h"
 #include "../optional.h"
-extern bool main_power_on_available;
-extern bool main_power_off_available;
-extern bool raise_pantograph_available;
-extern bool lower_pantograph_available;
-extern bool traction_cutoff_available;
+extern bool automatic_close_power_switch;
+extern bool automatic_open_power_switch;
+extern bool automatic_raise_pantograph;
+extern bool automatic_lower_pantograph;
+extern bool automatic_traction_system_change;
+extern bool traction_cutoff_implemented;
 void update_power_status();
