@@ -1,34 +1,34 @@
 {
    "SimRail/F160":{
-     "SpeedDial":240,
-     "STMLayout":"stm_bombardier.json",
-     "UnsupportedLevels":[
-        0
-     ],
-     "AvailableNTC":[
-        26
-     ]
-  },
+      "SpeedDial":240,
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
    "SimRail/E186":{
-     "SpeedDial":180,
+      "SpeedDial":180,
       "SoftKeys":true,
-     "STMLayout":"stm_bombardier.json",
-     "UnsupportedLevels":[
-        0
-     ],
-     "AvailableNTC":[
-        26
-     ]
-  },
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
    "SimRail/ED250":{
       "TrainData":"TrainData/SimRail/ED250.json",
       "SpeedDial":400,
-     "SoftKeys":true,
-     "STMLayout":"stm_bombardier.json",
+      "SoftKeys":true,
+      "STMLayout":"stm_bombardier.json",
 	  "PlaySoundOnRadioStatusChange": true,
 	  "EnteringModeMessageIsTimeDependent": true,
-     "AvailableNTC":[
-        26
+      "AvailableNTC":[
+         26
       ],
 	  "ConstTrainDataValues": [
 		  {
@@ -43,8 +43,8 @@
 			"Field": "Airtight",
 			"Value": "No"
 		  }
-     ]
-  },
+	  ]
+   },
    "SimRail/E6ACTad":{
 	  "TrainData":"TrainData/SimRail/E6ACTad.json",
       "PlaySoundOnRadioStatusChange": true,
@@ -75,23 +75,51 @@
 			  "Value": ["PASS 3", "FP 4", "FG 4"]
 		  }
 	  ],
-     "SpeedDial":160,
-     "STMLayout":"stm_bombardier.json",
-     "UnsupportedLevels":[
-        0
-     ],
-     "AvailableNTC":[
-        26
-     ]
-  },
+      "SpeedDial":160,
+      "STMLayout":"stm_bombardier.json",
+      "UnsupportedLevels":[
+         0
+      ],
+      "AvailableNTC":[
+         26
+      ]
+   },
    "SimRail/36WEd":{
-      "TrainData":"TrainData/SimRail/36WEd.json",
-     "SpeedDial":240,
-     "STMLayout":"stm_bombardier.json",
-     "AvailableNTC":[
-        26
-     ]
-  },
+      "SpeedDial":240,
+      "STMLayout":"stm_bombardier.json",
+      "AvailableNTC":[
+         26
+      ],
+	  "UnsupportedLevels":[
+         0
+      ],
+	  "PlaySoundOnRadioStatusChange": true,
+      "MessageWhenDriverIdEntered": true,
+      "MessageWhenLevelSelected": true,
+      "MessageWhenRunningNumberEntered": true,
+      "MessageWhenTrainDataEntered": true,
+	  "MessageWhenModeAck": true,
+	  "MessageWhenLevelAck": true,
+	  "EnteringModeMessageIsTimeDependent": true,
+      "ConstTrainDataValues": [
+		  {
+			"Field": "LoadingGauge",
+			"Value": "GC"
+		  },
+		  {
+			"Field": "AxleLoadCategory",
+			"Value": "A"
+		  },
+		  {
+			"Field": "Airtight",
+			"Value": "No"
+		  },
+		  {
+			"Field": "TrainCategory",
+			"Value": "PASS 3"
+		  }
+	  ]
+   },
   "406": {
       "TrainData":"TrainData/DB/traindata_406.json",
       "SpeedDial": 400,
