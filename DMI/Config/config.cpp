@@ -15,6 +15,7 @@ extern int etcsDialMaxSpeed;
 extern bool softkeys;
 extern bool serieSelected;
 extern bool playSoundOnRadioStatusChange;
+extern bool displayTTPavailable;
 extern std::string stm_layout_file;
 void startWindows();
 void load_config(std::string serie)
@@ -27,16 +28,12 @@ void load_config(std::string serie)
         json j = json::parse(*contents);
         if (j.contains(serie)) {
             json &cfg = j[serie];
-            if (cfg.contains("SpeedDial")) {
-                etcsDialMaxSpeed = cfg["SpeedDial"];
-            }
+            etcsDialMaxSpeed = cfg.value("SpeedDial", 400);
             if (cfg.contains("STMLayout")) {
                 stm_layout_file = cfg["STMLayout"];
             }
-            if (cfg.contains("PlaySoundOnRadioStatusChange"))
-            {
-                playSoundOnRadioStatusChange = cfg["PlaySoundOnRadioStatusChange"];
-            }
+            playSoundOnRadioStatusChange = cfg.value("PlaySoundOnRadioStatusChange", false);
+            displayTTPavailable = cfg.value("DisplayTimeToPermitted", false);
             bool sk = cfg.contains("SoftKeys") && cfg["SoftKeys"];
             if (softkeys != sk) {
                 softkeys = sk;

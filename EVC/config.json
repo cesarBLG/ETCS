@@ -7,7 +7,8 @@
      ],
      "AvailableNTC":[
         26
-     ]
+     ],
+     "DisplayTimeToPermitted": true
   },
    "SimRail/E186":{
      "SpeedDial":180,
@@ -18,7 +19,8 @@
      ],
      "AvailableNTC":[
         26
-     ]
+     ],
+     "DisplayTimeToPermitted": true
   },
    "SimRail/ED250":{
       "TrainData":"TrainData/SimRail/ED250.json",
@@ -43,7 +45,8 @@
 			"Field": "Airtight",
 			"Value": "No"
 		  }
-     ]
+     ],
+     "DisplayTimeToPermitted": true
   },
    "SimRail/E6ACTad":{
 	  "TrainData":"TrainData/SimRail/E6ACTad.json",
@@ -82,7 +85,8 @@
      ],
      "AvailableNTC":[
         26
-     ]
+     ],
+     "DisplayTimeToPermitted": true
   },
    "SimRail/36WEd":{
       "TrainData":"TrainData/SimRail/36WEd.json",
@@ -90,7 +94,8 @@
      "STMLayout":"stm_bombardier.json",
      "AvailableNTC":[
         26
-     ]
+     ],
+     "DisplayTimeToPermitted": true
   },
   "406": {
       "TrainData":"TrainData/DB/traindata_406.json",
