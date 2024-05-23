@@ -299,7 +299,8 @@ void update_track_comm()
                     higherver = false;
             }
             if (higherver) {
-                trigger_condition(65);
+                if (mode != Mode::RV)
+                    trigger_condition(65);
                 update_track_comm();
                 return;
             }

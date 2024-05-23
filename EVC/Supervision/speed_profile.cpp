@@ -26,6 +26,7 @@ optional<speed_restriction> SH_speed;
 optional<speed_restriction> UN_speed;
 optional<speed_restriction> OS_speed;
 optional<speed_restriction> LS_speed;
+optional<speed_restriction> RV_speed;
 optional<speed_restriction> override_speed;
 optional<speed_restriction> STM_system_speed;
 optional<speed_restriction> STM_max_speed;
@@ -147,6 +148,8 @@ void recalculate_MRSP()
         restrictions.push_back(*SH_speed);
     if (UN_speed && mode == Mode::UN)
         restrictions.push_back(*UN_speed);
+    if (RV_speed && mode == Mode::RV)
+        restrictions.push_back(*RV_speed);
     if (STM_system_speed && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::UN))
         restrictions.push_back(*STM_system_speed);
     if (STM_max_speed && (mode == Mode::FS || mode == Mode::LS || mode == Mode::OS || mode == Mode::SR || mode == Mode::UN || mode == Mode::SN))

@@ -325,6 +325,9 @@ struct L_ACKMAMODE_t : D_t
 struct L_ADHESION_t : D_t
 {
 };
+struct L_AXLELOAD_t : D_t
+{
+};
 struct L_DOUBTOVER_t : D_t
 {
     static const uint32_t Unknown=32767;

@@ -43,6 +43,8 @@
 #include "132.h"
 #include "136.h"
 #include "137.h"
+#include "138.h"
+#include "139.h"
 #include "140.h"
 #include "141.h"
 #include "180.h"
@@ -56,6 +58,7 @@
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
+#include "../Procedures/reversing.h"
 #include "../Procedures/stored_information.h"
 #include "../Procedures/train_trip.h"
 #include "../TrackConditions/track_condition.h"
@@ -472,11 +475,16 @@ void train_running_number_information::handle()
 }
 void reversing_area_information::handle()
 {
-
+    rv_position = {};
+    auto &rai = *(ReversingAreaInformation*)linked_packets.front().get();
+    rv_area = {*ref+rai.D_STARTREVERSEAREA.get_value(rai.Q_SCALE), *ref+rai.D_STARTREVERSEAREA.get_value(rai.Q_SCALE)+rai.L_REVERSEAREA.get_value(rai.Q_SCALE)};
+    rv_area_end_original = rv_area->end;
 }
 void reversing_supervision_information::handle()
 {
-    
+    rv_position = {};
+    auto &rsi = *(ReversingSupervisionInformation*)linked_packets.front().get();
+    rv_supervision = {rsi.V_REVERSE.get_value(), rsi.D_REVERSE.get_value(rsi.Q_SCALE)};
 }
 void taf_level23_information::handle()
 {

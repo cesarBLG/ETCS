@@ -103,6 +103,7 @@ extern optional<speed_restriction> SH_speed;
 extern optional<speed_restriction> UN_speed;
 extern optional<speed_restriction> OS_speed;
 extern optional<speed_restriction> LS_speed;
+extern optional<speed_restriction> RV_speed;
 extern optional<speed_restriction> STM_system_speed;
 extern optional<speed_restriction> STM_max_speed;
 extern optional<speed_restriction> override_speed;

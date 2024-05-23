@@ -27,6 +27,7 @@
 #include "45.h"
 #include "46.h"
 #include "49.h"
+#include "51.h"
 #include "52.h"
 #include "57.h"
 #include "58.h"
@@ -93,6 +94,7 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 45: p = new RadioNetworkRegistration(); break;
         case 46: p = new ConditionalLevelTransitionOrder(); break;
         case 49: p = new ListSHBalises();
+        case 51: p = new AxleLoadSpeedProfile(); break;
         case 52: p = new PermittedBrakingDistanceInformation(); break;
         case 57: p = new MovementAuthorityRequestParameters(); break;
         case 58: p = new PositionReportParameters(); break;

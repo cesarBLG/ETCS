@@ -39,7 +39,7 @@ struct AxleLoadSpeedProfile : ETCS_directional_packet
     D_TRACKINIT_t D_TRACKINIT;
     ASP_element_packet element;
     N_ITER_t N_ITER;
-    std::vector<SSP_element_packet> elements;
+    std::vector<ASP_element_packet> elements;
     void copy(bit_manipulator &r) override
     {
         NID_PACKET.copy(r);
