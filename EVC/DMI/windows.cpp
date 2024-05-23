@@ -1059,7 +1059,7 @@ void validate_data_entry(std::string name, json &result)
     } else if (name == get_text("Train data")) {
         if (flexible_data_entry) {
             int length = stoi(result[get_text("Length (m)")].get<std::string>());
-            std::string str = result[get_text("Train category")].get<std::string>();
+            std::string str = const_train_data.count("TrainCategory") ? get_text(const_train_data["TrainCategory"]) : result[get_text("Train category")].get<std::string>();
             int cat;
             if (str == get_text("PASS 1"))
                 cat = 2;
@@ -1179,7 +1179,7 @@ void validate_data_entry(std::string name, json &result)
 
                 brake_percentage = stoi(result[get_text("Brake percentage")].get<std::string>());
 
-                std::string str = const_train_data.count("TrainCategory") ? get_text(const_train_data["TrainCategory"]) :  result[get_text("Train category")].get<std::string>();
+                std::string str = const_train_data.count("TrainCategory") ? get_text(const_train_data["TrainCategory"]) : result[get_text("Train category")].get<std::string>();
                 int cant;
                 int cat;
                 if (str == get_text("PASS 1")) {

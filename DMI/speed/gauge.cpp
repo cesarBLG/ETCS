@@ -357,12 +357,15 @@ static float prevVrelease=0;
 bool releaseSignShown=false;
 void displayVrelease()
 {
+    if (prevUseImperialSystem != useImperialSystem)
+        releaseSignShown = false;
+
     if (mode == Mode::SN && active_ntc_window != nullptr && active_ntc_window->monitoring_data.Vrelease_display & 1) {
         if(prevVrelease!=Vrelease || !releaseSignShown)
         {
             releaseSignShown = true;
             releaseRegion.clear();
-            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, active_ntc_window->monitoring_data.Vrelease_color, CENTER, 0);
+            releaseRegion.addText(to_string((int)std::round(useImperialSystem ? Vrelease * KMH_TO_MPH : Vrelease)).c_str(), 0, 0, 17, active_ntc_window->monitoring_data.Vrelease_color, CENTER, 0);
             prevVrelease = Vrelease;
         }
     } else if (Vrelease!=0 && Vtarget == 0 && (monitoring == TSM || monitoring == RSM) && (mode != Mode::OS || showSpeeds) && mode != Mode::SN) {
@@ -370,7 +373,7 @@ void displayVrelease()
         {
             releaseSignShown = true;
             releaseRegion.clear();
-            releaseRegion.addText(to_string((int)std::round(Vrelease)).c_str(), 0, 0, 17, 
+            releaseRegion.addText(to_string((int)std::round(useImperialSystem ? Vrelease * KMH_TO_MPH : Vrelease)).c_str(), 0, 0, 17,
 #if BASELINE == 4
             mode == Mode::AD ? MediumGrey : Yellow,
 #else
