@@ -669,7 +669,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
             if (p->NID_PACKET == 136) {
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
                 infill = bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, (int)ilr.NID_BG});
-            } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
+            } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49 || p->NID_PACKET == 181) {
                 for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
                     if (it->get()->index_level == 3 || it->get()->index_level == 39) {
                         it->get()->linked_packets.push_back(t.packets[j]);
