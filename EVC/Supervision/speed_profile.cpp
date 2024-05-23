@@ -19,6 +19,7 @@
 #include <cmath>
 std::map<relocable_dist_base,double,std::less<>> MRSP;
 std::list<speed_restriction> SSP;
+std::list<speed_restriction> ASP;
 std::list<TSR> TSRs;
 optional<speed_restriction> train_speed;
 optional<speed_restriction> SR_speed;
@@ -42,12 +43,12 @@ int default_gradient_tsr;
 void delete_back_info()
 {
     const dist_base mindist = d_minsafefront(confidence_data::basic())-L_TRAIN-D_keep_information;
-    for (auto it = SSP.begin(); it != SSP.end(); ) {
-        if (it->get_end() < mindist)
-            it = SSP.erase(it);
-        else
-            ++it;
-    }
+    SSP.remove_if([mindist](const speed_restriction &r) {
+        return r.get_end() < mindist;
+    });
+    ASP.remove_if([mindist](const speed_restriction &r) {
+        return r.get_end() < mindist;
+    });
     for (auto it = gradient_profile.begin(); it != gradient_profile.end(); ) {
         if (it->end.min < mindist)
             it = gradient_profile.erase(it);
@@ -80,6 +81,23 @@ void delete_SSP(const distance &start)
 void delete_SSP()
 {
     SSP.clear();
+}
+void delete_ASP(const distance &start)
+{
+    for (auto it = ASP.begin(); it != ASP.end(); ) {
+        if (it->get_start() > start.min) {
+            it = ASP.erase(it);
+            continue;
+        }
+        if (it->get_uncompensated_end() > start.min) {
+            *it = speed_restriction(it->get_speed(), it->start_distance, start, it->is_compensated());
+        }
+        ++it;
+    }
+}
+void delete_ASP()
+{
+    ASP.clear();
 }
 void delete_gradient(const distance &start)
 {
@@ -121,6 +139,8 @@ void recalculate_MRSP()
     std::list<std::reference_wrapper<speed_restriction>> restrictions;
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)
         restrictions.insert(restrictions.end(), SSP.begin(), SSP.end());
+    if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS)
+        restrictions.insert(restrictions.end(), ASP.begin(), ASP.end());
     if (mode == Mode::FS || mode == Mode::OS || mode == Mode::LS || mode == Mode::SR || mode == Mode::UN) {
         for (auto &tsr : TSRs)
             restrictions.push_back(tsr.restriction);
@@ -215,6 +235,13 @@ dist_base SSP_end()
             d = c;
     }
     return d;
+}
+void update_ASP(distance start, std::vector<speed_restriction> &nASP)
+{
+    delete_ASP(start);
+    for (auto &rest : nASP) {
+        ASP.push_back(rest);
+    }
 }
 void update_gradient(std::vector<std::pair<distance,double>> grad)
 {

@@ -14,6 +14,7 @@
 #include "../Supervision/track_pbd.h"
 #include "../Position/linking.h"
 #include "../DMI/text_message.h"
+#include "../DMI/track_ahead_free.h"
 #include "level_transition.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrackConditions/route_suitability.h"
@@ -475,6 +476,7 @@ void set_mode_deleted_data()
     information_list[3].delete_info = []() {delete_MA();};
     information_list[4].delete_info = []() {delete_gradient();};
     information_list[5].delete_info = []() {delete_SSP();};
+    information_list[6].delete_info = []() {delete_ASP();};
     information_list[7].delete_info = []() {STM_max_speed = {};};
     information_list[8].delete_info = []() {STM_system_speed = {};};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
@@ -538,6 +540,7 @@ void set_mode_deleted_data()
     information_list[41].delete_info = []() {train_running_number = 0;};
     information_list[42].delete_info = []() {rv_area = {};};
     information_list[43].delete_info = []() {rv_supervision = {};};
+    information_list[44].delete_info = []() {taf_request = {};};
     information_list[45].delete_info = []() {PBDs.clear();};
     information_list[46].delete_info = []() {level_crossings.clear();};
     information_list[52].delete_info = []() {display_lssma_time = {};};

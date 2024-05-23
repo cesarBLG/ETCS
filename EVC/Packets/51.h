@@ -5,11 +5,11 @@
 #include <vector>
 struct ASP_diff
 {
-    M_AXLELOADCAT_t M_AXLELOAD;
+    M_AXLELOADCAT_t M_AXLELOADCAT;
     V_AXLELOAD_t V_AXLELOAD;
     void copy(bit_manipulator &r)
     {
-        M_AXLELOAD.copy(r);
+        M_AXLELOADCAT.copy(r);
         V_AXLELOAD.copy(r);
     }
 };

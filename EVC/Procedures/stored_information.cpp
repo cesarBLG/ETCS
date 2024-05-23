@@ -25,6 +25,7 @@ void shorten(bool include_ma, distance d)
         delete_MA(distance::from_odometer(d_estfront_dir[odometer_orientation == -1]), d);
     delete_gradient(d);
     delete_SSP(d);
+    delete_ASP(d);
     if (mode != Mode::SH)
         sh_balises = {};
     for (auto it = mode_profiles.begin(); it != mode_profiles.end();) {

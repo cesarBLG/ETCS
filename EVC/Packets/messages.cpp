@@ -1374,6 +1374,8 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
         info.push_back(new session_management_information());
     } else if (packet_num == 46) {
         info.push_back(new condleveltr_order_information());
+    } else if (packet_num == 51) {
+        info.push_back(new axle_load_speed_profile_information());
     } else if (packet_num == 52) {
         info.push_back(new pbd_information());
     } else if (packet_num == 57) {

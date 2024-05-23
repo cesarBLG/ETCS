@@ -23,6 +23,7 @@
 #include "41.h"
 #include "42.h"
 #include "49.h"
+#include "51.h"
 #include "52.h"
 #include "57.h"
 #include "58.h"
@@ -183,6 +184,30 @@ void issp_information::handle()
 {
     InternationalSSP issp = *(InternationalSSP*)linked_packets.front().get();
     update_SSP(get_SSP(*ref, issp));
+}
+void axle_load_speed_profile_information::handle()
+{
+    AxleLoadSpeedProfile asp = *(AxleLoadSpeedProfile*)linked_packets.front().get();
+    if (asp.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+        delete_ASP(*ref+asp.D_TRACKINIT.get_value(asp.Q_SCALE));
+        return;
+    }
+    std::vector<ASP_element_packet> asps;
+    asps.push_back(asp.element);
+    asps.insert(asps.end(), asp.elements.begin(), asp.elements.end());
+    std::vector<speed_restriction> rests;
+    distance dist = *ref;
+    for (auto &el : asps) {
+        dist += el.D_AXLELOAD.get_value(asp.Q_SCALE);
+        double v = 1000;
+        for (auto &cat : el.diffs) {
+            if ((int)axle_load_category >= cat.M_AXLELOADCAT)
+                v = std::min(v, cat.V_AXLELOAD.get_value());
+        }
+        if (v < 1000)
+            rests.push_back(speed_restriction(v, dist, dist+el.L_AXLELOAD.get_value(asp.Q_SCALE), el.Q_FRONT == Q_FRONT_t::TrainLengthDelay));
+    }
+    update_ASP(*ref+asps[0].D_AXLELOAD.get_value(asp.Q_SCALE), rests);
 }
 void leveltr_order_information::handle()
 {
