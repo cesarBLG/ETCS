@@ -13,8 +13,6 @@
 #include "../TrainSubsystems/train_interface.h"
 #include "../Supervision/conversion_model.h"
 std::list<std::shared_ptr<track_condition>> track_conditions;
-optional<distance> restore_initial_states_various;
-optional<distance> restore_initial_states_platforms;
 std::set<distance> brake_change;
 //std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
 void add_condition();
@@ -62,32 +60,6 @@ void update_brake_contributions()
 }
 void update_track_conditions()
 {
-    if (restore_initial_states_various && restore_initial_states_various->min<d_minsafefront(*restore_initial_states_various)) {
-        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
-            TrackConditions c = it->get()->condition;
-            if (c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea ||
-                c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
-                c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
-                c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) {
-                it = track_conditions.erase(it);
-                continue;
-            }
-            ++it;
-        }
-        restore_initial_states_various = {};
-        update_brake_contributions();
-    }
-    if (restore_initial_states_platforms && restore_initial_states_platforms->min<d_minsafefront(*restore_initial_states_platforms)) {
-        for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
-            TrackConditions c = it->get()->condition;
-            if (c == TrackConditions::StationPlatform) {
-                it = track_conditions.erase(it);
-                continue;
-            }
-            ++it;
-        }
-        restore_initial_states_platforms = {};
-    }
     neutral_section_info = {{},{}};
     lower_pantograph_info = {{},{}};
     air_tightness_info = {{},{}};
@@ -347,10 +319,25 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
 void load_track_condition_various(TrackCondition cond, distance ref, bool special)
 {
     if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        restore_initial_states_various = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        distance resume = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        for (auto it = track_conditions.begin(); it != track_conditions.end();) {
+            TrackConditions c = it->get()->condition;
+            if (((c == TrackConditions::SoundHorn || c == TrackConditions::NonStoppingArea || c == TrackConditions::TunnelStoppingArea) && special) ||
+                ((c == TrackConditions::PowerLessSectionLowerPantograph || c == TrackConditions::PowerLessSectionSwitchMainPowerSwitch || 
+                c == TrackConditions::RadioHole || c == TrackConditions::AirTightness || c == TrackConditions::SwitchOffRegenerativeBrake ||
+                c == TrackConditions::SwitchOffEddyCurrentEmergencyBrake || c == TrackConditions::SwitchOffEddyCurrentServiceBrake || c == TrackConditions::SwitchOffMagneticShoe) && !special)) {
+                
+                if (it->get()->start.max >= resume.min) {
+                    it = track_conditions.erase(it);
+                    continue;
+                }
+                if (it->get()->end.min > resume.max)
+                    it->get()->end = resume;
+            }
+            ++it;
+        }
         return;
     }
-    restore_initial_states_various = {};
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         TrackConditions c = it->get()->condition;
@@ -480,9 +467,19 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
 }
 void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref)
 {
-    if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        restore_initial_states_platforms = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
-        return;
+    if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) { 
+        distance resume = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
+        for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
+            if (it->get()->condition == TrackConditions::StationPlatform) {
+                if (it->get()->start.max >= resume.min) {
+                    it = track_conditions.erase(it);
+                    continue;
+                }
+                if (it->get()->end.min > resume.max)
+                    it->get()->end = resume;
+            }
+            ++it;
+        }
     }
     distance first = ref + cond.element.D_TRACKCOND.get_value(cond.Q_SCALE);
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {

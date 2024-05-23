@@ -349,16 +349,14 @@ void PBD_target::calculate_restriction()
     }
     restriction = speed_restriction(((int)(V_PBD*3.6/5))*5/3.6, start, end, false);
 }
-optional<distance> reset_pbd;
 void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
 {
     if (pbd.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        reset_pbd = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
-        return;
+        distance resume = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
+        delete_PBD(resume);
     }
-    reset_pbd = {};
     distance start = ref+pbd.element.D_PBDSR.get_value(pbd.Q_SCALE);
-    PBDs.remove_if([start](std::shared_ptr<PBD_target> &t) {return t->start.min < start.max;});
+    delete_PBD(start);
     std::vector<PBD_element> elements;
     elements.push_back(pbd.element);
     elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());

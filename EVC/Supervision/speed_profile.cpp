@@ -332,5 +332,16 @@ void delete_PBD()
 }
 void delete_PBD(const distance &from)
 {
-    //PBDs.remove_if([from](auto &pbd) { return pbd->end > from.min; });
+    for (auto it = PBDs.begin(); it != PBDs.end(); ) {
+        if (it->get()->start.max >= from.min) {
+            it = PBDs.erase(it);
+            continue;
+        }
+        if (it->get()->end.min > from.max) {
+            it->get()->end = from;
+            it->get()->calculate_restriction();
+        }
+        ++it;
+    }
+    PBDs.remove_if([from](auto &pbd) { return pbd->start.max > from.min; });
 }
