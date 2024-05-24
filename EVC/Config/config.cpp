@@ -19,6 +19,7 @@ using json = nlohmann::json;
 extern ORserver::ParameterManager manager;
 extern std::string traindata_file;
 extern int data_entry_type;
+extern int data_entry_type_tiu;
 extern bool message_when_driver_id_entered;
 extern bool message_when_running_number_entered;
 extern bool message_when_train_data_entered;
@@ -42,7 +43,10 @@ void load_config(std::string serie)
 		json& cfg = j[serie];
 		if (cfg.contains("TrainData")) {
 			traindata_file = cfg["TrainData"];
-			data_entry_type = 1;
+			if (data_entry_type_tiu >= 0)
+				data_entry_type = data_entry_type_tiu;
+			else
+				data_entry_type = 1;
 		}
 		unsupported_levels = {};
 		if (cfg.contains("UnsupportedLevels")) {
