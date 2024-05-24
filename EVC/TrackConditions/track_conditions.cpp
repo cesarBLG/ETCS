@@ -452,8 +452,10 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
             if (tc2->condition == tc->condition) {
                 if (tc->start.max <= tc2->end.min) {
                     exists = true;
-                    tc->targets.clear();
-                    tc2->end = tc->end;
+                    if (tc2->end.min < tc->end.min) {
+                        tc2->end = tc->end;
+                        tc->targets.clear();
+                    }
                 }
             } 
         }
