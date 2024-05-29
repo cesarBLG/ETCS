@@ -159,6 +159,9 @@ struct D_ENDTIMERSTARTLOC_t : D_t
 struct D_GRADIENT_t : D_t
 {
 };
+struct D_INFILL_t : D_t
+{
+};
 struct D_LEVELTR_t : D_t
 {
     static const uint32_t Now=32767;
@@ -323,6 +326,9 @@ struct L_ACKMAMODE_t : D_t
 {
 };
 struct L_ADHESION_t : D_t
+{
+};
+struct L_AXLELOAD_t : D_t
 {
 };
 struct L_DOUBTOVER_t : D_t
@@ -1553,6 +1559,10 @@ struct NID_RBC_t : ETCS_variable
     static const uint32_t ContactLastRBC=16383;
     NID_RBC_t() : ETCS_variable(14) {}
 };
+struct NID_RIU_t : ETCS_variable
+{
+    NID_RIU_t() : ETCS_variable(14) {}
+};
 struct NID_TEXTMESSAGE_t : ETCS_variable
 {
     NID_TEXTMESSAGE_t() : ETCS_variable(8) {}
@@ -1952,6 +1962,12 @@ struct Q_RBC_t : ETCS_variable
     static const uint32_t TerminateSession=0;
     static const uint32_t EstablishSession=1;
     Q_RBC_t() : ETCS_variable(1) {}
+};
+struct Q_RIU_t : ETCS_variable
+{
+    static const uint32_t TerminateSession=0;
+    static const uint32_t EstablishSession=1;
+    Q_RIU_t() : ETCS_variable(1) {}
 };
 struct Q_TEXT_t : ETCS_variable
 {

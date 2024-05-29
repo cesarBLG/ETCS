@@ -17,4 +17,5 @@ struct brake_command_information
     std::function<bool(brake_command_information &i)> revoke;
 };
 extern std::list<brake_command_information> brake_conditions;
+extern std::list<brake_command_information> emergency_brake_conditions;
 void trigger_brake_reason(int reason);

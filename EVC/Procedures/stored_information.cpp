@@ -13,6 +13,7 @@
 #include "../Supervision/national_values.h"
 #include "../Packets/radio.h"
 #include "../Procedures/mode_transition.h"
+#include "../Procedures/reversing.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrackConditions/route_suitability.h"
 void shorten(bool include_ma, distance d)
@@ -24,6 +25,7 @@ void shorten(bool include_ma, distance d)
         delete_MA(distance::from_odometer(d_estfront_dir[odometer_orientation == -1]), d);
     delete_gradient(d);
     delete_SSP(d);
+    delete_ASP(d);
     if (mode != Mode::SH)
         sh_balises = {};
     for (auto it = mode_profiles.begin(); it != mode_profiles.end();) {
@@ -45,6 +47,12 @@ void shorten(bool include_ma, distance d)
             it = track_conditions.erase(it);
         else
             ++it;
+    }
+    if (rv_area) {
+        if (rv_area->start.est > d.min)
+            rv_area = {};
+        else if (rv_area->end.est > d.min)
+            rv_area->end = d;
     }
     delete_PBD(d);
     calculate_SvL();

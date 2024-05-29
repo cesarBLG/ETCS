@@ -8,6 +8,7 @@
 
 #include <functional>
 #include <optional>
+#include <algorithm>
 
 #ifndef NO_THREADS
 #define THREAD_LOCAL_DEF thread_local

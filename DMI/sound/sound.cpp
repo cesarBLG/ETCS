@@ -48,6 +48,7 @@ std::unique_ptr<UiPlatform::SoundData> swarn;
 std::unique_ptr<UiPlatform::SoundData> stoofast;
 std::unique_ptr<UiPlatform::SoundData> click;
 int64_t last_sinfo;
+int64_t last_stoofast;
 std::unique_ptr<UiPlatform::SoundSource> swarn_source;
 
 void loadBeeps()
@@ -80,6 +81,9 @@ void playSinfo()
 
 void playTooFast()
 {
+    int64_t now = platform->get_timer();
+    if (now-last_stoofast<2000) return;
+    last_stoofast = now;
     platform->play_sound(*stoofast, false)->detach();
 }
 

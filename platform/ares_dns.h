@@ -28,12 +28,12 @@ class AresQuery : public DNSQuery
     std::map<int, PlatformUtil::Promise<short>> promises;
     std::optional<std::string> a;
     std::optional<std::string> txt;
-    static void callback_a(void *arg, int status, int timeouts, struct hostent *host)
+    static void callback_a(void *arg, int status, int timeouts, struct ares_addrinfo *addr)
     {
         AresQuery *q = (AresQuery*)arg;        
-        if (status == ARES_SUCCESS && host->h_length > 0) {
+        if (status == ARES_SUCCESS && addr->nodes) {
             char ip[INET6_ADDRSTRLEN];
-            ares_inet_ntop(host->h_addrtype, host->h_addr_list[0], ip, INET6_ADDRSTRLEN);
+            ares_inet_ntop(addr->nodes->ai_family, &((struct sockaddr_in *)addr->nodes->ai_addr)->sin_addr, ip, INET6_ADDRSTRLEN);
             q->a = ip;
         } else {
             q->a = "";
@@ -42,29 +42,55 @@ class AresQuery : public DNSQuery
             q->fulfiller.fulfill({*q->a, *q->txt});
         }
     }
-    static void callback_txt(void *arg, int status, int timeouts, unsigned char *buff, int alen)
+    static void callback_txt(void *arg, ares_status_t status, size_t timeouts, const ares_dns_record_t *dnsrec)
     {
         AresQuery *q = (AresQuery*)arg;    
         q->txt = "";
         if (status == ARES_SUCCESS) {
-            ares_txt_reply *reply;
-            if (ares_parse_txt_reply(buff, alen, &reply) == ARES_SUCCESS) {
-                q->txt = std::string((char*)reply->txt, reply->length);
-                ares_free_data(reply);
+            const ares_dns_rr_t *res = ares_dns_record_rr_get_const(dnsrec, ARES_SECTION_ANSWER, 0);
+            if (res != nullptr) {
+                size_t len;
+                const unsigned char *data = ares_dns_rr_get_bin(res, ARES_RR_TXT_DATA, &len);
+                q->txt = std::string((const char *)data, len);
             }
         }
         if (q->a && q->txt) {
             q->fulfiller.fulfill({*q->a, *q->txt});
         }
     }
+    void process_fd(ares_socket_t fd, int rev)
+    {
+        ares_process_fd(channel, (rev & POLLIN) ? fd : ARES_SOCKET_BAD, (rev & POLLOUT) ? fd : ARES_SOCKET_BAD);
+        if (promises.count(fd))
+            callback_fds(this, fd, 1, 1);
+    }
+    static void callback_fds(void *arg, ares_socket_t fd, int readable, int writable)
+    {
+        AresQuery *q = (AresQuery*)arg;
+        if (!readable && !writable) {
+            q->promises.erase(fd);
+            return;
+        }
+        q->promises[fd] = q->poller.on_fd_ready(fd, POLLIN|POLLOUT).then([q, fd](int rev) {
+                q->process_fd(fd, rev);
+            });
+    }
 public:
     AresQuery(FdPoller &poller, std::string hostname) : DNSQuery(hostname), poller(poller)
     {
-        ares_init(&channel);
+        ares_options options;
+        options.sock_state_cb = callback_fds;
+        options.sock_state_cb_data = this;
+        ares_init_options(&channel, &options, ARES_OPT_SOCK_STATE_CB);
         ares_set_servers_csv(channel, "8.8.8.8,8.8.4.4");
-        ares_gethostbyname(channel, hostname.c_str(), AF_UNSPEC, callback_a, this);
-        ares_query(channel, hostname.c_str(), 1, 16, callback_txt, this);
-        process();
+        ares_addrinfo_hints hints;
+        hints.ai_family = AF_UNSPEC;
+        hints.ai_flags = 0;
+        hints.ai_protocol = 0;
+        hints.ai_socktype = 0;
+        ares_getaddrinfo(channel, hostname.c_str(), "30993", &hints, callback_a, this);
+        ares_query_dnsrec(channel, hostname.c_str(), ARES_CLASS_IN, ARES_REC_TYPE_TXT, callback_txt, this, nullptr);
+        process_timeout();
     }
     ~AresQuery()
     {
@@ -72,28 +98,16 @@ public:
         ares_destroy(channel);
     }
 protected:
-    void process()
+    void process_timeout()
     {
-        promises.clear();
-        ares_socket_t fds[ARES_GETSOCK_MAXNUM];
-        int flags = ares_getsock(channel, fds, ARES_GETSOCK_MAXNUM);
-        for (int i=0; i<ARES_GETSOCK_MAXNUM; i++) {
-            ares_socket_t fd = fds[i];
-            if (!ARES_GETSOCK_READABLE(flags, i) && !ARES_GETSOCK_WRITABLE(flags, i))
-                continue;
-            promises[fd] = poller.on_fd_ready(fd, (ARES_GETSOCK_READABLE(flags, i) ? POLLIN : 0)
-            | (ARES_GETSOCK_WRITABLE(flags, i) ? POLLOUT : 0)).then([this, fd](int rev){
-                ares_process_fd(channel, (rev & POLLIN) ? fd : ARES_SOCKET_BAD, (rev & POLLOUT) ? fd : ARES_SOCKET_BAD);
-                promises.erase(fd);
-                if (promises.empty())
-                    process();
-            });
-        }
         timeval req;
         req.tv_sec = 1;
         req.tv_usec = 0;
         timeval tv;
         tv = *ares_timeout(channel, &req, &tv);
-        timeout = platform->delay(tv.tv_sec*1000 + tv.tv_usec/1000).then([this](){process();});
+        timeout = platform->delay(tv.tv_sec*1000 + tv.tv_usec/1000).then([this]() {
+            ares_process_fd(channel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+            process_timeout();
+        });
     }
 };

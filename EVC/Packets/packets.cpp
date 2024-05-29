@@ -27,6 +27,7 @@
 #include "45.h"
 #include "46.h"
 #include "49.h"
+#include "51.h"
 #include "52.h"
 #include "57.h"
 #include "58.h"
@@ -50,12 +51,14 @@
 #include "90.h"
 #include "131.h"
 #include "132.h"
+#include "133.h"
 #include "136.h"
 #include "137.h"
 #include "138.h"
 #include "139.h"
 #include "140.h"
 #include "141.h"
+#include "143.h"
 #include "180.h"
 #include "181.h"
 #include "V1/200.h"
@@ -92,11 +95,12 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 42: p = new SessionManagement(); break;
         case 45: p = new RadioNetworkRegistration(); break;
         case 46: p = new ConditionalLevelTransitionOrder(); break;
-        case 49: p = new ListSHBalises();
+        case 49: p = new ListSHBalises(); break;
+        case 51: p = new AxleLoadSpeedProfile(); break;
         case 52: p = new PermittedBrakingDistanceInformation(); break;
         case 57: p = new MovementAuthorityRequestParameters(); break;
         case 58: p = new PositionReportParameters(); break;
-        case 63: p = new ListSRBalises();
+        case 63: p = new ListSRBalises(); break;
         case 64: p = new InhibitionOfRevocableTSRL23(); break;
         case 65: p = new TemporarySpeedRestriction(); break;
         case 66: p = new TemporarySpeedRestrictionRevocation(); break;
@@ -122,12 +126,14 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 90: p = new TrackAheadFreeTransition(); break;
         case 131: p = new RBCTransitionOrder(); break;
         case 132: p = new DangerForShunting(); break;
+        case 133: p = new RadioInfillAreaInformation(); break;
         case 136: p = new InfillLocationReference(); break;
         case 137: p = new StopIfInSR(); break;
         case 138: p = new ReversingAreaInformation(); break;
         case 139: p = new ReversingSupervisionInformation(); break;
         case 140: p = new TrainRunningNumberRBC(); break;
         case 141: p = new DefaultGradientTSR(); break;
+        case 143: p = new SessionManagementNeighbourRIU(); break;
         case 180: p = new LSSMAToggleOrder(); break;
         case 181: p = new GenericLSFunctionMarker(); break;
         case 200: if (VERSION_X(m_version) == 1) p = new V1::VirtualBaliseCoverMarker(); break;

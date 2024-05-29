@@ -14,6 +14,7 @@
 #include "../Supervision/track_pbd.h"
 #include "../Position/linking.h"
 #include "../DMI/text_message.h"
+#include "../DMI/track_ahead_free.h"
 #include "level_transition.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrackConditions/route_suitability.h"
@@ -23,6 +24,7 @@
 #include "../language/language.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../TrainSubsystems/cold_movement.h"
+#include "../Procedures/reversing.h"
 #include <map>
 #include "platform_runtime.h"
 cond mode_conditions[78];
@@ -325,7 +327,9 @@ void update_mode_status()
             SH_speed = speed_restriction(requested_mode_profile ? requested_mode_profile->speed : V_NVSHUNT, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         else
             SH_speed = {};
-        
+        if (mode == Mode::RV)
+            RV_speed = speed_restriction(rv_supervision->speed, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+
         if (mode == Mode::FS) {
             int64_t time = get_milliseconds();
             add_message(text_message(get_text("Entering FS"), true, false, false, [time](text_message &t){
@@ -472,6 +476,7 @@ void set_mode_deleted_data()
     information_list[3].delete_info = []() {delete_MA();};
     information_list[4].delete_info = []() {delete_gradient();};
     information_list[5].delete_info = []() {delete_SSP();};
+    information_list[6].delete_info = []() {delete_ASP();};
     information_list[7].delete_info = []() {STM_max_speed = {};};
     information_list[8].delete_info = []() {STM_system_speed = {};};
     information_list[9].delete_info = []() {ongoing_transition = {}; transition_buffer.clear(); sh_transition = {};};
@@ -533,6 +538,9 @@ void set_mode_deleted_data()
     information_list[38].invalidate_info = []() {driver_id_valid = false;};
     information_list[41].invalidate_info = []() {train_running_number_valid = false;};
     information_list[41].delete_info = []() {train_running_number = 0;};
+    information_list[42].delete_info = []() {rv_area = {};};
+    information_list[43].delete_info = []() {rv_supervision = {};};
+    information_list[44].delete_info = []() {taf_request = {};};
     information_list[45].delete_info = []() {PBDs.clear();};
     information_list[46].delete_info = []() {level_crossings.clear();};
     information_list[52].delete_info = []() {display_lssma_time = {};};

@@ -5,11 +5,11 @@
 #include <vector>
 struct ASP_diff
 {
-    M_AXLELOADCAT_t M_AXLELOAD;
+    M_AXLELOADCAT_t M_AXLELOADCAT;
     V_AXLELOAD_t V_AXLELOAD;
     void copy(bit_manipulator &r)
     {
-        M_AXLELOAD.copy(r);
+        M_AXLELOADCAT.copy(r);
         V_AXLELOAD.copy(r);
     }
 };
@@ -39,7 +39,7 @@ struct AxleLoadSpeedProfile : ETCS_directional_packet
     D_TRACKINIT_t D_TRACKINIT;
     ASP_element_packet element;
     N_ITER_t N_ITER;
-    std::vector<SSP_element_packet> elements;
+    std::vector<ASP_element_packet> elements;
     void copy(bit_manipulator &r) override
     {
         NID_PACKET.copy(r);

@@ -299,7 +299,8 @@ void update_track_comm()
                     higherver = false;
             }
             if (higherver) {
-                trigger_condition(65);
+                if (mode != Mode::RV)
+                    trigger_condition(65);
                 update_track_comm();
                 return;
             }
@@ -669,7 +670,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
             if (p->NID_PACKET == 136) {
                 InfillLocationReference ilr = *((InfillLocationReference*)p);
                 infill = bg_id({ilr.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? nid_bg.NID_C : ilr.NID_C, (int)ilr.NID_BG});
-            } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49) {
+            } else if (p->NID_PACKET == 80 || p->NID_PACKET == 49 || p->NID_PACKET == 181) {
                 for (auto it = ordered_info.rbegin(); it!=ordered_info.rend(); ++it) {
                     if (it->get()->index_level == 3 || it->get()->index_level == 39) {
                         it->get()->linked_packets.push_back(t.packets[j]);
@@ -719,8 +720,6 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         session->report_error(3);
         return false;
     }
-    if (pos)
-        session->accept_unknown_position = false;
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
@@ -889,6 +888,19 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
             info[i]->message = message;
             info[i]->version = session->version;
             ordered_info.push_back(std::shared_ptr<etcs_information>(info[i]));
+        }
+    }
+    if (pos) {
+        session->accept_unknown_position = false;
+    } else {
+        for (auto &i : ordered_info) {
+            if (i->location_based || i->index_level == 1) {
+#ifdef DEBUG_MSG_CONSISTENCY
+                platform->debug_print("Radio message rejected: location-based information sent with unknown LRBG");
+#endif
+                session->report_error(3);
+                return false;
+            }
         }
     }
     handle_information_set(ordered_info);
@@ -1294,7 +1306,7 @@ bool mode_filter(std::shared_ptr<etcs_information> info, const std::list<std::sh
         if (s.exceptions.find(9) != s.exceptions.end()) {
             bool inside_ls = false;
             for (auto i : message) {
-                if (i->index_mode == 3) {
+                if (i->index_mode == 3 && i->ref) {
                     for (auto it = ++i->linked_packets.begin(); it != i->linked_packets.end(); ++it) {
                         if (it->get()->NID_PACKET == 80) {
                             ModeProfile &profile = *(ModeProfile*)(it->get());
@@ -1362,6 +1374,8 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
         info.push_back(new session_management_information());
     } else if (packet_num == 46) {
         info.push_back(new condleveltr_order_information());
+    } else if (packet_num == 51) {
+        info.push_back(new axle_load_speed_profile_information());
     } else if (packet_num == 52) {
         info.push_back(new pbd_information());
     } else if (packet_num == 57) {

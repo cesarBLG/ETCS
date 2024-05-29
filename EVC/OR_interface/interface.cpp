@@ -32,6 +32,7 @@ using std::string;
 extern double V_est;
 double V_set;
 extern int data_entry_type;
+extern int data_entry_type_tiu;
 extern bool bot_driver;
 extern bool EB_command;
 extern bool SB_command;
@@ -176,7 +177,7 @@ void SetParameters()
 
     p = new ORserver::Parameter("etcs::tractioncutoff");
     p->GetValue = []() {
-        return traction_cutoff_status ? "false" : "true";
+        return traction_cutoff_active ? "true" : "false";
     };
     manager.AddParameter(p);
 
@@ -316,7 +317,16 @@ void SetParameters()
 
     p = new ORserver::Parameter("etcs::data_entry_type");
     p->SetValue = [](std::string val) {
-        data_entry_type = stoi(val);
+        if (val == "")
+            data_entry_type_tiu = -1;
+        else
+            data_entry_type_tiu = stoi(val);
+        if (data_entry_type >= 0) {
+            if (platform->read_file(traindata_file))
+                data_entry_type = data_entry_type_tiu;
+            else
+                data_entry_type = 0;
+        }
     };
     manager.AddParameter(p);
     

@@ -48,6 +48,11 @@ struct issp_information : etcs_information
     issp_information() : etcs_information(6) {}
     void handle() override;
 };
+struct axle_load_speed_profile_information : etcs_information
+{
+    axle_load_speed_profile_information() : etcs_information(7) {}
+    void handle() override;
+};
 struct leveltr_order_information : etcs_information
 {
     leveltr_order_information() : etcs_information(8, 10) {location_based=false;}

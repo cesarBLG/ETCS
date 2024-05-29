@@ -37,6 +37,7 @@ bool message_when_running_number_entered = false;
 bool message_when_train_data_entered = false;
 bool message_when_level_selected = false;
 int data_entry_type = 0;
+int data_entry_type_tiu = -1;
 extern bool bot_driver;
 std::map<std::string, std::string> const_train_data;
 std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
@@ -1259,7 +1260,10 @@ void validate_data_entry(std::string name, json &result)
                 cant_deficiency = cant;
                 brake_position = (brake_position_types)cat;
                 set_conversion_model();
-                train_data_valid = conversion_model_used;
+                if (!conversion_model_used) {
+                    // TODO: use pre-programmed deceleration curves if available
+                    train_data_valid = false;
+                }
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
             }
@@ -1273,7 +1277,11 @@ void validate_data_entry(std::string name, json &result)
                 active_dialog_step = "D1";
                 stm_send_train_data();
             } else {
-                active_dialog_step = "S1";
+                prev_step = active_dialog_step = "S3-1";
+                if (flexible_data_entry)
+                    active_window_dmi = train_data_window();
+                else
+                    active_window_dmi = fixed_train_data_window();
             }
         }
     } else if (name == get_text("Driver ID")) {
