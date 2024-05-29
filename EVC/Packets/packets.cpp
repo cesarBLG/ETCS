@@ -95,12 +95,12 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 42: p = new SessionManagement(); break;
         case 45: p = new RadioNetworkRegistration(); break;
         case 46: p = new ConditionalLevelTransitionOrder(); break;
-        case 49: p = new ListSHBalises();
+        case 49: p = new ListSHBalises(); break;
         case 51: p = new AxleLoadSpeedProfile(); break;
         case 52: p = new PermittedBrakingDistanceInformation(); break;
         case 57: p = new MovementAuthorityRequestParameters(); break;
         case 58: p = new PositionReportParameters(); break;
-        case 63: p = new ListSHBalises();
+        case 63: p = new ListSRBalises(); break;
         case 64: p = new InhibitionOfRevocableTSRL23(); break;
         case 65: p = new TemporarySpeedRestriction(); break;
         case 66: p = new TemporarySpeedRestrictionRevocation(); break;
