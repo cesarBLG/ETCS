@@ -52,7 +52,7 @@ void set_train_data(std::string spec)
             L_TRAIN = traindata["length"].get<double>();
             V_train = traindata["speed"].get<double>()/3.6;
             set_train_max_speed(V_train);
-            if (!traindata.contains("brakes") || !traindata.contains("emergency")) {
+            if (!traindata.contains("brakes")) {
                 set_conversion_model();
                 if (!conversion_model_used)
                     train_data_valid = false;
