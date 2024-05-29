@@ -1262,7 +1262,8 @@ void validate_data_entry(std::string name, json &result)
                 set_conversion_model();
                 if (!conversion_model_used) {
                     // TODO: use pre-programmed deceleration curves if available
-                    train_data_valid = false;
+                } else {
+                    train_data_valid = true;
                 }
             } else {
                 set_train_data(result[get_text("Train type")].get<std::string>());
