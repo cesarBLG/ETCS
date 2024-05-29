@@ -396,8 +396,12 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
             read_telegrams.push_back(t);
         }
     }
-    if (sh_balises && sh_balises->find({nid_c, nid_bg}) == sh_balises->end() && !overrideProcedure)
-        trigger_condition(52);
+    if (nid_bg >= 0 && !overrideProcedure) {
+        if (sr_balises && sr_balises->find({nid_c, nid_bg}) == sr_balises->end())
+            trigger_condition(36);
+        if (sh_balises && sh_balises->find({nid_c, nid_bg}) == sh_balises->end())
+            trigger_condition(52);
+    }
     if (dir == 1)
         std::reverse(read_telegrams.begin(), read_telegrams.end());
 
