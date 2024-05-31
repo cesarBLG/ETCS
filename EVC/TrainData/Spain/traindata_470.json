@@ -2,9 +2,11 @@
 "1UT" : {
         "length": 80,
         "speed": 140,
-        "cant_deficiency": 100,
+        "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
+        "axle_load_category ": "B2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0}
         ],
@@ -65,9 +67,11 @@
 	"2UT" : {
         "length": 160,
         "speed": 140,
-        "cant_deficiency": 100,
+        "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
+        "axle_load_category ": "B2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0}
         ],

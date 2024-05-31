@@ -1,10 +1,12 @@
 {
 	"Simple" : {
         "length": 200,
-        "speed": 300,
+        "speed": 330,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category ": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "AC25kV", "nid_ctraction": 0},
             {"name": "DC3kV", "nid_ctraction": 0}
@@ -77,10 +79,12 @@
     },
     "Doble" : {
         "length": 400,
-        "speed": 300,
+        "speed": 330,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category ": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "AC25kV", "nid_ctraction": 0},
             {"name": "DC3kV", "nid_ctraction": 0}

@@ -5,6 +5,8 @@
         "cant_deficiency": 115,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category ": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "AC15kV", "nid_ctraction": 0}
         ],
@@ -81,6 +83,8 @@
         "cant_deficiency": 115,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category ": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
             {"name": "AC15kV", "nid_ctraction": 0}
         ],
