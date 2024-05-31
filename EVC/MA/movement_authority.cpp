@@ -214,7 +214,6 @@ void calculate_SvL()
             EoA = SvL = it->start;
             LoA = {};
             V_releaseSvL = 0;
-            break;
         }
     }
 

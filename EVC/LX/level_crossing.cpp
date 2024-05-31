@@ -34,7 +34,7 @@ void update_lx()
         if (!it->lx_protected) {
             if (it->svl_replaced && d_minsafefront(it->start) < it->start.min+it->length) inform_lx = true;
             if (!it->svl_replaced && V_est == 0 && it->stop && d_estfront > it->start.est-it->stoplength) {
-                it->svl_replaced = speed_restriction(it->V_LX, distance::from_odometer(d_estfront_dir[odometer_orientation == -1]), it->start+it->length, false);
+                it->svl_replaced = speed_restriction(it->V_LX, it->start-(it->start.max-d_estfront), it->start+it->length, false);
                 calculate_SvL();
             }
             if (EoA && EoA->est == it->start.est && !it->svl_replaced) {
@@ -51,10 +51,15 @@ void update_lx()
                     continue;
                 tEoA->calculate_curves(it->V_LX);
                 tSvL->calculate_curves(it->V_LX);
-                bool c1 = tEoA->d_P < d_estfront;
-                bool c2 = tSvL->d_P < d_maxsafefront(tSvL->get_target_position());
+                bool c1 = tEoA->d_P <= d_estfront;
+                bool c2 = tSvL->d_P <= d_maxsafefront(tSvL->get_target_position());
                 if (c1 || c2) {
-                    it->svl_replaced = speed_restriction(it->V_LX, distance::from_odometer(c1 ? d_estfront_dir[odometer_orientation == -1] : d_maxsafefront(tSvL->get_target_position())), it->start+it->length, false);
+                    distance start = it->start;
+                    if (c1)
+                        start -= tEoA->get_target_position() - tEoA->d_P;
+                    else
+                        start -= tSvL->get_target_position() - tSvL->d_P;
+                    it->svl_replaced = speed_restriction(it->V_LX, start, it->start+it->length, false);
                     calculate_SvL();
                 }
             }
