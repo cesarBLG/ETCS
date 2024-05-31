@@ -63,7 +63,7 @@ double calc_ceiling_limit()
         dist_base max = d_maxsafefront(d);
         auto next = it;
         ++next;
-        if ((max>d && min<d) || (min>d && (next==MRSP.end() || min<next->first)))
+        if (max >= d && (next == MRSP.end() || min < next->first))
             V_MRSP = std::min(it->second, V_MRSP);
     }
     return V_MRSP;
