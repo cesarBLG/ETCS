@@ -350,9 +350,11 @@ void dmi_update_func()
         }
         j["IndicationMarkerTarget"] = nullptr;
         j["IndicationMarkerDistanceM"] = nullptr;
+        double prevMRSP = 5000;
         for (auto it=MRSP.begin(); it!=MRSP.end(); ++it) {
             relocable_dist_base dist = it->first;
-            float safedist = dist-d_maxsafefront(dist);
+            float safedist = dist-(prevMRSP > it->second ? d_maxsafefront(dist) : d_minsafefront(dist));
+            prevMRSP = it->second;
             if (safedist < 0)
                 continue;
             if (safedist > last_distance + 1)
