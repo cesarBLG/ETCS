@@ -1083,7 +1083,7 @@
     "108":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_alstom.json",
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1106,7 +1106,7 @@
     "1081":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_alstom.json",
        "UnsupportedLevels":[
           2
        ],
@@ -1132,7 +1132,7 @@
     "108tgv": {
        "TrainData": "TrainData/France/traindata_tgv.json",
        "SpeedDial": 400,
-       "STMLayout": "stm_siemens.json",
+       "STMLayout": "stm_alstom.json",
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1210,7 +1210,7 @@
     "100":{
        "TrainData":"TrainData/Spain/traindata_100.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_alstom.json",
        "DisplayTimeToPermitted":true,
        "SoftKeys":true,
        "ConstTrainDataValues":[
