@@ -87,7 +87,7 @@ msgstr "Tågdata"
 #: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:291
 #: c:\etcs\src\evc\dmi\windows.cpp:1060
 msgid "Train type"
-msgstr "Tåg typ"
+msgstr "Tågtyp"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:192 c:\etcs\src\evc\dmi\windows.cpp:292
 #: c:\etcs\src\evc\dmi\windows.cpp:991 c:\etcs\src\evc\dmi\windows.cpp:1230
@@ -206,11 +206,11 @@ msgstr "Adhesion"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:236
 msgid "Non slippery rail"
-msgstr "Icke-hal skena"
+msgstr "Icke-halt spår"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1131
 msgid "Slippery rail"
-msgstr "Hal skena"
+msgstr "Halt spår"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:243 c:\etcs\src\evc\dmi\windows.cpp:1123
 #: c:\etcs\src\evc\dmi\windows.cpp:1253
@@ -250,7 +250,7 @@ msgstr "Ta bort VBC"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:293
 msgid "Brake percentaje"
-msgstr "bromsprocent"
+msgstr "Bromsprocent"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:294
 #, fuzzy
@@ -291,7 +291,7 @@ msgstr "Avvisat tåg"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:679
 msgid "Shunting request failed"
-msgstr "Växel förfrågan misslyckades"
+msgstr "Rangeringsförfrågan misslyckades"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:970 c:\etcs\src\evc\dmi\windows.cpp:974
 #, fuzzy
@@ -325,7 +325,7 @@ msgstr "Bekräfta "
 #: c:\etcs\src\evc\dmi\windows.cpp:1395
 #: c:\etcs\src\evc\procedures\train_trip.cpp:40
 msgid "SH refused"
-msgstr "Växling avvisad"
+msgstr "Rangering avvisad"
 
 #: c:\etcs\src\evc\euroradio\session.cpp:126
 #: c:\etcs\src\evc\procedures\train_trip.cpp:43
