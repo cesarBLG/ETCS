@@ -66,7 +66,7 @@ msgstr "RBC ID"
 #: c:\etcs\src\evc\dmi\windows.cpp:154 c:\etcs\src\evc\dmi\windows.cpp:300
 #: c:\etcs\src\evc\dmi\windows.cpp:1083
 msgid "RBC phone number"
-msgstr "RBC telefon"
+msgstr "RBC telefonnummer"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:158 c:\etcs\src\evc\dmi\windows.cpp:1081
 #: c:\etcs\src\evc\dmi\windows.cpp:1244
@@ -87,7 +87,7 @@ msgstr "Tågdata"
 #: c:\etcs\src\evc\dmi\windows.cpp:184 c:\etcs\src\evc\dmi\windows.cpp:291
 #: c:\etcs\src\evc\dmi\windows.cpp:1060
 msgid "Train type"
-msgstr "Typ tåg"
+msgstr "Tåg typ"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:192 c:\etcs\src\evc\dmi\windows.cpp:292
 #: c:\etcs\src\evc\dmi\windows.cpp:991 c:\etcs\src\evc\dmi\windows.cpp:1230
@@ -98,17 +98,17 @@ msgstr "Längd (m)"
 #: c:\etcs\src\evc\dmi\windows.cpp:193 c:\etcs\src\evc\dmi\windows.cpp:996
 #: c:\etcs\src\evc\dmi\windows.cpp:1234
 msgid "Brake percentage"
-msgstr "bromsprocent"
+msgstr "Bromsprocent"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:194 c:\etcs\src\evc\dmi\windows.cpp:995
 #: c:\etcs\src\evc\dmi\windows.cpp:1238
 #, fuzzy
 msgid "Max speed (km/h)"
-msgstr "fart max (km/h)"
+msgstr "Maxfart (km/h)"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:195 c:\etcs\src\evc\dmi\windows.cpp:992
 msgid "Loading gauge"
-msgstr "Laddningsmätare"
+msgstr "Laddar mätare"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:195
 msgid "Out of GC"
@@ -117,19 +117,19 @@ msgstr "Ute från GC"
 #: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:994
 #: c:\etcs\src\evc\dmi\windows.cpp:997
 msgid "Train category"
-msgstr "tågtyp"
+msgstr "Tåg kategori"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1000
 msgid "PASS 1"
-msgstr "RESA N"
+msgstr "PASSERA 1"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1003
 msgid "PASS 2"
-msgstr "STEG 2"
+msgstr "PASSERA 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:196 c:\etcs\src\evc\dmi\windows.cpp:1006
 msgid "PASS 3"
-msgstr "RESOR"
+msgstr "PASSERA 3"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1009
 msgid "TILT 1"
@@ -137,7 +137,7 @@ msgstr "LUTA 1"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1012
 msgid "TILT 2"
-msgstr "RESA B"
+msgstr "LUTA 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1015
 msgid "TILT 3"
@@ -145,7 +145,7 @@ msgstr "LUTA 3"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1018
 msgid "TILT 4"
-msgstr "RESA C"
+msgstr "LUTA 4"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1021
 msgid "TILT 5"
@@ -153,7 +153,7 @@ msgstr "LUTA 5"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1024
 msgid "TILT 6"
-msgstr "RESA D"
+msgstr "LUTA 6"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:197 c:\etcs\src\evc\dmi\windows.cpp:1027
 msgid "TILT 7"
@@ -206,11 +206,11 @@ msgstr "Adhesion"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:236
 msgid "Non slippery rail"
-msgstr "Halkfri skena"
+msgstr "Icke-hal skena"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:236 c:\etcs\src\evc\dmi\windows.cpp:1131
 msgid "Slippery rail"
-msgstr "Halt skena"
+msgstr "Hal skena"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:243 c:\etcs\src\evc\dmi\windows.cpp:1123
 #: c:\etcs\src\evc\dmi\windows.cpp:1253
@@ -222,13 +222,13 @@ msgstr "SR hastighet (km/h)"
 #: c:\etcs\src\evc\dmi\windows.cpp:1250
 #, fuzzy
 msgid "SR distance (m)"
-msgstr "Avstånd i SR (m)"
+msgstr "SR Avstånd (m)"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:246 c:\etcs\src\evc\dmi\windows.cpp:1121
 #: c:\etcs\src\evc\dmi\windows.cpp:1249
 #, fuzzy
 msgid "SR speed/distance"
-msgstr "SR dist/fart"
+msgstr "SR hastighet/distans"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:252 c:\etcs\src\evc\dmi\windows.cpp:1117
 msgid "Language"
@@ -236,7 +236,7 @@ msgstr "Språk"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:1133
 msgid "Set VBC"
-msgstr "Lägg till VBC"
+msgstr "Sätt VBC"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:258 c:\etcs\src\evc\dmi\windows.cpp:264
 #: c:\etcs\src\evc\dmi\windows.cpp:1163 c:\etcs\src\evc\dmi\windows.cpp:1164
@@ -259,7 +259,7 @@ msgstr "Maxhastighet (km/h)"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:295
 msgid "Airtight"
-msgstr "Trycksättning"
+msgstr "Lufttät"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:295
 msgid "Yes"
@@ -271,7 +271,7 @@ msgstr "Nej"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:309
 msgid "Data view"
-msgstr "Se data"
+msgstr "Datavy"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:315
 msgid "System version"
@@ -279,19 +279,19 @@ msgstr "Systemversion"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:315
 msgid "Operated system version"
-msgstr "Operativt systemversion"
+msgstr "Operativ systemversion"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:406 c:\etcs\src\evc\dmi\windows.cpp:514
 msgid "Radio network registration failed"
-msgstr ""
+msgstr "Radio nätverksregistrering misslyckades"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:417
 msgid "Train is rejected"
-msgstr "avvisat tåg"
+msgstr "Avvisat tåg"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:679
 msgid "Shunting request failed"
-msgstr "omöjlig manöver"
+msgstr "Växel förfrågan misslyckades"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:970 c:\etcs\src\evc\dmi\windows.cpp:974
 #, fuzzy
@@ -304,7 +304,7 @@ msgstr "PF 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"
-msgstr "Validera VBC har lagts till"
+msgstr "Validera sätt VBC"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1147 c:\etcs\src\evc\dmi\windows.cpp:1168
 msgid "Validate remove VBC"
@@ -312,11 +312,11 @@ msgstr "Validera borttagning av VBC"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1184
 msgid "Brightness"
-msgstr ""
+msgstr "Ljusstyrka"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1186
 msgid "Volume"
-msgstr ""
+msgstr "Volym"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1198 c:\etcs\src\evc\dmi\windows.cpp:1202
 msgid "Validate "
@@ -325,34 +325,34 @@ msgstr "Bekräfta "
 #: c:\etcs\src\evc\dmi\windows.cpp:1395
 #: c:\etcs\src\evc\procedures\train_trip.cpp:40
 msgid "SH refused"
-msgstr "Manöver avvisad"
+msgstr "Växling avvisad"
 
 #: c:\etcs\src\evc\euroradio\session.cpp:126
 #: c:\etcs\src\evc\procedures\train_trip.cpp:43
 msgid "Trackside not compatible"
-msgstr "sökväg stöds inte"
+msgstr "Spårsida är inte kompatibel"
 
 #: c:\etcs\src\evc\procedures\mode_transition.cpp:325
 msgid "Entering FS"
-msgstr "Inträde i FS"
+msgstr "Inträder FS"
 
 #: c:\etcs\src\evc\procedures\mode_transition.cpp:332
 msgid "Entering OS"
-msgstr "in i OS"
+msgstr "Inträder OS"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:26
 #, fuzzy
 msgid "Unauthorized passing of EoA/LoA"
-msgstr "EoA eller LoA överskrids"
+msgstr "Oauktoriserad passage av EoA/LoA"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:30
 #: c:\etcs\src\evc\trainsubsystems\brake.cpp:30
 msgid "Balise read error"
-msgstr "Beacon läsning misslyckande"
+msgstr "Balisefel"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:34
 msgid "No MA received at level transition"
-msgstr "Ingen MA vid nivåövergång"
+msgstr "Ingen MA mottagen vid nivåövergång"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:37
 #: c:\etcs\src\evc\trainsubsystems\brake.cpp:64
@@ -361,15 +361,15 @@ msgstr "kommunikationsfel"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:46
 msgid "SR distance exceeded"
-msgstr "SR-avståndet har överskridits"
+msgstr "SR-avstånd har överskridits"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:50
 msgid "SH stop order"
-msgstr "Stopporder i SH"
+msgstr "SH stopporder"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:54
 msgid "SR stop order"
-msgstr "SR stoppkommando"
+msgstr "SR stopporder"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:57
 msgid "Emergency stop"
@@ -377,7 +377,7 @@ msgstr "Nödstopp"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:60
 msgid "No track description"
-msgstr "inga spårdata"
+msgstr "Ingen spårbeskrivning"
 
 #: c:\etcs\src\evc\procedures\train_trip.cpp:71
 msgid " brake demand"
@@ -393,7 +393,7 @@ msgstr " inte tillgänglig"
 
 #: c:\etcs\src\evc\trackconditions\route_suitability.cpp:43
 msgid "Route suitability - loading gauge"
-msgstr "Ruttlämplighet - lastmätare"
+msgstr "Ruttlämplighet - laddar mätare"
 
 #: c:\etcs\src\evc\trackconditions\route_suitability.cpp:46
 msgid "Route suitability - axle load category"
@@ -405,7 +405,7 @@ msgstr "Ruttlämplighet - dragsystem"
 
 #: c:\etcs\src\evc\trainsubsystems\brake.cpp:50
 msgid "Runaway movement"
-msgstr "Glida"
+msgstr "Okontrollerad rörelse"
 
 #: c:\etcs\src\evc\trainsubsystems\brake.cpp:86
 msgid "Train data changed"
