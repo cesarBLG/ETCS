@@ -13,7 +13,7 @@ msgstr ""
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:51
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Main"
+msgstr "Primär"
 
 #: c:\etcs\src\dmi\language\language.cpp:44
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:52
@@ -31,14 +31,14 @@ msgctxt "Navigation bar"
 msgid ""
 "Data\n"
 "view"
-msgstr "Data\n"
+msgstr "Data-\n"
 "vy"
 
 #: c:\etcs\src\dmi\language\language.cpp:46
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:54
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Särskild"
+msgstr "Speciellt"
 
 #: c:\etcs\src\dmi\window\brightness.cpp:13
 #: c:\etcs\src\dmi\window\menu_settings.cpp:21
@@ -103,19 +103,19 @@ msgstr "Tågnummer"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:42
 msgid "Exit Shunting"
-msgstr "Avsluta växling"
+msgstr "Avsluta Rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:42
 msgid "Shunting"
-msgstr "Växling"
+msgstr "Rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:46
 msgid "Non-Leading"
-msgstr "Dubbel dragkraft"
+msgstr "Icke-Ledande"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:47
 msgid "Maintain shunting"
-msgstr "Behåll växling"
+msgstr "Behåll rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:48
 msgid "Radio data"
