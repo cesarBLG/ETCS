@@ -13,6 +13,7 @@
 #include <variant>
 #include "../optional.h"
 #include "acceleration.h"
+#include "platform_runtime.h"
 #include "../Position/distance.h"
 #include "supervision.h"
 #include "conversion_model.h"
@@ -43,6 +44,8 @@ public:
     relocable_dist_base get_target_position() const { return d_target; }
     bool operator== (const basic_target &t) const
     {
+        std::string log = "Comparing targets: DELTA = " + std::to_string(std::abs(d_target - t.d_target)) + " V = " + std::to_string(t.V_target) + ", D1 = " + std::to_string(t.d_target.dist) + ", D2 = " + std::to_string(t.d_target.dist);
+        platform->debug_print(log);
         return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
     }
 };
