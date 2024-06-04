@@ -16,6 +16,7 @@
 #endif
 
 static std::atomic<bool>* quit_request_ptr;
+extern std::unique_ptr<BasePlatform::BusSocket> logging_socket;
 
 static void sigterm_handler(int sig) {
 	*quit_request_ptr = true;
@@ -102,6 +103,7 @@ void ConsolePlatform::debug_print(const std::string_view msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "ConsolePlatform" ,"%s\n", std::string(msg).c_str());
 #else
 	std::cout << msg << std::endl;
+	logging_socket->broadcast(msg);
 #endif
 }
 
