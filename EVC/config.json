@@ -141,7 +141,7 @@
          },
          {
              "Field":"AxleLoadCategory",
-             "Value":"C2"
+             "Value":"B2"
          },
          {
              "Field":"LoadingGauge",
@@ -165,7 +165,7 @@
          },
          {
              "Field":"AxleLoadCategory",
-             "Value":"C2"
+             "Value":"B2"
          },
          {
              "Field":"LoadingGauge",
@@ -865,17 +865,20 @@
           }
        ],
        "CustomTrainDataInputs":[
-          {
-             "Field":"AxleLoadCategory",
-             "Value":[
-                "D2",
-                "D3",
-                "D4",
-                "D4XL"
-             ]
-          }
-       ]
-    },
+         {
+            "Field":"AxleLoadCategory",
+            "Value":[
+               "C2",
+               "C3",
+               "C4",
+               "D2",
+               "D3",
+               "D4",
+               "D4XL"
+            ]
+         }
+     ]
+   },
     "252":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
@@ -887,13 +890,16 @@
           {
              "Field":"AxleLoadCategory",
              "Value":[
+                "C2",
+                "C3",
+                "C4",
                 "D2",
                 "D3",
                 "D4",
                 "D4XL"
              ]
           }
-       ]
+      ]
     },
     "336":{
        "SpeedDial":180,
@@ -1068,7 +1074,7 @@
          },
          {
              "Field":"AxleLoadCategory",
-             "Value":"C2"
+             "Value":"B2"
          },
          {
              "Field":"LoadingGauge",
