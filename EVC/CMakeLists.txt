@@ -7,7 +7,7 @@ OR_interface/interface.cpp OR_interface/orts_server.cpp SSP/ssp.cpp Packets/pack
 Packets/messages.cpp Packets/information.cpp Packets/radio.cpp Packets/vbc.cpp 
 Euroradio/session.cpp Euroradio/terminal.cpp Euroradio/radio_connection.cpp Euroradio/safe_radio_connection.cpp Euroradio/cfm.cpp
 Packets/logging.cpp Packets/io/io.cpp Packets/io/base64.cpp STM/stm.cpp Packets/STM/message.cpp
-Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp 
+Procedures/start.cpp Procedures/override.cpp Procedures/train_trip.cpp Procedures/level_transition.cpp Procedures/reversing.cpp
 Procedures/stored_information.cpp TrackConditions/track_conditions.cpp  TrackConditions/route_suitability.cpp
 Time/clock.cpp Position/geographical.cpp DMI/text_messages.cpp DMI/windows.cpp DMI/track_ahead_free.cpp DMI/acks.cpp
 TrainSubsystems/power.cpp TrainSubsystems/brake.cpp TrainSubsystems/train_interface.cpp TrainSubsystems/cold_movement.cpp

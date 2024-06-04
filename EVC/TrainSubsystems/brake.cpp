@@ -21,6 +21,7 @@ extern bool EB;
 bool brake_acknowledgeable;
 bool brake_acknowledged;
 std::list<brake_command_information> brake_conditions;
+std::list<brake_command_information> emergency_brake_conditions;
 void trigger_brake_reason(int reason)
 {
     for (auto cond : brake_conditions) {
@@ -47,10 +48,11 @@ void trigger_brake_reason(int reason)
         extern bool rmp_applied;
         extern bool pt_applied;
         extern bool traindata_applied;
-        text_message msg(get_text("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied;});
+        extern bool rv_applied;
+        text_message msg(get_text("Runaway movement"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied;});
         text_message *m = &add_message(msg);
         brake_conditions.push_back({reason, m, [](brake_command_information &i) {
-            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied) {
+            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied) {
                 brake_acknowledgeable = false;
                 return true;
             }
@@ -97,6 +99,46 @@ void trigger_brake_reason(int reason)
             }
             return false;
         }});
+    } else if (reason == 4) {
+        extern bool standstill_applied;
+        extern bool rollaway_applied;
+        extern bool rmp_applied;
+        extern bool pt_applied;
+        extern bool traindata_applied;
+        extern bool rv_applied;
+        text_message msg(get_text("PT distance exceeded"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied;});
+        text_message *m = &add_message(msg);
+        brake_conditions.push_back({reason, m, [](brake_command_information &i) {
+            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied) {
+                brake_acknowledgeable = false;
+                return true;
+            }
+            if (V_est == 0 && !brake_acknowledgeable) {
+                brake_acknowledgeable = true;
+                brake_acknowledged = false;
+            }
+            return false;
+        }});
+    } else if (reason == 5) {
+        extern bool standstill_applied;
+        extern bool rollaway_applied;
+        extern bool rmp_applied;
+        extern bool pt_applied;
+        extern bool traindata_applied;
+        extern bool rv_applied;
+        text_message msg(get_text("RV distance exceeded"), true, false, 2, [](text_message &msg){return !standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied;});
+        text_message *m = &add_message(msg);
+        emergency_brake_conditions.push_back({reason, m, [](brake_command_information &i) {
+            if (!standstill_applied && !rollaway_applied && !rmp_applied && !pt_applied && !traindata_applied && !rv_applied) {
+                brake_acknowledgeable = false;
+                return true;
+            }
+            if (V_est == 0 && !brake_acknowledgeable) {
+                brake_acknowledgeable = true;
+                brake_acknowledged = false;
+            }
+            return false;
+        }});
     }
 }
 static bool prevEB;
@@ -107,6 +149,7 @@ void handle_brake_command()
     {
         EB_command = SB_command = false;
         brake_conditions.clear();
+        emergency_brake_conditions.clear();
         return;
     }
     for (auto it = brake_conditions.begin(); it!=brake_conditions.end();) {
@@ -115,9 +158,20 @@ void handle_brake_command()
         else
             ++it;
     }
+    for (auto it = emergency_brake_conditions.begin(); it!=emergency_brake_conditions.end();) {
+        if (it->revoke(*it))
+            it = emergency_brake_conditions.erase(it);
+        else
+            ++it;
+    }
     SB_command = !brake_conditions.empty();
-    SB_command |= SB;
-    EB_command = EB;
+    EB_command = !emergency_brake_conditions.empty();
+    if (mode == Mode::RV) {
+        EB_command |= SB | EB;
+    } else {
+        SB_command |= SB;
+        EB_command |= EB;
+    }
     EB_command |= stm_control_EB;
     if (mode == Mode::SN) {
         for (auto kvp : installed_stms) {

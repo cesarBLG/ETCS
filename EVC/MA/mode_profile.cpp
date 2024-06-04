@@ -99,7 +99,7 @@ void update_mode_profile()
             lssma = 0;
         }
         if (ls_function_marker)
-            display_lssma = display_lssma_time && get_milliseconds()-*display_lssma_time;
+            display_lssma = display_lssma_time && get_milliseconds()>*display_lssma_time;
         else
             display_lssma = (EoA || (LoA && LoA->second < requested_mode_profile->speed)) && lssma < V_train;
     }

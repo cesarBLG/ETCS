@@ -31,6 +31,7 @@ const float ang1 = 54*PI/180.0;
 const float cx = 140;
 const float cy = 150;
 bool showSpeeds = false;
+bool displayTTPavailable = true;
 void displaya1();
 Component a1(54,54, displaya1);
 Component csg(2*cx, 2*cy, displayGauge);
@@ -443,7 +444,7 @@ void displaya1()
         a1.drawRectangle(0, 0, 5*n, 5*n, Grey, CENTER);
     }
     else ttiShown = false;
-    if (mode == Mode::FS && (monitoring == TSM || monitoring == RSM) && TTP < TdispTTI) {
+    if (displayTTPavailable && mode == Mode::FS && (monitoring == TSM || monitoring == RSM) && TTP < TdispTTI) {
         int n;
         for(n = 1; n<11; n++)
         {

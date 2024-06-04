@@ -82,7 +82,7 @@ public:
     mutable double T_bs;
     mutable double T_bs1;
     mutable double T_bs2;
-    void calculate_times() const;
+    virtual void calculate_times() const;
     void calculate_curves(double V_est=::V_est, double A_est=::A_est, double V_delta=::V_ura) const;
     virtual void calculate_decelerations();
     void calculate_decelerations(const std::map<dist_base,double> &gradient);

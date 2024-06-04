@@ -21,6 +21,7 @@
 #define KMH_TO_MPH 0.621371192
 const int posy[] = {283,250,206,182,164,150,107,64,21};
 const int divs[] = { 0, 25, 50, 75, 100, 125, 250, 500, 1000 };
+int planning_scale = 4;
 const int object_pos[] = {55,80,105};
 Component planning_distance(246,300, displayPlanning);
 Component planning_objects(246,300, displayObjects);
@@ -41,10 +42,8 @@ void displayScaleDown();
 void speedLines();
 #if SIMRAIL
 #define MAX_SCALE 16
-int planning_scale = 4;
 #else
 #define MAX_SCALE 32
-int planning_scale = 1;
 #endif
 void zoominp()
 {

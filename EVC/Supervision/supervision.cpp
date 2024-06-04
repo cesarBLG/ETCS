@@ -21,6 +21,7 @@
 #include "../TrainSubsystems/brake.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../TrainSubsystems/power.h"
+#include "../Procedures/reversing.h"
 #include <cmath>
 double V_est=0;
 double V_ura = 0;
@@ -216,6 +217,8 @@ optional<distance> rmp_position;
 bool rmp_applied;
 optional<distance> pt_position;
 bool pt_applied;
+optional<distance> rv_position;
+bool rv_applied;
 bool traindata_applied;
 void update_supervision()
 {
@@ -287,7 +290,7 @@ void update_supervision()
         if (!pt_applied) {
             if (pt_position->est > d_estfront) {
                 pt_applied = true;
-                trigger_brake_reason(1);
+                trigger_brake_reason(4);
             }
         }
         if (pt_applied && brake_acknowledged) {
@@ -297,6 +300,21 @@ void update_supervision()
     } else {
         pt_position = {};
         pt_applied = false;
+    }
+    if (mode == Mode::RV && rv_position) {
+        if (!rv_applied) {
+            if (rv_position->est > d_estfront) {
+                rv_applied = true;
+                trigger_brake_reason(5);
+            }
+        }
+        if (rv_applied && brake_acknowledged) {
+            rv_position = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
+            rv_applied = false;
+        }
+    } else {
+        rv_position = {};
+        rv_applied = false;
     }
     if (traindata_applied && brake_acknowledged)
         traindata_applied = false;
@@ -390,7 +408,7 @@ void update_supervision()
                 }
             }
         }
-        double A_MAXREDADH = (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1));      
+        double A_MAXREDADH = (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_available ? A_NVMAXREDADH2 : A_NVMAXREDADH1));      
         if (indication_target && A_MAXREDADH == -1) {
             V_target = indication_target->get_target_speed();
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {

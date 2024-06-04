@@ -35,9 +35,6 @@ std::list<traction_type> traction_systems;
 std::string traindata_file = "traindata.txt";
 void set_train_data(std::string spec)
 {
-    if (special_train_data != spec) {
-        //trigger_brake_reason(3);
-    }
     train_data_known = true;
     train_data_valid = false;
     special_train_data = spec;
@@ -49,11 +46,19 @@ void set_train_data(std::string spec)
         if (contents)
             j = json::parse(*contents);
         if (j.contains(special_train_data)) {
+            train_data_valid = true;
             json &traindata = j[special_train_data];
             if (traindata.contains("brake_percentage")) brake_percentage = (int)traindata["brake_percentage"].get<double>();
-            set_brake_model(traindata);
             L_TRAIN = traindata["length"].get<double>();
             V_train = traindata["speed"].get<double>()/3.6;
+            set_train_max_speed(V_train);
+            if (!traindata.contains("brakes")) {
+                set_conversion_model();
+                if (!conversion_model_used)
+                    train_data_valid = false;
+            } else {
+                set_brake_model(traindata);
+            }
             cant_deficiency = (int)traindata["cant_deficiency"].get<double>();
             T_traction_cutoff = traindata["t_traction_cutoff"].get<double>();
             Q_airtight = traindata["airtight"].get<int>();
@@ -100,9 +105,7 @@ void set_train_data(std::string spec)
             for (auto it = tracts.begin(); it != tracts.end(); ++it) {
                 std::string name = (*it)["name"].get<std::string>();
                 Electrifications elec;
-                if (name == "none")
-                    elec = NonElectrical;
-                else if (name == "DC600/750V")
+                if (name == "DC600/750V")
                     elec = DC600_750V;
                 else if (name == "DC1.5kV")
                     elec = DC1500V;
@@ -112,11 +115,13 @@ void set_train_data(std::string spec)
                     elec = AC15KV;
                 else if (name == "AC25kV")
                     elec = AC25KV;
-                int info = (*it)["nid_ctraction"].get<int>();
+                else
+                    elec = NonElectrical;
+                int info = 0;
+                if (elec != NonElectrical)
+                    info = (*it)["nid_ctraction"].get<int>();
                 traction_systems.push_back({elec,info});
             }
-            train_data_valid = true;
         }
     }
-    set_train_max_speed(V_train);
 }

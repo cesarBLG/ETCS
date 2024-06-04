@@ -12,15 +12,19 @@
 #include "../Supervision/train_data.h"
 #include "../DMI/text_message.h"
 #include "../language/language.h"
-optional<distance> restore_route_suitability;
 std::map<int, distance> route_suitability;
 void load_route_suitability(RouteSuitabilityData &data, distance ref)
 {
     if (data.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        restore_route_suitability = ref + data.D_TRACKINIT.get_value(data.Q_SCALE);
+        distance resume = ref + data.D_TRACKINIT.get_value(data.Q_SCALE);
+        for (auto it = route_suitability.begin(); it != route_suitability.end(); ) {
+            if (it->second.max > resume.min)
+                it = route_suitability.erase(it);
+            else
+                ++it;
+        }
         return;
     }
-    restore_route_suitability = {};
     std::vector<RouteSuitability_element> elements;
     elements.push_back(data.element);
     elements.insert(elements.end(), data.elements.begin(), data.elements.end());
@@ -87,9 +91,4 @@ void load_route_suitability(RouteSuitabilityData &data, distance ref)
 }
 void update_route_suitability()
 {
-    if (restore_route_suitability && restore_route_suitability->min<d_minsafefront(*restore_route_suitability)) {
-        restore_route_suitability = {};
-        route_suitability.clear();
-        calculate_SvL();
-    }
 }

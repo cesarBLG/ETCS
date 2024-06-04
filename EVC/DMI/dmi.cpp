@@ -24,6 +24,7 @@
 #include "../Procedures/override.h"
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
+#include "../Procedures/reversing.h"
 #include "../TrackConditions/track_condition.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../STM/stm.h"
@@ -324,6 +325,7 @@ void dmi_update_func()
     j["TextMessages"] = messages;
     j["DisplayTAF"] = start_display_taf && !stop_display_taf;
     j["AllowedAck"] = ack_allowed;
+    j["ReversingPermitted"] = reversing_permitted;
     json clock;
     clock["Hour"] = WallClockTime::hour;
     clock["Minute"] = WallClockTime::minute;

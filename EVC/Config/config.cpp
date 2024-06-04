@@ -10,6 +10,8 @@
 #include "../DMI/dmi.h"
 #include "../Procedures/level_transition.h"
 #include "../STM/stm.h"
+#include "../TrainSubsystems/power.h"
+#include "../TrainSubsystems/train_interface.h"
 #include <orts/common.h>
 #include <nlohmann/json.hpp>
 #include "platform_runtime.h"
@@ -17,6 +19,7 @@ using json = nlohmann::json;
 extern ORserver::ParameterManager manager;
 extern std::string traindata_file;
 extern int data_entry_type;
+extern int data_entry_type_tiu;
 extern bool message_when_driver_id_entered;
 extern bool message_when_running_number_entered;
 extern bool message_when_train_data_entered;
@@ -40,55 +43,39 @@ void load_config(std::string serie)
 		json& cfg = j[serie];
 		if (cfg.contains("TrainData")) {
 			traindata_file = cfg["TrainData"];
-			data_entry_type = 1;
+			if (data_entry_type_tiu >= 0)
+				data_entry_type = data_entry_type_tiu;
+			else
+				data_entry_type = 1;
 		}
+		unsupported_levels = {};
 		if (cfg.contains("UnsupportedLevels")) {
 			unsupported_levels = cfg["UnsupportedLevels"].get<std::set<int>>();
 		}
-		if (cfg.contains("MessageWhenDriverIdEntered"))
-		{
-			message_when_driver_id_entered = cfg["MessageWhenDriverIdEntered"];
-		}
-		if (cfg.contains("MessageWhenLevelSelected"))
-		{
-			message_when_level_selected = cfg["MessageWhenLevelSelected"];
-		}
-		if (cfg.contains("MessageWhenRunningNumberEntered"))
-		{
-			message_when_running_number_entered = cfg["MessageWhenRunningNumberEntered"];
-		}
-		if (cfg.contains("MessageWhenTrainDataEntered"))
-		{
-			message_when_train_data_entered = cfg["MessageWhenTrainDataEntered"];
-		}
-		if (cfg.contains("MessageWhenModeAck"))
-		{
-			message_when_driver_ack_mode = cfg["MessageWhenModeAck"];
-		}
-		if (cfg.contains("MessageWhenLevelAck"))
-		{
-			message_when_driver_ack_level = cfg["MessageWhenLevelAck"];
-		}
-		if (cfg.contains("EnteringModeMessageIsTimeDependent"))
-		{
-			entering_mode_message_is_time_dependent = cfg["EnteringModeMessageIsTimeDependent"];
-		}
+		message_when_driver_id_entered = cfg.value("MessageWhenDriverIdEntered", false);
+		message_when_level_selected = cfg.value("MessageWhenLevelSelected", false);
+		message_when_running_number_entered = cfg.value("MessageWhenRunningNumberEntered", false);
+		message_when_train_data_entered = cfg.value("MessageWhenTrainDataEntered", false);
+		message_when_driver_ack_mode = cfg.value("MessageWhenModeAck", false);
+		message_when_driver_ack_level = cfg.value("MessageWhenLevelAck", false);
+		entering_mode_message_is_time_dependent = cfg.value("EnteringModeMessageIsTimeDependent", false);
+		const_train_data.clear();
 		if (cfg.contains("ConstTrainDataValues"))
 		{
-			const_train_data.clear();
 			for (json& j : cfg["ConstTrainDataValues"])
 			{
 				const_train_data[j["Field"].get<std::string>()] = j["Value"].get<std::string>();
 			}
 		}
+		custom_train_data_inputs.clear();
 		if (cfg.contains("CustomTrainDataInputs"))
 		{
-			custom_train_data_inputs.clear();
 			for (json& j : cfg["CustomTrainDataInputs"])
 			{
 				custom_train_data_inputs[j["Field"].get<std::string>()] = j["Value"].get<std::vector<std::string>>();
 			}
 		}
+		ntc_available_no_stm.clear();
 		if (cfg.contains("AvailableNTC")) {
 			std::set<int> ntcs = cfg["AvailableNTC"].get<std::set<int>>();
 			for (int ntc : ntcs)
@@ -130,13 +117,24 @@ void load_config(std::string serie)
 				}
 			}
 		}
+		ntc_to_stm_lookup_table.clear();
 		if (cfg.contains("STMPriorityTable")) {
-			ntc_to_stm_lookup_table.clear();
 			for (json& j : cfg["STMPriorityTable"])
 			{
 				ntc_to_stm_lookup_table[j["nid_ntc"].get<int>()] = j["nid_stms"].get<std::vector<int>>();
 			}
 		}
+		traction_cutoff_implemented = cfg.value("TractionCutOffImplemented", true);
+		automatic_close_power_switch = cfg.value("AutomaticCloseMainPowerSwitch", true);
+		automatic_open_power_switch = cfg.value("AutomaticOpenMainPowerSwitch", true);
+		automatic_raise_pantograph = cfg.value("AutomaticRaisePantograph", false);
+		automatic_lower_pantograph = cfg.value("AutomaticLowerPantograph", false);
+		automatic_traction_system_change = cfg.value("AutomaticTractionSystemChange", false);
+		automatic_close_air_intake = cfg.value("AutomaticCloseAirIntake", true);
+		automatic_open_air_intake = cfg.value("AutomaticOpenAirIntake", true);
+		automatic_eddy_inhibition = cfg.value("AutomaticEddyCurrentBrakeInhibition", false);
+		automatic_magnetic_inhibition = cfg.value("AutomaticMagneticShoeBrakeInhibition", false);
+		automatic_regenerative_inhibition = cfg.value("AutomaticRegenerativeBrakeInhibition", false);
 	}
 	set_persistent_command("setSerie", serie);
 }

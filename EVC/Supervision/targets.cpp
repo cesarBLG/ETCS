@@ -19,6 +19,7 @@
 #include "../TrackConditions/track_condition.h"
 #include "../MA/movement_authority.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../TrainSubsystems/power.h"
 #include <set>
 std::list<std::shared_ptr<PBD_target>> PBDs;
 target::target(relocable_dist_base dist, double speed, target_class type, bool is_TSR) : basic_target(dist, speed, type, is_TSR)
@@ -111,7 +112,10 @@ void target::calculate_times() const
     } else {
         T_bs1 = T_bs2 = T_bs;
     }
-    T_traction = T_traction_cutoff;
+    if (traction_cutoff_implemented)
+        T_traction = std::max(0.0, T_traction_cutoff-(T_warning+T_bs2));
+    else
+        T_traction = T_traction_cutoff;
     T_berem = std::max(0.0, T_be-T_traction);
 }
 void target::calculate_curves(double V_est, double A_est, double V_delta) const
@@ -273,7 +277,7 @@ void target::calculate_decelerations(const std::map<dist_base,double> &gradient)
     for (auto &d : A_safe.dist_step) {
         for (auto &V : A_safe.speed_step) {
             bool slip = (--redadh.upper_bound(d))->second || slippery_rail_driver;
-            double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_active ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;
+            double A_MAXREDADH = slip ? (brake_position != brake_position_types::PassengerP ? A_NVMAXREDADH3 : (additional_brake_available ? A_NVMAXREDADH2 : A_NVMAXREDADH1)) : -3;
             if (!slip || A_MAXREDADH < 0)
                 A_MAXREDADH = std::numeric_limits<double>::max();
             A_safe.accelerations[d][V] =  std::min(A_brake_safe(V,d), A_MAXREDADH) + A_gradient(V,d);
@@ -345,16 +349,14 @@ void PBD_target::calculate_restriction()
     }
     restriction = speed_restriction(((int)(V_PBD*3.6/5))*5/3.6, start, end, false);
 }
-optional<distance> reset_pbd;
 void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
 {
     if (pbd.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
-        reset_pbd = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
-        return;
+        distance resume = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
+        delete_PBD(resume);
     }
-    reset_pbd = {};
     distance start = ref+pbd.element.D_PBDSR.get_value(pbd.Q_SCALE);
-    PBDs.remove_if([start](std::shared_ptr<PBD_target> &t) {return t->start.min < start.max;});
+    delete_PBD(start);
     std::vector<PBD_element> elements;
     elements.push_back(pbd.element);
     elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());
