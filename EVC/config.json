@@ -901,6 +901,25 @@
           }
       ]
     },
+    "252lzb":{
+       "SpeedDial":250,
+       "STMLayout":"stm_bombardier.json",
+       "DisplayTimeToPermitted":true,
+       "CustomTrainDataInputs":[
+          {
+             "Field":"AxleLoadCategory",
+             "Value":[
+                "C2",
+                "C3",
+                "C4",
+                "D2",
+                "D3",
+                "D4",
+                "D4XL"
+             ]
+          }
+      ]
+    },
     "336":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
