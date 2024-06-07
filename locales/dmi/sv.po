@@ -13,7 +13,7 @@ msgstr ""
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:51
 msgctxt "Navigation bar"
 msgid "Main"
-msgstr "Main"
+msgstr "Primär"
 
 #: c:\etcs\src\dmi\language\language.cpp:44
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:52
@@ -22,8 +22,8 @@ msgid ""
 "Over-\n"
 "ride"
 msgstr ""
-"Åsido-\n"
-"sätta"
+"Över-\n"
+"skrid"
 
 #: c:\etcs\src\dmi\language\language.cpp:45
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:53
@@ -31,18 +31,19 @@ msgctxt "Navigation bar"
 msgid ""
 "Data\n"
 "view"
-msgstr "Data"
+msgstr "Data-\n"
+"vy"
 
 #: c:\etcs\src\dmi\language\language.cpp:46
 #: c:\etcs\src\dmi\window\nav_buttons.cpp:54
 msgctxt "Navigation bar"
 msgid "Spec"
-msgstr "Särskild"
+msgstr "Speciellt"
 
 #: c:\etcs\src\dmi\window\brightness.cpp:13
 #: c:\etcs\src\dmi\window\menu_settings.cpp:21
 msgid "Brightness"
-msgstr ""
+msgstr "Ljusstyrka"
 
 #: c:\etcs\src\dmi\window\data_entry.cpp:16
 #: c:\etcs\src\dmi\window\data_entry.cpp:17
@@ -55,7 +56,7 @@ msgstr "Ja"
 
 #: c:\etcs\src\dmi\window\data_entry.cpp:62
 msgid " entry complete?"
-msgstr " fullständigt inträde?"
+msgstr " fullständig inmatning?"
 
 #: c:\etcs\src\dmi\window\driver_id.cpp:16
 msgid "TRN"
@@ -68,7 +69,7 @@ msgid ""
 "Enter\n"
 "data"
 msgstr ""
-"Int.\n"
+"Inmata\n"
 "data"
 
 #: c:\etcs\src\dmi\window\keyboard.cpp:244
@@ -78,7 +79,7 @@ msgstr "Nej"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:20
 msgid "Main"
-msgstr "Rektor"
+msgstr ""
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:22
 msgid "Start"
@@ -102,19 +103,19 @@ msgstr "Tågnummer"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:42
 msgid "Exit Shunting"
-msgstr "Avsluta manövrar"
+msgstr "Avsluta Rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:42
 msgid "Shunting"
-msgstr "Manövrar"
+msgstr "Rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:46
 msgid "Non-Leading"
-msgstr "Dubbel dragkraft"
+msgstr "Icke-Ledande"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:47
 msgid "Maintain shunting"
-msgstr "Hålla manöver"
+msgstr "Behåll rangering"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:48
 msgid "Radio data"
@@ -130,7 +131,7 @@ msgstr "Slut på datainmatning"
 
 #: c:\etcs\src\dmi\window\menu_override.cpp:12
 msgid "Override"
-msgstr "Överskridande"
+msgstr "Överskrid"
 
 #: c:\etcs\src\dmi\window\menu_override.cpp:14
 msgid "EoA"
@@ -162,12 +163,12 @@ msgstr "Inställningar"
 
 #: c:\etcs\src\dmi\window\menu_settings.cpp:13
 msgid "Language"
-msgstr ""
+msgstr "Språk"
 
 #: c:\etcs\src\dmi\window\menu_settings.cpp:17
 #: c:\etcs\src\dmi\window\volume.cpp:13
 msgid "Volume"
-msgstr ""
+msgstr "Volym"
 
 #: c:\etcs\src\dmi\window\menu_settings.cpp:25
 msgid "System version"
@@ -183,11 +184,11 @@ msgstr "Ta bort VBC"
 
 #: c:\etcs\src\dmi\window\menu_spec.cpp:11
 msgid "Special"
-msgstr "Särskild"
+msgstr "Speciell"
 
 #: c:\etcs\src\dmi\window\menu_spec.cpp:13
 msgid "Adhesion"
-msgstr "Efterlevnad"
+msgstr "Adhesion"
 
 #: c:\etcs\src\dmi\window\menu_spec.cpp:17
 msgid "SR Speed/Distance"
@@ -195,7 +196,7 @@ msgstr "SR Hastighet/Avstånd"
 
 #: c:\etcs\src\dmi\window\menu_spec.cpp:21
 msgid "Train integrity"
-msgstr "Träna integritet"
+msgstr "Tåg integritet"
 
 #: c:\etcs\src\dmi\window\train_data.cpp:14
 #: c:\etcs\src\dmi\window\train_data.cpp:18
@@ -204,8 +205,8 @@ msgid ""
 "Select\n"
 "type"
 msgstr ""
-"Sel.\n"
-"kille"
+"Välj\n"
+"typ"
 
 #~ msgid "DEL"
-#~ msgstr "AV"
+#~ msgstr "DEL"
