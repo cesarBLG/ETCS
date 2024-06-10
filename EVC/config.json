@@ -876,6 +876,13 @@
                "D4",
                "D4XL"
             ]
+         },
+         {
+            "Field":"TrainCategory",
+            "Value":[
+               "FP",
+               "FG"
+            ]
          }
      ]
    },
@@ -898,10 +905,17 @@
                 "D4",
                 "D4XL"
              ]
+          },
+          {
+             "Field":"TrainCategory",
+             "Value":[
+                "FP",
+                "FG"
+             ]
           }
       ]
     },
-    "252lzb":{
+    "252francia":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
@@ -916,6 +930,39 @@
                 "D3",
                 "D4",
                 "D4XL"
+             ]
+          },
+          {
+             "Field":"TrainCategory",
+             "Value":[
+                "FP",
+                "FG"
+             ]
+          }
+      ]
+    },
+    "252lzb":{
+       "SpeedDial":250,
+       "STMLayout":"stm_siemens.json",
+       "DisplayTimeToPermitted":true,
+       "CustomTrainDataInputs":[
+          {
+             "Field":"AxleLoadCategory",
+             "Value":[
+                "C2",
+                "C3",
+                "C4",
+                "D2",
+                "D3",
+                "D4",
+                "D4XL"
+             ]
+          },
+          {
+             "Field":"TrainCategory",
+             "Value":[
+                "FP",
+                "FG"
              ]
           }
       ]
