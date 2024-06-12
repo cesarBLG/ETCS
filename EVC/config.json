@@ -983,6 +983,23 @@
           }
        ]
     },
+    "256":{
+       "SpeedDial":180,
+       "STMLayout":"stm_siemens.json",
+       "DisplayTimeToPermitted":true,
+       "SoftKeys":true,
+       "CustomTrainDataInputs":[
+          {
+             "Field":"AxleLoadCategory",
+             "Value":[
+                "D2",
+                "D3",
+                "D4",
+                "D4XL"
+             ]
+          }
+       ]
+    },
     "112":{
        "TrainData":"TrainData/Spain/traindata_112.json",
        "SpeedDial":400,
