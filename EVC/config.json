@@ -307,7 +307,7 @@
     },
     "450":{
        "TrainData":"TrainData/Spain/traindata_450.json",
-       "SpeedDial":160,
+       "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
        "ConstTrainDataValues":[
          {
@@ -399,7 +399,7 @@
     },
     "470":{
        "TrainData":"TrainData/Spain/traindata_470.json",
-       "SpeedDial":160,
+       "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
        "ConstTrainDataValues":[
          {
