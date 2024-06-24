@@ -5,7 +5,7 @@
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
-        "axle_load_category ": "C2",
+        "axle_load_category": "C2",
         "loading_gauge": "GC",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0}
@@ -76,7 +76,7 @@
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
-        "axle_load_category ": "C2",
+        "axle_load_category": "C2",
         "loading_gauge": "GC",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0}
