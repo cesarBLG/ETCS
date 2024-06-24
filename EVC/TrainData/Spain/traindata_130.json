@@ -1,10 +1,12 @@
 {
 	"730 Simple" : {
-        "length": 189,
+        "length": 186,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
@@ -73,11 +75,13 @@
         }
     },
     "730 Doble" : {
-        "length": 375,
+        "length": 372,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
@@ -146,11 +150,13 @@
         }
     },
     "130 Simple" : {
-        "length": 189,
+        "length": 185,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
@@ -219,11 +225,13 @@
         }
     },
     "130 Doble" : {
-        "length": 375,
+        "length": 370,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
             {"name": "AC25kV", "nid_ctraction": 0}
