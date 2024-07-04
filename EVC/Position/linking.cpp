@@ -424,6 +424,7 @@ void update_linking(Linking link, bool infill, bg_id ref_bg)
         for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
             if (it->first.nid_lrbg == ref_bg) {
                 d.dist = it->first.position;
+                d.reverse_dir = it->first.dir;
                 found = true;
             }
         }
