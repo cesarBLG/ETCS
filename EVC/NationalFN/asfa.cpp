@@ -19,7 +19,9 @@ using std::string;
 extern ParameterManager manager;
 bool AKT=false;
 bool CON=true;
-bool CON_LZB=false;
+bool LZB_handles_asfa=true;
+bool LZB_supervising=false;
+bool LZB_degraded_pending=false;
 bool detected = false;
 bool connected = false;
 bool active = false;
@@ -47,14 +49,19 @@ void initialize_asfa()
     };
     manager.AddParameter(p);
 
-    p = new Parameter("asfa::con::lzb");
+    p = new Parameter("lzb::supervising");
     p->SetValue = [](string val) {
-        CON_LZB = val == "1";
+        if (val == "0" || val == "1") {
+            LZB_supervising = val == "1";
+            LZB_handles_asfa = false;
+        } else {
+            LZB_handles_asfa = true;
+        }
     };
     manager.AddParameter(p);
 
     register_parameter("asfa::conectado");
-    register_parameter("asfa::con::lzb");
+    register_parameter("lzb::supervising");
 }
 extern double V_NVUNFIT;
 #include "../Position/distance.h"
@@ -76,14 +83,29 @@ text_message &send_msg()
         return !brake_commanded && (time+30000<get_milliseconds() || con != CON);
     }));
 }
-void update_stm_asfa()
+void update_asfa_con_lzb(bool ntc_asfa)
 {
     if (installed_stms.find(10) == installed_stms.end()) return;
-    if (level == Level::NTC && nid_ntc == 10 && installed_stms[10]->state == stm_state::DA && CON_LZB) {
-        level_information lv = {Level::NTC, 0};
-        stm_level_change(lv, true);
-        nid_ntc = 0;
-        if (!ongoing_transition) {
+    if (level == Level::NTC && nid_ntc == 10 && installed_stms[10]->state == stm_state::DA && !LZB_supervising) {
+        if (ntc_asfa) {
+            level_information lv = {Level::NTC, 0};
+            stm_level_change(lv, true);
+            nid_ntc = 0;
+        } else {
+            level_information lv = {Level::N0, -1};
+            stm_level_change(lv, true);
+            level = Level::N0;
+            nid_ntc = -1;
+        }
+        LZB_degraded_pending = true;
+    }
+    if (((level != Level::NTC || nid_ntc != 0) && ntc_asfa) || (level != Level::N0 && !ntc_asfa)) {
+        if (LZB_degraded_pending)
+            LZB_degraded_pending = false;
+        return;
+    }
+    if (LZB_degraded_pending) {
+        if (!ongoing_transition && ((!ntc_asfa && mode == Mode::UN) || (ntc_asfa && mode == Mode::SN))) {
             ongoing_transition = level_transition_information();
             ongoing_transition->immediate = false;
             ongoing_transition->dist = 0;
@@ -95,13 +117,16 @@ void update_stm_asfa()
             level_to_ack = Level::NTC;
             ntc_to_ack = 10;
             assign_stm(10, false);
+            LZB_degraded_pending = false;
+        } else if (ongoing_transition || mode != Mode::SN) {
+            LZB_degraded_pending = false;
         }
     }
-    if (level != Level::NTC || nid_ntc != 0) return;
-    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 10 && installed_stms[10]->state == stm_state::HS && !CON_LZB) {
+    if (ongoing_transition && ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 10 && installed_stms[10]->state == stm_state::HS && LZB_supervising) {
         ongoing_transition = {};
         level_information lv = {Level::NTC, 10};
         stm_level_change(lv, false);
+        level = Level::NTC;
         nid_ntc = 10;
     }
 }
@@ -113,9 +138,11 @@ void update_asfa()
         CON = true;
         active = false;
         brake_commanded = false;
-        update_stm_asfa();
+        update_asfa_con_lzb(true);
         return;
     }
+    if (!LZB_handles_asfa)
+        update_asfa_con_lzb(ntc_available_no_stm.find(0) != ntc_available_no_stm.end());
     if (!detected || mode == Mode::IS || mode == Mode::SL || mode == Mode::NP || level == Level::Unknown || !level_valid) {
         AKT = false;
         CON = true;
@@ -148,7 +175,7 @@ void update_asfa()
             akt_delay = get_milliseconds();
             msg = true;
         }
-    } else if ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && (nid_ntc == 0 || nid_ntc == 10))) {
+    } else if ((level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (level == Level::NTC && (nid_ntc == 0 || (nid_ntc == 10 && LZB_handles_asfa)))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();
