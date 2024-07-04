@@ -43,7 +43,7 @@ public:
     relocable_dist_base get_target_position() const { return d_target; }
     bool operator== (const basic_target &t) const
     {
-        return V_target == t.V_target && std::abs(d_target-t.d_target)<1.1f && (int)type==(int)t.type;
+        return V_target == t.V_target && std::abs(d_target-t.d_target)<2.1f && (int)type==(int)t.type;
     }
 };
 class target : public basic_target
