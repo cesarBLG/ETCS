@@ -173,7 +173,7 @@ void on_platform_ready()
 #endif
 
 #if RADIO_CFM
-    initialize_cfm(platform.get(), dynamic_cast<ConsolePlatform&>(*platform).get_poller());
+    initialize_cfm(dynamic_cast<ConsolePlatform&>(*platform).get_poller());
 #endif
 
     platform->debug_print("Starting European Train Control System...");

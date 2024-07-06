@@ -72,4 +72,4 @@ public:
     void T_disconnect_request(std::vector<unsigned char> &&data) override;
     void update() override;
 };
-void initialize_cfm(BasePlatform *pl, FdPoller &po);
+void initialize_cfm(FdPoller &po);

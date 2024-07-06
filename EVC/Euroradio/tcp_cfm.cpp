@@ -24,6 +24,7 @@
 #endif
 static FdPoller *poller;
 std::map<etcs_id, radio_connection_mode> connection_modes;
+std::string radio_domain = "etcs.vtrains.es";
 uint16_t crc16(const uint8_t *ptr, size_t count)
 {
     uint16_t crc = 0xFFFF;
@@ -131,7 +132,6 @@ void tcp_cfm::T_connect_request(called_address address, etcs_id calling_address,
 
 std::unique_ptr<DNSQuery> tcp_cfm::query_dns()
 {
-    std::string domain = "etcs.vtrains.dedyn.io";
     std::string hostname = "id";
     std::stringstream ss;
     ss << std::setfill ('0') << std::setw(6) << std::hex << peer_address.id.id;
@@ -141,7 +141,7 @@ std::unique_ptr<DNSQuery> tcp_cfm::query_dns()
     hostname += ".ty";
     hostname += ss.str();
     hostname += ".";
-    hostname += domain;
+    hostname += radio_domain;
 
     platform->debug_print("Trying RBC "+hostname);
 
@@ -448,7 +448,7 @@ void tcp_cfm::update()
         }
     }
 }
-void initialize_cfm(BasePlatform *pl, FdPoller &po)
+void initialize_cfm(FdPoller &po)
 {
 	ares_library_init(ARES_LIB_INIT_ALL);
     poller = &po;
@@ -458,7 +458,10 @@ void initialize_cfm(BasePlatform *pl, FdPoller &po)
         cfm_connections.insert(cfm);
         return cfm;
     };
-    pl->on_quit().then([](){
+    platform->on_quit().then([](){
         ares_library_cleanup();
     }).detach();
+    auto contents = platform->read_file("radio_domain.conf");
+    if (contents)
+        radio_domain = contents->substr(0, contents->find('\n'));
 }
