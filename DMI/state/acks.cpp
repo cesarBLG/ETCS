@@ -172,6 +172,8 @@ void updateAcks()
         ackButton.clear();
         ackButton.setAck(nullptr);
         componentAck = nullptr;
+        brakeAck = false;
+        if (levelAck == 2) levelAck = level_announce ? 1 : 0;
     }
     if (componentAck != nullptr)
     {
