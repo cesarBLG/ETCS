@@ -311,9 +311,10 @@ void update_mode_status()
             SR_dist_start = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
         } else {
             SR_speed_override = {};
-            SR_dist_override = {};
-            SR_dist = {};
             SR_speed = {};
+            SR_dist_override = {};
+            SR_dist_start = {};
+            SR_dist = {};
             formerEoA = {};
         }
         if (mode == Mode::UN)

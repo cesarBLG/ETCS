@@ -215,12 +215,15 @@ void set_supervised_targets()
         if (LoA)
             supervised_targets.push_back(std::make_shared<target>(LoA->first.max, LoA->second, target_class::LoA));
     }
+    SR_dist = {};
     if (mode == Mode::SR && SR_dist_start) {
         double D_STFF = D_NVSTFF;
         if (SR_dist_override)
             D_STFF = *SR_dist_override;
         if (std::isfinite(D_STFF))
-            supervised_targets.push_back(std::make_shared<target>(SR_dist_start->max+D_STFF, 0, target_class::SR_distance));
+            SR_dist = *SR_dist_start + D_STFF;
+        if (SR_dist)
+            supervised_targets.push_back(std::make_shared<target>(SR_dist->max, 0, target_class::SR_distance));
     }
     target::recalculate_all_decelerations();
 }
