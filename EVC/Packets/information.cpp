@@ -257,19 +257,16 @@ void SR_authorisation_info::handle()
 {
     auto *sr = (SR_authorisation*)message->get();
     ma_rq_reasons[0] = false;
+    if (sr->D_SR != D_SR_t::Infinity)
+        SR_dist_override = sr->D_SR.get_value(sr->Q_SCALE);
+    else
+        SR_dist_override = std::numeric_limits<double>::infinity();
     if (mode == Mode::SR) {
-        if (sr->D_SR != D_SR_t::Infinity)
-            SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1] + sr->D_SR.get_value(sr->Q_SCALE));
-        else
-            SR_dist = {};
+        SR_dist_start = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
     } else {
         mode_to_ack = Mode::SR;
         mode_acknowledgeable = true;
         mode_acknowledged = false;
-        if (sr->D_SR != D_SR_t::Infinity)
-            D_STFF_rbc = sr->D_SR.get_value(sr->Q_SCALE);
-        else
-            D_STFF_rbc = std::numeric_limits<double>::infinity();
     }
     if (active_dialog == dialog_sequence::Main && active_dialog_step == "S7")
         active_dialog = dialog_sequence::None;

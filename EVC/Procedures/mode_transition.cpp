@@ -307,16 +307,11 @@ void update_mode_status()
         if (mode == Mode::TR || mode == Mode::LS || mode == Mode::OS || mode == Mode::SH)
             overrideProcedure = false;
         if (mode == Mode::SR) {
-            double D_STFF = D_NVSTFF;
-            if (D_STFF_rbc)
-                D_STFF = *D_STFF_rbc;
-            if (std::isfinite(D_STFF))
-                SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]+D_STFF);
-            else
-                SR_dist = {};
             SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+            SR_dist_start = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
         } else {
-            D_STFF_rbc = {};
+            SR_speed_override = {};
+            SR_dist_override = {};
             SR_dist = {};
             SR_speed = {};
             formerEoA = {};

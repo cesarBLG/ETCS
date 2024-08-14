@@ -1340,10 +1340,10 @@ void validate_data_entry(std::string name, json &result)
             active_dialog_step = "S1";
     } else if (name == get_text("SR speed/distance")) {
         if (mode == Mode::SR) {
-            double v = stod(result[get_text("SR speed (km/h)")].get<std::string>())/3.6;
-            double d = stod(result[get_text("SR distance (m)")].get<std::string>());
-            SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]+d);
-            SR_speed = speed_restriction(v, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+            SR_speed_override = stod(result[get_text("SR speed (km/h)")].get<std::string>())/3.6;
+            SR_speed = speed_restriction(*SR_speed_override, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+            SR_dist_override = stod(result[get_text("SR distance (m)")].get<std::string>());
+            SR_dist_start = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
             recalculate_MRSP();
         }
         active_dialog_step = "S1";
