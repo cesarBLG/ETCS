@@ -12,6 +12,7 @@
 #include "../STM/stm.h"
 #include "../TrainSubsystems/power.h"
 #include "../TrainSubsystems/train_interface.h"
+#include "../Supervision/locomotive_data.h"
 #include <orts/common.h>
 #include <nlohmann/json.hpp>
 #include "platform_runtime.h"
@@ -135,6 +136,8 @@ void load_config(std::string serie)
 		automatic_eddy_inhibition = cfg.value("AutomaticEddyCurrentBrakeInhibition", false);
 		automatic_magnetic_inhibition = cfg.value("AutomaticMagneticShoeBrakeInhibition", false);
 		automatic_regenerative_inhibition = cfg.value("AutomaticRegenerativeBrakeInhibition", false);
+		L_antenna_front = cfg.value("AntennaOffset", 0.0);
+		L_locomotive = cfg.value("RearCabOffset", 0.0);
 	}
 	set_persistent_command("setSerie", serie);
 }

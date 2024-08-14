@@ -9,6 +9,7 @@
 #include "distance.h"
 #include "../Supervision/supervision.h"
 #include "../Supervision/national_values.h"
+#include "../Supervision/locomotive_data.h"
 #include "linking.h"
 #include <limits>
 relocable_dist_base *relocable_dist_base::begin = nullptr;
@@ -205,9 +206,11 @@ int current_odometer_orientation=1;
 int odometer_direction=1;
 void update_odometer()
 {
-    d_estfront = dist_base(odometer_value-odometer_reference,0);
-    d_estfront_dir[0] = dist_base(odometer_value-odometer_reference,1);
-    d_estfront_dir[1] = dist_base(odometer_value-odometer_reference,-1);
+    double raw = odometer_value-odometer_reference;
+    if (odometer_orientation == -1) raw -= L_locomotive;
+    d_estfront = dist_base(raw,0);
+    d_estfront_dir[0] = dist_base(raw,1);
+    d_estfront_dir[1] = dist_base(raw,-1);
 }
 void reset_odometer(double dist)
 {

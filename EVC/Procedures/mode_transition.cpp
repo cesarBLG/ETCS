@@ -266,6 +266,8 @@ void update_mode_status()
 {
     if (!prev_desk_open && (cab_active[0] ^ cab_active[1])) {
         odometer_orientation = cab_active[0] ? 1 : -1;
+        extern optional<distance> standstill_position;
+        standstill_position = {};
         if (solr) {
             if (solr->dir != -1 && solr->position.orientation != odometer_orientation)
                 solr->dir = 1-solr->dir;

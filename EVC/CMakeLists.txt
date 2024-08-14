@@ -1,8 +1,8 @@
 set (SOURCES evc.cpp DMI/dmi.cpp Supervision/national_values.cpp Supervision/fixed_values.cpp 
 Supervision/curve_calc.cpp  Supervision/conversion_model.cpp  Position/distance.cpp
-Supervision/speed_profile.cpp Supervision/supervision.cpp Supervision/targets.cpp Supervision/train_data.cpp 
+Supervision/speed_profile.cpp Supervision/supervision.cpp Supervision/targets.cpp Supervision/train_data.cpp Supervision/locomotive_data.cpp 
 Supervision/emergency_stop.cpp 
-Supervision/acceleration.cpp antenna.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp 
+Supervision/acceleration.cpp MA/movement_authority.cpp MA/mode_profile.cpp Position/linking.cpp 
 OR_interface/interface.cpp OR_interface/orts_server.cpp SSP/ssp.cpp Packets/packets.cpp Procedures/mode_transition.cpp LX/level_crossing.cpp
 Packets/messages.cpp Packets/information.cpp Packets/radio.cpp Packets/vbc.cpp 
 Euroradio/session.cpp Euroradio/terminal.cpp Euroradio/radio_connection.cpp Euroradio/safe_radio_connection.cpp Euroradio/cfm.cpp
