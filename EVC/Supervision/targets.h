@@ -88,8 +88,10 @@ public:
 };
 extern optional<distance> EoA;
 extern optional<distance> SvL;
+extern optional<distance> SR_dist_start;
 extern optional<distance> SR_dist;
-extern optional<double> D_STFF_rbc;
+extern optional<float> SR_dist_override;
+extern optional<float> SR_speed_override;
 extern optional<std::pair<distance,double>> LoA;
 extern double V_releaseSvL;
 void set_supervised_targets();

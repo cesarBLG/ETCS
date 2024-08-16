@@ -17,7 +17,6 @@
 #include "targets.h"
 #include "supervision.h"
 #include "supervision_targets.h"
-#include "../antenna.h"
 #include "../TrainSubsystems/brake.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../TrainSubsystems/power.h"
@@ -259,7 +258,7 @@ void update_supervision()
             }
         }
         if (brake_acknowledged) {
-            rollaway_position = distance::from_odometer(d_estfront);
+            rollaway_position = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
             rollaway_applied = false;
         }
     } else {

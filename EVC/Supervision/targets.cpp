@@ -172,8 +172,10 @@ void target::calculate_curves(double V_est, double A_est, double V_delta) const
 }
 optional<distance> EoA;
 optional<distance> SvL;
+optional<distance> SR_dist_start;
 optional<distance> SR_dist;
-optional<double> D_STFF_rbc;
+optional<float> SR_dist_override;
+optional<float> SR_speed_override;
 optional<std::pair<distance,double>> LoA;
 double V_releaseSvL=0;
 static std::list<std::shared_ptr<target>> supervised_targets;
@@ -213,8 +215,16 @@ void set_supervised_targets()
         if (LoA)
             supervised_targets.push_back(std::make_shared<target>(LoA->first.max, LoA->second, target_class::LoA));
     }
-    if (SR_dist && mode == Mode::SR)
-        supervised_targets.push_back(std::make_shared<target>(SR_dist->max, 0, target_class::SR_distance));
+    SR_dist = {};
+    if (mode == Mode::SR && SR_dist_start) {
+        double D_STFF = D_NVSTFF;
+        if (SR_dist_override)
+            D_STFF = *SR_dist_override;
+        if (std::isfinite(D_STFF))
+            SR_dist = *SR_dist_start + D_STFF;
+        if (SR_dist)
+            supervised_targets.push_back(std::make_shared<target>(SR_dist->max, 0, target_class::SR_distance));
+    }
     target::recalculate_all_decelerations();
 }
 bool supervised_targets_changed()

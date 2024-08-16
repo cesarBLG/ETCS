@@ -41,13 +41,9 @@ void start_override()
             formerEoA = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]);
         } else if (mode == Mode::SR) {
             formerSRdist = SR_dist;
-            if (std::isfinite(D_NVSTFF)) {
-                SR_dist = distance::from_odometer(d_estfront_dir[odometer_orientation == -1]+D_NVSTFF);
-                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), *SR_dist, false);
-            } else {
-                SR_dist = {};
-                SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
-            }
+            SR_dist_override = {};
+            SR_speed_override = {};
+            SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
         }
         recalculate_MRSP();
         trigger_condition(37);

@@ -9,7 +9,7 @@
 #pragma once
 #include <set>
 #include <list>
-#include "../antenna.h"
+#include "locomotive_data.h"
 #include <string>
 enum brake_position_types
 {

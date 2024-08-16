@@ -64,10 +64,9 @@ double A_NVMAXREDADH3;
 std::set<int> NV_NID_Cs;
 void nv_changed()
 {
-    /*set_conversion_correction_values();
-    SR_dist;
-    SR_speed;
-    recalculate_MRSP();*/
+    //set_conversion_correction_values();
+    if (!SR_speed_override)
+        SR_speed = speed_restriction(V_NVSTFF, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
 }
 void set_default_nv()
 {
@@ -236,6 +235,7 @@ void update_national_values()
 {
     if (not_yet_applicable_nv && not_yet_applicable_nv->first_applicable.est < d_estfront) {
         load_national_values(not_yet_applicable_nv->nv);
+        recalculate_MRSP();
         not_yet_applicable_nv = {};
     }
 }
