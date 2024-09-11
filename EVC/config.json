@@ -466,6 +466,29 @@
          }
       ]
     },
+    "599":{
+       "TrainData":"TrainData/Spain/traindata_599.json",
+       "SpeedDial":180,
+       "STMLayout":"stm_siemens.json",
+       "ConstTrainDataValues":[
+         {
+            "Field":"TrainCategory",
+            "Value":"PASS 3"
+         },
+         {
+             "Field":"AxleLoadCategory",
+             "Value":"B2"
+         },
+         {
+             "Field":"LoadingGauge",
+             "Value":"G1"
+         },
+         {
+             "Field":"Airtight",
+             "Value":"No"
+         }
+      ]
+    },
     "490":{
        "TrainData":"TrainData/Spain/traindata_490.json",
        "SpeedDial":180,

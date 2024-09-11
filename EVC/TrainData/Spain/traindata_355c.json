@@ -8,7 +8,7 @@
         "axle_load_category": "C2",
         "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "DIESEL", "nid_ctraction": 0}
+            {"name": "DIESEL"}
         ],
         "brakes": {
             "emergency": {
@@ -79,7 +79,7 @@
         "axle_load_category": "C2",
         "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "DIESEL", "nid_ctraction": 0}
+            {"name": "DIESEL"}
         ],
         "brakes": {
             "emergency": {

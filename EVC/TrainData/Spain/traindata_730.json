@@ -9,7 +9,8 @@
         "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DIESEL"}
         ],
         "brakes": {
             "emergency": {
@@ -84,7 +85,8 @@
         "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DIESEL"}
         ],
         "brakes": {
             "emergency": {
@@ -159,7 +161,8 @@
         "loading_gauge": "GA",
         "traction_systems": [
             {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DIESEL"}
         ],
         "brakes": {
             "emergency": {
