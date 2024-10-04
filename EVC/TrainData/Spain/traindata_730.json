@@ -8,8 +8,10 @@
         "axle_load_category": "C2",
         "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
             {"name": "DIESEL"}
         ],
         "brakes": {
@@ -84,8 +86,10 @@
         "axle_load_category": "C2",
         "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
             {"name": "DIESEL"}
         ],
         "brakes": {
@@ -160,8 +164,10 @@
         "axle_load_category": "C2",
         "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
             {"name": "DIESEL"}
         ],
         "brakes": {

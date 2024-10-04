@@ -8,7 +8,8 @@
         "axle_load_category": "B2",
         "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
         ],
         "brakes": {
             "emergency": {
@@ -77,7 +78,8 @@
         "axle_load_category": "B2",
         "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
         ],
         "brakes": {
             "emergency": {
