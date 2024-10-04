@@ -1,13 +1,24 @@
 {
-	"Semplice" : {
-        "length": 198,
-        "speed": 300,
-        "cant_deficiency": 115,
+	 "Simple" : {
+        "length": 200,
+        "speed": 320,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "axle_load_category": "C2",
-        "loading_gauge": "G1",
+        "loading_gauge": "GA",
         "traction_systems": [
+            {"name": "DC1.5kV", "nid_ctraction": 14},
+            {"name": "AC25kV", "nid_ctraction": 12},
+            {"name": "AC25kV", "nid_ctraction": 13},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
+            {"name": "AC15kV", "nid_ctraction": 19},
+            {"name": "AC15kV", "nid_ctraction": 20},
+            {"name": "AC15kV", "nid_ctraction": 21},
+            {"name": "AC15kV", "nid_ctraction": 22},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
             {"name": "DC3kV", "nid_ctraction": 10},
             {"name": "AC25kV", "nid_ctraction": 11}
         ],
@@ -24,16 +35,26 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.9},
-                        {"speed": 69.4444, "value": 0.85},
-                        {"speed": 83.3333, "value": 0.8}
+                        {"speed": 0, "value": 0.95},
+						{"speed": 13.8889, "value": 0.94},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.84},
+						{"speed": 55.5556, "value": 0.76},
+						{"speed": 69.4444, "value": 0.75},
+						{"speed": 83.3333, "value": 0.74}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 0.8}
+                        {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
+						{"speed": 27.7778, "value": 0.91},
+						{"speed": 41.6667, "value": 0.82},
+						{"speed": 55.5556, "value": 0.74},
+						{"speed": 69.4444, "value": 0.73},
+						{"speed": 83.3333, "value": 0.72}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -67,15 +88,26 @@
             
         }
     },
-    "Doppio" : {
-        "length": 396,
-        "speed": 300,
-        "cant_deficiency": 115,
+    "Doble" : {
+        "length": 400,
+        "speed": 320,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
         "axle_load_category": "C2",
-        "loading_gauge": "G1",
+        "loading_gauge": "GA",
         "traction_systems": [
+            {"name": "DC1.5kV", "nid_ctraction": 14},
+            {"name": "AC25kV", "nid_ctraction": 12},
+            {"name": "AC25kV", "nid_ctraction": 13},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
+            {"name": "AC15kV", "nid_ctraction": 19},
+            {"name": "AC15kV", "nid_ctraction": 20},
+            {"name": "AC15kV", "nid_ctraction": 21},
+            {"name": "AC15kV", "nid_ctraction": 22},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
             {"name": "DC3kV", "nid_ctraction": 10},
             {"name": "AC25kV", "nid_ctraction": 11}
         ],
@@ -83,7 +115,7 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -92,16 +124,26 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.9},
-                        {"speed": 69.4444, "value": 0.85},
-                        {"speed": 83.3333, "value": 0.8}
-                     ],
-                     "build_up_time": 0.5,
-                     "validity": "1..."
-                 },
-                 "no_dynamic": {
-                     "curves": [
-                        {"speed": 0, "value": 0.8}
+                        {"speed": 0, "value": 0.95},
+						{"speed": 13.8889, "value": 0.94},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.84},
+						{"speed": 55.5556, "value": 0.76},
+						{"speed": 69.4444, "value": 0.75},
+						{"speed": 83.3333, "value": 0.74}
+                    ],
+                    "build_up_time": 0.5,
+                    "validity": "1..."
+                },
+                "no_dynamic": {
+                    "curves": [
+                        {"speed": 0, "value": 0.93},
+						{"speed": 13.8889, "value": 0.92},
+						{"speed": 27.7778, "value": 0.91},
+						{"speed": 41.6667, "value": 0.82},
+						{"speed": 55.5556, "value": 0.74},
+						{"speed": 69.4444, "value": 0.73},
+						{"speed": 83.3333, "value": 0.72}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."

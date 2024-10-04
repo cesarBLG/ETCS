@@ -1,12 +1,15 @@
 {
-	"1UT" : {
-        "length": 150,
-        "speed": 160,
-        "cant_deficiency": 150,
+		"1UT_451" : {
+        "length": 80,
+        "speed": 140,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
         ],
         "brakes": {
             "emergency": {
@@ -21,20 +24,14 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.36},
-						{"speed": 13.8889, "value": 1.62},
-						{"speed": 27.7778, "value": 1.58},
-						{"speed": 41.6667, "value": 0.76}
+                        {"speed": 0, "value": 0.9}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.6},
-						{"speed": 27.7778, "value": 1.56},
-						{"speed": 41.6667, "value": 0.74}
+                        {"speed": 0, "value": 1.1}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
@@ -68,14 +65,17 @@
             
         }
     },
-	"2UT" : {
-        "length": 298,
-        "speed": 160,
-        "cant_deficiency": 150,
+		"2UT_451" : {
+        "length": 160,
+        "speed": 140,
+        "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 0,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
         ],
         "brakes": {
             "emergency": {
@@ -90,20 +90,80 @@
             "service": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.36},
-						{"speed": 13.8889, "value": 1.62},
-						{"speed": 27.7778, "value": 1.58},
-						{"speed": 41.6667, "value": 0.76}
+                        {"speed": 0, "value": 0.9}
                     ],
                     "build_up_time": 0.5,
                     "validity": "1..."
                 },
                 "no_dynamic": {
                     "curves": [
-                        {"speed": 0, "value": 1.34},
-						{"speed": 13.8889, "value": 1.6},
-						{"speed": 27.7778, "value": 1.56},
-						{"speed": 41.6667, "value": 0.74}
+                        {"speed": 0, "value": 1.1}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "0..."
+                }
+            },
+            "normal_service": {
+                "passenger": {
+                    "0": {
+                        "curves": [
+                            {"speed": 0, "value": 0.4}
+                        ]
+                    },
+                    "0.5": {
+                        "curves": [
+                            {"speed": 0, "value": 0.6}
+                        ]
+                    },
+                    "0.7": {
+                        "curves": [
+                            {"speed": 0, "value": 0.7}
+                        ]
+                    }
+                },
+                "kn+": [
+                    {"speed": 0, "value": 1}
+                ],
+                "kn-": [
+                    {"speed": 0, "value": 1}
+                ]
+            }
+            
+        }
+    },
+		"3UT_451" : {
+        "length": 240,
+        "speed": 140,
+        "cant_deficiency": 100,
+        "t_traction_cutoff": 0.3,
+        "airtight": 0,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
+        "traction_systems": [
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
+        ],
+        "brakes": {
+            "emergency": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 1.3, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "...."
+                }
+            },
+            "service": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 0.9}
+                    ],
+                    "build_up_time": 0.5,
+                    "validity": "1..."
+                },
+                "no_dynamic": {
+                    "curves": [
+                        {"speed": 0, "value": 1.1}
                     ],
                     "build_up_time": 5,
                     "validity": "0..."
