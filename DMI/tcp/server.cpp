@@ -36,7 +36,7 @@ void fill_non_existent(json &j, std::string str, T def)
 {
     if (!j.contains("str") || j.is_null()) j[str] = def;
 }
-void fill_non_existent(json &j, std::string str, nullptr_t null)
+void fill_non_existent(json &j, std::string str, std::nullptr_t null)
 {
     if (!j.contains("str")) j[str] = nullptr;
 }
