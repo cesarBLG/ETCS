@@ -30,7 +30,7 @@ jobs:
       run: cmake --build ${{github.workspace}}/build --config Release
 
     - name: Install
-      run: cmake --install ${{github.workspace}}/build -DDESTDIR=${{github.workspace}}/dist/ETCS
+      run: cmake --install ${{github.workspace}}/build --prefix ${{github.workspace}}/dist/ETCS
 
     - name: Publish
       uses: actions/upload-artifact@v3
