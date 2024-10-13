@@ -24,18 +24,20 @@ jobs:
         submodules: 'recursive'
 
     - name: Configure
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -A x64 -DSIMRAIL=${{matrix.sr_flag}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -A x64 -DSIMRAIL=${{matrix.sr_flag}} -DCMAKE_INSTALL_PREFIX=/
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build -DDESTDIR=${{github.workspace}}/dist/ETCS
 
     - name: Publish
       uses: actions/upload-artifact@v3
       with:
         name: build-win64-sr${{matrix.sr_flag}}
         path: |
-          ${{github.workspace}}/build/DMI/Release
-          ${{github.workspace}}/build/EVC/Release
+          ${{github.workspace}}/dist/ETCS
 
   build_wasm:
     name: Build for WASM
