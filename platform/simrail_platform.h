@@ -147,7 +147,7 @@ public:
 	int64_t get_timer() override { return base.get_timer(); };
 
 	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override { return base.open_socket(channel, tid); };
-	std::optional<std::string> read_file(const std::string_view path, FileType file_type) override { return base.read_file(path); };
+	std::optional<std::string> read_file(const std::string_view path, FileType file_type=ETCS_ASSET_FILE) override { return base.read_file(path); };
 	bool write_file(const std::string_view path, const std::string_view contents) override { return base.write_file(path, contents); };
 	void debug_print(const std::string_view msg) override { base.debug_print(msg); };
 
