@@ -8,11 +8,11 @@
 #include <string>
 #include <fstream>
 
-FstreamFileImpl::FstreamFileImpl(const std::string_view load_path) : load_path(load_path) {
+FstreamFileImpl::FstreamFileImpl() {
 }
 
-std::optional<std::string> FstreamFileImpl::read_file(const std::string_view path) {
-    std::ifstream file(load_path + std::string(path), std::ios::binary | std::ios::ate);
+std::optional<std::string> FstreamFileImpl::read_file(const std::string &path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.good())
         return std::nullopt;
     size_t size = file.tellg();
@@ -23,8 +23,8 @@ std::optional<std::string> FstreamFileImpl::read_file(const std::string_view pat
     return buffer;
 }
 
-bool FstreamFileImpl::write_file(const std::string_view path, const std::string_view contents) {
-    std::ofstream file(load_path + std::string(path), std::ios::binary);
+bool FstreamFileImpl::write_file(const std::string &path, const std::string_view contents) {
+    std::ofstream file(path, std::ios::binary);
     file.write(contents.data(), contents.size());
     return file.good();
 }

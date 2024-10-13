@@ -78,7 +78,7 @@ int64_t SimrailBasePlatform::get_timer() {
 	return api::get_timer();
 }
 
-std::optional<std::string> SimrailBasePlatform::read_file(const std::string_view path) {
+std::optional<std::string> SimrailBasePlatform::read_file(const std::string_view path, FileType file_type) {
 	size_t len;
 	char *ret = api::read_file(path.data(), path.size(), &len);
 	if (!ret)

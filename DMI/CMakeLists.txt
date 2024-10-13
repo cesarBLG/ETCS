@@ -81,13 +81,19 @@ if (WASM)
     set_target_properties(dmi PROPERTIES SUFFIX ".wasm")
 endif()
 
-if (WITH_SDL AND WIN32)
-    add_custom_command(TARGET dmi POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL2>              
-        $<TARGET_FILE_DIR:dmi>)
-    add_custom_command(TARGET dmi POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:SDL2_ttf>              
-        $<TARGET_FILE_DIR:dmi>)
+if(NOT ANDROID)
+    install(TARGETS dmi RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(DIRECTORY fonts DESTINATION ${ETCS_ASSET_DIR})
+    install(DIRECTORY symbols DESTINATION ${ETCS_ASSET_DIR})
+    install(DIRECTORY sound DESTINATION ${ETCS_ASSET_DIR})
+    if (WITH_SDL AND ETCS_VENDORED)
+        if (WIN32)
+            install(TARGETS SDL2 RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+            install(TARGETS SDL2_ttf RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        elseif(NOT ANDROID)
+            install(TARGETS SDL2 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+            install(TARGETS SDL2_ttf LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        endif()
+    endif()
+    install(DIRECTORY ../locales/dmi DESTINATION ${ETCS_ASSET_DIR}/locales)
 endif()

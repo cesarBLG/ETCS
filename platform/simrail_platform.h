@@ -32,7 +32,7 @@ public:
 	int64_t get_timer() override;
 
 	std::unique_ptr<BusSocket> open_socket(const std::string_view channel, uint32_t tid) override;
-	std::optional<std::string> read_file(const std::string_view path) override;
+	std::optional<std::string> read_file(const std::string_view path, FileType file_type=ETCS_ASSET_FILE) override;
 	bool write_file(const std::string_view path, const std::string_view contents) override;
 	void debug_print(const std::string_view msg) override;
 

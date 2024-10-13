@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
 void SdlPlatform::SdlPlatform::load_config(const std::vector<std::string>& args)
 {
-	std::ifstream file(load_path + "settings.ini", std::ios::binary);
+	std::ifstream file(config_dir + "settings.ini", std::ios::binary);
 	std::string line;
 
 	while (std::getline(file, line)) {
@@ -60,13 +60,75 @@ std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key, con
 		return std::string(def);
 	return it->second;
 }
-
-SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args) :
 #ifdef __ANDROID__
-	load_path(std::string(SDL_AndroidGetExternalStoragePath()) + "/"),
+std::string get_files_dir(ConsolePlatform::FileType type)
+{
+	return SDL_AndroidGetExternalStoragePath();
+}
+#elif defined(__unix__)
+#include <string>
+#include <limits.h>
+#include <unistd.h>
+std::string getexepath()
+{
+  char result[ PATH_MAX ];
+  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  return std::string( result, (count > 0) ? count : 0 );
+}
+#include <filesystem>
+std::string get_files_dir(FileType type)
+{
+	switch (type)
+	{
+		case ETCS_ASSET_FILE:
+			{
+				auto exepath = std::filesystem::path(getexepath()).remove_filename();
+				if (exepath.parent_path().filename() != "bin")
+					return "";
+				if (exepath == "/bin/")
+					return "/usr/share/ETCS/";
+				return exepath / "../share/ETCS/";
+			}
+		case ETCS_CONFIG_FILE:
+			{
+				auto exepath = std::filesystem::path(getexepath()).remove_filename();
+				if (exepath.parent_path().filename() != "bin")
+					return "";
+				if (exepath.parent_path().parent_path().filename() == "usr")
+					return exepath / "../../etc/ETCS/";
+				return exepath / "../etc/ETCS/";
+			}
+		case ETCS_STORAGE_FILE:
+			{
+				const char* wd  = getenv("OWD");
+				if (wd)
+					return std::string(wd)+"/";
+				return "";
+			}
+		default:
+			return "";
+	}
+}
+#else
+#include <string>
+#include <windows.h>
+std::string getexepath()
+{
+  char result[ MAX_PATH ];
+  return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
+}
+#include <filesystem>
+std::string get_files_dir(FileType type)
+{
+	return std::filesystem::path(getexepath()).remove_filename().string();
+}
 #endif
-	bus_socket_impl(load_path, poller, args),
-	fstream_file_impl(load_path)
+SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args) :
+	assets_dir(get_files_dir(ETCS_ASSET_FILE)),
+	config_dir(get_files_dir(ETCS_CONFIG_FILE)),
+	storage_dir(get_files_dir(ETCS_STORAGE_FILE)),
+	bus_socket_impl(config_dir, poller, args),
+	fstream_file_impl()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -168,12 +230,12 @@ int64_t SdlPlatform::get_timer() {
 	return libc_time_impl.get_timer();
 }
 
-std::optional<std::string> SdlPlatform::read_file(const std::string_view path) {
-	return fstream_file_impl.read_file(path);
+std::optional<std::string> SdlPlatform::read_file(const std::string_view path, FileType type) {
+	return fstream_file_impl.read_file((type == ETCS_ASSET_FILE ? assets_dir : (type == ETCS_CONFIG_FILE ? config_dir : storage_dir)) + std::string(path));
 }
 
 bool SdlPlatform::write_file(const std::string_view path, const std::string_view contents) {
-	return fstream_file_impl.write_file(path, contents);
+	return fstream_file_impl.write_file(storage_dir + std::string(path), contents);
 }
 
 void SdlPlatform::debug_print(const std::string_view msg) {
@@ -358,7 +420,7 @@ void SdlPlatform::present() {
 }
 
 std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_view p) {
-	std::string path = load_path + std::string(p);
+	std::string path = assets_dir + std::string(p);
 	SDL_Surface *surf = SDL_LoadBMP(path.c_str());
 	if (surf == nullptr) {
 		printf("Error loading BMP %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
@@ -394,18 +456,18 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bol
 #if SIMRAIL
 		if (lang == "zh_Hans") {
 			// Simplified Chinese
-			path = load_path + (!bold ? "fonts/NotoSansSC-Regular.ttf" : "fonts/NotoSansSC-Bold.ttf");
+			path = assets_dir + (!bold ? "fonts/NotoSansSC-Regular.ttf" : "fonts/NotoSansSC-Bold.ttf");
 		}
 		else if (lang == "zh_Hant") {
 			// Traditional  Chinese
-			path = load_path + (!bold ? "fonts/NotoSansTC-Regular.ttf" : "fonts/NotoSansTC-Bold.ttf");
+			path = assets_dir + (!bold ? "fonts/NotoSansTC-Regular.ttf" : "fonts/NotoSansTC-Bold.ttf");
 		}
 		else {
 			// Other languages
-			path = load_path + (!bold ? "fonts/Play-Regular.ttf" : "fonts/Play-Bold.ttf");
+			path = assets_dir + (!bold ? "fonts/Play-Regular.ttf" : "fonts/Play-Bold.ttf");
 		}
 #else
-		path = load_path + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
+		path = assets_dir + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
 #endif
 
 		float size_probe = ascent * 2.0f * scale;
@@ -628,7 +690,7 @@ int SdlPlatform::get_volume() {
 }
 
 std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string_view path) {
-	std::string file = load_path + "sound/" + std::string(path) + ".wav";
+	std::string file = assets_dir + "sound/" + std::string(path) + ".wav";
 
 	SDL_AudioSpec spec;
 	uint8_t* buffer;

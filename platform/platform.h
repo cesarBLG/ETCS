@@ -11,7 +11,12 @@
 #include <vector>
 #include <variant>
 #include "platform_util.h"
-
+enum FileType
+{
+	ETCS_ASSET_FILE,
+	ETCS_CONFIG_FILE,
+	ETCS_STORAGE_FILE,
+};
 class BasePlatform : private PlatformUtil::NoCopy
 {
 public:
@@ -62,7 +67,7 @@ public:
 	}
 
 	virtual std::unique_ptr<BusSocket> open_socket(const std::string_view bus, uint32_t tid) = 0;
-	virtual std::optional<std::string> read_file(const std::string_view path) = 0;
+	virtual std::optional<std::string> read_file(const std::string_view path, FileType file_type=ETCS_ASSET_FILE) = 0;
 	virtual bool write_file(const std::string_view path, const std::string_view contents) = 0;
 	virtual void debug_print(const std::string_view msg) = 0;
 

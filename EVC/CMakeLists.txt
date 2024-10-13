@@ -84,9 +84,17 @@ endif()
 if (WASM)
     set_target_properties(evc PROPERTIES SUFFIX ".wasm")
 endif()
-if (RADIO_CFM AND WIN32)
-    add_custom_command(TARGET evc POST_BUILD 
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:c-ares>              
-        $<TARGET_FILE_DIR:evc>)
+
+if (NOT ANDROID)
+    install(TARGETS evc RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(DIRECTORY TrainData DESTINATION ${ETCS_ASSET_DIR})
+    if (RADIO_CFM AND ETCS_VENDORED)
+        if (WIN32)
+            install(TARGETS c-ares RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        elseif(NOT ANDROID)
+            install(TARGETS c-ares LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+        endif()
+    endif()
+    install(DIRECTORY ../locales/evc DESTINATION ${ETCS_ASSET_DIR}/locales)
+    install(FILES config.json DESTINATION ${ETCS_ASSET_DIR})
 endif()

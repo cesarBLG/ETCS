@@ -20,14 +20,14 @@ static std::atomic<bool>* quit_request_ptr;
 static void sigterm_handler(int sig) {
 	*quit_request_ptr = true;
 }
-
 #ifdef __ANDROID__
+std::string android_external_storage_dir;
 #include <jni.h>
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
 	std::vector<std::string> args;
-	platform = std::make_unique<ConsolePlatform>(std::string(env->GetStringUTFChars(stringObject, &b)) + "/", args);
+	platform = std::make_unique<ConsolePlatform>(args);
 	on_platform_ready();
 	static_cast<ConsolePlatform*>(platform.get())->event_loop();
 }
@@ -41,21 +41,86 @@ int main(int argc, char *argv[])
 	std::vector<std::string> args;
 	for (int i = 1; i < argc; i++)
 		args.push_back(std::string(argv[i]));
-	platform = std::make_unique<ConsolePlatform>("", args);
+	platform = std::make_unique<ConsolePlatform>(args);
 	on_platform_ready();
 	static_cast<ConsolePlatform*>(platform.get())->event_loop();
 	return 0;
 }
 #endif
-ConsolePlatform::ConsolePlatform(const std::string_view path, const std::vector<std::string> &args) :
-	load_path(path),
-	bus_socket_impl(load_path, poller, args),
-	fstream_file_impl(load_path)
+#ifdef __ANDROID__
+std::string get_files_dir(ConsolePlatform::FileType type)
+{
+	return android_external_storage_dir;
+}
+#elif defined(__unix__)
+#include <string>
+#include <limits.h>
+#include <unistd.h>
+std::string getexepath()
+{
+  char result[ PATH_MAX ];
+  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+  return std::string( result, (count > 0) ? count : 0 );
+}
+#include <filesystem>
+std::string get_files_dir(FileType type)
+{
+	switch (type)
+	{
+		case ETCS_ASSET_FILE:
+			{
+				auto exepath = std::filesystem::path(getexepath()).remove_filename();
+				if (exepath.parent_path().filename() != "bin")
+					return "";
+				if (exepath == "/bin/")
+					return "/usr/share/ETCS/";
+				return exepath / "../share/ETCS/";
+			}
+		case ETCS_CONFIG_FILE:
+			{
+				auto exepath = std::filesystem::path(getexepath()).remove_filename();
+				if (exepath.parent_path().filename() != "bin")
+					return "";
+				if (exepath.parent_path().parent_path().filename() == "usr")
+					return exepath / "../../etc/ETCS/";
+				return exepath / "../etc/ETCS/";
+			}
+		case ETCS_STORAGE_FILE:
+			{
+				const char* wd  = getenv("OWD");
+				if (wd)
+					return std::string(wd)+"/";
+				return "";
+			}
+		default:
+			return "";
+	}
+}
+#else
+#include <string>
+#include <windows.h>
+std::string getexepath()
+{
+  char result[ MAX_PATH ];
+  return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
+}
+#include <filesystem>
+std::string get_files_dir(FileType type)
+{
+	return std::filesystem::path(getexepath()).remove_filename().string();
+}
+#endif
+ConsolePlatform::ConsolePlatform(const std::vector<std::string> &args) :
+	assets_dir(get_files_dir(ETCS_ASSET_FILE)),
+	config_dir(get_files_dir(ETCS_CONFIG_FILE)),
+	storage_dir(get_files_dir(ETCS_STORAGE_FILE)),
+	bus_socket_impl(config_dir, poller, args),
+	fstream_file_impl()
 #ifdef EVC
 	,
-	bus_server_manager(load_path, poller),
-	bus_bridge_manager(load_path, poller, bus_socket_impl),
-	orts_bridge(load_path, poller, bus_socket_impl)
+	bus_server_manager(config_dir, poller),
+	bus_bridge_manager(config_dir, poller, bus_socket_impl),
+	orts_bridge(config_dir, poller, bus_socket_impl)
 #endif
 	{
 	running = true;
@@ -89,12 +154,12 @@ ConsolePlatform::DateTime ConsolePlatform::get_local_time() {
 	return libc_time_impl.get_local_time();
 }
 
-std::optional<std::string> ConsolePlatform::read_file(const std::string_view path) {
-	return fstream_file_impl.read_file(path);
+std::optional<std::string> ConsolePlatform::read_file(const std::string_view path, FileType type) {
+	return fstream_file_impl.read_file((type == ETCS_ASSET_FILE ? assets_dir : (type == ETCS_CONFIG_FILE ? config_dir : storage_dir)) + std::string(path));
 }
 
 bool ConsolePlatform::write_file(const std::string_view path, const std::string_view contents) {
-	return fstream_file_impl.write_file(path, contents);
+	return fstream_file_impl.write_file(storage_dir + std::string(path), contents);
 }
 
 void ConsolePlatform::debug_print(const std::string_view msg) {
