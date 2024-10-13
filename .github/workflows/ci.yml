@@ -29,13 +29,15 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config Release
 
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build --prefix ${{github.workspace}}/dist
+
     - name: Publish
       uses: actions/upload-artifact@v3
       with:
         name: build-win64-sr${{matrix.sr_flag}}
         path: |
-          ${{github.workspace}}/build/DMI/Release
-          ${{github.workspace}}/build/EVC/Release
+          ${{github.workspace}}/dist
 
   build_wasm:
     name: Build for WASM
