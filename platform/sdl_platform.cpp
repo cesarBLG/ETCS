@@ -467,7 +467,7 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bol
 			path = assets_dir + (!bold ? "fonts/Play-Regular.ttf" : "fonts/Play-Bold.ttf");
 		}
 #else
-		path = assets_dir + (!bold ? "fonts/swiss.ttf" : "fonts/swissb.ttf");
+		path = assets_dir + "fonts/" + (!bold ? get_config("font", "swiss.ttf") : get_config("fontBold", "swissb.ttf"));
 #endif
 
 		float size_probe = ascent * 2.0f * scale;
