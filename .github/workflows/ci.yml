@@ -119,3 +119,24 @@ jobs:
         path: |
           ${{github.workspace}}/locales/dmi/*.mo
           ${{github.workspace}}/locales/evc/*.mo
+
+  upload:
+      name: Create release and upload artifacts
+      needs:
+        - build_win
+        - build_wasm
+      runs-on: ubuntu-22.04
+      steps:
+        - name: Download artifacts
+          uses: actions/download-artifact@v4
+        - name: Package artifacts
+          run: |
+            zip -r WASM.zip build-wasm-srON-verboseON/*
+            zip -r Windows.zip build-win64-srOFF/*
+        - name: Create release and upload artifacts
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
+            chmod +x pyuploadtool-x86_64.AppImage
+            ./pyuploadtool-x86_64.AppImage *.zip
