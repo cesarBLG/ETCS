@@ -26,16 +26,22 @@ build_android() {
         mv /var/www/vtrains/ETCS/ETCS_Android.apk /var/www/vtrains/ETCS/ETCS_Android_old.apk
         mv app/build/outputs/apk/debug/app-debug.apk /var/www/vtrains/ETCS/ETCS_Android.apk
 }
+build_win32() {
+        build win32 -DCMAKE_TOOLCHAIN_FILE=utils/TC-mingw.cmake -DCMAKE_INSTALL_PREFIX=/
+        cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libwinpthread-1.dll) dist/win32/
+        cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libstdc++-6.dll) dist/win32/
+        cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libgcc_s_seh-1.dll) dist/win32/
+        package win32
+}
 cd ~/ETCS
 git fetch
-if [[ $(git status) != *"Your branch is up to date"* || "$1" == "f" ]]; then
+if [[ $(LANG="C" git status) != *"Your branch is up to date"* || "$1" == "f" ]]; then
         # Actualizar git
         git pull
 
         build_locales
 
-        build win32 -DCMAKE_TOOLCHAIN_FILE=utils/TC-mingw.cmake -DCMAKE_INSTALL_PREFIX=/
-        package win32
+        build_win32
 
         build_linux_appimage
 
