@@ -34,7 +34,7 @@ build_win32() {
         package win32
 }
 ETCS_DIR="${ETCS_DIR:-$HOME/ETCS}"
-cd ETCS_DIR
+cd $ETCS_DIR
 git fetch
 if [[ $(LANG="C" git status) != *"Your branch is up to date"* || "$1" == "f" ]]; then
         # Actualizar git
