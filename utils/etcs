@@ -1,0 +1,9 @@
+#!/bin/bash
+if [[$1 --eq "evc"]]
+    exec evc
+elif [[$1 --eq "dmi"]]
+    exec dmi
+else
+    dmi&
+    exec evc
+fi

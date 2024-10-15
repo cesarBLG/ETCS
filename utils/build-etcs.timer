@@ -1,0 +1,9 @@
+[Unit]
+Description=Periodically run ETCS build script
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=10min
+
+[Install]
+WantedBy=timers.target

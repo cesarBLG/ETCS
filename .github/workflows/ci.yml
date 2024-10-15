@@ -81,7 +81,7 @@ jobs:
         tar xf wasi-sdk-${WASI_VERSION_FULL}-linux.tar.gz --strip-components=1
 
     - name: Configure
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DSIMRAIL=${{matrix.sr_flag}} -DDEBUG_VERBOSE=${{matrix.verbose_flag}} -DWASI_HOST_EXE_SUFFIX= -DWASI_SDK_PREFIX=${{github.workspace}}/wasi-sdk -DCMAKE_TOOLCHAIN_FILE=wasi-sdk.cmake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DSIMRAIL=${{matrix.sr_flag}} -DDEBUG_VERBOSE=${{matrix.verbose_flag}} -DWASI_HOST_EXE_SUFFIX= -DWASI_SDK_PREFIX=${{github.workspace}}/wasi-sdk -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/utils/TC-wasi-sdk.cmake
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config Release
