@@ -1,9 +1,10 @@
 #!/bin/bash
-if [[$1 --eq "evc"]]
+
+if [[ "$1" = "evc" ]]; then
     exec evc
-elif [[$1 --eq "dmi"]]
+elif [[ "$1" = "dmi" ]]; then
     exec dmi
 else
-    dmi&
+    dmi &
     exec evc
 fi

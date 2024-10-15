@@ -1,8 +1,0 @@
-[Unit] 
-Description=ETCS build script
-
-[Service] 
-Type=simple 
-ExecStart= /home/cesar/build_etcs.sh
-[Install] 
-WantedBy=default.target
