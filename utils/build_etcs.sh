@@ -33,7 +33,8 @@ build_win32() {
         cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libgcc_s_seh-1.dll) dist/win32/
         package win32
 }
-cd ~/ETCS
+ETCS_DIR="${ETCS_DIR:-$HOME/ETCS}"
+cd ETCS_DIR
 git fetch
 if [[ $(LANG="C" git status) != *"Your branch is up to date"* || "$1" == "f" ]]; then
         # Actualizar git
