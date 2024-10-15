@@ -132,10 +132,10 @@ jobs:
       - name: Package artifacts
         run: |
           cd build-wasm-srON-verboseON/
-          zip -r ../WASM.zip *
+          zip -r ../ETCS-wasm.zip *
           cd ..
           cd build-win64-srOFF/
-          zip -r ../Windows.zip *
+          zip -r ../ETCS-windows.zip *
           cd ..
       - name: Install FUSE
         run: sudo apt-get install -y fuse
