@@ -5,7 +5,7 @@ build_locales() {
 build() {
         mkdir -p build/$1
         cd build/$1
-        cmake ${@:2} -DETCS_VENDORED=ON -DCMAKE_BUILD_TYPE=Release -DDEBUG_VERBOSE=ON ../..
+        cmake ${@:2} -DCMAKE_BUILD_TYPE=Release -DDEBUG_VERBOSE=ON ../..
         make
         make install DESTDIR=../../dist/$1
         cd ../..
@@ -17,9 +17,9 @@ package() {
         cd ../..
 }
 build_linux_appimage() {
-        build linux -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_RPATH='$ORIGIN/../lib'
-        ../linuxdeploy-x86_64.AppImage --appdir=dist/linux --icon-file=utils/ETCS.png --desktop-file=utils/ETCS.desktop
-        ../appimagetool-x86_64.AppImage dist/linux /var/www/vtrains/ETCS/ETCS-x86_64.AppImage
+        build linux-appimage -DETCS_VENDORED=OFF -DETCS_PACK_VENDORED=ON -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_RPATH='$ORIGIN/../lib'
+        ../linuxdeploy-x86_64.AppImage --appdir=dist/linux-appimage --icon-file=utils/ETCS.png --desktop-file=utils/ETCS.desktop
+        ../appimagetool-x86_64.AppImage dist/linux-appimage /var/www/vtrains/ETCS/ETCS-x86_64.AppImage
 }
 build_android() {
         ./gradlew build
@@ -27,7 +27,7 @@ build_android() {
         mv app/build/outputs/apk/debug/app-debug.apk /var/www/vtrains/ETCS/ETCS_Android.apk
 }
 build_win32() {
-        build win32 -DCMAKE_TOOLCHAIN_FILE=utils/TC-mingw.cmake -DCMAKE_INSTALL_PREFIX=/
+        build win32 -DETCS_VENDORED=ON -DETCS_PACK_VENDORED=ON -DCMAKE_TOOLCHAIN_FILE=utils/TC-mingw.cmake -DCMAKE_INSTALL_PREFIX=/
         cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libwinpthread-1.dll) dist/win32/
         cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libstdc++-6.dll) dist/win32/
         cp -p $(x86_64-w64-mingw32-gcc -print-file-name=libgcc_s_seh-1.dll) dist/win32/
