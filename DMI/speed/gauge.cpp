@@ -323,33 +323,45 @@ void displayLines()
 #endif
     for(int i = 0; i<=maxSpeed; i+=step)
     {
-        float size;
+        float rminline;
         float an = speedToAngle(i);
 #if SIMRAIL
         int longinterval = maxSpeed == 400 ? 50 : (i > maxSpeed / 2 ? 40 : 20);
 #else
         int longinterval = maxSpeed == 400 ? 50 : (maxSpeed == 150 ? 25 : 20);
 #endif
-        size = i%longinterval!=0 ? -110 : -100;
+        rminline = i%longinterval!=0 ? -110 : -100;
         if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
             std::pair<float, float> wh = gaugeFont->calc_size(s);
-            float hx = wh.first/2 + 1;
-            float hy = wh.second/2 + 1;
-            float maxan = atanf(hy/hx);
-            float cuadran = abs(-an-PI/2);
-            float adjust = (abs(PI/2-cuadran) > maxan) ? hy/abs(cosf(cuadran)) : hx/sinf(cuadran);
-            float val = size + adjust + 5;
+            float hx = wh.first/2;
+#if SIMRAIL
+            float hy = wh.second/2;
+#else
+            float hy = 16/2;
+#endif
+            float textDiagAn = atanf(hy/hx);
+            float speedLineAn = abs(-an-PI/2);
+            // Depending on the speed line angle, the radius will cross the text rectangle
+            // from left to right, or from top to bottom.
+            // In either case, compute the half-length of the radius segment inside the rectangle
+            float hradiusIn = (abs(PI/2-speedLineAn) > textDiagAn) ? hy/abs(cosf(speedLineAn)) : hx/sinf(speedLineAn);
+#if SIMRAIL
+            float pad = 5;
+#else
+            float pad = 2;
+#endif
+            float rcenter = rminline + hradiusIn + pad;
             texture *t = new texture();
-            t->x = cx-val*cosf(an);
-            t->y = cy-val*sinf(an);
+            t->x = cx-rcenter*cosf(an);
+            t->y = cy-rcenter*sinf(an);
             t->width = wh.first;
             t->height = wh.second;
             t->tex = platform->make_text_image(s, *gaugeFont, White);
             csg.add(t);
         }
-        csg.drawRadius(cx, cy, size, -125, an);
+        csg.drawRadius(cx, cy, rminline, -125, an);
     }
 }
 Component releaseRegion(36,36, displayVrelease);
