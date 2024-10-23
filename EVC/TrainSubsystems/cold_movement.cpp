@@ -43,7 +43,7 @@ void initialize_cold_movement()
 }
 void save_cold_data(std::string field, json &value)
 {
-    auto contents = platform->read_file("cold_data.json");
+    auto contents = platform->read_file("cold_data.json", ETCS_STORAGE_FILE);
     json j;
     if (contents)
         j = json::parse(*contents);
@@ -52,7 +52,7 @@ void save_cold_data(std::string field, json &value)
 }
 json load_cold_data(std::string field)
 {
-    auto contents = platform->read_file("cold_data.json");
+    auto contents = platform->read_file("cold_data.json", ETCS_STORAGE_FILE);
     if (!contents)
         return json();
     json j = json::parse(*contents);

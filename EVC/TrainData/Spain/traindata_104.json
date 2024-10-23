@@ -5,8 +5,11 @@
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {
@@ -76,8 +79,11 @@
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {
@@ -147,8 +153,11 @@
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {

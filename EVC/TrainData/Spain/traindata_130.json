@@ -1,159 +1,17 @@
 {
-	"730 Simple" : {
-        "length": 189,
-        "speed": 250,
-        "cant_deficiency": 180,
-        "t_traction_cutoff": 0.3,
-        "airtight": 1,
-        "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
-        ],
-        "brakes": {
-            "emergency": {
-                "normal": {
-                    "curves": [
-                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
-                    ],
-                    "build_up_time": 5,
-                    "validity": "...."
-                }
-            },
-            "service": {
-                "normal": {
-                    "curves": [
-                        {"speed": 0, "value": 1.0},
-						{"speed": 13.8889, "value": 0.98},
-						{"speed": 27.7778, "value": 0.95},
-						{"speed": 41.6667, "value": 0.94},
-						{"speed": 55.5556, "value": 0.76}
-                    ],
-                    "build_up_time": 0.5,
-                    "validity": "1..."
-                },
-                "no_dynamic": {
-                    "curves": [
-                        {"speed": 0, "value": 0.98},
-						{"speed": 13.8889, "value": 0.96},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.92},
-						{"speed": 55.5556, "value": 0.74}
-                    ],
-                    "build_up_time": 5,
-                    "validity": "0..."
-                }
-            },
-            "normal_service": {
-                "passenger": {
-                    "0": {
-                        "curves": [
-                            {"speed": 0, "value": 0.4}
-                        ]
-                    },
-                    "0.5": {
-                        "curves": [
-                            {"speed": 0, "value": 0.6}
-                        ]
-                    },
-                    "0.7": {
-                        "curves": [
-                            {"speed": 0, "value": 0.7}
-                        ]
-                    }
-                },
-                "kn+": [
-                    {"speed": 0, "value": 1}
-                ],
-                "kn-": [
-                    {"speed": 0, "value": 1}
-                ]
-            }
-            
-        }
-    },
-    "730 Doble" : {
-        "length": 375,
-        "speed": 250,
-        "cant_deficiency": 180,
-        "t_traction_cutoff": 0.3,
-        "airtight": 1,
-        "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
-        ],
-        "brakes": {
-            "emergency": {
-                "normal": {
-                    "curves": [
-                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
-                    ],
-                    "build_up_time": 5,
-                    "validity": "...."
-                }
-            },
-            "service": {
-                "normal": {
-                    "curves": [
-                        {"speed": 0, "value": 1.0},
-						{"speed": 13.8889, "value": 0.98},
-						{"speed": 27.7778, "value": 0.95},
-						{"speed": 41.6667, "value": 0.94},
-						{"speed": 55.5556, "value": 0.76}
-                    ],
-                    "build_up_time": 0.5,
-                    "validity": "1..."
-                },
-                "no_dynamic": {
-                    "curves": [
-                        {"speed": 0, "value": 0.98},
-						{"speed": 13.8889, "value": 0.96},
-						{"speed": 27.7778, "value": 0.93},
-						{"speed": 41.6667, "value": 0.92},
-						{"speed": 55.5556, "value": 0.74}
-                    ],
-                    "build_up_time": 5,
-                    "validity": "0..."
-                }
-            },
-            "normal_service": {
-                "passenger": {
-                    "0": {
-                        "curves": [
-                            {"speed": 0, "value": 0.4}
-                        ]
-                    },
-                    "0.5": {
-                        "curves": [
-                            {"speed": 0, "value": 0.6}
-                        ]
-                    },
-                    "0.7": {
-                        "curves": [
-                            {"speed": 0, "value": 0.7}
-                        ]
-                    }
-                },
-                "kn+": [
-                    {"speed": 0, "value": 1}
-                ],
-                "kn-": [
-                    {"speed": 0, "value": 1}
-                ]
-            }
-            
-        }
-    },
     "130 Simple" : {
-        "length": 189,
+        "length": 185,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {
@@ -219,14 +77,95 @@
         }
     },
     "130 Doble" : {
-        "length": 375,
+        "length": 370,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 0},
-            {"name": "AC25kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
+        ],
+        "brakes": {
+            "emergency": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "...."
+                }
+            },
+            "service": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 1.0},
+						{"speed": 13.8889, "value": 0.98},
+						{"speed": 27.7778, "value": 0.95},
+						{"speed": 41.6667, "value": 0.94},
+						{"speed": 55.5556, "value": 0.76}
+                    ],
+                    "build_up_time": 0.5,
+                    "validity": "1..."
+                },
+                "no_dynamic": {
+                    "curves": [
+                        {"speed": 0, "value": 0.98},
+						{"speed": 13.8889, "value": 0.96},
+						{"speed": 27.7778, "value": 0.93},
+						{"speed": 41.6667, "value": 0.92},
+						{"speed": 55.5556, "value": 0.74}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "0..."
+                }
+            },
+            "normal_service": {
+                "passenger": {
+                    "0": {
+                        "curves": [
+                            {"speed": 0, "value": 0.4}
+                        ]
+                    },
+                    "0.5": {
+                        "curves": [
+                            {"speed": 0, "value": 0.6}
+                        ]
+                    },
+                    "0.7": {
+                        "curves": [
+                            {"speed": 0, "value": 0.7}
+                        ]
+                    }
+                },
+                "kn+": [
+                    {"speed": 0, "value": 1}
+                ],
+                "kn-": [
+                    {"speed": 0, "value": 1}
+                ]
+            }
+            
+        }
+    },
+    "130+730" : {
+        "length": 371,
+        "speed": 250,
+        "cant_deficiency": 180,
+        "t_traction_cutoff": 0.3,
+        "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "GA",
+        "traction_systems": [
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {

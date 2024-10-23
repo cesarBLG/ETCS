@@ -1,13 +1,20 @@
 {
 	"Simple" : {
         "length": 200,
-        "speed": 300,
+        "speed": 330,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0},
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "DC1.5kV", "nid_ctraction": 14},
+            {"name": "AC25kV", "nid_ctraction": 12},
+            {"name": "AC25kV", "nid_ctraction": 13},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18}
         ],
         "brakes": {
             "emergency": {
@@ -77,13 +84,18 @@
     },
     "Doble" : {
         "length": 400,
-        "speed": 300,
+        "speed": 330,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
         "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
         "traction_systems": [
-            {"name": "AC25kV", "nid_ctraction": 0},
-            {"name": "DC3kV", "nid_ctraction": 0}
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
+            {"name": "DC1.5kV", "nid_ctraction": 0},
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16}
         ],
         "brakes": {
             "emergency": {
