@@ -61,9 +61,11 @@ std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key, con
 	return it->second;
 }
 #ifdef __ANDROID__
-std::string get_files_dir(ConsolePlatform::FileType type)
+std::string android_external_storage_dir;
+std::string get_files_dir(FileType type)
 {
-	return SDL_AndroidGetExternalStoragePath();
+    if (android_external_storage_dir == "") android_external_storage_dir = std::string(SDL_AndroidGetExternalStoragePath())+"/";
+	return android_external_storage_dir;
 }
 #elif defined(__unix__)
 #include <string>
