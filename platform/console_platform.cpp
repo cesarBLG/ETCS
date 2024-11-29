@@ -27,6 +27,7 @@ std::string android_external_storage_dir;
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
     jboolean b;
+    android_external_storage_dir = std::string(env->GetStringUTFChars(stringObject, &b)) + "/";
 	std::vector<std::string> args;
 	platform = std::make_unique<ConsolePlatform>(args);
 	on_platform_ready();
@@ -49,7 +50,7 @@ int main(int argc, char *argv[])
 }
 #endif
 #ifdef __ANDROID__
-std::string get_files_dir(ConsolePlatform::FileType type)
+std::string get_files_dir(FileType type)
 {
 	return android_external_storage_dir;
 }
