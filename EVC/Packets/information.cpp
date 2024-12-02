@@ -404,13 +404,13 @@ void ma_shortening_information::handle()
     bool accept = true;
     if (MA.LoA_ma || MA.SvL_ma) {
         target svl(MA.LoA_ma ? MA.LoA_ma->first.max : MA.SvL_ma->max, MA.LoA_ma ? MA.LoA_ma->second : 0, MA.LoA_ma ? target_class::LoA : target_class::SvL);
-        svl.calculate_curves();
+        svl.calculate_curves(V_est, A_est, V_ura);
         if (svl.d_I < d_maxsafefront(svl.get_target_position()))
             accept = false;
     }
     if (MA.EoA_ma) {
         target eoa(MA.EoA_ma->est, 0, target_class::EoA);
-        eoa.calculate_curves();
+        eoa.calculate_curves(V_est, A_est, V_ura);
         if (eoa.d_I < d_estfront)
             accept = false;
     }

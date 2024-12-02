@@ -344,7 +344,7 @@ void update_supervision()
     std::shared_ptr<target> tEoA1, tSvL1;
     const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
     for (auto &it : supervised_targets) {
-        it->calculate_curves();
+        it->calculate_curves(V_est, A_est, V_ura);
         if (it->type == target_class::SvL)
             tSvL1 = it;
         if (it->type == target_class::EoA)
@@ -413,7 +413,7 @@ void update_supervision()
             if (indication_target->type == target_class::EoA || indication_target->type == target_class::SvL) {
                 D_target = std::max(std::min(EoA->est-d_estfront, SvL->max-d_maxsafefront(*SvL)), 0.0);
             } else {
-                indication_target->calculate_curves(V_target);
+                indication_target->calculate_curves(V_target, 0, f41(V_target));
                 D_target = std::max(indication_target->d_P-d_maxsafefront(indication_target->get_target_position()), 0.0);
             }
         }
@@ -449,7 +449,7 @@ void update_supervision()
                     }
                     if (already)
                         continue;
-                    t->calculate_curves(MRDT[i-1]->get_target_speed());
+                    t->calculate_curves(MRDT[i-1]->get_target_speed(), 0, f41(V_target));
                     if (t->d_I < MRDT[i-1]->d_P) {
                         mask = true;
                         MRDT.push_back(t);
@@ -545,7 +545,7 @@ void update_supervision()
         if (MRDT->type == target_class::EoA || MRDT->type == target_class::SvL) {
             D_target = std::max(std::min(EoA->est-d_estfront, SvL->max-d_maxsafefront(*SvL)), 0.0);
         } else {
-            MRDT->calculate_curves(V_target);
+            MRDT->calculate_curves(V_target, 0, f41(V_target));
             D_target = std::max(MRDT->d_P-d_maxsafefront(MRDT->get_target_position()), 0.0);
         }
         

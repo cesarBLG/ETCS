@@ -87,8 +87,8 @@ void update_track_conditions()
             std::vector<std::shared_ptr<target>> &l = c->targets;
             auto &SBId = *l[0];
             auto &SBIg = *l[1];
-            SBId.calculate_curves();
-            SBIg.calculate_curves();
+            SBId.calculate_curves(V_est, A_est, V_ura);
+            SBIg.calculate_curves(V_est, A_est, V_ura);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start);
             if (max<SBId.d_SBI1 || min > SBIg.d_SBI1) {

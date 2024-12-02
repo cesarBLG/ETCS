@@ -373,7 +373,7 @@ void SetParameters()
             double currd = 0;
             const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
             for (auto &t : supervised_targets) {
-                t->calculate_curves();
+                t->calculate_curves(V_est, 0, V_ura);
                 if (t->get_target_speed() > V_est)
                     continue;
                 double d = t->d_P - (t->is_EBD_based ? d_maxsafefront(t->get_target_position()) : d_estfront);
@@ -387,10 +387,10 @@ void SetParameters()
                 if (mrt->type == target_class::EoA || mrt->type == target_class::SvL) {
                     dt = std::max(std::min(EoA->est-d_estfront, SvL->max-d_maxsafefront(*SvL)), 0.0);
                 } else {
-                    mrt->calculate_curves(mrt->get_target_speed());
+                    mrt->calculate_curves(mrt->get_target_speed(), 0, f41(mrt->get_target_speed()));
                     dt = std::max(mrt->d_P-d_maxsafefront(mrt->get_target_position()), 0.0);
                 }
-                return std::to_string(V_perm)+";"+std::to_string(mrt->get_target_speed())+";"+std::to_string(dt);
+                return std::to_string(V_perm)+";"+std::to_string(mrt->get_target_speed())+";"+std::to_string(dt+odometer_value);
             } else {
                 return std::to_string(V_perm);
             }
