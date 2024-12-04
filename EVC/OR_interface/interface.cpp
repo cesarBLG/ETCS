@@ -16,6 +16,7 @@
 #include "../MA/movement_authority.h"
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
+#include "../TrainSubsystems/asc.h"
 #include "../TrainSubsystems/power.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../STM/stm.h"
@@ -366,36 +367,9 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("etcs::ato");
+    p = new ORserver::Parameter("etcs::asc");
     p->GetValue = []() {
-        if (mode == Mode::FS) {
-            std::shared_ptr<target> mrt;
-            double currd = 0;
-            const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
-            for (auto &t : supervised_targets) {
-                t->calculate_curves(V_est, 0, V_ura);
-                if (t->get_target_speed() > V_est)
-                    continue;
-                double d = t->d_P - (t->is_EBD_based ? d_maxsafefront(t->get_target_position()) : d_estfront);
-                if (!mrt || currd > d) {
-                    mrt = t;
-                    currd = d;
-                }
-            }
-            if (mrt) {
-                float dt;
-                if (mrt->type == target_class::EoA || mrt->type == target_class::SvL) {
-                    dt = std::max(std::min(EoA->est-d_estfront, SvL->max-d_maxsafefront(*SvL)), 0.0);
-                } else {
-                    mrt->calculate_curves(mrt->get_target_speed(), 0, f41(mrt->get_target_speed()));
-                    dt = std::max(mrt->d_P-d_maxsafefront(mrt->get_target_position()), 0.0);
-                }
-                return std::to_string(V_perm)+";"+std::to_string(mrt->get_target_speed())+";"+std::to_string(dt+odometer_value);
-            } else {
-                return std::to_string(V_perm);
-            }
-        }
-        return std::string();
+        return asc_status;
     };
     manager.AddParameter(p);
 }
