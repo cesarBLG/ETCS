@@ -32,6 +32,7 @@
 using std::string;
 extern double V_est;
 double V_set;
+int V_set_display = -1;
 extern int data_entry_type;
 extern int data_entry_type_tiu;
 extern bool bot_driver;
@@ -191,6 +192,14 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::lower_pantographs");
     p->GetValue = []() {
         return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::set_speed_display");
+    p->SetValue = [](string val) {
+        if (val == "1" || val == "true") V_set_display = 1;
+        else if (val != "") V_set_display = 0;
+        else V_set_display = -1;
     };
     manager.AddParameter(p);
 
@@ -434,6 +443,7 @@ void start_or_iface()
     register_parameter("etcs::data_entry_type");
     register_parameter("etcs::telegram");
     register_parameter("cruise_speed");
+    register_parameter("etcs::set_speed_display");
     register_parameter("etcs::dmi::feedback");
     register_parameter("master_key");
     register_parameter("controller::direction");

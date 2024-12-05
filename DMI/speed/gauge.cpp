@@ -166,7 +166,7 @@ void drawImperialIndicator()
 }
 void drawSetSpeed()
 {
-    if (Vset == 0) return;
+    if (Vset < 0) return;
     float an = speedToAngle(useImperialSystem ? Vset * KMH_TO_MPH : Vset);
 
     platform->set_color(White);
