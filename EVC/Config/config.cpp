@@ -29,6 +29,7 @@ extern bool message_when_driver_ack_level;
 extern bool message_when_driver_ack_mode;
 extern bool message_when_driver_ack_mode;
 extern bool entering_mode_message_is_time_dependent;
+extern bool asc_fitted;
 extern std::map<std::string, std::string> const_train_data;
 extern std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
 
@@ -136,6 +137,7 @@ void load_config(std::string serie)
 		automatic_eddy_inhibition = cfg.value("AutomaticEddyCurrentBrakeInhibition", false);
 		automatic_magnetic_inhibition = cfg.value("AutomaticMagneticShoeBrakeInhibition", false);
 		automatic_regenerative_inhibition = cfg.value("AutomaticRegenerativeBrakeInhibition", false);
+		asc_fitted = cfg.value("AutomaticSpeedControl", false);
 		L_antenna_front = cfg.value("AntennaOffset", 0.0);
 		L_locomotive = cfg.value("RearCabOffset", 0.0);
 	}

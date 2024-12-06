@@ -16,6 +16,7 @@
 #include "../MA/movement_authority.h"
 #include "../Position/linking.h"
 #include "../Packets/messages.h"
+#include "../TrainSubsystems/asc.h"
 #include "../TrainSubsystems/power.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../STM/stm.h"
@@ -31,6 +32,7 @@
 using std::string;
 extern double V_est;
 double V_set;
+int V_set_display = -1;
 extern int data_entry_type;
 extern int data_entry_type_tiu;
 extern bool bot_driver;
@@ -190,6 +192,14 @@ void SetParameters()
     p = new ORserver::Parameter("etcs::lower_pantographs");
     p->GetValue = []() {
         return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
+    };
+    manager.AddParameter(p);
+
+    p = new ORserver::Parameter("etcs::set_speed_display");
+    p->SetValue = [](string val) {
+        if (val == "1" || val == "true") V_set_display = 1;
+        else if (val != "") V_set_display = 0;
+        else V_set_display = -1;
     };
     manager.AddParameter(p);
 
@@ -366,36 +376,9 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("etcs::ato");
+    p = new ORserver::Parameter("etcs::asc");
     p->GetValue = []() {
-        if (mode == Mode::FS) {
-            std::shared_ptr<target> mrt;
-            double currd = 0;
-            const std::list<std::shared_ptr<target>> &supervised_targets = get_supervised_targets();
-            for (auto &t : supervised_targets) {
-                t->calculate_curves();
-                if (t->get_target_speed() > V_est)
-                    continue;
-                double d = t->d_P - (t->is_EBD_based ? d_maxsafefront(t->get_target_position()) : d_estfront);
-                if (!mrt || currd > d) {
-                    mrt = t;
-                    currd = d;
-                }
-            }
-            if (mrt) {
-                float dt;
-                if (mrt->type == target_class::EoA || mrt->type == target_class::SvL) {
-                    dt = std::max(std::min(EoA->est-d_estfront, SvL->max-d_maxsafefront(*SvL)), 0.0);
-                } else {
-                    mrt->calculate_curves(mrt->get_target_speed());
-                    dt = std::max(mrt->d_P-d_maxsafefront(mrt->get_target_position()), 0.0);
-                }
-                return std::to_string(V_perm)+";"+std::to_string(mrt->get_target_speed())+";"+std::to_string(dt);
-            } else {
-                return std::to_string(V_perm);
-            }
-        }
-        return std::string();
+        return asc_status;
     };
     manager.AddParameter(p);
 }
@@ -460,6 +443,7 @@ void start_or_iface()
     register_parameter("etcs::data_entry_type");
     register_parameter("etcs::telegram");
     register_parameter("cruise_speed");
+    register_parameter("etcs::set_speed_display");
     register_parameter("etcs::dmi::feedback");
     register_parameter("master_key");
     register_parameter("controller::direction");

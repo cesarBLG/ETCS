@@ -49,8 +49,8 @@ void update_lx()
                 if (MRDT && (*MRDT == *tEoA || *MRDT == *tSvL)) inform_lx = true;
                 if (it->stop)
                     continue;
-                tEoA->calculate_curves(it->V_LX);
-                tSvL->calculate_curves(it->V_LX);
+                tEoA->calculate_curves(it->V_LX, 0, f41(it->V_LX));
+                tSvL->calculate_curves(it->V_LX, 0, f41(it->V_LX));
                 bool c1 = tEoA->d_P <= d_estfront;
                 bool c2 = tSvL->d_P <= d_maxsafefront(tSvL->get_target_position());
                 if (c1 || c2) {
