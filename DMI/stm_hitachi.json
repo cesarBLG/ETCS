@@ -214,8 +214,16 @@
                 {
                     "id": 1,
                     "file": "LZB_Schnarre.wav"
+                },
+                {
+                    "id": 2,
+                    "file": "LZB_Conduccion_Automatica.wav"
+                },
+                {
+                    "id": 3,
+                    "file": "LZB_Freno_Emergencia.wav"
                 }
-            ]
+			]
         }
     ]
 }
