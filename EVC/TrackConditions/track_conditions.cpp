@@ -12,9 +12,8 @@
 #include "../TrainSubsystems/power.h"
 #include "../TrainSubsystems/train_interface.h"
 #include "../Supervision/conversion_model.h"
-std::list<std::shared_ptr<track_condition>> track_conditions;
+std::set<std::shared_ptr<track_condition>> track_conditions;
 std::set<distance> brake_change;
-//std::map<track_condition*, std::vector<std::shared_ptr<target>>> track_condition_targets; 
 void add_condition();
 void update_brake_contributions()
 {
@@ -60,9 +59,6 @@ void update_brake_contributions()
 }
 void update_track_conditions()
 {
-    neutral_section_info = {{},{}};
-    lower_pantograph_info = {{},{}};
-    air_tightness_info = {{},{}};
     for (auto it = track_conditions.begin(); it != track_conditions.end();) {
         track_condition *c = it->get();
         double end = c->get_end_distance_to_train();
@@ -110,13 +106,14 @@ void update_track_conditions()
             dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC.max-max < 0) {
-                track_condition_profile_external info = {{},{}};
+            if (pointC.max-max < 0 && pointE.min-min > -L_TRAIN) {
+                track_condition_profile_external ext;
                 if (pointD.max-max > -L_TRAIN)
-                    info.start = pointD.max-max;
-                if (pointE.min-min > -L_TRAIN)
-                    info.end = pointE.min-min;
-                if (!neutral_section_info.start && !neutral_section_info.end) neutral_section_info = info;
+                    ext.start = pointD.max-max;
+                ext.end = pointE.min-min;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
             c->announce_distance = pointC.max-max;
             if (min > c->end.min) {
@@ -135,13 +132,14 @@ void update_track_conditions()
             dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC.max-max < 0) {
-                track_condition_profile_external info = {{},{}};
+            if (pointC.max-max < 0 && pointE.min-min > -L_TRAIN) {
+                track_condition_profile_external ext;
                 if (pointD.max-max > -L_TRAIN)
-                    info.start = pointD.max-max;
-                if (pointE.min-min > -L_TRAIN)
-                    info.end = pointE.min-min;
-                if (!lower_pantograph_info.start && !lower_pantograph_info.end) lower_pantograph_info = info;
+                    ext.start = pointD.max-max;
+                ext.end = pointE.min-min;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
             c->announce_distance = pointC.max-max;
             if (min > c->end.min) {
@@ -165,13 +163,14 @@ void update_track_conditions()
             dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC.max-max < 0) {
-                track_condition_profile_external info = {{},{}};
+            if (pointC.max-max < 0 && pointE.min-min > -L_TRAIN) {
+                track_condition_profile_external ext;
                 if (pointD.max-max > 0)
-                    info.start = pointD.max-max;
-                if (pointE.min-min > -L_TRAIN)
-                    info.end = pointE.min-min;
-                if (!air_tightness_info.start && !air_tightness_info.end) air_tightness_info = info;
+                    ext.start = pointD.max-max;
+                ext.end = pointE.min-min;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
             c->announce_distance = pointC.max-max;
             if (min - L_TRAIN > c->end.min) {
@@ -187,7 +186,16 @@ void update_track_conditions()
         } else if (c->condition == TrackConditions::ChangeOfTractionSystem) {
             distance pointC = c->start - V_est * 20;
             dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointF = c->start;
+            if (pointC.max-max < 0 && pointF.min-min > 0) {
+                track_condition_profile_external ext;
+                if (pointF.min-min > 0)
+                    ext.start = pointF.max-max;
+                c->external = ext;
+            } else {
+                c->external = {};
+            }
             c->announce_distance = pointC.max-max;
             if (c->end_displayed) {
                 c->announce = false;
@@ -204,8 +212,13 @@ void update_track_conditions()
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointF = c->start;
-            if (min < pointF.min) {
-                
+            if (pointC.max-max < 0 && pointF.min-min > 0) {
+                track_condition_profile_external ext;
+                if (pointF.min-min > 0)
+                    ext.start = pointF.max-max;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
         } else if (c->condition == TrackConditions::RadioHole) {
             distance &pointD = c->start;
@@ -223,28 +236,14 @@ void update_track_conditions()
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointD = c->start;
             distance &pointE = c->end;
-            if (pointC.max-max < 0) {
-                track_condition_profile_external info = {{},{}};
-                if (pointD.max-max > -L_TRAIN)
-                    info.start = pointD.max-max;
-                if (pointE.min-min > -L_TRAIN)
-                    info.end = pointE.min-min;
-                track_condition_profile_external *info2 = nullptr;
-                switch (c->condition) {
-                    case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
-                        info2 = &eddy_eb_inhibition;
-                        break;
-                    case TrackConditions::SwitchOffEddyCurrentServiceBrake:
-                        info2 = &eddy_sb_inhibition;
-                        break;
-                    case TrackConditions::SwitchOffMagneticShoe:
-                        info2 = &magnetic_inhibition;
-                        break;
-                    case TrackConditions::SwitchOffRegenerativeBrake:
-                        info2 = &regenerative_inhibition;
-                        break;
-                }
-                if (info2 != nullptr && !info2->start && !info2->end) *info2 = info;
+            if (pointC.max-max < 0 && pointE.min-min > 0) {
+                track_condition_profile_external ext;
+                if (pointD.max-max > 0)
+                    ext.start = pointD.max-max;
+                ext.end = pointE.min-min;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
             c->announce_distance = pointC.max-max;
             if (min > c->end.min) {
@@ -256,6 +255,21 @@ void update_track_conditions()
             } else if (max > pointC.max) {
                 c->announce = true;
                 c->order = false;
+            }
+        } else if (c->condition == TrackConditions::StationPlatform) {
+            distance pointC = c->start - V_est * 20;
+            dist_base max = d_maxsafefront(c->start);
+            dist_base min = d_minsafefront(c->start) - L_TRAIN;
+            distance &pointD = c->start;
+            distance &pointE = c->end;
+            if (pointC.max-max < 0 && pointE.min-min > 0) {
+                track_condition_profile_external ext;
+                if (pointD.max-max > 0)
+                    ext.start = pointD.max-max;
+                ext.end = pointE.min-min;
+                c->external = ext;
+            } else {
+                c->external = {};
             }
         }
         ++it;
@@ -269,10 +283,12 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
         else
             ++it;
     }
-    track_condition *tc = new track_condition();
+    track_condition_traction_change *tc = new track_condition_traction_change();
     tc->start = ref + cond.D_TRACTION.get_value(cond.Q_SCALE);
     tc->condition = TrackConditions::ChangeOfTractionSystem;
     tc->profile = false;
+    tc->m_voltage = cond.M_VOLTAGE;
+    tc->nid_ctraction = cond.NID_CTRACTION;
     TractionSystem_DMI traction;
     switch (cond.M_VOLTAGE.rawdata) {
         case M_VOLTAGE_t::NonFitted: traction = TractionSystem_DMI::NonFitted; break;
@@ -286,7 +302,7 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
     tc->announcement_symbol = 25 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
     tc->active_symbol = 23 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
     tc->end_active_symbol = tc->active_symbol;
-    track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+    track_conditions.insert(std::shared_ptr<track_condition_traction_change>(tc));
 }
 void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance ref)
 {
@@ -313,7 +329,7 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
         tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
         tc->profile = true;
         tc->condition = TrackConditions::BigMetalMasses;
-        track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+        track_conditions.insert(std::shared_ptr<track_condition>(tc));
     }
 }
 void load_track_condition_various(TrackCondition cond, distance ref, bool special)
@@ -462,7 +478,7 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
         if (exists)
             delete tc;
         else
-            track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+            track_conditions.insert(std::shared_ptr<track_condition>(tc));
         
     }
     update_brake_contributions();
@@ -509,6 +525,6 @@ void load_track_condition_platforms(TrackConditionStationPlatforms cond, distanc
         tc->right_side = it->Q_PLATFORM != Q_PLATFORM_t::LeftSide;
         tc->left_side = it->Q_PLATFORM != Q_PLATFORM_t::RightSide;
         tc->condition = TrackConditions::StationPlatform;
-        track_conditions.push_back(std::shared_ptr<track_condition>(tc));
+        track_conditions.insert(std::shared_ptr<track_condition>(tc));
     }
 }

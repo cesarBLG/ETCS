@@ -183,15 +183,9 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
-    p = new ORserver::Parameter("etcs::neutral_section");
+    p = new ORserver::Parameter("etcs::obu_tr");
     p->GetValue = []() {
-        return (neutral_section_info.start ? std::to_string(*neutral_section_info.start) : "")+";"+(neutral_section_info.end ? std::to_string(*neutral_section_info.end) : "");
-    };
-    manager.AddParameter(p);
-
-    p = new ORserver::Parameter("etcs::lower_pantographs");
-    p->GetValue = []() {
-        return (lower_pantograph_info.start ? std::to_string(*lower_pantograph_info.start) : "")+";"+(lower_pantograph_info.end ? std::to_string(*lower_pantograph_info.end) : "");
+        return obu_tr_status;
     };
     manager.AddParameter(p);
 

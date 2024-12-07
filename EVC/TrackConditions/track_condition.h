@@ -86,6 +86,11 @@ struct PlanningTrackCondition
         TractionSystem = tractionSystem;
     }
 };
+struct track_condition_profile_external
+{
+    optional<double> start;
+    optional<double> end;
+};
 struct track_condition
 {
     TrackConditions condition;
@@ -104,12 +109,14 @@ struct track_condition
     bool end_displayed;
     int64_t end_time;
     std::vector<std::shared_ptr<target>> targets;
+    optional<track_condition_profile_external> external;
     track_condition() : start_symbol(TrackConditionType_DMI::None, false), end_symbol(TrackConditionType_DMI::None, false)
     {
         active_symbol = announcement_symbol = end_active_symbol = -1;
         announce = order = display_end = end_displayed = false;
         announce_distance = std::numeric_limits<double>::max();
     }
+    virtual ~track_condition() = default;
     virtual double get_distance_to_train()
     {
         if (condition == TrackConditions::BigMetalMasses)
@@ -140,7 +147,16 @@ struct track_condition_platforms : track_condition
     bool left_side;
     bool right_side;
 };
-extern std::list<std::shared_ptr<track_condition>> track_conditions;
+struct track_condition_traction_change : track_condition
+{
+    int m_voltage;
+    int nid_ctraction;
+};
+struct track_condition_current_consumption : track_condition
+{
+    double max_current;
+};
+extern std::set<std::shared_ptr<track_condition>> track_conditions;
 extern optional<distance> restore_initial_states_various;
 void update_track_conditions();
 void update_brake_contributions();
