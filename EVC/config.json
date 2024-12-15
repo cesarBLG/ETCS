@@ -632,6 +632,30 @@
          }
       ]
     },
+    "16212":{
+       "TrainData":"TrainData/Spain/traindata_16212.json",
+       "SpeedDial":400,
+       "STMLayout":"stm_stadler.json",
+       "AutomaticSpeedControl":true,
+       "ConstTrainDataValues":[
+         {
+            "Field":"TrainCategory",
+            "Value":"PASS 3"
+         },
+         {
+             "Field":"AxleLoadCategory",
+             "Value":"C2"
+         },
+         {
+             "Field":"LoadingGauge",
+             "Value":"G1"
+         },
+         {
+             "Field":"Airtight",
+             "Value":"Yes"
+         }
+      ]
+    },
     "120":{
        "TrainData":"TrainData/Spain/traindata_120.json",
        "SpeedDial":400,
