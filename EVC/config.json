@@ -285,7 +285,7 @@
     "465caf":{
        "TrainData":"TrainData/Spain/traindata_CiviaC.json",
        "SpeedDial":150,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_alstom.json",
        "SoftKeys":true,
        "DisplayTimeToPermitted":true,
        "ConstTrainDataValues":[
