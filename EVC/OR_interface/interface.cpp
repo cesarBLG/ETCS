@@ -31,8 +31,8 @@
 
 using std::string;
 extern double V_est;
-double V_set;
-int V_set_display = -1;
+extern double V_set;
+extern int V_set_display;
 extern int data_entry_type;
 extern int data_entry_type_tiu;
 extern bool bot_driver;

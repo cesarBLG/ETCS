@@ -101,7 +101,7 @@ void update_track_conditions()
                 }
             }
         } else if (c->condition == TrackConditions::PowerLessSectionSwitchMainPowerSwitch) {
-            distance pointC = c->start - V_est * 10;
+            distance pointC = c->start - std::max(V_est * T_open_mps, D_open_mps);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
@@ -127,7 +127,7 @@ void update_track_conditions()
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::PowerLessSectionLowerPantograph) {
-            distance pointC = c->start - V_est * 20;
+            distance pointC = c->start - std::max(V_est * T_lower_pantograph, D_lower_pantograph);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start);
             distance &pointD = c->start;
@@ -184,7 +184,7 @@ void update_track_conditions()
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::ChangeOfTractionSystem) {
-            distance pointC = c->start - V_est * 20;
+            distance pointC = c->start - std::max(V_est * T_traction_system_change, D_traction_system_change);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointF = c->start;
@@ -208,7 +208,7 @@ void update_track_conditions()
                 c->order = true;
             }
         } else if (c->condition == TrackConditions::ChangeOfAllowedCurrentConsumption) {
-            distance pointC = c->start - V_est * 20;
+            distance pointC = c->start - std::max(V_est * T_current_consumption_change, D_current_consumption_change);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointF = c->start;
@@ -231,7 +231,7 @@ void update_track_conditions()
             c->condition == TrackConditions::SwitchOffEddyCurrentServiceBrake ||
             c->condition == TrackConditions::SwitchOffMagneticShoe ||
             c->condition == TrackConditions::SwitchOffRegenerativeBrake) {
-            distance pointC = c->start - V_est * 20;
+            distance pointC = c->start - std::max(V_est * T_brake_inhibit, D_brake_inhibit);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointD = c->start;
@@ -257,7 +257,7 @@ void update_track_conditions()
                 c->order = false;
             }
         } else if (c->condition == TrackConditions::StationPlatform) {
-            distance pointC = c->start - V_est * 20;
+            distance pointC = c->start - std::max(V_est * T_station_platform, D_station_platform);
             dist_base max = d_maxsafefront(c->start);
             dist_base min = d_minsafefront(c->start) - L_TRAIN;
             distance &pointD = c->start;

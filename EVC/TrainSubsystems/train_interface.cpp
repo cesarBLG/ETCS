@@ -20,8 +20,12 @@ bool isolated;
 bool failed;
 bool SB_command;
 bool EB_command;
+int V_set_display = -1;
+double V_set;
 double brake_pressure;
 int reverser_direction;
+extern int data_entry_type;
+extern int data_entry_type_tiu;
 bool traction_cutoff_active;
 bool ep_brake_available=true;
 bool eddy_brake_available=true;
@@ -153,4 +157,57 @@ void update_train_interface()
     obu_json["OBU_TR_ServiceBrake"] = SB_command;
 
     obu_tr_status = obu_json.dump();
+}
+void handle_tr_inputs(json &j)
+{
+    if (j.contains("TR_OBU_TrainSleep") && j.contains("TR_OBU_TrainSleep_Not"))
+        sl_signal = j["TR_OBU_Train_Sleep"] && !j["TR_OBU_TrainSleep_Not"];
+    if (j.contains("TR_OBU_PassiveShunting"))
+        ps_signal = j["TR_OBU_PassiveShunting"];
+    if (j.contains("TR_OBU_NLEnabled"))
+        nl_signal = j["TR_OBU_NLEnabled"];
+    if (j.contains("TR_OBU_CabStatusA"))
+        cab_active[0] = j["TR_OBU_CabStatusA"];
+    if (j.contains("TR_OBU_CabStatusB"))
+        cab_active[1] = j["TR_OBU_CabStatusB"];
+    if (j.contains("TR_OBU_TypeTrainData_S1") && j.contains("TR_OBU_TypeTrainData_S2")) {
+        data_entry_type_tiu = j["TR_OBU_TypeTrainData_S1"].get<bool>()*2 + j["TR_OBU_TypeTrainData_S2"].get<bool>() - 1;
+        if (data_entry_type_tiu >= 0) {
+            if (platform->read_file(traindata_file))
+                data_entry_type = data_entry_type_tiu;
+            else
+                data_entry_type = 0;
+        }
+    }
+    //if (j.contains("TR_OBU_TractionStatus"))
+    //if (j.contains("TR_OBU_AirTightFitted"))
+    if (j.contains("TR_OBU_SetSpeedDisplay"))
+        V_set_display = j["TR_OBU_SetSpeedDisplay"];
+    if (j.contains("TR_OBU_BrakePressure"))
+        brake_pressure = j["TR_OBU_BrakePressure"];
+    if (j.contains("TR_OBU_Brake_Status")) {
+        json &stat = j["TR_OBU_Brake_Status"];
+        if (stat.contains("EP_S") && stat.contains("EP_S_NOT"))
+            ep_brake_available = stat["EP_S"] && !stat["EP_S_NOT"];
+        if (stat.contains("EC_S") && stat.contains("EC_S_NOT"))
+            eddy_brake_available = stat["EC_S"] && !stat["EC_S_NOT"];
+        if (stat.contains("RB_S") && stat.contains("RB_S_NOT"))
+            regenerative_brake_available = stat["RB_S"] && !stat["RB_S_NOT"];
+        if (stat.contains("MG_S") && stat.contains("MG_S_NOT"))
+            magnetic_brake_available = stat["MG_S"] && !stat["MG_S_NOT"];
+    }
+    if (j.contains("TR_OBU_NTCIsolated")) {
+        for (auto &ntc : j["TR_OBU_NTCIsolated"]) {
+            int id = ntc["NID_NTC"];
+            bool isolated = ntc["T_IS"];
+            if (installed_stms.count(id))
+                installed_stms[id]->isolated = isolated;
+        }
+    }
+    if (j.contains("TR_OBU_SetSpeedValue"))
+        V_set = j["TR_OBU_SetSpeedValue"];
+}
+void handle_tr_train_data(json &data)
+{
+
 }
