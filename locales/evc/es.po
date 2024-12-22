@@ -81,8 +81,8 @@ msgstr "Porcentaje freno [%]"
 
 #: DMI/windows.cpp:288
 msgid "Maximum speed (km/h)"
-msgstr "Velocidad máxima del tren\n"
-"[km/h]"
+msgstr "Velocidad máxima del \n"
+"tren [km/h]"
 
 #: DMI/windows.cpp:289
 msgid "Airtight"
@@ -118,8 +118,8 @@ msgstr "Datos de Tren"
 
 #: DMI/windows.cpp:189 DMI/windows.cpp:904 DMI/windows.cpp:1140
 msgid "Max speed (km/h)"
-msgstr "Velocidad máxima del tren\n"
-"[km/h]"
+msgstr "Velocidad máxima del\n"
+"tren [km/h]"
 
 #: DMI/windows.cpp:188 DMI/windows.cpp:905 DMI/windows.cpp:1136
 msgid "Brake percentage"
