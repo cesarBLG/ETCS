@@ -523,7 +523,7 @@
        "TrainData":"TrainData/Spain/traindata_104.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -547,7 +547,7 @@
        "TrainData":"TrainData/Spain/traindata_105.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -671,7 +671,7 @@
        "TrainData":"TrainData/Spain/traindata_120.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -695,7 +695,7 @@
        "TrainData":"TrainData/Spain/traindata_121.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -768,7 +768,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1065,7 +1065,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":500,
        "InstalledSTM":[
           19
        ],
@@ -1107,7 +1107,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":500,
        "UnsupportedLevels":[
           2
        ],
@@ -1137,7 +1137,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
           {
              "Field":"AxleLoadCategory",
@@ -1164,7 +1164,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
           {
              "Field":"AxleLoadCategory",
@@ -1205,7 +1205,7 @@
     "006":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":125,
+       "OpenMainPowerSwitchDistance":500,
        "SoftKeys":true,
        "CustomTrainDataInputs":[
           {
