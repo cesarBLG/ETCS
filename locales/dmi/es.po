@@ -74,7 +74,7 @@ msgstr "Non-Leading"
 #: window/menu_main.cpp:47
 msgid "Maintain shunting"
 msgstr "Mantener\n"
-"maniobra"
+"Maniobra"
 
 #: window/menu_main.cpp:48
 msgid "Radio data"
