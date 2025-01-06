@@ -1064,7 +1064,6 @@
     "252stmasfa":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
-       "AutomaticCloseMainPowerSwitch":true,
        "DisplayTimeToPermitted":false,
        "OpenMainPowerSwitchDistance":500,
        "InstalledSTM":[
@@ -1107,7 +1106,6 @@
     "252":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
-       "AutomaticCloseMainPowerSwitch":true,
        "DisplayTimeToPermitted":true,
        "OpenMainPowerSwitchDistance":500,
        "UnsupportedLevels":[
@@ -1138,7 +1136,6 @@
     "252francia":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
-       "AutomaticCloseMainPowerSwitch":true,
        "DisplayTimeToPermitted":true,
        "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
@@ -1166,7 +1163,6 @@
     "252lzb":{
        "SpeedDial":250,
        "STMLayout":"stm_siemens.json",
-       "AutomaticCloseMainPowerSwitch":true,
        "DisplayTimeToPermitted":true,
        "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
@@ -1209,7 +1205,6 @@
     "6":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "AutomaticCloseMainPowerSwitch":true,
        "OpenMainPowerSwitchDistance":500,
        "SoftKeys":true,
        "CustomTrainDataInputs":[
