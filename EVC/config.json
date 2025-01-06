@@ -1206,7 +1206,7 @@
           }
        ]
     },
-    "006":{
+    "6":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
        "AutomaticCloseMainPowerSwitch":true,
