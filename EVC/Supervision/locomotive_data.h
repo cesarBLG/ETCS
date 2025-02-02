@@ -9,3 +9,4 @@
 #pragma once
 extern double L_antenna_front;
 extern double L_locomotive;
+extern int nid_engine;

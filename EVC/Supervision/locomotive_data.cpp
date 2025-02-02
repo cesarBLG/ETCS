@@ -9,3 +9,4 @@
 #include "locomotive_data.h"
 double L_antenna_front=0;
 double L_locomotive=0;
+int nid_engine=0;
