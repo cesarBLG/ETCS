@@ -27,24 +27,26 @@
 #endif
 
 void ConsoleFdPoller::poll(int timeout) {
-	auto tmp = std::move(fds);
-	fds.clear();
-	tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](const auto &entry) { return !entry.second.is_pending(); }), tmp.end());
+	fds.erase(std::remove_if(fds.begin(), fds.end(), [](const auto &entry) { return !entry.second.is_pending(); }), fds.end());
 
 	std::vector<pollfd> pfd;
-	pfd.reserve(tmp.size());
-	for (const auto &entry : tmp)
+	pfd.reserve(fds.size());
+	for (const auto &entry : fds)
 		pfd.push_back({ (socket_type)entry.first.first, entry.first.second, 0 });
 
-	::sys_poll(pfd.data(), pfd.size(), timeout);
+	int numfd = ::sys_poll(pfd.data(), pfd.size(), timeout);
 
-	for (int i = 0; i < pfd.size(); i++) {
-		if (pfd[i].revents & POLLNVAL)
-			platform->debug_print("POLLNVAL!");
-		else if ((pfd[i].events & pfd[i].revents) != 0 || (pfd[i].revents & (POLLERR | POLLHUP)) != 0)
-			tmp[i].second.fulfill(pfd[i].revents, false);
-		else
-			fds.push_back(std::move(tmp[i]));
+	if (numfd != 0) {
+		auto tmp = std::move(fds);
+		fds.clear();
+		for (int i = 0; i < pfd.size(); i++) {
+			if (pfd[i].revents & POLLNVAL)
+				platform->debug_print("POLLNVAL!");
+			else if ((pfd[i].events & pfd[i].revents) != 0 || (pfd[i].revents & (POLLERR | POLLHUP)) != 0)
+				tmp[i].second.fulfill(pfd[i].revents, false);
+			else
+				fds.push_back(std::move(tmp[i]));
+		}
 	}
 }
 
