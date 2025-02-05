@@ -134,6 +134,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":3,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
@@ -159,6 +160,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":3,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
@@ -183,6 +185,7 @@
        "TrainData":"TrainData/Italy/traindata_agv.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchTime":11,
        "DisplayTimeToPermitted":true,
        "ConstTrainDataValues":[
          {
@@ -207,6 +210,7 @@
        "TrainData":"TrainData/Italy/traindata_agvi.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchTime":11,
        "DisplayTimeToPermitted":true,
        "ConstTrainDataValues":[
          {
@@ -231,6 +235,7 @@
        "TrainData":"TrainData/Italy/traindata_etr1000.json",
        "SpeedDial": 400,
        "STMLayout": "stm_hitachi.json",
+       "OpenMainPowerSwitchTime":11,
        "CustomTrainDataInputs":[
         {
            "Field":"TrainCategory",
@@ -285,7 +290,7 @@
     "465caf":{
        "TrainData":"TrainData/Spain/traindata_CiviaC.json",
        "SpeedDial":150,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_alstom.json",
        "SoftKeys":true,
        "DisplayTimeToPermitted":true,
        "ConstTrainDataValues":[
@@ -518,6 +523,7 @@
        "TrainData":"TrainData/Spain/traindata_104.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -541,6 +547,7 @@
        "TrainData":"TrainData/Spain/traindata_105.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -565,6 +572,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":15,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -589,6 +597,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":15,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -613,6 +622,32 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":15,
+       "ConstTrainDataValues":[
+         {
+            "Field":"TrainCategory",
+            "Value":"PASS 3"
+         },
+         {
+             "Field":"AxleLoadCategory",
+             "Value":"C2"
+         },
+         {
+             "Field":"LoadingGauge",
+             "Value":"G1"
+         },
+         {
+             "Field":"Airtight",
+             "Value":"Yes"
+         }
+      ]
+    },
+    "16212":{
+       "TrainData":"TrainData/Spain/traindata_16212.json",
+       "SpeedDial":400,
+       "STMLayout":"stm_stadler.json",
+       "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":15,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -636,6 +671,7 @@
        "TrainData":"TrainData/Spain/traindata_120.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -659,6 +695,7 @@
        "TrainData":"TrainData/Spain/traindata_121.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -731,6 +768,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
+       "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -755,6 +793,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
@@ -793,6 +832,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
@@ -831,6 +871,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
@@ -869,6 +910,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
@@ -907,6 +949,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
@@ -945,6 +988,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
@@ -983,6 +1027,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":11,
        "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
@@ -1019,7 +1064,8 @@
     "252stmasfa":{
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
-       "DisplayTimeToPermitted":true,
+       "DisplayTimeToPermitted":false,
+       "OpenMainPowerSwitchDistance":500,
        "InstalledSTM":[
           19
        ],
@@ -1061,6 +1107,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchDistance":500,
        "UnsupportedLevels":[
           2
        ],
@@ -1090,6 +1137,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
           {
              "Field":"AxleLoadCategory",
@@ -1116,6 +1164,7 @@
        "SpeedDial":250,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchDistance":500,
        "CustomTrainDataInputs":[
           {
              "Field":"AxleLoadCategory",
@@ -1141,7 +1190,6 @@
     "336":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "DisplayTimeToPermitted":true,
        "CustomTrainDataInputs":[
           {
              "Field":"AxleLoadCategory",
@@ -1154,10 +1202,10 @@
           }
        ]
     },
-    "256":{
+    "6":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchDistance":500,
        "SoftKeys":true,
        "CustomTrainDataInputs":[
           {
@@ -1176,6 +1224,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":15,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
@@ -1202,6 +1251,7 @@
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":15,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
@@ -1226,6 +1276,7 @@
        "TrainData":"TrainData/Spain/traindata_1127.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "OpenMainPowerSwitchTime":15,
        "SoftKeys":true,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
@@ -1252,6 +1303,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
+       "OpenMainPowerSwitchTime":15,
        "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
@@ -1278,6 +1330,7 @@
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
        "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":15,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1302,6 +1355,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":15,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1327,6 +1381,7 @@
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
        "AutomaticSpeedControl":true,
+       "OpenMainPowerSwitchTime":3,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1350,6 +1405,7 @@
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
        "STMLayout":"stm_alstom.json",
+       "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1373,6 +1429,7 @@
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
        "STMLayout":"stm_alstom.json",
+       "OpenMainPowerSwitchTime":10,
        "UnsupportedLevels":[
           2
        ],
@@ -1399,6 +1456,7 @@
        "TrainData": "TrainData/France/traindata_tgv.json",
        "SpeedDial": 400,
        "STMLayout": "stm_alstom.json",
+       "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1421,6 +1479,7 @@
     "109":{
        "TrainData":"TrainData/Spain/traindata_109.json",
        "SpeedDial":400,
+       "OpenMainPowerSwitchTime":10,
        "STMLayout":"stm_hitachi.json",
        "CustomTrainDataInputs":[
         {
@@ -1478,6 +1537,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_alstom.json",
        "DisplayTimeToPermitted":true,
+       "OpenMainPowerSwitchTime":10,
        "SoftKeys":true,
        "ConstTrainDataValues":[
          {

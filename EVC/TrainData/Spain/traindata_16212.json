@@ -1,0 +1,73 @@
+{
+	"162.12" : {
+        "length": 70,
+        "speed": 200,
+        "cant_deficiency": 150,
+        "t_traction_cutoff": 0.3,
+        "airtight": 1,
+        "axle_load_category": "C2",
+        "loading_gauge": "G1",
+        "traction_systems": [
+            {"name": "DC3kV", "nid_ctraction": 15},
+            {"name": "DC3kV", "nid_ctraction": 16},
+            {"name": "AC25kV", "nid_ctraction": 12},
+            {"name": "AC25kV", "nid_ctraction": 13},
+            {"name": "AC25kV", "nid_ctraction": 17},
+            {"name": "AC25kV", "nid_ctraction": 18},
+            {"name": "DIESEL"}
+        ],
+        "brakes": {
+            "emergency": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "...."
+                }
+            },
+            "service": {
+                "normal": {
+                    "curves": [
+                        {"speed": 0, "value": 0.8}
+                    ],
+                    "build_up_time": 0.5,
+                    "validity": "1..."
+                },
+                "no_dynamic": {
+                    "curves": [
+                        {"speed": 0, "value": 0.7}
+                    ],
+                    "build_up_time": 5,
+                    "validity": "0..."
+                }
+            },
+            "normal_service": {
+                "passenger": {
+                    "0": {
+                        "curves": [
+                            {"speed": 0, "value": 0.4}
+                        ]
+                    },
+                    "0.5": {
+                        "curves": [
+                            {"speed": 0, "value": 0.6}
+                        ]
+                    },
+                    "0.7": {
+                        "curves": [
+                            {"speed": 0, "value": 0.7}
+                        ]
+                    }
+                },
+                "kn+": [
+                    {"speed": 0, "value": 1}
+                ],
+                "kn-": [
+                    {"speed": 0, "value": 1}
+                ]
+            }
+            
+        }
+    }
+}
