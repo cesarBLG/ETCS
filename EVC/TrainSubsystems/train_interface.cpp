@@ -56,77 +56,75 @@ void update_train_interface()
     json traction_change_condition;
     json allowed_current_consumption_condition;
     for (auto &tc : track_conditions) {
-        if (tc->external && external_conditions.find(tc) == external_conditions.end()) {
-            if (tc->condition == TrackConditions::StationPlatform) {
-                auto *platform = (track_condition_platforms*)tc.get();
-                json cond;
-                if (tc->external->start)
-                    cond["StartDistanceToTrainM"] = *(tc->external->start);
-                if (tc->external->end)
-                    cond["EndDistanceToTrainM"] = *(tc->external->end);
-                cond["LeftSide"] = platform->left_side;
-                cond["RightSide"] = platform->right_side;
-                cond["HeightM"] = platform->platform_height;
-                platform_conditions.push_back(cond);
-            } else if (tc->condition == TrackConditions::ChangeOfTractionSystem) {
-                auto *traction = (track_condition_traction_change*)tc.get();
-                if (tc->external->start)
-                    traction_change_condition["DistanceToTrainM"] = *(tc->external->start);
-                traction_change_condition["M_VOLTAGE"] = traction->m_voltage;
-                traction_change_condition["NID_CTRACTION"] = traction->nid_ctraction;
-            } else if (tc->condition == TrackConditions::ChangeOfAllowedCurrentConsumption) {
-                auto *current = (track_condition_current_consumption*)tc.get();
-                if (tc->external->start)
-                    allowed_current_consumption_condition["DistanceToTrainM"] = *(tc->external->start);
-                allowed_current_consumption_condition["MaxCurrentA"] = current->max_current;
-            } else {
-                for (int i=0; i<256; i++) {
-                    if (used_external_condition_ids.find(i) == used_external_condition_ids.end()) {
-                        used_external_condition_ids.insert(i);
-                        external_conditions[tc] = i;
-                        break;
-                    }
+        if (tc->condition == TrackConditions::StationPlatform) {
+            auto *platform = (track_condition_platforms*)tc.get();
+            json cond;
+            if (tc->external && tc->external->start)
+                cond["StartDistanceToTrainM"] = *(tc->external->start);
+            if (tc->external && tc->external->end)
+                cond["EndDistanceToTrainM"] = *(tc->external->end);
+            cond["LeftSide"] = platform->left_side;
+            cond["RightSide"] = platform->right_side;
+            cond["HeightM"] = platform->platform_height;
+            platform_conditions.push_back(cond);
+        } else if (tc->condition == TrackConditions::ChangeOfTractionSystem) {
+            auto *traction = (track_condition_traction_change*)tc.get();
+            if (tc->external && tc->external->start)
+                traction_change_condition["DistanceToTrainM"] = *(tc->external->start);
+            traction_change_condition["M_VOLTAGE"] = traction->m_voltage;
+            traction_change_condition["NID_CTRACTION"] = traction->nid_ctraction;
+        } else if (tc->condition == TrackConditions::ChangeOfAllowedCurrentConsumption) {
+            auto *current = (track_condition_current_consumption*)tc.get();
+            if (tc->external && tc->external->start)
+                allowed_current_consumption_condition["DistanceToTrainM"] = *(tc->external->start);
+            allowed_current_consumption_condition["MaxCurrentA"] = current->max_current;
+        } else if (external_conditions.find(tc) == external_conditions.end()) {
+            for (int i=0; i<256; i++) {
+                if (used_external_condition_ids.find(i) == used_external_condition_ids.end()) {
+                    used_external_condition_ids.insert(i);
+                    external_conditions[tc] = i;
+                    break;
                 }
             }
         }
     }
     json profile_conditions;
     for (auto &kvp : external_conditions) {
+        json cond;
+        cond["Id"] = kvp.second;
+        int type = 0;
+        switch (kvp.first->condition)
+        {
+            case TrackConditions::SwitchOffRegenerativeBrake:
+                type = 0;
+                break;
+            case TrackConditions::SwitchOffMagneticShoe:
+                type = 1;
+                break;
+            case TrackConditions::SwitchOffEddyCurrentServiceBrake:
+                type = 2;
+                break;
+            case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
+                type = 3;
+                break;
+            case TrackConditions::AirTightness:
+                type = 4;
+                break;
+            case TrackConditions::PowerLessSectionLowerPantograph:
+                type = 5;
+                break;
+            case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
+                type = 6;
+                break;
+        }
+        cond["Type"] = type;
         if (kvp.first->external) {
-            json cond;
-            cond["Id"] = kvp.second;
-            int type = 0;
-            switch (kvp.first->condition)
-            {
-                case TrackConditions::SwitchOffRegenerativeBrake:
-                    type = 0;
-                    break;
-                case TrackConditions::SwitchOffMagneticShoe:
-                    type = 1;
-                    break;
-                case TrackConditions::SwitchOffEddyCurrentServiceBrake:
-                    type = 2;
-                    break;
-                case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
-                    type = 3;
-                    break;
-                case TrackConditions::AirTightness:
-                    type = 4;
-                    break;
-                case TrackConditions::PowerLessSectionLowerPantograph:
-                    type = 5;
-                    break;
-                case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
-                    type = 6;
-                    break;
-            }
-            cond["Type"] = type;
             if (kvp.first->external->start)
                 cond["StartDistanceToTrainM"] = *(kvp.first->external->start);
             if (kvp.first->external->end)
                 cond["EndDistanceToTrainM"] = *(kvp.first->external->end);
-            profile_conditions.push_back(cond);
         }
+        profile_conditions.push_back(cond);
     }
     if (!traction_change_condition.empty())
         obu_json["TractionSystemChange"] = traction_change_condition;
