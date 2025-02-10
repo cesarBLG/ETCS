@@ -92,41 +92,41 @@ void update_train_interface()
     }
     json profile_conditions;
     for (auto &kvp : external_conditions) {
+        json cond;
+        cond["Id"] = kvp.second;
+        int type = 0;
+        switch (kvp.first->condition)
+        {
+            case TrackConditions::SwitchOffRegenerativeBrake:
+                type = 0;
+                break;
+            case TrackConditions::SwitchOffMagneticShoe:
+                type = 1;
+                break;
+            case TrackConditions::SwitchOffEddyCurrentServiceBrake:
+                type = 2;
+                break;
+            case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
+                type = 3;
+                break;
+            case TrackConditions::AirTightness:
+                type = 4;
+                break;
+            case TrackConditions::PowerLessSectionLowerPantograph:
+                type = 5;
+                break;
+            case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
+                type = 6;
+                break;
+        }
+        cond["Type"] = type;
         if (kvp.first->external) {
-            json cond;
-            cond["Id"] = kvp.second;
-            int type = 0;
-            switch (kvp.first->condition)
-            {
-                case TrackConditions::SwitchOffRegenerativeBrake:
-                    type = 0;
-                    break;
-                case TrackConditions::SwitchOffMagneticShoe:
-                    type = 1;
-                    break;
-                case TrackConditions::SwitchOffEddyCurrentServiceBrake:
-                    type = 2;
-                    break;
-                case TrackConditions::SwitchOffEddyCurrentEmergencyBrake:
-                    type = 3;
-                    break;
-                case TrackConditions::AirTightness:
-                    type = 4;
-                    break;
-                case TrackConditions::PowerLessSectionLowerPantograph:
-                    type = 5;
-                    break;
-                case TrackConditions::PowerLessSectionSwitchMainPowerSwitch:
-                    type = 6;
-                    break;
-            }
-            cond["Type"] = type;
             if (kvp.first->external->start)
                 cond["StartDistanceToTrainM"] = *(kvp.first->external->start);
             if (kvp.first->external->end)
                 cond["EndDistanceToTrainM"] = *(kvp.first->external->end);
-            profile_conditions.push_back(cond);
         }
+        profile_conditions.push_back(cond);
     }
     if (!traction_change_condition.empty())
         obu_json["TractionSystemChange"] = traction_change_condition;
