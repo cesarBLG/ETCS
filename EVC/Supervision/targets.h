@@ -13,7 +13,6 @@
 #include <variant>
 #include "../optional.h"
 #include "acceleration.h"
-#include "platform_runtime.h"
 #include "../Position/distance.h"
 #include "supervision.h"
 #include "conversion_model.h"

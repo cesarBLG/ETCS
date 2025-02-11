@@ -192,7 +192,6 @@ void ConsolePlatform::debug_print(const std::string_view msg) {
 	__android_log_print(ANDROID_LOG_DEBUG, "ConsolePlatform" ,"%s\n", std::string(msg).c_str());
 #else
 	std::cout << msg << std::endl;
-	logging_socket->broadcast(msg);
 #endif
 }
 
