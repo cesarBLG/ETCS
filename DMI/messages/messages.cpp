@@ -152,9 +152,9 @@ void updateMessages()
                 {
                     if(!m.shown && (m.firstGroup || m.ack)) playSinfo();
                     m.shown = true;
-                    textArea.addText(date, 2, 4 + (line-current)*20, 10, m.fgColor, UP | LEFT, m.firstGroup);
+                    textArea.addText(date, 2, 10 + (line-current)*20 - textArea.sy / 2, 10, m.fgColor, LEFT, m.firstGroup);
                 }
-                textArea.addText(text.substr(0, last), 2 + clock_size.first, 2 + (line-current)*20, 12, m.fgColor, UP | LEFT, m.firstGroup);
+                textArea.addText(text.substr(0, last), 2 + clock_size.first, 9 + (line-current)*20 - textArea.sy / 2, 12, m.fgColor, LEFT, m.firstGroup);
             }
             ++line;
             while (last != text.size() && text[last] == ' ') last++;

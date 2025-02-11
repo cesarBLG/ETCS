@@ -766,7 +766,7 @@ void handle_stm_message(stm_message &msg)
                     tiu.close_air_intake = true;
                 if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
                     tiu.open_circuit_breaker = true;
-                else if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchOpen)
+                else if (ti.M_TIMS_CMD == M_TIMS_CMD_t::MainSwitchClose)
                     tiu.open_circuit_breaker = false;
                 if (ti.M_TITR_CMD == M_TITR_CMD_t::TCO)
                     tiu.TCO = true;

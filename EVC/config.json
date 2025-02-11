@@ -134,6 +134,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -158,6 +159,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -562,6 +564,7 @@
        "TrainData":"TrainData/Spain/traindata_106.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -585,6 +588,7 @@
        "TrainData":"TrainData/Spain/traindata_107.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -608,6 +612,7 @@
        "TrainData":"TrainData/Spain/traindata_162.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -677,6 +682,7 @@
        "TrainData":"TrainData/Spain/traindata_355.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -700,6 +706,7 @@
        "TrainData":"TrainData/Spain/traindata_355c.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -748,6 +755,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
           10
@@ -785,6 +793,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
           19
@@ -822,6 +831,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
           19
@@ -859,6 +869,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
           10
@@ -896,6 +907,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           0,
           10
@@ -933,6 +945,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
           19
@@ -970,6 +983,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_bombardier.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "InstalledSTM":[
           10,
           19
@@ -1162,6 +1176,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1187,6 +1202,7 @@
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1211,6 +1227,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1235,6 +1252,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1259,6 +1277,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
@@ -1307,6 +1326,7 @@
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
        "DisplayTimeToPermitted":true,
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",

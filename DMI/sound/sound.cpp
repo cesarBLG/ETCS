@@ -29,7 +29,7 @@ void StmSound::stop() {
 std::unique_ptr<StmSound> loadStmSound(const std::string &path)
 {
     size_t slash = path.find_last_of('/');
-    std::string filename = path.substr(slash != -1 ? slash + 1 : 0, -1);
+    std::string filename = path.substr(slash != std::string::npos ? slash + 1 : 0);
     size_t dot = path.find_last_of('.');
     std::string basename = filename.substr(0, dot);
     return std::make_unique<StmSound>(platform->load_sound(basename));

@@ -31,3 +31,7 @@ extern double T_bs2;
 double calc_ceiling_limit();
 void update_supervision();
 double calculate_V_release();
+inline double f41(double speed)
+{
+    return speed * 0.01;
+}

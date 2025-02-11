@@ -263,7 +263,7 @@ void ma_request(bool driver, bool perturb, bool timer, bool trackdel, bool taf)
 int64_t last_sent_timestamp;
 void fill_message(euroradio_message_traintotrack *m)
 {
-    m->NID_ENGINE.rawdata = 0;
+    m->NID_ENGINE.rawdata = nid_engine;
     ETCS_packet *pos = get_position_report();
     m->PositionReport1BG = {};
     m->PositionReport2BG = {};

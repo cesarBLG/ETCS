@@ -17,6 +17,7 @@
 #include "Supervision/speed_profile.h"
 #include "Supervision/targets.h"
 #include "Supervision/supervision.h"
+#include "Supervision/locomotive_data.h"
 #include "Position/distance.h"
 #include "Position/geographical.h"
 #include "Supervision/conversion_model.h"
@@ -30,6 +31,8 @@
 #include "STM/stm.h"
 #include "Euroradio/terminal.h"
 #include "platform_runtime.h"
+
+#include <random>
 
 #ifdef RADIO_CFM
 #include "../EVC/Euroradio/tcp_cfm.h"
@@ -182,6 +185,9 @@ void on_platform_ready()
         save_cold_data("odometer_value", odo);
         platform->quit();
     }).detach();
+
+    std::random_device rd;
+    nid_engine = rd() & 0xFFFFFFUL;
 
     start_dmi();
     start_or_iface();

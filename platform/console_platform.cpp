@@ -37,6 +37,29 @@ extern "C" void Java_com_etcs_dmi_EVC_evcStop(JNIEnv *env, jobject thiz)
 {
     sigterm_handler(SIGTERM);
 }
+#elif defined(DLL_EXPORT)
+static bool initialized = false;
+DLL_EXPORT void update_etcs()
+{
+	if (!initialized) {
+		initialized = true;
+		std::vector<std::string> args;
+		platform = std::make_unique<ConsolePlatform>(args);
+		on_platform_ready();
+		return;
+	}
+	int64_t now = get_timer();
+	while (!timer_queue.empty() && timer_queue.begin()->first <= now) {
+		timer_queue.begin()->second.fulfill(false);
+		timer_queue.erase(timer_queue.begin());
+	}
+
+	for (int i = 0; i < 10; i++)
+		if (!PlatformUtil::DeferredFulfillment::execute())
+			break;
+
+	poller.poll(0);
+}
 #else
 int main(int argc, char *argv[])
 {

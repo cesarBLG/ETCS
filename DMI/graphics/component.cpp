@@ -208,7 +208,7 @@ std::unique_ptr<text_graphic> Component::getTextUnique(const string &text, float
     t->alignment = align;
     t->aspect = aspect;
     int v = text.find('\n');
-    t->tex = getTextGraphic(text, size, col, aspect, align, width);
+    t->tex = getTextGraphic(text, size, col, aspect, align&(LEFT|RIGHT), width);
     float sx = t->tex == nullptr ? 0 : t->tex->size().first;
     float sy = t->tex == nullptr ? 0 : t->tex->size().second;
     if (align & UP) y = y + sy / 2;

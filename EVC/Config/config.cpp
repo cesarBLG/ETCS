@@ -29,6 +29,7 @@ extern bool message_when_driver_ack_level;
 extern bool message_when_driver_ack_mode;
 extern bool message_when_driver_ack_mode;
 extern bool entering_mode_message_is_time_dependent;
+extern bool asc_fitted;
 extern std::map<std::string, std::string> const_train_data;
 extern std::map<std::string, std::vector<std::string>> custom_train_data_inputs;
 
@@ -136,6 +137,21 @@ void load_config(std::string serie)
 		automatic_eddy_inhibition = cfg.value("AutomaticEddyCurrentBrakeInhibition", false);
 		automatic_magnetic_inhibition = cfg.value("AutomaticMagneticShoeBrakeInhibition", false);
 		automatic_regenerative_inhibition = cfg.value("AutomaticRegenerativeBrakeInhibition", false);
+		T_open_mps = cfg.value("OpenMainPowerSwitchTime", 11);
+		D_open_mps = cfg.value("OpenMainPowerSwitchDistance", 0);
+		T_lower_pantograph = cfg.value("LowerPantographTime", 20);
+		D_lower_pantograph = cfg.value("LowerPantographDistance", 0);
+		T_brake_inhibit = cfg.value("BrakeInhibitionTime", 11);
+		D_brake_inhibit = cfg.value("BrakeInhibitionDistance", 0);
+		T_air_tightness = cfg.value("AirTightnessTime", 11);
+		D_air_tightness = cfg.value("AirTightnessDistance", 0);
+		T_traction_system_change = cfg.value("TractionSystemChangeTime", 20);
+		D_traction_system_change = cfg.value("TractionSystemChangeDistance", 0);
+		T_current_consumption_change = cfg.value("CurrentConsumptionChangeTime", 11);
+		D_current_consumption_change = cfg.value("CurrentConsumptionChangeDistance", 0);
+		T_station_platform = cfg.value("StationPlatformTime", 0);
+		D_station_platform = cfg.value("StationPlatformDistance", 500);
+		asc_fitted = cfg.value("AutomaticSpeedControl", false);
 		L_antenna_front = cfg.value("AntennaOffset", 0.0);
 		L_locomotive = cfg.value("RearCabOffset", 0.0);
 	}

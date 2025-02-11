@@ -56,6 +56,7 @@ void start_dmi()
     platform->delay(100).then(dmi_update_func).detach();
 }
 extern double V_set;
+extern int V_set_display;
 extern double TTI;
 extern double TTP;
 extern bool EB_command;
@@ -447,7 +448,7 @@ void dmi_update_func()
     j2["Status"] = j;
     j2["ActiveWindow"] = active_window_dmi;
     send_command("json", j2.dump());
-    send_command("setVset", to_string(V_set * 3.6));
+    send_command("setVset", to_string(((V_set > 0 && V_set_display == -1) || V_set_display == 1) ? V_set * 3.6 : -1));
     /*
     send_command("setGeoPosition", valid_geo_reference ? to_string(valid_geo_reference->get_position(d_estfront)) : "-1");
     auto m = mode;

@@ -27,7 +27,7 @@ float Vsbi;
 float Vebi;
 float Vrelease;
 float Vest;
-float Vset;
+float Vset=-1;
 float Dtarg;
 float TTI = 20;
 float TTP = 20;

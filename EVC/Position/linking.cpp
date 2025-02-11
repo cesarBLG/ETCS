@@ -131,7 +131,7 @@ void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir)
             ++unlinked_count;
         }
         if (buffer) {
-            bool in = false;;
+            bool in = false;
             for (auto &msg : transition_buffer) {
                 if (!msg.empty() && msg.front()->nid_bg == it->first.nid_lrbg) {
                     in = true;
@@ -158,7 +158,7 @@ void relocate()
     } else {
         for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
             if (it->second & 1)
-                return;
+                continue;
             bool link = false;
             for (auto &l : linking) {
                 if (l.nid_bg == it->first.nid_lrbg) {
