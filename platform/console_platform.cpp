@@ -16,7 +16,6 @@
 #endif
 
 static std::atomic<bool>* quit_request_ptr;
-extern std::unique_ptr<BasePlatform::BusSocket> logging_socket;
 
 static void sigterm_handler(int sig) {
 	*quit_request_ptr = true;
