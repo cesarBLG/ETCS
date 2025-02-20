@@ -19,8 +19,7 @@
 struct SDL_Renderer;
 struct SDL_Texture;
 struct SDL_Window;
-struct _TTF_Font;
-typedef struct _TTF_Font TTF_Font;
+typedef struct TTF_Font TTF_Font;
 
 class SdlPlatform final : public UiPlatform {
 private:
