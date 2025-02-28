@@ -145,6 +145,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	bool rotate = get_config("rotateScreen") == "true";
 	bool ontop = get_config("alwaysOnTop") == "true";
 	bool hidecursor = get_config("hideCursor") == "true";
+	touch = get_config("touch") == "true";
 	std::string title = get_config("title") == "" ? "SdlPlatform" : get_config("title");
 
 	int flags = 0;
@@ -166,7 +167,6 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
-	int wx, wy;
 	SDL_GetWindowSize(sdlwindow, &wx, &wy);
 	float sx = wx / virtual_w;
 	float sy = wy / virtual_h;
@@ -265,10 +265,34 @@ PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {
 bool SdlPlatform::poll_sdl() {
 	SDL_Event ev;
 	if (SDL_PollEvent(&ev)) {
-		if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE) {
+		if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
+		{
 			on_close_list.fulfill_all(false);
 		}
-		else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP) {
+		else if (touch && (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION))
+		{
+			SDL_TouchFingerEvent tfe = ev.tfinger;
+			InputEvent ev;
+			if (tfe.type == SDL_FINGERMOTION)
+			{
+				if (tfe.pressure > 0)
+				{
+					ev.action = InputEvent::Action::Move;
+					ev.x = (tfe.x*wx - ox) / s;
+					ev.y = (tfe.y*wy - oy) / s;
+					on_input_list.fulfill_all(ev, false);
+				}
+			}
+			else
+			{
+				ev.action = tfe.type == SDL_FINGERDOWN ? InputEvent::Action::Press : InputEvent::Action::Release;
+				ev.x = (tfe.x*wx - ox) / s;
+				ev.y = (tfe.y*wy - oy) / s;
+				on_input_list.fulfill_all(ev, false);
+			}
+		}
+		else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP)
+		{
 			SDL_MouseButtonEvent sdlev = ev.button;
 			if (sdlev.button == SDL_BUTTON_LEFT) {
 				InputEvent ev;
@@ -279,7 +303,8 @@ bool SdlPlatform::poll_sdl() {
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
-		else if (ev.type == SDL_MOUSEMOTION) {
+		else if (ev.type == SDL_MOUSEMOTION)
+		{
 			SDL_MouseMotionEvent sdlev = ev.motion;
 			if (sdlev.state & SDL_BUTTON_LMASK) {
 				InputEvent ev;
