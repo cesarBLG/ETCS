@@ -20,6 +20,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
+#define USE_OLD_CARES
 class AresQuery : public DNSQuery
 {
     FdPoller &poller;
@@ -42,6 +43,23 @@ class AresQuery : public DNSQuery
             q->fulfiller.fulfill({*q->a, *q->txt});
         }
     }
+#ifdef USE_OLD_CARES
+    static void callback_txt(void *arg, int status, int timeouts, unsigned char *buff, int alen)
+    {
+        AresQuery *q = (AresQuery*)arg;    
+        q->txt = "";
+        if (status == ARES_SUCCESS) {
+            ares_txt_reply *reply;
+            if (ares_parse_txt_reply(buff, alen, &reply) == ARES_SUCCESS) {
+                q->txt = std::string((char*)reply->txt, reply->length);
+                ares_free_data(reply);
+            }
+        }
+        if (q->a && q->txt) {
+            q->fulfiller.fulfill({*q->a, *q->txt});
+        }
+    }
+#else
     static void callback_txt(void *arg, ares_status_t status, size_t timeouts, const ares_dns_record_t *dnsrec)
     {
         AresQuery *q = (AresQuery*)arg;    
@@ -58,6 +76,7 @@ class AresQuery : public DNSQuery
             q->fulfiller.fulfill({*q->a, *q->txt});
         }
     }
+#endif
     void process_fd(ares_socket_t fd, int rev)
     {
         ares_process_fd(channel, (rev & POLLIN) ? fd : ARES_SOCKET_BAD, (rev & POLLOUT) ? fd : ARES_SOCKET_BAD);
@@ -89,7 +108,11 @@ public:
         hints.ai_protocol = 0;
         hints.ai_socktype = 0;
         ares_getaddrinfo(channel, hostname.c_str(), "30993", &hints, callback_a, this);
+#ifdef USE_OLD_CARES
+        ares_query(channel, hostname.c_str(), 1, 16, callback_txt, this);
+#else
         ares_query_dnsrec(channel, hostname.c_str(), ARES_CLASS_IN, ARES_REC_TYPE_TXT, callback_txt, this, nullptr);
+#endif
         process_timeout();
     }
     ~AresQuery()
