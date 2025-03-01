@@ -157,7 +157,7 @@ void drawImperialIndicator()
     if (!useImperialSystem)
         return;
 
-    if (mphIndicator == NULL) {
+    if (mphIndicator == nullptr) {
         string s = "mph";
         std::unique_ptr<UiPlatform::Font> mphFont = platform->load_font(12, false, "");
         mphIndicator = platform->make_text_image(s, *mphFont, White);
@@ -304,16 +304,12 @@ void displayCSG()
         }
     }
 }
-static int initSpeed = 0;
-void displayLines()
+int prevMaxSpeed = 0;
+void displayLines(bool redraw)
 {
-    bool inited = initSpeed == maxSpeed;
-    initSpeed = maxSpeed;
     std::unique_ptr<UiPlatform::Font> gaugeFont;
-    if (!inited) {
-        csg.clear();
+    if (redraw)
         gaugeFont = platform->load_font(16, false, "");
-    }
     platform->set_color(White);
 
 #if SIMRAIL
@@ -331,7 +327,7 @@ void displayLines()
         int longinterval = maxSpeed == 400 ? 50 : (maxSpeed == 150 ? 25 : 20);
 #endif
         rminline = i%longinterval!=0 ? -110 : -100;
-        if(!inited && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
+        if(redraw && i%longinterval == 0 && (maxSpeed != 400 || (i!=250 && i!=350)))
         {
             std::string s = to_string(i);
             std::pair<float, float> wh = gaugeFont->calc_size(s);
@@ -403,11 +399,27 @@ void displayGauge()
 {
 	if (prevUseImperialSystem != useImperialSystem) {
 		maxSpeed = useImperialSystem ? (((int)(etcsDialMaxSpeed * KMH_TO_MPH / 20) * 20) + 20) : etcsDialMaxSpeed;
-		initSpeed = 0;
+		prevMaxSpeed = 0;
 		csg.clear();
 	}
 	
-    displayLines();
+    bool inited = prevMaxSpeed == maxSpeed;
+    prevMaxSpeed = maxSpeed;
+    std::unique_ptr<UiPlatform::Font> gaugeFont;
+    if (!inited) {
+        mphIndicator = nullptr;
+        for(int i=0; i<10; i++)
+        {
+            if(spd_nums[i]!=nullptr)
+            {
+                delete spd_nums[i];
+                spd_nums[i] = nullptr;
+            }
+        }
+        csg.clear();
+    }
+
+    displayLines(!inited);
     displayCSG();
     drawNeedle();
     drawImperialIndicator();

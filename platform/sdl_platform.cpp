@@ -126,6 +126,8 @@ std::string get_files_dir(FileType type)
 }
 #endif
 SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args) :
+	virtual_w(virtual_w),
+	virtual_h(virtual_h),
 	assets_dir(get_files_dir(ETCS_ASSET_FILE)),
 	config_dir(get_files_dir(ETCS_CONFIG_FILE)),
 	storage_dir(get_files_dir(ETCS_STORAGE_FILE)),
@@ -142,7 +144,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	int xpos = std::stoi(get_config("xpos", "0"));
 	int ypos = std::stoi(get_config("ypos", "0"));
 	bool borderless = get_config("borderless") == "true";
-	bool rotate = get_config("rotateScreen") == "true";
+	rotate = get_config("rotateScreen") == "true";
 	bool ontop = get_config("alwaysOnTop") == "true";
 	bool hidecursor = get_config("hideCursor") == "true";
 	touch = get_config("touch") == "true";
@@ -315,6 +317,29 @@ bool SdlPlatform::poll_sdl() {
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
+        else if (ev.type == SDL_WINDOWEVENT && ev.window.event == SDL_WINDOWEVENT_RESIZED)
+		{
+            SDL_GetWindowSize(sdlwindow, &wx, &wy);
+			float sx = wx / virtual_w;
+			float sy = wy / virtual_h;
+			s = std::min(sx, sy);
+			if (sx > sy) {
+				ox = (wx - wy * (virtual_w / virtual_h)) * 0.5f;
+				oy = 0.0f;
+			} else {
+				ox = 0.0f;
+				oy = (wy - wx * (virtual_h / virtual_w)) * 0.5f;
+			}
+			if (rotate) {
+				s *= -1.0f;
+				ox += wx - ox * 2.0f;
+				oy += wy - oy * 2.0f;
+			}
+			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+			loaded_fonts.clear();
+			void startWindows();
+			startWindows();
+        }
 		return true;
 	}
 	return false;

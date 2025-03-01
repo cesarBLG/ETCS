@@ -59,6 +59,8 @@ private:
 	int audio_volume;
 	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
+	float virtual_w, virtual_h;
+	bool rotate;
 	int wx, wy;
 	bool touch;
 	std::multimap<int64_t, PlatformUtil::Fulfiller<void>> timer_queue;

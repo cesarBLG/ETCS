@@ -11,4 +11,5 @@
 void displayGauge();
 void displayVrelease();
 void setLSSMA(int nlssma);
+extern int prevMaxSpeed;
 #endif
