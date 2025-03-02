@@ -8,7 +8,7 @@
 #include "platform_runtime.h"
 #include <iostream>
 
-#ifdef __unix__
+#if defined(__unix__) or defined(__APPLE__)
 #include <signal.h>
 #endif
 #ifdef __ANDROID__
@@ -76,9 +76,20 @@ std::string get_files_dir(FileType type)
 {
 	return android_external_storage_dir;
 }
-#elif defined(__unix__)
+#elif defined(__unix__) or defined(__APPLE__)
 #include <string>
 #include <limits.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+std::string getexepath()
+{
+	char result[ PATH_MAX ];
+  	uint32_t count = PATH_MAX;
+  	if(!_NSGetExecutablePath(result, &count))
+		return std::string(result);
+  	return "";
+}
+#else
 #include <unistd.h>
 std::string getexepath()
 {
@@ -86,6 +97,7 @@ std::string getexepath()
   ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
   return std::string( result, (count > 0) ? count : 0 );
 }
+#endif
 #include <filesystem>
 std::string get_files_dir(FileType type)
 {
@@ -149,7 +161,7 @@ ConsolePlatform::ConsolePlatform(const std::vector<std::string> &args) :
 	{
 	running = true;
 	quit_request = false;
-#ifdef __unix__
+#if defined(__unix__) or defined(__APPLE__)
 	quit_request_ptr = &quit_request;
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
@@ -164,7 +176,7 @@ ConsolePlatform::~ConsolePlatform() {
 	while (PlatformUtil::DeferredFulfillment::execute());
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
-#ifdef __unix__
+#if defined(__unix__) or defined(__APPLE__)
 	signal(SIGTERM, SIG_DFL);
 	signal(SIGINT, SIG_DFL);
 #endif

@@ -67,9 +67,20 @@ std::string get_files_dir(FileType type)
     if (android_external_storage_dir == "") android_external_storage_dir = std::string(SDL_AndroidGetExternalStoragePath())+"/";
 	return android_external_storage_dir;
 }
-#elif defined(__unix__)
+#elif defined(__unix__) or defined(__APPLE__)
 #include <string>
 #include <limits.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+std::string getexepath()
+{
+	char result[ PATH_MAX ];
+  	uint32_t count = PATH_MAX;
+  	if(!_NSGetExecutablePath(result, &count))
+		return std::string(result);
+  	return "";
+}
+#else
 #include <unistd.h>
 std::string getexepath()
 {
@@ -77,6 +88,7 @@ std::string getexepath()
   ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
   return std::string( result, (count > 0) ? count : 0 );
 }
+#endif
 #include <filesystem>
 std::string get_files_dir(FileType type)
 {
@@ -151,6 +163,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	std::string title = get_config("title") == "" ? "SdlPlatform" : get_config("title");
 
 	int flags = 0;
+	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
 	if (borderless)
 		flags |= SDL_WINDOW_BORDERLESS;
 	if (fullscreen)
@@ -169,7 +182,10 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
-	SDL_GetWindowSize(sdlwindow, &wx, &wy);
+	SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
+	int px,py;
+	SDL_GetWindowSize(sdlwindow, &px, &py);
+	dpiscale = wx / (float)px;
 	float sx = wx / virtual_w;
 	float sy = wy / virtual_h;
 	s = std::min(sx, sy);
@@ -299,8 +315,8 @@ bool SdlPlatform::poll_sdl() {
 			if (sdlev.button == SDL_BUTTON_LEFT) {
 				InputEvent ev;
 				ev.action = (sdlev.state == SDL_PRESSED) ? InputEvent::Action::Press : InputEvent::Action::Release;
-				ev.x = (sdlev.x - ox) / s;
-				ev.y = (sdlev.y - oy) / s;
+				ev.x = (sdlev.x * dpiscale - ox) / s;
+				ev.y = (sdlev.y * dpiscale - oy) / s;
 
 				on_input_list.fulfill_all(ev, false);
 			}
@@ -311,15 +327,18 @@ bool SdlPlatform::poll_sdl() {
 			if (sdlev.state & SDL_BUTTON_LMASK) {
 				InputEvent ev;
 				ev.action = InputEvent::Action::Move;
-				ev.x = (sdlev.x - ox) / s;
-				ev.y = (sdlev.y - oy) / s;
+				ev.x = (sdlev.x * dpiscale - ox) / s;
+				ev.y = (sdlev.y * dpiscale - oy) / s;
 
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
         else if (ev.type == SDL_WINDOWEVENT && ev.window.event == SDL_WINDOWEVENT_RESIZED)
 		{
-            SDL_GetWindowSize(sdlwindow, &wx, &wy);
+            SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
+			int px,py;
+			SDL_GetWindowSize(sdlwindow, &px, &py);
+			dpiscale = wx / (float)px;
 			float sx = wx / virtual_w;
 			float sy = wy / virtual_h;
 			s = std::min(sx, sy);

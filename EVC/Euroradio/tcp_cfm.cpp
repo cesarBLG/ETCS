@@ -337,7 +337,7 @@ void tcp_cfm::connect()
     setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &t, sizeof(t));
     t = 1;
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &t, sizeof(t));
-    #ifndef _WIN32
+#ifndef _WIN32
     int tp[5] = {12, 3, 3, 20000, 1416};
     {
         std::string tp_str = params.tp;
@@ -351,12 +351,14 @@ void tcp_cfm::connect()
             tp_str = tp_str.substr(pos+1);
         }
     }
+#ifdef __linux__
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &tp[0], sizeof(tp[0]));
+    setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &tp[3], sizeof(tp[3]));
+#endif
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &tp[1], sizeof(tp[1]));
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &tp[2], sizeof(tp[2]));
-    setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, &tp[3], sizeof(tp[3]));
     setsockopt(sock, IPPROTO_TCP, TCP_MAXSEG, &tp[4], sizeof(tp[4]));
-    #endif
+#endif
 	unsigned long one = 1;
 #ifdef _WIN32
 	ioctlsocket(sock, FIONBIO, &one);
