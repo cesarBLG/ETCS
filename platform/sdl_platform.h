@@ -10,16 +10,13 @@
 #include <atomic>
 #include <optional>
 #include <functional>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include "platform.h"
 #include "bus_socket_impl.h"
 #include "libc_time_impl.h"
 #include "fstream_file_impl.h"
 #include "console_fd_poller.h"
-
-struct SDL_Renderer;
-struct SDL_Texture;
-struct SDL_Window;
-typedef struct TTF_Font TTF_Font;
 
 class SdlPlatform final : public UiPlatform {
 private:
