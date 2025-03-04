@@ -1,4 +1,8 @@
 #!/bin/bash
+function _kill_etcs() {
+    kill $(jobs -p) 2>/dev/null
+}
+
 SOURCE=${BASH_SOURCE[0]}
 while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
   DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
@@ -7,10 +11,24 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 if [[ $1 = "evc" ]]; then
-    exec $DIR/evc
+    exec "$DIR"/evc
 elif [[ $1 = "dmi" ]]; then
-    exec $DIR/dmi
+    exec "$DIR"/dmi
 else
-    $DIR/dmi &
-    exec $DIR/evc
+    "$DIR"/dmi &
+    dmi_pid=$!
+    "$DIR"/evc &
+    evc_pid=$!
 fi
+trap _kill_etcs SIGINT SIGTERM
+if [[ ${BASH_VERSINFO[0]} -gt 4 ]] || { [[ ${BASH_VERSINFO[0]} -eq 4 ]] && [[ ${BASH_VERSINFO[1]} -ge 3 ]]; }; then
+    wait -n
+else
+    while true; do
+        if ! kill -0 $dmi_pid 2>/dev/null || ! kill -0 $evc_pid 2>/dev/null; then
+            break
+        fi
+        sleep 1
+    done
+fi
+_kill_etcs

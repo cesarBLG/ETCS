@@ -6,6 +6,7 @@
 
 #include "console_platform.h"
 #include "platform_runtime.h"
+#include "console_tools.h"
 #include <iostream>
 
 #if defined(__unix__) or defined(__APPLE__)
@@ -21,7 +22,6 @@ static void sigterm_handler(int sig) {
 	*quit_request_ptr = true;
 }
 #ifdef __ANDROID__
-std::string android_external_storage_dir;
 #include <jni.h>
 extern "C" void Java_com_etcs_dmi_EVC_evcMain(JNIEnv *env, jobject thiz, jstring stringObject)
 {
@@ -71,81 +71,6 @@ int main(int argc, char *argv[])
 	return 0;
 }
 #endif
-#ifdef __ANDROID__
-std::string get_files_dir(FileType type)
-{
-	return android_external_storage_dir;
-}
-#elif defined(__unix__) or defined(__APPLE__)
-#include <string>
-#include <limits.h>
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-std::string getexepath()
-{
-	char result[ PATH_MAX ];
-  	uint32_t count = PATH_MAX;
-  	if(!_NSGetExecutablePath(result, &count))
-		return std::string(result);
-  	return "";
-}
-#else
-#include <unistd.h>
-std::string getexepath()
-{
-  char result[ PATH_MAX ];
-  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-  return std::string( result, (count > 0) ? count : 0 );
-}
-#endif
-#include <filesystem>
-std::string get_files_dir(FileType type)
-{
-	switch (type)
-	{
-		case ETCS_ASSET_FILE:
-			{
-				auto exepath = std::filesystem::path(getexepath()).remove_filename();
-				if (exepath.parent_path().filename() != "bin")
-					return "";
-				if (exepath == "/bin/")
-					return "/usr/share/ETCS/";
-				return exepath / "../share/ETCS/";
-			}
-		case ETCS_CONFIG_FILE:
-			{
-				auto exepath = std::filesystem::path(getexepath()).remove_filename();
-				if (exepath.parent_path().filename() != "bin")
-					return "";
-				if (exepath.parent_path().parent_path().filename() == "usr")
-					return exepath / "../../etc/ETCS/";
-				return exepath / "../etc/ETCS/";
-			}
-		case ETCS_STORAGE_FILE:
-			{
-				const char* wd  = getenv("OWD");
-				if (wd)
-					return std::string(wd)+"/";
-				return "";
-			}
-		default:
-			return "";
-	}
-}
-#else
-#include <string>
-#include <windows.h>
-std::string getexepath()
-{
-  char result[ MAX_PATH ];
-  return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
-}
-#include <filesystem>
-std::string get_files_dir(FileType type)
-{
-	return std::filesystem::path(getexepath()).remove_filename().string();
-}
-#endif
 ConsolePlatform::ConsolePlatform(const std::vector<std::string> &args) :
 	assets_dir(get_files_dir(ETCS_ASSET_FILE)),
 	config_dir(get_files_dir(ETCS_CONFIG_FILE)),
@@ -158,7 +83,7 @@ ConsolePlatform::ConsolePlatform(const std::vector<std::string> &args) :
 	bus_bridge_manager(config_dir, poller, bus_socket_impl),
 	orts_bridge(config_dir, poller, bus_socket_impl)
 #endif
-	{
+{
 	running = true;
 	quit_request = false;
 #if defined(__unix__) or defined(__APPLE__)
@@ -166,6 +91,7 @@ ConsolePlatform::ConsolePlatform(const std::vector<std::string> &args) :
 	signal(SIGTERM, &sigterm_handler);
 	signal(SIGINT, &sigterm_handler);
 #endif
+	setup_crash_handler();
 	PlatformUtil::DeferredFulfillment::list = &event_list;
 }
 

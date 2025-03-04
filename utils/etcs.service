@@ -1,0 +1,12 @@
+[Unit]
+Description=European Train Control System
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=-/var/lib/etcs
+ExecStart=etcs
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

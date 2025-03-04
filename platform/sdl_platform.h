@@ -85,6 +85,7 @@ private:
 	void mixer_func(int16_t *buffer, size_t len);
 	bool poll_sdl();
 	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly);
+	void calc_scale();
 
 public:
 	class SdlImage final : public Image

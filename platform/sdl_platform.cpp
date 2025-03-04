@@ -6,6 +6,7 @@
 
 #include "sdl_platform.h"
 #include "sdl_gfx/gfx_primitives.h"
+#include "console_tools.h"
 #include "platform_runtime.h"
 #include <algorithm>
 #include <fstream>
@@ -18,6 +19,9 @@ int main(int argc, char *argv[])
 	std::vector<std::string> args;
 	for (int i = 1; i < argc; i++)
 		args.push_back(std::string(argv[i]));
+#ifdef __ANDROID__
+	android_external_storage_dir = SDL_AndroidGetExternalStoragePath();
+#endif
 	platform = std::make_unique<SdlPlatform>(platform_size_w, platform_size_h, args);
 	on_platform_ready();
 	static_cast<SdlPlatform*>(platform.get())->event_loop();
@@ -60,83 +64,6 @@ std::string SdlPlatform::SdlPlatform::get_config(const std::string_view key, con
 		return std::string(def);
 	return it->second;
 }
-#ifdef __ANDROID__
-std::string android_external_storage_dir;
-std::string get_files_dir(FileType type)
-{
-    if (android_external_storage_dir == "") android_external_storage_dir = std::string(SDL_AndroidGetExternalStoragePath())+"/";
-	return android_external_storage_dir;
-}
-#elif defined(__unix__) or defined(__APPLE__)
-#include <string>
-#include <limits.h>
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-std::string getexepath()
-{
-	char result[ PATH_MAX ];
-  	uint32_t count = PATH_MAX;
-  	if(!_NSGetExecutablePath(result, &count))
-		return std::string(result);
-  	return "";
-}
-#else
-#include <unistd.h>
-std::string getexepath()
-{
-  char result[ PATH_MAX ];
-  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-  return std::string( result, (count > 0) ? count : 0 );
-}
-#endif
-#include <filesystem>
-std::string get_files_dir(FileType type)
-{
-	switch (type)
-	{
-		case ETCS_ASSET_FILE:
-			{
-				auto exepath = std::filesystem::path(getexepath()).remove_filename();
-				if (exepath.parent_path().filename() != "bin")
-					return "";
-				if (exepath == "/bin/")
-					return "/usr/share/ETCS/";
-				return exepath / "../share/ETCS/";
-			}
-		case ETCS_CONFIG_FILE:
-			{
-				auto exepath = std::filesystem::path(getexepath()).remove_filename();
-				if (exepath.parent_path().filename() != "bin")
-					return "";
-				if (exepath.parent_path().parent_path().filename() == "usr")
-					return exepath / "../../etc/ETCS/";
-				return exepath / "../etc/ETCS/";
-			}
-		case ETCS_STORAGE_FILE:
-			{
-				const char* wd  = getenv("OWD");
-				if (wd)
-					return std::string(wd)+"/";
-				return "";
-			}
-		default:
-			return "";
-	}
-}
-#else
-#include <string>
-#include <windows.h>
-std::string getexepath()
-{
-  char result[ MAX_PATH ];
-  return std::string( result, GetModuleFileName( NULL, result, MAX_PATH ) );
-}
-#include <filesystem>
-std::string get_files_dir(FileType type)
-{
-	return std::filesystem::path(getexepath()).remove_filename().string();
-}
-#endif
 SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std::string> &args) :
 	virtual_w(virtual_w),
 	virtual_h(virtual_h),
@@ -146,6 +73,8 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	bus_socket_impl(config_dir, poller, args),
 	fstream_file_impl()
 {
+	setup_crash_handler();
+
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	load_config(args);
@@ -182,27 +111,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 
 	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 
-	SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
-	int px,py;
-	SDL_GetWindowSize(sdlwindow, &px, &py);
-	dpiscale = wx / (float)px;
-	float sx = wx / virtual_w;
-	float sy = wy / virtual_h;
-	s = std::min(sx, sy);
-	if (sx > sy) {
-		ox = (wx - wy * (virtual_w / virtual_h)) * 0.5f;
-		oy = 0.0f;
-	} else {
-		ox = 0.0f;
-		oy = (wy - wx * (virtual_h / virtual_w)) * 0.5f;
-	}
-	if (rotate) {
-		s *= -1.0f;
-		ox += wx - ox * 2.0f;
-		oy += wy - oy * 2.0f;
-	}
-
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+	calc_scale();
 
 	TTF_Init();
 
@@ -240,6 +149,29 @@ SdlPlatform::~SdlPlatform() {
 	//SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
 	SDL_Quit();
+}
+
+void SdlPlatform::calc_scale() {
+	SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
+	int px,py;
+	SDL_GetWindowSize(sdlwindow, &px, &py);
+	dpiscale = wx / (float)px;
+	float sx = wx / virtual_w;
+	float sy = wy / virtual_h;
+	s = std::min(sx, sy);
+	if (sx > sy) {
+		ox = (wx - wy * (virtual_w / virtual_h)) * 0.5f;
+		oy = 0.0f;
+	} else {
+		ox = 0.0f;
+		oy = (wy - wx * (virtual_h / virtual_w)) * 0.5f;
+	}
+	if (rotate) {
+		s *= -1.0f;
+		ox += wx - ox * 2.0f;
+		oy += wy - oy * 2.0f;
+	}
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
 }
 
 std::unique_ptr<SdlPlatform::BusSocket> SdlPlatform::open_socket(const std::string_view channel, uint32_t tid) {
@@ -333,28 +265,9 @@ bool SdlPlatform::poll_sdl() {
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
-        else if (ev.type == SDL_WINDOWEVENT && ev.window.event == SDL_WINDOWEVENT_RESIZED)
+        else if (ev.type == SDL_WINDOWEVENT && (ev.window.event == SDL_WINDOWEVENT_RESIZED || ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED))
 		{
-            SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
-			int px,py;
-			SDL_GetWindowSize(sdlwindow, &px, &py);
-			dpiscale = wx / (float)px;
-			float sx = wx / virtual_w;
-			float sy = wy / virtual_h;
-			s = std::min(sx, sy);
-			if (sx > sy) {
-				ox = (wx - wy * (virtual_w / virtual_h)) * 0.5f;
-				oy = 0.0f;
-			} else {
-				ox = 0.0f;
-				oy = (wy - wx * (virtual_h / virtual_w)) * 0.5f;
-			}
-			if (rotate) {
-				s *= -1.0f;
-				ox += wx - ox * 2.0f;
-				oy += wy - oy * 2.0f;
-			}
-			SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+            calc_scale();
 			loaded_fonts.clear();
 			void startWindows();
 			startWindows();
