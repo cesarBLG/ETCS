@@ -132,6 +132,27 @@ void update_asfa_con_lzb(bool ntc_asfa)
 }
 void update_asfa()
 {
+    if (!NV_NID_Cs.empty()) {
+        bool in_spain = false;
+        for (int nid_c : NV_NID_Cs) {
+            if ((nid_c >= 352 && nid_c <= 383) || nid_c == 0) {
+                in_spain = true;
+                break;
+            }
+        }
+        if (!in_spain) {
+            if (mode == Mode::IS) {
+                AKT = false;
+                CON = true;
+            } else {
+                AKT = true;
+                CON = false;
+            }
+            active = false;
+            brake_commanded = false;
+            return;
+        }
+    }
     bool stm = installed_stms.find(0) != installed_stms.end() || installed_stms.find(2) != installed_stms.end() || installed_stms.find(19) != installed_stms.end();
     if (stm) {
         AKT = false;
