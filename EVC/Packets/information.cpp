@@ -56,6 +56,7 @@
 #include "../Position/geographical.h"
 #include "../LX/level_crossing.h"
 #include "../Euroradio/session.h"
+#include "../language/language.h"
 #include "../Procedures/mode_transition.h"
 #include "../Procedures/level_transition.h"
 #include "../Procedures/override.h"
@@ -507,6 +508,11 @@ void reversing_supervision_information::handle()
     rv_position = {};
     auto &rsi = *(ReversingSupervisionInformation*)linked_packets.front().get();
     rv_supervision = {rsi.V_REVERSE.get_value(), rsi.D_REVERSE.get_value(rsi.Q_SCALE)};
+}
+void default_balise_information::handle()
+{
+    int64_t time = get_milliseconds();
+    add_message(text_message(get_text("Trackside malfunction"), true, false, false, [time](text_message& t) { return time + 30000 < get_milliseconds(); }));
 }
 void taf_level23_information::handle()
 {

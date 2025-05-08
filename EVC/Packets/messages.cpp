@@ -476,6 +476,13 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
         if ((c2 && passed_dir==0) || (c3 && passed_dir==1)) {
             eurobalise_telegram first = t;
             eurobalise_telegram second = c2 ? read_telegrams[i+1] : read_telegrams[i-1];
+            bool firstdefault = false;
+            for (int j=0; j<first.packets.size(); j++) {
+                if (first.packets[j]->NID_PACKET == 254) {
+                    firstdefault = true;
+                    break;
+                }
+            }
             bool seconddefault = false;
             for (int j=0; j<second.packets.size(); j++) {
                 if (second.packets[j]->NID_PACKET == 254) {
@@ -483,7 +490,7 @@ void check_valid_data(std::vector<eurobalise_telegram> telegrams, dist_base bg_r
                     break;
                 }
             }
-            message.push_back(seconddefault ? first : second);
+            message.push_back(seconddefault && !firstdefault ? first : second);
         }
     }
     std::vector<std::shared_ptr<ETCS_packet>> packets;
@@ -1433,6 +1440,8 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
             info.push_back(new lssma_display_on_information());
     } else if (packet_num == 181) {
         info.push_back(new generic_ls_marker_information());
+    } else if (packet_num == 254) {
+        info.push_back(new default_balise_information());
     }
     return info;
 }

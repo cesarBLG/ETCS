@@ -204,6 +204,11 @@ struct reversing_supervision_information : etcs_information
     reversing_supervision_information() : etcs_information(50,52) {location_based=false;}
     void handle() override;
 };
+struct default_balise_information : etcs_information
+{
+    default_balise_information() : etcs_information(51,53) {location_based=false;}
+    void handle() override;
+};
 struct taf_level23_information : etcs_information
 {
     taf_level23_information() : etcs_information(56,58) {location_based=false;}
