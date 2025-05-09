@@ -196,17 +196,17 @@ struct train_running_number_information : etcs_information
 };
 struct reversing_area_information : etcs_information
 {
-    reversing_area_information() : etcs_information(49,51) {}
+    reversing_area_information() : etcs_information(53,55) {}
     void handle() override;
 };
 struct reversing_supervision_information : etcs_information
 {
-    reversing_supervision_information() : etcs_information(50,52) {location_based=false;}
+    reversing_supervision_information() : etcs_information(54,56) {location_based=false;}
     void handle() override;
 };
 struct default_balise_information : etcs_information
 {
-    default_balise_information() : etcs_information(51,53) {location_based=false;}
+    default_balise_information() : etcs_information(55,57) {location_based=false;}
     void handle() override;
 };
 struct taf_level23_information : etcs_information
