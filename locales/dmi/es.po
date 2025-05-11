@@ -7,140 +7,189 @@ msgstr ""
 "Project-Id-Version: ETCS DMI\n"
 "Language: es\n"
 
-#: window/menu_main.cpp:20
-msgid "Main"
-msgstr "Principal"
+#: ../DMI/graphics/display.cpp:44
+msgid "EVC not connected!"
+msgstr "¡EVC no conectado!"
 
-#: window/data_entry.cpp:16 window/data_entry.cpp:17
-#: window/data_validation.cpp:19 window/data_validation.h:19
-#: window/data_validation.h:86 window/keyboard.cpp:245 window/keyboard.cpp:252
-#: window/track_ahead_free.cpp:26
+#: ../DMI/graphics/display.cpp:55
+msgid "Train serie not selected!"
+msgstr "¡Serie de tren no seleccionado!"
+
+#: ../DMI/window/brightness.cpp:13 ../DMI/window/menu_settings.cpp:21
+msgid "Brightness"
+msgstr "Brillo"
+
+#: ../DMI/window/data_entry.cpp:16 ../DMI/window/data_entry.cpp:17
+#: ../DMI/window/data_validation.cpp:19 ../DMI/window/keyboard.cpp:250
+#: ../DMI/window/keyboard.cpp:257 ../DMI/window/track_ahead_free.cpp:27
 msgid "Yes"
 msgstr "Si"
 
-#: window/data_entry.cpp:62
+#: ../DMI/window/data_entry.cpp:62
 msgid " entry complete?"
 msgstr ": ¿ Entrada completada ?"
 
-#: window/keyboard.cpp:244 window/keyboard.cpp:248
-msgid "No"
-msgstr "No"
-
-#: window/driver_id.cpp:16
+#: ../DMI/window/driver_id.cpp:16
 msgid "TRN"
 msgstr "Número de\n"
 "tren"
 
-#: window/fixed_train_data.cpp:15 window/fixed_train_data.cpp:19
-#: window/fixed_train_data.cpp:25
+#: ../DMI/window/fixed_train_data.cpp:15 ../DMI/window/fixed_train_data.cpp:19
+#: ../DMI/window/fixed_train_data.cpp:25
 msgid "Enter\n"
 "data"
 msgstr "Int.\n"
 "datos"
 
-#: window/menu_main.cpp:22
+#: ../DMI/window/keyboard.cpp:249 ../DMI/window/keyboard.cpp:253
+msgid "No"
+msgstr "No"
+
+#: ../DMI/window/menu_main.cpp:20
+msgid "Main"
+msgstr "Principal"
+
+#: ../DMI/window/menu_main.cpp:22
 msgid "Start"
 msgstr "Inicio"
 
-#: window/menu_main.cpp:26
+#: ../DMI/window/menu_main.cpp:26
 msgid "Driver ID"
 msgstr "Datos del \n"
 "Maquinista"
 
-#: window/menu_main.cpp:30
+#: ../DMI/window/menu_main.cpp:30
 msgid "Train Data"
 msgstr "Datos del tren"
 
-#: window/menu_main.cpp:34
+#: ../DMI/window/menu_main.cpp:34
 msgid "Level"
 msgstr "Nivel"
 
-#: window/menu_main.cpp:38
+#: ../DMI/window/menu_main.cpp:38
 msgid "Train running number"
 msgstr "Número de tren"
 
-#: window/menu_main.cpp:42
+#: ../DMI/window/menu_main.cpp:42
 msgid "Exit Shunting"
 msgstr "Fin Maniobras"
 
-#: window/menu_main.cpp:42
+#: ../DMI/window/menu_main.cpp:42
 msgid "Shunting"
 msgstr "Maniobras"
 
-#: window/menu_main.cpp:46
+#: ../DMI/window/menu_main.cpp:46
 msgid "Non-Leading"
 msgstr "Non-Leading"
 
-#: window/menu_main.cpp:47
+#: ../DMI/window/menu_main.cpp:47
 msgid "Maintain shunting"
 msgstr "Mantener\n"
 "Maniobra"
 
-#: window/menu_main.cpp:48
+#: ../DMI/window/menu_main.cpp:48
 msgid "Radio data"
 msgstr "Datos de Radio"
 
-#: window/menu_override.cpp:12
+#: ../DMI/window/menu_main.cpp:53
+msgid "Continue in SM"
+msgstr "Continuar en SM"
+
+#: ../DMI/window/menu_main.cpp:53
+msgid "Initiate SM"
+msgstr "Iniciar SM"
+
+#: ../DMI/window/menu_main.cpp:57
+msgid "Exit SM"
+msgstr "Salir SM"
+
+#: ../DMI/window/menu_ntc.cpp:11
+msgid "NTC data entry"
+msgstr "Entrada de datos NTC"
+
+#: ../DMI/window/menu_ntc.cpp:20
+msgid "End of data entry"
+msgstr "Fin entrada datos"
+
+#: ../DMI/window/menu_override.cpp:12
 msgid "Override"
 msgstr "Rebase"
 
-#: window/menu_override.cpp:14
+#: ../DMI/window/menu_override.cpp:14
 msgid "EoA"
 msgstr "EOA"
 
-#: window/menu_radio.cpp:20
+#: ../DMI/window/menu_radio.cpp:18
+msgid "RBC data"
+msgstr "Datos de Radio"
+
+#: ../DMI/window/menu_radio.cpp:20
 msgid "Contact last RBC"
 msgstr "Contactar último\n"
 "RBC"
 
-#: window/menu_radio.cpp:24
+#: ../DMI/window/menu_radio.cpp:24
 msgid "Use short number"
 msgstr "Usar número corto"
 
-#: window/menu_radio.cpp:28
+#: ../DMI/window/menu_radio.cpp:28
 msgid "Enter RBC data"
 msgstr "Introducir datos\n"
 "RBC"
 
-#: window/menu_radio.cpp:32
+#: ../DMI/window/menu_radio.cpp:32
 msgid "Radio Network ID"
 msgstr "ID Red de radio"
 
-#: window/menu_settings.cpp:11
+#: ../DMI/window/menu_settings.cpp:11
 msgid "Settings"
 msgstr "Ajustes"
 
-#: window/menu_settings.cpp:25
-msgid "System version"
-msgstr "Versión del Sistema"
+#: ../DMI/window/menu_settings.cpp:13
+msgid "Language"
+msgstr "Idioma"
 
-#: window/menu_settings.cpp:29
+#: ../DMI/window/menu_settings.cpp:17 ../DMI/window/volume.cpp:13
+msgid "Volume"
+msgstr "Volumen"
+
+#: ../DMI/window/menu_settings.cpp:25
+msgid "System version"
+msgstr "Versión del\n"
+"Sistema"
+
+#: ../DMI/window/menu_settings.cpp:29
 msgid "Set VBC"
 msgstr "Establecimiento \n"
 "VBC"
 
-#: window/menu_settings.cpp:33
+#: ../DMI/window/menu_settings.cpp:33
 msgid "Remove VBC"
 msgstr "Suprimir VBC"
 
-#: window/menu_spec.cpp:11
+#: ../DMI/window/menu_spec.cpp:11
 msgid "Special"
 msgstr "Especial"
 
-#: window/menu_spec.cpp:13
+#: ../DMI/window/menu_spec.cpp:13
 msgid "Adhesion"
 msgstr "Adherencia"
 
-#: window/menu_spec.cpp:17
+#: ../DMI/window/menu_spec.cpp:17
 msgid "SR Speed/Distance"
 msgstr "Datos SR\n"
 "velocidad/distancia"
 
-#: window/menu_spec.cpp:21
+#: ../DMI/window/menu_spec.cpp:21
 msgid "Train integrity"
 msgstr "Integridad del tren"
 
-#: window/train_data.cpp:14 window/train_data.cpp:18 window/train_data.cpp:24
+#: ../DMI/window/menu_spec.cpp:26
+msgid "BMM reaction inhibition"
+msgstr "Inhibición de la reacción de BMM"
+
+#: ../DMI/window/train_data.cpp:14 ../DMI/window/train_data.cpp:18
+#: ../DMI/window/train_data.cpp:24
 msgid "Select\n"
 "type"
 msgstr "Sel.\n"
@@ -170,27 +219,23 @@ msgid "Spec"
 msgstr "Especi\n"
 "al"
 
-#: window/menu_ntc.cpp:11
-msgid "NTC data entry"
-msgstr "Entrada de datos NTC"
+#: ../DMI/window/menu_settings.cpp:37 ../DMI/window/menu_tests.cpp:14
+msgid "Component testing"
+msgstr "Pruebas EVC"
 
-#: window/menu_ntc.cpp:20
-msgid "End of data entry"
-msgstr "Fin entrada datos"
+#: ../DMI/window/menu_tests.cpp:35
+msgid "In progress..."
+msgstr "En curso"
 
-#: window/menu_radio.cpp:18
-msgid "RBC data"
-msgstr "Datos de Radio"
+#: ../DMI/window/menu_tests.cpp:44
+msgid "OK"
+msgstr "Correcto"
 
-#: window/brightness.cpp:13 window/menu_settings.cpp:21
-msgid "Brightness"
-msgstr "Brillo"
+#: ../DMI/window/menu_tests.cpp:48
+msgid "Failed"
+msgstr "Falló"
 
-#: window/menu_settings.cpp:13
-msgid "Language"
-msgstr "Idioma"
-
-#: window/menu_settings.cpp:17 window/volume.cpp:13
-msgid "Volume"
-msgstr "Volumen"
+#: ../DMI/window/menu_tests.cpp:53
+msgid "Type"
+msgstr "Tipo"
 
