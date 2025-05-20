@@ -18,6 +18,8 @@
 #include "../Packets/V1/27.h"
 #include "../Packets/39.h"
 #include "../Packets/V1/39.h"
+#include "../Packets/51.h"
+#include "../Packets/V1/51.h"
 #include "../Packets/68.h"
 #include "../Packets/79.h"
 #include "../Packets/V1/79.h"
@@ -36,8 +38,11 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
         case 3: {
             auto *nv = (V1::NationalValues*)packet.get();
             auto *nv2 = new NationalValues();
+            nv2->adhesion_nv_provided = false;
+            nv2->version_2_provided = false;
             for (auto &p2 : packets) {
                 if (p2->NID_PACKET == 203) {
+                    nv2->adhesion_nv_provided = true;
                     auto *brak = (V1::NationalValuesBraking*)p2.get();
                     nv2->Q_NVGUIPERM = brak->Q_NVGUIPERM;
                     nv2->Q_NVSBFBPERM = brak->Q_NVSBFBPERM;
@@ -91,7 +96,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             sp2->NID_PACKET = sp->NID_PACKET;
             sp2->Q_DIR = sp->Q_DIR;
             sp2->Q_SCALE = sp->Q_SCALE;
-            auto translate_element = [](V1::SSP_element_packet e) {
+            auto translate_element = [](const V1::SSP_element_packet &e) {
                 SSP_element_packet e2;
                 e2.Q_FRONT = e.Q_FRONT;
                 e2.D_STATIC = e.D_STATIC;
@@ -166,6 +171,43 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             }
             break;
         }
+        case 51: {
+            auto *asp = (V1::AxleLoadSpeedProfile*)packet.get();
+            auto *asp2 = new AxleLoadSpeedProfile();
+            asp2->NID_PACKET = asp->NID_PACKET;
+            asp2->Q_DIR = asp->Q_DIR;
+            asp2->Q_SCALE = asp->Q_SCALE;
+            auto translate_element = [](V1::ASP_element_packet e) {
+                ASP_element_packet e2;
+                e2.D_AXLELOAD = e.D_AXLELOAD;
+                e2.L_AXLELOAD = e.L_AXLELOAD;
+                e2.Q_FRONT = e.Q_FRONT;
+                e2.N_ITER = e.N_ITER;
+                auto translate_diff = [](V1::ASP_diff d) {
+                    ASP_diff d2;
+                    float load = d.M_AXLELOAD.rawdata / 2.0f;
+                    if (load <= 16) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.A;
+                    else if (load <= 17) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.HS17;
+                    else if (load <= 18) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.B1;
+                    else if (load <= 20) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.C2;
+                    else if (load <= 22.51) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.D2;
+                    else if (load <= 22.51) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.E4;
+                    d2.V_AXLELOAD = d.V_AXLELOAD;
+                    return d2;
+                };
+                for (auto &d : e.diffs) {
+                    e2.diffs.push_back(translate_diff(d));
+                }
+                return e2;
+            };
+            asp2->element = translate_element(asp->element);
+            asp2->N_ITER = asp->N_ITER;
+            for (auto &e : asp->elements) {
+                asp2->elements.push_back(translate_element(e));
+            }
+            trans = std::shared_ptr<ETCS_packet>(asp2);
+            break;
+        }
         case 68: {
             for (auto &p2 : packets) {
                 if (p2->NID_PACKET == 206) {
@@ -187,7 +229,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             geo2->NID_PACKET = geo->NID_PACKET;
             geo2->Q_DIR = geo->Q_DIR;
             geo2->Q_SCALE = geo->Q_SCALE;
-            auto translate_element = [](V1::GeographicalPosition_element_packet e) {
+            auto translate_element = [](const V1::GeographicalPosition_element_packet &e) {
                 GeographicalPosition_element_packet e2;
                 e2.D_POSOFF = e.D_POSOFF;
                 e2.NID_BG = e.NID_BG;
@@ -214,7 +256,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             mp2->NID_PACKET = mp->NID_PACKET;
             mp2->Q_DIR = mp->Q_DIR;
             mp2->Q_SCALE = mp->Q_SCALE;
-            auto translate_element = [](V1::MP_element_packet e) {
+            auto translate_element = [](const V1::MP_element_packet &e) {
                 MP_element_packet e2;
                 e2.D_MAMODE = e.D_MAMODE;
                 e2.L_MAMODE = e.L_MAMODE;

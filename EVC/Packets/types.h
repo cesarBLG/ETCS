@@ -21,6 +21,7 @@ struct bit_manipulator
     int position;
     bool error=false;
     bool sparefound=false;
+    int m_version = 33;
     bit_manipulator() : position(0)
     {
         write_mode = true;
@@ -64,7 +65,7 @@ struct bit_manipulator
             value = value<<1 | operator[](position++);
         }
         var->rawdata = value;
-        if (!var->is_valid())
+        if (!var->is_valid(m_version))
             sparefound = true;
         log(var);
     }

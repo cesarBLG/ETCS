@@ -71,7 +71,7 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
     r.peek(&NID_PACKET);
     ETCS_packet *p = nullptr;
     switch ((unsigned char)NID_PACKET) {
-        case 0: p = new VirtualBaliseCoverMarker(); break;
+        case 0: if (VERSION_X(m_version) > 1) p = new VirtualBaliseCoverMarker(); break;
         case 2: p = new SystemVersionOrder(); break;
         case 3:
             if (VERSION_X(m_version) == 1) p = new V1::NationalValues();
@@ -90,30 +90,30 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
             if (VERSION_X(m_version) == 1) p = new V1::TrackConditionChangeTractionSystem();
             else p = new TrackConditionChangeTractionSystem();
             break;
-        case 40: p = new TrackConditionChangeCurrentConsumption(); break;
+        case 40: if (VERSION_X(m_version) > 1) p = new TrackConditionChangeCurrentConsumption(); break;
         case 41: p = new LevelTransitionOrder(); break;
         case 42: p = new SessionManagement(); break;
         case 45: p = new RadioNetworkRegistration(); break;
         case 46: p = new ConditionalLevelTransitionOrder(); break;
         case 49: p = new ListSHBalises(); break;
         case 51: p = new AxleLoadSpeedProfile(); break;
-        case 52: p = new PermittedBrakingDistanceInformation(); break;
+        case 52: if (VERSION_X(m_version) > 1)p = new PermittedBrakingDistanceInformation(); break;
         case 57: p = new MovementAuthorityRequestParameters(); break;
         case 58: p = new PositionReportParameters(); break;
         case 63: p = new ListSRBalises(); break;
-        case 64: p = new InhibitionOfRevocableTSRL23(); break;
+        case 64: if (VERSION_X(m_version) > 1) p = new InhibitionOfRevocableTSRL23(); break;
         case 65: p = new TemporarySpeedRestriction(); break;
         case 66: p = new TemporarySpeedRestrictionRevocation(); break;
         case 67: p = new TrackConditionBigMetalMasses(); break;
         case 68: p = new TrackCondition(); break;
-        case 69: p = new TrackConditionStationPlatforms(); break;
+        case 69: if (VERSION_X(m_version) > 1) p = new TrackConditionStationPlatforms(); break;
         case 70: p = new RouteSuitabilityData(); break;
         case 71: p = new AdhesionFactor(); break;
         case 72:
             if (VERSION_X(m_version) == 1) p = new V1::PlainTextMessage();
             else p = new PlainTextMessage();
             break;
-        case 76: p = new FixedTextMessage(); break;
+        case 76: if (VERSION_X(m_version) > 1) p = new FixedTextMessage(); break;
         case 79:
             if (VERSION_X(m_version) == 1) p = new V1::GeographicalPosition();
             else p = new GeographicalPosition();
@@ -122,7 +122,7 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
             if (VERSION_X(m_version) == 1) p = new V1::ModeProfile();
             else p = new ModeProfile();
             break;
-        case 88: p = new LevelCrossingInformation(); break;
+        case 88: if (VERSION_X(m_version) > 1) p = new LevelCrossingInformation(); break;
         case 90: p = new TrackAheadFreeTransition(); break;
         case 131: p = new RBCTransitionOrder(); break;
         case 132: p = new DangerForShunting(); break;
@@ -133,9 +133,9 @@ ETCS_packet *ETCS_packet::construct(bit_manipulator &r, int m_version)
         case 139: p = new ReversingSupervisionInformation(); break;
         case 140: p = new TrainRunningNumberRBC(); break;
         case 141: p = new DefaultGradientTSR(); break;
-        case 143: p = new SessionManagementNeighbourRIU(); break;
-        case 180: p = new LSSMAToggleOrder(); break;
-        case 181: p = new GenericLSFunctionMarker(); break;
+        case 143: if (VERSION_X(m_version) > 1) p = new SessionManagementNeighbourRIU(); break;
+        case 180: if (VERSION_X(m_version) > 1) p = new LSSMAToggleOrder(); break;
+        case 181: if (VERSION_X(m_version) > 1) p = new GenericLSFunctionMarker(); break;
         case 200: if (VERSION_X(m_version) == 1) p = new V1::VirtualBaliseCoverMarker(); break;
         case 203: if (VERSION_X(m_version) == 1) p = new V1::NationalValuesBraking(); break;
         case 206: if (VERSION_X(m_version) == 1) p = new TrackCondition(); break;

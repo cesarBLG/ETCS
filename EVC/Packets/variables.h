@@ -12,6 +12,7 @@
 #include <set>
 #include "../Supervision/common.h"
 #include "../Time/clock.h"
+#include "../Version/version.h"
 #include "types.h"
 template<typename T>
 class ETCS_variable_custom
@@ -25,7 +26,7 @@ class ETCS_variable_custom
     {
         return rawdata;
     }
-    virtual bool is_valid()
+    virtual bool is_valid(int m_version)
     {
         return invalid.find(rawdata)==invalid.end();
     }
@@ -459,7 +460,7 @@ struct M_AXLELOADCAT_t : ETCS_variable
     uint32_t E4=11;
     uint32_t E5=12;
     M_AXLELOADCAT_t() : ETCS_variable(7) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 13;
     }
@@ -495,9 +496,9 @@ struct M_ERROR_t : ETCS_variable
     uint32_t DoubleLinkingError=7;
     uint32_t DoubleRepositioningError=8;
     M_ERROR_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata < 9;
+        return rawdata < (VERSION_X(m_version) == 1 ? 8 : 9);
     }
 };
 #if BASELINE > 3
@@ -675,7 +676,7 @@ struct M_LINEGAUGE_t : ETCS_variable
     uint32_t BitGB = 4;
     uint32_t BitGC = 8;
     M_LINEGAUGE_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata!=0 && (rawdata&0xF0)==0;
     }
@@ -687,9 +688,9 @@ struct M_LOADINGGAUGE_t : ETCS_variable
     uint32_t GB = 2;
     uint32_t GC = 3;
     M_LOADINGGAUGE_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<4;
+        return VERSION_X(m_version) == 1 || rawdata<4;
     }
 };
 struct M_LOC_t : ETCS_variable
@@ -698,7 +699,7 @@ struct M_LOC_t : ETCS_variable
     uint32_t EveryLRBG = 1;
     uint32_t NotEveryLRBG = 2;
     M_LOC_t() : ETCS_variable(3) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<3;
     }
@@ -708,9 +709,10 @@ struct M_MAMODE_t : ETCS_variable
     uint32_t OS=0;
     uint32_t SH=1;
     uint32_t LS=2;
-    M_MAMODE_t() : ETCS_variable(2) 
+    M_MAMODE_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
     {
-        invalid.insert(3);
+        return rawdata<(VERSION_X(m_version) == 1 ? 2 : 3);
     }
 };
 struct M_MCOUNT_t : ETCS_variable
@@ -819,6 +821,11 @@ struct M_MODE_t : ETCS_variable
         else if (rawdata == PS) return Mode::PS;
         else return Mode::SF;
     }
+    
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata != 15;
+    }
 };
 struct M_MODETEXTDISPLAY_t : ETCS_variable
 {
@@ -832,7 +839,7 @@ struct M_MODETEXTDISPLAY_t : ETCS_variable
     uint32_t LS = 12;
     uint32_t RV = 14;
     uint32_t NoModeLimited = 15;
-    M_MODETEXTDISPLAY_t() : ETCS_variable(4) 
+    M_MODETEXTDISPLAY_t() : ETCS_variable(4)
     {
         invalid.insert(3);
         invalid.insert(5);
@@ -852,6 +859,11 @@ struct M_MODETEXTDISPLAY_t : ETCS_variable
         else if (rawdata == LS) return Mode::LS;
         else if (rawdata == RV) return Mode::RV;
         else return Mode::TR;
+    }
+    bool is_valid(int m_version) override
+    {
+        if (VERSION_X(m_version) == 1 && rawdata == 12) return false;
+        return ETCS_variable::is_valid(m_version);
     }
 };
 #if BASELINE > 3
@@ -1043,7 +1055,7 @@ struct M_NVAVADH_t : ETCS_variable
     {
         return rawdata*0.05;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return get_value()<1.05;
     }
@@ -1094,7 +1106,7 @@ struct M_NVEBCL_t : ETCS_variable
         }
         return 0;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 10;
     }
@@ -1169,9 +1181,9 @@ struct M_POSITION_t : ETCS_variable
 {
     uint32_t NoMoreCalculation=16777215UL;
     M_POSITION_t() : ETCS_variable(24) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<10000000UL || rawdata == 16777215UL;
+        return VERSION_X(m_version) == 1 || rawdata<10000000UL || rawdata == 16777215UL;
     }
 };
 struct M_TRACKCOND_t : ETCS_variable
@@ -1188,9 +1200,9 @@ struct M_TRACKCOND_t : ETCS_variable
     uint32_t PowerlessSwitchOffPower=9;
     uint32_t SwitchOffEddyEmergency=10;
     M_TRACKCOND_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<11;
+        return rawdata < (VERSION_X(m_version) == 1 ? 10 : 11);
     }
 };
 struct M_VERSION_t : ETCS_variable
@@ -1200,7 +1212,7 @@ struct M_VERSION_t : ETCS_variable
     uint32_t V2_0=32;
     uint32_t V2_1=33;
     M_VERSION_t() : ETCS_variable(7) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<17 || rawdata>31;
     }
@@ -1214,7 +1226,7 @@ struct M_VOLTAGE_t : ETCS_variable
     uint32_t DC1k5V=4;
     uint32_t DC600V=5;
     M_VOLTAGE_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<6;
     }
@@ -1222,7 +1234,7 @@ struct M_VOLTAGE_t : ETCS_variable
 struct NC_CDDIFF_t : ETCS_variable
 {
     NC_CDDIFF_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<11;
     }
@@ -1284,7 +1296,7 @@ struct NC_CDDIFF_t : ETCS_variable
 struct NC_CDTRAIN_t : ETCS_variable
 {
     NC_CDTRAIN_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<11;
     }
@@ -1349,7 +1361,7 @@ struct NC_DIFF_t : ETCS_variable
     uint32_t FreightG=1;
     uint32_t Passenger=2;
     NC_DIFF_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<3;
     }
@@ -1360,9 +1372,9 @@ struct NC_TRAIN_t : ETCS_variable
     uint32_t FreightGBit=1;
     uint32_t PassengerBit=2;
     NC_TRAIN_t() : ETCS_variable(15) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<8;
+        return rawdata<(VERSION_X(m_version) ? 16384 : 8);
     }
 };
 struct NID_BG_t : ETCS_variable
@@ -1496,10 +1508,10 @@ struct NID_OPERATIONAL_t : ETCS_variable
         }
         return value;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         if (rawdata == 0xFFFFFFFF)
-            return false;
+            return VERSION_X(m_version) == 1;
         for (int i=0; i<8; i++)
         {
             int c = (rawdata>>(4*i))&15;
@@ -1634,6 +1646,10 @@ struct Q_EMERGENCYSTOP_t : ETCS_variable
     uint32_t NotRelevant=2;
     uint32_t Rejected=3;
     Q_EMERGENCYSTOP_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata < 3;
+    }
 };
 struct Q_ENDTIMER_t : ETCS_variable
 {
@@ -1888,7 +1904,7 @@ struct Q_TEXT_t : ETCS_variable
     uint32_t LXNotProtected=0;
     uint32_t Acknowledgement=1;
     Q_TEXT_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<2;
     }
@@ -1916,6 +1932,10 @@ struct Q_TEXTCONFIRM_t : ETCS_variable
     uint32_t ConfirmSB=2;
     uint32_t ConfirmEB=3;
     Q_TEXTCONFIRM_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata < 3;
+    }
 };
 struct Q_TEXTREPORT_t : ETCS_variable
 {
@@ -2031,7 +2051,7 @@ struct V_t : ETCS_variable
     {
         rawdata = (uint32_t)(val*3.6/5);
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 121;
     }
@@ -2054,7 +2074,7 @@ struct V_MAIN_t : V_t
 struct V_MAMODE_t : V_t
 {
     uint32_t UseNationalValue=127;
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata>126;
     }
@@ -2093,7 +2113,7 @@ struct V_release_t : V_t
 {
     uint32_t CalculateOnBoard=126;
     uint32_t UseNationalValue=127;
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata>125;
     }
@@ -2110,7 +2130,7 @@ struct V_REVERSE_t : V_t
 struct V_STATIC_t : V_t
 {
     uint32_t EndOfProfile=127;
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata==127;
     }
@@ -2120,7 +2140,7 @@ struct V_TRAIN_t : V_t
 };
 struct V_TSR_t : V_t
 {
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<121;
     }

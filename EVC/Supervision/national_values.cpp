@@ -120,6 +120,7 @@ void set_default_nv()
 }
 void load_national_values(NationalValues nv)
 {
+    // TODO: handle older versions
     set_default_nv();
     NV_NID_Cs.insert(nv.NID_C);
     NV_NID_Cs.insert(nv.NID_Cs.begin(), nv.NID_Cs.end());

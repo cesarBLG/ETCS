@@ -23,7 +23,7 @@ struct L_MESSAGE_stm_t : ETCS_variable
 struct M_BUT_ATTRIB_t : ETCS_variable
 {
     M_BUT_ATTRIB_t() : ETCS_variable(10) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return ((rawdata>>6)&3) != 3;
     }
@@ -41,7 +41,7 @@ struct NID_DRV_LANGUAGE_t : ETCS_variable
 struct M_IND_ATTRIB_t : ETCS_variable
 {
     M_IND_ATTRIB_t() : ETCS_variable(10) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return ((rawdata>>6)&3) != 3;
     }
@@ -224,7 +224,7 @@ struct T_BUTTONEVENT_t : ETCS_variable
 struct T_SOUND_t : ETCS_variable
 {
     T_SOUND_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 101 && rawdata > 0;
     }
@@ -241,7 +241,7 @@ struct V_DISPLAY_t : ETCS_variable
     {
         return rawdata/3.6;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 601 || rawdata == 1023;
     }
