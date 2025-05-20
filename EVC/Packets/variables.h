@@ -1214,7 +1214,7 @@ struct M_VERSION_t : ETCS_variable
     M_VERSION_t() : ETCS_variable(7) {}
     bool is_valid(int m_version) override
     {
-        return rawdata<17 || rawdata>31;
+        return rawdata<=17 || rawdata>31;
     }
 };
 struct M_VOLTAGE_t : ETCS_variable

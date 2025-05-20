@@ -89,6 +89,8 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             nv2->M_NVDERUN = nv->M_NVDERUN;
             nv2->D_NVSTFF = nv->D_NVSTFF;
             nv2->Q_NVDRIVER_ADHES = nv->Q_NVDRIVER_ADHES;
+            trans = std::shared_ptr<ETCS_packet>(nv2);
+            break;
         }
         case 27: {
             auto *sp = (V1::InternationalSSP*)packet.get();
@@ -134,6 +136,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             for (auto &e : sp->elements) {
                 sp2->elements.push_back(translate_element(e));
             }
+            trans = std::shared_ptr<ETCS_packet>(sp2);
             break;
         }
         case 39: {
@@ -271,6 +274,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             for (auto &e : mp->elements) {
                 mp2->elements.push_back(translate_element(e));
             }
+            break;
         }
         case 200:
             packet->NID_PACKET.rawdata = 0;
