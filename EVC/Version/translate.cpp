@@ -59,10 +59,8 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             nv2->NID_PACKET = nv->NID_PACKET;
             nv2->Q_DIR = nv->Q_DIR;
             nv2->Q_SCALE = nv->Q_SCALE;
-            if (nv->D_VALIDNV == 32767)
-                nv2->D_VALIDNV.rawdata = 32766;
-            else
-                nv2->D_VALIDNV = nv->D_VALIDNV;
+            nv2->D_VALIDNV = nv->D_VALIDNV;
+            nv2->D_VALIDNV.Now = 32768;
             nv2->NID_C = nv->NID_Cs[0];
             nv2->N_ITER_c.rawdata = nv->N_ITER_c-1;
             for (int i=0; i<nv2->N_ITER_c; i++) {
@@ -196,8 +194,8 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
                 e2.NID_C = e.NID_C;
                 e2.Q_NEWCOUNTRY = e.Q_NEWCOUNTRY;
                 e2.Q_MPOSITION = e.Q_MPOSITION;
-                if (e.M_POSITION == V1::M_POSITION_t::NoMoreCalculation)
-                    e2.M_POSITION.rawdata = M_POSITION_t::NoMoreCalculation;
+                if (e.M_POSITION == e.M_POSITION.NoMoreCalculation)
+                    e2.M_POSITION.rawdata = e2.M_POSITION.NoMoreCalculation;
                 else
                     e2.M_POSITION.rawdata = e.M_POSITION;
                 return e2;
@@ -255,7 +253,7 @@ std::shared_ptr<euroradio_message> translate_message(std::shared_ptr<euroradio_m
 {
     if (VERSION_X(version)==1) {
         if (message->NID_MESSAGE == 40 || message->NID_MESSAGE == 41) {
-            message->NID_LRBG.rawdata = NID_LRBG_t::Unknown;
+            message->NID_LRBG.rawdata = message->NID_LRBG.Unknown;
         } else if (message->NID_MESSAGE == 15) {
             auto *emerg = (conditional_emergency_stop*)message.get();
             emerg->D_REF.rawdata = 0;
@@ -306,21 +304,19 @@ std::shared_ptr<euroradio_message_traintotrack> translate_message(std::shared_pt
                 p2->V_MAXTRAIN = p->V_MAXTRAIN;
                 p2->M_LOADINGGAUGE.rawdata = 0;
                 float load = 0;
-                switch (p->M_AXLELOADCAT.rawdata) {
-                    case M_AXLELOADCAT_t::A: load = 16; break;
-                    case M_AXLELOADCAT_t::HS17: load = 17; break;
-                    case M_AXLELOADCAT_t::B1: load = 18; break;
-                    case M_AXLELOADCAT_t::B2: load = 18; break;
-                    case M_AXLELOADCAT_t::C2: load = 20; break;
-                    case M_AXLELOADCAT_t::C3: load = 20; break;
-                    case M_AXLELOADCAT_t::C4: load = 20; break;
-                    case M_AXLELOADCAT_t::D2: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D3: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D4: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D4XL: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::E4: load = 25; break;
-                    case M_AXLELOADCAT_t::E5: load = 25; break;
-                }
+                if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.A) load = 16;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.HS17) load = 17;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.B1) load = 18;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.B2) load = 18;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C2) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C3) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C4) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D2) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D3) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D4) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D4XL) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.E4) load = 25;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.E5) load = 25;
                 p2->M_AXLELOAD.rawdata = (int)(load*2);
                 p2->M_AIRTIGHT = p->M_AIRTIGHT;
                 p2->N_ITERtraction.rawdata = p2->M_TRACTIONs.size();
@@ -333,7 +329,7 @@ std::shared_ptr<euroradio_message_traintotrack> translate_message(std::shared_pt
                 auto *ma = (MA_request*)message.get();
                 auto *ma2 = new V1::MA_request();
                 ma2->NID_MESSAGE = ma->NID_MESSAGE;
-                ma2->Q_TRACKDEL.rawdata = (ma->Q_MARQSTREASON.rawdata>>Q_MARQSTREASON_t::TrackDescriptionDeletedBit)&1;
+                ma2->Q_TRACKDEL.rawdata = (ma->Q_MARQSTREASON.rawdata>>ma->Q_MARQSTREASON.TrackDescriptionDeletedBit)&1;
                 trans = std::shared_ptr<euroradio_message_traintotrack>(ma2);
                 break;
             }

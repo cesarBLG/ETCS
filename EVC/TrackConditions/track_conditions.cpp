@@ -290,14 +290,12 @@ void load_track_condition_traction(TrackConditionChangeTractionSystem cond, dist
     tc->m_voltage = cond.M_VOLTAGE;
     tc->nid_ctraction = cond.NID_CTRACTION;
     TractionSystem_DMI traction;
-    switch (cond.M_VOLTAGE.rawdata) {
-        case M_VOLTAGE_t::NonFitted: traction = TractionSystem_DMI::NonFitted; break;
-        case M_VOLTAGE_t::DC600V: traction = TractionSystem_DMI::DC750V; break;
-        case M_VOLTAGE_t::DC1k5V: traction = TractionSystem_DMI::DC1500V; break;
-        case M_VOLTAGE_t::DC3kV: traction = TractionSystem_DMI::DC3000V; break;
-        case M_VOLTAGE_t::AC15kV16Hz7: traction = TractionSystem_DMI::AC15kV; break;
-        case M_VOLTAGE_t::AC25kV50Hz: traction = TractionSystem_DMI::AC25kV; break;
-    }
+    if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.NonFitted) traction = TractionSystem_DMI::NonFitted;
+    else if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.DC600V) traction = TractionSystem_DMI::DC750V;
+    else if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.DC1k5V) traction = TractionSystem_DMI::DC1500V;
+    else if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.DC3kV) traction = TractionSystem_DMI::DC3000V;
+    else if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.AC15kV16Hz7) traction = TractionSystem_DMI::AC15kV;
+    else if (cond.M_VOLTAGE.rawdata == cond.M_VOLTAGE.AC25kV50Hz) traction = TractionSystem_DMI::AC25kV;
     tc->start_symbol = PlanningTrackCondition(traction, true);
     tc->announcement_symbol = 25 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
     tc->active_symbol = 23 + cond.M_VOLTAGE.rawdata*2 + (automatic_traction_system_change ? 0 : 1);
@@ -334,7 +332,7 @@ void load_track_condition_bigmetal(TrackConditionBigMetalMasses cond, distance r
 }
 void load_track_condition_various(TrackCondition cond, distance ref, bool special)
 {
-    if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+    if (cond.Q_TRACKINIT == cond.Q_TRACKINIT.InitialState) {
         distance resume = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
         for (auto it = track_conditions.begin(); it != track_conditions.end();) {
             TrackConditions c = it->get()->condition;
@@ -376,13 +374,13 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
     elements.insert(elements.end(), cond.elements.begin(), cond.elements.end());
     distance curr = ref;
     for (auto it = elements.begin(); it != elements.end(); ++it) {
-        bool s = it->M_TRACKCOND == M_TRACKCOND_t::NonStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::TunnelStoppingArea || it->M_TRACKCOND == M_TRACKCOND_t::SoundHorn;
+        bool s = it->M_TRACKCOND == it->M_TRACKCOND.NonStoppingArea || it->M_TRACKCOND == it->M_TRACKCOND.TunnelStoppingArea || it->M_TRACKCOND == it->M_TRACKCOND.SoundHorn;
         if (s != special) {
             curr += it->D_TRACKCOND.get_value(cond.Q_SCALE);
             continue;
         }
         if ((traction_systems.empty() || (traction_systems.size() == 1 && traction_systems.front().electrification == NonElectrical)) &&
-        (it->M_TRACKCOND == M_TRACKCOND_t::PowerlessLowerPantograph || it->M_TRACKCOND == M_TRACKCOND_t::PowerlessSwitchOffPower || it->M_TRACKCOND == M_TRACKCOND_t::SwitchOffRegenerative)) {
+        (it->M_TRACKCOND == it->M_TRACKCOND.PowerlessLowerPantograph || it->M_TRACKCOND == it->M_TRACKCOND.PowerlessSwitchOffPower || it->M_TRACKCOND == it->M_TRACKCOND.SwitchOffRegenerative)) {
             curr += it->D_TRACKCOND.get_value(cond.Q_SCALE);
             continue;
         }
@@ -391,76 +389,64 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
         curr = tc->start;
         tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
         tc->profile = true;
-        switch(it->M_TRACKCOND) {
-            case M_TRACKCOND_t::AirTightness:
-                tc->condition = TrackConditions::AirTightness;
-                if (Q_airtight) {
-                    tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::CloseAirIntake, !automatic_close_air_intake);
-                    tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::OpenAirIntake, !automatic_open_air_intake);
-                    tc->announcement_symbol = automatic_open_air_intake ? 19 : 21;
-                    tc->active_symbol = 19;
-                    tc->end_active_symbol = automatic_close_air_intake ? 20 : 22;
-                }
-                break;
-            case M_TRACKCOND_t::TunnelStoppingArea:
-                tc->condition = TrackConditions::TunnelStoppingArea;
-                break;
-            case M_TRACKCOND_t::NonStoppingArea:
-                tc->condition = TrackConditions::NonStoppingArea;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NonStoppingArea, true);
-                tc->active_symbol = 10;
-                tc->announcement_symbol = 11;
-                break;
-            case M_TRACKCOND_t::SoundHorn:
-                tc->condition = TrackConditions::SoundHorn;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::SoundHorn, true);
-                tc->active_symbol = 35;
-                break;
-            case M_TRACKCOND_t::PowerlessLowerPantograph:
-                tc->condition = TrackConditions::PowerLessSectionLowerPantograph;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::LowerPantograph, !automatic_lower_pantograph);
-                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::RaisePantograph, !automatic_raise_pantograph);
-                tc->announcement_symbol = automatic_lower_pantograph ? 2 : 3;
-                tc->active_symbol = 1;
-                tc->end_active_symbol = automatic_raise_pantograph ? 4 : 5;
-                break;
-            case M_TRACKCOND_t::PowerlessSwitchOffPower:
-                tc->condition = TrackConditions::PowerLessSectionSwitchMainPowerSwitch;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NeutralSectionAnnouncement, !automatic_open_power_switch);
-                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::EndOfNeutralSection, !automatic_close_power_switch);
-                tc->announcement_symbol = automatic_open_power_switch ? 6 : 7;
-                tc->active_symbol = 6;
-                tc->end_active_symbol = automatic_close_power_switch ? 8 : 9;
-                break;
-            case M_TRACKCOND_t::RadioHole:
-                tc->condition = TrackConditions::RadioHole;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RadioHole, false);
-                tc->active_symbol = 12;
-                break;
-            case M_TRACKCOND_t::SwitchOffRegenerative:
-                tc->condition = TrackConditions::SwitchOffRegenerativeBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, !automatic_regenerative_inhibition);
-                tc->announcement_symbol = automatic_regenerative_inhibition ? 17 : 18;
-                tc->active_symbol = 17;
-                break;
-            case M_TRACKCOND_t::SwitchOffShoe:
-                tc->condition = TrackConditions::SwitchOffMagneticShoe;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, !automatic_magnetic_inhibition);
-                tc->announcement_symbol = automatic_magnetic_inhibition ? 13 : 14;
-                tc->active_symbol = 13;
-                break;
-            case M_TRACKCOND_t::SwitchOffEddyService:
-                tc->condition = TrackConditions::SwitchOffEddyCurrentServiceBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
-                tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
-                tc->active_symbol = 15;
-                break;
-            case M_TRACKCOND_t::SwitchOffEddyEmergency:
-                tc->condition = TrackConditions::SwitchOffEddyCurrentEmergencyBrake;
-                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
-                tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
-                tc->active_symbol = 15;
-                break;
+        if (it->M_TRACKCOND == it->M_TRACKCOND.AirTightness) {
+            tc->condition = TrackConditions::AirTightness;
+            if (Q_airtight) {
+                tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::CloseAirIntake, !automatic_close_air_intake);
+                tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::OpenAirIntake, !automatic_open_air_intake);
+                tc->announcement_symbol = automatic_open_air_intake ? 19 : 21;
+                tc->active_symbol = 19;
+                tc->end_active_symbol = automatic_close_air_intake ? 20 : 22;
+            }
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.TunnelStoppingArea) {
+            tc->condition = TrackConditions::TunnelStoppingArea;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.NonStoppingArea) {
+            tc->condition = TrackConditions::NonStoppingArea;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NonStoppingArea, true);
+            tc->active_symbol = 10;
+            tc->announcement_symbol = 11;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.SoundHorn) {
+            tc->condition = TrackConditions::SoundHorn;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::SoundHorn, true);
+            tc->active_symbol = 35;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.PowerlessLowerPantograph) {
+            tc->condition = TrackConditions::PowerLessSectionLowerPantograph;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::LowerPantograph, !automatic_lower_pantograph);
+            tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::RaisePantograph, !automatic_raise_pantograph);
+            tc->announcement_symbol = automatic_lower_pantograph ? 2 : 3;
+            tc->active_symbol = 1;
+            tc->end_active_symbol = automatic_raise_pantograph ? 4 : 5;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.PowerlessSwitchOffPower) {
+            tc->condition = TrackConditions::PowerLessSectionSwitchMainPowerSwitch;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::NeutralSectionAnnouncement, !automatic_open_power_switch);
+            tc->end_symbol = PlanningTrackCondition(TrackConditionType_DMI::EndOfNeutralSection, !automatic_close_power_switch);
+            tc->announcement_symbol = automatic_open_power_switch ? 6 : 7;
+            tc->active_symbol = 6;
+            tc->end_active_symbol = automatic_close_power_switch ? 8 : 9;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.RadioHole) {
+            tc->condition = TrackConditions::RadioHole;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RadioHole, false);
+            tc->active_symbol = 12;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.SwitchOffRegenerative) {
+            tc->condition = TrackConditions::SwitchOffRegenerativeBrake;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::RegenerativeBrakeInhibition, !automatic_regenerative_inhibition);
+            tc->announcement_symbol = automatic_regenerative_inhibition ? 17 : 18;
+            tc->active_symbol = 17;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.SwitchOffShoe) {
+            tc->condition = TrackConditions::SwitchOffMagneticShoe;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::MagneticShoeInhibition, !automatic_magnetic_inhibition);
+            tc->announcement_symbol = automatic_magnetic_inhibition ? 13 : 14;
+            tc->active_symbol = 13;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.SwitchOffEddyService) {
+            tc->condition = TrackConditions::SwitchOffEddyCurrentServiceBrake;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
+            tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
+            tc->active_symbol = 15;
+        } else if (it->M_TRACKCOND == it->M_TRACKCOND.SwitchOffEddyEmergency) {
+            tc->condition = TrackConditions::SwitchOffEddyCurrentEmergencyBrake;
+            tc->start_symbol = PlanningTrackCondition(TrackConditionType_DMI::EddyCurrentBrakeInhibition, !automatic_eddy_inhibition);
+            tc->announcement_symbol = automatic_eddy_inhibition ? 15 : 16;
+            tc->active_symbol = 15;
         }
         bool exists = false;
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ++it) {
@@ -485,7 +471,7 @@ void load_track_condition_various(TrackCondition cond, distance ref, bool specia
 }
 void load_track_condition_platforms(TrackConditionStationPlatforms cond, distance ref)
 {
-    if (cond.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) { 
+    if (cond.Q_TRACKINIT == cond.Q_TRACKINIT.InitialState) { 
         distance resume = ref + cond.D_TRACKINIT.get_value(cond.Q_SCALE);
         for (auto it = track_conditions.begin(); it != track_conditions.end(); ) {
             if (it->get()->condition == TrackConditions::StationPlatform) {
@@ -522,8 +508,8 @@ void load_track_condition_platforms(TrackConditionStationPlatforms cond, distanc
         tc->end = tc->start + it->L_TRACKCOND.get_value(cond.Q_SCALE);
         tc->profile = true;
         tc->platform_height = it->M_PLATFORM.get_value();
-        tc->right_side = it->Q_PLATFORM != Q_PLATFORM_t::LeftSide;
-        tc->left_side = it->Q_PLATFORM != Q_PLATFORM_t::RightSide;
+        tc->right_side = it->Q_PLATFORM != it->Q_PLATFORM.LeftSide;
+        tc->left_side = it->Q_PLATFORM != it->Q_PLATFORM.RightSide;
         tc->condition = TrackConditions::StationPlatform;
         track_conditions.insert(std::shared_ptr<track_condition>(tc));
     }

@@ -231,7 +231,7 @@ void level_transition_received(level_transition_information info)
 }
 level_transition_information::level_transition_information(LevelTransitionOrder o)
 {
-    if (o.D_LEVELTR == D_LEVELTR_t::Now) {
+    if (o.D_LEVELTR == o.D_LEVELTR.Now) {
         immediate = true;
     } else {
         immediate = false;

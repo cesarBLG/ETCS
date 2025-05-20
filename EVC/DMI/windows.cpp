@@ -1509,7 +1509,7 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "TrainRunningNumber") {
             active_dialog_step = "S1-2";
         } else if (step == "ContactLastRBC" || step == "UseShortNumber") {
-            set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,NID_RBC_t::ContactLastRBC,0}) : contact_info({0,0,NID_RADIO_t::UseShortNumber}));
+            set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,ContactLastRBC,0}) : contact_info({0,0,UseShortNumber}));
             som_status = A31;
         } else if (step == "EnterRBCdata") {
             active_dialog_step = "S3-3";
@@ -1580,7 +1580,7 @@ void update_dialog_step(std::string step, std::string step2)
         } else if (step == "MaintainShunting" || step == "NonLeading") {
             active_dialog = dialog_sequence::None;
         } else if (step == "ContactLastRBC" || step == "UseShortNumber") {
-            set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,NID_RBC_t::ContactLastRBC,0}) : contact_info({0,0,NID_RADIO_t::UseShortNumber}));
+            set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,ContactLastRBC,0}) : contact_info({0,0,UseShortNumber}));
             if (supervising_rbc)
                 supervising_rbc->open(N_tries_radio);
             active_dialog_step = "S8";

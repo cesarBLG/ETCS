@@ -18,12 +18,12 @@ void handle_geographical_position(GeographicalPosition p, bg_id this_bg)
     elems.insert(elems.end(), p.elements.begin(), p.elements.end());
     for (int i=0; i<elems.size(); i++) {
         geographical_position g;
-        g.forwards = elems[i].Q_MPOSITION == Q_MPOSITION_t::Same;
+        g.forwards = elems[i].Q_MPOSITION == elems[i].Q_MPOSITION.Same;
         g.initial_val = elems[i].M_POSITION.rawdata;
-        if (elems[i].M_POSITION == M_POSITION_t::NoMoreCalculation)
+        if (elems[i].M_POSITION == elems[i].M_POSITION.NoMoreCalculation)
             g.initial_val = -1;
         g.start_offset = elems[i].D_POSOFF.get_value(p.Q_SCALE);
-        g.id = {elems[i].Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? this_bg.NID_C : elems[i].NID_C, (int)elems[i].NID_BG};
+        g.id = {elems[i].Q_NEWCOUNTRY == elems[i].Q_NEWCOUNTRY.SameCountry ? this_bg.NID_C : elems[i].NID_C, (int)elems[i].NID_BG};
         geo_references.push_back(g);
     }
 }

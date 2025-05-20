@@ -61,13 +61,13 @@ void add_message(PlainTextMessage m, distance ref)
 {
     std::string text = X_TEXT_t::getUTF8(m.X_TEXT);
     std::function<bool(text_message&)> start = [m, ref](text_message &t) {
-        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
-        if (m.D_TEXTDISPLAY != D_TEXTDISPLAY_t::NotDistanceLimited)
+        if (m.D_TEXTDISPLAY != m.D_TEXTDISPLAY.NotDistanceLimited)
             conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
-        if (m.M_MODETEXTDISPLAY1!=M_MODETEXTDISPLAY_t::NoModeLimited)
+        if (m.M_MODETEXTDISPLAY1 != m.M_MODETEXTDISPLAY1.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
-        if (m.M_LEVELTEXTDISPLAY1!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+        if (m.M_LEVELTEXTDISPLAY1 != m.M_LEVELTEXTDISPLAY1.NoLevelLimited)
             conds.push_back(level == m.M_LEVELTEXTDISPLAY1.get_value());
         bool cond = waitall;
         for (int i=0; i<conds.size(); i++) {
@@ -79,15 +79,15 @@ void add_message(PlainTextMessage m, distance ref)
         return cond;
     };
     std::function<bool(text_message&)> end = [m, ref](text_message &t) {
-        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
-        if (m.L_TEXTDISPLAY != L_TEXTDISPLAY_t::NotDistanceLimited)
+        if (m.L_TEXTDISPLAY != m.L_TEXTDISPLAY.NotDistanceLimited)
             conds.push_back(t.shown && d_estfront>t.first_distance.est+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
-        if (m.M_MODETEXTDISPLAY2!=M_MODETEXTDISPLAY_t::NoModeLimited)
+        if (m.M_MODETEXTDISPLAY2 != m.M_MODETEXTDISPLAY2.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY2.get_value());
-        if (m.M_LEVELTEXTDISPLAY2!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+        if (m.M_LEVELTEXTDISPLAY2 != m.M_LEVELTEXTDISPLAY2.NoLevelLimited)
             conds.push_back(level == m.M_LEVELTEXTDISPLAY2.get_value());
-        if (m.T_TEXTDISPLAY != T_TEXTDISPLAY_t::NoTimeLimited)
+        if (m.T_TEXTDISPLAY != m.T_TEXTDISPLAY.NoTimeLimited)
             conds.push_back(t.shown && t.first_displayed+m.T_TEXTDISPLAY*1000<get_milliseconds());
         bool cond = waitall;
         for (int i=0; i<conds.size(); i++) {
@@ -96,14 +96,14 @@ void add_message(PlainTextMessage m, distance ref)
             else
                 cond |= conds[i];
         }
-        if (m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm)
-            return (m.Q_CONFTEXTDISPLAY == Q_CONFTEXTDISPLAY_t::AcknowledgeEnds || cond || (operated_version>>4)==1) && t.acknowledged;
+        if (m.Q_TEXTCONFIRM != m.Q_TEXTCONFIRM.NoConfirm)
+            return (m.Q_CONFTEXTDISPLAY == m.Q_CONFTEXTDISPLAY.AcknowledgeEnds || cond || (operated_version>>4)==1) && t.acknowledged;
         return cond;
     };
-    text_message t(text, m.Q_TEXTCLASS == Q_TEXTCLASS_t::ImportantInformation, m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm, 0, end);
+    text_message t(text, m.Q_TEXTCLASS == m.Q_TEXTCLASS.ImportantInformation, m.Q_TEXTCONFIRM != m.Q_TEXTCONFIRM.NoConfirm, 0, end);
     t.start_condition = start;
     t.type = text_message_type::PlainText;
-    if (m.Q_TEXTREPORT == Q_TEXTREPORT_t::AckReport) {
+    if (m.Q_TEXTREPORT == m.Q_TEXTREPORT.AckReport) {
         t.trackid = m.NID_TEXTMESSAGE;
         t.report_rbc = {m.NID_C, m.NID_RBC, 0};
     }
@@ -112,18 +112,16 @@ void add_message(PlainTextMessage m, distance ref)
 void add_message(FixedTextMessage m, distance ref)
 {
     std::string text;
-    switch (m.Q_TEXT.rawdata) {
-        case Q_TEXT_t::LXNotProtected: text = get_text("Level crossing not protected"); break;
-        case Q_TEXT_t::Acknowledgement: text = get_text("Acknowledgement"); break;
-    }
+    if (m.Q_TEXT.rawdata == m.Q_TEXT.LXNotProtected) text = get_text("Level crossing not protected");
+    else if (m.Q_TEXT.rawdata == m.Q_TEXT.Acknowledgement) text = get_text("Acknowledgement");
     std::function<bool(text_message&)> start = [m, ref](text_message &t) {
-        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
-        if (m.D_TEXTDISPLAY != D_TEXTDISPLAY_t::NotDistanceLimited)
+        if (m.D_TEXTDISPLAY != m.D_TEXTDISPLAY.NotDistanceLimited)
             conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
-        if (m.M_MODETEXTDISPLAY1!=M_MODETEXTDISPLAY_t::NoModeLimited)
+        if (m.M_MODETEXTDISPLAY1 != m.M_MODETEXTDISPLAY1.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
-        if (m.M_LEVELTEXTDISPLAY1!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+        if (m.M_LEVELTEXTDISPLAY1 != m.M_LEVELTEXTDISPLAY1.NoLevelLimited)
             conds.push_back(level == m.M_LEVELTEXTDISPLAY1.get_value());
         bool cond = waitall;
         for (int i=0; i<conds.size(); i++) {
@@ -135,15 +133,15 @@ void add_message(FixedTextMessage m, distance ref)
         return cond;
     };
     std::function<bool(text_message&)> end = [m, ref](text_message &t) {
-        bool waitall = (m.Q_TEXTDISPLAY == Q_TEXTDISPLAY_t::WaitAll);
+        bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
-        if (m.L_TEXTDISPLAY != L_TEXTDISPLAY_t::NotDistanceLimited)
+        if (m.L_TEXTDISPLAY != m.L_TEXTDISPLAY.NotDistanceLimited)
             conds.push_back(t.shown && d_estfront>t.first_distance.est+m.L_TEXTDISPLAY.get_value(m.Q_SCALE));
-        if (m.M_MODETEXTDISPLAY2!=M_MODETEXTDISPLAY_t::NoModeLimited)
+        if (m.M_MODETEXTDISPLAY2 != m.M_MODETEXTDISPLAY2.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY2.get_value());
-        if (m.M_LEVELTEXTDISPLAY2!=M_LEVELTEXTDISPLAY_t::NoLevelLimited)
+        if (m.M_LEVELTEXTDISPLAY2 != m.M_LEVELTEXTDISPLAY2.NoLevelLimited)
             conds.push_back(level == m.M_LEVELTEXTDISPLAY2.get_value());
-        if (m.T_TEXTDISPLAY != T_TEXTDISPLAY_t::NoTimeLimited)
+        if (m.T_TEXTDISPLAY != m.T_TEXTDISPLAY.NoTimeLimited)
             conds.push_back(t.shown && t.first_displayed+m.T_TEXTDISPLAY*1000<get_milliseconds());
         bool cond = waitall;
         for (int i=0; i<conds.size(); i++) {
@@ -152,14 +150,14 @@ void add_message(FixedTextMessage m, distance ref)
             else
                 cond |= conds[i];
         }
-        if (m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm)
-            return (m.Q_CONFTEXTDISPLAY == Q_CONFTEXTDISPLAY_t::AcknowledgeEnds || cond || (operated_version>>4)==1) && t.acknowledged;
+        if (m.Q_TEXTCONFIRM != m.Q_TEXTCONFIRM.NoConfirm)
+            return (m.Q_CONFTEXTDISPLAY == m.Q_CONFTEXTDISPLAY.AcknowledgeEnds || cond || (operated_version>>4)==1) && t.acknowledged;
         return cond;
     };
-    text_message t(text, m.Q_TEXTCLASS == Q_TEXTCLASS_t::ImportantInformation, m.Q_TEXTCONFIRM != Q_TEXTCONFIRM_t::NoConfirm, 0, end);
+    text_message t(text, m.Q_TEXTCLASS == m.Q_TEXTCLASS.ImportantInformation, m.Q_TEXTCONFIRM != m.Q_TEXTCONFIRM.NoConfirm, 0, end);
     t.start_condition = start;
     t.type = text_message_type::FixedText;
-    if (m.Q_TEXTREPORT == Q_TEXTREPORT_t::AckReport) {
+    if (m.Q_TEXTREPORT == m.Q_TEXTREPORT.AckReport) {
         t.trackid = m.NID_TEXTMESSAGE;
         t.report_rbc = {m.NID_C, m.NID_RBC, 0};
     }

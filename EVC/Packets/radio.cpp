@@ -209,10 +209,10 @@ void send_position_report(bool som)
             return;
         auto *rep = new SoM_position_report();
         if (!solr)
-            rep->Q_STATUS.rawdata = Q_STATUS_t::Unknown;
+            rep->Q_STATUS.rawdata = rep->Q_STATUS.Unknown;
         else
-            rep->Q_STATUS.rawdata = position_valid ? Q_STATUS_t::Valid : Q_STATUS_t::Invalid;
-        if (rep->Q_STATUS != Q_STATUS_t::Valid)
+            rep->Q_STATUS.rawdata = position_valid ? rep->Q_STATUS.Valid : rep->Q_STATUS.Invalid;
+        if (rep->Q_STATUS != rep->Q_STATUS.Valid)
             supervising_rbc->accept_unknown_position = true;
         supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(rep));
     } else {
@@ -229,9 +229,9 @@ void send_position_report(bool som)
             if (session->status != session_status::Established)
                 continue;
             auto *rep = new position_report();
-            if (rep->PositionReport1BG && rep->PositionReport1BG->get()->NID_LRBG == NID_LRBG_t::Unknown)
+            if (rep->PositionReport1BG && rep->PositionReport1BG->get()->NID_LRBG == rep->PositionReport1BG->get()->NID_LRBG.Unknown)
                 supervising_rbc->accept_unknown_position = true;
-            else if (rep->PositionReport2BG && rep->PositionReport2BG->get()->NID_LRBG == NID_LRBG_t::Unknown)
+            else if (rep->PositionReport2BG && rep->PositionReport2BG->get()->NID_LRBG == rep->PositionReport2BG->get()->NID_LRBG.Unknown)
                 supervising_rbc->accept_unknown_position = true;
             auto msg = std::shared_ptr<euroradio_message_traintotrack>(rep);
             session->queue(msg);
@@ -253,11 +253,11 @@ void ma_request(bool driver, bool perturb, bool timer, bool trackdel, bool taf)
 {
     auto req = new MA_request();
     req->Q_MARQSTREASON.rawdata = 0;
-    req->Q_MARQSTREASON.rawdata |= (driver<<Q_MARQSTREASON_t::StartSelectedByDriverBit);
-    req->Q_MARQSTREASON.rawdata |= (perturb<<Q_MARQSTREASON_t::TimeBeforePerturbationBit);
-    req->Q_MARQSTREASON.rawdata |= (timer<<Q_MARQSTREASON_t::TimeBeforeTimerBit);
-    req->Q_MARQSTREASON.rawdata |= (trackdel<<Q_MARQSTREASON_t::TrackDescriptionDeletedBit);
-    req->Q_MARQSTREASON.rawdata |= (taf<<Q_MARQSTREASON_t::TrackAheadFreeBit);
+    req->Q_MARQSTREASON.rawdata |= (driver<<req->Q_MARQSTREASON.StartSelectedByDriverBit);
+    req->Q_MARQSTREASON.rawdata |= (perturb<<req->Q_MARQSTREASON.TimeBeforePerturbationBit);
+    req->Q_MARQSTREASON.rawdata |= (timer<<req->Q_MARQSTREASON.TimeBeforeTimerBit);
+    req->Q_MARQSTREASON.rawdata |= (trackdel<<req->Q_MARQSTREASON.TrackDescriptionDeletedBit);
+    req->Q_MARQSTREASON.rawdata |= (taf<<req->Q_MARQSTREASON.TrackAheadFreeBit);
     supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(req));
 }
 int64_t last_sent_timestamp;
@@ -295,15 +295,15 @@ ETCS_packet *get_position_report()
     if (!lrbg || lrbg->dir != -1) {
         PositionReport *r = new PositionReport();
         r->NID_PACKET = 0;
-        r->Q_SCALE = Q_SCALE_t::m1;
+        r->Q_SCALE = r->Q_SCALE.m1;
         if (!lrbg) {
-            r->NID_LRBG = NID_LRBG_t::Unknown;
-            r->D_LRBG = D_LRBG_t::Unknown;
-            r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
-            r->Q_DLRBG = Q_DLRBG_t::Unknown;
-            r->L_DOUBTOVER = L_DOUBTOVER_t::Unknown;
-            r->L_DOUBTUNDER = L_DOUBTUNDER_t::Unknown;
-            r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
+            r->NID_LRBG = r->NID_LRBG.Unknown;
+            r->D_LRBG = r->D_LRBG .Unknown;
+            r->Q_DIRLRBG = r->Q_DIRLRBG.Unknown;
+            r->Q_DLRBG = r->Q_DLRBG.Unknown;
+            r->L_DOUBTOVER = r->L_DOUBTOVER.Unknown;
+            r->L_DOUBTUNDER = r->L_DOUBTUNDER.Unknown;
+            r->Q_DIRTRAIN = r->Q_DIRTRAIN.Unknown;
         } else {
             int dir = lrbg->dir;
             r->NID_LRBG.set_value(lrbg->nid_lrbg);
@@ -315,7 +315,7 @@ ETCS_packet *get_position_report()
             r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
             r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront({lrbg->position, lrbg->locacc}), r->Q_SCALE);
         }
-        r->Q_LENGTH = Q_LENGTH_t::NoTrainIntegrityAvailable;
+        r->Q_LENGTH = r->Q_LENGTH.NoTrainIntegrityAvailable;
         r->V_TRAIN.set_value(V_est);
         r->M_MODE.set_value(mode);
         r->M_LEVEL.set_value(level);
@@ -324,31 +324,24 @@ ETCS_packet *get_position_report()
     } else {
         PositionReportBasedOnTwoBaliseGroups *r = new PositionReportBasedOnTwoBaliseGroups();
         r->NID_PACKET = 1;
-        r->Q_SCALE = Q_SCALE_t::m1;
+        r->Q_SCALE = r->Q_SCALE.m1;
         r->NID_LRBG.set_value(lrbg->nid_lrbg);
         double dist = d_estfront - lrbg->position;
         r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
-        if (prvlrbg) {
-            if (prvlrbg->position.orientation != lrbg->position.orientation) {
-                r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
-                r->Q_DLRBG = Q_DLRBG_t::Unknown;
-                r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
-                r->NID_PRVLRBG = NID_PRVLRBG_t::Unknown;
-            } else {
-                r->Q_DIRLRBG.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_orientation < 0);
-                r->Q_DLRBG.set_value(dist < 0);
-                r->Q_DIRTRAIN.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_direction < 0);
-                r->NID_PRVLRBG.set_value(prvlrbg->nid_lrbg);
-            }
+        if (prvlrbg && prvlrbg->position.orientation == lrbg->position.orientation) {
+            r->Q_DIRLRBG.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_orientation < 0);
+            r->Q_DLRBG.set_value(dist < 0);
+            r->Q_DIRTRAIN.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_direction < 0);
+            r->NID_PRVLRBG.set_value(prvlrbg->nid_lrbg);
         } else {
-            r->Q_DIRLRBG = Q_DIRLRBG_t::Unknown;
-            r->Q_DLRBG = Q_DLRBG_t::Unknown;
-            r->Q_DIRTRAIN = Q_DIRTRAIN_t::Unknown;
-            r->NID_PRVLRBG = NID_PRVLRBG_t::Unknown;
+            r->Q_DIRLRBG = r->Q_DIRLRBG.Unknown;
+            r->Q_DLRBG = r->Q_DLRBG.Unknown;
+            r->Q_DIRTRAIN = r->Q_DIRTRAIN.Unknown;
+            r->NID_PRVLRBG = r->NID_PRVLRBG.Unknown;
         }
         r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
         r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront({lrbg->position, lrbg->locacc}), r->Q_SCALE);
-        r->Q_LENGTH = Q_LENGTH_t::NoTrainIntegrityAvailable;
+        r->Q_LENGTH = r->Q_LENGTH.NoTrainIntegrityAvailable;
         r->V_TRAIN.set_value(V_est);
         r->M_MODE.set_value(mode);
         r->M_LEVEL.set_value(level);

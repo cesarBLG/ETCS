@@ -16,11 +16,11 @@ std::vector<SSP_element> get_SSP(distance start, InternationalSSP issp)
     for (int i=0; i<elements.size(); i++)
     {
         SSP_element e;
-        e.compensate_train_length = elements[i].Q_FRONT == Q_FRONT_t::TrainLengthDelay;
+        e.compensate_train_length = elements[i].Q_FRONT == elements[i].Q_FRONT.TrainLengthDelay;
         double dist = elements[i].D_STATIC.get_value(issp.Q_SCALE);
         start += dist;
         e.start = start;
-        if (elements[i].V_STATIC == V_STATIC_t::EndOfProfile)
+        if (elements[i].V_STATIC == elements[i].V_STATIC.EndOfProfile)
         {
             e.restrictions[0][0] = -1;
             ssp.push_back(e);

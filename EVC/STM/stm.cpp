@@ -579,7 +579,7 @@ void stm_send_train_data()
             }
             td->L_TRAIN.set_value(L_TRAIN);
             td->V_MAXTRAIN.set_value(V_train);
-            td->M_AIRTIGHT.rawdata = Q_airtight ? M_AIRTIGHT_t::Fitted : M_AIRTIGHT_t::NotFitted;
+            td->M_AIRTIGHT.rawdata = Q_airtight ? td->M_AIRTIGHT.Fitted : td->M_AIRTIGHT.NotFitted;
             msg.packets.push_back(std::shared_ptr<ETCS_packet>(td));
             stm->send_message(msg);
         }

@@ -131,25 +131,20 @@ void set_mode_profile(ModeProfile profile, distance ref, bool infill)
         start += it->D_MAMODE.get_value(profile.Q_SCALE);
         mode_profile p;
         p.start = start;
-        p.length = it->L_MAMODE == L_MAMODE_t::Infinity ? std::numeric_limits<float>::max() : it->L_MAMODE.get_value(profile.Q_SCALE);
+        p.length = it->L_MAMODE == it->L_MAMODE.Infinity ? std::numeric_limits<float>::max() : it->L_MAMODE.get_value(profile.Q_SCALE);
         p.acklength = it->L_ACKMAMODE.get_value(profile.Q_SCALE);
-        switch (it->M_MAMODE)
-        {
-            case M_MAMODE_t::OS:
-                p.mode = Mode::OS;
-                p.speed = V_NVONSIGHT;
-                break;
-            case M_MAMODE_t::LS:
-                p.mode = Mode::LS;
-                p.speed = V_NVLIMSUPERV;
-                break;
-            case M_MAMODE_t::SH:
-                p.mode = Mode::SH;
-                p.speed = V_NVSHUNT;
-                break;
+        if (it->M_MAMODE == it->M_MAMODE.OS) {
+            p.mode = Mode::OS;
+            p.speed = V_NVONSIGHT;
+        } else if (it->M_MAMODE == it->M_MAMODE.LS) {
+            p.mode = Mode::LS;
+            p.speed = V_NVLIMSUPERV;
+        } else if (it->M_MAMODE == it->M_MAMODE.SH) {
+            p.mode = Mode::SH;
+            p.speed = V_NVSHUNT;
         }
-        p.start_SvL = it->Q_MAMODE==Q_MAMODE_t::BeginningIsSvL;
-        if (it->V_MAMODE != V_MAMODE_t::UseNationalValue)
+        p.start_SvL = it->Q_MAMODE == it->Q_MAMODE.BeginningIsSvL;
+        if (it->V_MAMODE != it->V_MAMODE.UseNationalValue)
             p.speed = it->V_MAMODE.get_value();
         mode_profiles.push_back(p);
     }
