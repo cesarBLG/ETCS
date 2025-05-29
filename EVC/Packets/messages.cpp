@@ -324,8 +324,10 @@ void update_track_comm()
         reading = true;
         if (!t.readerror) {
             linked = t.Q_LINK == t.Q_LINK.Linked;
-            if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG)
+            if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG) {
                 balise_group_passed();
+                reading = true;
+            }
             if (reading_nid_bg != t.NID_BG) {
                 first_balise_time = get_milliseconds();
             }
@@ -355,7 +357,7 @@ void update_track_comm()
                 refpassed = true;
                 check_linking();
             }
-            if ((dir==0 && t.N_PIG == t.N_TOTAL) || (dir == 1 && t.N_PIG == 0)) {
+            if ((dir==0 && t.N_PIG == t.N_TOTAL) || (dir == 1 && t.N_PIG == 0) || (t.N_PIG == 0 && t.N_TOTAL == 0)) {
                 telegrams.push_back(t);
                 balise_group_passed();
                 return;
