@@ -323,11 +323,11 @@ void update_track_comm()
         last_passed_distance = passed_dist;
         reading = true;
         if (!t.readerror) {
-            linked = t.Q_LINK == t.Q_LINK.Linked;
             if (reading_nid_bg != -1 && reading_nid_bg != t.NID_BG) {
                 balise_group_passed();
                 reading = true;
             }
+            linked = t.Q_LINK == t.Q_LINK.Linked;
             if (reading_nid_bg != t.NID_BG) {
                 first_balise_time = get_milliseconds();
             }
