@@ -189,6 +189,13 @@ void SetParameters()
     };
     manager.AddParameter(p);
 
+    p = new ORserver::Parameter("etcs::tr_obu");
+    p->SetValue = [](string val) {
+        auto data = json::parse(val);
+        handle_tr_inputs(data);
+    };
+    manager.AddParameter(p);
+
     p = new ORserver::Parameter("etcs::set_speed_display");
     p->SetValue = [](string val) {
         if (val == "1" || val == "true") V_set_display = 1;
@@ -444,6 +451,7 @@ void start_or_iface()
     register_parameter("train_orientation");
     register_parameter("stm::command");
     register_parameter("stm::+::isolated");
+    register_parameter("etcs::tr_obu");
     register_parameter("etcs::isolated");
     register_parameter("etcs::failed");
     register_parameter("gsmr::active");

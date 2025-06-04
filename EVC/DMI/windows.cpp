@@ -19,6 +19,7 @@
 #include "../Procedures/stored_information.h"
 #include "../Packets/vbc.h"
 #include "../STM/stm.h"
+#include "../TrainSubsystems/train_interface.h"
 #include "../Version/version.h"
 #include "dmi.h"
 #include "platform_runtime.h"
@@ -827,7 +828,7 @@ void update_dmi_windows()
             (V_est == 0 && driver_id_valid && (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::UN || mode == Mode::SN)
                 && level_valid && (level == Level::N0 || level == Level::N1 || level == Level::NTC || ((level == Level::N2 || level == Level::N3) && supervising_rbc && supervising_rbc->status == session_status::Established))) ||
             (V_est == 0 && mode == Mode::PT && (level == Level::N1 || ((level == Level::N2 || level == Level::N3) && trip_exit_acknowledged && supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty())));
-        enabled_buttons["Non Leading"] = false;
+        enabled_buttons["Non Leading"] = V_est == 0 && driver_id_valid && level_valid && (mode == Mode::SB || mode == Mode::SH || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS) && nl_signal;
         enabled_buttons["Radio Data"] = V_est == 0 && driver_id_valid && level_valid &&
             (mode == Mode::SB || mode == Mode::FS || mode == Mode::LS || mode == Mode::SR || mode == Mode::OS || mode == Mode::NL || mode == Mode::PT || mode == Mode::UN || mode == Mode::SN);
         
@@ -1577,7 +1578,11 @@ void update_dialog_step(std::string step, std::string step2)
                 active_dialog = dialog_sequence::Shunting;
                 active_dialog_step = "D1";
             }
-        } else if (step == "MaintainShunting" || step == "NonLeading") {
+        } else if (step == "NonLeading") {
+            active_dialog = dialog_sequence::None;
+            if (V_est == 0 && nl_signal)
+                trigger_condition(46);
+        } else if (step == "MaintainShunting") {
             active_dialog = dialog_sequence::None;
         } else if (step == "ContactLastRBC" || step == "UseShortNumber") {
             set_supervising_rbc(step == "ContactLastRBC" ? contact_info({0,ContactLastRBC,0}) : contact_info({0,0,UseShortNumber}));

@@ -208,6 +208,13 @@ void initialize_mode_transitions()
     transitions.push_back({Mode::SN, Mode::IS, {1}, 1});
     transitions.push_back({Mode::RV, Mode::IS, {1}, 1});
 
+    transitions.push_back({Mode::SB, Mode::NL, {46}, 6});
+    transitions.push_back({Mode::SH, Mode::NL, {46}, 5});
+    transitions.push_back({Mode::FS, Mode::NL, {46}, 6});
+    transitions.push_back({Mode::LS, Mode::NL, {46}, 6});
+    transitions.push_back({Mode::SR, Mode::NL, {46}, 6});
+    transitions.push_back({Mode::OS, Mode::NL, {46}, 6});
+
     // Out of SRS conditions
     transitions.push_back({ Mode::IS, Mode::SB, {75}, 1 });
     transitions.push_back({ Mode::NP, Mode::SF, {76}, 1 });
