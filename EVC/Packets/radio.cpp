@@ -310,7 +310,7 @@ ETCS_packet *get_position_report()
             double dist = d_estfront - lrbg->position;
             r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
             r->Q_DIRLRBG.set_value(odometer_orientation * lrbg->position.orientation == 1 ? dir : 1-dir);
-            r->Q_DLRBG.set_value(dist > 0 ? dir : 1-dir);
+            r->Q_DLRBG.set_value(dist >= 0 ? dir : 1-dir);
             r->Q_DIRTRAIN.set_value(odometer_direction * lrbg->position.orientation == 1 ? dir : 1-dir);
             r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
             r->L_DOUBTUNDER.set_value(d_estfront-d_minsafefront({lrbg->position, lrbg->locacc}), r->Q_SCALE);
