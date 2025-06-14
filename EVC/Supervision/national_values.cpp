@@ -120,6 +120,7 @@ void set_default_nv()
 }
 void load_national_values(NationalValues nv)
 {
+    // TODO: handle older versions
     set_default_nv();
     NV_NID_Cs.insert(nv.NID_C);
     NV_NID_Cs.insert(nv.NID_Cs.begin(), nv.NID_Cs.end());
@@ -142,11 +143,11 @@ void load_national_values(NationalValues nv)
     M_NVCONTACT = nv.M_NVCONTACT;
     T_NVCONTACT = nv.T_NVCONTACT;
 
-    M_NVDERUN = nv.M_NVDERUN == M_NVDERUN_t::Yes;
+    M_NVDERUN = nv.M_NVDERUN == nv.M_NVDERUN.Yes;
 
     D_NVSTFF = nv.D_NVSTFF.get_value(nv.Q_SCALE);
 
-    Q_NVDRIVER_ADHES = nv.Q_NVDRIVER_ADHES == Q_NVDRIVER_ADHES_t::Allowed;
+    Q_NVDRIVER_ADHES = nv.Q_NVDRIVER_ADHES == nv.Q_NVDRIVER_ADHES.Allowed;
 
     A_NVMAXREDADH1 = nv.A_NVMAXREDADH1.get_value();
     A_NVMAXREDADH2 = nv.A_NVMAXREDADH2.get_value();
@@ -158,12 +159,12 @@ void load_national_values(NationalValues nv)
 
     M_NVEBCL = nv.M_NVEBCL.get_value();
 
-    if (nv.Q_NVKINT == Q_NVKINT_t::CorrectionFollow) {
+    if (nv.Q_NVKINT == nv.Q_NVKINT.CorrectionFollow) {
         std::vector<KVINT_element> kv;
         kv.push_back(nv.element_kv);
         kv.insert(kv.end(), nv.elements_kv.begin(), nv.elements_kv.end());
         for (KVINT_element e : kv) {
-            if (e.Q_NVKVINTSET == Q_NVKVINTSET_t::ConventionalPassengerTrains) {
+            if (e.Q_NVKVINTSET == e.Q_NVKVINTSET.ConventionalPassengerTrains) {
                 NV_KVINT_pass.clear();
                 std::vector<KVINT_step_element> kvp;
                 kvp.push_back(e.element);
@@ -176,7 +177,7 @@ void load_national_values(NationalValues nv)
                     ps.A_NVP23 = e.A_NVP23.get_value();
                     NV_KVINT_pass[s.V_NVKVINT.get_value()] = ps;
                 }
-            } else if (e.Q_NVKVINTSET == Q_NVKVINTSET_t::FreightTrains) {
+            } else if (e.Q_NVKVINTSET == e.Q_NVKVINTSET.FreightTrains) {
                 NV_KVINT_freight.clear();
                 std::vector<KVINT_step_element> kvf;
                 kvf.push_back(e.element);
@@ -205,7 +206,7 @@ optional<StoredNationalValueSet> not_yet_applicable_nv;
 void national_values_received(NationalValues nv, distance reference)
 {
     not_yet_applicable_nv = {};
-    if (nv.D_VALIDNV == D_VALIDNV_t::Now) {
+    if (nv.D_VALIDNV == nv.D_VALIDNV.Now) {
         load_national_values(nv);
     } else {
         not_yet_applicable_nv = {reference, nv};

@@ -76,6 +76,8 @@ class communication_session
     void setup_connection();
     void report_error(int num);
 };
+const unsigned int ContactLastRBC = 16383;
+const uint64_t UseShortNumber=std::numeric_limits<uint64_t>::max();
 extern communication_session *supervising_rbc;
 extern communication_session *accepting_rbc;
 extern communication_session *handing_over_rbc;

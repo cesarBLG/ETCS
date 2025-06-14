@@ -15,15 +15,13 @@ struct RouteSuitability_element
     {
         D_SUITABILITY.copy(r);
         Q_SUITABILITY.copy(r);
-        switch (Q_SUITABILITY.rawdata) {
-            case Q_SUITABILITY_t::LoadingGauge: M_LINEGAUGE.copy(r); break;
-            case Q_SUITABILITY_t::MaxAxleLoad: M_AXLELOADCAT.copy(r); break;
-            case Q_SUITABILITY_t::TractionSystem:
-                M_VOLTAGE.copy(r);
-                if (M_VOLTAGE != 0)
-                    NID_CTRACTION.copy(r);
-                break;
+        if (Q_SUITABILITY.rawdata == Q_SUITABILITY.LoadingGauge) M_LINEGAUGE.copy(r);
+        else if (Q_SUITABILITY.rawdata == Q_SUITABILITY.MaxAxleLoad) M_AXLELOADCAT.copy(r);
+        else if (Q_SUITABILITY.rawdata == Q_SUITABILITY.TractionSystem) {
+            M_VOLTAGE.copy(r);
+            if (M_VOLTAGE != 0) NID_CTRACTION.copy(r);
         }
+
     }
 };
 struct RouteSuitabilityData : ETCS_directional_packet

@@ -10,8 +10,6 @@
 #include "../TrackConditions/track_condition.h"
 #include "train_interface.h"
 #include "../STM/stm.h"
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
 bool cab_active[2] = {true, false};
 bool sl_signal;
 bool ps_signal;
@@ -159,7 +157,7 @@ void update_train_interface()
 void handle_tr_inputs(json &j)
 {
     if (j.contains("TR_OBU_TrainSleep") && j.contains("TR_OBU_TrainSleep_Not"))
-        sl_signal = j["TR_OBU_Train_Sleep"] && !j["TR_OBU_TrainSleep_Not"];
+        sl_signal = j["TR_OBU_TrainSleep"] && !j["TR_OBU_TrainSleep_Not"];
     if (j.contains("TR_OBU_PassiveShunting"))
         ps_signal = j["TR_OBU_PassiveShunting"];
     if (j.contains("TR_OBU_NLEnabled"))

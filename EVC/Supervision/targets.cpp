@@ -361,7 +361,7 @@ void PBD_target::calculate_restriction()
 }
 void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
 {
-    if (pbd.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+    if (pbd.Q_TRACKINIT == pbd.Q_TRACKINIT.InitialState) {
         distance resume = ref + pbd.D_TRACKINIT.get_value(pbd.Q_SCALE);
         delete_PBD(resume);
     }
@@ -372,7 +372,7 @@ void load_PBD(PermittedBrakingDistanceInformation &pbd, distance ref)
     elements.insert(elements.end(), pbd.elements.begin(), pbd.elements.end());
     for (auto &e : elements) {
         ref += e.D_PBDSR.get_value(pbd.Q_SCALE);
-        double grad = (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_PBDSR;
-        PBDs.push_back(std::make_shared<PBD_target>(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == Q_PBDSR_t::EBIntervention, grad));
+        double grad = (e.Q_GDIR == e.Q_GDIR.Uphill ? 0.001 : -0.001)*e.G_PBDSR;
+        PBDs.push_back(std::make_shared<PBD_target>(ref, ref+e.L_PBDSR.get_value(pbd.Q_SCALE), e.D_PBD.get_value(pbd.Q_SCALE), e.Q_PBDSR == e.Q_PBDSR.EBIntervention, grad));
     }
 }

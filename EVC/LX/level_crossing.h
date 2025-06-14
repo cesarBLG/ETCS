@@ -28,11 +28,11 @@ class level_crossing
         id = lx.NID_LX;
         start = ref+lx.D_LX.get_value(lx.Q_SCALE);
         length = lx.L_LX.get_value(lx.Q_SCALE);
-        lx_protected = lx.Q_LXSTATUS == Q_LXSTATUS_t::Protected;
+        lx_protected = lx.Q_LXSTATUS == lx.Q_LXSTATUS.Protected;
         if (!lx_protected)
         {
             V_LX = lx.V_LX.get_value();
-            stop = lx.Q_STOPLX == Q_STOPLX_t::StopRequired;
+            stop = lx.Q_STOPLX == lx.Q_STOPLX.StopRequired;
             if (stop) stoplength = lx.L_STOPLX.get_value(lx.Q_SCALE);
         }
     }

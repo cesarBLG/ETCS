@@ -10,6 +10,8 @@
 #include "../optional.h"
 #include <map>
 #include <string>
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 extern bool sl_signal;
 extern bool ps_signal;
 extern bool nl_signal;
@@ -34,3 +36,4 @@ extern bool automatic_eddy_inhibition;
 extern bool automatic_magnetic_inhibition;
 extern bool automatic_regenerative_inhibition;
 void update_train_interface();
+void handle_tr_inputs(json &j);

@@ -14,3 +14,4 @@ extern int operated_version;
 extern std::set<int> supported_versions;
 bool is_version_supported(int version);
 void operate_version(int version, bool rbc);
+void load_version();

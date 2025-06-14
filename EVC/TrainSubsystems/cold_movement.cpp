@@ -13,6 +13,7 @@
 #include "../Euroradio/session.h"
 #include "../Position/linking.h"
 #include "../Procedures/level_transition.h"
+#include "../Version/version.h"
 #include "platform_runtime.h"
 int cold_movement_status;
 void initialize_cold_movement()
@@ -34,6 +35,7 @@ void initialize_cold_movement()
     }
     odo = nullptr;
     save_cold_data("odometer_value", odo);
+    load_version();
     load_language();
     setup_national_values();
     load_vbcs();

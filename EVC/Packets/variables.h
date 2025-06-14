@@ -12,6 +12,7 @@
 #include <set>
 #include "../Supervision/common.h"
 #include "../Time/clock.h"
+#include "../Version/version.h"
 #include "types.h"
 template<typename T>
 class ETCS_variable_custom
@@ -25,7 +26,7 @@ class ETCS_variable_custom
     {
         return rawdata;
     }
-    virtual bool is_valid()
+    virtual bool is_valid(int m_version)
     {
         return invalid.find(rawdata)==invalid.end();
     }
@@ -43,6 +44,7 @@ struct bg_id
 {
     int NID_C;
     int NID_BG;
+    static const int Unknown = 16383;
     bool operator==(const bg_id &o) const
     {
         return NID_C == o.NID_C && NID_BG == o.NID_BG;
@@ -59,9 +61,9 @@ struct bg_id
 };
 struct Q_SCALE_t : ETCS_variable
 {
-    static const uint32_t cm10 = 0;
-    static const uint32_t m1 = 1;
-    static const uint32_t m10 = 2;
+    uint32_t cm10 = 0;
+    uint32_t m1 = 1;
+    uint32_t m10 = 2;
     Q_SCALE_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -78,9 +80,9 @@ struct A_t : ETCS_variable
 };
 struct A_NVMAXREDADH1_t : A_t
 {
-    static const uint32_t NoMaximumDisplayTargetInformation=61;
-    static const uint32_t NoMaximumDisplayTTI=62;
-    static const uint32_t NoMaximumNoDisplay=63;
+    uint32_t NoMaximumDisplayTargetInformation=61;
+    uint32_t NoMaximumDisplayTTI=62;
+    uint32_t NoMaximumNoDisplay=63;
     double get_value() const override
     {
         if (rawdata == NoMaximumDisplayTargetInformation) return -1;
@@ -91,9 +93,9 @@ struct A_NVMAXREDADH1_t : A_t
 };
 struct A_NVMAXREDADH2_t : A_t
 {
-    static const uint32_t NoMaximumDisplayTargetInformation=61;
-    static const uint32_t NoMaximumDisplayTTI=62;
-    static const uint32_t NoMaximumNoDisplay=63;
+    uint32_t NoMaximumDisplayTargetInformation=61;
+    uint32_t NoMaximumDisplayTTI=62;
+    uint32_t NoMaximumNoDisplay=63;
     double get_value() const override
     {
         if (rawdata == NoMaximumDisplayTargetInformation) return -1;
@@ -104,9 +106,9 @@ struct A_NVMAXREDADH2_t : A_t
 };
 struct A_NVMAXREDADH3_t : A_t
 {
-    static const uint32_t NoMaximumDisplayTargetInformation=61;
-    static const uint32_t NoMaximumDisplayTTI=62;
-    static const uint32_t NoMaximumNoDisplay=63;
+    uint32_t NoMaximumDisplayTargetInformation=61;
+    uint32_t NoMaximumDisplayTTI=62;
+    uint32_t NoMaximumNoDisplay=63;
     double get_value() const override
     {
         if (rawdata == NoMaximumDisplayTargetInformation) return -1;
@@ -127,9 +129,9 @@ struct D_t : ETCS_variable
     virtual double get_value(const Q_SCALE_t scale) const
     {
         double fact=1;
-        if (scale == Q_SCALE_t::m10)
+        if (scale == scale.m10)
             fact = 10;
-        else if (scale == Q_SCALE_t::cm10)
+        else if (scale == scale.cm10)
             fact = 0.1;
         return fact*rawdata;
     }
@@ -145,7 +147,7 @@ struct D_CURRENT_t : D_t
 };
 struct D_CYCLOC_t : D_t
 {
-    static const uint32_t NoCyclicalReportPosition=32767;
+    uint32_t NoCyclicalReportPosition=32767;
 };
 struct D_DP_t : D_t
 {
@@ -164,7 +166,7 @@ struct D_INFILL_t : D_t
 };
 struct D_LEVELTR_t : D_t
 {
-    static const uint32_t Now=32767;
+    uint32_t Now=32767;
 };
 struct D_LINK_t : D_t
 {
@@ -174,11 +176,11 @@ struct D_LOC_t : D_t
 };
 struct D_LRBG_t : D_t
 {
-    static const uint32_t Unknown=32767;
+    uint32_t Unknown=32767;
     void set_value(double val, Q_SCALE_t scale)
     {
-        if (scale == Q_SCALE_t::cm10) rawdata = val/10;
-        else if (scale == Q_SCALE_t::m1) rawdata = val;
+        if (scale == scale.cm10) rawdata = val/10;
+        else if (scale == scale.m1) rawdata = val;
         else rawdata = 10*val;
     }
     D_LRBG_t &operator=(uint32_t data) {rawdata=data; return *this;}
@@ -197,7 +199,7 @@ struct D_NVPOTRP_t : D_t
 };
 struct D_NVROLL_t : D_t
 {
-    static const uint32_t Infinity=32767;
+    uint32_t Infinity=32767;
     double get_value(Q_SCALE_t scale) const
     {
         if (rawdata == Infinity)
@@ -207,7 +209,7 @@ struct D_NVROLL_t : D_t
 };
 struct D_NVSTFF_t : D_t
 {
-    static const uint32_t Infinity=32767;
+    uint32_t Infinity=32767;
     double get_value(Q_SCALE_t scale) const
     {
         if (rawdata == Infinity)
@@ -236,9 +238,9 @@ struct D_REF_t : ETCS_variable
     double get_value(Q_SCALE_t scale)
     {
         double fact=1;
-        if (scale == Q_SCALE_t::m10)
+        if (scale == scale.m10)
             fact = 10;
-        else if (scale == Q_SCALE_t::cm10)
+        else if (scale == scale.cm10)
             fact = 0.1;
         if (rawdata>32767)
             return -fact*((rawdata ^ 65535)+1);
@@ -248,14 +250,14 @@ struct D_REF_t : ETCS_variable
 };
 struct D_REVERSE_t : D_t
 {
-    static const uint32_t Infinity=32767;
+    uint32_t Infinity=32767;
 };
 struct D_SECTIONTIMERSTOPLOC_t : D_t
 {
 };
 struct D_SR_t : D_t
 {
-    static const uint32_t Infinity=32767;
+    uint32_t Infinity=32767;
 };
 struct D_STARTREVERSEAREA_t : D_t
 {
@@ -274,7 +276,7 @@ struct D_TAFDISPLAY_t : D_t
 };
 struct D_TEXTDISPLAY_t : D_t
 {
-    static const uint32_t NotDistanceLimited=32767;
+    uint32_t NotDistanceLimited=32767;
 };
 struct D_TRACTION_t : D_t
 {
@@ -290,7 +292,7 @@ struct D_TSR_t : D_t
 };
 struct D_VALIDNV_t : D_t
 {
-    static const uint32_t Now=32767;
+    uint32_t Now=32767;
 };
 struct G_t : ETCS_variable
 {
@@ -298,7 +300,7 @@ struct G_t : ETCS_variable
 };
 struct G_A_t : G_t
 {
-    static const uint32_t EndOfGradient=255;
+    uint32_t EndOfGradient=255;
 };
 struct G_TSR_t : G_t
 {
@@ -333,23 +335,23 @@ struct L_AXLELOAD_t : D_t
 };
 struct L_DOUBTOVER_t : D_t
 {
-    static const uint32_t Unknown=32767;
+    uint32_t Unknown=32767;
     L_DOUBTOVER_t &operator=(uint32_t data) {rawdata=data; return *this;}
     void set_value(double val, Q_SCALE_t scale)
     {
-        if (scale == Q_SCALE_t::cm10) rawdata = val/10;
-        else if (scale == Q_SCALE_t::m1) rawdata = val;
+        if (scale == scale.cm10) rawdata = val/10;
+        else if (scale == scale.m1) rawdata = val;
         else rawdata = 10*val;
     }
 };
 struct L_DOUBTUNDER_t : D_t
 {
-    static const uint32_t Unknown=32767;
+    uint32_t Unknown=32767;
     L_DOUBTUNDER_t &operator=(uint32_t data) {rawdata=data; return *this;}
     void set_value(double val, Q_SCALE_t scale)
     {
-        if (scale == Q_SCALE_t::cm10) rawdata = val/10;
-        else if (scale == Q_SCALE_t::m1) rawdata = val;
+        if (scale == scale.cm10) rawdata = val/10;
+        else if (scale == scale.m1) rawdata = val;
         else rawdata = 10*val;
     }
 };
@@ -361,7 +363,7 @@ struct L_LX_t : D_t
 };
 struct L_MAMODE_t : D_t
 {
-    static const uint32_t Infinity=32767;
+    uint32_t Infinity=32767;
 };
 struct L_MESSAGE_t : ETCS_variable
 {
@@ -392,7 +394,7 @@ struct L_TEXT_t : ETCS_variable
 };
 struct L_TEXTDISPLAY_t : D_t
 {
-    static const uint32_t NotDistanceLimited=32767;
+    uint32_t NotDistanceLimited=32767;
 };
 struct L_TRACKCOND_t : D_t
 {
@@ -422,20 +424,20 @@ struct L_TSR_t : D_t
 };
 struct M_ACK_t : ETCS_variable
 {
-    static const uint32_t NoAcknowledgement=0;
-    static const uint32_t AcknowledgementRequired=1;
+    uint32_t NoAcknowledgement=0;
+    uint32_t AcknowledgementRequired=1;
     M_ACK_t() : ETCS_variable(1) {}
 };
 struct M_ADHESION_t : ETCS_variable
 {
-    static const uint32_t SlipperyRail=0;
-    static const uint32_t NonSlipperyRail=1;
+    uint32_t SlipperyRail=0;
+    uint32_t NonSlipperyRail=1;
     M_ADHESION_t() : ETCS_variable(1) {}
 };
 struct M_AIRTIGHT_t : ETCS_variable
 {
-    static const uint32_t NotFitted=0;
-    static const uint32_t Fitted=1;
+    uint32_t NotFitted=0;
+    uint32_t Fitted=1;
     M_AIRTIGHT_t() : ETCS_variable(2)
     {
         invalid.insert(2);
@@ -444,28 +446,28 @@ struct M_AIRTIGHT_t : ETCS_variable
 };
 struct M_AXLELOADCAT_t : ETCS_variable
 {
-    static const uint32_t A=0;
-    static const uint32_t HS17=1;
-    static const uint32_t B1=2;
-    static const uint32_t B2=3;
-    static const uint32_t C2=4;
-    static const uint32_t C3=5;
-    static const uint32_t C4=6;
-    static const uint32_t D2=7;
-    static const uint32_t D3=8;
-    static const uint32_t D4=9;
-    static const uint32_t D4XL=10;
-    static const uint32_t E4=11;
-    static const uint32_t E5=12;
+    uint32_t A=0;
+    uint32_t HS17=1;
+    uint32_t B1=2;
+    uint32_t B2=3;
+    uint32_t C2=4;
+    uint32_t C3=5;
+    uint32_t C4=6;
+    uint32_t D2=7;
+    uint32_t D3=8;
+    uint32_t D4=9;
+    uint32_t D4XL=10;
+    uint32_t E4=11;
+    uint32_t E5=12;
     M_AXLELOADCAT_t() : ETCS_variable(7) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 13;
     }
 };
 struct M_CURRENT_t : ETCS_variable
 {
-    static const uint32_t NoRestriction=1023;
+    uint32_t NoRestriction=1023;
     M_CURRENT_t() : ETCS_variable(10) {}
     int get_value()
     {
@@ -474,9 +476,9 @@ struct M_CURRENT_t : ETCS_variable
 };
 struct M_DUP_t : ETCS_variable
 {
-    static const uint32_t NoDuplicates=0;
-    static const uint32_t DuplicateOfNext=1;
-    static const uint32_t DuplicateOfPrev=2;
+    uint32_t NoDuplicates=0;
+    uint32_t DuplicateOfNext=1;
+    uint32_t DuplicateOfPrev=2;
     M_DUP_t() : ETCS_variable(2)
     {
         invalid.insert(3);
@@ -484,19 +486,19 @@ struct M_DUP_t : ETCS_variable
 };
 struct M_ERROR_t : ETCS_variable
 {
-    static const uint32_t BaliseGroupLinkingConsistencyError=0;
-    static const uint32_t LinkedMessageConsistencyError=1;
-    static const uint32_t UnlinkedMessageConsistencyError=2;
-    static const uint32_t RadioMessageConsistencyError=3;
-    static const uint32_t RadioSequenceError=4;
-    static const uint32_t SafeRadioConnectionError=5;
-    static const uint32_t SafetyCriticalFault=6;
-    static const uint32_t DoubleLinkingError=7;
-    static const uint32_t DoubleRepositioningError=8;
+    uint32_t BaliseGroupLinkingConsistencyError=0;
+    uint32_t LinkedMessageConsistencyError=1;
+    uint32_t UnlinkedMessageConsistencyError=2;
+    uint32_t RadioMessageConsistencyError=3;
+    uint32_t RadioSequenceError=4;
+    uint32_t SafeRadioConnectionError=5;
+    uint32_t SafetyCriticalFault=6;
+    uint32_t DoubleLinkingError=7;
+    uint32_t DoubleRepositioningError=8;
     M_ERROR_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata < 9;
+        return rawdata < (VERSION_X(m_version) == 1 ? 8 : 9);
     }
 };
 #if BASELINE > 3
@@ -505,6 +507,11 @@ namespace V2
 #endif
 struct M_LEVEL_t : ETCS_variable
 {
+    uint32_t N0=0;
+    uint32_t NTC=1;
+    uint32_t N1=2;
+    uint32_t N2=3;
+    uint32_t N3=4;
     M_LEVEL_t() : ETCS_variable(3)
     {
         invalid.insert(5);
@@ -513,56 +520,36 @@ struct M_LEVEL_t : ETCS_variable
     }
     Level get_level()
     {
-        switch (rawdata) {
-            case 0:
-                return Level::N0;
-            case 1:
-                return Level::NTC;
-            case 2:
-                return Level::N1;
-            case 3:
-                return Level::N2;
-            case 4:
-#if BASELINE == 4
-                return Level::N2;
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
+#if BASELINE < 4
+        else if (rawdata == N3) return Level::N3;
 #else
-                return Level::N3;
+        else if (rawdata == N3) return Level::N2;
 #endif
-            default:
-                return Level::Unknown;
-        }
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
     void set_value(Level lv)
     {
-        switch(lv) {
-            case Level::N0:
-                rawdata = 0;
-                break;
-            case Level::NTC:
-                rawdata = 1;
-                break;
-            case Level::N1:
-                rawdata = 2;
-                break;
-            case Level::N2:
-                rawdata = 3;
-                break;
+        if (lv == Level::N0) rawdata = N0;
+        else if (lv == Level::NTC) rawdata = NTC;
+        else if (lv == Level::N1) rawdata = N1;
+        else if (lv == Level::N2) rawdata = N2;
 #if BASELINE < 4
-            case Level::N3:
-                rawdata = 4;
-                break;
+        else if (lv == Level::N3) rawdata = N3;
 #endif
-        }
     }
 };
 struct M_LEVELTEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t N0=0;
-    static const uint32_t NTC=1;
-    static const uint32_t N1=2;
-    static const uint32_t N2=3;
-    static const uint32_t N3=4;
-    static const uint32_t NoLevelLimited=5;
+    uint32_t N0=0;
+    uint32_t NTC=1;
+    uint32_t N1=2;
+    uint32_t N2=3;
+    uint32_t N3=4;
+    uint32_t NoLevelLimited=5;
     M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
     {
         invalid.insert(6);
@@ -570,28 +557,25 @@ struct M_LEVELTEXTDISPLAY_t : ETCS_variable
     }
     Level get_value() const
     {
-        switch (rawdata) {
-            case N0:
-                return Level::N0;
-            case N1:
-                return Level::N1;
-            case N2:
-                return Level::N2;
-            case N3:
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
 #if BASELINE < 4
-                return Level::N3;
+        else if (rawdata == N3) return Level::N3;
 #else
-                return Level::N2;
+        else if (rawdata == N3) return Level::N2;
 #endif
-            case NTC:
-                return Level::NTC;
-            default:
-                return Level::Unknown;
-        }
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
 };
 struct M_LEVELTR_t : ETCS_variable
 {
+    uint32_t N0=0;
+    uint32_t NTC=1;
+    uint32_t N1=2;
+    uint32_t N2=3;
+    uint32_t N3=4;
     M_LEVELTR_t() : ETCS_variable(3)
     {
         invalid.insert(5);
@@ -600,30 +584,27 @@ struct M_LEVELTR_t : ETCS_variable
     }
     Level get_level()
     {
-        switch (rawdata) {
-            case 0:
-                return Level::N0;
-            case 1:
-                return Level::NTC;
-            case 2:
-                return Level::N1;
-            case 3:
-                return Level::N2;
-            case 4:
+
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
 #if BASELINE < 4
-                return Level::N3;
+        else if (rawdata == N3) return Level::N3;
 #else
-                return Level::N2;
+        else if (rawdata == N3) return Level::N2;
 #endif
-            default:
-                return Level::N0;
-        }
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
 };
 #if BASELINE > 3
 }
 struct M_LEVEL_t : ETCS_variable
 {
+    uint32_t N0=0;
+    uint32_t NTC=1;
+    uint32_t N1=2;
+    uint32_t N2=3;
     M_LEVEL_t() : ETCS_variable(3)
     {
         invalid.insert(4);
@@ -633,67 +614,40 @@ struct M_LEVEL_t : ETCS_variable
     }
     Level get_level()
     {
-        switch (rawdata) {
-            case 0:
-                return Level::N0;
-            case 1:
-                return Level::NTC;
-            case 2:
-                return Level::N1;
-            case 3:
-                return Level::N2;
-            default:
-                return Level::Unknown;
-        }
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
     void set_value(Level lv)
     {
-        switch(lv) {
-            case Level::N0:
-                rawdata = 0;
-                break;
-            case Level::NTC:
-                rawdata = 1;
-                break;
-            case Level::N1:
-                rawdata = 2;
-                break;
-            case Level::N2:
-                rawdata = 3;
-                break;
-            default:
-                rawdata = 5;
-                break;
-        }
+        if (lv == Level::N0) rawdata = N0;
+        else if (lv == Level::NTC) rawdata = NTC;
+        else if (lv == Level::N1) rawdata = N1;
+        else if (lv == Level::N2) rawdata = N2;
     }
 };
 struct M_LEVELTEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t N0=0;
-    static const uint32_t NTC=1;
-    static const uint32_t N1=2;
-    static const uint32_t N2=3;
-    static const uint32_t NoLevelLimited=4;
+    uint32_t N0=0;
+    uint32_t NTC=1;
+    uint32_t N1=2;
+    uint32_t N2=3;
+    uint32_t NoLevelLimited=4;
     M_LEVELTEXTDISPLAY_t() : ETCS_variable(3)
     {
         invalid.insert(5);
         invalid.insert(6);
         invalid.insert(7);
     }
-    Level get_value() const
+    Level get_level()
     {
-        switch (rawdata) {
-            case N0:
-                return Level::N0;
-            case N1:
-                return Level::N1;
-            case N2:
-                return Level::N2;
-            case NTC:
-                return Level::NTC;
-            default:
-                return Level::Unknown;
-        }
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
 };
 struct M_LEVELTR_t : ETCS_variable
@@ -707,70 +661,64 @@ struct M_LEVELTR_t : ETCS_variable
     }
     Level get_level()
     {
-        switch (rawdata) {
-            case 0:
-                return Level::N0;
-            case 1:
-                return Level::NTC;
-            case 2:
-                return Level::N1;
-            case 3:
-                return Level::N2;
-            default:
-                return Level::N0;
-        }
+        if (rawdata == N0) return Level::N0;
+        else if (rawdata == N1) return Level::N1;
+        else if (rawdata == N2) return Level::N2;
+        else if (rawdata == NTC) return Level::NTC;
+        else return Level::Unknown;
     }
 };
 #endif
 struct M_LINEGAUGE_t : ETCS_variable
 {
-    static const uint32_t BitG1 = 1;
-    static const uint32_t BitGA = 2;
-    static const uint32_t BitGB = 4;
-    static const uint32_t BitGC = 8;
+    uint32_t BitG1 = 1;
+    uint32_t BitGA = 2;
+    uint32_t BitGB = 4;
+    uint32_t BitGC = 8;
     M_LINEGAUGE_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata!=0 && (rawdata&0xF0)==0;
     }
 };
 struct M_LOADINGGAUGE_t : ETCS_variable
 {
-    static const uint32_t G1 = 0;
-    static const uint32_t GA = 1;
-    static const uint32_t GB = 2;
-    static const uint32_t GC = 3;
+    uint32_t G1 = 0;
+    uint32_t GA = 1;
+    uint32_t GB = 2;
+    uint32_t GC = 3;
     M_LOADINGGAUGE_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<4;
+        return VERSION_X(m_version) == 1 || rawdata<4;
     }
 };
 struct M_LOC_t : ETCS_variable
 {
-    static const uint32_t Now = 0;
-    static const uint32_t EveryLRBG = 1;
-    static const uint32_t NotEveryLRBG = 2;
+    uint32_t Now = 0;
+    uint32_t EveryLRBG = 1;
+    uint32_t NotEveryLRBG = 2;
     M_LOC_t() : ETCS_variable(3) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<3;
     }
 };
 struct M_MAMODE_t : ETCS_variable
 {
-    static const uint32_t OS=0;
-    static const uint32_t SH=1;
-    static const uint32_t LS=2;
-    M_MAMODE_t() : ETCS_variable(2) 
+    uint32_t OS=0;
+    uint32_t SH=1;
+    uint32_t LS=2;
+    M_MAMODE_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
     {
-        invalid.insert(3);
+        return rawdata<(VERSION_X(m_version) == 1 ? 2 : 3);
     }
 };
 struct M_MCOUNT_t : ETCS_variable
 {
-    static const uint32_t NeverFitsTelegrams=254;
-    static const uint32_t FitsAllTelegrams=255;
+    uint32_t NeverFitsTelegrams=254;
+    uint32_t FitsAllTelegrams=255;
     M_MCOUNT_t() : ETCS_variable(8) {}
 };
 #if BASELINE > 3
@@ -779,22 +727,22 @@ namespace V2
 #endif
 struct M_MODE_t : ETCS_variable
 {
-    static const uint32_t FS=0;
-    static const uint32_t OS=1;
-    static const uint32_t SR=2;
-    static const uint32_t SH=3;
-    static const uint32_t UN=4;
-    static const uint32_t SL=5;
-    static const uint32_t SB = 6;
-    static const uint32_t TR = 7;
-    static const uint32_t PT = 8;
-    static const uint32_t SF = 9;
-    static const uint32_t IS = 10;
-    static const uint32_t NL = 11;
-    static const uint32_t LS = 12;
-    static const uint32_t SN = 13;
-    static const uint32_t RV = 14;
-    static const uint32_t PS = 15;
+    uint32_t FS=0;
+    uint32_t OS=1;
+    uint32_t SR=2;
+    uint32_t SH=3;
+    uint32_t UN=4;
+    uint32_t SL=5;
+    uint32_t SB = 6;
+    uint32_t TR = 7;
+    uint32_t PT = 8;
+    uint32_t SF = 9;
+    uint32_t IS = 10;
+    uint32_t NL = 11;
+    uint32_t LS = 12;
+    uint32_t SN = 13;
+    uint32_t RV = 14;
+    uint32_t PS = 15;
     M_MODE_t() : ETCS_variable(4) {}
     void set_value(Mode m)
     {
@@ -855,58 +803,43 @@ struct M_MODE_t : ETCS_variable
     }
     Mode get_value() const
     {
-        switch (rawdata)
-        {
-            case FS:
-                return Mode::FS;
-            case OS:
-                return Mode::OS;
-            case SR:
-                return Mode::SR;
-            case SH:
-                return Mode::SH;
-            case UN:
-                return Mode::UN;
-            case SL:
-                return Mode::SL;
-            case SB:
-                return Mode::SB;
-            case TR:
-                return Mode::TR;
-            case PT:
-                return Mode::PT;
-            case SF:
-                return Mode::SF;
-            case IS:
-                return Mode::IS;
-            case NL:
-                return Mode::NL;
-            case LS:
-                return Mode::LS;
-            case SN:
-                return Mode::SN;
-            case RV:
-                return Mode::RV;
-            case PS:
-                return Mode::PS;
-            default:
-                return Mode::SF;
-        }
+        if (rawdata == FS) return Mode::FS;
+        else if (rawdata == OS) return Mode::OS;
+        else if (rawdata == SR) return Mode::SR;
+        else if (rawdata == SH) return Mode::SH;
+        else if (rawdata == UN) return Mode::UN;
+        else if (rawdata == SL) return Mode::SL;
+        else if (rawdata == SB) return Mode::SB;
+        else if (rawdata == TR) return Mode::TR;
+        else if (rawdata == PT) return Mode::PT;
+        else if (rawdata == SF) return Mode::SF;
+        else if (rawdata == IS) return Mode::IS;
+        else if (rawdata == NL) return Mode::NL;
+        else if (rawdata == LS) return Mode::LS;
+        else if (rawdata == SN) return Mode::SN;
+        else if (rawdata == RV) return Mode::RV;
+        else if (rawdata == PS) return Mode::PS;
+        else return Mode::SF;
+    }
+    
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata != 15;
     }
 };
 struct M_MODETEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t FS=0;
-    static const uint32_t OS=1;
-    static const uint32_t SR=2;
-    static const uint32_t UN=4;
-    static const uint32_t SB = 6;
-    static const uint32_t TR = 7;
-    static const uint32_t PT = 8;
-    static const uint32_t LS = 12;
-    static const uint32_t RV = 14;
-    static const uint32_t NoModeLimited = 15;
-    M_MODETEXTDISPLAY_t() : ETCS_variable(4) 
+    uint32_t FS=0;
+    uint32_t OS=1;
+    uint32_t SR=2;
+    uint32_t UN=4;
+    uint32_t SB = 6;
+    uint32_t TR = 7;
+    uint32_t PT = 8;
+    uint32_t LS = 12;
+    uint32_t RV = 14;
+    uint32_t NoModeLimited = 15;
+    M_MODETEXTDISPLAY_t() : ETCS_variable(4)
     {
         invalid.insert(3);
         invalid.insert(5);
@@ -917,51 +850,44 @@ struct M_MODETEXTDISPLAY_t : ETCS_variable
     }
     Mode get_value() const
     {
-        switch (rawdata)
-        {
-            case FS:
-                return Mode::FS;
-            case OS:
-                return Mode::OS;
-            case SR:
-                return Mode::SR;
-            case UN:
-                return Mode::UN;
-            case SB:
-                return Mode::SB;
-            case PT:
-                return Mode::PT;
-            case LS:
-                return Mode::LS;
-            case RV:
-                return Mode::RV;
-            default:
-                return Mode::TR;
-        }
+        if (rawdata == FS) return Mode::FS;
+        else if (rawdata == OS) return Mode::OS;
+        else if (rawdata == SR) return Mode::SR;
+        else if (rawdata == UN) return Mode::UN;
+        else if (rawdata == SB) return Mode::SB;
+        else if (rawdata == PT) return Mode::PT;
+        else if (rawdata == LS) return Mode::LS;
+        else if (rawdata == RV) return Mode::RV;
+        else return Mode::TR;
+    }
+    bool is_valid(int m_version) override
+    {
+        if (VERSION_X(m_version) == 1 && rawdata == 12) return false;
+        return ETCS_variable::is_valid(m_version);
     }
 };
 #if BASELINE > 3
 }
 struct M_MODE_t : ETCS_variable
 {
-    static const uint32_t FS=0;
-    static const uint32_t OS=1;
-    static const uint32_t SR=2;
-    static const uint32_t SH=3;
-    static const uint32_t UN=4;
-    static const uint32_t SL=5;
-    static const uint32_t SB = 6;
-    static const uint32_t TR = 7;
-    static const uint32_t PT = 8;
-    static const uint32_t SF = 9;
-    static const uint32_t IS = 10;
-    static const uint32_t NL = 11;
-    static const uint32_t LS = 12;
-    static const uint32_t SN = 13;
-    static const uint32_t RV = 14;
-    static const uint32_t PS = 15;
-    static const uint32_t AD = 16;
-    static const uint32_t SM = 17;
+    uint32_t FS=0;
+    uint32_t OS=1;
+    uint32_t SR=2;
+    uint32_t SH=3;
+    uint32_t UN=4;
+    uint32_t SL=5;
+    uint32_t SB = 6;
+    uint32_t TR = 7;
+    uint32_t PT = 8;
+    uint32_t SF = 9;
+    uint32_t IS = 10;
+    uint32_t NL = 11;
+    uint32_t LS = 12;
+    uint32_t SN = 13;
+    uint32_t RV = 14;
+    uint32_t PS = 15;
+    uint32_t AD = 16;
+    uint32_t SM = 17;
     M_MODE_t() : ETCS_variable(5) {}
     void set_value(Mode m)
     {
@@ -1073,18 +999,18 @@ struct M_MODE_t : ETCS_variable
 };
 struct M_MODETEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t FS=0;
-    static const uint32_t OS=1;
-    static const uint32_t SR=2;
-    static const uint32_t AD=3;
-    static const uint32_t UN=4;
-    static const uint32_t SM=5;
-    static const uint32_t SB = 6;
-    static const uint32_t TR = 7;
-    static const uint32_t PT = 8;
-    static const uint32_t LS = 12;
-    static const uint32_t RV = 14;
-    static const uint32_t NoModeLimited = 15;
+    uint32_t FS=0;
+    uint32_t OS=1;
+    uint32_t SR=2;
+    uint32_t AD=3;
+    uint32_t UN=4;
+    uint32_t SM=5;
+    uint32_t SB = 6;
+    uint32_t TR = 7;
+    uint32_t PT = 8;
+    uint32_t LS = 12;
+    uint32_t RV = 14;
+    uint32_t NoModeLimited = 15;
     M_MODETEXTDISPLAY_t() : ETCS_variable(4) 
     {
         invalid.insert(9);
@@ -1129,16 +1055,16 @@ struct M_NVAVADH_t : ETCS_variable
     {
         return rawdata*0.05;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return get_value()<1.05;
     }
 };
 struct M_NVCONTACT_t : ETCS_variable
 {
-    static const uint32_t TrainTrip=0;
-    static const uint32_t ServiceBrake=1;
-    static const uint32_t NoReaction=2;
+    uint32_t TrainTrip=0;
+    uint32_t ServiceBrake=1;
+    uint32_t NoReaction=2;
     M_NVCONTACT_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1146,8 +1072,8 @@ struct M_NVCONTACT_t : ETCS_variable
 };
 struct M_NVDERUN_t : ETCS_variable
 {
-    static const uint32_t No=0;
-    static const uint32_t Yes=1;
+    uint32_t No=0;
+    uint32_t Yes=1;
     M_NVDERUN_t() : ETCS_variable(1) {}
 };
 struct M_NVEBCL_t : ETCS_variable
@@ -1180,7 +1106,7 @@ struct M_NVEBCL_t : ETCS_variable
         }
         return 0;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 10;
     }
@@ -1253,54 +1179,54 @@ struct M_PLATFORM_t : ETCS_variable
 };
 struct M_POSITION_t : ETCS_variable
 {
-    static const uint32_t NoMoreCalculation=16777215UL;
+    uint32_t NoMoreCalculation=16777215UL;
     M_POSITION_t() : ETCS_variable(24) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<10000000UL || rawdata == 16777215UL;
+        return VERSION_X(m_version) == 1 || rawdata<10000000UL || rawdata == 16777215UL;
     }
 };
 struct M_TRACKCOND_t : ETCS_variable
 {
-    static const uint32_t NonStoppingArea=0;
-    static const uint32_t TunnelStoppingArea=1;
-    static const uint32_t SoundHorn=2;
-    static const uint32_t PowerlessLowerPantograph=3;
-    static const uint32_t RadioHole=4;
-    static const uint32_t AirTightness=5;
-    static const uint32_t SwitchOffRegenerative=6;
-    static const uint32_t SwitchOffEddyService=7;
-    static const uint32_t SwitchOffShoe=8;
-    static const uint32_t PowerlessSwitchOffPower=9;
-    static const uint32_t SwitchOffEddyEmergency=10;
+    uint32_t NonStoppingArea=0;
+    uint32_t TunnelStoppingArea=1;
+    uint32_t SoundHorn=2;
+    uint32_t PowerlessLowerPantograph=3;
+    uint32_t RadioHole=4;
+    uint32_t AirTightness=5;
+    uint32_t SwitchOffRegenerative=6;
+    uint32_t SwitchOffEddyService=7;
+    uint32_t SwitchOffShoe=8;
+    uint32_t PowerlessSwitchOffPower=9;
+    uint32_t SwitchOffEddyEmergency=10;
     M_TRACKCOND_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<11;
+        return rawdata < (VERSION_X(m_version) == 1 ? 10 : 11);
     }
 };
 struct M_VERSION_t : ETCS_variable
 {
-    static const uint32_t V1_0=16;
-    static const uint32_t V1_1=17;
-    static const uint32_t V2_0=32;
-    static const uint32_t V2_1=33;
+    uint32_t V1_0=16;
+    uint32_t V1_1=17;
+    uint32_t V2_0=32;
+    uint32_t V2_1=33;
     M_VERSION_t() : ETCS_variable(7) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<17 || rawdata>31;
+        return rawdata<=17 || rawdata>31;
     }
 };
 struct M_VOLTAGE_t : ETCS_variable
 {
-    static const uint32_t NonFitted=0;
-    static const uint32_t AC25kV50Hz=1;
-    static const uint32_t AC15kV16Hz7=2;
-    static const uint32_t DC3kV=3;
-    static const uint32_t DC1k5V=4;
-    static const uint32_t DC600V=5;
+    uint32_t NonFitted=0;
+    uint32_t AC25kV50Hz=1;
+    uint32_t AC15kV16Hz7=2;
+    uint32_t DC3kV=3;
+    uint32_t DC1k5V=4;
+    uint32_t DC600V=5;
     M_VOLTAGE_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<6;
     }
@@ -1308,7 +1234,7 @@ struct M_VOLTAGE_t : ETCS_variable
 struct NC_CDDIFF_t : ETCS_variable
 {
     NC_CDDIFF_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<11;
     }
@@ -1370,7 +1296,7 @@ struct NC_CDDIFF_t : ETCS_variable
 struct NC_CDTRAIN_t : ETCS_variable
 {
     NC_CDTRAIN_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<11;
     }
@@ -1431,29 +1357,29 @@ struct NC_CDTRAIN_t : ETCS_variable
 };
 struct NC_DIFF_t : ETCS_variable
 {
-    static const uint32_t FreightP=0;
-    static const uint32_t FreightG=1;
-    static const uint32_t Passenger=2;
+    uint32_t FreightP=0;
+    uint32_t FreightG=1;
+    uint32_t Passenger=2;
     NC_DIFF_t() : ETCS_variable(4) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<3;
     }
 };
 struct NC_TRAIN_t : ETCS_variable
 {
-    static const uint32_t FreightPBit=0;
-    static const uint32_t FreightGBit=1;
-    static const uint32_t PassengerBit=2;
+    uint32_t FreightPBit=0;
+    uint32_t FreightGBit=1;
+    uint32_t PassengerBit=2;
     NC_TRAIN_t() : ETCS_variable(15) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
-        return rawdata<8;
+        return rawdata<(VERSION_X(m_version) ? 16384 : 8);
     }
 };
 struct NID_BG_t : ETCS_variable
 {
-    static const uint32_t Unknown=16383;
+    uint32_t Unknown=16383;
     NID_BG_t() : ETCS_variable(14) {}
 };
 struct NID_C_t : ETCS_variable
@@ -1474,7 +1400,7 @@ struct NID_ENGINE_t : ETCS_variable
 };
 struct NID_LRBG_t : ETCS_variable
 {
-    static const uint32_t Unknown=16777215;
+    uint32_t Unknown=16777215;
     NID_LRBG_t() : ETCS_variable(24) {}
     bg_id get_value()
     {
@@ -1492,7 +1418,7 @@ struct NID_LRBG_t : ETCS_variable
 };
 struct NID_PRVLRBG_t : ETCS_variable
 {
-    static const uint32_t Unknown=16777215;
+    uint32_t Unknown=16777215;
     NID_PRVLRBG_t() : ETCS_variable(24) {}
     bg_id get_value()
     {
@@ -1551,12 +1477,12 @@ struct NID_NTC_t : ETCS_variable
 };
 struct NID_RADIO_t : ETCS_variable_custom<uint64_t>
 {   
-    static const uint64_t UseShortNumber=std::numeric_limits<uint64_t>::max();
+    uint64_t UseShortNumber=std::numeric_limits<uint64_t>::max();
     NID_RADIO_t() : ETCS_variable_custom<uint64_t>(64) {}
 };
 struct NID_RBC_t : ETCS_variable
 {
-    static const uint32_t ContactLastRBC=16383;
+    uint32_t ContactLastRBC=16383;
     NID_RBC_t() : ETCS_variable(14) {}
 };
 struct NID_RIU_t : ETCS_variable
@@ -1582,10 +1508,10 @@ struct NID_OPERATIONAL_t : ETCS_variable
         }
         return value;
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         if (rawdata == 0xFFFFFFFF)
-            return false;
+            return VERSION_X(m_version) == 1;
         for (int i=0; i<8; i++)
         {
             int c = (rawdata>>(4*i))&15;
@@ -1602,7 +1528,7 @@ struct NID_PACKET_t : ETCS_variable
 };
 struct NID_TSR_t : ETCS_variable
 {
-    static const uint32_t NonRevocable=255;
+    uint32_t NonRevocable=255;
     NID_TSR_t() : ETCS_variable(8) {}
 };
 struct NID_VBCMK_t : ETCS_variable
@@ -1615,7 +1541,7 @@ struct NID_XUSER_t : ETCS_variable
 };
 struct N_AXLE_t : ETCS_variable
 {
-    static const uint32_t Unknown=1023;
+    uint32_t Unknown=1023;
     N_AXLE_t() : ETCS_variable(10) {}
 };
 struct N_ITER_t : ETCS_variable
@@ -1632,27 +1558,27 @@ struct N_TOTAL_t : ETCS_variable
 };
 struct Q_ASPECT_t : ETCS_variable
 {
-    static const uint32_t StopIfInSH=0;
-    static const uint32_t GoIfInSH=1;
+    uint32_t StopIfInSH=0;
+    uint32_t GoIfInSH=1;
     Q_ASPECT_t() : ETCS_variable(1) {}
 };
 struct Q_CONFTEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t AcknowledgeEnds=0;
-    static const uint32_t AcknowledgeRequired=1;
+    uint32_t AcknowledgeEnds=0;
+    uint32_t AcknowledgeRequired=1;
     Q_CONFTEXTDISPLAY_t() : ETCS_variable(1) {}
 };
 struct Q_DANGERPOINT_t : ETCS_variable
 {
-    static const uint32_t NoDangerpoint=0;
-    static const uint32_t ExistsDangerpoint=1;
+    uint32_t NoDangerpoint=0;
+    uint32_t ExistsDangerpoint=1;
     Q_DANGERPOINT_t() : ETCS_variable(1) {}
 };
 struct Q_DIFF_t : ETCS_variable
 {
-    static const uint32_t CantDeficiency = 0;
-    static const uint32_t OtherSpecificReplacesCant = 1;
-    static const uint32_t OtherSpecificNotReplacesCant = 2;
+    uint32_t CantDeficiency = 0;
+    uint32_t OtherSpecificReplacesCant = 1;
+    uint32_t OtherSpecificNotReplacesCant = 2;
     Q_DIFF_t() : ETCS_variable(2)
     {
         invalid.insert(3);
@@ -1660,9 +1586,9 @@ struct Q_DIFF_t : ETCS_variable
 };
 struct Q_DIR_t : ETCS_variable
 {
-    static const uint32_t Reverse = 0;
-    static const uint32_t Nominal = 1;
-    static const uint32_t Both = 2;
+    uint32_t Reverse = 0;
+    uint32_t Nominal = 1;
+    uint32_t Both = 2;
     Q_DIR_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1670,9 +1596,9 @@ struct Q_DIR_t : ETCS_variable
 };
 struct Q_DIRLRBG_t : ETCS_variable
 {
-    static const uint32_t Reverse = 0;
-    static const uint32_t Nominal = 1;
-    static const uint32_t Unknown = 2;
+    uint32_t Reverse = 0;
+    uint32_t Nominal = 1;
+    uint32_t Unknown = 2;
     Q_DIRLRBG_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1685,9 +1611,9 @@ struct Q_DIRLRBG_t : ETCS_variable
 };
 struct Q_DIRTRAIN_t : ETCS_variable
 {
-    static const uint32_t Reverse = 0;
-    static const uint32_t Nominal = 1;
-    static const uint32_t Unknown = 2;
+    uint32_t Reverse = 0;
+    uint32_t Nominal = 1;
+    uint32_t Unknown = 2;
     Q_DIRTRAIN_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1700,9 +1626,9 @@ struct Q_DIRTRAIN_t : ETCS_variable
 };
 struct Q_DLRBG_t : ETCS_variable
 {
-    static const uint32_t Reverse = 0;
-    static const uint32_t Nominal = 1;
-    static const uint32_t Unknown = 2;
+    uint32_t Reverse = 0;
+    uint32_t Nominal = 1;
+    uint32_t Unknown = 2;
     Q_DLRBG_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1715,49 +1641,53 @@ struct Q_DLRBG_t : ETCS_variable
 };
 struct Q_EMERGENCYSTOP_t : ETCS_variable
 {
-    static const uint32_t AcceptedEoAChanged=0;
-    static const uint32_t AcceptedEoAUnchanged=1;
-    static const uint32_t NotRelevant=2;
-    static const uint32_t Rejected=3;
+    uint32_t AcceptedEoAChanged=0;
+    uint32_t AcceptedEoAUnchanged=1;
+    uint32_t NotRelevant=2;
+    uint32_t Rejected=3;
     Q_EMERGENCYSTOP_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata < 3;
+    }
 };
 struct Q_ENDTIMER_t : ETCS_variable
 {
-    static const uint32_t NoTimer=0;
-    static const uint32_t HasTimer=1;
+    uint32_t NoTimer=0;
+    uint32_t HasTimer=1;
     Q_ENDTIMER_t() : ETCS_variable(1) {}
 };
 struct Q_FRONT_t : ETCS_variable
 {
-    static const uint32_t TrainLengthDelay=0;
-    static const uint32_t NoTrainLengthDelay=1;
+    uint32_t TrainLengthDelay=0;
+    uint32_t NoTrainLengthDelay=1;
     Q_FRONT_t() : ETCS_variable(1) {}
 };
 struct Q_GDIR_t : ETCS_variable
 {
-    static const uint32_t Downhill=0;
-    static const uint32_t Uphill=1;
+    uint32_t Downhill=0;
+    uint32_t Uphill=1;
     Q_GDIR_t() : ETCS_variable(1) {}
 };
 struct Q_LENGTH_t : ETCS_variable
 {
-    static const uint32_t NoTrainIntegrityAvailable=0;
-    static const uint32_t TrainIntegrityConfirmedByMonitoringDevice=1;
-    static const uint32_t TrainIntegrityConfirmedByDriver=2;
-    static const uint32_t TrainIntegrityLost=3;
+    uint32_t NoTrainIntegrityAvailable=0;
+    uint32_t TrainIntegrityConfirmedByMonitoringDevice=1;
+    uint32_t TrainIntegrityConfirmedByDriver=2;
+    uint32_t TrainIntegrityLost=3;
     Q_LENGTH_t() : ETCS_variable(2) {}
     Q_LENGTH_t &operator=(uint32_t data) {rawdata=data; return *this;}
 };
 struct Q_LGTLOC_t : ETCS_variable
 {
-    static const uint32_t MinSafeRearEnd=0;
-    static const uint32_t MaxSafeFrontEnd=1;
+    uint32_t MinSafeRearEnd=0;
+    uint32_t MaxSafeFrontEnd=1;
     Q_LGTLOC_t() : ETCS_variable(1) {}
 };
 struct Q_LINK_t : ETCS_variable
 {
-    static const uint32_t Unlinked=0;
-    static const uint32_t Linked=1;
+    uint32_t Unlinked=0;
+    uint32_t Linked=1;
     Q_LINK_t() : ETCS_variable(1) {}
 };
 struct Q_LOCACC_t : ETCS_variable
@@ -1766,15 +1696,15 @@ struct Q_LOCACC_t : ETCS_variable
 };
 struct Q_LINKORIENTATION_t : ETCS_variable
 {
-    static const uint32_t Reverse=0;
-    static const uint32_t Nominal=1;
+    uint32_t Reverse=0;
+    uint32_t Nominal=1;
     Q_LINKORIENTATION_t() : ETCS_variable(1) {}
 };
 struct Q_LINKREACTION_t : ETCS_variable
 {
-    static const uint32_t TrainTrip=0;
-    static const uint32_t ServiceBrake=1;
-    static const uint32_t NoReaction=2;
+    uint32_t TrainTrip=0;
+    uint32_t ServiceBrake=1;
+    uint32_t NoReaction=2;
     Q_LINKREACTION_t() : ETCS_variable(2)
     {
         invalid.insert(3);
@@ -1782,83 +1712,83 @@ struct Q_LINKREACTION_t : ETCS_variable
 };
 struct Q_LSSMA_t : ETCS_variable
 {
-    static const uint32_t ToggleOff=0;
-    static const uint32_t ToggleOn=1;
+    uint32_t ToggleOff=0;
+    uint32_t ToggleOn=1;
     Q_LSSMA_t() : ETCS_variable(1) {}
 };
 struct Q_LXSTATUS_t : ETCS_variable
 {
-    static const uint32_t Protected=0;
-    static const uint32_t NotProtected=1;
+    uint32_t Protected=0;
+    uint32_t NotProtected=1;
     Q_LXSTATUS_t() : ETCS_variable(1) {}
 };
 struct Q_MAMODE_t : ETCS_variable
 {
-    static const uint32_t DeriveSvL=0;
-    static const uint32_t BeginningIsSvL=1;
+    uint32_t DeriveSvL=0;
+    uint32_t BeginningIsSvL=1;
     Q_MAMODE_t() : ETCS_variable(1) {}
 };
 struct Q_MARQSTREASON_t : ETCS_variable
 {
-    static const uint8_t StartSelectedByDriverBit=0;
-    static const uint8_t TimeBeforePerturbationBit=1;
-    static const uint8_t TimeBeforeTimerBit=2;
-    static const uint8_t TrackDescriptionDeletedBit=3;
-    static const uint8_t TrackAheadFreeBit=4;
+    uint8_t StartSelectedByDriverBit=0;
+    uint8_t TimeBeforePerturbationBit=1;
+    uint8_t TimeBeforeTimerBit=2;
+    uint8_t TrackDescriptionDeletedBit=3;
+    uint8_t TrackAheadFreeBit=4;
     Q_MARQSTREASON_t() : ETCS_variable(5) {}
 };
 struct Q_MEDIA_t : ETCS_variable
 {
-    static const uint32_t Balise=0;
-    static const uint32_t Loop=1;
+    uint32_t Balise=0;
+    uint32_t Loop=1;
     Q_MEDIA_t() : ETCS_variable(1) {}
 };
 struct Q_MPOSITION_t : ETCS_variable
 {
-    static const uint32_t Opposite=0;
-    static const uint32_t Same=1;
+    uint32_t Opposite=0;
+    uint32_t Same=1;
     Q_MPOSITION_t() : ETCS_variable(1) {}
 };
 struct Q_NEWCOUNTRY_t : ETCS_variable
 {
-    static const uint32_t SameCountry=0;
-    static const uint32_t NewCountry=1;
+    uint32_t SameCountry=0;
+    uint32_t NewCountry=1;
     Q_NEWCOUNTRY_t() : ETCS_variable(1) {}
 };
 struct Q_NVDRIVER_ADHES_t : ETCS_variable
 {
-    static const uint32_t NotAllowed=0;
-    static const uint32_t Allowed=1;
+    uint32_t NotAllowed=0;
+    uint32_t Allowed=1;
     Q_NVDRIVER_ADHES_t() : ETCS_variable(1) {}
 };
 struct Q_NVEMRRLS_t : ETCS_variable
 {
-    static const uint32_t RevokeAtStandstill=0;
-    static const uint32_t RevokeNotExceeded=1;
+    uint32_t RevokeAtStandstill=0;
+    uint32_t RevokeNotExceeded=1;
     Q_NVEMRRLS_t() : ETCS_variable(1) {}
 };
 struct Q_NVGUIPERM_t : ETCS_variable
 {
-    static const uint32_t No=0;
-    static const uint32_t Yes=1;
+    uint32_t No=0;
+    uint32_t Yes=1;
     Q_NVGUIPERM_t() : ETCS_variable(1) {}
 };
 struct Q_NVINHSMICPERM_t : ETCS_variable
 {
-    static const uint32_t No=0;
-    static const uint32_t Yes=1;
+    uint32_t No=0;
+    uint32_t Yes=1;
     Q_NVINHSMICPERM_t() : ETCS_variable(1) {}
 };
 struct Q_NVKINT_t : ETCS_variable
 {
-    static const uint32_t NoCorrectionFollow=0;
-    static const uint32_t CorrectionFollow=1;
+    uint32_t NoCorrectionFollow=0;
+    uint32_t CorrectionFollow=1;
     Q_NVKINT_t() : ETCS_variable(1) {}
 };
 struct Q_NVKVINTSET_t : ETCS_variable
 {
-    static const uint32_t FreightTrains=0;
-    static const uint32_t ConventionalPassengerTrains=1;
+    uint32_t FreightTrains=0;
+    uint32_t ConventionalPassengerTrains=1;
     Q_NVKVINTSET_t() : ETCS_variable(2) 
     {
         invalid.insert(2);
@@ -1875,39 +1805,39 @@ struct Q_NVLOCACC_t : ETCS_variable
 };
 struct Q_NVSBFBPERM_t : ETCS_variable
 {
-    static const uint32_t No=0;
-    static const uint32_t Yes=1;
+    uint32_t No=0;
+    uint32_t Yes=1;
     Q_NVSBFBPERM_t() : ETCS_variable(1) {}
 };
 struct Q_NVSBTSMPERM_t : ETCS_variable
 {
-    static const uint32_t No=0;
-    static const uint32_t Yes=1;
+    uint32_t No=0;
+    uint32_t Yes=1;
     Q_NVSBTSMPERM_t() : ETCS_variable(1) {}
 };
 struct Q_ORIENTATION_t : ETCS_variable
 {
-    static const uint32_t Reverse=0;
-    static const uint32_t Nominal=1;
+    uint32_t Reverse=0;
+    uint32_t Nominal=1;
     Q_ORIENTATION_t() : ETCS_variable(1) {}
 };
 struct Q_OVERLAP_t : ETCS_variable
 {
-    static const uint32_t NoOverlap=0;
-    static const uint32_t ExistsOverlap=1;
+    uint32_t NoOverlap=0;
+    uint32_t ExistsOverlap=1;
     Q_OVERLAP_t() : ETCS_variable(1) {}
 };
 struct Q_PBDSR_t : ETCS_variable
 {
-    static const uint32_t EBIntervention=0;
-    static const uint32_t SBIntervention=1;
+    uint32_t EBIntervention=0;
+    uint32_t SBIntervention=1;
     Q_PBDSR_t() : ETCS_variable(1) {}
 };
 struct Q_PLATFORM_t : ETCS_variable
 {
-    static const uint32_t LeftSide=0;
-    static const uint32_t RightSide=1;
-    static const uint32_t BothSides=2;
+    uint32_t LeftSide=0;
+    uint32_t RightSide=1;
+    uint32_t BothSides=2;
     Q_PLATFORM_t() : ETCS_variable(2) 
     {
         invalid.insert(3);
@@ -1915,27 +1845,27 @@ struct Q_PLATFORM_t : ETCS_variable
 };
 struct Q_SECTIONTIMER_t : ETCS_variable
 {
-    static const uint32_t NoTimer=0;
-    static const uint32_t HasTimer=1;
+    uint32_t NoTimer=0;
+    uint32_t HasTimer=1;
     Q_SECTIONTIMER_t() : ETCS_variable(1) {}
 };
 struct Q_SLEEPSESSION_t : ETCS_variable
 {
-    static const uint32_t IgnoreOrder=0;
-    static const uint32_t ExecuteOrder=1;
+    uint32_t IgnoreOrder=0;
+    uint32_t ExecuteOrder=1;
     Q_SLEEPSESSION_t() : ETCS_variable(1) {}
 };
 struct Q_SRSTOP_t : ETCS_variable
 {
-    static const uint32_t StopIfInSR=0;
-    static const uint32_t GoIfInSR=1;
+    uint32_t StopIfInSR=0;
+    uint32_t GoIfInSR=1;
     Q_SRSTOP_t() : ETCS_variable(1) {}
 };
 struct Q_STATUS_t : ETCS_variable
 {
-    static const uint32_t Invalid=0;
-    static const uint32_t Valid=1;
-    static const uint32_t Unknown=2;
+    uint32_t Invalid=0;
+    uint32_t Valid=1;
+    uint32_t Unknown=2;
     Q_STATUS_t() : ETCS_variable(2)
     {
         invalid.insert(3);
@@ -1943,15 +1873,15 @@ struct Q_STATUS_t : ETCS_variable
 };
 struct Q_STOPLX_t : ETCS_variable
 {
-    static const uint32_t NoStopRequired=0;
-    static const uint32_t StopRequired=1;
+    uint32_t NoStopRequired=0;
+    uint32_t StopRequired=1;
     Q_STOPLX_t() : ETCS_variable(1) {}
 };
 struct Q_SUITABILITY_t : ETCS_variable
 {
-    static const uint32_t LoadingGauge=0;
-    static const uint32_t MaxAxleLoad=1;
-    static const uint32_t TractionSystem=2;
+    uint32_t LoadingGauge=0;
+    uint32_t MaxAxleLoad=1;
+    uint32_t TractionSystem=2;
     Q_SUITABILITY_t() : ETCS_variable(2)
     {
         invalid.insert(3);
@@ -1959,30 +1889,30 @@ struct Q_SUITABILITY_t : ETCS_variable
 };
 struct Q_RBC_t : ETCS_variable
 {
-    static const uint32_t TerminateSession=0;
-    static const uint32_t EstablishSession=1;
+    uint32_t TerminateSession=0;
+    uint32_t EstablishSession=1;
     Q_RBC_t() : ETCS_variable(1) {}
 };
 struct Q_RIU_t : ETCS_variable
 {
-    static const uint32_t TerminateSession=0;
-    static const uint32_t EstablishSession=1;
+    uint32_t TerminateSession=0;
+    uint32_t EstablishSession=1;
     Q_RIU_t() : ETCS_variable(1) {}
 };
 struct Q_TEXT_t : ETCS_variable
 {
-    static const uint32_t LXNotProtected=0;
-    static const uint32_t Acknowledgement=1;
+    uint32_t LXNotProtected=0;
+    uint32_t Acknowledgement=1;
     Q_TEXT_t() : ETCS_variable(8) {}
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<2;
     }
 };
 struct Q_TEXTCLASS_t : ETCS_variable
 {
-    static const uint32_t AuxiliaryInformation=0;
-    static const uint32_t ImportantInformation=1;
+    uint32_t AuxiliaryInformation=0;
+    uint32_t ImportantInformation=1;
     Q_TEXTCLASS_t() : ETCS_variable(2)
     {
         invalid.insert(2);
@@ -1991,40 +1921,44 @@ struct Q_TEXTCLASS_t : ETCS_variable
 };
 struct Q_TEXTDISPLAY_t : ETCS_variable
 {
-    static const uint32_t WaitOne=0;
-    static const uint32_t WaitAll=1;
+    uint32_t WaitOne=0;
+    uint32_t WaitAll=1;
     Q_TEXTDISPLAY_t() : ETCS_variable(1) {}
 };
 struct Q_TEXTCONFIRM_t : ETCS_variable
 {
-    static const uint32_t NoConfirm=0;
-    static const uint32_t Confirm=1;
-    static const uint32_t ConfirmSB=2;
-    static const uint32_t ConfirmEB=3;
+    uint32_t NoConfirm=0;
+    uint32_t Confirm=1;
+    uint32_t ConfirmSB=2;
+    uint32_t ConfirmEB=3;
     Q_TEXTCONFIRM_t() : ETCS_variable(2) {}
+    bool is_valid(int m_version) override
+    {
+        return VERSION_X(m_version) > 1 || rawdata < 3;
+    }
 };
 struct Q_TEXTREPORT_t : ETCS_variable
 {
-    static const uint32_t NoAckReport=0;
-    static const uint32_t AckReport=1;
+    uint32_t NoAckReport=0;
+    uint32_t AckReport=1;
     Q_TEXTREPORT_t() : ETCS_variable(1) {}
 };
 struct Q_TRACKINIT_t : ETCS_variable
 {
-    static const uint32_t NoInitialState=0;
-    static const uint32_t InitialState=1;
+    uint32_t NoInitialState=0;
+    uint32_t InitialState=1;
     Q_TRACKINIT_t() : ETCS_variable(1) {}
 };
 struct Q_VBCO_t : ETCS_variable
 {
-    static const uint32_t RemoveVBC=0;
-    static const uint32_t SetVBC=1;
+    uint32_t RemoveVBC=0;
+    uint32_t SetVBC=1;
     Q_VBCO_t() : ETCS_variable(1) {}
 };
 struct Q_UPDOWN_t : ETCS_variable
 {
-    static const uint32_t TrainToTrack=0;
-    static const uint32_t TrackToTrain=1;
+    uint32_t TrainToTrack=0;
+    uint32_t TrackToTrain=1;
     Q_UPDOWN_t() : ETCS_variable(1) {}
 };
 struct T_t : ETCS_variable
@@ -2033,21 +1967,21 @@ struct T_t : ETCS_variable
 };
 struct T_CYCRQST_t : ETCS_variable
 {
-    static const uint32_t NoRepetition=255;
+    uint32_t NoRepetition=255;
     T_CYCRQST_t() : ETCS_variable(8) {}
 };
 struct T_CYCLOC_t : ETCS_variable
 {
-    static const uint32_t Infinity=255;
+    uint32_t Infinity=255;
     T_CYCLOC_t() : ETCS_variable(8) {}
 };
 struct T_EMA_t : T_t
 {
-    static const uint32_t NoTimeout=1023;
+    uint32_t NoTimeout=1023;
 };
 struct T_ENDTIMER_t : T_t
 {
-    static const uint32_t Infinity=1023;
+    uint32_t Infinity=1023;
 };
 struct T_LSSMA_t : ETCS_variable
 {
@@ -2055,12 +1989,12 @@ struct T_LSSMA_t : ETCS_variable
 };
 struct T_MAR_t : ETCS_variable
 {
-    static const uint32_t NoMaRequest=255;
+    uint32_t NoMaRequest=255;
     T_MAR_t() : ETCS_variable(8) {}
 };
 struct T_NVCONTACT_t : ETCS_variable
 {
-    static const uint32_t Infinity=255;
+    uint32_t Infinity=255;
     T_NVCONTACT_t() : ETCS_variable(8) {}
 };
 struct T_NVOVTRP_t : ETCS_variable
@@ -2069,23 +2003,23 @@ struct T_NVOVTRP_t : ETCS_variable
 };
 struct T_OL_t : T_t
 {
-    static const uint32_t Infinity=1023;
+    uint32_t Infinity=1023;
 };
 struct T_SECTIONTIMER_t : T_t
 {
-    static const uint32_t Infinity=1023;
+    uint32_t Infinity=1023;
 };
 struct T_TEXTDISPLAY_t : T_t
 {
-    static const uint32_t NoTimeLimited=1023;
+    uint32_t NoTimeLimited=1023;
 };
 struct T_TIMEOUTRQST_t : T_t
 {
-    static const uint32_t NoMaRequest=1023;
+    uint32_t NoMaRequest=1023;
 };
 struct T_TRAIN_t : ETCS_variable
 {
-    static const uint32_t Unknown=4294967295ULL;
+    uint32_t Unknown=4294967295ULL;
     T_TRAIN_t() : ETCS_variable(32) {}
     int64_t get_value() 
     {
@@ -2117,7 +2051,7 @@ struct V_t : ETCS_variable
     {
         rawdata = (uint32_t)(val*3.6/5);
     }
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata < 121;
     }
@@ -2139,8 +2073,8 @@ struct V_MAIN_t : V_t
 };
 struct V_MAMODE_t : V_t
 {
-    static const uint32_t UseNationalValue=127;
-    bool is_valid() override
+    uint32_t UseNationalValue=127;
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata>126;
     }
@@ -2177,9 +2111,9 @@ struct V_NVUNFIT_t : V_t
 };
 struct V_release_t : V_t
 {
-    static const uint32_t CalculateOnBoard=126;
-    static const uint32_t UseNationalValue=127;
-    bool is_valid() override
+    uint32_t CalculateOnBoard=126;
+    uint32_t UseNationalValue=127;
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata>125;
     }
@@ -2195,8 +2129,8 @@ struct V_REVERSE_t : V_t
 };
 struct V_STATIC_t : V_t
 {
-    static const uint32_t EndOfProfile=127;
-    bool is_valid() override
+    uint32_t EndOfProfile=127;
+    bool is_valid(int m_version) override
     {
         return rawdata<121 || rawdata==127;
     }
@@ -2206,7 +2140,7 @@ struct V_TRAIN_t : V_t
 };
 struct V_TSR_t : V_t
 {
-    bool is_valid() override
+    bool is_valid(int m_version) override
     {
         return rawdata<121;
     }

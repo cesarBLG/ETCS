@@ -10,7 +10,9 @@
 #include <memory>
 #include <vector>
 #include <variant>
+#include <cstdint>
 #include "platform_util.h"
+using std::uint32_t;
 enum FileType
 {
 	ETCS_ASSET_FILE,

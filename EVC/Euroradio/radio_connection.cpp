@@ -26,6 +26,7 @@ void radio_connection::Sa_data_indication(std::vector<unsigned char>&& data)
     if (session == nullptr)
         return;
     bit_manipulator r(std::move(data));
+    r.m_version = session->version;
     session->rx_list.push_back(euroradio_message::build(r, session->version));
 }
 void radio_connection::Sa_disconnect_indication(int reason, int subreason)

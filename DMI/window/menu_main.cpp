@@ -43,7 +43,10 @@ menu_main::menu_main() : menu(get_text("Main"))
     {
         write_command("Shunting","");
     }, true};
-    entries[7] = {get_text("Non-Leading"), "", nullptr, true};
+    entries[7] = {get_text("Non-Leading"), "", []
+    {
+        write_command("NonLeading","");
+    }, true};
     entries[8] = {get_text("Maintain shunting"), "", nullptr, true};
     entries[9] = {get_text("Radio data"), "", []
     {

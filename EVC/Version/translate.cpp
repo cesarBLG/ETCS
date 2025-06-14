@@ -18,6 +18,8 @@
 #include "../Packets/V1/27.h"
 #include "../Packets/39.h"
 #include "../Packets/V1/39.h"
+#include "../Packets/51.h"
+#include "../Packets/V1/51.h"
 #include "../Packets/68.h"
 #include "../Packets/79.h"
 #include "../Packets/V1/79.h"
@@ -36,8 +38,11 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
         case 3: {
             auto *nv = (V1::NationalValues*)packet.get();
             auto *nv2 = new NationalValues();
+            nv2->adhesion_nv_provided = false;
+            nv2->version_2_provided = false;
             for (auto &p2 : packets) {
                 if (p2->NID_PACKET == 203) {
+                    nv2->adhesion_nv_provided = true;
                     auto *brak = (V1::NationalValuesBraking*)p2.get();
                     nv2->Q_NVGUIPERM = brak->Q_NVGUIPERM;
                     nv2->Q_NVSBFBPERM = brak->Q_NVSBFBPERM;
@@ -59,10 +64,8 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             nv2->NID_PACKET = nv->NID_PACKET;
             nv2->Q_DIR = nv->Q_DIR;
             nv2->Q_SCALE = nv->Q_SCALE;
-            if (nv->D_VALIDNV == 32767)
-                nv2->D_VALIDNV.rawdata = 32766;
-            else
-                nv2->D_VALIDNV = nv->D_VALIDNV;
+            nv2->D_VALIDNV = nv->D_VALIDNV;
+            nv2->D_VALIDNV.Now = 32768;
             nv2->NID_C = nv->NID_Cs[0];
             nv2->N_ITER_c.rawdata = nv->N_ITER_c-1;
             for (int i=0; i<nv2->N_ITER_c; i++) {
@@ -86,6 +89,8 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             nv2->M_NVDERUN = nv->M_NVDERUN;
             nv2->D_NVSTFF = nv->D_NVSTFF;
             nv2->Q_NVDRIVER_ADHES = nv->Q_NVDRIVER_ADHES;
+            trans = std::shared_ptr<ETCS_packet>(nv2);
+            break;
         }
         case 27: {
             auto *sp = (V1::InternationalSSP*)packet.get();
@@ -93,7 +98,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             sp2->NID_PACKET = sp->NID_PACKET;
             sp2->Q_DIR = sp->Q_DIR;
             sp2->Q_SCALE = sp->Q_SCALE;
-            auto translate_element = [](V1::SSP_element_packet e) {
+            auto translate_element = [](const V1::SSP_element_packet &e) {
                 SSP_element_packet e2;
                 e2.Q_FRONT = e.Q_FRONT;
                 e2.D_STATIC = e.D_STATIC;
@@ -131,6 +136,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             for (auto &e : sp->elements) {
                 sp2->elements.push_back(translate_element(e));
             }
+            trans = std::shared_ptr<ETCS_packet>(sp2);
             break;
         }
         case 39: {
@@ -168,6 +174,43 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             }
             break;
         }
+        case 51: {
+            auto *asp = (V1::AxleLoadSpeedProfile*)packet.get();
+            auto *asp2 = new AxleLoadSpeedProfile();
+            asp2->NID_PACKET = asp->NID_PACKET;
+            asp2->Q_DIR = asp->Q_DIR;
+            asp2->Q_SCALE = asp->Q_SCALE;
+            auto translate_element = [](V1::ASP_element_packet e) {
+                ASP_element_packet e2;
+                e2.D_AXLELOAD = e.D_AXLELOAD;
+                e2.L_AXLELOAD = e.L_AXLELOAD;
+                e2.Q_FRONT = e.Q_FRONT;
+                e2.N_ITER = e.N_ITER;
+                auto translate_diff = [](V1::ASP_diff d) {
+                    ASP_diff d2;
+                    float load = d.M_AXLELOAD.rawdata / 2.0f;
+                    if (load <= 16) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.A;
+                    else if (load <= 17) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.HS17;
+                    else if (load <= 18) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.B1;
+                    else if (load <= 20) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.C2;
+                    else if (load <= 22.51) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.D2;
+                    else if (load <= 22.51) d2.M_AXLELOADCAT.rawdata = d2.M_AXLELOADCAT.E4;
+                    d2.V_AXLELOAD = d.V_AXLELOAD;
+                    return d2;
+                };
+                for (auto &d : e.diffs) {
+                    e2.diffs.push_back(translate_diff(d));
+                }
+                return e2;
+            };
+            asp2->element = translate_element(asp->element);
+            asp2->N_ITER = asp->N_ITER;
+            for (auto &e : asp->elements) {
+                asp2->elements.push_back(translate_element(e));
+            }
+            trans = std::shared_ptr<ETCS_packet>(asp2);
+            break;
+        }
         case 68: {
             for (auto &p2 : packets) {
                 if (p2->NID_PACKET == 206) {
@@ -189,15 +232,15 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             geo2->NID_PACKET = geo->NID_PACKET;
             geo2->Q_DIR = geo->Q_DIR;
             geo2->Q_SCALE = geo->Q_SCALE;
-            auto translate_element = [](V1::GeographicalPosition_element_packet e) {
+            auto translate_element = [](const V1::GeographicalPosition_element_packet &e) {
                 GeographicalPosition_element_packet e2;
                 e2.D_POSOFF = e.D_POSOFF;
                 e2.NID_BG = e.NID_BG;
                 e2.NID_C = e.NID_C;
                 e2.Q_NEWCOUNTRY = e.Q_NEWCOUNTRY;
                 e2.Q_MPOSITION = e.Q_MPOSITION;
-                if (e.M_POSITION == V1::M_POSITION_t::NoMoreCalculation)
-                    e2.M_POSITION.rawdata = M_POSITION_t::NoMoreCalculation;
+                if (e.M_POSITION == e.M_POSITION.NoMoreCalculation)
+                    e2.M_POSITION.rawdata = e2.M_POSITION.NoMoreCalculation;
                 else
                     e2.M_POSITION.rawdata = e.M_POSITION;
                 return e2;
@@ -216,7 +259,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             mp2->NID_PACKET = mp->NID_PACKET;
             mp2->Q_DIR = mp->Q_DIR;
             mp2->Q_SCALE = mp->Q_SCALE;
-            auto translate_element = [](V1::MP_element_packet e) {
+            auto translate_element = [](const V1::MP_element_packet &e) {
                 MP_element_packet e2;
                 e2.D_MAMODE = e.D_MAMODE;
                 e2.L_MAMODE = e.L_MAMODE;
@@ -231,6 +274,7 @@ std::shared_ptr<ETCS_packet> translate_packet(std::shared_ptr<ETCS_packet> packe
             for (auto &e : mp->elements) {
                 mp2->elements.push_back(translate_element(e));
             }
+            break;
         }
         case 200:
             packet->NID_PACKET.rawdata = 0;
@@ -255,7 +299,7 @@ std::shared_ptr<euroradio_message> translate_message(std::shared_ptr<euroradio_m
 {
     if (VERSION_X(version)==1) {
         if (message->NID_MESSAGE == 40 || message->NID_MESSAGE == 41) {
-            message->NID_LRBG.rawdata = NID_LRBG_t::Unknown;
+            message->NID_LRBG.rawdata = message->NID_LRBG.Unknown;
         } else if (message->NID_MESSAGE == 15) {
             auto *emerg = (conditional_emergency_stop*)message.get();
             emerg->D_REF.rawdata = 0;
@@ -306,21 +350,19 @@ std::shared_ptr<euroradio_message_traintotrack> translate_message(std::shared_pt
                 p2->V_MAXTRAIN = p->V_MAXTRAIN;
                 p2->M_LOADINGGAUGE.rawdata = 0;
                 float load = 0;
-                switch (p->M_AXLELOADCAT.rawdata) {
-                    case M_AXLELOADCAT_t::A: load = 16; break;
-                    case M_AXLELOADCAT_t::HS17: load = 17; break;
-                    case M_AXLELOADCAT_t::B1: load = 18; break;
-                    case M_AXLELOADCAT_t::B2: load = 18; break;
-                    case M_AXLELOADCAT_t::C2: load = 20; break;
-                    case M_AXLELOADCAT_t::C3: load = 20; break;
-                    case M_AXLELOADCAT_t::C4: load = 20; break;
-                    case M_AXLELOADCAT_t::D2: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D3: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D4: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::D4XL: load = 22.5f; break;
-                    case M_AXLELOADCAT_t::E4: load = 25; break;
-                    case M_AXLELOADCAT_t::E5: load = 25; break;
-                }
+                if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.A) load = 16;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.HS17) load = 17;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.B1) load = 18;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.B2) load = 18;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C2) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C3) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.C4) load = 20;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D2) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D3) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D4) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.D4XL) load = 22.5f;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.E4) load = 25;
+                else if (p->M_AXLELOADCAT.rawdata == p->M_AXLELOADCAT.E5) load = 25;
                 p2->M_AXLELOAD.rawdata = (int)(load*2);
                 p2->M_AIRTIGHT = p->M_AIRTIGHT;
                 p2->N_ITERtraction.rawdata = p2->M_TRACTIONs.size();
@@ -333,7 +375,7 @@ std::shared_ptr<euroradio_message_traintotrack> translate_message(std::shared_pt
                 auto *ma = (MA_request*)message.get();
                 auto *ma2 = new V1::MA_request();
                 ma2->NID_MESSAGE = ma->NID_MESSAGE;
-                ma2->Q_TRACKDEL.rawdata = (ma->Q_MARQSTREASON.rawdata>>Q_MARQSTREASON_t::TrackDescriptionDeletedBit)&1;
+                ma2->Q_TRACKDEL.rawdata = (ma->Q_MARQSTREASON.rawdata>>ma->Q_MARQSTREASON.TrackDescriptionDeletedBit)&1;
                 trans = std::shared_ptr<euroradio_message_traintotrack>(ma2);
                 break;
             }

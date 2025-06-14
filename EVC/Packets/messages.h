@@ -38,6 +38,7 @@ struct eurobalise_telegram : public ETCS_message
         extern double or_dist;
         Q_UPDOWN.copy(b);
         M_VERSION.copy(b);
+        b.m_version = M_VERSION.rawdata;
         Q_MEDIA.copy(b);
         N_PIG.copy(b);
         N_TOTAL.copy(b);

@@ -22,38 +22,38 @@ movement_authority::movement_authority(distance start, Level1_MA ma, int64_t tim
     for (int i=0; i<ma.N_ITER; i++) {
         ma_section section;
         section.length = ma.sections[i].L_SECTION.get_value(ma.Q_SCALE);
-        if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+        if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != ma.sections[i].T_SECTIONTIMER.Infinity)
             section.stimer = section_timer(ma.sections[i].T_SECTIONTIMER, cumdist + ma.sections[i].D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
         sections.push_back(section);
         cumdist += section.length;
     }
     ma_section endsection;
     endsection.length = ma.L_ENDSECTION.get_value(ma.Q_SCALE);
-    if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+    if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != ma.T_ENDTIMER.Infinity)
         endsection.stimer = section_timer(ma.T_SECTIONTIMER, cumdist + ma.D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
     sections.push_back(endsection);
     cumdist += endsection.length;
-    if (ma.Q_ENDTIMER && ma.T_ENDTIMER != T_SECTIONTIMER_t::Infinity)
+    if (ma.Q_ENDTIMER && ma.T_ENDTIMER != ma.T_ENDTIMER.Infinity)
         endtimer = end_timer(ma.T_ENDTIMER, cumdist-ma.D_ENDTIMERSTARTLOC.get_value(ma.Q_SCALE));
     if (ma.Q_OVERLAP) {
         overlap ov;
         ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEOL == V_release_t::CalculateOnBoard)
+        if (ma.V_RELEASEOL == ma.V_RELEASEOL.CalculateOnBoard)
             ov.vrelease = -2;
-        else if (ma.V_RELEASEOL == V_release_t::UseNationalValue)
+        else if (ma.V_RELEASEOL == ma.V_RELEASEOL.UseNationalValue)
             ov.vrelease = -1;
         else
             ov.vrelease = ma.V_RELEASEOL.get_value();
-        if (ma.T_OL != T_OL_t::Infinity)
+        if (ma.T_OL != ma.T_OL.Infinity)
             ov.ovtimer = end_timer(ma.T_OL, cumdist-ma.D_STARTOL.get_value(ma.Q_SCALE));
         ol = ov;
     }
     if (ma.Q_DANGERPOINT) {
         danger_point d;
         d.distance = ma.D_DP.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEDP == V_release_t::CalculateOnBoard)
+        if (ma.V_RELEASEDP == ma.V_RELEASEDP.CalculateOnBoard)
             d.vrelease = -2;
-        else if (ma.V_RELEASEDP == V_release_t::UseNationalValue)
+        else if (ma.V_RELEASEDP == ma.V_RELEASEDP.UseNationalValue)
             d.vrelease = -1;
         else
             d.vrelease = ma.V_RELEASEDP.get_value();
@@ -68,38 +68,38 @@ movement_authority::movement_authority(distance start, Level2_3_MA ma, int64_t t
     for (int i=0; i<ma.N_ITER; i++) {
         ma_section section;
         section.length = ma.sections[i].L_SECTION.get_value(ma.Q_SCALE);
-        if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+        if (ma.sections[i].Q_SECTIONTIMER && ma.sections[i].T_SECTIONTIMER != ma.sections[i].T_SECTIONTIMER.Infinity)
             section.stimer = section_timer(ma.sections[i].T_SECTIONTIMER, cumdist + ma.sections[i].D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
         sections.push_back(section);
         cumdist += section.length;
     }
     ma_section endsection;
     endsection.length = ma.L_ENDSECTION.get_value(ma.Q_SCALE);
-    if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != T_SECTIONTIMER_t::Infinity)
+    if (ma.Q_SECTIONTIMER && ma.T_SECTIONTIMER != ma.T_SECTIONTIMER.Infinity)
         endsection.stimer = section_timer(ma.T_SECTIONTIMER, cumdist + ma.D_SECTIONTIMERSTOPLOC.get_value(ma.Q_SCALE));
     sections.push_back(endsection);
     cumdist += endsection.length;
-    if (ma.Q_ENDTIMER && ma.T_ENDTIMER != T_SECTIONTIMER_t::Infinity)
+    if (ma.Q_ENDTIMER && ma.T_ENDTIMER != ma.T_SECTIONTIMER.Infinity)
         endtimer = end_timer(ma.T_ENDTIMER, cumdist-ma.D_ENDTIMERSTARTLOC.get_value(ma.Q_SCALE));
     if (ma.Q_OVERLAP) {
         overlap ov;
         ov.distance = ma.D_OL.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEOL == V_release_t::CalculateOnBoard)
+        if (ma.V_RELEASEOL == ma.V_RELEASEOL.CalculateOnBoard)
             ov.vrelease = -2;
-        else if (ma.V_RELEASEOL == V_release_t::UseNationalValue)
+        else if (ma.V_RELEASEOL == ma.V_RELEASEOL.UseNationalValue)
             ov.vrelease = -1;
         else
             ov.vrelease = ma.V_RELEASEOL.get_value();
-        if (ma.T_OL != T_OL_t::Infinity)
+        if (ma.T_OL != ma.T_OL.Infinity)
             ov.ovtimer = end_timer(ma.T_OL, cumdist-ma.D_STARTOL.get_value(ma.Q_SCALE));
         ol = ov;
     }
     if (ma.Q_DANGERPOINT) {
         danger_point d;
         d.distance = ma.D_DP.get_value(ma.Q_SCALE);
-        if (ma.V_RELEASEDP == V_release_t::CalculateOnBoard)
+        if (ma.V_RELEASEDP == ma.V_RELEASEDP.CalculateOnBoard)
             d.vrelease = -2;
-        else if (ma.V_RELEASEDP == V_release_t::UseNationalValue)
+        else if (ma.V_RELEASEDP == ma.V_RELEASEDP.UseNationalValue)
             d.vrelease = -1;
         else
             d.vrelease = ma.V_RELEASEDP.get_value();

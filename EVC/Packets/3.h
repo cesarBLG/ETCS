@@ -89,6 +89,8 @@ struct NationalValues : ETCS_directional_packet
     N_ITER_t N_ITER_kr;
     std::vector<KRINT_element> elements_kr;
     M_NVKTINT_t M_NVKTINT;
+    bool adhesion_nv_provided = true;
+    bool version_2_provided = true;
     void copy(bit_manipulator &w) override
     {
         NID_PACKET.copy(w);

@@ -74,7 +74,7 @@ optional<std::pair<double, double>> get_linked_bg_location(bg_id nid_bg)
     for (auto it = linking.begin(); it != linking.end(); ++it) {
         if (it->nid_bg == solr->nid_lrbg) {
             for (auto it2 = it; it2 != linking.end(); ++it2) {
-                if (it2->nid_bg.NID_BG == NID_BG_t::Unknown)
+                if (it2->nid_bg.NID_BG == bg_id::Unknown)
                     break;
                 if (it2->nid_bg == nid_bg)
                     return std::pair<double,double>(it2->dist-it->dist, it2->locacc);
@@ -83,7 +83,7 @@ optional<std::pair<double, double>> get_linked_bg_location(bg_id nid_bg)
         }
         if (it->nid_bg == nid_bg) {
             for (auto it2 = it; it2 != linking.end(); ++it2) {
-                if (it2->nid_bg.NID_BG == NID_BG_t::Unknown)
+                if (it2->nid_bg.NID_BG == bg_id::Unknown)
                     break;
                 if (it2->nid_bg == solr->nid_lrbg)
                     return std::pair<double,double>(it->dist-it2->dist, it2->locacc);
@@ -439,9 +439,9 @@ void update_linking(Linking link, bool infill, bg_id ref_bg)
         link_data d;
         d.dist = cumdist+l.D_LINK.get_value(link.Q_SCALE);
         d.locacc = l.Q_LOCACC;
-        d.nid_bg = {l.Q_NEWCOUNTRY == Q_NEWCOUNTRY_t::SameCountry ? current_NID_C : l.NID_C, (int)l.NID_BG};
+        d.nid_bg = {l.Q_NEWCOUNTRY == l.Q_NEWCOUNTRY.SameCountry ? current_NID_C : l.NID_C, l.NID_BG == l.NID_BG.Unknown ? bg_id::Unknown : (int)l.NID_BG};
         d.reaction = l.Q_LINKREACTION;
-        d.reverse_dir = l.Q_LINKORIENTATION == Q_LINKORIENTATION_t::Reverse;
+        d.reverse_dir = l.Q_LINKORIENTATION == l.Q_LINKORIENTATION.Reverse;
         current_NID_C = d.nid_bg.NID_C;
         links.push_back(d);
         cumdist = d.dist;

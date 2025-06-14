@@ -171,12 +171,12 @@ void gradient_information::handle()
     distance d = *ref;
     for (auto &e : elements) {
         d += e.D_GRADIENT.get_value(grad.Q_SCALE);
-        if (e.G_A == G_A_t::EndOfGradient) {
+        if (e.G_A == e.G_A.EndOfGradient) {
             gradient.push_back({d, 1000});
             update_gradient(gradient);
             return;
         }
-        gradient.push_back({d, (e.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*e.G_A});
+        gradient.push_back({d, (e.Q_GDIR == e.Q_GDIR.Uphill ? 0.001 : -0.001)*e.G_A});
     }
     gradient.push_back({distance::from_odometer(dist_base::max), 1000});
     update_gradient(gradient);
@@ -189,7 +189,7 @@ void issp_information::handle()
 void axle_load_speed_profile_information::handle()
 {
     AxleLoadSpeedProfile asp = *(AxleLoadSpeedProfile*)linked_packets.front().get();
-    if (asp.Q_TRACKINIT == Q_TRACKINIT_t::InitialState) {
+    if (asp.Q_TRACKINIT == asp.Q_TRACKINIT.InitialState) {
         delete_ASP(*ref+asp.D_TRACKINIT.get_value(asp.Q_SCALE));
         return;
     }
@@ -206,7 +206,7 @@ void axle_load_speed_profile_information::handle()
                 v = std::min(v, cat.V_AXLELOAD.get_value());
         }
         if (v < 1000)
-            rests.push_back(speed_restriction(v, dist, dist+el.L_AXLELOAD.get_value(asp.Q_SCALE), el.Q_FRONT == Q_FRONT_t::TrainLengthDelay));
+            rests.push_back(speed_restriction(v, dist, dist+el.L_AXLELOAD.get_value(asp.Q_SCALE), el.Q_FRONT == el.Q_FRONT.TrainLengthDelay));
     }
     update_ASP(*ref+asps[0].D_AXLELOAD.get_value(asp.Q_SCALE), rests);
 }
@@ -223,16 +223,17 @@ void condleveltr_order_information::handle()
 void session_management_information::handle()
 {
     SessionManagement &session = *(SessionManagement*)linked_packets.front().get();
-    if (mode != Mode::SL || session.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
-        contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
-        if (session.Q_RBC == Q_RBC_t::EstablishSession) {
-            set_supervising_rbc(info);
-            if (supervising_rbc && mode != Mode::SH && mode != Mode::PS)
-                supervising_rbc->open(0);
-        } else {
-            terminate_session(info);
-        }
-    }
+    bool ignore = mode == Mode::SL && session.Q_SLEEPSESSION == session.Q_SLEEPSESSION.IgnoreOrder;
+    contact_info info = {session.NID_C, session.NID_RBC, session.NID_RADIO};
+    if (session.NID_RBC == session.NID_RBC.ContactLastRBC) info.id = ContactLastRBC;
+    if (session.NID_RADIO == session.NID_RADIO.UseShortNumber) info.phone_number = UseShortNumber;
+    if (session.Q_RBC == session.Q_RBC.EstablishSession) {
+        set_supervising_rbc(info);
+        if (supervising_rbc && mode != Mode::SH && mode != Mode::PS && !ignore)
+            supervising_rbc->open(0);
+    } else if (!ignore) {
+        terminate_session(info);
+    } 
 }
 void ma_request_params_info::handle()
 {
@@ -245,11 +246,11 @@ void position_report_params_info::handle()
     position_report_parameters p;
     p.D_sendreport = params->D_CYCLOC.get_value(params->Q_SCALE);
     p.T_sendreport = params->T_CYCLOC * 1000;
-    p.LRBG = params->M_LOC != M_LOC_t::NotEveryLRBG;
+    p.LRBG = params->M_LOC != params->M_LOC.NotEveryLRBG;
     distance pos = *ref;
     for (auto &e : params->elements) {
         pos += e.D_LOC.get_value(params->Q_SCALE);
-        if (e.Q_LGTLOC == Q_LGTLOC_t::MaxSafeFrontEnd) p.location_front.push_back(pos);
+        if (e.Q_LGTLOC == e.Q_LGTLOC.MaxSafeFrontEnd) p.location_front.push_back(pos);
         else p.location_rear.push_back(pos);
     }
     pos_report_params = p;
@@ -258,7 +259,7 @@ void SR_authorisation_info::handle()
 {
     auto *sr = (SR_authorisation*)message->get();
     ma_rq_reasons[0] = false;
-    if (sr->D_SR != D_SR_t::Infinity)
+    if (sr->D_SR != sr->D_SR.Infinity)
         SR_dist_override = sr->D_SR.get_value(sr->Q_SCALE);
     else
         SR_dist_override = std::numeric_limits<double>::infinity();
@@ -288,7 +289,7 @@ void SR_authorisation_info::handle()
 void stop_if_in_SR_information::handle()
 {
     StopIfInSR s = *(StopIfInSR*)linked_packets.front().get();
-    if (s.Q_SRSTOP == Q_SRSTOP_t::StopIfInSR && (!sr_balises || sr_balises->find(nid_bg) == sr_balises->end() || (operated_version>>4)==1)) {
+    if (s.Q_SRSTOP == s.Q_SRSTOP.StopIfInSR && (!sr_balises || sr_balises->find(nid_bg) == sr_balises->end() || (operated_version>>4)==1)) {
         if (!overrideProcedure)
             trigger_condition(54);
         else
@@ -299,9 +300,9 @@ void TSR_information::handle()
 {
     TemporarySpeedRestriction t = *(TemporarySpeedRestriction*)linked_packets.front().get();
     distance start = *ref + t.D_TSR.get_value(t.Q_SCALE);
-    speed_restriction p(t.V_TSR.get_value(), start, start+t.L_TSR.get_value(t.Q_SCALE), t.Q_FRONT==Q_FRONT_t::TrainLengthDelay);
+    speed_restriction p(t.V_TSR.get_value(), start, start+t.L_TSR.get_value(t.Q_SCALE), t.Q_FRONT == t.Q_FRONT.TrainLengthDelay);
     p.is_tsr = true;
-    TSR tsr = {(int)t.NID_TSR, t.NID_TSR != NID_TSR_t::NonRevocable, p};
+    TSR tsr = {(int)t.NID_TSR, t.NID_TSR != t.NID_TSR.NonRevocable, p};
     insert_TSR(tsr);
 }
 void TSR_revocation_information::handle()
@@ -316,7 +317,7 @@ void TSR_revocable_inhibition_information::handle()
 void TSR_gradient_information::handle()
 {
     auto &gr = *(DefaultGradientTSR*)linked_packets.front().get();
-    default_gradient_tsr = (gr.Q_GDIR == Q_GDIR_t::Uphill ? 0.001 : -0.001)*gr.G_TSR;
+    default_gradient_tsr = (gr.Q_GDIR == gr.Q_GDIR.Uphill ? 0.001 : -0.001)*gr.G_TSR;
     target::recalculate_all_decelerations();
 }
 void route_suitability_information::handle()
@@ -342,15 +343,19 @@ void geographical_position_information::handle()
 void rbc_transition_information::handle()
 {
     RBCTransitionOrder o = *(RBCTransitionOrder*)linked_packets.front().get();
-    if (mode != Mode::SL || o.Q_SLEEPSESSION == Q_SLEEPSESSION_t::ExecuteOrder) {
-        contact_info info = {o.NID_C, o.NID_RBC, o.NID_RADIO};
+    contact_info info = {o.NID_C, o.NID_RBC, o.NID_RADIO};
+    if (o.NID_RBC == o.NID_RBC.ContactLastRBC) info.id = ContactLastRBC;
+    if (o.NID_RADIO == o.NID_RADIO.UseShortNumber) info.phone_number = UseShortNumber;
+    if ((mode != Mode::SL || o.Q_SLEEPSESSION == o.Q_SLEEPSESSION.ExecuteOrder) && mode != Mode::PS && mode != Mode::SH) {
         rbc_handover(*ref + o.D_RBCTR.get_value(o.Q_SCALE), info);
+    } else if (o.D_RBCTR == 0) {
+        set_rbc_contact(info);
     }
 }
 void danger_for_SH_information::handle()
 {
     DangerForShunting s = *(DangerForShunting*)linked_packets.front().get();
-    if (s.Q_ASPECT == Q_ASPECT_t::StopIfInSH) {
+    if (s.Q_ASPECT == s.Q_ASPECT.StopIfInSH) {
         if (!overrideProcedure)
             trigger_condition(49);
         else
@@ -362,7 +367,7 @@ void coordinate_system_information::handle()
     auto &msg = *(coordinate_system_assignment*)message->get();
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
         if ((it->second & 1) == 0 && it->first.nid_lrbg == msg.NID_LRBG.get_value()) {
-            it->first.dir = msg.Q_ORIENTATION == Q_ORIENTATION_t::Reverse;
+            it->first.dir = msg.Q_ORIENTATION == msg.Q_ORIENTATION.Reverse;
         }
     }
 }
@@ -522,7 +527,7 @@ void taf_level23_information::handle()
         lti->NID_LTRBG.set_value(bg_id({taf.Q_NEWCOUNTRY ? (int)taf.NID_C : (int)nid_bg.NID_C, (int)taf.NID_BG}));
         auto pack = std::shared_ptr<ETCS_packet>(lti);
         auto *req = new MA_request();
-        req->Q_MARQSTREASON.rawdata = Q_MARQSTREASON_t::TrackAheadFreeBit;
+        req->Q_MARQSTREASON.rawdata = req->Q_MARQSTREASON.TrackAheadFreeBit;
         req->optional_packets.push_back(pack);
         supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(req));
     }
@@ -541,7 +546,7 @@ void vbc_order::handle()
 {
     VirtualBaliseCoverOrder &vbco = *(VirtualBaliseCoverOrder*)linked_packets.front().get();
     virtual_balise_cover vbc = {(int)vbco.NID_C, (int)vbco.NID_VBCMK, get_milliseconds()+vbco.T_VBC.get_value()};
-    if (vbco.Q_VBCO == Q_VBCO_t::SetVBC)
+    if (vbco.Q_VBCO == vbco.Q_VBCO.SetVBC)
         set_vbc(vbc);
     else
         remove_vbc(vbc);

@@ -36,17 +36,36 @@ build_win32() {
 ETCS_DIR="${ETCS_DIR:-$HOME/ETCS}"
 cd $ETCS_DIR
 git fetch
-if [[ $(LANG="C" git status) != *"Your branch is up to date"* || "$1" == "f" ]]; then
-        # Actualizar git
+if [[ $(LANG="C" git status) != *"Your branch is up to date"* || "$1" == "-f" || "$1" == "--force" ]]; then
         git pull
 
         build_locales
 
-        build_win32
-
-        build_linux_appimage
-
-        build aarch64 -DCMAKE_TOOLCHAIN_FILE=utils/TC-aarch64.cmake
-        package aarch64
+        for arg in "$@"; do
+                case $arg in
+                        win32)
+                                build_win32
+                        ;;
+                        linux)
+                                build linux
+                                package linux
+                        ;;
+                        linux_appimage)
+                                build_linux_appimage
+                        ;;
+                        aarch64)
+                                build aarch64 -DCMAKE_TOOLCHAIN_FILE=utils/TC-aarch64.cmake
+                                package aarch64
+                        ;;
+                        android)
+                                build_android
+                        ;;
+                        -f|--force)
+                        ;;
+                        *)
+                        echo "Unknown target $arg"
+                        ;;
+                esac
+        done
 fi
 
