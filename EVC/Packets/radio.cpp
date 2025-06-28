@@ -286,11 +286,26 @@ ETCS_packet *get_position_report()
         if ((it->second & 1) == 0) {
             if (!lrbg)
                 lrbg = it->first;
-            else if (!prvlrbg) {
+            else if (!prvlrbg && lrbg->nid_lrbg != it->first.nid_lrbg) {
                 prvlrbg = it->first;
                 break;
             }
         }
+    }
+    if (prvlrbg) {
+        bool same_orientation = false;
+        for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
+            if ((it->second & 1) == 0) {
+                if (it->first.nid_lrbg == prvlrbg->nid_lrbg)
+                    break;
+                if (it->first.nid_lrbg == lrbg->nid_lrbg && it->first.original_orientation == prvlrbg->original_orientation) {
+                    same_orientation = true;
+                    break;
+                }
+            }
+        }
+        if (!same_orientation)
+            prvlrbg = {};
     }
     if (!lrbg || lrbg->dir != -1) {
         PositionReport *r = new PositionReport();

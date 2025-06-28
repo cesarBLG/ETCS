@@ -22,7 +22,7 @@ std::map<bg_id, double> stored_locacc;
 bool position_valid=false;
 void from_json(const json &pos, lrbg_info &lrbg)
 {
-    lrbg = {bg_id({pos["NID_C"], pos["NID_BG"]}), pos["Direction"], dist_base(pos["Position"], pos["Orientation"]), pos["Q_LOCACC"]};
+    lrbg = {bg_id({pos["NID_C"], pos["NID_BG"]}), pos["Direction"], dist_base(pos["Position"], pos["Orientation"]), pos["OriginalOrientation"], pos["Q_LOCACC"]};
 }
 void to_json(json &pos, const lrbg_info &lrbg)
 {
@@ -31,6 +31,7 @@ void to_json(json &pos, const lrbg_info &lrbg)
     pos["Q_LOCACC"] = lrbg.locacc;
     pos["Direction"] = lrbg.dir;
     pos["Orientation"] = lrbg.position.orientation;
+    pos["OriginalOrientation"] = lrbg.original_orientation;
     pos["Position"] = lrbg.position.dist;
 }
 void load_train_position()
@@ -105,7 +106,7 @@ void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir)
 #endif
     if (stored_locacc.find(id) == stored_locacc.end())
         stored_locacc[id] = Q_NVLOCACC;
-    orbgs.push_front({{id, dir, pos, stored_locacc[id]}, linked ? 0 : 1});
+    orbgs.push_front({{id, dir, pos, pos.orientation, stored_locacc[id]}, linked ? 0 : 1});
     if (linked && (!pos_report_params || pos_report_params->LRBG))
         position_report_reasons[9] = true;
     int lrbg_count = 0;
