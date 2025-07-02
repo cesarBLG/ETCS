@@ -171,7 +171,7 @@ msgid "FP 1"
 msgstr "货1"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198
-msgid "FP2"
+msgid "FP 2"
 msgstr "货2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1036
@@ -299,10 +299,6 @@ msgstr "调车请求超时"
 #: c:\etcs\src\evc\dmi\windows.cpp:970 c:\etcs\src\evc\dmi\windows.cpp:974
 msgid "Validate train data"
 msgstr "使用列车数据"
-
-#: c:\etcs\src\evc\dmi\windows.cpp:1033
-msgid "FP 2"
-msgstr "货2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"

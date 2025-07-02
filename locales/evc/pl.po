@@ -159,7 +159,7 @@ msgid "FP 1"
 msgstr ""
 
 #: ../EVC/DMI/windows.cpp:225
-msgid "FP2"
+msgid "FP 2"
 msgstr ""
 
 #: ../EVC/DMI/windows.cpp:226 ../EVC/DMI/windows.cpp:1139
@@ -367,10 +367,6 @@ msgstr ""
 
 #: ../EVC/DMI/windows.cpp:1081
 msgid "E5"
-msgstr ""
-
-#: ../EVC/DMI/windows.cpp:1135
-msgid "FP 2"
 msgstr ""
 
 #: ../EVC/DMI/windows.cpp:1174

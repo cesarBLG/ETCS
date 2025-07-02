@@ -163,7 +163,7 @@ msgid "FP 1"
 msgstr "FP 1"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198
-msgid "FP2"
+msgid "FP 2"
 msgstr "FP 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1036
@@ -293,9 +293,6 @@ msgstr "Rangieranfrage fehlgeschlagen"
 msgid "Validate train data"
 msgstr "Zugdaten bestätigen"
 
-#: c:\etcs\src\evc\dmi\windows.cpp:1033
-msgid "FP 2"
-msgstr "FP 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"

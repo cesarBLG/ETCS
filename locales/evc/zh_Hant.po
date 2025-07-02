@@ -171,8 +171,8 @@ msgid "FP 1"
 msgstr "FP 1"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198
-msgid "FP2"
-msgstr "FP2"
+msgid "FP 2"
+msgstr "FP 2"
 
 #: c:\etcs\src\evc\dmi\windows.cpp:198 c:\etcs\src\evc\dmi\windows.cpp:1036
 msgid "FP 3"
@@ -300,9 +300,7 @@ msgstr "調車請求失敗"
 msgid "Validate train data"
 msgstr "確認列車資訊"
 
-#: c:\etcs\src\evc\dmi\windows.cpp:1033
-msgid "FP 2"
-msgstr "FP 2"
+
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"
