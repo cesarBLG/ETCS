@@ -292,9 +292,7 @@ msgstr "Échec de la demande de manoeuvre"
 msgid "Validate train data"
 msgstr "Valider les données du train"
 
-#: c:\etcs\src\evc\dmi\windows.cpp:1033
-msgid "FP 2"
-msgstr "FP 2"
+
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"

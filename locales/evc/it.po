@@ -292,9 +292,7 @@ msgstr "Richiesta di shunting fallita"
 msgid "Validate train data"
 msgstr "Convalida i dati del treno"
 
-#: c:\etcs\src\evc\dmi\windows.cpp:1033
-msgid "FP 2"
-msgstr "FP 2"
+
 
 #: c:\etcs\src\evc\dmi\windows.cpp:1138 c:\etcs\src\evc\dmi\windows.cpp:1151
 msgid "Validate set VBC"
