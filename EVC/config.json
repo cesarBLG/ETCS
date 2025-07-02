@@ -1097,8 +1097,8 @@
          {
             "Field":"TrainCategory",
             "Value":[
-               "FP",
-               "FG"
+               "FP 1",
+               "FG 1"
             ]
          }
      ]
@@ -1127,8 +1127,8 @@
           {
              "Field":"TrainCategory",
              "Value":[
-                "FP",
-                "FG"
+                "FP 1",
+                "FG 1"
              ]
           }
       ]
@@ -1154,8 +1154,8 @@
           {
              "Field":"TrainCategory",
              "Value":[
-                "FP",
-                "FG"
+                "FP 1",
+                "FG 1"
              ]
           }
       ]
@@ -1181,8 +1181,8 @@
           {
              "Field":"TrainCategory",
              "Value":[
-                "FP",
-                "FG"
+                "FP 1",
+                "FG 1"
              ]
           }
       ]
