@@ -369,10 +369,6 @@ msgstr ""
 msgid "E5"
 msgstr ""
 
-#: ../EVC/DMI/windows.cpp:1135
-msgid "FP 2"
-msgstr ""
-
 #: ../EVC/DMI/windows.cpp:1174
 msgid "Train data entered"
 msgstr "Wprowadzono dane pociągu"
