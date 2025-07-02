@@ -399,10 +399,6 @@ msgstr "Número de tren introducido"
 msgid "TrainCategory"
 msgstr "CategoríaTren"
 
-#: ../EVC/DMI/windows.cpp:1087 ../EVC/DMI/windows.cpp:1230
-msgid "FP 2"
-msgstr "FP 2"
-
 #: ../EVC/DMI/windows.cpp:1112 ../EVC/DMI/windows.cpp:1116
 msgid "Validate train data"
 msgstr "Validar datos del tren"
