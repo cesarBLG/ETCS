@@ -141,6 +141,16 @@ distance d_last_pos_rep;
 void update_radio()
 {
     update_euroradio();
+    if ((mode != Mode::SR && mode != Mode::SB && mode != Mode::PT) || (level != Level::N2 && level != Level::N3))
+        ma_rq_reasons[0] = false;
+    if ((mode != Mode::FS && mode != Mode::LS && mode != Mode::OS) || (level != Level::N2 && level != Level::N3)) {
+        ma_rq_reasons[1] = false;
+        ma_rq_reasons[2] = false;
+        ma_rq_reasons[3] = false;
+    }
+    if ((mode != Mode::SB && mode != Mode::FS && mode != Mode::LS && mode != Mode::SR && mode != Mode::OS && mode != Mode::UN && mode != Mode::TR && mode != Mode::PT && mode != Mode::SN) || level == Level::N2 || level == Level::N3) {
+        ma_rq_reasons[4] = false;
+    }
     if (supervising_rbc) {
         double V_MRSP = calc_ceiling_limit();
         double advance = (V_MRSP + dV_warning(V_MRSP))*ma_params.T_MAR/1000;
@@ -286,11 +296,26 @@ ETCS_packet *get_position_report()
         if ((it->second & 1) == 0) {
             if (!lrbg)
                 lrbg = it->first;
-            else if (!prvlrbg) {
+            else if (!prvlrbg && lrbg->nid_lrbg != it->first.nid_lrbg) {
                 prvlrbg = it->first;
                 break;
             }
         }
+    }
+    if (prvlrbg) {
+        bool same_orientation = false;
+        for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
+            if ((it->second & 1) == 0) {
+                if (it->first.nid_lrbg == prvlrbg->nid_lrbg)
+                    break;
+                if (it->first.nid_lrbg == lrbg->nid_lrbg && it->first.original_orientation == prvlrbg->original_orientation) {
+                    same_orientation = true;
+                    break;
+                }
+            }
+        }
+        if (!same_orientation)
+            prvlrbg = {};
     }
     if (!lrbg || lrbg->dir != -1) {
         PositionReport *r = new PositionReport();

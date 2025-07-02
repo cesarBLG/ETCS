@@ -34,6 +34,7 @@ struct lrbg_info
     bg_id nid_lrbg;
     int dir;
     dist_base position;
+    int original_orientation;
     double locacc;
 };
 extern std::list<link_data> linking;
