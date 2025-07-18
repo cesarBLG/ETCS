@@ -17,8 +17,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -67,10 +67,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -94,8 +94,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -144,10 +144,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -171,8 +171,8 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.28, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+                        {"speed": 54.7222, "value": 0.96, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -221,10 +221,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
