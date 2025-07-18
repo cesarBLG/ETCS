@@ -17,9 +17,9 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.1, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.97, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.1, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 38.8889, "value": 1.0, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 55.5556, "value": 0.97, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -64,10 +64,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -91,9 +91,9 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 1.02, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.93, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.9, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 1.02, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 38.8889, "value": 0.93, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 55.5556, "value": 0.9, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -138,10 +138,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -165,9 +165,9 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.95, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.86, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.84, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.95, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 38.8889, "value": 0.86, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 55.5556, "value": 0.84, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -212,10 +212,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -239,9 +239,9 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.87, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.79, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.77, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.87, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 38.8889, "value": 0.79, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 55.5556, "value": 0.77, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -286,10 +286,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -313,9 +313,9 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                        {"speed": 0, "value": 0.8, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 38.8889, "value": 0.72, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-						{"speed": 55.5556, "value": 0.7, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                        {"speed": 0, "value": 0.8, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 38.8889, "value": 0.72, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+						{"speed": 55.5556, "value": 0.7, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                     ],
                     "build_up_time": 5,
                     "validity": "...."
@@ -360,10 +360,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
@@ -387,9 +387,9 @@
            "emergency": {
                "normal": {
                    "curves": [
-                       {"speed": 0, "value": 1.1, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                       {"speed": 38.8889, "value": 1.0, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8},
-                       {"speed": 55.5556, "value": 0.97, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8}
+                       {"speed": 0, "value": 1.1, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+                       {"speed": 38.8889, "value": 1.0, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9},
+                       {"speed": 55.5556, "value": 0.97, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9}
                    ],
                    "build_up_time": 5,
                    "validity": "...."
@@ -434,10 +434,10 @@
                    }
                },
                "kn+": [
-                   {"speed": 0, "value": 1}
+                   {"speed": 0, "value": 0}
                ],
                "kn-": [
-                   {"speed": 0, "value": 1}
+                   {"speed": 0, "value": 0}
                ]
            }
            

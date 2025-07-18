@@ -12,19 +12,19 @@
             "emergency": {
                 "normal": {
                     "curves": [
-                            {"speed": 0, "value": 1.4, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
-                            {"speed": 30, "value": 1.68, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
-                            {"speed": 160, "value": 1.55, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
-                            {"speed": 180, "value": 1.4, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 }
+                            {"speed": 0, "value": 1.4, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 },
+                            {"speed": 30, "value": 1.68, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 },
+                            {"speed": 160, "value": 1.55, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 },
+                            {"speed": 180, "value": 1.4, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 }
                     ],
                     "build_up_time": 5,
                     "validity": "..1."
                 },
                 "no_mg": {
                     "curves": [
-                            {"speed": 0, "value": 1.4, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 }, 
-                            {"speed": 160, "value": 1.3, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 },
-                            {"speed": 180, "value": 1.1, "kdry": [{"confidence": 50, "value": 1}], "kwet": 0.8 }
+                            {"speed": 0, "value": 1.4, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 }, 
+                            {"speed": 160, "value": 1.3, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 },
+                            {"speed": 180, "value": 1.1, "kdry": [{"confidence": 50, "value": 0.8}], "kwet": 0.9 }
                     ],
                     "build_up_time": 5,
                     "validity": "..0."
@@ -72,10 +72,10 @@
                     }
                 },
                 "kn+": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ],
                 "kn-": [
-                    {"speed": 0, "value": 1}
+                    {"speed": 0, "value": 0}
                 ]
             }
             
