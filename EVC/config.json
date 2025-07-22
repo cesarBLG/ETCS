@@ -546,7 +546,7 @@
     "105":{
        "TrainData":"TrainData/Spain/traindata_105.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_ansaldo.json",
        "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
@@ -670,7 +670,31 @@
     "120":{
        "TrainData":"TrainData/Spain/traindata_120.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_ansaldo.json",
+       "OpenMainPowerSwitchDistance":225,
+       "ConstTrainDataValues":[
+         {
+            "Field":"TrainCategory",
+            "Value":"PASS 3"
+         },
+         {
+             "Field":"AxleLoadCategory",
+             "Value":"C2"
+         },
+         {
+             "Field":"LoadingGauge",
+             "Value":"G1"
+         },
+         {
+             "Field":"Airtight",
+             "Value":"Yes"
+         }
+      ]
+    },
+    "125":{
+       "TrainData":"TrainData/Spain/traindata_120.json",
+       "SpeedDial":400,
+       "STMLayout":"stm_ansaldo.json",
        "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
@@ -694,7 +718,7 @@
     "121":{
        "TrainData":"TrainData/Spain/traindata_121.json",
        "SpeedDial":400,
-       "STMLayout":"stm_siemens.json",
+       "STMLayout":"stm_ansaldo.json",
        "OpenMainPowerSwitchDistance":225,
        "ConstTrainDataValues":[
          {
@@ -715,6 +739,90 @@
          }
       ]
     },
+    "121ebicab":{
+      "TrainData":"TrainData/Spain/traindata_121.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_ansaldo.json",
+      "DisplayTimeToPermitted":true,
+      "OpenMainPowerSwitchDistance":225,
+      "InstalledSTM":[
+         19
+      ],
+      "ConstTrainDataValues":[
+        {
+           "Field":"TrainCategory",
+           "Value":"PASS 3"
+        },
+        {
+            "Field":"AxleLoadCategory",
+            "Value":"C2"
+        },
+        {
+            "Field":"LoadingGauge",
+            "Value":"G1"
+        },
+        {
+            "Field":"Airtight",
+            "Value":"Yes"
+        }
+     ]
+   },
+   "125ebicab":{
+      "TrainData":"TrainData/Spain/traindata_120.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_ansaldo.json",
+      "DisplayTimeToPermitted":true,
+      "OpenMainPowerSwitchDistance":225,
+      "InstalledSTM":[
+         19
+      ],
+      "ConstTrainDataValues":[
+        {
+           "Field":"TrainCategory",
+           "Value":"PASS 3"
+        },
+        {
+            "Field":"AxleLoadCategory",
+            "Value":"C2"
+        },
+        {
+            "Field":"LoadingGauge",
+            "Value":"G1"
+        },
+        {
+            "Field":"Airtight",
+            "Value":"Yes"
+        }
+     ]
+   },
+   "125an":{
+      "TrainData":"TrainData/Spain/traindata_120.json",
+      "SpeedDial":400,
+      "STMLayout":"stm_ansaldo.json",
+      "DisplayTimeToPermitted":true,
+      "OpenMainPowerSwitchDistance":225,
+      "InstalledSTM":[
+         19
+      ],
+      "ConstTrainDataValues":[
+        {
+           "Field":"TrainCategory",
+           "Value":"PASS 3"
+        },
+        {
+            "Field":"AxleLoadCategory",
+            "Value":"C2"
+        },
+        {
+            "Field":"LoadingGauge",
+            "Value":"G1"
+        },
+        {
+            "Field":"Airtight",
+            "Value":"Yes"
+        }
+     ]
+   },
     "355":{
        "TrainData":"TrainData/Spain/traindata_355.json",
        "SpeedDial":400,

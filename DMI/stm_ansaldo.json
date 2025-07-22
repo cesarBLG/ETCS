@@ -1,0 +1,392 @@
+{
+    "STM" : [
+        {
+            "nid_stm": 10,
+            "indicators": [
+                {
+                    "id": 1,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 4,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 5,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 6,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 7,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 8,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 9,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 12,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 13,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 14,
+                    "font_size": 20,
+                    "halign": "center",
+                    "valign": "center"
+                }
+                
+            ],
+            "positions": [
+                {
+                    "id": 1,
+                    "x": 54,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 2,
+                    "x": 91,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 3,
+                    "x": 128,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 4,
+                    "x": 223,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 5,
+                    "x": 260,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 6,
+                    "x": 297,
+                    "y": 315,
+                    "width": 37,
+                    "height": 50
+                }
+            ],
+            "positions_softkeys": [
+                {
+                    "id": 1,
+                    "x": 54,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 2,
+                    "x": 91,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 3,
+                    "x": 128,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 4,
+                    "x": 223,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 5,
+                    "x": 260,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                },
+                {
+                    "id": 6,
+                    "x": 297,
+                    "y": 300,
+                    "width": 37,
+                    "height": 50
+                }
+            ],
+            "icons": [
+                {
+                    "id": 1,
+                    "file": "LZB/S.bmp",
+                    "text": false
+                },
+                {
+                    "id": 4,
+                    "file": "LZB/FIN.bmp",
+                    "text": false
+                },
+                {
+                    "id": 5,
+                    "file": "LZB/EL.bmp",
+                    "text": false
+                },
+                {
+                    "id": 6,
+                    "file": "LZB/V.bmp",
+                    "text": false
+                },
+                {
+                    "id": 7,
+                    "file": "LZB/E.bmp",
+                    "text": false
+                },
+                {
+                    "id": 8,
+                    "file": "LZB/P.bmp",
+                    "text": false
+                },
+                {
+                    "id": 9,
+                    "file": "LZB/OE.bmp",
+                    "text": false
+                },
+                {
+                    "id": 12,
+                    "file": "LZB/R.bmp",
+                    "text": false
+                },
+                {
+                    "id": 13,
+                    "file": "LZB/60.bmp",
+                    "text": false
+                },
+                {
+                    "id": 14,
+                    "file": "LZB/80.bmp",
+                    "text": false
+                }
+            ],
+            "etcs_supervision": true,
+            "etcs_dial_range": 400,
+            "flash_fast": 4,
+            "flash_slow": 2,
+            "flash_style": "area",
+            "sounds": [
+                {
+                    "id": 1,
+                    "file": "LZB_Schnarre.wav"
+                }
+            ]
+        },
+        {
+            "nid_stm": 19,
+            "indicators": [
+                {
+                    "id": 1,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 2,
+                    "font_size": 10,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 3,
+                    "font_size": 10,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 4,
+                    "font_size": 10,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 5,
+                    "font_size": 10,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 6,
+                    "font_size": 8,
+                    "halign": "center",
+                    "valign": "center"
+                }
+                
+            ],
+			"positions": [
+                {
+                    "id": 1,
+                    "x": 334,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 2,
+                    "x": 384,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 3,
+                    "x": 434,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 4,
+                    "x": 484,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 5,
+                    "x": 534,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 6,
+                    "x": 584,
+                    "y": 315,
+                    "width": 50,
+                    "height": 50
+                }
+            ],
+            "buttons": [
+                {
+                    "id": 1,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 2,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 3,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 4,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                },
+                {
+                    "id": 5,
+                    "font_size": 9,
+                    "halign": "center",
+                    "valign": "center"
+                }
+                
+            ],
+			"button_positions": [
+                {
+                    "id": 1,
+                    "x": 334,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 2,
+                    "x": 384,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 3,
+                    "x": 434,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 4,
+                    "x": 484,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                },
+                {
+                    "id": 5,
+                    "x": 584,
+                    "y": 365,
+                    "width": 50,
+                    "height": 50
+                }
+            ],
+            "etcs_supervision": true,
+            "etcs_dial_range": 250,
+            "flash_fast": 4,
+            "flash_slow": 2,
+            "flash_style": "area",
+            "sounds": [
+                {
+                    "id": 1,
+                    "file": "ASFA_corto.wav"
+                },
+                {
+                    "id": 2,
+                    "file": "ASFA_REC.wav"
+                }
+			]
+        }
+    ]
+}
