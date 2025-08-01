@@ -285,6 +285,7 @@ void update_mode_status()
                 it.first.dir = 1-it.first.dir;
             it.first.position.orientation = odometer_orientation;
         }
+        update_odometer();
         void reset_eurobalise_data();
         reset_eurobalise_data();
     }
