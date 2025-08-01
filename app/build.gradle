@@ -16,8 +16,8 @@ android {
             applicationId "com.etcs.dmi"
         }
         minSdkVersion 19
-        targetSdkVersion 34
-        compileSdk 34
+        targetSdkVersion 35
+        compileSdk 35
         versionCode 10
         versionName "0.10"
         externalNativeBuild {
@@ -43,6 +43,7 @@ android {
     lint {
         abortOnError false
     }
+    compileSdk 35
     if (!project.hasProperty('EXCLUDE_NATIVE_LIBS')) {
         sourceSets{
             main {

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	for (int i = 1; i < argc; i++)
 		args.push_back(std::string(argv[i]));
 #ifdef __ANDROID__
-	android_external_storage_dir = SDL_AndroidGetExternalStoragePath();
+	android_external_storage_dir = std::string(SDL_AndroidGetExternalStoragePath())+"/";
 #endif
 	platform = std::make_unique<SdlPlatform>(platform_size_w, platform_size_h, args);
 	on_platform_ready();
