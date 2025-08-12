@@ -27,6 +27,24 @@ void update_mode_profile()
             return false;
         }});
     }
+
+    if (requested_mode_profile && requested_mode_profile->mode == Mode::LS) {
+        if (LoA) {
+            lssma = LoA->second;
+            auto mrsp = get_MRSP();
+            for (auto it = mrsp.begin(); it != mrsp.end(); ++it) {
+                if (d_minsafefront(it->first) < it->first && lssma > it->second)
+                    lssma = it->second;
+            }
+        } else {
+            lssma = 0;
+        }
+        if (ls_function_marker)
+            display_lssma = display_lssma_time && get_milliseconds()>*display_lssma_time;
+        else
+            display_lssma = (EoA || (LoA && LoA->second < requested_mode_profile->speed)) && lssma < V_train;
+    }
+
     in_mode_ack_area = false;
     if (mode_profiles.empty()) {
         requested_mode_profile = {};
@@ -88,23 +106,6 @@ void update_mode_profile()
             mode_acknowledged = false;
             mode_to_ack = first.mode;
         }
-    }
-
-    if (requested_mode_profile && requested_mode_profile->mode == Mode::LS) {
-        if (LoA) {
-            lssma = LoA->second;
-            auto mrsp = get_MRSP();
-            for (auto it = mrsp.begin(); it != mrsp.end(); ++it) {
-                if (d_minsafefront(it->first) < it->first && lssma > it->second)
-                    lssma = it->second;
-            }
-        } else {
-            lssma = 0;
-        }
-        if (ls_function_marker)
-            display_lssma = display_lssma_time && get_milliseconds()>*display_lssma_time;
-        else
-            display_lssma = (EoA || (LoA && LoA->second < requested_mode_profile->speed)) && lssma < V_train;
     }
 }
 void reset_mode_profile(distance ref, bool infill)
