@@ -23,7 +23,7 @@ struct mode_profile
     double speed;
 };
 extern std::list<mode_profile> mode_profiles;
-extern bool in_mode_ack_area;
+extern optional<Mode> in_mode_ack_area;
 extern bool mode_timer_started;
 extern int64_t mode_timer;
 extern optional<mode_profile> requested_mode_profile;
