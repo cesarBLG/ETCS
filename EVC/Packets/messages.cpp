@@ -942,7 +942,7 @@ struct accepted_condition
 std::map<level_filter_data, accepted_condition> level_filter_index;
 bool level_filter(std::shared_ptr<etcs_information> info, const std::list<std::shared_ptr<etcs_information>> &message) 
 {
-    if (info->infill && ((level != Level::N1 && (!ongoing_transition || ongoing_transition->leveldata.level != Level::N1 || (level != Level::N2 && level != Level::N3))) || (mode != Mode::FS && mode != Mode::OS)))
+    if (info->infill && ((level != Level::N1 && (!ongoing_transition || ongoing_transition->leveldata.level != Level::N1 || (level != Level::N2 && level != Level::N3))) || (mode != Mode::FS && mode != Mode::LS)))
         return false;
     accepted_condition s = level_filter_index[{info->index_level, level, info->fromRBC != nullptr}];
     if (!s.reject && info->infill)

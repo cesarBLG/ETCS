@@ -77,6 +77,9 @@ void update_mode_profile()
             } else if (mode == Mode::SH && (!SH_speed || SH_speed->speed != requested_mode_profile->speed)) {
                 SH_speed = speed_restriction(requested_mode_profile->speed, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
                 recalculate_MRSP();
+            } else if (mode == Mode::LS && (!LS_speed || LS_speed->speed != requested_mode_profile->speed)) {
+                LS_speed = speed_restriction(requested_mode_profile->speed, distance::from_odometer(dist_base::min), distance::from_odometer(dist_base::max), false);
+                recalculate_MRSP();
             }
         } else {
             mode_timer_started = true;
