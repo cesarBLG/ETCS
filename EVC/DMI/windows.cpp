@@ -391,7 +391,7 @@ json data_view_window()
         fields.push_back(build_field("", ""));
         int i = 1;
         for (auto &vbc : vbcs) {
-            fields.push_back(build_numeric_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK)));
+            fields.push_back(build_numeric_field("VBC #"+std::to_string(i++)+" set code", std::to_string(vbc.NID_VBCMK|(vbc.NID_C<<6)|((vbc.validity/86400000LL)<<16))));
         }
     }
     j["WindowDefinition"] = build_data_view_window(get_text("Data view"), fields);
@@ -1383,7 +1383,7 @@ void validate_data_entry(std::string name, json &result)
         } else {
             std::string t = get_text("VBC code");
             uint32_t num = stoi(result[get_text("VBC code")].get<std::string>());
-            set_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
+            set_vbc({(int)(num>>6) & 1023, (int)(num & 63), get_milliseconds(), (num>>16)*86400000LL});
             active_dialog_step = "S1";
         }
     } else if (name == get_text("Validate remove VBC")) {
@@ -1399,7 +1399,7 @@ void validate_data_entry(std::string name, json &result)
             return;
         } else {
             uint32_t num = stoi(result[get_text("VBC code")].get<std::string>());
-            remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), (num>>16)*86400000LL+get_milliseconds()});
+            remove_vbc({(int)(num>>6) & 1023, (int)(num & 63), 0, 0});
             active_dialog_step = "S1";
         }
     } else if (name == get_text("Brightness")) {

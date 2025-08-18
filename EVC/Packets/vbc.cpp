@@ -8,17 +8,19 @@
  */
 #include "vbc.h"
 #include "../TrainSubsystems/cold_movement.h"
-std::set<virtual_balise_cover> vbcs;
+std::list<virtual_balise_cover> vbcs;
 void from_json(const json&j, virtual_balise_cover &vbc)
 {
     vbc.NID_C = j["NID_C"].get<int>();
     vbc.NID_VBCMK = j["NID_VBCMK"].get<int>();
+    vbc.set_time = j.value<int64_t>("SetTime", 0);
     vbc.validity = j["Validity"].get<int64_t>();
 }
 void to_json(json&j, const virtual_balise_cover &vbc)
 {
     j["NID_C"] = vbc.NID_C;
     j["NID_VBCMK"] = vbc.NID_VBCMK;
+    j["SetTime"] = vbc.set_time;
     j["Validity"] = vbc.validity;
 }
 void write_vbcs()
@@ -35,21 +37,44 @@ void load_vbcs()
     json vbcj = load_cold_data("VBC");
     if (vbcj.is_null()) return;
     for (auto &vbc : vbcj) {
-        vbcs.insert(vbc);
+        vbcs.push_back(vbc);
     }
 }
 void set_vbc(virtual_balise_cover vbc)
 {
-    vbcs.insert(vbc);
+    for (auto it = vbcs.begin(); it != vbcs.end(); ) {
+        if (vbc.NID_C == it->NID_C && vbc.NID_VBCMK == it->NID_VBCMK)
+            it = vbcs.erase(it);
+        else
+            ++it;
+    }
+    vbcs.push_back(vbc);
     write_vbcs();
 }
 void remove_vbc(virtual_balise_cover vbc)
 {
-    vbcs.erase(vbc);
+    for (auto it = vbcs.begin(); it != vbcs.end(); ) {
+        if (vbc.NID_C == it->NID_C && vbc.NID_VBCMK == it->NID_VBCMK)
+            it = vbcs.erase(it);
+        else
+            ++it;
+    }
     write_vbcs();
+}
+void update_vbc()
+{
+    for (auto it = vbcs.begin(); it != vbcs.end(); ) {
+        if (it->validity + it->set_time > get_milliseconds())
+            it = vbcs.erase(it);
+        else
+            ++it;
+    }
 }
 bool vbc_ignored(int nid_c, int nid_vbcmk)
 {
-    auto it = vbcs.find({nid_c, nid_vbcmk, 0});
-    return it != vbcs.end() && it->validity > get_milliseconds() && it->NID_C == nid_c;
+    for (auto &vbc : vbcs) {
+        if (vbc.NID_C == nid_c && vbc.NID_VBCMK == nid_vbcmk)
+            return true;
+    }
+    return false;
 }

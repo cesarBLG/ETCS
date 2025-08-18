@@ -269,6 +269,7 @@ void balise_group_passed()
 void update_track_comm()
 {
     update_radio();
+    update_vbc();
     if (pending_telegrams.empty()) {
         check_linking();
         if (reading) {
@@ -658,7 +659,7 @@ void handle_telegrams(std::vector<eurobalise_telegram> message, dist_base dist, 
     }
     if (VERSION_X(m_version) > VERSION_X(operated_version))
         operate_version(m_version, false);
-    std::set<virtual_balise_cover> old_vbcs = vbcs;
+    std::list<virtual_balise_cover> old_vbcs = vbcs;
     for (auto it = old_vbcs.begin(); it != old_vbcs.end(); ++it) {
         if (it->NID_C != nid_bg.NID_C)
             remove_vbc(*it);
