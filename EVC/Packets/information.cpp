@@ -72,7 +72,7 @@
 void national_values_information::handle()
 {
     NationalValues nv = *(NationalValues*)linked_packets.front().get();
-    national_values_received(nv, *ref);
+    national_values_received(nv, ref);
 }
 void linking_information::handle()
 {

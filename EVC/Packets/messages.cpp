@@ -1359,7 +1359,10 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
     if (packet_num == 2) {
         info.push_back(new version_order_information());
     } else if (packet_num == 3) {
-        info.push_back(new national_values_information());
+        auto nvi = new national_values_information();
+        auto *nv = (NationalValues*)packet;
+        nvi->location_based = nv->D_VALIDNV != nv->D_VALIDNV.Now;
+        info.push_back(nvi);
     } else if (packet_num == 5) {
         info.push_back(new linking_information());
     } else if (packet_num == 6) {

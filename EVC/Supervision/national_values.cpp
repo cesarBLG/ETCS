@@ -203,13 +203,13 @@ void load_national_values(NationalValues nv)
     save_cold_data("NationalValues", j);
 }
 optional<StoredNationalValueSet> not_yet_applicable_nv;
-void national_values_received(NationalValues nv, distance reference)
+void national_values_received(NationalValues nv, optional<distance> reference)
 {
     not_yet_applicable_nv = {};
     if (nv.D_VALIDNV == nv.D_VALIDNV.Now) {
         load_national_values(nv);
     } else {
-        not_yet_applicable_nv = {reference, nv};
+        not_yet_applicable_nv = {*reference, nv};
     }
 }
 void setup_national_values()

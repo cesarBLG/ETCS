@@ -76,6 +76,6 @@ struct StoredNationalValueSet
 extern std::optional<StoredNationalValueSet> not_yet_applicable_nv;
 
 void setup_national_values();
-void national_values_received(NationalValues nv, distance reference);
+void national_values_received(NationalValues nv, optional<distance> reference);
 void update_national_values();
 void reset_national_values();
