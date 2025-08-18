@@ -43,7 +43,7 @@ struct text_message
 };
 extern std::list<text_message> messages;
 text_message &add_message(text_message t);
-void add_message(PlainTextMessage m, distance ref);
-void add_message(FixedTextMessage m, distance ref);
+void add_message(PlainTextMessage m, optional<distance> ref);
+void add_message(FixedTextMessage m, optional<distance> ref);
 void update_messages();
 void message_acked(int id);

@@ -1412,9 +1412,15 @@ std::vector<etcs_information*> construct_information(ETCS_packet *packet, eurora
     } else if (packet_num == 70) {
         info.push_back(new route_suitability_information());
     } else if (packet_num == 72) {
-        info.push_back(new plain_text_information());
+        auto pti = new plain_text_information();
+        PlainTextMessage *m = (PlainTextMessage*)packet;
+        pti->location_based = m->D_TEXTDISPLAY != m->D_TEXTDISPLAY.NotDistanceLimited;
+        info.push_back(pti);
     } else if (packet_num == 76) {
-        info.push_back(new fixed_text_information());
+        auto fti = new fixed_text_information();
+        FixedTextMessage *m = (FixedTextMessage*)packet;
+        fti->location_based = m->D_TEXTDISPLAY != m->D_TEXTDISPLAY.NotDistanceLimited;
+        info.push_back(fti);
     } else if (packet_num == 79) {
         info.push_back(new geographical_position_information());
     } else if (packet_num == 88) {

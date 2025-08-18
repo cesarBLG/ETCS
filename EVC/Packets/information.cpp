@@ -328,12 +328,12 @@ void route_suitability_information::handle()
 void plain_text_information::handle()
 {
     PlainTextMessage m = *(PlainTextMessage*)linked_packets.front().get();
-    add_message(m, *ref);
+    add_message(m, ref);
 }
 void fixed_text_information::handle()
 {
     FixedTextMessage m = *(FixedTextMessage*)linked_packets.front().get();
-    add_message(m, *ref);
+    add_message(m, ref);
 }
 void geographical_position_information::handle()
 {

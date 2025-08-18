@@ -57,14 +57,14 @@ void update_messages()
         ++it;
     }
 }
-void add_message(PlainTextMessage m, distance ref)
+void add_message(PlainTextMessage m, optional<distance> ref)
 {
     std::string text = X_TEXT_t::getUTF8(m.X_TEXT);
     std::function<bool(text_message&)> start = [m, ref](text_message &t) {
         bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
         if (m.D_TEXTDISPLAY != m.D_TEXTDISPLAY.NotDistanceLimited)
-            conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(d_estfront>ref->est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY1 != m.M_MODETEXTDISPLAY1.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
         if (m.M_LEVELTEXTDISPLAY1 != m.M_LEVELTEXTDISPLAY1.NoLevelLimited)
@@ -78,7 +78,7 @@ void add_message(PlainTextMessage m, distance ref)
         }
         return cond;
     };
-    std::function<bool(text_message&)> end = [m, ref](text_message &t) {
+    std::function<bool(text_message&)> end = [m](text_message &t) {
         bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
         if (m.L_TEXTDISPLAY != m.L_TEXTDISPLAY.NotDistanceLimited)
@@ -109,7 +109,7 @@ void add_message(PlainTextMessage m, distance ref)
     }
     add_message(t);
 }
-void add_message(FixedTextMessage m, distance ref)
+void add_message(FixedTextMessage m, optional<distance> ref)
 {
     std::string text;
     if (m.Q_TEXT.rawdata == m.Q_TEXT.LXNotProtected) text = get_text("Level crossing not protected");
@@ -118,7 +118,7 @@ void add_message(FixedTextMessage m, distance ref)
         bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
         if (m.D_TEXTDISPLAY != m.D_TEXTDISPLAY.NotDistanceLimited)
-            conds.push_back(d_estfront>ref.est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
+            conds.push_back(d_estfront>ref->est+m.D_TEXTDISPLAY.get_value(m.Q_SCALE));
         if (m.M_MODETEXTDISPLAY1 != m.M_MODETEXTDISPLAY1.NoModeLimited)
             conds.push_back(mode == m.M_MODETEXTDISPLAY1.get_value());
         if (m.M_LEVELTEXTDISPLAY1 != m.M_LEVELTEXTDISPLAY1.NoLevelLimited)
@@ -132,7 +132,7 @@ void add_message(FixedTextMessage m, distance ref)
         }
         return cond;
     };
-    std::function<bool(text_message&)> end = [m, ref](text_message &t) {
+    std::function<bool(text_message&)> end = [m](text_message &t) {
         bool waitall = (m.Q_TEXTDISPLAY == m.Q_TEXTDISPLAY.WaitAll);
         std::vector<bool> conds;
         if (m.L_TEXTDISPLAY != m.L_TEXTDISPLAY.NotDistanceLimited)
