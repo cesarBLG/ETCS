@@ -9,6 +9,7 @@
 #pragma once
 #include <limits>
 #include <map>
+#include <optional>
 #include "../Packets/3.h"
 #include "../Position/distance.h"
 extern bool Q_NVDRIVER_ADHES;
@@ -76,6 +77,6 @@ struct StoredNationalValueSet
 extern std::optional<StoredNationalValueSet> not_yet_applicable_nv;
 
 void setup_national_values();
-void national_values_received(NationalValues nv, optional<distance> reference);
+void national_values_received(NationalValues nv, std::optional<distance> reference);
 void update_national_values();
 void reset_national_values();
