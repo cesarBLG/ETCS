@@ -149,7 +149,10 @@ void SetParameters()
         }
         bit_manipulator r(std::move(message));
         eurobalise_telegram t(r);
-        pending_telegrams.push_back({t,{distance::from_odometer(dist_base(odometer_value-odometer_reference, odometer_orientation)), get_milliseconds()}});
+
+        double raw_odo = odometer_value-odometer_reference;
+        if (odometer_orientation == -1) raw_odo -= L_locomotive;
+        pending_telegrams.push_back({t,{distance::from_odometer(dist_base(raw_odo, odometer_orientation)), get_milliseconds()}});
     };
     manager.AddParameter(p);
 
