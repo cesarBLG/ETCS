@@ -177,6 +177,7 @@ void movement_authority::update_timers()
 			loa_timer->start(time_stamp);
 		if (loa_timer->triggered()) {
 			v_ema = 0;
+            loa_timer = {};
 			set_data();
             svl_shorten('n');
 		}
