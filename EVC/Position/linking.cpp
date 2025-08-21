@@ -58,7 +58,7 @@ void save_train_position()
         position_valid = true;
     json pos;
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-        if ((it->second & 1) == 0) {
+        if ((it->second & ORBG_UNLINKED) == 0) {
             pos["LRBG"] = it->first;
             pos["OdometerOffset"] = odometer_reference;
             break;
@@ -114,8 +114,8 @@ void position_update_bg_passed(bg_id id, bool linked, dist_base pos, int dir)
     int count = 0;
     for (auto it = orbgs.begin(); it != orbgs.end();) {
         ++count;
-        bool unlinked = (it->second & 1) != 0;
-        bool buffer = (it->second & 2) != 0;
+        bool unlinked = (it->second & ORBG_UNLINKED) != 0;
+        bool buffer = (it->second & ORBG_BUFFER) != 0;
         if (!unlinked) {
             if (lrbg_count >= 8 && !buffer) {
                 it = orbgs.erase(it);
@@ -158,7 +158,7 @@ void relocate()
         newsolr = orbgs.front().first.nid_lrbg;
     } else {
         for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-            if (it->second & 1)
+            if ((it->second & ORBG_UNLINKED) != 0)
                 continue;
             bool link = false;
             for (auto &l : linking) {
@@ -175,7 +175,7 @@ void relocate()
 #else
     bool any = false;
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-        if ((it->second & 1) == 0) {
+        if ((it->second & ORBG_UNLINKED) == 0) {
             any = true;
             newsolr = it->first.nid_lrbg;
             break;

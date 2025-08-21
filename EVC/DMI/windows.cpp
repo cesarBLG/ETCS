@@ -1567,9 +1567,7 @@ void update_dialog_step(std::string step, std::string step2)
             }
             if (V_est == 0 && (level == Level::N2 || level == Level::N3)) {
                 if (supervising_rbc && supervising_rbc->status == session_status::Established && emergency_stops.empty()) {
-                    SH_request *req = new SH_request();
-                    fill_message(req);
-                    supervising_rbc->queue(std::shared_ptr<SH_request>(req));
+                    supervising_rbc->queue(std::make_shared<SH_request>());
                 }
             }
             if (mode == Mode::SH) {

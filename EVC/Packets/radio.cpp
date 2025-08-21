@@ -274,13 +274,17 @@ int64_t last_sent_timestamp;
 void fill_message(euroradio_message_traintotrack *m)
 {
     m->NID_ENGINE.rawdata = nid_engine;
-    ETCS_packet *pos = get_position_report();
-    m->PositionReport1BG = {};
-    m->PositionReport2BG = {};
-    if (pos->NID_PACKET == 1)
-        m->PositionReport2BG = std::shared_ptr<PositionReportBasedOnTwoBaliseGroups>((PositionReportBasedOnTwoBaliseGroups*)pos);
-    else
-        m->PositionReport1BG = std::shared_ptr<PositionReport>((PositionReport*)pos);
+
+    int nid = m->NID_MESSAGE.rawdata;
+    if (nid != 146 && nid != 154 && nid != 155 && nid != 156 && nid != 159) {
+        ETCS_packet *pos = get_position_report();
+        m->PositionReport1BG = {};
+        m->PositionReport2BG = {};
+        if (pos->NID_PACKET == 1)
+            m->PositionReport2BG = std::shared_ptr<PositionReportBasedOnTwoBaliseGroups>((PositionReportBasedOnTwoBaliseGroups*)pos);
+        else
+            m->PositionReport1BG = std::shared_ptr<PositionReport>((PositionReport*)pos);
+    }
 
     int64_t timestamp = get_milliseconds()/10;
     if (last_sent_timestamp >= timestamp)
@@ -293,7 +297,7 @@ ETCS_packet *get_position_report()
     std::optional<lrbg_info> lrbg;
     std::optional<lrbg_info> prvlrbg;
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-        if ((it->second & 1) == 0) {
+        if ((it->second & ORBG_UNLINKED) == 0) {
             if (!lrbg)
                 lrbg = it->first;
             else if (!prvlrbg && lrbg->nid_lrbg != it->first.nid_lrbg) {
@@ -305,7 +309,7 @@ ETCS_packet *get_position_report()
     if (prvlrbg) {
         bool same_orientation = false;
         for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-            if ((it->second & 1) == 0) {
+            if ((it->second & ORBG_UNLINKED) == 0) {
                 if (it->first.nid_lrbg == prvlrbg->nid_lrbg)
                     break;
                 if (it->first.nid_lrbg == lrbg->nid_lrbg && it->first.original_orientation == prvlrbg->original_orientation) {

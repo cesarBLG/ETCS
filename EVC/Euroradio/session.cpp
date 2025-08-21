@@ -41,6 +41,7 @@ void communication_session::open(int ntries)
     train_data_ack_sent = false;
     train_running_number_sent = false;
     accept_unknown_position = true;
+    prvlrbgs.clear();
     closing = false;
     initsent = false;
     status = session_status::Establishing;
@@ -174,6 +175,9 @@ void communication_session::update_ack()
                 msg.times_sent++;
                 msg.last_sent = get_milliseconds();
                 fill_message(msg.message.get());
+                if (msg.message->PositionReport2BG && msg.message->PositionReport2BG->get()->NID_PRVLRBG.rawdata != msg.message->PositionReport2BG->get()->NID_PRVLRBG.Unknown) {
+                    prvlrbgs[msg.message->PositionReport2BG->get()->NID_LRBG.get_value()].insert(msg.message->PositionReport2BG->get()->NID_PRVLRBG.get_value());
+                }
                 if (VERSION_X(version) == 1) {
                     if (msg.message->PositionReport1BG) {
                         auto &mode = msg.message->PositionReport1BG->get()->M_MODE;
@@ -342,6 +346,9 @@ void communication_session::queue(std::shared_ptr<euroradio_message_traintotrack
 void communication_session::send(std::shared_ptr<euroradio_message_traintotrack> msg)
 {
     fill_message(msg.get());
+    if (msg->PositionReport2BG && msg->PositionReport2BG->get()->NID_PRVLRBG.rawdata != msg->PositionReport2BG->get()->NID_PRVLRBG.Unknown) {
+        prvlrbgs[msg->PositionReport2BG->get()->NID_LRBG.get_value()].insert(msg->PositionReport2BG->get()->NID_PRVLRBG.get_value());
+    }
     msg = translate_message(msg, version);
     log_message(*msg, d_estfront, get_milliseconds());
     if (status == session_status::Inactive || (status == session_status::Establishing && msg->NID_MESSAGE != 155) || (closing && msg->NID_MESSAGE != 156))

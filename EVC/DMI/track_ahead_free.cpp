@@ -36,8 +36,6 @@ void track_ahead_free_granted()
 {
     taf_request = {};
     if (supervising_rbc) {
-        auto *taf = new taf_granted();
-        fill_message(taf);
-        supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(taf));
+        supervising_rbc->queue(std::make_shared<taf_granted>());
     }
 }

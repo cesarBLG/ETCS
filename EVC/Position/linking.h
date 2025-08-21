@@ -37,6 +37,8 @@ struct lrbg_info
     int original_orientation;
     double locacc;
 };
+constexpr int ORBG_UNLINKED = 1 << 0;
+constexpr int ORBG_BUFFER = 1 << 1;
 extern std::list<link_data> linking;
 extern std::list<std::pair<lrbg_info, int>> orbgs;
 extern std::optional<lrbg_info> solr;

@@ -644,7 +644,7 @@ void handle_information_set(std::list<std::shared_ptr<etcs_information>> &ordere
         } else {
             for (auto &it : orbgs) {
                 if (it.first.nid_lrbg == transition_buffer.back().front()->nid_bg)
-                    it.second |= 2;
+                    it.second |= ORBG_BUFFER;
             }
         }
     }
@@ -993,18 +993,10 @@ bool level_filter(std::shared_ptr<etcs_information> info, const std::list<std::s
         }
         if (s.exceptions.find(10) != s.exceptions.end()) {
             auto &msg = *((coordinate_system_assignment*)info->message->get());
-            bg_id prvlrbg = {-1,-1};
-            bg_id memorized_lrbg = prvlrbg;
-            for (auto &it : orbgs) {
-                if ((it.second&1) == 0) {
-                    if (it.first.nid_lrbg == msg.NID_LRBG.get_value() && prvlrbg.NID_BG >= 0) {
-                        if (memorized_lrbg.NID_BG >= 0 && memorized_lrbg != prvlrbg)
-                            return false;
-                        else
-                            memorized_lrbg = prvlrbg;
-                    }
-                    prvlrbg = it.first.nid_lrbg;
-                }
+            if (info->fromRBC != nullptr) {
+                auto it = info->fromRBC->prvlrbgs.find(msg.NID_LRBG.get_value());
+                if (it != info->fromRBC->prvlrbgs.end() && it->second.size() > 1)
+                    return false;
             }
         }
         if (s.exceptions.find(11) != s.exceptions.end()) {

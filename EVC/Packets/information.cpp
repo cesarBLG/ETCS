@@ -367,20 +367,13 @@ void coordinate_system_information::handle()
     auto &msg = *(coordinate_system_assignment*)message->get();
     auto bg = orbgs.end();
     auto prvbg = orbgs.end();
-    bool prev_follows = false;
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
-        if ((it->second & 1) == 0) {
+        if ((it->second & ORBG_UNLINKED) == 0) {
             if (it->first.nid_lrbg == msg.NID_LRBG.get_value()) {
                 bg = it;
-                prev_follows = true;
-            } else if (prev_follows) {
-                if (prvbg != orbgs.end() && prvbg->first.nid_lrbg != it->first.nid_lrbg) {
-                    prvbg = orbgs.end();
-                    break;
-                }
-                if (prvbg == orbgs.end())
-                    prvbg = it;
-                prev_follows = false;
+            } else if (bg != orbgs.end()) {
+                prvbg = it;
+                break;
             }
         }
     }

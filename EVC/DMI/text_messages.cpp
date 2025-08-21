@@ -170,10 +170,9 @@ void message_acked(int id)
             msg.acknowledged = true;
             if (msg.report_rbc && supervising_rbc && supervising_rbc->status == session_status::Established &&
             supervising_rbc->contact.country == msg.report_rbc->country && supervising_rbc->contact.id == msg.report_rbc->id) {
-                auto *ack = new text_message_ack_message();
+                auto ack = std::make_shared<text_message_ack_message>();
                 ack->NID_TEXTMESSAGE.rawdata = msg.trackid;
-                fill_message(ack);
-                supervising_rbc->queue(std::shared_ptr<euroradio_message_traintotrack>(ack));
+                supervising_rbc->queue(ack);
             }
         }
     }
