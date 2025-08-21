@@ -365,23 +365,11 @@ void danger_for_SH_information::handle()
 void coordinate_system_information::handle()
 {
     auto &msg = *(coordinate_system_assignment*)message->get();
-    auto bg = orbgs.end();
-    auto prvbg = orbgs.end();
     for (auto it = orbgs.begin(); it != orbgs.end(); ++it) {
         if ((it->second & ORBG_UNLINKED) == 0) {
-            if (it->first.nid_lrbg == msg.NID_LRBG.get_value()) {
-                bg = it;
-            } else if (bg != orbgs.end()) {
-                prvbg = it;
-                break;
-            }
+            it->first.dir = msg.Q_ORIENTATION == msg.Q_ORIENTATION.Reverse;
+            break;
         }
-    }
-    if (bg != orbgs.end() && prvbg != orbgs.end()) {
-        if (prvbg->first.original_orientation == odometer_orientation)
-            bg->first.dir = msg.Q_ORIENTATION == msg.Q_ORIENTATION.Reverse;
-        else
-            bg->first.dir = msg.Q_ORIENTATION != msg.Q_ORIENTATION.Reverse;
     }
 }
 void track_condition_information::handle()

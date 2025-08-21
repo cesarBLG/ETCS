@@ -338,7 +338,7 @@ ETCS_packet *get_position_report()
             r->NID_LRBG.set_value(lrbg->nid_lrbg);
             double dist = d_estfront - lrbg->position;
             r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
-            r->Q_DIRLRBG.set_value(odometer_orientation * lrbg->position.orientation == 1 ? dir : 1-dir);
+            r->Q_DIRLRBG.set_value(dir);
             r->Q_DLRBG.set_value(dist >= 0 ? dir : 1-dir);
             r->Q_DIRTRAIN.set_value(odometer_direction * lrbg->position.orientation == 1 ? dir : 1-dir);
             r->L_DOUBTOVER.set_value(d_maxsafefront({lrbg->position, lrbg->locacc})-d_estfront, r->Q_SCALE);
@@ -357,10 +357,11 @@ ETCS_packet *get_position_report()
         r->NID_LRBG.set_value(lrbg->nid_lrbg);
         double dist = d_estfront - lrbg->position;
         r->D_LRBG.set_value(std::abs(dist), r->Q_SCALE);
-        if (prvlrbg && prvlrbg->position.orientation == lrbg->position.orientation) {
-            r->Q_DIRLRBG.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_orientation < 0);
-            r->Q_DLRBG.set_value(dist < 0);
-            r->Q_DIRTRAIN.set_value((lrbg->position.dist-prvlrbg->position.dist)*odometer_direction < 0);
+        if (prvlrbg) {
+            int dir = lrbg->position < prvlrbg->position;
+            r->Q_DIRLRBG.set_value(dir);
+            r->Q_DLRBG.set_value(dist >= 0 ? dir : 1-dir);
+            r->Q_DIRTRAIN.set_value(odometer_direction * lrbg->position.orientation == 1 ? dir : 1-dir);
             r->NID_PRVLRBG.set_value(prvlrbg->nid_lrbg);
         } else {
             r->Q_DIRLRBG = r->Q_DIRLRBG.Unknown;
