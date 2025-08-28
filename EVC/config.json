@@ -1313,7 +1313,6 @@
     "6":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":500,
        "SoftKeys":true,
        "CustomTrainDataInputs":[
           {
