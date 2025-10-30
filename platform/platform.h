@@ -18,6 +18,7 @@ enum FileType
 	ETCS_ASSET_FILE,
 	ETCS_CONFIG_FILE,
 	ETCS_STORAGE_FILE,
+	ETCS_ICON_FILE,
 };
 class BasePlatform : private PlatformUtil::NoCopy
 {

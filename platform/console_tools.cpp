@@ -75,6 +75,15 @@ std::string get_files_dir(FileType type)
 					return std::string(wd)+"/";
 				return "";
 			}
+		case ETCS_ICON_FILE:
+			{
+				auto exepath = std::filesystem::path(getexepath()).remove_filename();
+				if (exepath.parent_path().filename() != "bin")
+					return "";
+				if (exepath == "/bin/")
+					return "/usr/share/ETCS/";
+				return "";
+			}
 		default:
 			return "";
 	}
