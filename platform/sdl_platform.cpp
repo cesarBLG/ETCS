@@ -102,6 +102,15 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 	sdlwindow = SDL_CreateWindow(title.c_str(), x, y, width, height, flags);
 
+	#ifdef __unix__
+		std::string icon_path = get_files_dir(ETCS_ASSET_FILE) + "DMI.bmp";
+		SDL_Surface* icon = SDL_LoadBMP(icon_path.c_str());
+		if (icon) {
+			SDL_SetWindowIcon(sdlwindow, icon);
+			SDL_FreeSurface(icon);
+		}
+	#endif
+
 	if (ontop)
 		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
 	if (hidecursor)
