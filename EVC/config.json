@@ -1511,7 +1511,7 @@
     "108":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_alstom.json",
+       "STMLayout":"stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
@@ -1535,7 +1535,7 @@
     "1081":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_alstom.json",
+       "STMLayout":"stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "UnsupportedLevels":[
           2
@@ -1562,7 +1562,7 @@
     "108tgv": {
        "TrainData": "TrainData/France/traindata_tgv.json",
        "SpeedDial": 400,
-       "STMLayout": "stm_alstom.json",
+       "STMLayout": "stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
