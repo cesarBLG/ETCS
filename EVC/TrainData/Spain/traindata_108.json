@@ -1,6 +1,6 @@
 {
-	 "Simple" : {
-        "length": 200,
+	 "US_ZBGIS_0" : {
+        "length": 201,
         "speed": 300,
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
@@ -79,8 +79,8 @@
             
         }
     },
-    "Doble" : {
-        "length": 400,
+    "UM_ZBGIS_0" : {
+        "length": 402,
         "speed": 300,
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
