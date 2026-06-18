@@ -8,7 +8,7 @@ int pixelRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uin
 	int result = 0;
 	result |= SDL_SetRenderDrawBlendMode(renderer, (a == 255) ? SDL_BLENDMODE_NONE : SDL_BLENDMODE_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
-	result |= SDL_RenderDrawPoint(renderer, x, y);
+	result |= SDL_RenderPoint(renderer, x, y);
 	return result;
 }
 int pixelRGBAWeight(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a, Uint32 weight)
@@ -28,18 +28,18 @@ int pixelRGBAWeight(SDL_Renderer * renderer, Sint16 x, Sint16 y, Uint8 r, Uint8 
 }
 int vline(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2)
 {
-	return SDL_RenderDrawLine(renderer, x, y1, x, y2);;
+	return SDL_RenderLine(renderer, x, y1, x, y2);;
 }
 int hline(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y)
 {
-	return SDL_RenderDrawLine(renderer, x1, y, x2, y);;
+	return SDL_RenderLine(renderer, x1, y, x2, y);;
 }
 int hlineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 x2, Sint16 y, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
 	int result = 0;
 	result |= SDL_SetRenderDrawBlendMode(renderer, (a == 255) ? SDL_BLENDMODE_NONE : SDL_BLENDMODE_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
-	result |= SDL_RenderDrawLine(renderer, x1, y, x2, y);
+	result |= SDL_RenderLine(renderer, x1, y, x2, y);
 	return result;
 }
 int vlineRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
@@ -47,12 +47,12 @@ int vlineRGBA(SDL_Renderer * renderer, Sint16 x, Sint16 y1, Sint16 y2, Uint8 r, 
 	int result = 0;
 	result |= SDL_SetRenderDrawBlendMode(renderer, (a == 255) ? SDL_BLENDMODE_NONE : SDL_BLENDMODE_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);
-	result |= SDL_RenderDrawLine(renderer, x, y1, x, y2);
+	result |= SDL_RenderLine(renderer, x, y1, x, y2);
 	return result;
 }
 int pixel(SDL_Renderer *renderer, Sint16 x, Sint16 y)
 {
-	return SDL_RenderDrawPoint(renderer, x, y);
+	return SDL_RenderPoint(renderer, x, y);
 }
 int _drawQuadrants(SDL_Renderer * renderer,  Sint16 x, Sint16 y, Sint16 dx, Sint16 dy, Sint32 f)
 {
@@ -261,7 +261,7 @@ int lineRGBA(SDL_Renderer * renderer, Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2
 	int result = 0;
 	result |= SDL_SetRenderDrawBlendMode(renderer, (a == 255) ? SDL_BLENDMODE_NONE : SDL_BLENDMODE_BLEND);
 	result |= SDL_SetRenderDrawColor(renderer, r, g, b, a);	
-	result |= SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+	result |= SDL_RenderLine(renderer, x1, y1, x2, y2);
 	return result;
 }
 #define AAlevels 256
