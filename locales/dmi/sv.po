@@ -87,7 +87,7 @@ msgstr "Start"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:26
 msgid "Driver ID"
-msgstr "Förar-ID"
+msgstr "Föraridentitet"
 
 #: c:\etcs\src\dmi\window\menu_main.cpp:30
 msgid "Train Data"
