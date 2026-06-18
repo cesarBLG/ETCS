@@ -21,7 +21,7 @@ Please note that you can also get builds from the [release page on github](https
 
 3. Compile:
     ```bash
-    cmake -S . -B build -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    cmake -S . -B build -DETCS_VENDORED=OFF
     cmake --build build -j$(nproc --all)
     ```
 
