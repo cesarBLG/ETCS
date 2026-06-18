@@ -19,6 +19,7 @@ using std::string;
 extern ParameterManager manager;
 bool AKT=false;
 bool CON=true;
+bool activate_in_announcement=true;
 bool LZB_handles_asfa=true;
 bool LZB_supervising=false;
 bool LZB_degraded_pending=false;
@@ -190,7 +191,7 @@ void update_asfa()
     } else {
         brake_commanded = false;
     }
-    if (ongoing_transition && ((ongoing_transition->leveldata.level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
+    if (activate_in_announcement && ongoing_transition && ((ongoing_transition->leveldata.level == Level::N0 && ntc_available_no_stm.find(0) == ntc_available_no_stm.end()) || (ongoing_transition->leveldata.level == Level::NTC && ongoing_transition->leveldata.nid_ntc == 0))) {
         if (!CON) {
             CON = true;
             akt_delay = get_milliseconds();

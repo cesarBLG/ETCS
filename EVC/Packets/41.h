@@ -23,6 +23,10 @@ struct LevelTransitionOrder : ETCS_directional_packet
     LTO_element_packet element;
     N_ITER_t N_ITER;
     std::vector<LTO_element_packet> elements;
+    LevelTransitionOrder()
+    {
+        NID_PACKET.rawdata = 41;
+    }
     void copy(bit_manipulator &r) override
     {
         NID_PACKET.copy(r);
