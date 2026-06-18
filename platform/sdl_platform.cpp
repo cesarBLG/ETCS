@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
-
+#include <SDL3/SDL_main.h>
 #include "sdl_platform.h"
 #include "sdl_gfx/gfx_primitives.h"
 #include "console_tools.h"
@@ -73,7 +73,7 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 {
 	setup_crash_handler();
 
-	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
 	load_config(args);
 	bool fullscreen = get_config("fullScreen") == "true";
@@ -89,51 +89,48 @@ SdlPlatform::SdlPlatform(float virtual_w, float virtual_h, const std::vector<std
 	touch = get_config("touch") == "true";
 	std::string title = get_config("title") == "" ? "SdlPlatform" : get_config("title");
 
-	int flags = 0;
-	flags |= SDL_WINDOW_ALLOW_HIGHDPI;
-	if (borderless)
-		flags |= SDL_WINDOW_BORDERLESS;
-	if (fullscreen)
-		flags |= SDL_WINDOW_FULLSCREEN;
-
 	int x = borderless ? xpos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
 	int y = borderless ? ypos : (fullscreen ? SDL_WINDOWPOS_CENTERED_DISPLAY(display) : SDL_WINDOWPOS_UNDEFINED);
 
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-	sdlwindow = SDL_CreateWindow(title.c_str(), x, y, width, height, flags);
+	SDL_PropertiesID props = SDL_CreateProperties();
+	SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, title.c_str());
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, x);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, y);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+    SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+	SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_HIGH_PIXEL_DENSITY_BOOLEAN, true);
+	if (borderless) SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_BORDERLESS_BOOLEAN, true);
+	if (fullscreen) SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, true);
+    sdlwindow = SDL_CreateWindowWithProperties(props);
+    SDL_DestroyProperties(props);
 
 	#ifdef __unix__
 		std::string icon_path = get_files_dir(ETCS_ASSET_FILE) + "DMI.bmp";
 		SDL_Surface* icon = SDL_LoadBMP(icon_path.c_str());
 		if (icon) {
 			SDL_SetWindowIcon(sdlwindow, icon);
-			SDL_FreeSurface(icon);
+			SDL_DestroySurface(icon);
 		}
 	#endif
 
 	if (ontop)
-		SDL_SetWindowAlwaysOnTop(sdlwindow, SDL_TRUE);
+		SDL_SetWindowAlwaysOnTop(sdlwindow, true);
 	if (hidecursor)
-		SDL_ShowCursor(SDL_DISABLE);
+		SDL_HideCursor();
 
-	sdlrend = SDL_CreateRenderer(sdlwindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+	sdlrend = SDL_CreateRenderer(sdlwindow, nullptr);
+	SDL_SetRenderVSync(sdlrend, true);
 
 	calc_scale();
 
 	TTF_Init();
 
-	SDL_AudioSpec desired = {};
-	SDL_AudioSpec obtained;
-	desired.freq = 44100;
-	desired.format = AUDIO_S16;
-	desired.channels = 1;
-	desired.samples = 2048;
-	desired.callback = &mixer_func_proxy;
-	desired.userdata = this;
-	audio_device = SDL_OpenAudioDevice(nullptr, 0, &desired, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
-	audio_samplerate = obtained.freq;
+	audio_samplerate = 44100;
+	const SDL_AudioSpec spec = { SDL_AUDIO_S16, 1, audio_samplerate };
+    audio_stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, mixer_func_proxy, this);
 	audio_volume = 100;
-	SDL_PauseAudioDevice(audio_device, 0);
+	SDL_ResumeAudioStreamDevice(audio_stream);
 
 	running = true;
 	present_count = 0;
@@ -151,7 +148,7 @@ SdlPlatform::~SdlPlatform() {
 	PlatformUtil::DeferredFulfillment::list = nullptr;
 
 	loaded_fonts.clear();
-	SDL_CloseAudioDevice(audio_device);
+	SDL_DestroyAudioStream(audio_stream);
 	TTF_Quit();
 	//SDL_DestroyRenderer(sdlrend);
 	SDL_DestroyWindow(sdlwindow);
@@ -159,7 +156,7 @@ SdlPlatform::~SdlPlatform() {
 }
 
 void SdlPlatform::calc_scale() {
-	SDL_GetRendererOutputSize(sdlrend, &wx, &wy);
+	SDL_GetCurrentRenderOutputSize(sdlrend, &wx, &wy);
 	int px,py;
 	SDL_GetWindowSize(sdlwindow, &px, &py);
 	dpiscale = wx / (float)px;
@@ -178,7 +175,7 @@ void SdlPlatform::calc_scale() {
 		ox += wx - ox * 2.0f;
 		oy += wy - oy * 2.0f;
 	}
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, s == std::floor(s) ? "0" : "1");
+	SDL_SetDefaultTextureScaleMode(sdlrend, s == std::floor(s) ? SDL_SCALEMODE_NEAREST : SDL_SCALEMODE_LINEAR);
 }
 
 std::unique_ptr<SdlPlatform::BusSocket> SdlPlatform::open_socket(const std::string_view channel, uint32_t tid) {
@@ -222,15 +219,15 @@ PlatformUtil::Promise<SdlPlatform::InputEvent> SdlPlatform::on_input_event() {
 bool SdlPlatform::poll_sdl() {
 	SDL_Event ev;
 	if (SDL_PollEvent(&ev)) {
-		if (ev.type == SDL_QUIT || ev.type == SDL_WINDOWEVENT_CLOSE)
+		if (ev.type == SDL_EVENT_QUIT || ev.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
 		{
 			on_close_list.fulfill_all(false);
 		}
-		else if (touch && (ev.type == SDL_FINGERDOWN || ev.type == SDL_FINGERUP || ev.type == SDL_FINGERMOTION))
+		else if (touch && (ev.type == SDL_EVENT_FINGER_DOWN || ev.type == SDL_EVENT_FINGER_UP || ev.type == SDL_EVENT_FINGER_MOTION))
 		{
 			SDL_TouchFingerEvent tfe = ev.tfinger;
 			InputEvent ev;
-			if (tfe.type == SDL_FINGERMOTION)
+			if (tfe.type == SDL_EVENT_FINGER_MOTION)
 			{
 				if (tfe.pressure > 0)
 				{
@@ -242,25 +239,25 @@ bool SdlPlatform::poll_sdl() {
 			}
 			else
 			{
-				ev.action = tfe.type == SDL_FINGERDOWN ? InputEvent::Action::Press : InputEvent::Action::Release;
+				ev.action = tfe.pressure > 0 ? InputEvent::Action::Press : InputEvent::Action::Release;
 				ev.x = (tfe.x*wx - ox) / s;
 				ev.y = (tfe.y*wy - oy) / s;
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
-		else if (ev.type == SDL_MOUSEBUTTONDOWN || ev.type == SDL_MOUSEBUTTONUP)
+		else if (ev.type == SDL_EVENT_MOUSE_BUTTON_DOWN || ev.type == SDL_EVENT_MOUSE_BUTTON_UP)
 		{
 			SDL_MouseButtonEvent sdlev = ev.button;
 			if (sdlev.button == SDL_BUTTON_LEFT) {
 				InputEvent ev;
-				ev.action = (sdlev.state == SDL_PRESSED) ? InputEvent::Action::Press : InputEvent::Action::Release;
+				ev.action = sdlev.down ? InputEvent::Action::Press : InputEvent::Action::Release;
 				ev.x = (sdlev.x * dpiscale - ox) / s;
 				ev.y = (sdlev.y * dpiscale - oy) / s;
 
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
-		else if (ev.type == SDL_MOUSEMOTION)
+		else if (ev.type == SDL_EVENT_MOUSE_MOTION)
 		{
 			SDL_MouseMotionEvent sdlev = ev.motion;
 			if (sdlev.state & SDL_BUTTON_LMASK) {
@@ -272,7 +269,7 @@ bool SdlPlatform::poll_sdl() {
 				on_input_list.fulfill_all(ev, false);
 			}
 		}
-        else if (ev.type == SDL_WINDOWEVENT && (ev.window.event == SDL_WINDOWEVENT_RESIZED || ev.window.event == SDL_WINDOWEVENT_SIZE_CHANGED))
+        else if (ev.type == SDL_EVENT_WINDOW_RESIZED || ev.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
 		{
             calc_scale();
 			loaded_fonts.clear();
@@ -337,17 +334,17 @@ void SdlPlatform::set_color(Color c) {
 }
 
 void SdlPlatform::draw_line(float x1, float y1, float x2, float y2) {
-	SDL_RenderDrawLineF(sdlrend, x1 * s + ox, y1 * s + oy, x2 * s + ox, y2 * s + oy);
+	SDL_RenderLine(sdlrend, x1 * s + ox, y1 * s + oy, x2 * s + ox, y2 * s + oy);
 }
 
 void SdlPlatform::draw_rect(float x, float y, float w, float h) {
 	SDL_FRect rect { x * s + ox, y * s + oy, w * s, h * s };
-	SDL_RenderDrawRectF(sdlrend, &rect);
+	SDL_RenderRect(sdlrend, &rect);
 }
 
 void SdlPlatform::draw_rect_filled(float x, float y, float w, float h) {
 	SDL_FRect rect { x * s + ox, y * s + oy, w * s, h * s };
-	SDL_RenderFillRectF(sdlrend, &rect);
+	SDL_RenderFillRect(sdlrend, &rect);
 }
 
 void SdlPlatform::draw_image(const Image &base, float x, float y) {
@@ -355,10 +352,10 @@ void SdlPlatform::draw_image(const Image &base, float x, float y) {
 	auto size = img.size();
 	if (s > 0.0f) {
 		SDL_FRect rect { std::floor(x * s + ox), std::floor(y * s + oy), size.first * s, size.second * s };
-		SDL_RenderCopyF(sdlrend, img.get(), nullptr, &rect);
+		SDL_RenderTexture(sdlrend, img.get(), nullptr, &rect);
 	} else {
 		SDL_FRect rect { std::floor((x + size.first) * s + ox), std::floor((y + size.second) * s + oy), size.first * -s, size.second * -s };
-		SDL_RenderCopyExF(sdlrend, img.get(), nullptr, &rect, 180.0, nullptr, SDL_FLIP_NONE);
+		SDL_RenderTextureRotated(sdlrend, img.get(), nullptr, &rect, 180.0, nullptr, SDL_FLIP_NONE);
 	}
 }
 
@@ -420,11 +417,11 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::load_image(const std::string_vi
 	SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlrend, surf);
 	if (tex == nullptr) {
 		printf("SDL_CreateTextureFromSurface failed: %s\n", SDL_GetError());
-		SDL_FreeSurface(surf);
+		SDL_DestroySurface(surf);
 		return nullptr;
 	}
 	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, 1.0f);
-	SDL_FreeSurface(surf);
+	SDL_DestroySurface(surf);
 	return img;
 }
 
@@ -472,7 +469,7 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bol
 		float adjust = (ascent * scale) / TTF_FontAscent(font);
 #else
 		int minx, maxx, miny, maxy, advance;
-		TTF_GlyphMetrics32(font, 'R', &minx, &maxx, &miny, &maxy, &advance);
+		TTF_GetGlyphMetrics(font, 'R', &minx, &maxx, &miny, &maxy, &advance);
 
 		float adjust = (ascent * scale) / maxy;
 #endif
@@ -498,7 +495,8 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::stri
 	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended(font.get(), std::string(text).c_str(), color);
+	std::string text_str(text);
+	SDL_Surface *surf = TTF_RenderText_Blended(font.get(), text_str.c_str(), text_str.length(), color);
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -507,12 +505,12 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_text_image(const std::stri
 	SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlrend, surf);
 	if (tex == nullptr) {
 		printf("SDL_CreateTextureFromSurface failed: %s\n", SDL_GetError());
-		SDL_FreeSurface(surf);
+		SDL_DestroySurface(surf);
 		return nullptr;
 	}
 
 	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, std::abs(s));
-	SDL_FreeSurface(surf);
+	SDL_DestroySurface(surf);
 	return img;
 }
 
@@ -522,11 +520,12 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 
 	const SdlFont &font = dynamic_cast<const SdlFont&>(base);
 
-	TTF_SetFontWrappedAlign(font.get(), align == 0 ? TTF_WRAPPED_ALIGN_CENTER : (align == 1 ? TTF_WRAPPED_ALIGN_RIGHT : TTF_WRAPPED_ALIGN_LEFT));
+	TTF_SetFontWrapAlignment(font.get(), align == 0 ? TTF_HORIZONTAL_ALIGN_CENTER : (align == 1 ? TTF_HORIZONTAL_ALIGN_RIGHT : TTF_HORIZONTAL_ALIGN_LEFT));
 
 	//if (aspect & 2) TTF_SetFontStyle(font, TTF_STYLE_UNDERLINE);
 	SDL_Color color = { c.R, c.G, c.B };
-	SDL_Surface *surf = TTF_RenderUTF8_Blended_Wrapped(font.get(), std::string(text).c_str(), color, width * std::abs(s));
+	std::string text_str(text);
+	SDL_Surface *surf = TTF_RenderText_Blended_Wrapped(font.get(), text_str.c_str(), text_str.size(), color, width * std::abs(s));
 	if (surf == nullptr) {
 		printf("TTF render failed\n");
 		return nullptr;
@@ -535,12 +534,12 @@ std::unique_ptr<SdlPlatform::Image> SdlPlatform::make_wrapped_text_image(const s
 	SDL_Texture *tex = SDL_CreateTextureFromSurface(sdlrend, surf);
 	if (tex == nullptr) {
 		printf("SDL_CreateTextureFromSurface failed: %s\n", SDL_GetError());
-		SDL_FreeSurface(surf);
+		SDL_DestroySurface(surf);
 		return nullptr;
 	}
 
 	std::unique_ptr<SdlImage> img = std::make_unique<SdlImage>(tex, surf->w, surf->h, std::abs(s));
-	SDL_FreeSurface(surf);
+	SDL_DestroySurface(surf);
 	return img;
 }
 
@@ -575,7 +574,8 @@ SdlPlatform::SdlFont::SdlFont(std::shared_ptr<SdlFontWrapper> wrapper, float s) 
 std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view str, float wrap_width) const {
 	if (wrap_width == 0.0f) {
 		int w, h;
-		TTF_SizeUTF8(font->font, std::string(str).c_str(), &w, &h);
+		std::string text_str(str);
+		TTF_GetStringSize(font->font, text_str.c_str(), text_str.length(), &w, &h);
 		return std::make_pair(w / scale, h / scale);
 	} else {
 		std::pair<float, float> out(0.0f, 0.0f);
@@ -592,9 +592,11 @@ std::pair<float, float> SdlPlatform::SdlFont::calc_size(const std::string_view s
 }
 
 size_t SdlPlatform::SdlFont::calc_wrap_point(const std::string_view str, float wrap_width) const {
-	int extent, count;
-	TTF_MeasureUTF8(font->font, std::string(str).c_str(), wrap_width * scale, &extent, &count);
-	count = std::max(count, 1);
+	int extent;
+	size_t count;
+	std::string text_str(str);
+	TTF_MeasureString(font->font, text_str.c_str(), text_str.length(), wrap_width * scale, &extent, &count);
+	count = std::max(count, (size_t)1);
 	if (count > str.size())
 		return str.size();
 	const char *pos = str.data();
@@ -629,9 +631,20 @@ SdlPlatform::SdlSoundData::SdlSoundData(const std::shared_ptr<SdlSoundDataWrappe
 const std::shared_ptr<SdlPlatform::SdlSoundDataWrapper>& SdlPlatform::SdlSoundData::get() const {
 	return data;
 }
-
-void SdlPlatform::mixer_func_proxy(void *ptr, unsigned char *stream, int len) {
-	((SdlPlatform*)ptr)->mixer_func((int16_t*)stream, len / 2);
+void SDLCALL SdlPlatform::mixer_func_proxy(void *ptr, SDL_AudioStream *stream, int additional_amount, int total_amount)
+{
+	/* Calculate a little more audio here, maybe using `userdata`, write it to `stream`
+		*
+		* If you want to use the original callback, you could do something like this:
+		*/
+	if (additional_amount > 0) {
+		Uint8 *data = SDL_stack_alloc(Uint8, additional_amount);
+		if (data) {
+			((SdlPlatform*)ptr)->mixer_func((int16_t*)data, additional_amount / 2);
+			SDL_PutAudioStreamData(stream, data, additional_amount);
+			SDL_stack_free(data);
+		}
+	}
 }
 
 void SdlPlatform::mixer_func(int16_t *buffer, size_t len) {
@@ -681,30 +694,58 @@ int SdlPlatform::get_volume() {
 }
 
 std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::string_view path) {
-	std::string file = assets_dir + "sound/" + std::string(path) + ".wav";
+	std::string file =
+        assets_dir + "sound/" + std::string(path) + ".wav";
 
-	SDL_AudioSpec spec;
-	uint8_t* buffer;
-	uint32_t len;
-	if (!SDL_LoadWAV(file.c_str(), &spec, &buffer, &len))
-		return nullptr;
+    SDL_AudioSpec spec;
+    Uint8 *buffer = nullptr;
+    Uint32 len = 0;
 
-	SDL_AudioCVT cvt;
-	int ret = SDL_BuildAudioCVT(&cvt, spec.format, spec.channels, spec.freq, AUDIO_S16, 1, audio_samplerate);
-	if (ret < 0)
-		return nullptr;
+    if (!SDL_LoadWAV(file.c_str(), &spec, &buffer, &len)) {
+        return nullptr;
+    }
 
-	std::unique_ptr<int16_t[]> buf = std::make_unique<int16_t[]>(len * cvt.len_mult / 2);
-	memcpy(buf.get(), buffer, len);
-	SDL_FreeWAV(buffer);
+    SDL_AudioSpec dst;
+    dst.format   = SDL_AUDIO_S16;
+    dst.channels = 1;
+    dst.freq     = audio_samplerate;
 
-	cvt.buf = (Uint8*)buf.get();
-	cvt.len = len;
+    SDL_AudioStream *stream = SDL_CreateAudioStream(&spec, &dst);
+    if (!stream) {
+        SDL_free(buffer);
+		debug_print("SDL_CreateAudioStream");
+        return nullptr;
+    }
 
-	if (SDL_ConvertAudio(&cvt))
-		return nullptr;
+    if (!SDL_PutAudioStreamData(stream, buffer, (int)len)) {
+        SDL_free(buffer);
+        SDL_DestroyAudioStream(stream);
+		debug_print("SDL_PutAudioStreamData");
+        return nullptr;
+    }
 
-	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), cvt.len * cvt.len_ratio / 2));
+    SDL_free(buffer);
+    SDL_FlushAudioStream(stream);
+
+    size_t available = SDL_GetAudioStreamAvailable(stream);
+    if (available == 0) {
+        SDL_DestroyAudioStream(stream);
+		debug_print("SDL_GetAudioStreamAvailable");
+        return nullptr;
+    }
+
+    size_t samples = available / sizeof(int16_t);
+
+    auto buf = std::make_unique<int16_t[]>(samples);
+
+    size_t got = SDL_GetAudioStreamData(stream, buf.get(), (int)available);
+    SDL_DestroyAudioStream(stream);
+
+    if (got == 0) {
+        return nullptr;
+    }
+
+	return std::make_unique<SdlSoundData>(std::make_shared<SdlSoundDataWrapper>(std::move(buf), samples));
 }
 
 std::unique_ptr<SdlPlatform::SoundData> SdlPlatform::load_sound(const std::vector<std::pair<int, int>> &melody) {
@@ -739,17 +780,15 @@ std::unique_ptr<SdlPlatform::SoundSource> SdlPlatform::play_sound(const SoundDat
 	if (state->data->samples == 0)
 		return nullptr;
 
-	SDL_LockAudioDevice(audio_device);
 	playback_list.push_back(state);
-	SDL_UnlockAudioDevice(audio_device);
 
 	return std::make_unique<SdlSoundSource>(state);
 }
 
 void SdlPlatform::set_brightness(int val) {
-	SDL_SetWindowBrightness(sdlwindow, val / 100.0f);
+	//SDL_SetWindowBrightness(sdlwindow, val / 100.0f);
 }
 
 int SdlPlatform::get_brightness() {
-	return (int)(SDL_GetWindowBrightness(sdlwindow) * 100);
+	return 100;//(int)(SDL_GetWindowBrightness(sdlwindow) * 100);
 }

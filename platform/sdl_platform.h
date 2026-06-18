@@ -10,8 +10,8 @@
 #include <atomic>
 #include <optional>
 #include <functional>
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include "platform.h"
 #include "bus_socket_impl.h"
 #include "libc_time_impl.h"
@@ -52,7 +52,7 @@ private:
 	std::string storage_dir;
 	Color current_color;
 	int audio_samplerate;
-	int audio_device;
+	SDL_AudioStream *audio_stream;
 	int audio_volume;
 	std::map<std::tuple<float, bool, std::string>, std::shared_ptr<SdlFontWrapper>> loaded_fonts;
 	float s, ox, oy;
@@ -78,7 +78,7 @@ private:
 	std::vector<std::unique_ptr<PlatformUtil::TypeErasedFulfiller>> event_list;
 
 	std::vector<std::shared_ptr<PlaybackState>> playback_list;
-	static void mixer_func_proxy(void *ptr, unsigned char *stream, int len);
+	static void SDLCALL mixer_func_proxy(void *ptr, SDL_AudioStream *stream, int additional_amount, int total_amount);
 	void mixer_func(int16_t *buffer, size_t len);
 	bool poll_sdl();
 	void draw_polygon_filled(const std::vector<std::pair<float, float>> &poly);
