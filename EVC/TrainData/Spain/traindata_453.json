@@ -1,6 +1,6 @@
 {
 	"453.0" : {
-        "length": 100,
+        "length": 98,
         "speed": 140,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
@@ -132,7 +132,7 @@
         }
     },
 	"453.4" : {
-        "length": 160,
+        "length": 147,
         "speed": 140,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
@@ -198,7 +198,7 @@
         }
     },
 	"453.6" : {
-        "length": 200,
+        "length": 192,
         "speed": 140,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
@@ -265,7 +265,7 @@
     },
     
 	"453.8" : {
-        "length": 240,
+        "length": 236,
         "speed": 140,
         "cant_deficiency": 150,
         "t_traction_cutoff": 0.3,
