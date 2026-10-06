@@ -69,6 +69,7 @@ data_set([this](std::string s){setData(s);}), more("symbols/Navigation/NA_23.bmp
 }
 void input_data::setData(std::string s)
 {
+    if (s.length() > 16) return;
     if (window != nullptr) window->inputChanged(this);
     techcross_invalid = techrange_invalid = techresol_invalid = operatcross_invalid = operatrange_invalid = false;
     data = s;
