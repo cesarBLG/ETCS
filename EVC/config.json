@@ -268,6 +268,7 @@
        "TrainData":"TrainData/Spain/traindata_453.json",
        "SpeedDial":160,
        "STMLayout":"stm_stadler.json",
+       "AutomaticSpeedControl":true,
        "ConstTrainDataValues":[
          {
             "Field":"TrainCategory",
