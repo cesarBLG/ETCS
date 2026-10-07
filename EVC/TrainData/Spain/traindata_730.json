@@ -1,6 +1,6 @@
 {
 	"730 Simple" : {
-        "length": 186,
+        "length": 190,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
@@ -78,7 +78,7 @@
         }
     },
     "730 Doble" : {
-        "length": 372,
+        "length": 380,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,
@@ -156,7 +156,7 @@
         }
     },
     "730+130" : {
-        "length": 371,
+        "length": 380,
         "speed": 250,
         "cant_deficiency": 180,
         "t_traction_cutoff": 0.3,

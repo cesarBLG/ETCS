@@ -1,6 +1,6 @@
 {
-	 "Simple" : {
-        "length": 200,
+	 "US_ZBGIS_0" : {
+        "length": 201,
         "speed": 300,
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
@@ -8,8 +8,6 @@
         "axle_load_category": "C2",
         "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 15},
-            {"name": "DC3kV", "nid_ctraction": 16},
             {"name": "AC25kV", "nid_ctraction": 17},
             {"name": "AC25kV", "nid_ctraction": 18}
         ],
@@ -79,8 +77,8 @@
             
         }
     },
-    "Doble" : {
-        "length": 400,
+    "UM_ZBGIS_0" : {
+        "length": 402,
         "speed": 300,
         "cant_deficiency": 100,
         "t_traction_cutoff": 0.3,
@@ -88,8 +86,6 @@
         "axle_load_category": "C2",
         "loading_gauge": "GA",
         "traction_systems": [
-            {"name": "DC3kV", "nid_ctraction": 15},
-            {"name": "DC3kV", "nid_ctraction": 16},
             {"name": "AC25kV", "nid_ctraction": 17},
             {"name": "AC25kV", "nid_ctraction": 18}
         ],
