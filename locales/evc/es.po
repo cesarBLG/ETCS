@@ -61,7 +61,8 @@ msgstr "Identificador RBC"
 #: ../EVC/DMI/windows.cpp:184 ../EVC/DMI/windows.cpp:387
 #: ../EVC/DMI/windows.cpp:1303
 msgid "RBC phone number"
-msgstr "Número de teléfono RBC"
+msgstr "Número de teléfono\n"
+"RBC"
 
 #: ../EVC/DMI/windows.cpp:188 ../EVC/DMI/windows.cpp:1301
 #: ../EVC/DMI/windows.cpp:1464
@@ -191,7 +192,7 @@ msgstr "Porcentaje de freno [%]"
 #: ../EVC/DMI/windows.cpp:243 ../EVC/DMI/windows.cpp:1179
 #: ../EVC/DMI/windows.cpp:1458
 msgid "Max speed (km/h)"
-msgstr "Velocidad máxima [km/h]"
+msgstr "Vel. máxima [km/h]"
 
 #: ../EVC/DMI/windows.cpp:246 ../EVC/DMI/windows.cpp:372
 #: ../EVC/DMI/windows.cpp:1149
@@ -326,7 +327,7 @@ msgstr "Via no deslizante"
 #: ../EVC/DMI/windows.cpp:317 ../EVC/DMI/windows.cpp:1343
 #: ../EVC/DMI/windows.cpp:1473
 msgid "SR speed (km/h)"
-msgstr "Max. velocidad SR [km/h]"
+msgstr "Vel. máxima SR [km/h]"
 
 #: ../EVC/DMI/windows.cpp:318 ../EVC/DMI/windows.cpp:1345
 #: ../EVC/DMI/windows.cpp:1470
@@ -360,7 +361,8 @@ msgstr "Suprimir VBC"
 
 #: ../EVC/DMI/windows.cpp:370
 msgid "Maximum speed (km/h)"
-msgstr "Velocidad máxima [km/h]"
+msgstr "Vel. máxima [km/h]"
+
 
 #: ../EVC/DMI/windows.cpp:396
 msgid "Data view"

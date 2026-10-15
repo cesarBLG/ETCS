@@ -264,6 +264,30 @@
         }
      ]
    },
+    "453":{
+       "TrainData":"TrainData/Spain/traindata_453.json",
+       "SpeedDial":160,
+       "STMLayout":"stm_stadler.json",
+       "AutomaticSpeedControl":true,
+       "ConstTrainDataValues":[
+         {
+            "Field":"TrainCategory",
+            "Value":"PASS 3"
+         },
+         {
+             "Field":"AxleLoadCategory",
+             "Value":"C2"
+         },
+         {
+             "Field":"LoadingGauge",
+             "Value":"G1"
+         },
+         {
+             "Field":"Airtight",
+             "Value":"No"
+         }
+      ]
+    },
     "465":{
        "TrainData":"TrainData/Spain/traindata_CiviaA.json",
        "SpeedDial":250,
@@ -617,7 +641,7 @@
          }
       ]
     },
-    "1621":{
+    "106162":{
        "TrainData":"TrainData/Spain/traindata_162.json",
        "SpeedDial":400,
        "STMLayout":"stm_siemens.json",
@@ -1313,7 +1337,22 @@
     "6":{
        "SpeedDial":180,
        "STMLayout":"stm_siemens.json",
-       "OpenMainPowerSwitchDistance":500,
+       "SoftKeys":true,
+       "CustomTrainDataInputs":[
+          {
+             "Field":"AxleLoadCategory",
+             "Value":[
+                "D2",
+                "D3",
+                "D4",
+                "D4XL"
+             ]
+          }
+       ]
+    },
+    "2563":{
+       "SpeedDial":140,
+       "STMLayout":"stm_siemens.json",
        "SoftKeys":true,
        "CustomTrainDataInputs":[
           {
@@ -1512,7 +1551,7 @@
     "108":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_alstom.json",
+       "STMLayout":"stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
@@ -1536,7 +1575,7 @@
     "1081":{
        "TrainData":"TrainData/Spain/traindata_108.json",
        "SpeedDial":400,
-       "STMLayout":"stm_alstom.json",
+       "STMLayout":"stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "UnsupportedLevels":[
           2
@@ -1563,7 +1602,7 @@
     "108tgv": {
        "TrainData": "TrainData/France/traindata_tgv.json",
        "SpeedDial": 400,
-       "STMLayout": "stm_alstom.json",
+       "STMLayout": "stm_hitachi.json",
        "OpenMainPowerSwitchTime":10,
        "ConstTrainDataValues":[
          {
