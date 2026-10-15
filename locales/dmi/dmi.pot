@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-03-04 16:10+0100\n"
+"POT-Creation-Date: 2026-10-05 16:56+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,6 +23,30 @@ msgstr ""
 
 #: ../DMI/graphics/display.cpp:55
 msgid "Train serie not selected!"
+msgstr ""
+
+#: ../DMI/language/language.cpp:43 ../DMI/window/nav_buttons.cpp:51
+msgctxt "Navigation bar"
+msgid "Main"
+msgstr ""
+
+#: ../DMI/language/language.cpp:44 ../DMI/window/nav_buttons.cpp:52
+msgctxt "Navigation bar"
+msgid ""
+"Over-\n"
+"ride"
+msgstr ""
+
+#: ../DMI/language/language.cpp:45 ../DMI/window/nav_buttons.cpp:53
+msgctxt "Navigation bar"
+msgid ""
+"Data\n"
+"view"
+msgstr ""
+
+#: ../DMI/language/language.cpp:46 ../DMI/window/nav_buttons.cpp:54
+msgctxt "Navigation bar"
+msgid "Spec"
 msgstr ""
 
 #: ../DMI/window/brightness.cpp:13 ../DMI/window/menu_settings.cpp:21
@@ -90,23 +114,23 @@ msgstr ""
 msgid "Non-Leading"
 msgstr ""
 
-#: ../DMI/window/menu_main.cpp:47
+#: ../DMI/window/menu_main.cpp:50
 msgid "Maintain shunting"
 msgstr ""
 
-#: ../DMI/window/menu_main.cpp:48
+#: ../DMI/window/menu_main.cpp:51
 msgid "Radio data"
 msgstr ""
 
-#: ../DMI/window/menu_main.cpp:53
+#: ../DMI/window/menu_main.cpp:56
 msgid "Continue in SM"
 msgstr ""
 
-#: ../DMI/window/menu_main.cpp:53
+#: ../DMI/window/menu_main.cpp:56
 msgid "Initiate SM"
 msgstr ""
 
-#: ../DMI/window/menu_main.cpp:57
+#: ../DMI/window/menu_main.cpp:60
 msgid "Exit SM"
 msgstr ""
 
