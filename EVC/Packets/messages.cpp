@@ -737,8 +737,13 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
     switch (message->NID_MESSAGE) {
         case 15: {
             auto *emerg = (conditional_emergency_stop*)message.get();
-            if ((dir == -1 && emerg->Q_DIR != emerg->Q_DIR.Both) || (emerg->Q_DIR == emerg->Q_DIR.Nominal && dir == 1) || (emerg->Q_DIR == emerg->Q_DIR.Reverse && dir == 0))
+            if ((dir == -1 && emerg->Q_DIR != emerg->Q_DIR.Both) || (emerg->Q_DIR == emerg->Q_DIR.Nominal && dir == 1) || (emerg->Q_DIR == emerg->Q_DIR.Reverse && dir == 0)) {
+#ifdef DEBUG_MSG_CONSISTENCY
+                if (dir == -1)
+                    platform->debug_print("Directional message rejected due to unknown LRBG direction");
+#endif
                 return false;
+            }
             shift = emerg->D_REF.get_value(emerg->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -749,8 +754,13 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
         }
         case 34: {
             auto *taf = (taf_request_message*)message.get();
-            if ((dir == -1 && taf->Q_DIR != taf->Q_DIR.Both) || (taf->Q_DIR == taf->Q_DIR.Nominal && dir == 1) || (taf->Q_DIR == taf->Q_DIR.Reverse && dir == 0))
+            if ((dir == -1 && taf->Q_DIR != taf->Q_DIR.Both) || (taf->Q_DIR == taf->Q_DIR.Nominal && dir == 1) || (taf->Q_DIR == taf->Q_DIR.Reverse && dir == 0)) {
+#ifdef DEBUG_MSG_CONSISTENCY
+                if (dir == -1)
+                    platform->debug_print("Directional message rejected due to unknown LRBG direction");
+#endif
                 return false;
+            }
             shift = taf->D_REF.get_value(taf->Q_SCALE) * (dir == 1 ? -1 : 1);
             break;
         }
@@ -774,11 +784,7 @@ bool handle_radio_message(std::shared_ptr<euroradio_message> message, communicat
                 break;
             case 15:{
                 auto *emerg = (conditional_emergency_stop*)message.get();
-                if (pos && !((emerg->Q_DIR == emerg->Q_DIR.Nominal && dir == 1) && (emerg->Q_DIR == emerg->Q_DIR.Reverse && dir == 0))) {
-                    
-                    distance d = distance::from_odometer(d_estfront);
-                    info = new ces_information(d);
-                }
+                info = new ces_information(distance::from_odometer(d_estfront));
                 break;
             }
             case 16:
