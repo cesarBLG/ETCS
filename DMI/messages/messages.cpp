@@ -157,8 +157,8 @@ void updateMessages()
                 textArea.addText(text.substr(0, last), 2 + clock_size.first, 9 + (line-current)*20 - textArea.sy / 2, 12, m.fgColor, LEFT, m.firstGroup);
             }
             ++line;
-            while (last != text.size() && text[last] == ' ') last++;
-            if (last == text.size()) break;
+            while (last < text.size() && text[last] == ' ') last++;
+            if (last >= text.size()) break;
             text = text.substr(last);
         }
     }
