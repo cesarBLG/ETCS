@@ -66,6 +66,7 @@ private:
 	PlatformUtil::FulfillerList<void> on_quit_list;
 	PlatformUtil::FulfillerList<void> on_present_list;
 	PlatformUtil::FulfillerList<InputEvent> on_input_list;
+	int brightness = 100;
 	int present_count;
 	bool running;
 	std::map<std::string, std::string, std::less<>> ini_items;

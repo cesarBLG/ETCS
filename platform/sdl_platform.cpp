@@ -307,6 +307,12 @@ void SdlPlatform::event_loop() {
 		if (present_count > 0) {
 			present_count--;
 			idle = false;
+
+			Uint8 alpha = (Uint8)((100 - brightness) * 2.55f);
+			SDL_SetRenderDrawBlendMode(sdlrend, SDL_BLENDMODE_BLEND);
+			SDL_SetRenderDrawColor(sdlrend, 0, 0, 0, alpha);
+			SDL_RenderFillRect(sdlrend, NULL);
+
 			SDL_RenderPresent(sdlrend);
 			SDL_SetRenderDrawColor(sdlrend, 0, 0, 0, 255);
 			SDL_RenderClear(sdlrend);
@@ -787,9 +793,9 @@ std::unique_ptr<SdlPlatform::SoundSource> SdlPlatform::play_sound(const SoundDat
 }
 
 void SdlPlatform::set_brightness(int val) {
-	//SDL_SetWindowBrightness(sdlwindow, val / 100.0f);
+	brightness = val;//SDL_SetWindowBrightness(sdlwindow, val / 100.0f);
 }
 
 int SdlPlatform::get_brightness() {
-	return 100;//(int)(SDL_GetWindowBrightness(sdlwindow) * 100);
+	return brightness;//(int)(SDL_GetWindowBrightness(sdlwindow) * 100);
 }
