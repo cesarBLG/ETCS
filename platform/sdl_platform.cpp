@@ -466,7 +466,7 @@ std::unique_ptr<SdlPlatform::Font> SdlPlatform::load_font(float ascent, bool bol
 		}
 
 #if SIMRAIL
-		float adjust = (ascent * scale) / TTF_FontAscent(font);
+		float adjust = (ascent * scale) / TTF_GetFontAscent(font);
 #else
 		int minx, maxx, miny, maxy, advance;
 		TTF_GetGlyphMetrics(font, 'R', &minx, &maxx, &miny, &maxy, &advance);
