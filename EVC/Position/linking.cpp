@@ -11,6 +11,7 @@
 #include "../Supervision/national_values.h"
 #include "../Supervision/supervision_targets.h"
 #include "../Packets/messages.h"
+#include "../Packets/logging.h"
 #include "../TrainSubsystems/cold_movement.h"
 #include "../Procedures/level_transition.h"
 #include "../TrackConditions/track_condition.h"
@@ -307,7 +308,7 @@ void relocate()
     dbg += "Relocated agains link: "+std::to_string(reloc_link)+"\r\n";
 #endif
     dbg += "Relocated against odo: "+std::to_string(reloc_odo);
-    platform->debug_print(dbg);
+    log_debug(dbg);
 #endif
     relocate_linking();
     recalculate_MRSP();

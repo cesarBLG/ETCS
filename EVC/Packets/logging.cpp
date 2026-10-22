@@ -38,3 +38,9 @@ void log_message(ETCS_message &msg, dist_base &dist, int64_t time)
 #endif
     logging_socket->broadcast(str);
 }
+void log_debug(std::string_view msg)
+{
+    platform->debug_print(msg);
+    if (logging_socket)
+        logging_socket->broadcast(msg);
+}

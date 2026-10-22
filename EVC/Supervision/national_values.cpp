@@ -223,7 +223,12 @@ void setup_national_values()
     bit_manipulator r(j.get<std::string>());
     NationalValues nv = NationalValues();
     nv.copy(r);
-    platform->debug_print("Loading national values");
+    std::string str = "Loading national values\n";
+    for (auto &var : r.log_entries)
+    {
+        str += var.first + '\t' + var.second + '\n';
+    }
+    log_debug(str);
     for (auto &var : r.log_entries)
         platform->debug_print(var.first+"="+var.second);
     if (r.error || r.sparefound || r.position != nv.L_PACKET) {

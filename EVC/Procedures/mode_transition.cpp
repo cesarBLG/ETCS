@@ -19,6 +19,7 @@
 #include "../TrackConditions/track_condition.h"
 #include "../TrackConditions/route_suitability.h"
 #include "../Packets/radio.h"
+#include "../Packets/logging.h"
 #include "../Euroradio/session.h"
 #include "../LX/level_crossing.h"
 #include "../language/language.h"
@@ -299,7 +300,7 @@ void update_mode_status()
         int i = t.happens();
         if (t.from == mode && i>=0 && t.priority < priority) {
 #ifdef DEBUG_MODE
-            platform->debug_print("Mode transition: "+std::to_string(i));
+            log_debug("Mode transition: "+std::to_string(i));
 #endif
             transition = t.to;
             priority = t.priority;

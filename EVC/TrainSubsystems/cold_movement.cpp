@@ -7,6 +7,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 #include "cold_movement.h"
+#include "../Packets/logging.h"
 #include "../Packets/vbc.h"
 #include "../Supervision/national_values.h"
 #include "../language/language.h"
@@ -23,15 +24,15 @@ void initialize_cold_movement()
         float val = odo;
         if (std::abs(val - odometer_value) < 1) {
             cold_movement_status = NoColdMovement;
-            platform->debug_print("No cold movement detected");
+            log_debug("No cold movement detected");
             odometer_reference = 0;
         } else {
             cold_movement_status = ColdMovement;
-            platform->debug_print("Cold movement detected");
+            log_debug("Cold movement detected");
         }
     } else {
         cold_movement_status = ColdMovementUnknown;
-        platform->debug_print("No information about cold movement");
+        log_debug("No information about cold movement");
     }
     odo = nullptr;
     save_cold_data("odometer_value", odo);

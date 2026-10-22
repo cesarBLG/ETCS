@@ -12,3 +12,4 @@
 #include "messages.h"
 void start_logging();
 void log_message(ETCS_message &msg, dist_base &dist, int64_t time);
+void log_debug(std::string_view msg);
